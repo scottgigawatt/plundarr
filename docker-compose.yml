@@ -54,7 +54,7 @@ x-arr-stack-container: &arr-stack-container # YAML anchor for arr-stack containe
 #
 services:
   #
-  # Define the 'glueton' service
+  # Define the 'gluetun' service
   #
   gluetun:
     # Docker image build and container information
@@ -62,6 +62,8 @@ services:
     container_name: gluetun-${GLUETUN_TAG} # Append Docker image tag to container name
     cap_add:                               # Add additional linux capabilities
       - NET_ADMIN                          # Allow modification of network interfaces
+
+    # Specify devices used by the container
     # devices:
     #   - /dev/net/tun:/dev/net/tun
 
