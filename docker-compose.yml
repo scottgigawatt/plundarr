@@ -43,8 +43,8 @@ x-default-container: &default-container # YAML anchor for default container
 #
 # Containers on the arr-stack nework, also have access to specific volumes
 #
-x-arr-stack-container: &arr-stack-container
-  <<: *default-container
+x-arr-stack-container: &arr-stack-container # YAML anchor for arr-stack container
+  <<: *default-container                    # Pull in the default container information
   volumes:                                  # Mount host directories into the container
     - ${HOST_DOWNLOADS_PATH}:/mnt/downloads # Mount host downloads folder
     - ${HOST_MEDIA_PATH}:/mnt/media         # Mount host media folder
