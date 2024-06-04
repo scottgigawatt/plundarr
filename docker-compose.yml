@@ -91,7 +91,7 @@ services:
 
     # Mount host directories into the container
     volumes:
-      - ${GLUETON_CONFIG_PATH}:/gluetun # Configuration files
+      - ${GLUETUN_CONFIG_PATH}:/gluetun # Configuration files
 
   #
   # Define the 'flaresolverr' service to bypass Cloudflare and DDoS-GUARD protection
