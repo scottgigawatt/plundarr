@@ -18,6 +18,8 @@
 # - sonarr: https://github.com/Sonarr/Sonarr
 # - bazarr: https://github.com/morpheus65535/bazarr
 # - readarr: https://github.com/Readarr/Readarr
+# - duplicati: https://www.duplicati.com
+# - watchtower: https://containrrr.dev/watchtower
 #
 
 ---
@@ -28,55 +30,49 @@
 x-default-container: &default-container # YAML anchor for default container
   pull_policy: always                   # Ensure that the image is always pulled
   restart: unless-stopped               # Restart the container unless explicitly stopped
-  user: ${DEFAULT_UID}:${DEFAULT_GID}   # Default user and group IDs for containers
-  group_add:                            # Add additional user groups
-    - ${DEFAULT_GROUP}                  # Default group used to manage write permisions
   logging:                              # Configure container logging options
     options:
       max-size: ${LOG_MAX_SIZE}         # Maximum file size for logs files
       max-file: ${LOG_MAX_FILE}         # Maximum number of log files to retain
-  environment:
-    PUID: ${DEFAULT_PUID}               # Default user id mapping for containers
-    PGID: ${DEFAULT_PGID}               # Default group id mapping for containers
-    TZ: ${TZ}                           # Set the appropriate timezone
+
+#
+# Setup default variables for all or most containers
+#
+x-default-environment: &default-environment # YAML anchor for default environment
+    TZ: ${TZ}                               # Set the appropriate timezone
 
 #
 # Containers on the arr-stack nework, also have access to specific volumes
 #
 x-arr-stack-container: &arr-stack-container # YAML anchor for arr-stack container
   <<: *default-container                    # Pull in the default container information
-  volumes:                                  # Mount host directories into the container
-    - ${HOST_DOWNLOADS_PATH}:/mnt/downloads # Mount host downloads folder
-    - ${HOST_MEDIA_PATH}:/mnt/media         # Mount host media folder
+  group_add:                                # Add additional user groups
+    - ${DEFAULT_GROUP}                      # Default group used to manage write permisions
+  environment:                              # Define common arr-stack environment variables
+    <<: *default-environment                # Pull in the default environment information
+    PUID: ${DEFAULT_PUID}                   # Default user id mapping for containers
+    PGID: ${DEFAULT_PGID}                   # Default group id mapping for containers
 
 #
 # Define the services section
 #
 services:
   #
-  # Define the 'gluetun' service
+  # Define the 'gluetun' service to route traffic through a wireguard VPN connection
   #
   gluetun:
-    # Docker image build and container information
+    # Docker image and container information
+    <<: *default-container                 # Pull in default container config
     image: qmcgaw/gluetun:${GLUETUN_TAG}   # Run using the specified tag
     container_name: gluetun-${GLUETUN_TAG} # Append Docker image tag to container name
     cap_add:                               # Add additional linux capabilities
       - NET_ADMIN                          # Allow modification of network interfaces
 
-    # Specify devices used by the container
-    # devices:
-    #   - /dev/net/tun:/dev/net/tun
-
     # Define the container environment
     environment:
-      VPN_SERVICE_PROVIDER: ${GLUETUN_VPN_SERVICE_PROVIDER}       # The VPN service provider
-      VPN_TYPE: ${GLUETUN_VPN_TYPE}                               # The VPN type, e.g. wireguard
-      VPN_ENDPOINT_IP: ${GLUETUN_VPN_ENDPOINT_IP}                 # The server endpoint IP address
-      VPN_ENDPOINT_PORT: ${GLUETUN_VPN_ENDPOINT_PORT}             # The server endpoint port
-      WIREGUARD_PUBLIC_KEY: ${GLUETUN_WIREGUARD_PUBLIC_KEY}       # The server 32 bytes public key in base64 format
-      WIREGUARD_PRIVATE_KEY: ${GLUETUN_WIREGUARD_PRIVATE_KEY}     # Your 32 bytes private key in base64 format
-      WIREGUARD_PRESHARED_KEY: ${GLUETUN_WIREGUARD_PRESHARED_KEY} # Optional 32 bytes pre-shared key in base64 format
-      WIREGUARD_ADDRESSES: ${GLUETUN_WIREGUARD_ADDRESSES}         # Your IP network interface address
+      <<: *default-environment                              # Pull in the default environment information
+      VPN_SERVICE_PROVIDER: ${GLUETUN_VPN_SERVICE_PROVIDER} # The VPN service provider, e.g. custom
+      VPN_TYPE: ${GLUETUN_VPN_TYPE}                         # The VPN type, e.g. wireguard
 
     # Define the host and container ports
     ports:
@@ -86,24 +82,31 @@ services:
       - ${PROWLARR_WEBUI_PORT}:9696      # Prowlarr web UI port
       - ${RADARR_WEBUI_PORT}:7878        # Radarr web UI port
       - ${SONARR_WEBUI_PORT}:8989        # Sonarr web UI port
+      - ${BAZARR_WEBUI_PORT}:6767        # Bazarr web UI port
       - ${READARR_WEBUI_PORT}:8787       # Readarr web UI port
-      - ${JACKETT_WEBUI_PORT}:9117       # Jackett web UI port
 
     # Mount host directories into the container
     volumes:
-      - ${GLUETUN_CONFIG_PATH}:/gluetun # Configuration files
+      - ${GLUETUN_CONFIG_PATH}:/gluetun:rw # Configuration files including wireguard config at gluetun/wireguard/wg0.conf
 
   #
   # Define the 'flaresolverr' service to bypass Cloudflare and DDoS-GUARD protection
   #
   flaresolverr:
-    <<: *arr-stack-container                                     # Pull in default container config
+    # Docker image and container information
+    <<: *default-container                                       # Pull in default container config
     image: ghcr.io/flaresolverr/flaresolverr:${FLARESOLVERR_TAG} # Run using the specified tag
     container_name: flaresolverr-${FLARESOLVERR_TAG}             # Append Docker image tag to container name
     hostname: flaresolverr                                       # Set the container hostname
+    network_mode: bridge                                         # Use the default bridge network
+
+    # Define the host and container ports
+    ports:
+      - ${FLARESOLVERR_PORT}:8191 # Port to listen for requests
 
     # Define the container environment
     environment:
+      <<: *default-environment                       # Pull in the default environment information
       LOG_LEVEL: ${FLARESOLVERR_LOG_LEVEL}           # Container log level
       LOG_HTML: ${FLARESOLVERR_LOG_HTML}             # Toggle HTML logging
       CAPTCHA_SOLVER: ${FLARESOLVERR_CAPTCHA_SOLVER} # Specify captcha solver
@@ -112,15 +115,15 @@ services:
   # Define the 'prowlarr' service for managing indexers
   #
   prowlarr:
-    <<: *arr-stack-container                    # Pull in default container config
+    # Docker image and container information
+    <<: *arr-stack-container                    # Pull in arr-stack container config
     image: linuxserver/prowlarr:${PROWLARR_TAG} # Run using the specified tag
     container_name: prowlarr-${PROWLARR_TAG}    # Append Docker image tag to container name
-    hostname: prowlarr                          # Set the container hostname
     network_mode: service:gluetun               # Route network traffic through gluetun
 
     # Mount host directories into the container
     volumes:
-      - ${PROWLARR_CONFIG_PATH}:/config # Database and Prowlarr configs
+      - ${PROWLARR_CONFIG_PATH}:/config:rw # Database and Prowlarr configs
 
     # Specify container service dependencies
     depends_on:
@@ -131,36 +134,32 @@ services:
   # Define the 'qbittorrent' service for managing torrents
   #
   qbittorrent:
-    <<: *arr-stack-container                                  # Pull in default container config
+    # Docker image and container information
+    <<: *arr-stack-container                                  # Pull in arr-stack container config
     image: lscr.io/linuxserver/qbittorrent:${QBITTORRENT_TAG} # Run using the specified tag
     container_name: qbittorrent-${QBITTORRENT_TAG}            # Append Docker image tag to container name
-    hostname: qbittorrent                                     # Set the container hostname
     network_mode: service:gluetun                             # Route network traffic through gluetun
-
-    # Define the container environment
-    environment:
-      WEBUI_PORT: ${QBITTORRENT_WEBUI_PORT} # Change web UI port
 
     # Mount host directories into the container
     volumes:
-      - ${QBITTORRENT_CONFIG_PATH}:/config # Configuration files
-      - ${HOST_DOWNLOADS_PATH}:/downloads  # Location of download managers output directory
+      - ${QBITTORRENT_CONFIG_PATH}:/config:rw # Configuration files
+      - ${HOST_DOWNLOADS_PATH}:/downloads:rw  # Location of download managers output directory
 
   #
   # Define the 'radarr' service for managing movies
   #
   radarr:
-    <<: *arr-stack-container                        # Pull in default container config
+    # Docker image and container information
+    <<: *arr-stack-container                        # Pull in arr-stack container config
     image: lscr.io/linuxserver/radarr:${RADARR_TAG} # Run using the specified tag
     container_name: radarr-${RADARR_TAG}            # Append Docker image tag to container name
-    hostname: radarr                                # Set the container hostname
     network_mode: service:gluetun                   # Route network traffic through gluetun
 
     # Mount host directories into the container
     volumes:
-      - ${RADARR_CONFIG_PATH}:/config     # Database and Radarr configs
-      - ${HOST_DOWNLOADS_PATH}:/downloads # Location of download managers output directory
-      - ${HOST_MOVIES_PATH}:/movies       # Location of movie library on disk
+      - ${RADARR_CONFIG_PATH}:/config:rw     # Database and Radarr configs
+      - ${HOST_DOWNLOADS_PATH}:/downloads:rw # Location of download managers output directory
+      - ${HOST_MOVIES_PATH}:/movies:rw       # Location of movie library on disk
 
     # Specify container service dependencies
     depends_on:
@@ -172,17 +171,17 @@ services:
   # Define the 'sonarr' service for managing tv shows
   #
   sonarr:
-    <<: *arr-stack-container                        # Pull in default container config
+    # Docker image and container information
+    <<: *arr-stack-container                        # Pull in arr-stack container config
     image: lscr.io/linuxserver/sonarr:${SONARR_TAG} # Run using the specified tag
     container_name: sonarr-${SONARR_TAG}            # Append Docker image tag to container name
-    hostname: sonarr                                # Set the container hostname
     network_mode: service:gluetun                   # Route network traffic through gluetun
 
     # Mount host directories into the container
     volumes:
-      - ${SONARR_CONFIG_PATH}:/config     # Database and Sonarr configs
-      - ${HOST_DOWNLOADS_PATH}:/downloads # Location of download managers output directory
-      - ${HOST_TV_PATH}:/tv               # Location of TV library on disk
+      - ${SONARR_CONFIG_PATH}:/config:rw     # Database and Sonarr configs
+      - ${HOST_DOWNLOADS_PATH}:/downloads:rw # Location of download managers output directory
+      - ${HOST_TV_PATH}:/tv:rw               # Location of TV library on disk
 
     # Specify container service dependencies
     depends_on:
@@ -194,21 +193,17 @@ services:
   # Define the 'bazarr' service for managing subtitles
   #
   bazarr:
-    <<: *arr-stack-container                        # Pull in default container config
+    # Docker image and container information
+    <<: *arr-stack-container                        # Pull in arr-stack container config
     image: lscr.io/linuxserver/bazarr:${BAZARR_TAG} # Run using the specified tag
     container_name: bazarr-${BAZARR_TAG}            # Append Docker image tag to container name
-    hostname: bazarr                                # Set the container hostname
     network_mode: service:gluetun                   # Route network traffic through gluetun
 
     # Mount host directories into the container
     volumes:
-      - ${BAZARR_CONFIG_PATH}:/config # Persistent config files
-      - ${HOST_MOVIES_PATH}:/movies   # Location of movies library on disk
-      - ${HOST_TV_PATH}:/tv           # Location of TV library on disk
-
-    # Define the host and container ports
-    ports:
-      - ${BAZARR_WEBSERVER_PORT}:6767 # Allow HTTP access to the internal webserver
+      - ${BAZARR_CONFIG_PATH}:/config:rw # Persistent config files
+      - ${HOST_MOVIES_PATH}:/movies:rw   # Location of movies library on disk
+      - ${HOST_TV_PATH}:/tv:rw           # Location of TV library on disk
 
     # Specify container service dependencies
     depends_on:
@@ -219,17 +214,17 @@ services:
   # Define the 'readarr' service for managing ebooks
   #
   readarr:
-    <<: *arr-stack-container                          # Pull in default container config
+    # Docker image and container information
+    <<: *arr-stack-container                          # Pull in arr-stack container config
     image: lscr.io/linuxserver/readarr:${READARR_TAG} # Run using the specified tag
     container_name: readarr-${READARR_TAG}            # Append Docker image tag to container name
-    hostname: readarr                                 # Set the container hostname
     network_mode: service:gluetun                     # Route network traffic through gluetun
 
     # Mount host directories into the container
     volumes:
-      - ${READARR_CONFIG_PATH}:/config    # Database and Readarr configs
-      - ${HOST_DOWNLOADS_PATH}:/downloads # Location of download managers output directory
-      - ${HOST_BOOKS_PATH}:/books         # Location of book library on disk
+      - ${READARR_CONFIG_PATH}:/config:rw    # Database and Readarr configs
+      - ${HOST_DOWNLOADS_PATH}:/downloads:rw # Location of download managers output directory
+      - ${HOST_BOOKS_PATH}:/books:rw         # Location of book library on disk
 
     # Specify container service dependencies
     depends_on:
@@ -237,9 +232,49 @@ services:
       - prowlarr
       - qbittorrent
 
-#
-# Define services network
-#
-networks:
-  arr-stack:       # Services network name
-    driver: bridge # Use the default bridge network
+  #
+  # Define the 'duplicati' service for managing backups
+  #
+  duplicati:
+    # Docker image and container information
+    <<: *arr-stack-container                              # Pull in arr-stack container config
+    image: lscr.io/linuxserver/duplicati:${DUPLICATI_TAG} # Run using the specified tag
+    container_name: duplicati-${DUPLICATI_TAG}            # Append Docker image tag to container name
+    hostname: duplicati                                   # Set the container hostname
+    network_mode: bridge                                  # Use the default bridge network
+
+    # Define the host and container ports
+    ports:
+      - ${DUPLICATI_WEBUI_PORT}:8200 # Duplicati web UI port
+
+    # Mount host directories into the container
+    volumes:
+      - ${DUPLICATI_CONFIG_PATH}:/config:rw   # Contains all relevant configuration files
+      - ${DUPLICATI_BACKUPS_PATH}:/backups:rw # Path to store local backups
+      - ${DUPLICATI_SOURCE_PATH}:/source:rw   # Path to source for files to backup
+
+  #
+  # Define the 'watchtower' service for base image updates
+  #
+  watchtower:
+    # Docker image and container information
+    <<: *default-container                         # Pull in the default container information
+    image: containrrr/watchtower:${WATCHTOWER_TAG} # Run using the specified tag
+    container_name: watchtower-${WATCHTOWER_TAG}   # Append Docker image tag to container name
+    hostname: watchtower                           # Set the container hostname
+    network_mode: bridge                           # Use the default bridge network
+
+    # Define the container environment
+    environment:
+      <<: *default-environment                                    # Pull in the default environment
+      WATCHTOWER_POLL_INTERVAL: ${WATCHTOWER_POLL_INTERVAL}       # Set how often to check for new images
+      WATCHTOWER_CLEANUP: ${WATCHTOWER_CLEANUP}                   # Clean old images afer updates
+      WATCHTOWER_INCLUDE_STOPPED: ${WATCHTOWER_INCLUDE_STOPPED}   # Update stopped containers as well
+      WATCHTOWER_REVIVE_STOPPED: ${WATCHTOWER_REVIVE_STOPPED}     # Start stopped containers after update
+      WATCHTOWER_NOTIFICATIONS: ${WATCHTOWER_NOTIFICATIONS}       # Send notifications for updates
+      WATCHTOWER_NOTIFICATION_URL: ${WATCHTOWER_NOTIFICATION_URL} # URL for webhook notifications
+
+    # Mount host directories into the container
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:rw # Allow container to talk to host Docker API
+      - /etc/localtime:/etc/localtime:ro             # Setup container with the proper timezone

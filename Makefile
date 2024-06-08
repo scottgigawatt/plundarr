@@ -8,6 +8,7 @@
 # Makefile target names
 #
 ALL=all
+STOP=stop
 DOWN=down
 CLEAN=clean
 BUILD_DEPENDS=build-depends
@@ -22,17 +23,15 @@ RUN=run
 #
 # Docker Compose options
 #
-COMPOSE_QBITTORRENT_SERVICE ?= qbittorrent
-COMPOSE_PROWLARR_SERVICE    ?= prowlarr
-COMPOSE_RADARR_SERVICE      ?= radarr
-COMPOSE_SONARR_SERVICE      ?= sonarr
-COMPOSE_READARR_SERVICE     ?= readarr
-COMPOSE_JACKETT_SERVICE     ?= jackett
-COMPOSE_DOWN_TIMEOUT        ?= 30
-COMPOSE_DOWN_OPTIONS        ?= --timeout $(COMPOSE_DOWN_TIMEOUT) --rmi all --volumes
-COMPOSE_BUILD_OPTIONS       ?= --pull --no-cache
-COMPOSE_UP_OPTIONS          ?= --build --force-recreate --pull always --detach
-COMPOSE_LOGS_OPTIONS        ?= --follow
+COMPOSE_GLUETUN_SERVICE   ?= gluetun
+COMPOSE_DUPLICATI_SERVICE ?= duplicati
+COMPOSE_TIMEOUT           ?= 30
+COMPOSE_STOP_OPTIONS      ?= --timeout $(COMPOSE_TIMEOUT)
+COMPOSE_DOWN_OPTIONS      ?= --timeout $(COMPOSE_TIMEOUT)
+COMPOSE_CLEAN_OPTIONS     ?= --timeout $(COMPOSE_TIMEOUT) --rmi all --volumes
+COMPOSE_BUILD_OPTIONS     ?= --pull --no-cache
+COMPOSE_UP_OPTIONS        ?= --build --force-recreate --pull always --detach
+COMPOSE_LOGS_OPTIONS      ?= --follow
 
 #
 # Build dependencies
@@ -58,16 +57,28 @@ $(BUILD_DEPENDS):
 		$(if $(shell which $(exe) 2> /dev/null),,$(error "No $(exe) in PATH")))
 
 #
-# $(DOWN): Stops containers and removes containers, networks, volumes, and images created by up.
+# $(STOP): Stops running containers without removing them.
+#
+$(STOP): $(BUILD_DEPENDS)
+	@echo "\nStopping compose service containers"
+	docker-compose stop $(COMPOSE_STOP_OPTIONS)
+
+#
+# $(DOWN): Stops and removes containers.
 #
 $(DOWN): $(BUILD_DEPENDS)
-	@echo "\nStopping compose services"
+	@echo "\nStopping compose services and removing containers"
 	docker-compose down $(COMPOSE_DOWN_OPTIONS)
 
 #
-# $(BUILD): Builds the service stack.
+# $(CLEAN): Stops containers and removes containers, networks, volumes, and images created by up.
 #
-# Dependencies: $(BUILD_DEPENDS) - Ensure build dependencies are installed.
+$(CLEAN): $(BUILD_DEPENDS)
+	@echo "\nStopping compose services and removing containers, networks, volumes, and images"
+	docker-compose down $(COMPOSE_CLEAN_OPTIONS)
+
+#
+# $(BUILD): Builds the service stack.
 #
 $(BUILD): $(BUILD_DEPENDS)
 	@echo "\nBuilding compose services"
@@ -77,8 +88,14 @@ $(BUILD): $(BUILD_DEPENDS)
 # $(UP): Builds, (re)creates, and starts containers for services.
 #
 $(UP): $(BUILD_DEPENDS)
-	@echo "\nStarting compose services"
-	HOST_WIKI_PATH=${PWD} docker-compose up $(COMPOSE_UP_OPTIONS)
+	@echo "\nBuilding and starting compose services"
+	docker-compose up $(COMPOSE_UP_OPTIONS)
+
+#
+# $(START): Starts existing containers for a service.
+#
+$(START): $(BUILD_DEPENDS)
+	docker-compose start
 
 #
 # $(LOGS): View output from containers.
@@ -92,12 +109,13 @@ $(LOGS):
 #
 $(OPEN):
 	@echo "\nOpening compose services in default browser"
-	open "http://localhost:`docker-compose port $(COMPOSE_QBITTORRENT_SERVICE) 8080 | cut -d: -f2`" \
-		"http://localhost:`docker-compose port $(COMPOSE_PROWLARR_SERVICE) 9696 | cut -d: -f2`" \
-		"http://localhost:`docker-compose port $(COMPOSE_RADARR_SERVICE) 7878 | cut -d: -f2`" \
-		"http://localhost:`docker-compose port $(COMPOSE_SONARR_SERVICE) 8989 | cut -d: -f2`" \
-		"http://localhost:`docker-compose port $(COMPOSE_READARR_SERVICE) 8787 | cut -d: -f2`" \
-		"http://localhost:`docker-compose port $(COMPOSE_JACKETT_SERVICE) 9117 | cut -d: -f2`"
+	open "http://localhost:`docker-compose port $(COMPOSE_GLUETUN_SERVICE) 8080 | cut -d: -f2`" \
+		"http://localhost:`docker-compose port $(COMPOSE_GLUETUN_SERVICE) 9696 | cut -d: -f2`" \
+		"http://localhost:`docker-compose port $(COMPOSE_GLUETUN_SERVICE) 7878 | cut -d: -f2`" \
+		"http://localhost:`docker-compose port $(COMPOSE_GLUETUN_SERVICE) 8989 | cut -d: -f2`" \
+		"http://localhost:`docker-compose port $(COMPOSE_GLUETUN_SERVICE) 6767 | cut -d: -f2`" \
+		"http://localhost:`docker-compose port $(COMPOSE_GLUETUN_SERVICE) 8787 | cut -d: -f2`" \
+		"http://localhost:`docker-compose port $(COMPOSE_DUPLICATI_SERVICE) 8200 | cut -d: -f2`"
 
 #
 # $(HELP): Print help information.
@@ -108,25 +126,16 @@ $(HELP):
 	@echo "Targets:"
 	@echo "  $(ALL)             - Builds and starts the service stack."
 	@echo "  $(BUILD_DEPENDS)   - Ensures build dependencies are installed."
-	@echo "  $(DOWN)            - Stops and removes containers, networks, volumes, and images."
-	@echo "  $(CLEAN)           - Alias for $(DOWN)."
+	@echo "  $(STOP)            - Stops running containers without removing them."
+	@echo "  $(DOWN)            - Stops and removes containers."
+	@echo "  $(CLEAN)           - Stops and removes containers, networks, volumes, and images."
 	@echo "  $(BUILD)           - Builds the service stack."
 	@echo "  $(UP)              - Builds, (re)creates, and starts containers for services."
-	@echo "  $(START)           - Alias for $(UP)."
+	@echo "  $(START)           - Starts existing containers for a service."
 	@echo "  $(LOGS)            - Shows logs for the service."
 	@echo "  $(OPEN)            - Opens the service site in the default web browser."
 	@echo "  $(RUN)             - Alias for $(UP), $(OPEN), $(LOGS)."
 	@echo "  $(HELP)            - Displays this help message."
-
-#
-# Alias for down
-#
-$(CLEAN): $(DOWN)
-
-#
-# Alias for up
-#
-$(START): $(UP)
 
 #
 # $(RUN): Alias for up, open, logs

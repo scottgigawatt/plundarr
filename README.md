@@ -16,6 +16,8 @@ Plundarr be a collection of Docker Compose configurations to run a shipshape arr
 - **Sonarr**: Manage yer TV shows. [More info](https://github.com/Sonarr/Sonarr)
 - **Bazarr**: Subtitle matey for movies and TV. [More info](https://github.com/morpheus65535/bazarr)
 - **Readarr**: Keep yer ebooks in order. [More info](https://github.com/Readarr/Readarr)
+- **Duplicati**: Handles yer backups. [More info](https://www.duplicati.com)
+- **Watchtower**: Keeps yer Docker containers updated. [More info](https://containrrr.dev/watchtower)
 
 ## Hoist the Sails ⚓️
 

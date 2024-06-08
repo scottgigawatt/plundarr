@@ -1,2 +1,6 @@
 .DS_Store
 .secrets/
+servers.json
+config/*/*
+!config/*/*.md
+!config/gluetun/wireguard
