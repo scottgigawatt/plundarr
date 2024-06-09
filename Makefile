@@ -129,7 +129,7 @@ $(START): $(BUILD_DEPENDS) $(PIA_CREDS)
 # $(TEST_VPN): Obtains the VPN IP address and ensure the connection is working.
 #
 $(TEST_VPN):
-	docker run --rm --network=container:${DOCKER_VPN_CONTAINER} $(DOCKER_VPN_TEST_IMAGE) $(DOCKER_VPN_TEST_CMD)
+	docker run --rm --network=container:$(DOCKER_VPN_CONTAINER) $(DOCKER_VPN_TEST_IMAGE) $(DOCKER_VPN_TEST_CMD)
 
 #
 # $(PRINT_CONFIG): Prints the raw uncommented docker compose yaml configuration.
