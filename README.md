@@ -8,7 +8,7 @@ Plundarr be a collection of Docker Compose configurations to run a shipshape arr
 
 ## Treasure Map 🗺️
 
-| Pirate Shipmate | What It Be                                                                                                                     | Yo Ho Ho and More Info                                    |
+| Shipmate        | What It Be                                                                                                                     | Yo Ho Ho and More Info                                    |
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------- |
 | Privateerr      | 🏴‍☠️ Arrr, generate yer WireGuard config files for PIA VPN connections! Protect yer booty with the best VPN on the high seas.    | [More info](https://github.com/scottgigawatt/privateerr)  |
 | Gluetun         | 🌊 Secure VPN routing with WireGuard or OpenVPN, to keep yer online activities hidden from the pryin' eyes of landlubbers.     | [More info](https://github.com/qdm12/gluetun)             |
