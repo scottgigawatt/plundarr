@@ -8,24 +8,26 @@ Plundarr be a collection of Docker Compose configurations to run a shipshape arr
 
 ## Treasure Map 🗺️
 
-- **Gluetun**: Secure VPN routing with WireGuard or OpenVPN. [More info](https://github.com/qdm12/gluetun)
-- **FlareSolverr**: Bypass pesky web protections. [More info](https://github.com/FlareSolverr/FlareSolverr)
-- **Prowlarr**: Indexer manager for the 'arr' apps. [More info](https://github.com/Prowlarr/Prowlarr)
-- **qBittorrent**: Torrent management extraordinaire. [More info](https://github.com/qbittorrent/qBittorrent)
-- **Radarr**: Manage yer movies. [More info](https://github.com/Radarr/Radarr)
-- **Sonarr**: Manage yer TV shows. [More info](https://github.com/Sonarr/Sonarr)
-- **Bazarr**: Subtitle matey for movies and TV. [More info](https://github.com/morpheus65535/bazarr)
-- **Readarr**: Keep yer ebooks in order. [More info](https://github.com/Readarr/Readarr)
-- **Duplicati**: Handles yer backups. [More info](https://www.duplicati.com)
-- **Watchtower**: Keeps yer Docker containers updated. [More info](https://containrrr.dev/watchtower)
+- **Privateerr**: Arrr, generate yer WireGuard config files for PIA VPN connections! Protect yer booty with the best VPN on the high seas. [More info](https://github.com/scottgigawatt/privateerr)
+- **Gluetun**: Secure VPN routing with WireGuard or OpenVPN, to keep yer online activities hidden from the pryin' eyes of landlubbers. [More info](https://github.com/qdm12/gluetun)
+- **FlareSolverr**: Outsmart those pesky web protections and keep yer plunderin' smooth. [More info](https://github.com/FlareSolverr/FlareSolverr)
+- **Prowlarr**: The savvy indexer manager for all yer 'arr' apps. Keep yer treasure map updated with the latest and greatest loot. [More info](https://github.com/Prowlarr/Prowlarr)
+- **qBittorrent**: Yer trusty first mate for torrent management, hoist the colors and download with might. [More info](https://github.com/qbittorrent/qBittorrent)
+- **Radarr**: Chart the course for yer movie collection. Automatically plunder new films and keep the ship's library full. [More info](https://github.com/Radarr/Radarr)
+- **Sonarr**: Set sail for TV show management. Fetch new episodes and keep yer watchlist shipshape. [More info](https://github.com/Sonarr/Sonarr)
+- **Bazarr**: The parrot on yer shoulder for subtitles, squawkin' in many tongues for movies and TV shows. [More info](https://github.com/morpheus65535/bazarr)
+- **Readarr**: Captain's log for ebooks. Keep yer digital library well-organized and shipshape. [More info](https://github.com/Readarr/Readarr)
+- **Overseerr**: The quartermaster for media library requests, manage yer crew's demands with ease. [More info](https://github.com/sct/overseerr)
+- **Duplicati**: Guard yer precious booty with backups, in case the kraken strikes. [More info](https://www.duplicati.com)
+- **Watchtower**: Keep a lookout and ensure yer Docker containers are always up to date. [More info](https://containrrr.dev/watchtower)
 
 ## Hoist the Sails ⚓️
 
 Manage Docker configuration environment variables in the [`.env`](./.env) file. Override these variables easily on the command line when startin' the Docker Compose stack:
 
 ```bash
-# Hoist the Jolly Roger and clone the repository
-git clone git@github.com:scottgigawatt/plundarr.git
+# Hoist the Jolly Roger and clone the repository with submodules
+git clone --recurse-submodules git@github.com:scottgigawatt/plundarr.git
 cd plundarr
 
 # Weigh anchor and start the container

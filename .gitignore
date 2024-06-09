@@ -3,4 +3,5 @@
 servers.json
 config/*/*
 !config/*/*.md
+!config/privateerr/*
 !config/gluetun/wireguard

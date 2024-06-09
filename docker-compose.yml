@@ -4,12 +4,11 @@
 # and including other 'arr' applications like Sonarr, Radarr, etc.
 #
 # This configuration sets up default properties for all containers, integrates
-# PIA with native wireguard connections, and provides environment-specific settings
+# PIA with native WireGuard connections, and provides environment-specific settings
 # for a seamless VPN setup.
 #
-# For more details on PIA manual connections, visit: https://github.com/scottgigawatt/privataarr
-#
 # Services included:
+# - privateerr: https://github.com/scottgigawatt/privateerr
 # - gluetun: https://github.com/qdm12/gluetun
 # - flaresolverr: https://github.com/FlareSolverr/FlareSolverr
 # - prowlarr: https://github.com/Prowlarr/Prowlarr
@@ -18,6 +17,7 @@
 # - sonarr: https://github.com/Sonarr/Sonarr
 # - bazarr: https://github.com/morpheus65535/bazarr
 # - readarr: https://github.com/Readarr/Readarr
+# - overseerr: https://github.com/sct/overseerr
 # - duplicati: https://www.duplicati.com
 # - watchtower: https://containrrr.dev/watchtower
 #
@@ -58,7 +58,46 @@ x-arr-stack-container: &arr-stack-container # YAML anchor for arr-stack containe
 #
 services:
   #
-  # Define the 'gluetun' service to route traffic through a wireguard VPN connection
+  # Define the 'privateerr' service to generate the PIA manual WireGuard configuration
+  #
+  privateerr:
+    # Docker image build and container information
+    image: ${PRIVATEERR_IMAGE}:${PRIVATEERR_TAG}        # Set build image name and tag
+    build:                                              # Build to install required packages
+      context: config/privateerr/docker                 # Docker build context
+      dockerfile: Dockerfile                            # Dockerfile to use for the build
+      args:                                             # Build arguments passed to Dockerfile
+        PRIVATEERR_BASE_IMAGE: ${PRIVATEERR_BASE_IMAGE} # Specify build argument for FROM base image
+        PRIVATEERR_BASE_TAG: ${PRIVATEERR_BASE_TAG}     # Specify build argument for FROM base image tag
+        TZ: ${TZ}                                       # Specify build arguement for time zone
+        PIA_APP_HOME: ${PIA_APP_HOME}                   # Specify build arguement for PIA scripts path
+    container_name: privateerr-${PRIVATEERR_TAG}        # Append Docker image tag to container name
+    restart: no                                         # Do not restart the container once it exits
+    network_mode: bridge                                # Use the default bridge network
+    hostname: privateerr                                # Set the container hostname
+    privileged: true                                    # Run in privileged mode
+    labels:                                             # Add container labels
+      - "com.centurylinklabs.watchtower.enable=false"   # Exclude local init container from Watchtower
+
+    # Define the container environment
+    environment:
+      VPN_PROTOCOL: ${PIA_VPN_PROTOCOL} # VPN configuration, WireGuard or openvpn
+      DISABLE_IPV6: ${PIA_DISABLE_IPV6} # Toggle using IPV6, yes or no
+      DIP_TOKEN: ${PIA_DIP_TOKEN}       # Optional PIA dedicated IP token, token or no
+      AUTOCONNECT: ${PIA_AUTOCONNECT}   # Test and select server with the lowest latency, true or false
+      PIA_CONF_PATH: ${PIA_CONF_PATH}   # Path of WireGuard config file to be written
+      PIA_CONNECT: ${PIA_CONNECT}       # Connect to VPN after config has been created, true or false
+      PIA_PF: ${PIA_PF}                 # Configure port forwarding, true or false
+      PIA_DNS: ${PIA_DNS}               # Configure DNS, true or false
+      PIA_USER: ${PIA_USER}             # Set PIA username
+      PIA_PASS: ${PIA_PASS}             # Set PIA password
+
+    # Mount host directories into the container
+    volumes:
+      - ${PRIVATEERR_WIREGUARD_CONFIG}:/${PIA_CONF_PATH}:rw # Mount the WireGuard configuration file
+
+  #
+  # Define the 'gluetun' service to route traffic through a WireGuard VPN connection
   #
   gluetun:
     # Docker image and container information
@@ -87,7 +126,12 @@ services:
 
     # Mount host directories into the container
     volumes:
-      - ${GLUETUN_CONFIG_PATH}:/gluetun:rw # Configuration files including wireguard config at gluetun/wireguard/wg0.conf
+      - ${GLUETUN_CONFIG_PATH}:/gluetun:rw # Configuration files including WireGuard config at gluetun/wireguard/wg0.conf
+
+    # Specify container service dependencies
+    depends_on:
+      privateerr:                                 # Depends on privateer to generate the WireGuard config
+        condition: service_completed_successfully # Wait for container to exit successfully
 
   #
   # Define the 'flaresolverr' service to bypass Cloudflare and DDoS-GUARD protection
@@ -231,6 +275,25 @@ services:
       - gluetun
       - prowlarr
       - qbittorrent
+
+  #
+  # Define the 'overseerr' service for managing media library requests
+  #
+  overseerr:
+    # Docker image and container information
+    <<: *arr-stack-container                              # Pull in arr-stack container config
+    image: lscr.io/linuxserver/overseerr:${OVERSEERR_TAG} # Run using the specified tag
+    container_name: overseerr-${OVERSEERR_TAG}            # Append Docker image tag to container name
+    hostname: overseerr                                   # Set the container hostname
+    network_mode: bridge                                  # Use the default bridge network
+
+    # Define the host and container ports
+    ports:
+      - ${OVERSEERR_WEBUI_PORT}:5055  # Overseerr web UI port
+
+    # Mount host directories into the container
+    volumes:
+      - ${OVERSEERR_CONFIG_PATH}:/config:rw # Persistent config files
 
   #
   # Define the 'duplicati' service for managing backups

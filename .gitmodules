@@ -1,0 +1,3 @@
+[submodule "config/privateerr/docker/pia"]
+	path = config/privateerr/docker/pia
+	url = git@github.com:pia-foss/manual-connections.git
