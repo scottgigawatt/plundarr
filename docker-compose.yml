@@ -82,7 +82,7 @@ services:
         TZ: ${TZ}                                       # Specify build arguement for time zone
         PIA_APP_HOME: ${PIA_APP_HOME}                   # Specify build arguement for PIA scripts path
     container_name: privateerr-${PRIVATEERR_TAG}        # Append Docker image tag to container name
-    restart: no                                         # Do not restart the container once it exits
+    restart: "no"                                       # Do not restart the container once it exits
     hostname: privateerr                                # Set the container hostname
     privileged: true                                    # Run in privileged mode
 
