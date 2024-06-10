@@ -1,10 +1,10 @@
-# Privateer Configuration ☠️🏴
+# 🏴‍☠️ Privateerr Configuration ☠️
 
-Ahoy, matey! This be the config directory for Privateerr, yer trusty Docker Compose setup for Private Internet Access VPN connections with WireGuard.
+Greetings, swashbucklers! This be the config directory for **Privateerr**, yer trusty Docker Compose setup for Private Internet Access VPN connections with WireGuard.
 
 ## Purpose 🦜⚓️
 
-Ahoy there! Privateerr be a Docker Compose configuration for buildin' Private Internet Access manual connection scripts into a Docker image with the required WireGuard tools. It also be generatin' a configuration file for native WireGuard connections. Hoist the sails and set yer course for secure VPN connections, me hearties!
+Privateerr be a Docker Compose configuration fer buildin' Private Internet Access manual connection scripts into a Docker image with the required WireGuard tools. It also generates a configuration file for native WireGuard connections. Hoist the sails and set yer course for secure VPN connections, crew!
 
 This repo includes the [PIA manual-connections](https://github.com/pia-foss/manual-connections) repository as a submodule at [`config/privateerr/docker/pia`](./docker/pia/), so it be included in the image build.
 
@@ -20,4 +20,4 @@ To use this directory:
 
 Ye can then use this file to configure a VPN client like Gluetun for secure connections.
 
-Fair winds and following seas, me mateys! 🌊🏴‍☠️
+Smooth sailin' and safe voyages, me hearties! 🌊🏴‍☠️

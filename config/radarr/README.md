@@ -1,7 +1,7 @@
-# Radarr Configuration 🎥
+# 🎥 Radarr Configuration 🏴‍☠️
 
-This directory contains the configuration files for the Radarr service. These files will be mounted into the Radarr container as the service config directory.
+Shiver me timbers! This be the treasure chest holdin' the configuration files fer the **Radarr** service. These files will be mounted into the Radarr container as the service config directory, guidin' yer movie collection to safe harbor.
 
-For more information, see the [docker-compose.yml](../../docker-compose.yml) file in the root of the repository.
+Fer more details, set yer spyglass on the [docker-compose.yml](../../docker-compose.yml) file in the root of the repository.
 
-Arrr, may yer movie collection grow like a treasure hoard! 🏴‍☠️
+May yer movie collection be as vast as the seven seas, with hidden treasures awaitin' at every turn! 🌊⚔️

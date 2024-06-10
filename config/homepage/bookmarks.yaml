@@ -1,0 +1,9 @@
+---
+#
+# For more information see: https://gethomepage.dev/latest/configs/bookmarks
+#
+
+- Credits:
+    - Plundarr:
+        - abbr: ARR
+          href: https://github.com/scottgigawatt/plundarr

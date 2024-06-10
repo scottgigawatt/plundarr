@@ -1,7 +1,7 @@
-# Readarr Configuration 📚
+# 📚 Readarr Configuration 🏴‍☠️
 
-This directory contains the configuration files for the Readarr service. These files will be mounted into the Readarr container as the service config directory.
+Ahoy, me hearties! This be the chest where ye stash the configuration scrolls fer the **Readarr** service. These scrolls will be hoisted into the Readarr container as the service config directory, keepin' yer ebook library in shipshape order.
 
-For more information, see the [docker-compose.yml](../../docker-compose.yml) file in the root of the repository.
+For more details, cast yer gaze upon the [docker-compose.yml](../../docker-compose.yml) parchment in the root of the repository.
 
-Arrr, may yer ebook collection be as vast as the seven seas! 🏴‍☠️
+May yer ebook collection be as boundless as the vast ocean, with adventures awaitin' at every turn of the page! 📖⚔️

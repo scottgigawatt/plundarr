@@ -1,7 +1,10 @@
 .DS_Store
 .secrets/
+.env
 servers.json
 config/*/*
 !config/*/*.md
-!config/privateerr/*
 !config/gluetun/wireguard
+!config/homepage/*
+config/homepage/logs
+!config/privateerr/*

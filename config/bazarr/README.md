@@ -1,7 +1,7 @@
-# Bazarr Configuration 📝
+# ⚓️ Bazarr Configuration 📝
 
-This directory contains the configuration files for the Bazarr service. These files will be mounted into the Bazarr container as the service config directory.
+Ahoy, matey! This be the treasure chest holdin' the configuration files fer the **Bazarr** service. These here files will be mounted into the Bazarr container as the service config directory, guidin' yer subtitles to port.
 
-For more information, see the [docker-compose.yml](../../docker-compose.yml) file in the root of the repository.
+Fer more details, set yer spyglass on the [docker-compose.yml](../../docker-compose.yml) file in the root of the repository.
 
-Arrr, may yer subtitles be as clear as the stars in the night sky! 🏴‍☠️
+Arrr, may yer subtitles be as clear as the stars in the night sky! 🌟🏴‍☠️

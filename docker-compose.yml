@@ -1,3 +1,4 @@
+---
 #
 # docker-compose.yml: Docker Compose configuration for setting up a suite of services
 # that utilize Private Internet Access (PIA) with WireGuard, managed through Gluetun,
@@ -19,10 +20,8 @@
 # - readarr: https://github.com/Readarr/Readarr
 # - overseerr: https://github.com/sct/overseerr
 # - duplicati: https://www.duplicati.com
-# - watchtower: https://containrrr.dev/watchtower
+# - homepage: https://gethomepage.dev/latest
 #
-
----
 
 #
 # Setup default propreties for all or most containers
@@ -42,16 +41,22 @@ x-default-environment: &default-environment # YAML anchor for default environmen
     TZ: ${TZ}                               # Set the appropriate timezone
 
 #
-# Containers on the arr-stack nework, also have access to specific volumes
+# Setup default variables for arr-stack containers
+#
+x-arr-stack-environment: &arr-stack-environment # YAML anchor for arr-stack environment
+    <<: *default-environment                    # Pull in the default environment information
+    PUID: ${DEFAULT_PUID}                       # Default user id mapping for containers
+    PGID: ${DEFAULT_PGID}                       # Default group id mapping for containers
+
+#
+# Containers on the arr-stack nework
 #
 x-arr-stack-container: &arr-stack-container # YAML anchor for arr-stack container
   <<: *default-container                    # Pull in the default container information
   group_add:                                # Add additional user groups
     - ${DEFAULT_GROUP}                      # Default group used to manage write permisions
-  environment:                              # Define common arr-stack environment variables
-    <<: *default-environment                # Pull in the default environment information
-    PUID: ${DEFAULT_PUID}                   # Default user id mapping for containers
-    PGID: ${DEFAULT_PGID}                   # Default group id mapping for containers
+  environment:                              # Define common arr-stack container variables
+    <<: *arr-stack-environment              # Pull in the arr-stack environment information
 
 #
 # Define the services section
@@ -73,11 +78,12 @@ services:
         PIA_APP_HOME: ${PIA_APP_HOME}                   # Specify build arguement for PIA scripts path
     container_name: privateerr-${PRIVATEERR_TAG}        # Append Docker image tag to container name
     restart: no                                         # Do not restart the container once it exits
-    network_mode: bridge                                # Use the default bridge network
     hostname: privateerr                                # Set the container hostname
     privileged: true                                    # Run in privileged mode
-    labels:                                             # Add container labels
-      - "com.centurylinklabs.watchtower.enable=false"   # Exclude local init container from Watchtower
+
+    # Add container labels
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false" # Exclude local init container from Watchtower
 
     # Define the container environment
     environment:
@@ -104,8 +110,13 @@ services:
     <<: *default-container                 # Pull in default container config
     image: qmcgaw/gluetun:${GLUETUN_TAG}   # Run using the specified tag
     container_name: gluetun-${GLUETUN_TAG} # Append Docker image tag to container name
+    hostname: gluetun                      # Set the container hostname
     cap_add:                               # Add additional linux capabilities
       - NET_ADMIN                          # Allow modification of network interfaces
+
+    # Add container labels
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false" # Exclude local init container from Watchtower
 
     # Define the container environment
     environment:
@@ -116,7 +127,7 @@ services:
     # Define the host and container ports
     ports:
       - ${QBITTORRENT_TCP_PORT}:6881     # qBittorrent TCP connection port
-      - ${QBITTORRENT_TCP_PORT}:6881/udp # qBittorrent UDP connection port
+      - ${QBITTORRENT_UDP_PORT}:6881/udp # qBittorrent UDP connection port
       - ${QBITTORRENT_WEBUI_PORT}:8080   # qBittorrent web UI port
       - ${PROWLARR_WEBUI_PORT}:9696      # Prowlarr web UI port
       - ${RADARR_WEBUI_PORT}:7878        # Radarr web UI port
@@ -142,7 +153,6 @@ services:
     image: ghcr.io/flaresolverr/flaresolverr:${FLARESOLVERR_TAG} # Run using the specified tag
     container_name: flaresolverr-${FLARESOLVERR_TAG}             # Append Docker image tag to container name
     hostname: flaresolverr                                       # Set the container hostname
-    network_mode: bridge                                         # Use the default bridge network
 
     # Define the host and container ports
     ports:
@@ -165,6 +175,19 @@ services:
     container_name: prowlarr-${PROWLARR_TAG}    # Append Docker image tag to container name
     network_mode: service:gluetun               # Route network traffic through gluetun
 
+    # Add container labels
+    labels:
+      # Homepage service labels (https://gethomepage.dev)
+      homepage.group: Download
+      homepage.name: Prowlarr
+      homepage.icon: prowlarr.png
+      homepage.href: http://localhost:${PROWLARR_WEBUI_PORT}
+      homepage.description: Indexers management
+      homepage.weight: 1
+      homepage.widget.type: prowlarr
+      homepage.widget.url: http://gluetun:${PROWLARR_WEBUI_PORT}
+      homepage.widget.key: ${PROWLARR_API_KEY}
+
     # Mount host directories into the container
     volumes:
       - ${PROWLARR_CONFIG_PATH}:/config:rw # Database and Prowlarr configs
@@ -184,6 +207,20 @@ services:
     container_name: qbittorrent-${QBITTORRENT_TAG}            # Append Docker image tag to container name
     network_mode: service:gluetun                             # Route network traffic through gluetun
 
+    # Add container labels
+    labels:
+      # Homepage service labels (https://gethomepage.dev)
+      homepage.group: Download
+      homepage.name: qBittorrent
+      homepage.icon: qbittorrent.png
+      homepage.href: http://localhost:${QBITTORRENT_WEBUI_PORT}
+      homepage.description: Bittorrent client
+      homepage.weight: 2
+      homepage.widget.type: qbittorrent
+      homepage.widget.url: http://gluetun:${QBITTORRENT_WEBUI_PORT}
+      homepage.widget.username: ${QBITTORRENT_USERNAME}
+      homepage.widget.password: ${QBITTORRENT_PASSWORD}
+
     # Mount host directories into the container
     volumes:
       - ${QBITTORRENT_CONFIG_PATH}:/config:rw # Configuration files
@@ -198,6 +235,19 @@ services:
     image: lscr.io/linuxserver/radarr:${RADARR_TAG} # Run using the specified tag
     container_name: radarr-${RADARR_TAG}            # Append Docker image tag to container name
     network_mode: service:gluetun                   # Route network traffic through gluetun
+
+    # Add container labels
+    labels:
+      # Homepage service labels (https://gethomepage.dev)
+      homepage.group: Media
+      homepage.name: Radarr
+      homepage.icon: radarr.png
+      homepage.href: http://localhost:${RADARR_WEBUI_PORT}
+      homepage.description: Movies management
+      homepage.weight: 0
+      homepage.widget.type: radarr
+      homepage.widget.url: http://gluetun:${RADARR_WEBUI_PORT}
+      homepage.widget.key: ${RADARR_API_KEY}
 
     # Mount host directories into the container
     volumes:
@@ -221,6 +271,19 @@ services:
     container_name: sonarr-${SONARR_TAG}            # Append Docker image tag to container name
     network_mode: service:gluetun                   # Route network traffic through gluetun
 
+    # Add container labels
+    labels:
+      # Homepage service labels (https://gethomepage.dev)
+      homepage.group: Media
+      homepage.name: Sonarr
+      homepage.icon: sonarr.png
+      homepage.href: http://localhost:${SONARR_WEBUI_PORT}
+      homepage.description: Series management
+      homepage.weight: 1
+      homepage.widget.type: sonarr
+      homepage.widget.url: http://gluetun:${SONARR_WEBUI_PORT}
+      homepage.widget.key: ${SONARR_API_KEY}
+
     # Mount host directories into the container
     volumes:
       - ${SONARR_CONFIG_PATH}:/config:rw     # Database and Sonarr configs
@@ -243,6 +306,19 @@ services:
     container_name: bazarr-${BAZARR_TAG}            # Append Docker image tag to container name
     network_mode: service:gluetun                   # Route network traffic through gluetun
 
+    # Add container labels
+    labels:
+      # Homepage service labels (https://gethomepage.dev)
+      homepage.group: Download
+      homepage.name: Bazarr
+      homepage.icon: bazarr.png
+      homepage.href: http://localhost:${BAZARR_WEBUI_PORT}
+      homepage.description: Subtitles management
+      homepage.weight: 4
+      homepage.widget.type: bazarr
+      homepage.widget.url: http://gluetun:${BAZARR_WEBUI_PORT}
+      homepage.widget.key: ${BAZARR_API_KEY}
+
     # Mount host directories into the container
     volumes:
       - ${BAZARR_CONFIG_PATH}:/config:rw # Persistent config files
@@ -263,6 +339,19 @@ services:
     image: lscr.io/linuxserver/readarr:${READARR_TAG} # Run using the specified tag
     container_name: readarr-${READARR_TAG}            # Append Docker image tag to container name
     network_mode: service:gluetun                     # Route network traffic through gluetun
+
+    # Add container labels
+    labels:
+      # Homepage service labels (https://gethomepage.dev)
+      homepage.group: Media
+      homepage.name: Readarr
+      homepage.icon: readarr.png
+      homepage.href: http://localhost:${READARR_WEBUI_PORT}
+      homepage.description: Ebooks management
+      homepage.weight: 2
+      homepage.widget.type: readarr
+      homepage.widget.url: http://gluetun:${READARR_WEBUI_PORT}
+      homepage.widget.key: ${READARR_API_KEY}
 
     # Mount host directories into the container
     volumes:
@@ -285,7 +374,19 @@ services:
     image: lscr.io/linuxserver/overseerr:${OVERSEERR_TAG} # Run using the specified tag
     container_name: overseerr-${OVERSEERR_TAG}            # Append Docker image tag to container name
     hostname: overseerr                                   # Set the container hostname
-    network_mode: bridge                                  # Use the default bridge network
+
+    # Add container labels
+    labels:
+      # Homepage service labels (https://gethomepage.dev)
+      homepage.group: Media
+      homepage.name: Overseerr
+      homepage.icon: overseerr.png
+      homepage.href: http://localhost:${OVERSEERR_WEBUI_PORT}
+      homepage.description: Requests management
+      homepage.weight: 4
+      homepage.widget.type: overseerr
+      homepage.widget.url: http://overseerr:${OVERSEERR_WEBUI_PORT}
+      homepage.widget.key: ${OVERSEERR_API_KEY}
 
     # Define the host and container ports
     ports:
@@ -304,7 +405,6 @@ services:
     image: lscr.io/linuxserver/duplicati:${DUPLICATI_TAG} # Run using the specified tag
     container_name: duplicati-${DUPLICATI_TAG}            # Append Docker image tag to container name
     hostname: duplicati                                   # Set the container hostname
-    network_mode: bridge                                  # Use the default bridge network
 
     # Define the host and container ports
     ports:
@@ -317,27 +417,47 @@ services:
       - ${DUPLICATI_SOURCE_PATH}:/source:rw   # Path to source for files to backup
 
   #
-  # Define the 'watchtower' service for base image updates
+  # Define the 'homepage' service for highly customizable application dashboard
   #
-  watchtower:
+  homepage:
     # Docker image and container information
-    <<: *default-container                         # Pull in the default container information
-    image: containrrr/watchtower:${WATCHTOWER_TAG} # Run using the specified tag
-    container_name: watchtower-${WATCHTOWER_TAG}   # Append Docker image tag to container name
-    hostname: watchtower                           # Set the container hostname
-    network_mode: bridge                           # Use the default bridge network
+    <<: *default-container                              # Pull in the arr-stack container information
+    image: ghcr.io/gethomepage/homepage:${HOMEPAGE_TAG} # Run using the specified tag
+    container_name: homepage-${HOMEPAGE_TAG}            # Append Docker image tag to container name
+    hostname: homepage                                  # Set the container hostname
+
+    # Override container start command to copy
+    # command: [sh, -c, "cp -n /app/config/templates/*.yaml /app/config && node server.js"]
 
     # Define the container environment
     environment:
-      <<: *default-environment                                    # Pull in the default environment
-      WATCHTOWER_POLL_INTERVAL: ${WATCHTOWER_POLL_INTERVAL}       # Set how often to check for new images
-      WATCHTOWER_CLEANUP: ${WATCHTOWER_CLEANUP}                   # Clean old images afer updates
-      WATCHTOWER_INCLUDE_STOPPED: ${WATCHTOWER_INCLUDE_STOPPED}   # Update stopped containers as well
-      WATCHTOWER_REVIVE_STOPPED: ${WATCHTOWER_REVIVE_STOPPED}     # Start stopped containers after update
-      WATCHTOWER_NOTIFICATIONS: ${WATCHTOWER_NOTIFICATIONS}       # Send notifications for updates
-      WATCHTOWER_NOTIFICATION_URL: ${WATCHTOWER_NOTIFICATION_URL} # URL for webhook notifications
+      <<: *default-environment                                      # Pull in the arr-stack environment
+      HOMEPAGE_VAR_TITLE: ${HOMEPAGE_VAR_TITLE}                     # Title of the homepage
+      HOMEPAGE_VAR_SEARCH_PROVIDER: ${HOMEPAGE_VAR_SEARCH_PROVIDER} # Homepage search provider
+      HOMEPAGE_VAR_HEADER_STYLE: ${HOMEPAGE_VAR_HEADER_STYLE}       # Homepage header style, e.g. underlined, boxed, etc.
+      HOMEPAGE_VAR_WEATHER_CITY: ${HOMEPAGE_VAR_WEATHER_CITY}       # Homepage weather city name
+      HOMEPAGE_VAR_WEATHER_LAT: ${HOMEPAGE_VAR_WEATHER_LAT}         # Homepage weather city latitude
+      HOMEPAGE_VAR_WEATHER_LONG: ${HOMEPAGE_VAR_WEATHER_LONG}       # Homepage weather city longitude
+      HOMEPAGE_VAR_WEATHER_TZ: ${HOMEPAGE_VAR_WEATHER_TZ}           # Homepage weather time zone
+      HOMEPAGE_VAR_WEATHER_UNIT: ${HOMEPAGE_VAR_WEATHER_UNIT}       # Homepage weather unit, e.g. metric or imperial
+      HOMEPAGE_VAR_PLEX_URL: ${HOMEPAGE_VAR_PLEX_URL}               # Plex URL for plex widget
+      HOMEPAGE_VAR_PLEX_TOKEN: ${HOMEPAGE_VAR_PLEX_TOKEN}           # Plex token for plex widget
+
+    # Define the host and container ports
+    ports:
+      - ${HOMEPAGE_WEBUI_PORT}:3000 # Homepage web UI port
 
     # Mount host directories into the container
     volumes:
+      - ${HOMEPAGE_CONFIG_PATH}:/app/config          # Local config files directory
+      - ${HOMEPAGE_PUBLIC_PATH}:/app/public          # Local public files directory
+      - ${HOMEPAGE_DATA_ROOT_PATH}:/data             # Local directory to monitor disk space
       - /var/run/docker.sock:/var/run/docker.sock:rw # Allow container to talk to host Docker API
-      - /etc/localtime:/etc/localtime:ro             # Setup container with the proper timezone
+
+#
+# Define the networks section
+#
+networks:
+  # Configure the default network
+  default:
+    name: ${COMPOSE_PROJECT_NAME} # Use the name of the compose project

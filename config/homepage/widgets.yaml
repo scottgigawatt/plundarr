@@ -1,0 +1,28 @@
+---
+#
+# For more information see: https://gethomepage.dev/latest/widgets
+#
+
+- resources:
+    cpu: true
+    memory: true
+    disk:
+      - /
+      - /data
+
+- search:
+    provider: {{HOMEPAGE_VAR_SEARCH_PROVIDER}}
+    target: _blank
+
+- openmeteo:
+    label: {{HOMEPAGE_VAR_WEATHER_CITY}}
+    latitude: {{HOMEPAGE_VAR_WEATHER_LAT}}
+    longitude: {{HOMEPAGE_VAR_WEATHER_LONG}}
+    timezone: {{HOMEPAGE_VAR_WEATHER_TZ}}
+    units: {{HOMEPAGE_VAR_WEATHER_UNIT}}
+    cache: 5
+
+- datetime:
+    text_size: md
+    format:
+      timeStyle: short

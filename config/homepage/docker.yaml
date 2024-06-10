@@ -1,0 +1,7 @@
+---
+#
+# For more information see: https://gethomepage.dev/latest/configs/docker
+#
+
+my-docker:
+  socket: /var/run/docker.sock

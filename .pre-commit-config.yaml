@@ -9,6 +9,7 @@ repos:
     rev: v4.6.0
     hooks:
     -   id: check-yaml
+        exclude: config/homepage
     -   id: end-of-file-fixer
     -   id: trailing-whitespace
         args: ['--markdown-linebreak-ext=md']

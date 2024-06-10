@@ -21,7 +21,6 @@ Plundarr be a collection of Docker Compose configurations to run a shipshape arr
 | Readarr         | 📚 Captain's log for ebooks. Keep yer digital library well-organized and shipshape.                                            | [More info](https://github.com/Readarr/Readarr)           |
 | Overseerr       | ⚓️ The quartermaster for media library requests, manage yer crew's demands with ease.                                          | [More info](https://github.com/sct/overseerr)             |
 | Duplicati       | 💣 Guard yer precious booty with backups, in case the kraken strikes.                                                          | [More info](https://www.duplicati.com)                    |
-| Watchtower      | 🕵️‍♂️ Keep a lookout and ensure yer Docker containers are always up to date.                                                  | [More info](https://containrrr.dev/watchtower)            |
 
 ## Hoist the Sails ⚓️
 
@@ -40,7 +39,7 @@ Adjust the values of these environment variables to yer requirements.
 
 ## Ship's Log 🏝️
 
-Plundarr has been tested on macOS Sonoma 14.5. But fear not, me hearties! It should work on other lands as well.
+Plundarr has been tested on Synology DS916+ running DSM 7.2.1-69057 Update 5. But fear not, me hearties! It should work on other lands as well.
 
 ## Articles of Agreement ⚖️
 
