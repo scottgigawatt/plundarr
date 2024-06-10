@@ -24,6 +24,11 @@
 #
 
 #
+# Docker Compose version on the target system
+#
+version: "2.9"
+
+#
 # Setup default propreties for all or most containers
 #
 x-default-container: &default-container # YAML anchor for default container
