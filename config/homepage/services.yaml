@@ -5,23 +5,11 @@
 
 - Media:
   - Plex:
-    icon: plex.png
-    href: {{HOMEPAGE_VAR_PLEX_URL}}
-    description: Plex Media Server
-    widget:
-      type: plex
-      url: {{HOMEPAGE_VAR_PLEX_URL}}
-      key: {{HOMEPAGE_VAR_PLEX_TOKEN}} # see https://www.plexopedia.com/plex-media-server/general/plex-token/
-      fields: ["streams", "movies", "tv", "albums"]
-
-  # - Tautulli:
-  #   icon: tautulli.png
-  #   href: {{HOMEPAGE_VAR_TAUTULLI_URL}}
-  #   description: Tautulli Plex Monitoring
-  #   widget:
-  #     type: tautulli
-  #     url: {{HOMEPAGE_VAR_TAUTULLI_URL}}
-  #     key: {{HOMEPAGE_VAR_TAUTULLI_KEY}}
-  #     enableUser: true # optional, defaults to false
-  #     showEpisodeNumber: true # optional, defaults to false
-  #     expandOneStreamToTwoRows: false # optional, defaults to true
+      icon: plex.png
+      href: {{HOMEPAGE_VAR_PLEX_URL}}
+      description: Plex Media Server
+      widget:
+        type: plex
+        url: {{HOMEPAGE_VAR_PLEX_URL}}
+        key: {{HOMEPAGE_VAR_PLEX_TOKEN}} # see https://www.plexopedia.com/plex-media-server/general/plex-token/
+        fields: ["streams", "movies", "tv", "albums"]

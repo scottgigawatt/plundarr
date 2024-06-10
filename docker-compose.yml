@@ -186,7 +186,7 @@ services:
       homepage.group: Download # Homepage service grouping
       homepage.name: Prowlarr                                    # Homepage service name
       homepage.icon: prowlarr.png                                # Homepage service icon
-      homepage.href: http://localhost:${PROWLARR_WEBUI_PORT}     # Homepage service URL
+      homepage.href: https://prowlarr.${HOST_DOMAIN}             # Homepage service URL
       homepage.description: Indexers management                  # Homepage service description
       homepage.weight: 1                                         # Homepage service grouping order
       homepage.widget.type: prowlarr                             # Homepage widget type
@@ -219,7 +219,7 @@ services:
       homepage.group: Download                                      # Homepage service grouping
       homepage.name: qBittorrent                                    # Homepage service name
       homepage.icon: qbittorrent.png                                # Homepage service icon
-      homepage.href: http://localhost:${QBITTORRENT_WEBUI_PORT}     # Homepage service URL
+      homepage.href: https://qbittorrent.${HOST_DOMAIN}             # Homepage service URL
       homepage.description: Bittorrent client                       # Homepage service description
       homepage.weight: 2                                            # Homepage service grouping order
       homepage.widget.type: qbittorrent                             # Homepage widget type
@@ -249,7 +249,7 @@ services:
       homepage.group: Media                                    # Homepage service grouping
       homepage.name: Radarr                                    # Homepage service name
       homepage.icon: radarr.png                                # Homepage service icon
-      homepage.href: http://localhost:${RADARR_WEBUI_PORT}     # Homepage service URL
+      homepage.href: https://radarr.${HOST_DOMAIN}             # Homepage service URL
       homepage.description: Movies management                  # Homepage service description
       homepage.weight: 0                                       # Homepage service grouping order
       homepage.widget.type: radarr                             # Homepage widget type
@@ -284,7 +284,7 @@ services:
       homepage.group: Media                                    # Homepage service grouping
       homepage.name: Sonarr                                    # Homepage service name
       homepage.icon: sonarr.png                                # Homepage service icon
-      homepage.href: http://localhost:${SONARR_WEBUI_PORT}     # Homepage service URL
+      homepage.href: https://sonarr.${HOST_DOMAIN}             # Homepage service URL
       homepage.description: Series management                  # Homepage service description
       homepage.weight: 1                                       # Homepage service grouping order
       homepage.widget.type: sonarr                             # Homepage widget type
@@ -319,7 +319,7 @@ services:
       homepage.group: Download                                 # Homepage service grouping
       homepage.name: Bazarr                                    # Homepage service name
       homepage.icon: bazarr.png                                # Homepage service icon
-      homepage.href: http://localhost:${BAZARR_WEBUI_PORT}     # Homepage service URL
+      homepage.href: https://bazarr.${HOST_DOMAIN}             # Homepage service URL
       homepage.description: Subtitles management               # Homepage service description
       homepage.weight: 4                                       # Homepage service grouping order
       homepage.widget.type: bazarr                             # Homepage widget type
@@ -353,7 +353,7 @@ services:
       homepage.group: Media                                     # Homepage service grouping
       homepage.name: Readarr                                    # Homepage service name
       homepage.icon: readarr.png                                # Homepage service icon
-      homepage.href: http://localhost:${READARR_WEBUI_PORT}     # Homepage service URL
+      homepage.href: https://readarr.${HOST_DOMAIN}             # Homepage service URL
       homepage.description: Ebooks management                   # Homepage service description
       homepage.weight: 2                                        # Homepage service grouping order
       homepage.widget.type: readarr                             # Homepage widget type
@@ -388,7 +388,7 @@ services:
       homepage.group: Media                                         # Homepage service grouping
       homepage.name: Overseerr                                      # Homepage service name
       homepage.icon: overseerr.png                                  # Homepage service icon
-      homepage.href: http://localhost:${OVERSEERR_WEBUI_PORT}       # Homepage service URL
+      homepage.href: https://overseerr.${HOST_DOMAIN}               # Homepage service URL
       homepage.description: Requests management                     # Homepage service description
       homepage.weight: 4                                            # Homepage service grouping order
       homepage.widget.type: overseerr                               # Homepage widget type

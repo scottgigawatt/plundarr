@@ -9,6 +9,7 @@ backgroundOpacity: 0.6
 cardBlur: md # or sm, lg
 headerStyle: {{HOMEPAGE_VAR_HEADER_STYLE}}
 background: /images/canyon-waterfall.gif
+favicon: https://img.icons8.com/?size=100&id=32558&format=png&color=000000
 
 color: neutral
 
