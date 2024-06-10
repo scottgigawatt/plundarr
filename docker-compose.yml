@@ -183,15 +183,16 @@ services:
     # Add container labels
     labels:
       # Homepage service labels (https://gethomepage.dev)
-      homepage.group: Download
-      homepage.name: Prowlarr
-      homepage.icon: prowlarr.png
-      homepage.href: http://localhost:${PROWLARR_WEBUI_PORT}
-      homepage.description: Indexers management
-      homepage.weight: 1
-      homepage.widget.type: prowlarr
-      homepage.widget.url: http://gluetun:${PROWLARR_WEBUI_PORT}
-      homepage.widget.key: ${PROWLARR_API_KEY}
+      homepage.group: Download # Homepage service grouping
+      homepage.name: Prowlarr                                    # Homepage service name
+      homepage.icon: prowlarr.png                                # Homepage service icon
+      homepage.href: http://localhost:${PROWLARR_WEBUI_PORT}     # Homepage service URL
+      homepage.description: Indexers management                  # Homepage service description
+      homepage.weight: 1                                         # Homepage service grouping order
+      homepage.widget.type: prowlarr                             # Homepage widget type
+      homepage.widget.url: http://gluetun:${PROWLARR_WEBUI_PORT} # Homepage widget URL
+      homepage.widget.key: ${PROWLARR_API_KEY}                   # Homepage widget API key
+
 
     # Mount host directories into the container
     volumes:
@@ -215,16 +216,17 @@ services:
     # Add container labels
     labels:
       # Homepage service labels (https://gethomepage.dev)
-      homepage.group: Download
-      homepage.name: qBittorrent
-      homepage.icon: qbittorrent.png
-      homepage.href: http://localhost:${QBITTORRENT_WEBUI_PORT}
-      homepage.description: Bittorrent client
-      homepage.weight: 2
-      homepage.widget.type: qbittorrent
-      homepage.widget.url: http://gluetun:${QBITTORRENT_WEBUI_PORT}
-      homepage.widget.username: ${QBITTORRENT_USERNAME}
-      homepage.widget.password: ${QBITTORRENT_PASSWORD}
+      homepage.group: Download                                      # Homepage service grouping
+      homepage.name: qBittorrent                                    # Homepage service name
+      homepage.icon: qbittorrent.png                                # Homepage service icon
+      homepage.href: http://localhost:${QBITTORRENT_WEBUI_PORT}     # Homepage service URL
+      homepage.description: Bittorrent client                       # Homepage service description
+      homepage.weight: 2                                            # Homepage service grouping order
+      homepage.widget.type: qbittorrent                             # Homepage widget type
+      homepage.widget.url: http://gluetun:${QBITTORRENT_WEBUI_PORT} # Homepage widget URL
+      homepage.widget.username: ${QBITTORRENT_USERNAME}             # Homepage widget username
+      homepage.widget.password: ${QBITTORRENT_PASSWORD}             # Homepage widget password
+
 
     # Mount host directories into the container
     volumes:
@@ -244,15 +246,15 @@ services:
     # Add container labels
     labels:
       # Homepage service labels (https://gethomepage.dev)
-      homepage.group: Media
-      homepage.name: Radarr
-      homepage.icon: radarr.png
-      homepage.href: http://localhost:${RADARR_WEBUI_PORT}
-      homepage.description: Movies management
-      homepage.weight: 0
-      homepage.widget.type: radarr
-      homepage.widget.url: http://gluetun:${RADARR_WEBUI_PORT}
-      homepage.widget.key: ${RADARR_API_KEY}
+      homepage.group: Media                                    # Homepage service grouping
+      homepage.name: Radarr                                    # Homepage service name
+      homepage.icon: radarr.png                                # Homepage service icon
+      homepage.href: http://localhost:${RADARR_WEBUI_PORT}     # Homepage service URL
+      homepage.description: Movies management                  # Homepage service description
+      homepage.weight: 0                                       # Homepage service grouping order
+      homepage.widget.type: radarr                             # Homepage widget type
+      homepage.widget.url: http://gluetun:${RADARR_WEBUI_PORT} # Homepage widget URL
+      homepage.widget.key: ${RADARR_API_KEY}                   # Homepage widget API key
 
     # Mount host directories into the container
     volumes:
@@ -279,15 +281,15 @@ services:
     # Add container labels
     labels:
       # Homepage service labels (https://gethomepage.dev)
-      homepage.group: Media
-      homepage.name: Sonarr
-      homepage.icon: sonarr.png
-      homepage.href: http://localhost:${SONARR_WEBUI_PORT}
-      homepage.description: Series management
-      homepage.weight: 1
-      homepage.widget.type: sonarr
-      homepage.widget.url: http://gluetun:${SONARR_WEBUI_PORT}
-      homepage.widget.key: ${SONARR_API_KEY}
+      homepage.group: Media                                    # Homepage service grouping
+      homepage.name: Sonarr                                    # Homepage service name
+      homepage.icon: sonarr.png                                # Homepage service icon
+      homepage.href: http://localhost:${SONARR_WEBUI_PORT}     # Homepage service URL
+      homepage.description: Series management                  # Homepage service description
+      homepage.weight: 1                                       # Homepage service grouping order
+      homepage.widget.type: sonarr                             # Homepage widget type
+      homepage.widget.url: http://gluetun:${SONARR_WEBUI_PORT} # Homepage widget URL
+      homepage.widget.key: ${SONARR_API_KEY}                   # Homepage widget API key
 
     # Mount host directories into the container
     volumes:
@@ -314,15 +316,15 @@ services:
     # Add container labels
     labels:
       # Homepage service labels (https://gethomepage.dev)
-      homepage.group: Download
-      homepage.name: Bazarr
-      homepage.icon: bazarr.png
-      homepage.href: http://localhost:${BAZARR_WEBUI_PORT}
-      homepage.description: Subtitles management
-      homepage.weight: 4
-      homepage.widget.type: bazarr
-      homepage.widget.url: http://gluetun:${BAZARR_WEBUI_PORT}
-      homepage.widget.key: ${BAZARR_API_KEY}
+      homepage.group: Download                                 # Homepage service grouping
+      homepage.name: Bazarr                                    # Homepage service name
+      homepage.icon: bazarr.png                                # Homepage service icon
+      homepage.href: http://localhost:${BAZARR_WEBUI_PORT}     # Homepage service URL
+      homepage.description: Subtitles management               # Homepage service description
+      homepage.weight: 4                                       # Homepage service grouping order
+      homepage.widget.type: bazarr                             # Homepage widget type
+      homepage.widget.url: http://gluetun:${BAZARR_WEBUI_PORT} # Homepage widget URL
+      homepage.widget.key: ${BAZARR_API_KEY}                   # Homepage widget API key
 
     # Mount host directories into the container
     volumes:
@@ -348,15 +350,15 @@ services:
     # Add container labels
     labels:
       # Homepage service labels (https://gethomepage.dev)
-      homepage.group: Media
-      homepage.name: Readarr
-      homepage.icon: readarr.png
-      homepage.href: http://localhost:${READARR_WEBUI_PORT}
-      homepage.description: Ebooks management
-      homepage.weight: 2
-      homepage.widget.type: readarr
-      homepage.widget.url: http://gluetun:${READARR_WEBUI_PORT}
-      homepage.widget.key: ${READARR_API_KEY}
+      homepage.group: Media                                     # Homepage service grouping
+      homepage.name: Readarr                                    # Homepage service name
+      homepage.icon: readarr.png                                # Homepage service icon
+      homepage.href: http://localhost:${READARR_WEBUI_PORT}     # Homepage service URL
+      homepage.description: Ebooks management                   # Homepage service description
+      homepage.weight: 2                                        # Homepage service grouping order
+      homepage.widget.type: readarr                             # Homepage widget type
+      homepage.widget.url: http://gluetun:${READARR_WEBUI_PORT} # Homepage widget URL
+      homepage.widget.key: ${READARR_API_KEY}                   # Homepage widget API key
 
     # Mount host directories into the container
     volumes:
@@ -383,15 +385,15 @@ services:
     # Add container labels
     labels:
       # Homepage service labels (https://gethomepage.dev)
-      homepage.group: Media
-      homepage.name: Overseerr
-      homepage.icon: overseerr.png
-      homepage.href: http://localhost:${OVERSEERR_WEBUI_PORT}
-      homepage.description: Requests management
-      homepage.weight: 4
-      homepage.widget.type: overseerr
-      homepage.widget.url: http://overseerr:${OVERSEERR_WEBUI_PORT}
-      homepage.widget.key: ${OVERSEERR_API_KEY}
+      homepage.group: Media                                         # Homepage service grouping
+      homepage.name: Overseerr                                      # Homepage service name
+      homepage.icon: overseerr.png                                  # Homepage service icon
+      homepage.href: http://localhost:${OVERSEERR_WEBUI_PORT}       # Homepage service URL
+      homepage.description: Requests management                     # Homepage service description
+      homepage.weight: 4                                            # Homepage service grouping order
+      homepage.widget.type: overseerr                               # Homepage widget type
+      homepage.widget.url: http://overseerr:${OVERSEERR_WEBUI_PORT} # Homepage widget URL
+      homepage.widget.key: ${OVERSEERR_API_KEY}                     # Homepage widget API key
 
     # Define the host and container ports
     ports:
