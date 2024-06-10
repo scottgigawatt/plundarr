@@ -458,6 +458,16 @@ services:
       - ${HOMEPAGE_DATA_ROOT_PATH}:/data             # Local directory to monitor disk space
       - /var/run/docker.sock:/var/run/docker.sock:rw # Allow container to talk to host Docker API
 
+    # Specify container service dependencies
+    depends_on:
+      - prowlarr
+      - qbittorrent
+      - radarr
+      - sonarr
+      - bazarr
+      - readarr
+      - overseerr
+
 #
 # Define the networks section
 #
