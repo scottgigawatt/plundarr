@@ -431,9 +431,6 @@ services:
     container_name: homepage-${HOMEPAGE_TAG}            # Append Docker image tag to container name
     hostname: homepage                                  # Set the container hostname
 
-    # Override container start command to copy
-    # command: [sh, -c, "cp -n /app/config/templates/*.yaml /app/config && node server.js"]
-
     # Define the container environment
     environment:
       <<: *default-environment                                      # Pull in the arr-stack environment
