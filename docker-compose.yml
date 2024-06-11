@@ -402,7 +402,7 @@ networks:
   default:
     name: ${COMPOSE_PROJECT_NAME} # Use the name of the compose project
     ipam:                         # IP Address Management
-      driver: bridge              # Use the bridge driver
+      driver: default             # Use the default driver
       config:
         - subnet: ${COMPOSE_NETWORK_SUBNET}     # Subnet in CIDR format that represents a network segment
           ip_range: ${COMPOSE_NETWORK_IP_RANGE} # Range of IPs from which to allocate container IPs
