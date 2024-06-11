@@ -8,11 +8,11 @@ favicon: https://img.icons8.com/?size=100&id=32558&format=png&color=000000
 
 color: slate
 
-background: /images/fire-sword.gif
+background: /images/canyon-waterfall.gif
 backgroundOpacity: 0.6
 cardBlur: md # or sm, lg
 
-headerStyle: boxed
+headerStyle: boxedWidgets
 useEqualHeights: true
 disableCollapse: true
 hideVersion: false

@@ -176,10 +176,10 @@ services:
   #
   prowlarr:
     # Docker image and container information
-    <<: *arr-stack-container                    # Pull in arr-stack container config
-    image: linuxserver/prowlarr:${PROWLARR_TAG} # Run using the specified tag
-    container_name: prowlarr-${PROWLARR_TAG}    # Append Docker image tag to container name
-    network_mode: service:gluetun               # Route network traffic through gluetun
+    <<: *arr-stack-container                            # Pull in arr-stack container config
+    image: lscr.io/linuxserver/prowlarr:${PROWLARR_TAG} # Run using the specified tag
+    container_name: prowlarr-${PROWLARR_TAG}            # Append Docker image tag to container name
+    network_mode: service:gluetun                       # Route network traffic through gluetun
 
     # Mount host directories into the container
     volumes:
