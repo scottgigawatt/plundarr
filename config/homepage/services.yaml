@@ -4,12 +4,128 @@
 #
 
 - Media:
-  - Plex:
-      icon: plex.png
-      href: {{HOMEPAGE_VAR_PLEX_URL}}
-      description: Plex Media Server
+    - Plex:
+        id: 100
+        icon: plex.svg
+        href: https://plex.{{HOMEPAGE_VAR_HOST_URL}}
+        description: Plex Media Server
+        widget:
+          type: plex
+          fields: ["streams", "movies", "tv"]
+          url: {{HOMEPAGE_VAR_PLEX_URL}}
+          key: {{HOMEPAGE_VAR_PLEX_TOKEN}}
+
+    - Radarr:
+        icon: radarr.svg
+        href: https://radarr.{{HOMEPAGE_VAR_HOST_URL}}
+        description: Movies management
+        container: radarr-latest
+        widget:
+          type: radarr
+          fields: ["wanted", "queued"]
+          url: {{HOMEPAGE_VAR_RADARR_URL}}
+          key: {{HOMEPAGE_VAR_RADARR_KEY}}
+
+    - Sonarr:
+        icon: sonarr.svg
+        href: https://sonarr.{{HOMEPAGE_VAR_HOST_URL}}
+        description: Series management
+        container: sonarr-latest
+        widget:
+          type: sonarr
+          fields: ["wanted", "queued"]
+          url: {{HOMEPAGE_VAR_SONARR_URL}}
+          key: {{HOMEPAGE_VAR_SONARR_KEY}}
+
+    - Bazarr:
+        icon: bazarr.svg
+        href: https://bazarr.{{HOMEPAGE_VAR_HOST_URL}}
+        description: Subtitles management
+        container: bazarr-latest
+        widget:
+          type: bazarr
+          url: {{HOMEPAGE_VAR_BAZARR_URL}}
+          key: {{HOMEPAGE_VAR_BAZARR_KEY}}
+
+    - Readarr:
+        icon: readarr.svg
+        href: https://readarr.{{HOMEPAGE_VAR_HOST_URL}}
+        description: Ebooks management
+        container: readarr-develop
+        widget:
+          type: readarr
+          url: {{HOMEPAGE_VAR_READARR_URL}}
+          key: {{HOMEPAGE_VAR_READARR_KEY}}
+
+    - Overseerr:
+        icon: overseerr.svg
+        href: https://overseerr.{{HOMEPAGE_VAR_HOST_URL}}
+        description: Requests management
+        container: overseerr-latest
+        widget:
+          type: overseerr
+          url: {{HOMEPAGE_VAR_OVERSEERR_URL}}
+          key: {{HOMEPAGE_VAR_OVERSEERR_KEY}}
+
+- Data:
+    - Calendar:
       widget:
-        type: plex
-        url: {{HOMEPAGE_VAR_PLEX_URL}}
-        key: {{HOMEPAGE_VAR_PLEX_TOKEN}} # see https://www.plexopedia.com/plex-media-server/general/plex-token/
-        fields: ["streams", "movies", "tv", "albums"]
+        type: calendar
+        firstDayInWeek: sunday
+        view: monthly
+        maxEvents: 10
+        showTime: true
+        integrations:
+          - type: radarr
+            service_group: Media
+            service_name: Radarr
+            color: amber
+            params:
+              unmonitored: true
+          - type: sonarr
+            service_group: Media
+            service_name: Sonarr
+            color: teal
+            params:
+              unmonitored: true
+          - type: readarr
+            service_group: Media
+            service_name: Readarr
+            color: pink
+            params:
+              unmonitored: true
+
+    - Tautulli:
+        icon: tautulli.svg
+        href: https://tautulli.{{HOMEPAGE_VAR_HOST_URL}}
+        description: Plex monitoring
+        container: tautulli-latest
+        widget:
+          type: tautulli
+          url: {{HOMEPAGE_VAR_TAUTULLI_URL}}
+          key: {{HOMEPAGE_VAR_TAUTULLI_KEY}}
+          enableUser: true
+          showEpisodeNumber: true
+          expandOneStreamToTwoRows: false
+
+- Downloads:
+    - Prowlarr:
+        icon: prowlarr.svg
+        href: https://prowlarr.{{HOMEPAGE_VAR_HOST_URL}}
+        description: Indexers management
+        container: prowlarr-latest
+        widget:
+          type: prowlarr
+          url: {{HOMEPAGE_VAR_PROWLARR_URL}}
+          key: {{HOMEPAGE_VAR_PROWLARR_KEY}}
+
+    - qBittorrent:
+        icon: qbittorrent.svg
+        href: https://qbittorrent.{{HOMEPAGE_VAR_HOST_URL}}
+        description: Torrents management
+        container: qbittorrent-latest
+        widget:
+          type: qbittorrent
+          url: {{HOMEPAGE_VAR_QBITTORRENT_URL}}
+          username: {{HOMEPAGE_VAR_QBITTORRENT_USER}}
+          password: {{HOMEPAGE_VAR_QBITTORRENT_PASS}}

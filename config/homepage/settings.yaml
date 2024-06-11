@@ -4,24 +4,35 @@
 #
 
 title: {{HOMEPAGE_VAR_TITLE}}
-
-backgroundOpacity: 0.6
-cardBlur: md # or sm, lg
-headerStyle: {{HOMEPAGE_VAR_HEADER_STYLE}}
-background: /images/canyon-waterfall.gif
 favicon: https://img.icons8.com/?size=100&id=32558&format=png&color=000000
 
-color: neutral
+color: slate
 
-layout:
-  Media:
-    style: row
-    columns: 3
-  Download:
-    style: row
-    columns: 2
+background: /images/fire-sword.gif
+backgroundOpacity: 0.6
+cardBlur: md # or sm, lg
+
+headerStyle: boxed
+useEqualHeights: true
+disableCollapse: true
+hideVersion: false
+showStats: true
+statusStyle: "dot"
 
 quicklaunch:
   searchDescriptions: true
   hideInternetSearch: true
   hideVisitURL: true
+
+layout:
+  Media:
+    style: row
+    columns: 3
+
+  Data:
+    style: row
+    columns: 2
+
+  Downloads:
+    style: row
+    columns: 2

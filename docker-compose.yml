@@ -29,12 +29,13 @@
 version: "2.9"
 
 #
-# Setup default propreties for all or most containers
+# Setup default properties for all or most containers
 #
 x-default-container: &default-container # YAML anchor for default container
   pull_policy: always                   # Ensure that the image is always pulled
   restart: unless-stopped               # Restart the container unless explicitly stopped
   logging:                              # Configure container logging options
+    driver: "json-file"                 # Use JSON file logging driver
     options:
       max-size: ${LOG_MAX_SIZE}         # Maximum file size for logs files
       max-file: ${LOG_MAX_FILE}         # Maximum number of log files to retain
@@ -180,20 +181,6 @@ services:
     container_name: prowlarr-${PROWLARR_TAG}    # Append Docker image tag to container name
     network_mode: service:gluetun               # Route network traffic through gluetun
 
-    # Add container labels
-    labels:
-      # Homepage service labels (https://gethomepage.dev)
-      homepage.group: Download # Homepage service grouping
-      homepage.name: Prowlarr                                    # Homepage service name
-      homepage.icon: prowlarr.png                                # Homepage service icon
-      homepage.href: https://prowlarr.${HOST_DOMAIN}             # Homepage service URL
-      homepage.description: Indexers management                  # Homepage service description
-      homepage.weight: 1                                         # Homepage service grouping order
-      homepage.widget.type: prowlarr                             # Homepage widget type
-      homepage.widget.url: http://gluetun:${PROWLARR_WEBUI_PORT} # Homepage widget URL
-      homepage.widget.key: ${PROWLARR_API_KEY}                   # Homepage widget API key
-
-
     # Mount host directories into the container
     volumes:
       - ${PROWLARR_CONFIG_PATH}:/config:rw # Database and Prowlarr configs
@@ -213,21 +200,6 @@ services:
     container_name: qbittorrent-${QBITTORRENT_TAG}            # Append Docker image tag to container name
     network_mode: service:gluetun                             # Route network traffic through gluetun
 
-    # Add container labels
-    labels:
-      # Homepage service labels (https://gethomepage.dev)
-      homepage.group: Download                                      # Homepage service grouping
-      homepage.name: qBittorrent                                    # Homepage service name
-      homepage.icon: qbittorrent.png                                # Homepage service icon
-      homepage.href: https://qbittorrent.${HOST_DOMAIN}             # Homepage service URL
-      homepage.description: Bittorrent client                       # Homepage service description
-      homepage.weight: 2                                            # Homepage service grouping order
-      homepage.widget.type: qbittorrent                             # Homepage widget type
-      homepage.widget.url: http://gluetun:${QBITTORRENT_WEBUI_PORT} # Homepage widget URL
-      homepage.widget.username: ${QBITTORRENT_USERNAME}             # Homepage widget username
-      homepage.widget.password: ${QBITTORRENT_PASSWORD}             # Homepage widget password
-
-
     # Mount host directories into the container
     volumes:
       - ${QBITTORRENT_CONFIG_PATH}:/config:rw # Configuration files
@@ -242,19 +214,6 @@ services:
     image: lscr.io/linuxserver/radarr:${RADARR_TAG} # Run using the specified tag
     container_name: radarr-${RADARR_TAG}            # Append Docker image tag to container name
     network_mode: service:gluetun                   # Route network traffic through gluetun
-
-    # Add container labels
-    labels:
-      # Homepage service labels (https://gethomepage.dev)
-      homepage.group: Media                                    # Homepage service grouping
-      homepage.name: Radarr                                    # Homepage service name
-      homepage.icon: radarr.png                                # Homepage service icon
-      homepage.href: https://radarr.${HOST_DOMAIN}             # Homepage service URL
-      homepage.description: Movies management                  # Homepage service description
-      homepage.weight: 0                                       # Homepage service grouping order
-      homepage.widget.type: radarr                             # Homepage widget type
-      homepage.widget.url: http://gluetun:${RADARR_WEBUI_PORT} # Homepage widget URL
-      homepage.widget.key: ${RADARR_API_KEY}                   # Homepage widget API key
 
     # Mount host directories into the container
     volumes:
@@ -278,19 +237,6 @@ services:
     container_name: sonarr-${SONARR_TAG}            # Append Docker image tag to container name
     network_mode: service:gluetun                   # Route network traffic through gluetun
 
-    # Add container labels
-    labels:
-      # Homepage service labels (https://gethomepage.dev)
-      homepage.group: Media                                    # Homepage service grouping
-      homepage.name: Sonarr                                    # Homepage service name
-      homepage.icon: sonarr.png                                # Homepage service icon
-      homepage.href: https://sonarr.${HOST_DOMAIN}             # Homepage service URL
-      homepage.description: Series management                  # Homepage service description
-      homepage.weight: 1                                       # Homepage service grouping order
-      homepage.widget.type: sonarr                             # Homepage widget type
-      homepage.widget.url: http://gluetun:${SONARR_WEBUI_PORT} # Homepage widget URL
-      homepage.widget.key: ${SONARR_API_KEY}                   # Homepage widget API key
-
     # Mount host directories into the container
     volumes:
       - ${SONARR_CONFIG_PATH}:/config:rw     # Database and Sonarr configs
@@ -313,19 +259,6 @@ services:
     container_name: bazarr-${BAZARR_TAG}            # Append Docker image tag to container name
     network_mode: service:gluetun                   # Route network traffic through gluetun
 
-    # Add container labels
-    labels:
-      # Homepage service labels (https://gethomepage.dev)
-      homepage.group: Download                                 # Homepage service grouping
-      homepage.name: Bazarr                                    # Homepage service name
-      homepage.icon: bazarr.png                                # Homepage service icon
-      homepage.href: https://bazarr.${HOST_DOMAIN}             # Homepage service URL
-      homepage.description: Subtitles management               # Homepage service description
-      homepage.weight: 4                                       # Homepage service grouping order
-      homepage.widget.type: bazarr                             # Homepage widget type
-      homepage.widget.url: http://gluetun:${BAZARR_WEBUI_PORT} # Homepage widget URL
-      homepage.widget.key: ${BAZARR_API_KEY}                   # Homepage widget API key
-
     # Mount host directories into the container
     volumes:
       - ${BAZARR_CONFIG_PATH}:/config:rw # Persistent config files
@@ -346,19 +279,6 @@ services:
     image: lscr.io/linuxserver/readarr:${READARR_TAG} # Run using the specified tag
     container_name: readarr-${READARR_TAG}            # Append Docker image tag to container name
     network_mode: service:gluetun                     # Route network traffic through gluetun
-
-    # Add container labels
-    labels:
-      # Homepage service labels (https://gethomepage.dev)
-      homepage.group: Media                                     # Homepage service grouping
-      homepage.name: Readarr                                    # Homepage service name
-      homepage.icon: readarr.png                                # Homepage service icon
-      homepage.href: https://readarr.${HOST_DOMAIN}             # Homepage service URL
-      homepage.description: Ebooks management                   # Homepage service description
-      homepage.weight: 2                                        # Homepage service grouping order
-      homepage.widget.type: readarr                             # Homepage widget type
-      homepage.widget.url: http://gluetun:${READARR_WEBUI_PORT} # Homepage widget URL
-      homepage.widget.key: ${READARR_API_KEY}                   # Homepage widget API key
 
     # Mount host directories into the container
     volumes:
@@ -381,19 +301,6 @@ services:
     image: lscr.io/linuxserver/overseerr:${OVERSEERR_TAG} # Run using the specified tag
     container_name: overseerr-${OVERSEERR_TAG}            # Append Docker image tag to container name
     hostname: overseerr                                   # Set the container hostname
-
-    # Add container labels
-    labels:
-      # Homepage service labels (https://gethomepage.dev)
-      homepage.group: Media                                         # Homepage service grouping
-      homepage.name: Overseerr                                      # Homepage service name
-      homepage.icon: overseerr.png                                  # Homepage service icon
-      homepage.href: https://overseerr.${HOST_DOMAIN}               # Homepage service URL
-      homepage.description: Requests management                     # Homepage service description
-      homepage.weight: 4                                            # Homepage service grouping order
-      homepage.widget.type: overseerr                               # Homepage widget type
-      homepage.widget.url: http://overseerr:${OVERSEERR_WEBUI_PORT} # Homepage widget URL
-      homepage.widget.key: ${OVERSEERR_API_KEY}                     # Homepage widget API key
 
     # Define the host and container ports
     ports:
@@ -435,17 +342,36 @@ services:
 
     # Define the container environment
     environment:
-      <<: *default-environment                                      # Pull in the arr-stack environment
-      HOMEPAGE_VAR_TITLE: ${HOMEPAGE_VAR_TITLE}                     # Title of the homepage
-      HOMEPAGE_VAR_SEARCH_PROVIDER: ${HOMEPAGE_VAR_SEARCH_PROVIDER} # Homepage search provider
-      HOMEPAGE_VAR_HEADER_STYLE: ${HOMEPAGE_VAR_HEADER_STYLE}       # Homepage header style, e.g. underlined, boxed, etc.
-      HOMEPAGE_VAR_WEATHER_CITY: ${HOMEPAGE_VAR_WEATHER_CITY}       # Homepage weather city name
-      HOMEPAGE_VAR_WEATHER_LAT: ${HOMEPAGE_VAR_WEATHER_LAT}         # Homepage weather city latitude
-      HOMEPAGE_VAR_WEATHER_LONG: ${HOMEPAGE_VAR_WEATHER_LONG}       # Homepage weather city longitude
-      HOMEPAGE_VAR_WEATHER_TZ: ${HOMEPAGE_VAR_WEATHER_TZ}           # Homepage weather time zone
-      HOMEPAGE_VAR_WEATHER_UNIT: ${HOMEPAGE_VAR_WEATHER_UNIT}       # Homepage weather unit, e.g. metric or imperial
-      HOMEPAGE_VAR_PLEX_URL: ${HOMEPAGE_VAR_PLEX_URL}               # Plex URL for plex widget
-      HOMEPAGE_VAR_PLEX_TOKEN: ${HOMEPAGE_VAR_PLEX_TOKEN}           # Plex token for plex widget
+      <<: *default-environment                                                                # Pull in the arr-stack environment
+      HOMEPAGE_VAR_TITLE: ${HOMEPAGE_VAR_TITLE}                                               # Title of the homepage
+      HOMEPAGE_VAR_SEARCH_PROVIDER: ${HOMEPAGE_VAR_SEARCH_PROVIDER}                           # Homepage search provider
+      HOMEPAGE_VAR_WEATHER_CITY: ${HOMEPAGE_VAR_WEATHER_CITY}                                 # Homepage weather city name
+      HOMEPAGE_VAR_WEATHER_LAT: ${HOMEPAGE_VAR_WEATHER_LAT}                                   # Homepage weather city latitude
+      HOMEPAGE_VAR_WEATHER_LONG: ${HOMEPAGE_VAR_WEATHER_LONG}                                 # Homepage weather city longitude
+      HOMEPAGE_VAR_WEATHER_TZ: ${HOMEPAGE_VAR_WEATHER_TZ}                                     # Homepage weather time zone
+      HOMEPAGE_VAR_WEATHER_UNIT: ${HOMEPAGE_VAR_WEATHER_UNIT}                                 # Homepage weather unit, metric or imperial
+      HOMEPAGE_VAR_HOST_URL: ${HOMEPAGE_VAR_HOST_URL}                                         # Homepage base host URL, Synology DSM host
+      HOMEPAGE_VAR_DSM2_URL: ${HOMEPAGE_VAR_DSM2_URL}                                         # Homepage extra DSM host
+      HOMEPAGE_VAR_DSM3_URL: ${HOMEPAGE_VAR_DSM3_URL}                                         # Homepage extra DSM host
+      HOMEPAGE_VAR_PLEX_URL: ${HOMEPAGE_VAR_PLEX_URL}:${PLEX_WEBUI_PORT}                      # Plex internal URL for widget
+      HOMEPAGE_VAR_PLEX_TOKEN: ${HOMEPAGE_VAR_PLEX_TOKEN}                                     # Plex token for widget
+      HOMEPAGE_VAR_TAUTULLI_URL: ${HOMEPAGE_VAR_TAUTULLI_URL}:${TAUTULLI_WEBUI_PORT}          # Tautulli internal URL for widget
+      HOMEPAGE_VAR_TAUTULLI_KEY: ${HOMEPAGE_VAR_TAUTULLI_KEY}                                 # Tautulli api key for widget
+      HOMEPAGE_VAR_RADARR_URL: ${HOMEPAGE_VAR_RADARR_URL}:${RADARR_WEBUI_PORT}                # Radarr internal URL for widget
+      HOMEPAGE_VAR_RADARR_KEY: ${HOMEPAGE_VAR_RADARR_KEY}                                     # Radarr api key for widget
+      HOMEPAGE_VAR_SONARR_URL: ${HOMEPAGE_VAR_SONARR_URL}:${SONARR_WEBUI_PORT}                # Sonarr internal URL for widget
+      HOMEPAGE_VAR_SONARR_KEY: ${HOMEPAGE_VAR_SONARR_KEY}                                     # Sonarr api key for widget
+      HOMEPAGE_VAR_BAZARR_URL: ${HOMEPAGE_VAR_BAZARR_URL}:${BAZARR_WEBUI_PORT}                # Bazarr internal URL for widget
+      HOMEPAGE_VAR_BAZARR_KEY: ${HOMEPAGE_VAR_BAZARR_KEY}                                     # Bazarr api key for widget
+      HOMEPAGE_VAR_READARR_URL: ${HOMEPAGE_VAR_READARR_URL}:${READARR_WEBUI_PORT}             # Readarr internal URL for widget
+      HOMEPAGE_VAR_READARR_KEY: ${HOMEPAGE_VAR_READARR_KEY}                                   # Readarr api key for widget
+      HOMEPAGE_VAR_OVERSEERR_URL: ${HOMEPAGE_VAR_OVERSEERR_URL}:${OVERSEERR_WEBUI_PORT}       # Overseerr internal URL for widget
+      HOMEPAGE_VAR_OVERSEERR_KEY: ${HOMEPAGE_VAR_OVERSEERR_KEY}                               # Overseerr api key for widget
+      HOMEPAGE_VAR_PROWLARR_URL: ${HOMEPAGE_VAR_PROWLARR_URL}:${PROWLARR_WEBUI_PORT}          # Prowlarr internal URL for widget
+      HOMEPAGE_VAR_PROWLARR_KEY: ${HOMEPAGE_VAR_PROWLARR_KEY}                                 # Prowlarr api key for widget
+      HOMEPAGE_VAR_QBITTORRENT_URL: ${HOMEPAGE_VAR_QBITTORRENT_URL}:${QBITTORRENT_WEBUI_PORT} # qBittorrent internal URL for widget
+      HOMEPAGE_VAR_QBITTORRENT_USER: ${HOMEPAGE_VAR_QBITTORRENT_USER}                         # qBittorrent username for widget
+      HOMEPAGE_VAR_QBITTORRENT_PASS: ${HOMEPAGE_VAR_QBITTORRENT_PASS}                         # qBittorrent password for widget
 
     # Define the host and container ports
     ports:
@@ -453,9 +379,9 @@ services:
 
     # Mount host directories into the container
     volumes:
-      - ${HOMEPAGE_CONFIG_PATH}:/app/config          # Local config files directory
-      - ${HOMEPAGE_PUBLIC_PATH}:/app/public          # Local public files directory
-      - ${HOMEPAGE_DATA_ROOT_PATH}:/data             # Local directory to monitor disk space
+      - ${HOMEPAGE_CONFIG_PATH}:/app/config:rw       # Local config files directory
+      - ${HOMEPAGE_PUBLIC_PATH}:/app/public:rw       # Local public files directory
+      - ${HOMEPAGE_DATA_ROOT_PATH}:/data:rw          # Local directory to monitor disk space
       - /var/run/docker.sock:/var/run/docker.sock:rw # Allow container to talk to host Docker API
 
     # Specify container service dependencies
@@ -475,3 +401,9 @@ networks:
   # Configure the default network
   default:
     name: ${COMPOSE_PROJECT_NAME} # Use the name of the compose project
+    ipam:                         # IP Address Management
+      driver: bridge              # Use the bridge driver
+      config:
+        - subnet: ${COMPOSE_NETWORK_SUBNET}     # Subnet in CIDR format that represents a network segment
+          ip_range: ${COMPOSE_NETWORK_IP_RANGE} # Range of IPs from which to allocate container IPs
+          gateway: ${COMPOSE_NETWORK_GATEWAY}   # Gateway for the master subnet

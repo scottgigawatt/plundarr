@@ -3,9 +3,17 @@
 # For more information see: https://gethomepage.dev/latest/widgets
 #
 
+- greeting:
+  text_size: xl
+  text: Welcome to {{HOMEPAGE_VAR_TITLE}}
+
 - resources:
+    label: Plex Shared Folder
+    expanded: true
     cpu: true
     memory: true
+    uptime: true
+    refresh: 1000
     disk:
       - /
       - /data
@@ -26,3 +34,4 @@
     text_size: md
     format:
       timeStyle: short
+      dateStyle: long
