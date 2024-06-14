@@ -380,20 +380,10 @@ services:
 
     # Mount host directories into the container
     volumes:
-      - ${HOMEPAGE_CONFIG_PATH}:/app/config:rw       # Local config files directory
-      - ${HOMEPAGE_PUBLIC_PATH}:/app/public:rw       # Local public files directory
-      - ${HOMEPAGE_DATA_ROOT_PATH}:/data:rw          # Local directory to monitor disk space
-      - /var/run/docker.sock:/var/run/docker.sock:rw # Allow container to talk to host Docker API
-
-    # Specify container service dependencies
-    depends_on:
-      - prowlarr
-      - qbittorrent
-      - radarr
-      - sonarr
-      - bazarr
-      - readarr
-      - overseerr
+      - ${HOMEPAGE_CONFIG_PATH}:/app/config:rw        # Local config files directory
+      - ${HOMEPAGE_IMAGES_PATH}:/app/public/images:rw # Local public files directory
+      - ${HOMEPAGE_DATA_ROOT_PATH}:/data:rw           # Local directory to monitor disk space
+      - /var/run/docker.sock:/var/run/docker.sock:rw  # Allow container to talk to host Docker API
 
 #
 # Define the networks section
