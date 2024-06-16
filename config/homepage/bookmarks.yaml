@@ -5,21 +5,21 @@
 
 - Links:
     - GitHub:
-        - icon: si-github.png
+        - icon: git.svg
           href: https://github.com/scottgigawatt
           description: GitHub Projects 🐙
 
     - Hera:
-        - icon: si-synology-dsm.png
+        - icon: synology-dsm.svg
           href: https://{{HOMEPAGE_VAR_HOST_URL}}
           description: Gateway to the Gods 🏛️
 
-    - Cetus:
-        - icon: si-synology-dsm.png
-          href: https://{{HOMEPAGE_VAR_DSM2_URL}}
-          description: Portal to the Abyss 🌊
-
     - Codex:
-        - icon: si-mkdocs.svg
+        - icon: mkdocs.svg
           href: https://{{HOMEPAGE_VAR_WIKI_URL}}
           description: Wisdom of the Stars 🌟✨
+
+    - Cetus:
+        - icon: synology-dsm.svg
+          href: https://{{HOMEPAGE_VAR_DSM2_URL}}
+          description: Portal to the Abyss 🌊
