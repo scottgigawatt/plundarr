@@ -353,7 +353,7 @@ services:
       HOMEPAGE_VAR_WEATHER_UNIT: ${HOMEPAGE_VAR_WEATHER_UNIT}                                 # Homepage weather unit, metric or imperial
       HOMEPAGE_VAR_HOST_URL: ${HOMEPAGE_VAR_HOST_URL}                                         # Homepage base host URL, Synology DSM host
       HOMEPAGE_VAR_DSM2_URL: ${HOMEPAGE_VAR_DSM2_URL}                                         # Homepage extra DSM host
-      HOMEPAGE_VAR_DSM3_URL: ${HOMEPAGE_VAR_DSM3_URL}                                         # Homepage extra DSM host
+      HOMEPAGE_VAR_WIKI_URL: ${HOMEPAGE_VAR_WIKI_URL}                                         # Homepage wiki URL
       HOMEPAGE_VAR_PLEX_URL: ${HOMEPAGE_VAR_PLEX_URL}:${PLEX_WEBUI_PORT}                      # Plex internal URL for widget
       HOMEPAGE_VAR_PLEX_TOKEN: ${HOMEPAGE_VAR_PLEX_TOKEN}                                     # Plex token for widget
       HOMEPAGE_VAR_TAUTULLI_URL: ${HOMEPAGE_VAR_TAUTULLI_URL}:${TAUTULLI_WEBUI_PORT}          # Tautulli internal URL for widget
