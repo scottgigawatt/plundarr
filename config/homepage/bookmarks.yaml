@@ -3,61 +3,23 @@
 # For more information see: https://gethomepage.dev/latest/configs/bookmarks
 #
 
-- Credits:
-    - Duplex:
-        - icon: github.svg
-          href: https://github.com/scottgigawatt/duplex
-          description: Docker Utilities for Plex on Synology DSM 🍿
+- Links:
+    - GitHub:
+        - icon: si-github.png
+          href: https://github.com/scottgigawatt
+          description: GitHub Projects 🐙
 
-    - Plundarr:
-        - icon: github.svg
-          href: https://github.com/scottgigawatt/plundarr
-          description: Docker Compose for media 'arr' tools + PIA WireGuard VPN 🏴‍☠️
-
-    - Privateerr:
-        - icon: github.svg
-          href: https://github.com/scottgigawatt/privateerr
-          description: Docker Compose for PIA + WireGuard ⚓️
-
-- Synology:
     - Hera:
-        - icon: synology-dsm.svg
+        - icon: si-synology-dsm.png
           href: https://{{HOMEPAGE_VAR_HOST_URL}}
           description: Gateway to the Gods 🏛️
 
     - Cetus:
-        - icon: synology-dsm.svg
+        - icon: si-synology-dsm.png
           href: https://{{HOMEPAGE_VAR_DSM2_URL}}
           description: Portal to the Abyss 🌊
 
-    - Meow-thership:
-        - icon: synology-dsm.svg
-          href: https://{{HOMEPAGE_VAR_DSM3_URL}}
-          description: Space Cat World Domination 🐱🚀
-
-- Links:
-    - Trakt:
-        - icon: trakt.svg
-          href: https://trakt.tv/dashboard
-          description: Track. Discover. Share. 🎬🌟
-
     - Codex:
-        - icon: mkdocs.svg
-          href: https://{{HOMEPAGE_VAR_HOST_URL}}
+        - icon: si-mkdocs.svg
+          href: https://{{HOMEPAGE_VAR_WIKI_URL}}
           description: Wisdom of the Stars 🌟✨
-
-    - LinuxServer.io:
-        - icon: linuxserver-io.svg
-          href: https://docs.linuxserver.io/
-          description: Where 'Arr' Apps Set Sail for Smooth Seas and Safe Harbors! 🏴‍☠️
-
-- Social:
-    - Reddit:
-        - icon: reddit.svg
-          href: https://reddit.com/
-          description: The front page of the internet 🌐👾
-
-    - TikTok:
-        - icon: tiktok.svg
-          href: https://www.tiktok.com/
-          description: Make every second count ⏳🎵

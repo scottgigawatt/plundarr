@@ -4,11 +4,11 @@
 #
 
 title: {{HOMEPAGE_VAR_TITLE}}
-favicon: https://img.icons8.com/?size=100&id=32558&format=png&color=000000
+favicon: /images/icons/peacock-feather-gradient.png
 
 color: slate
 
-background: /images/canyon-waterfall.gif
+background: /images/backgrounds/mountain-clouds.gif
 backgroundOpacity: 0.6
 cardBlur: md # or sm, lg
 
@@ -18,6 +18,7 @@ disableCollapse: true
 hideVersion: false
 showStats: true
 statusStyle: "dot"
+target: _blank
 
 quicklaunch:
   searchDescriptions: true
@@ -36,3 +37,7 @@ layout:
   Downloads:
     style: row
     columns: 2
+
+  Links:
+    style: row
+    columns: 4

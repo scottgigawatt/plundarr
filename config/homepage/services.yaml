@@ -69,31 +69,31 @@
 
 - Data:
     - Calendar:
-      widget:
-        type: calendar
-        firstDayInWeek: sunday
-        view: monthly
-        maxEvents: 10
-        showTime: true
-        integrations:
-          - type: radarr
-            service_group: Media
-            service_name: Radarr
-            color: amber
-            params:
-              unmonitored: true
-          - type: sonarr
-            service_group: Media
-            service_name: Sonarr
-            color: teal
-            params:
-              unmonitored: true
-          - type: readarr
-            service_group: Media
-            service_name: Readarr
-            color: pink
-            params:
-              unmonitored: true
+        widget:
+          type: calendar
+          firstDayInWeek: sunday
+          view: monthly
+          maxEvents: 10
+          showTime: true
+          integrations:
+            - type: radarr
+              service_group: Media
+              service_name: Radarr
+              color: amber
+              params:
+                unmonitored: true
+            - type: sonarr
+              service_group: Media
+              service_name: Sonarr
+              color: teal
+              params:
+                unmonitored: true
+            - type: readarr
+              service_group: Media
+              service_name: Readarr
+              color: pink
+              params:
+                unmonitored: true
 
     - Tautulli:
         icon: tautulli.svg
