@@ -120,6 +120,10 @@ services:
     cap_add:                               # Add additional linux capabilities
       - NET_ADMIN                          # Allow modification of network interfaces
 
+    # Add container devices
+    devices:
+      - /dev/net/tun:/dev/net/tun # Allow container to handle encrypted VPN traffic directly
+
     # Add container labels
     labels:
       - "com.centurylinklabs.watchtower.enable=false" # Exclude local init container from Watchtower
