@@ -1,6 +1,6 @@
 # Plundarr 🏴‍☠️
 
-Ahoy, mateys! Welcome to Plundarr, the ultimate Docker Compose setup for all ye pirate-themed media needs. Manage yer favorite 'arr' apps and PIA VPN connections with ease, all while sailin' the high seas of secure and automated media management. ⚓️
+Ahoy, mateys! Welcome to Plundarr, the ultimate Docker Compose setup for all ye media needs. Manage yer favorite 'arr' apps and PIA VPN connections with ease, all while sailin' the high seas of secure and automated media management. ⚓️
 
 ## Captain's Log 📜
 
