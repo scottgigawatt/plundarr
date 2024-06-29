@@ -46,12 +46,12 @@ These following variables control ye Docker Compose gateway and subnet configura
 - `ip_range`: Range of IPs from which to allocate container IPs
 - `gateway`: IPv4 or IPv6 gateway for the master subnet
 
-Adjust the values of these environment variables to yer requirements.
+Adjust the values of these environment variables to yer requirements. Fer example, ye could use the following:
 
 ```bash
-COMPOSE_NETWORK_SUBNET="${COMPOSE_NETWORK_SUBNET:-0.0.0.0/16}"
-COMPOSE_NETWORK_IP_RANGE="${COMPOSE_NETWORK_IP_RANGE:-0.0.0.0/24}"
-COMPOSE_NETWORK_GATEWAY="${COMPOSE_NETWORK_GATEWAY:-0.0.0.0}"
+COMPOSE_NETWORK_SUBNET="${COMPOSE_NETWORK_SUBNET:-172.168.0.0/16}"
+COMPOSE_NETWORK_IP_RANGE="${COMPOSE_NETWORK_IP_RANGE:-172.168.5.0/24}"
+COMPOSE_NETWORK_GATEWAY="${COMPOSE_NETWORK_GATEWAY:-172.168.5.254}"
 ```
 
 ## Ship's Log 🏝️
