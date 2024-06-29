@@ -8,7 +8,7 @@ favicon: /images/icons/peacock-feather-gradient.png
 
 color: slate
 
-background: /images/backgrounds/mountain-clouds.gif
+background: /images/backgrounds/canyon-waterfall.gif
 backgroundOpacity: 0.6
 cardBlur: md # or sm, lg
 
