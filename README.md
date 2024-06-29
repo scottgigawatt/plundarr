@@ -40,18 +40,12 @@ cp example.env .env
 PIA_USER=<pia_username> PIA_PASS=<pia_password> make
 ```
 
-These following variables control ye Docker Compose gateway and subnet configurations.  From the Docker Compose [IPAM](https://docs.docker.com/compose/compose-file/06-networks/#ipam) documentation:
-
-- `subnet`: Subnet in CIDR format that represents a network segment
-- `ip_range`: Range of IPs from which to allocate container IPs
-- `gateway`: IPv4 or IPv6 gateway for the master subnet
-
-Adjust the values of these environment variables to yer requirements. Fer example, ye could use the following:
+See the Docker Compose [IPAM](https://docs.docker.com/compose/compose-file/06-networks/#ipam) documentation for more information on configuring the following [IP address information](https://github.com/scottgigawatt/plundarr/blob/main/example.env#L9-L11) for the compose stack:
 
 ```bash
-COMPOSE_NETWORK_SUBNET="${COMPOSE_NETWORK_SUBNET:-172.168.0.0/16}"
-COMPOSE_NETWORK_IP_RANGE="${COMPOSE_NETWORK_IP_RANGE:-172.168.5.0/24}"
-COMPOSE_NETWORK_GATEWAY="${COMPOSE_NETWORK_GATEWAY:-172.168.5.254}"
+COMPOSE_NETWORK_SUBNET="${COMPOSE_NETWORK_SUBNET:-0.0.0.0/16}"
+COMPOSE_NETWORK_IP_RANGE="${COMPOSE_NETWORK_IP_RANGE:-0.0.0.0/24}"
+COMPOSE_NETWORK_GATEWAY="${COMPOSE_NETWORK_GATEWAY:-0.0.0.0}"
 ```
 
 ## Ship's Log 🏝️
