@@ -24,12 +24,17 @@ Plundarr be a collection of Docker Compose configurations to run a shipshape arr
 
 ## Hoist the Sails ⚓️
 
-Manage Docker configuration environment variables in the [`.env`](./.env) file. Override these variables easily on the command line when startin' the Docker Compose stack:
+Manage Docker configuration environment variables in the [`.env`](./example.env) file. Override these variables easily on the command line when startin' the Docker Compose stack. Before ye begin, copy the example environment configuration file and update it to suit yer needs:
 
 ```bash
 # Hoist the Jolly Roger and clone the repository with submodules
 git clone --recurse-submodules git@github.com:scottgigawatt/plundarr.git
 cd plundarr
+
+# Copy the example environment file
+cp example.env .env
+
+# Open .env file and adjust the values to yer requirements
 
 # Weigh anchor and start the container
 PIA_USER=<pia_username> PIA_PASS=<pia_password> make
