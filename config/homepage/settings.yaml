@@ -8,10 +8,14 @@ favicon: /images/icons/peacock-feather-gradient.png
 
 color: slate
 
-background: /images/backgrounds/canyon-waterfall.gif
-backgroundOpacity: 0.6
-cardBlur: md # or sm, lg
+background:
+  image: /images/backgrounds/electric-sphere.gif
+  blur: sm
+  saturate: 50
+  brightness: 75
+  opacity: 80 #
 
+cardBlur: md
 headerStyle: boxedWidgets
 useEqualHeights: true
 disableCollapse: true
