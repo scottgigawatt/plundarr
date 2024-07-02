@@ -13,7 +13,7 @@ background:
   blur: sm
   saturate: 50
   brightness: 75
-  opacity: 80 #
+  opacity: 80
 
 cardBlur: md
 headerStyle: boxedWidgets
