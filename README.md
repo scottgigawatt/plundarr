@@ -48,6 +48,32 @@ COMPOSE_NETWORK_IP_RANGE="${COMPOSE_NETWORK_IP_RANGE:-0.0.0.0/24}"
 COMPOSE_NETWORK_GATEWAY="${COMPOSE_NETWORK_GATEWAY:-0.0.0.0}"
 ```
 
+## Ensure Yer Tunnels Be Ready at Boot 🛠️⚓️🏴‍☠️
+
+To make sure the `/dev/net/tun` device be present on Synology Disk Station for use with VPN applications like Gluetun, follow these steps, me hearties:
+
+1. **Setup Task Scheduler on Synology NAS:**
+
+    Open Synology's Control Panel and follow these steps to run the script on boot:
+
+    - Go to **Task Scheduler** 🗓️.
+    - Click **Create** -> **Triggered Task** -> **User-defined script** ✍️.
+    - Give the task a name, e.g., 'Create Tunnel' 🌉.
+    - Set the user to `root` 🧙.
+    - Set the event to **Boot-up** 🚀.
+    - Check **Enabled** ✅.
+    - Under **Task Settings**, enter the following command under **Run command** 💻:
+
+      ```bash
+      bash /volume1/docker/plundarr/scripts/tun.sh
+      ```
+
+    - Click **OK** to save the task 💾.
+
+This ensures that the `/dev/net/tun` device be available whenever yer Synology NAS boots up, so ye can sail the seas with yer VPN secure and sound. Arrr! 🏴‍☠️
+
+For more details, see the script [here](scripts/tun.sh) 📜.
+
 ## Ship's Log 🏝️
 
 Plundarr has been tested on Synology DS916+ running DSM 7.2.1-69057 Update 5. But fear not, me hearties! It should work on other lands as well.
