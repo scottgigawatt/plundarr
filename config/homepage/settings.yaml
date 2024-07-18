@@ -10,10 +10,10 @@ color: slate
 
 background:
   image: /images/backgrounds/electric-sphere.gif
-  blur: sm
-  saturate: 50
-  brightness: 75
-  opacity: 80
+#  blur: sm
+#  saturate: 50
+#  brightness: 75
+#  opacity: 75
 
 cardBlur: md
 headerStyle: boxedWidgets
