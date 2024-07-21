@@ -17,7 +17,7 @@
     - Codex:
         - icon: mkdocs.svg
           href: https://{{HOMEPAGE_VAR_WIKI_URL}}
-          description: Wisdom of the Stars 🌟✨
+          description: Wisdom of the Stars ✨
 
     - Cetus:
         - icon: synology-dsm.svg
