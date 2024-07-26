@@ -74,13 +74,13 @@ This ensures that the `/dev/net/tun` device be available whenever yer Synology N
 
 For more details, see the script [here](scripts/tun.sh) 📜.
 
-## Viewing Configuration Details
+## Viewing the Environment and Docker Compose Configuration Details 🏴‍⚓️
 
-The `plundarr` repository provides several tools to view and manage the environment and Docker Compose configuration details. While the configuration files are heavily documented to assist with understanding and customization, some users may prefer to see the uncommented versions for simplicity.
+Ahoy, mateys! The `plundarr` repo be providin' ye with tools t' view an' manage the environment an' Docker Compose configuration details. While the configuration files be heavily documented t' assist with understandin' an' customization, some o' ye may prefer t' see the uncommented versions fer simplicity.
 
-### Makefile Targets
+### Makefile Targets 🏴‍☠️⚓️
 
-The included `Makefile` contains targets to help with this:
+The included `Makefile` contains targets t' help ye navigate these treacherous waters. Usin' these commands will provide ye with a clearer view o' the environment an' configuration details without the additional comments. Set sail with confidence, ye scurvy dogs! 🏴‍☠️
 
 - **Print the evaluated Docker Compose default environment configuration:**
 
@@ -88,7 +88,7 @@ The included `Makefile` contains targets to help with this:
   make env
   ```
 
-- **Render the actual data model to be applied on the Docker Engine:**
+- **Render the actual data model t' be applied on the Docker Engine:**
 
   ```sh
   make config
