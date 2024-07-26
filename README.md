@@ -98,7 +98,6 @@ The included `Makefile` contains targets t' help ye navigate these treacherous w
 - **Render the actual data model t' be applied on the Docker Engine:**
 
   ```sh
-  make config
   ❯ make config
   docker-compose config
   name: plundarr
@@ -123,6 +122,7 @@ The included `Makefile` contains targets t' help ye navigate these treacherous w
   COMPOSE_NETWORK_GATEWAY="${COMPOSE_NETWORK_GATEWAY:-0.0.0.0}"
   HOST_VOLUME="${HOST_VOLUME:-/volume1}"
   HOST_DOWNLOADS_PATH="${HOST_DOWNLOADS_PATH:-/volume1/downloads}"
+  ...
   ```
 
 - **Print the raw uncommented Docker Compose YAML configuration:**
@@ -157,12 +157,6 @@ The included `Makefile` contains targets t' help ye navigate these treacherous w
       build:
         context: config/privateerr/docker
         dockerfile: Dockerfile
-        args:
-          PRIVATEERR_BASE_IMAGE: ${PRIVATEERR_BASE_IMAGE}
-          PRIVATEERR_BASE_TAG: ${PRIVATEERR_BASE_TAG}
-          TZ: ${TZ}
-          PIA_APP_HOME: ${PIA_APP_HOME}
-      container_name: privateerr-${PRIVATEERR_TAG}
   ...
   ```
 
