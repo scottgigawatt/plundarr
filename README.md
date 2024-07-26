@@ -74,6 +74,38 @@ This ensures that the `/dev/net/tun` device be available whenever yer Synology N
 
 For more details, see the script [here](scripts/tun.sh) 📜.
 
+## Viewing Configuration Details
+
+The `plundarr` repository provides several tools to view and manage the environment and Docker Compose configuration details. While the configuration files are heavily documented to assist with understanding and customization, some users may prefer to see the uncommented versions for simplicity.
+
+### Makefile Targets
+
+The included `Makefile` contains targets to help with this:
+
+- **Print the evaluated Docker Compose default environment configuration:**
+
+  ```sh
+  make env
+  ```
+
+- **Render the actual data model to be applied on the Docker Engine:**
+
+  ```sh
+  make config
+  ```
+
+- **Print the raw uncommented Docker Compose environment configuration:**
+
+  ```sh
+  make print-env
+  ```
+
+- **Print the raw uncommented Docker Compose YAML configuration:**
+
+  ```sh
+  make print-config
+  ```
+
 ## Ship's Log 🏝️
 
 Plundarr has been tested on Synology DS916+ running DSM 7.2.1-69057 Update 5. But fear not, me hearties! It should work on other lands as well.

@@ -29,7 +29,7 @@ RUN=run
 # Docker Compose options
 #
 COMPOSE_FILE              ?= docker-compose.yml
-COMPOSE_ENV_FILE          ?= .env
+COMPOSE_ENV_FILE          ?= example.env
 COMPOSE_GLUETUN_SERVICE   ?= gluetun
 COMPOSE_DUPLICATI_SERVICE ?= duplicati
 COMPOSE_OVERSEERR_SERVICE ?= overseerr
