@@ -85,25 +85,85 @@ The included `Makefile` contains targets t' help ye navigate these treacherous w
 - **Print the evaluated Docker Compose default environment configuration:**
 
   ```sh
-  make env
+  ❯ make env
+  COMPOSE_PROJECT_NAME=plundarr
+  COMPOSE_NETWORK_SUBNET=0.0.0.0/16
+  COMPOSE_NETWORK_IP_RANGE=0.0.0.0/24
+  COMPOSE_NETWORK_GATEWAY=0.0.0.0
+  HOST_VOLUME=/volume1
+  HOST_DOWNLOADS_PATH=/volume1/downloads
+  ...
   ```
 
 - **Render the actual data model t' be applied on the Docker Engine:**
 
   ```sh
   make config
+  ❯ make config
+  docker-compose config
+  name: plundarr
+  services:
+    bazarr:
+      container_name: bazarr-latest
+      depends_on:
+        gluetun:
+          condition: service_started
+          restart: true
+          required: true
+  ...
   ```
 
 - **Print the raw uncommented Docker Compose environment configuration:**
 
   ```sh
-  make print-env
+  ❯ make print-env
+  COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-plundarr}"
+  COMPOSE_NETWORK_SUBNET="${COMPOSE_NETWORK_SUBNET:-0.0.0.0/16}"
+  COMPOSE_NETWORK_IP_RANGE="${COMPOSE_NETWORK_IP_RANGE:-0.0.0.0/24}"
+  COMPOSE_NETWORK_GATEWAY="${COMPOSE_NETWORK_GATEWAY:-0.0.0.0}"
+  HOST_VOLUME="${HOST_VOLUME:-/volume1}"
+  HOST_DOWNLOADS_PATH="${HOST_DOWNLOADS_PATH:-/volume1/downloads}"
   ```
 
 - **Print the raw uncommented Docker Compose YAML configuration:**
 
   ```sh
-  make print-config
+  ❯ make print-config
+  ---
+  version: "2.9"
+  x-default-container: &default-container
+    pull_policy: always
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: ${LOG_MAX_SIZE}
+        max-file: ${LOG_MAX_FILE}
+  x-default-environment: &default-environment
+      TZ: ${TZ}
+  x-arr-stack-environment: &arr-stack-environment
+      <<: *default-environment
+      PUID: ${DEFAULT_PUID}
+      PGID: ${DEFAULT_PGID}
+  x-arr-stack-container: &arr-stack-container
+    <<: *default-container
+    group_add:
+      - ${DEFAULT_GROUP}
+    environment:
+      <<: *arr-stack-environment
+  services:
+    privateerr:
+      image: ${PRIVATEERR_IMAGE}:${PRIVATEERR_TAG}
+      build:
+        context: config/privateerr/docker
+        dockerfile: Dockerfile
+        args:
+          PRIVATEERR_BASE_IMAGE: ${PRIVATEERR_BASE_IMAGE}
+          PRIVATEERR_BASE_TAG: ${PRIVATEERR_BASE_TAG}
+          TZ: ${TZ}
+          PIA_APP_HOME: ${PIA_APP_HOME}
+      container_name: privateerr-${PRIVATEERR_TAG}
+  ...
   ```
 
 ## Ship's Log 🏝️
