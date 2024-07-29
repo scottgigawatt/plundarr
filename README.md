@@ -60,7 +60,7 @@ To bring this booty into DSM 7.2 Container Manager's Project feature, follow the
 
 Check out the official Synology documentation [here](https://kb.synology.com/en-id/DSM/help/ContainerManager/docker_project?version=7) fer more on Container Manager Projects. Yo ho ho!
 
-### Ensure Yer Tunnels Be Ready at Boot 🛠️⚓️🏴‍☠️
+### Ensure Yer Tunnels Be Ready at Boot 🚆🛤️
 
 To make sure the `/dev/net/tun` device be present on Synology Disk Station for use with VPN applications like Gluetun, follow these steps, me hearties:
 
@@ -86,11 +86,11 @@ This ensures that the `/dev/net/tun` device be available whenever yer Synology N
 
 For more details, see the script [here](scripts/tun.sh) 📜.
 
-## Navigatin' Troubled Waters ⚓️ 🏴‍☠️
+## Navigatin' Troubled Waters ⚓️🌊
 
 The `plundarr` repo be providin' ye with tools t' view an' manage the environment an' Docker Compose configuration details. While the configuration files be heavily documented t' assist with understandin' an' customization, some o' ye may prefer t' see the uncommented versions fer simplicity.
 
-### Makefile Targets 🏴‍☠️⚓️
+### Makefile Targets ⚙️
 
 The included `Makefile` contains targets t' help ye navigate these treacherous waters. Usin' these commands will provide ye with a clearer view o' the environment an' configuration details without the additional comments. Set sail with confidence, ye scurvy dogs! 🏴‍☠️
 
