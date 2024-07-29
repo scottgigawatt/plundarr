@@ -39,7 +39,7 @@ cp example.env .env
 
 ### Docker Network Configuration 🐋
 
-See the Docker Compose [IPAM](https://docs.docker.com/compose/compose-file/06-networks/#ipam) documentation fer more information on configurin' the followin' [IP address information](https://github.com/scottgigawatt/plundarr/blob/main/example.env#L9-L11) fer the compose stack. Ye can plunder the example config straight from the Docker Compose scrolls! 🐋🏴‍☠️:
+See the Docker Compose [IPAM](https://docs.docker.com/compose/compose-file/06-networks/#ipam) documentation fer more information on configurin' the followin' [IP address information](https://github.com/scottgigawatt/plundarr/blob/main/example.env#L9-L11) fer the compose stack. Ye can plunder the example config straight from the Docker Compose scrolls!
 
 ```bash
 COMPOSE_NETWORK_SUBNET="${COMPOSE_NETWORK_SUBNET:-172.28.0.0/16}"
@@ -52,7 +52,7 @@ COMPOSE_NETWORK_GATEWAY="${COMPOSE_NETWORK_GATEWAY:-172.28.5.254}"
 To bring this booty into DSM 7.2 Container Manager's Project feature, follow these steps, ye sea dogs:
 
 1. SSH into yer Synology system.
-2. Clone this repository, e.g., to `/volume1/docker/plundarr`.
+2. Recursively clone this repository with submodules, e.g., to `/volume1/docker/plundarr`.
 3. In Container Manager, click **Project** then **Create**.
 4. Provide a title, e.g., **plundarr**.
 5. Set the path to the cloned repository.
