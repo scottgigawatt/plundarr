@@ -35,12 +35,11 @@ cd plundarr
 cp example.env .env
 
 # Open .env file and adjust the values to yer requirements
-
-# Weigh anchor and start the container
-PIA_USER=<pia_username> PIA_PASS=<pia_password> make
 ```
 
-See the Docker Compose [IPAM](https://docs.docker.com/compose/compose-file/06-networks/#ipam) documentation for more information on configuring the following [IP address information](https://github.com/scottgigawatt/plundarr/blob/main/example.env#L9-L11) for the compose stack:
+### Docker Network Configuration 🐋
+
+See the Docker Compose [IPAM](https://docs.docker.com/compose/compose-file/06-networks/#ipam) documentation fer more information on configurin' the followin' [IP address information](https://github.com/scottgigawatt/plundarr/blob/main/example.env#L9-L11) fer the compose stack:
 
 ```bash
 COMPOSE_NETWORK_SUBNET="${COMPOSE_NETWORK_SUBNET:-0.0.0.0/16}"
@@ -48,7 +47,20 @@ COMPOSE_NETWORK_IP_RANGE="${COMPOSE_NETWORK_IP_RANGE:-0.0.0.0/24}"
 COMPOSE_NETWORK_GATEWAY="${COMPOSE_NETWORK_GATEWAY:-0.0.0.0}"
 ```
 
-## Ensure Yer Tunnels Be Ready at Boot 🛠️⚓️🏴‍☠️
+### ️Managing the Project with DSM Container Manager 📦
+
+To bring this booty into DSM 7.2 Container Manager's Project feature, follow these steps, ye sea dogs:
+
+1. SSH into yer Synology system.
+2. Clone this repository, e.g., to `/volume1/docker/plundarr`.
+3. In Container Manager, click **Project** then **Create**.
+4. Provide a title, e.g., **plundarr**.
+5. Set the path to the cloned repository.
+6. Navigate through the UI prompts t' finish creatin' the project.
+
+Check out the official Synology documentation [here](https://kb.synology.com/en-id/DSM/help/ContainerManager/docker_project?version=7) fer more on Container Manager Projects. Yo ho ho!
+
+### Ensure Yer Tunnels Be Ready at Boot 🛠️⚓️🏴‍☠️
 
 To make sure the `/dev/net/tun` device be present on Synology Disk Station for use with VPN applications like Gluetun, follow these steps, me hearties:
 
@@ -74,7 +86,7 @@ This ensures that the `/dev/net/tun` device be available whenever yer Synology N
 
 For more details, see the script [here](scripts/tun.sh) 📜.
 
-## Viewing the Configuration Details 🏴‍⚓️
+## Navigatin' Troubled Waters ⚓️ 🏴‍☠️
 
 The `plundarr` repo be providin' ye with tools t' view an' manage the environment an' Docker Compose configuration details. While the configuration files be heavily documented t' assist with understandin' an' customization, some o' ye may prefer t' see the uncommented versions fer simplicity.
 
@@ -82,83 +94,29 @@ The `plundarr` repo be providin' ye with tools t' view an' manage the environmen
 
 The included `Makefile` contains targets t' help ye navigate these treacherous waters. Usin' these commands will provide ye with a clearer view o' the environment an' configuration details without the additional comments. Set sail with confidence, ye scurvy dogs! 🏴‍☠️
 
-- **Print the evaluated Docker Compose default environment configuration:**
+```sh
+❯ make help
+Usage: make [TARGET]
 
-  ```sh
-  ❯ make env
-  COMPOSE_PROJECT_NAME=plundarr
-  COMPOSE_NETWORK_SUBNET=0.0.0.0/16
-  COMPOSE_NETWORK_IP_RANGE=0.0.0.0/24
-  COMPOSE_NETWORK_GATEWAY=0.0.0.0
-  HOST_VOLUME=/volume1
-  HOST_DOWNLOADS_PATH=/volume1/downloads
-  ...
-  ```
-
-- **Render the actual data model t' be applied on the Docker Engine:**
-
-  ```sh
-  ❯ make config
-  docker-compose config
-  name: plundarr
-  services:
-    bazarr:
-      container_name: bazarr-latest
-      depends_on:
-        gluetun:
-          condition: service_started
-          restart: true
-          required: true
-  ...
-  ```
-
-- **Print the raw uncommented Docker Compose environment configuration:**
-
-  ```sh
-  ❯ make print-env
-  COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-plundarr}"
-  COMPOSE_NETWORK_SUBNET="${COMPOSE_NETWORK_SUBNET:-0.0.0.0/16}"
-  COMPOSE_NETWORK_IP_RANGE="${COMPOSE_NETWORK_IP_RANGE:-0.0.0.0/24}"
-  COMPOSE_NETWORK_GATEWAY="${COMPOSE_NETWORK_GATEWAY:-0.0.0.0}"
-  HOST_VOLUME="${HOST_VOLUME:-/volume1}"
-  HOST_DOWNLOADS_PATH="${HOST_DOWNLOADS_PATH:-/volume1/downloads}"
-  ...
-  ```
-
-- **Print the raw uncommented Docker Compose YAML configuration:**
-
-  ```sh
-  ❯ make print-config
-  ---
-  version: "2.9"
-  x-default-container: &default-container
-    pull_policy: always
-    restart: unless-stopped
-    logging:
-      driver: "json-file"
-      options:
-        max-size: ${LOG_MAX_SIZE}
-        max-file: ${LOG_MAX_FILE}
-  x-default-environment: &default-environment
-      TZ: ${TZ}
-  x-arr-stack-environment: &arr-stack-environment
-      <<: *default-environment
-      PUID: ${DEFAULT_PUID}
-      PGID: ${DEFAULT_PGID}
-  x-arr-stack-container: &arr-stack-container
-    <<: *default-container
-    group_add:
-      - ${DEFAULT_GROUP}
-    environment:
-      <<: *arr-stack-environment
-  services:
-    privateerr:
-      image: ${PRIVATEERR_IMAGE}:${PRIVATEERR_TAG}
-      build:
-        context: config/privateerr/docker
-        dockerfile: Dockerfile
-  ...
-  ```
+Targets:
+  all             - Builds and starts the service stack.
+  build-depends   - Ensures build dependencies are installed.
+  stop            - Stops running containers without removing them.
+  down            - Stops and removes containers.
+  clean           - Stops and removes containers, networks, volumes, and images.
+  build           - Builds the service stack.
+  up              - Builds, (re)creates, and starts containers for services.
+  start           - Starts existing containers for a service.
+  test-vpn        - Obtain the VPN IP address and ensure the connection is working.
+  config          - Renders the actual data model to be applied on the Docker Engine.
+  env             - Prints the evaluated docker compose default env configuration.
+  print-config    - Print the raw uncommented docker compose yaml configuration.
+  print-env       - Print the raw uncommented docker compose env configuration.
+  logs            - Shows logs for the service.
+  open            - Opens the service site in the default web browser.
+  run             - Alias for up, open, logs.
+  help            - Displays this help message.
+```
 
 ## Ship's Log 🏝️
 
