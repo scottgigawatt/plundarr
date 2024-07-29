@@ -39,12 +39,12 @@ cp example.env .env
 
 ### Docker Network Configuration 🐋
 
-See the Docker Compose [IPAM](https://docs.docker.com/compose/compose-file/06-networks/#ipam) documentation fer more information on configurin' the followin' [IP address information](https://github.com/scottgigawatt/plundarr/blob/main/example.env#L9-L11) fer the compose stack:
+See the Docker Compose [IPAM](https://docs.docker.com/compose/compose-file/06-networks/#ipam) documentation fer more information on configurin' the followin' [IP address information](https://github.com/scottgigawatt/plundarr/blob/main/example.env#L9-L11) fer the compose stack. Ye can plunder the example config straight from the Docker Compose scrolls! 🐋🏴‍☠️:
 
 ```bash
-COMPOSE_NETWORK_SUBNET="${COMPOSE_NETWORK_SUBNET:-0.0.0.0/16}"
-COMPOSE_NETWORK_IP_RANGE="${COMPOSE_NETWORK_IP_RANGE:-0.0.0.0/24}"
-COMPOSE_NETWORK_GATEWAY="${COMPOSE_NETWORK_GATEWAY:-0.0.0.0}"
+COMPOSE_NETWORK_SUBNET="${COMPOSE_NETWORK_SUBNET:-172.28.0.0/16}"
+COMPOSE_NETWORK_IP_RANGE="${COMPOSE_NETWORK_IP_RANGE:-172.28.5.0/24}"
+COMPOSE_NETWORK_GATEWAY="${COMPOSE_NETWORK_GATEWAY:-172.28.5.254}"
 ```
 
 ### ️Managing the Project with DSM Container Manager 📦
