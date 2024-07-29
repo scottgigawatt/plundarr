@@ -86,7 +86,7 @@ This ensures that the `/dev/net/tun` device be available whenever yer Synology N
 
 For more details, see the script [here](scripts/tun.sh) 📜.
 
-## Navigatin' Troubled Waters 🏴‍☠️🌊
+## Navigatin' Troubled Waters ‍️☠️🌊
 
 The `plundarr` repo be providin' ye with tools t' view an' manage the environment an' Docker Compose configuration details. While the configuration files be heavily documented t' assist with understandin' an' customization, some o' ye may prefer t' see the uncommented versions fer simplicity.
 
