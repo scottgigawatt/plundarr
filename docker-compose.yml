@@ -126,7 +126,7 @@ services:
 
     # Add container labels
     labels:
-      - "com.centurylinklabs.watchtower.enable=false" # Exclude local init container from Watchtower
+      - "com.centurylinklabs.watchtower.enable=false" # Exclude VPN container from Watchtower
 
     # Define the container environment
     environment:
