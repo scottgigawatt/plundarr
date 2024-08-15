@@ -90,7 +90,7 @@ For more details, see the script [here](scripts/tun.sh) 📜.
 
 The `plundarr` repo be providin' ye with tools t' view an' manage the environment an' Docker Compose configuration details. While the configuration files be heavily documented t' assist with understandin' an' customization, some o' ye may prefer t' see the uncommented versions fer simplicity.
 
-### Makefile Targets ⚙️
+### Cap'n's Commands 🦜💀
 
 The included `Makefile` contains targets t' help ye navigate these treacherous waters. Usin' these commands will provide ye with a clearer view o' the environment an' configuration details without the additional comments. Set sail with confidence, ye scurvy dogs! 🏴‍☠️
 
