@@ -37,13 +37,30 @@ cp example.env .env
 # Open .env file and adjust the values to yer requirements
 ```
 
-### Docker Network Configuration 🐋
+### Setting Sail on the Docker Seas 🌊🐋
 
 See the Docker Compose [IPAM](https://docs.docker.com/compose/compose-file/06-networks/#ipam) documentation fer more information on configurin' the followin' [IP address information](https://github.com/scottgigawatt/plundarr/blob/main/example.env#L9-L11) fer the compose stack. Ye can plunder the example config straight from the Docker Compose scrolls!
 
 ```bash
+#
+# Chart the usable IP waters for this here subnet: 172.28.0.1 - 172.28.255.254
+# Total number of scallywag hosts: 65,536
+# Number of seaworthy hosts: 65,534
+# Subnet mask (or should I say, pirate's mask): 255.255.0.0
+#
 COMPOSE_NETWORK_SUBNET="${COMPOSE_NETWORK_SUBNET:-172.28.0.0/16}"
+
+#
+# Plot the IP course for the containers: 172.28.5.1 - 172.28.5.254
+# Total number of seadogs: 256
+# Number of usable scurvy dogs: 254
+# Subnet mask: 255.255.255.0 (aye, the smallest o' the masks)
+#
 COMPOSE_NETWORK_IP_RANGE="${COMPOSE_NETWORK_IP_RANGE:-172.28.5.0/24}"
+
+#
+# Set sail with the network gateway at the last IP address, the final port o' call
+#
 COMPOSE_NETWORK_GATEWAY="${COMPOSE_NETWORK_GATEWAY:-172.28.5.254}"
 ```
 
