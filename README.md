@@ -77,7 +77,7 @@ To bring this booty into DSM 7.2 Container Manager's Project feature, follow the
 
 Check out the official Synology documentation [here](https://kb.synology.com/en-id/DSM/help/ContainerManager/docker_project?version=7) fer more on Container Manager Projects. Yo ho ho!
 
-### Ensure Yer Tunnels Be Ready at Boot 🚆🛤️
+### Ensure Yer Tunnels Be Ready at Boot 🏴‍☠️⛏️
 
 To make sure the `/dev/net/tun` device be present on Synology Disk Station for use with VPN applications like Gluetun, follow these steps, me hearties:
 
