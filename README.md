@@ -111,7 +111,7 @@ The `plundarr` repo be providin' ye with tools t' view an' manage the environmen
 
 The included `Makefile` contains targets t' help ye navigate these treacherous waters. Usin' these commands will provide ye with a clearer view o' the environment an' configuration details without the additional comments. Set sail with confidence, ye scurvy dogs! 🏴‍☠️
 
-```sh
+```console
 ❯ make help
 Usage: make [TARGET]
 
