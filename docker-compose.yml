@@ -339,14 +339,14 @@ services:
   #
   homepage:
     # Docker image and container information
-    <<: *default-container                              # Pull in the arr-stack container information
+    <<: *default-container                              # Pull in the default container information
     image: ghcr.io/gethomepage/homepage:${HOMEPAGE_TAG} # Run using the specified tag
     container_name: homepage-${HOMEPAGE_TAG}            # Append Docker image tag to container name
     hostname: homepage                                  # Set the container hostname
 
     # Define the container environment
     environment:
-      <<: *default-environment                                                                # Pull in the arr-stack environment
+      <<: *default-environment                                                                # Pull in the default environment
       HOMEPAGE_LOG_LEVEL: ${HOMEPAGE_LOG_LEVEL}                                               # Set log level verbosity
       HOMEPAGE_VAR_TITLE: ${HOMEPAGE_VAR_TITLE}                                               # Title of the homepage
       HOMEPAGE_VAR_SEARCH_PROVIDER: ${HOMEPAGE_VAR_SEARCH_PROVIDER}                           # Homepage search provider
@@ -388,6 +388,34 @@ services:
       - ${HOMEPAGE_IMAGES_PATH}:/app/public/images:rw # Local public files directory
       - ${HOMEPAGE_DATA_ROOT_PATH}:/data:rw           # Local directory to monitor disk space
       - /var/run/docker.sock:/var/run/docker.sock:rw  # Allow container to talk to host Docker API
+
+  #
+  # Define the 'speedtest-tracker' service tracking internet speeds
+  #
+  speedtest-tracker:
+    # Docker image and container information
+    <<: *default-container                                                # Pull in the default container information
+    image: lscr.io/linuxserver/speedtest-tracker:${SPEEDTEST_TRACKER_TAG} # Run using the specified tag
+    container_name: speedtest-tracker-${SPEEDTEST_TRACKER_TAG}            # Append Docker image tag to container name
+    hostname: speedtest-tracker                                           # Set the container hostname
+
+    # Define the container environment
+    environment:
+      <<: *arr-stack-environment                           # Pull in the arr-stack environment
+      APP_KEY: ${SPEEDTEST_TRACKER_APP_KEY}                # App key for encrypting stored data from https://speedtest-tracker.dev
+      DB_CONNECTION: ${SPEEDTEST_TRACKER_DB_CONNECTION}    # Set the database type to use, e.g. sqlite, pgsql, or mysql
+      SPEEDTEST_SCHEDULE: ${SPEEDTEST_TRACKER_SCHEDULE}    # Set the test schedule in cron format
+      SPEEDTEST_SERVERS: ${SPEEDTEST_TRACKER_SERVERS}      # Comma-separated list of server IDs to test against
+      DISPLAY_TIMEZONE: ${TZ}                              # Timezone for the UI
+      PRUNE_RESULTS_OLDER_THAN: ${SPEEDTEST_TRACKER_PRUNE} # Days to keep test results
+
+    # Define the host and container ports
+    ports:
+      - ${SPEEDTEST_TRACKER_WEBUI_PORT}:80 # Speedtest Tracker web UI port
+
+    # Mount host directories into the container
+    volumes:
+      - ${SPEEDTEST_TRACKER_CONFIG_PATH}:/config:rw # Contains all relevant configuration files
 
 #
 # Define the networks section
