@@ -69,6 +69,7 @@
 
 - Data:
     - Calendar:
+        icon: mdi-calendar-month
         widget:
           type: calendar
           firstDayInWeek: sunday
@@ -109,7 +110,7 @@
           expandOneStreamToTwoRows: false
 
     - Speedtest Tracker:
-        icon: mdi-speedometer
+        icon: mdi-rabbit
         href: https://speedtest.{{HOMEPAGE_VAR_HOST_URL}}
         description: Speedtest monitoring
         container: speedtest-tracker-latest
