@@ -112,7 +112,7 @@
     - Speedtest Tracker:
         icon: mdi-rabbit
         href: https://speedtest.{{HOMEPAGE_VAR_HOST_URL}}
-        description: Speedtest monitoring
+        description: Internet speed monitoring
         container: speedtest-tracker-latest
         widget:
           type: speedtest
