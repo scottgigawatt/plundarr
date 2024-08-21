@@ -22,7 +22,7 @@ Plundarr be a collection of Docker Compose configurations to run a shipshape arr
 | Overseerr         | ⚓️ The quartermaster fer handlin' all yer crew's media requests, keepin' the ship runnin' smooth and the crew satisfied.                                                                               | [More info](https://github.com/sct/overseerr)                   |
 | Duplicati         | 💣 Guard yer precious booty with backups, lest the kraken strike and sink yer ship.                                                                                                                    | [More info](https://www.duplicati.com)                          |
 | Homepage          | 🏠 The captain's command deck fer all yer apps! A fully customizable, static dashboard fer keepin' tabs on all yer ship's systems. Easy to set up with YAML files or discovered through docker labels. | [More info](https://gethomepage.dev)                            |
-| Speedtest Tracker | ⚡️ Keep a sharp eye on yer internet speed, makin' sure yer ISP ain't feedin' ye lies. Track yer connection's speed over time and build a log as deep as the sea.                                       | [More info](https://docs.speedtest-tracker.dev/)                 |
+| Speedtest Tracker | ⚡️ Keep a log of yer internet speed to make sure yer ISP ain't sellin' ye snake oil. Monitor yer connection and track yer speeds over time.                                                            | [More info](https://docs.speedtest-tracker.dev/)                 |
 
 ## Hoist the Sails ⚓️
 
