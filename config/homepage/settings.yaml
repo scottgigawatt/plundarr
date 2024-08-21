@@ -40,7 +40,7 @@ layout:
 
   Downloads:
     style: row
-    columns: 2
+    columns: 3
 
   Links:
     style: row

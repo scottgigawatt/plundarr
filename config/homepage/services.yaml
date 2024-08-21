@@ -109,16 +109,6 @@
           showEpisodeNumber: true
           expandOneStreamToTwoRows: false
 
-    - Speedtest Tracker:
-        icon: mdi-rabbit
-        href: https://speedtest.{{HOMEPAGE_VAR_HOST_URL}}
-        description: Internet speed monitoring
-        container: speedtest-tracker-latest
-        widget:
-          type: speedtest
-          url: {{HOMEPAGE_VAR_SPEEDTEST_URL}}
-          bitratePrecision: 3
-
 - Downloads:
     - Prowlarr:
         icon: prowlarr.svg
@@ -140,3 +130,13 @@
           url: {{HOMEPAGE_VAR_QBITTORRENT_URL}}
           username: {{HOMEPAGE_VAR_QBITTORRENT_USER}}
           password: {{HOMEPAGE_VAR_QBITTORRENT_PASS}}
+
+    - Speedtest Tracker:
+        icon: mdi-rabbit
+        href: https://speedtest.{{HOMEPAGE_VAR_HOST_URL}}
+        description: Internet speed monitoring
+        container: speedtest-tracker-latest
+        widget:
+          type: speedtest
+          url: {{HOMEPAGE_VAR_SPEEDTEST_URL}}
+          bitratePrecision: 3
