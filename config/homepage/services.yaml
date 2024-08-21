@@ -108,6 +108,16 @@
           showEpisodeNumber: true
           expandOneStreamToTwoRows: false
 
+    - Speedtest Tracker:
+        icon: mdi-speedometer
+        href: https://speedtest.{{HOMEPAGE_VAR_HOST_URL}}
+        description: Speedtest monitoring
+        container: speedtest-tracker-latest
+        widget:
+          type: speedtest
+          url: {{HOMEPAGE_VAR_SPEEDTEST_URL}}
+          bitratePrecision: 3
+
 - Downloads:
     - Prowlarr:
         icon: prowlarr.svg
