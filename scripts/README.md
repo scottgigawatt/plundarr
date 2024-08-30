@@ -17,7 +17,7 @@ This script ensures the `/dev/net/tun` device exists on Synology Disk Station fo
 
 [View the `tun.sh` script](./tun.sh)
 
-### `entware-setup.sh`
+### `entware.sh`
 
 This script makes sure Entware be properly set up on boot of yer Synology NAS, so ye can be sure all yer Entware tools be ready when ye need 'em.
 
@@ -28,7 +28,7 @@ This script makes sure Entware be properly set up on boot of yer Synology NAS, s
 - Checks if the Entware profile be included in the global profile; adds it if it ain't.
 - Updates the Entware package list to make sure ye have the latest treasures.
 
-[View the `entware-setup.sh` script](./entware-setup.sh)
+[View the `entware.sh` script](./entware.sh)
 
 ## Setting Up Scripts to Run on Boot 🛠️
 
@@ -54,7 +54,7 @@ To ensure both scripts be running on boot, follow these steps, ye salty dogs:
 
       - Click **OK** to save the task 💾.
 
-    - **Create a Task for `entware-setup.sh`:**
+    - **Create a Task for `entware.sh`:**
       - Click **Create** -> **Triggered Task** -> **User-defined script** ✍️.
       - Name the task, e.g., 'Entware Setup' ⚙️.
       - Set the user to `root` 🧙.
@@ -63,7 +63,7 @@ To ensure both scripts be running on boot, follow these steps, ye salty dogs:
       - Under **Task Settings**, enter the following command under **Run command** 💻:
 
         ```bash
-        bash /volume1/docker/plundarr/scripts/entware-setup.sh
+        bash /volume1/docker/plundarr/scripts/entware.sh
         ```
 
       - Click **OK** to save the task 💾.
