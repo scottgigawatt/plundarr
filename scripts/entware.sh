@@ -12,12 +12,12 @@
 
 # Mount/Start Entware
 mkdir -p /opt  # Create /opt directory if it does not exist
-mount -o bind "/volume1/@Entware/opt" /opt  # Mount Entware to /opt
-/opt/etc/init.d/rc.unslung start  # Start Entware services
+mount -o bind "/volume1/@Entware/opt" /opt
+/opt/etc/init.d/rc.unslung start
 
 # Add Entware Profile in Global Profile
 if grep -qF '/opt/etc/profile' /etc/profile; then
-    echo "Confirmed: Entware Profile in Global Profile"  # Profile already present
+    echo "Confirmed: Entware Profile in Global Profile"
 else
     echo "Adding: Entware Profile in Global Profile"
     cat >>/etc/profile <<"EOF"
@@ -28,4 +28,4 @@ EOF
 fi
 
 # Update Entware List
-/opt/bin/opkg update  # Update Entware package list
+/opt/bin/opkg update
