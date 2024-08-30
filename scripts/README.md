@@ -17,29 +17,58 @@ This script ensures the `/dev/net/tun` device exists on Synology Disk Station fo
 
 [View the `tun.sh` script](./tun.sh)
 
-#### Usage 🛠️
+### `entware-setup.sh`
 
-To make sure the `/dev/net/tun` device be present on Synology Disk Station for use with VPN applications like Gluetun, follow these steps, me hearties:
+This script makes sure Entware be properly set up on boot of yer Synology NAS, so ye can be sure all yer Entware tools be ready when ye need 'em.
 
-1. **Setup Task Scheduler on Synology NAS:**
+**Features:**
 
-    Open Synology's Control Panel and follow these steps to run the script on boot:
+- Creates the `/opt` directory if it does not exist and mounts Entware to `/opt`.
+- Starts the Entware services using the init script.
+- Checks if the Entware profile be included in the global profile; adds it if it ain't.
+- Updates the Entware package list to make sure ye have the latest treasures.
 
-    - Go to **Task Scheduler** 🗓️.
-    - Click **Create** -> **Triggered Task** -> **User-defined script** ✍️.
-    - Give the task a name, e.g., 'Create Tunnel' 🌉.
-    - Set the user to `root` 🧙.
-    - Set the event to **Boot-up** 🚀.
-    - Check **Enabled** ✅.
-    - Under **Task Settings**, enter the following command under **Run command** 💻:
+[View the `entware-setup.sh` script](./entware-setup.sh)
 
-      ```bash
-      bash /volume1/docker/plundarr/scripts/tun.sh
-      ```
+## Setting Up Scripts to Run on Boot 🛠️
 
-    - Click **OK** to save the task 💾.
+To ensure both scripts be running on boot, follow these steps, ye salty dogs:
 
-This ensures that the `/dev/net/tun` device be available whenever yer Synology NAS boots up, so ye can sail the seas with yer VPN secure and sound. Arrr! 🏴‍☠️
+1. **Open Synology's Task Scheduler:**
+
+    - Go to **Control Panel** -> **Task Scheduler** 🗓️.
+
+2. **Create Tasks for Each Script:**
+
+    - **Create a Task for `tun.sh`:**
+      - Click **Create** -> **Triggered Task** -> **User-defined script** ✍️.
+      - Name the task, e.g., 'Create Tunnel' 🌉.
+      - Set the user to `root` 🧙.
+      - Set the event to **Boot-up** 🚀.
+      - Check **Enabled** ✅.
+      - Under **Task Settings**, enter the following command under **Run command** 💻:
+
+        ```bash
+        bash /volume1/docker/plundarr/scripts/tun.sh
+        ```
+
+      - Click **OK** to save the task 💾.
+
+    - **Create a Task for `entware-setup.sh`:**
+      - Click **Create** -> **Triggered Task** -> **User-defined script** ✍️.
+      - Name the task, e.g., 'Entware Setup' ⚙️.
+      - Set the user to `root` 🧙.
+      - Set the event to **Boot-up** 🚀.
+      - Check **Enabled** ✅.
+      - Under **Task Settings**, enter the following command under **Run command** 💻:
+
+        ```bash
+        bash /volume1/docker/plundarr/scripts/entware-setup.sh
+        ```
+
+      - Click **OK** to save the task 💾.
+
+These tasks ensure both scripts be runnin' every time yer Synology NAS starts up, keepin' yer VPNs secure and Entware in shipshape condition! 🏴‍☠️
 
 ---
 
