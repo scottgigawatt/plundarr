@@ -17,9 +17,32 @@ This script ensures the `/dev/net/tun` device exists on Synology Disk Station fo
 
 [View the `tun.sh` script](./tun.sh)
 
+#### Setup `tun.sh` to Run on Boot 🛠️
+
+To ensure ye script be running on boot, follow these steps, ye salty dogs:
+
+1. **Open Synology's Task Scheduler:**
+
+    - Go to **Control Panel** -> **Task Scheduler** 🗓️.
+
+2. **Create a Task for `tun.sh`:**
+
+    - Click **Create** -> **Triggered Task** -> **User-defined script** ✍️.
+    - Name the task, e.g., 'Create Tunnel' 🌉.
+    - Set the user to `root` 🧙.
+    - Set the event to **Boot-up** 🚀.
+    - Check **Enabled** ✅.
+    - Under **Task Settings**, enter the following command under **Run command** 💻:
+
+    ```bash
+    bash /volume1/docker/plundarr/scripts/tun.sh
+    ```
+
+    - Click **OK** to save the task 💾.
+
 ### `entware.sh`
 
-**Note:** Entware must be installed on your Synology NAS as a prerequisite. Follow the [Entware Installation Guide](https://github.com/Entware/Entware/wiki/Install-on-Synology-NAS) to complete the installation.
+**Prerequisite:** Entware must be installed on your Synology NAS as a prerequisite. Follow the [Entware Installation Guide](https://github.com/Entware/Entware/wiki/Install-on-Synology-NAS) to complete the installation.
 
 > **Note:** Entware is not required for the Plundarr Compose stack to run. This `entware.sh` setup script is provided here for convenience if you choose to use Entware on your system.
 
@@ -34,43 +57,28 @@ This script ensures Entware is properly set up on boot, so all Entware tools are
 
 [View the `entware.sh` script](./entware.sh)
 
-## Setting Up Scripts to Run on Boot 🛠️
+#### Setup `entware.sh` to Run on Boot 🛠️
 
-To ensure both scripts be running on boot, follow these steps, ye salty dogs:
+To ensure the script runs on boot, follow these steps:
 
 1. **Open Synology's Task Scheduler:**
 
     - Go to **Control Panel** -> **Task Scheduler** 🗓️.
 
-2. **Create Tasks for Each Script:**
+2. **Create a Task for `entware.sh`:**
 
-    - **Create a Task for `tun.sh`:**
-      - Click **Create** -> **Triggered Task** -> **User-defined script** ✍️.
-      - Name the task, e.g., 'Create Tunnel' 🌉.
-      - Set the user to `root` 🧙.
-      - Set the event to **Boot-up** 🚀.
-      - Check **Enabled** ✅.
-      - Under **Task Settings**, enter the following command under **Run command** 💻:
+    - Click **Create** -> **Triggered Task** -> **User-defined script** ✍️.
+    - Name the task, e.g., 'Entware Setup' ⚙️.
+    - Set the user to `root` 🧙.
+    - Set the event to **Boot-up** 🚀.
+    - Check **Enabled** ✅.
+    - Under **Task Settings**, enter the following command under **Run command** 💻:
 
-        ```bash
-        bash /volume1/docker/plundarr/scripts/tun.sh
-        ```
+    ```bash
+    bash /volume1/docker/plundarr/scripts/entware.sh
+    ```
 
-      - Click **OK** to save the task 💾.
-
-    - **Create a Task for `entware.sh`:**
-      - Click **Create** -> **Triggered Task** -> **User-defined script** ✍️.
-      - Name the task, e.g., 'Entware Setup' ⚙️.
-      - Set the user to `root` 🧙.
-      - Set the event to **Boot-up** 🚀.
-      - Check **Enabled** ✅.
-      - Under **Task Settings**, enter the following command under **Run command** 💻:
-
-        ```bash
-        bash /volume1/docker/plundarr/scripts/entware.sh
-        ```
-
-      - Click **OK** to save the task 💾.
+    - Click **OK** to save the task 💾.
 
 These tasks ensure both scripts be runnin' every time yer Synology NAS starts up, keepin' yer VPNs secure and Entware in shipshape condition! 🏴‍☠️
 
