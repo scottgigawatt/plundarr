@@ -34,9 +34,9 @@ To ensure ye script be running on boot, follow these steps, ye salty dogs:
     - Check **Enabled** ✅.
     - Under **Task Settings**, enter the following command under **Run command** 💻:
 
-    ```bash
-    bash /volume1/docker/plundarr/scripts/tun.sh
-    ```
+      ```bash
+      bash /volume1/docker/plundarr/scripts/tun.sh
+      ```
 
     - Click **OK** to save the task 💾.
 
@@ -74,13 +74,11 @@ To ensure the script runs on boot, follow these steps:
     - Check **Enabled** ✅.
     - Under **Task Settings**, enter the following command under **Run command** 💻:
 
-    ```bash
-    bash /volume1/docker/plundarr/scripts/entware.sh
-    ```
+      ```bash
+      bash /volume1/docker/plundarr/scripts/entware.sh
+      ```
 
     - Click **OK** to save the task 💾.
-
-These tasks ensure both scripts be runnin' every time yer Synology NAS starts up, keepin' yer VPNs secure and Entware in shipshape condition! 🏴‍☠️
 
 ---
 
