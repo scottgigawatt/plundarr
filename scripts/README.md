@@ -19,14 +19,18 @@ This script ensures the `/dev/net/tun` device exists on Synology Disk Station fo
 
 ### `entware.sh`
 
-This script makes sure Entware be properly set up on boot of yer Synology NAS, so ye can be sure all yer Entware tools be ready when ye need 'em.
+**Note:** Entware must be installed on your Synology NAS as a prerequisite. Follow the [Entware Installation Guide](https://github.com/Entware/Entware/wiki/Install-on-Synology-NAS) to complete the installation.
+
+> **Note:** Entware is not required for the Plundarr Compose stack to run. This `entware.sh` setup script is provided here for convenience if you choose to use Entware on your system.
+
+This script ensures Entware is properly set up on boot, so all Entware tools are ready when needed.
 
 **Features:**
 
 - Creates the `/opt` directory if it does not exist and mounts Entware to `/opt`.
 - Starts the Entware services using the init script.
-- Checks if the Entware profile be included in the global profile; adds it if it ain't.
-- Updates the Entware package list to make sure ye have the latest treasures.
+- Checks if the Entware profile is included in the global profile; adds it if missing.
+- Updates the Entware package list to ensure the latest packages are available.
 
 [View the `entware.sh` script](./entware.sh)
 
