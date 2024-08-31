@@ -42,9 +42,9 @@ To ensure ye script be running on boot, follow these steps, ye salty dogs:
 
 ### `entware.sh`
 
-**Prerequisite:** Entware must be installed on your Synology NAS as a prerequisite. Follow the [Entware Installation Guide](https://github.com/Entware/Entware/wiki/Install-on-Synology-NAS) to complete the installation.
-
 > **Note:** Entware is not required for the Plundarr Compose stack to run. This `entware.sh` setup script is provided here for convenience if you choose to use Entware on your system.
+>
+> Entware must be installed on your Synology NAS as a prerequisite. Follow the [Entware Installation Guide](https://github.com/Entware/Entware/wiki/Install-on-Synology-NAS) to complete the installation.
 
 This script ensures Entware is properly set up on boot, so all Entware tools are ready when needed.
 
