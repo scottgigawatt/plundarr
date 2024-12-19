@@ -74,4 +74,5 @@
         "WEBUI",
         "wranglin"
     ],
+    "makefile.configureOnOpen": false,
 }
