@@ -8,8 +8,7 @@ favicon: /images/icons/peacock-feather-gradient.png
 
 color: slate
 
-background:
-  image: /images/backgrounds/electric-sphere.gif
+background: /images/backgrounds/electric-sphere.gif
 #  blur: sm
 #  saturate: 50
 #  brightness: 75

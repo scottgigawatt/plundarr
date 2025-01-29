@@ -19,6 +19,7 @@
         "followin",
         "functionin",
         "generatin",
+        "gethomepage",
         "gitleaks",
         "Gluetun",
         "goin",
@@ -74,4 +75,5 @@
         "WEBUI",
         "wranglin"
     ],
+    "makefile.configureOnOpen": false,
 }
