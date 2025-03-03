@@ -32,38 +32,38 @@ version: "2.9"
 #
 # Setup default properties for all or most containers
 #
-x-default-container: &default-container # YAML anchor for default container
-  pull_policy: always                   # Ensure that the image is always pulled
-  restart: unless-stopped               # Restart the container unless explicitly stopped
-  logging:                              # Configure container logging options
-    driver: "json-file"                 # Use JSON file logging driver
+x-default-container: &default-container  # YAML anchor for default container
+  pull_policy: always                    # Ensure that the image is always pulled
+  restart: unless-stopped                # Restart the container unless explicitly stopped
+  logging:                               # Configure container logging options
+    driver: "json-file"                  # Use JSON file logging driver
     options:
-      max-size: ${LOG_MAX_SIZE}         # Maximum file size for logs files
-      max-file: ${LOG_MAX_FILE}         # Maximum number of log files to retain
+      max-size: ${LOG_MAX_SIZE}          # Maximum file size for logs files
+      max-file: ${LOG_MAX_FILE}          # Maximum number of log files to retain
 
 #
 # Setup default variables for all or most containers
 #
-x-default-environment: &default-environment # YAML anchor for default environment
-    TZ: ${TZ}                               # Set the appropriate timezone
+x-default-environment: &default-environment  # YAML anchor for default environment
+    TZ: ${TZ}                                # Set the appropriate timezone
 
 #
 # Setup default variables for arr-stack containers
 #
-x-arr-stack-environment: &arr-stack-environment # YAML anchor for arr-stack environment
-    <<: *default-environment                    # Pull in the default environment information
-    PUID: ${DEFAULT_PUID}                       # Default user id mapping for containers
-    PGID: ${DEFAULT_PGID}                       # Default group id mapping for containers
+x-arr-stack-environment: &arr-stack-environment  # YAML anchor for arr-stack environment
+    <<: *default-environment                     # Pull in the default environment information
+    PUID: ${DEFAULT_PUID}                        # Default user id mapping for containers
+    PGID: ${DEFAULT_PGID}                        # Default group id mapping for containers
 
 #
-# Containers on the arr-stack nework
+# Containers on the arr-stack network
 #
-x-arr-stack-container: &arr-stack-container # YAML anchor for arr-stack container
-  <<: *default-container                    # Pull in the default container information
-  group_add:                                # Add additional user groups
-    - ${DEFAULT_GROUP}                      # Default group used to manage write permisions
-  environment:                              # Define common arr-stack container variables
-    <<: *arr-stack-environment              # Pull in the arr-stack environment information
+x-arr-stack-container: &arr-stack-container  # YAML anchor for arr-stack container
+  <<: *default-container                     # Pull in the default container information
+  group_add:                                 # Add additional user groups
+    - ${DEFAULT_GROUP}                       # Default group used to manage write permissions
+  environment:                               # Define common arr-stack container variables
+    <<: *arr-stack-environment               # Pull in the arr-stack environment information
 
 #
 # Define the services section
@@ -74,121 +74,121 @@ services:
   #
   privateerr:
     # Docker image build and container information
-    image: ${PRIVATEERR_IMAGE}:${PRIVATEERR_TAG}        # Set build image name and tag
-    build:                                              # Build to install required packages
-      context: config/privateerr/docker                 # Docker build context
-      dockerfile: Dockerfile                            # Dockerfile to use for the build
-      args:                                             # Build arguments passed to Dockerfile
-        PRIVATEERR_BASE_IMAGE: ${PRIVATEERR_BASE_IMAGE} # Specify build argument for FROM base image
-        PRIVATEERR_BASE_TAG: ${PRIVATEERR_BASE_TAG}     # Specify build argument for FROM base image tag
-        TZ: ${TZ}                                       # Specify build arguement for time zone
-        PIA_APP_HOME: ${PIA_APP_HOME}                   # Specify build arguement for PIA scripts path
-    container_name: privateerr-${PRIVATEERR_TAG}        # Append Docker image tag to container name
-    restart: "no"                                       # Do not restart the container once it exits
-    hostname: privateerr                                # Set the container hostname
-    privileged: true                                    # Run in privileged mode
+    image: ${PRIVATEERR_IMAGE}:${PRIVATEERR_TAG}         # Set build image name and tag
+    build:                                               # Build to install required packages
+      context: config/privateerr/docker                  # Docker build context
+      dockerfile: Dockerfile                             # Dockerfile to use for the build
+      args:                                              # Build arguments passed to Dockerfile
+        PRIVATEERR_BASE_IMAGE: ${PRIVATEERR_BASE_IMAGE}  # Specify build argument for FROM base image
+        PRIVATEERR_BASE_TAG: ${PRIVATEERR_BASE_TAG}      # Specify build argument for FROM base image tag
+        TZ: ${TZ}                                        # Specify build argument for time zone
+        PIA_APP_HOME: ${PIA_APP_HOME}                    # Specify build argument for PIA scripts path
+    container_name: privateerr-${PRIVATEERR_TAG}         # Append Docker image tag to container name
+    restart: "no"                                        # Do not restart the container once it exits
+    hostname: privateerr                                 # Set the container hostname
+    privileged: true                                     # Run in privileged mode
 
     # Add container labels
     labels:
-      - "com.centurylinklabs.watchtower.enable=false" # Exclude local init container from Watchtower
+      - "com.centurylinklabs.watchtower.enable=false"  # Exclude local init container from Watchtower
 
     # Define the container environment
     environment:
-      VPN_PROTOCOL: ${PIA_VPN_PROTOCOL} # VPN configuration, WireGuard or openvpn
-      DISABLE_IPV6: ${PIA_DISABLE_IPV6} # Toggle using IPV6, yes or no
-      DIP_TOKEN: ${PIA_DIP_TOKEN}       # Optional PIA dedicated IP token, token or no
-      AUTOCONNECT: ${PIA_AUTOCONNECT}   # Test and select server with the lowest latency, true or false
-      PIA_CONF_PATH: ${PIA_CONF_PATH}   # Path of WireGuard config file to be written
-      PIA_CONNECT: ${PIA_CONNECT}       # Connect to VPN after config has been created, true or false
-      PIA_PF: ${PIA_PF}                 # Configure port forwarding, true or false
-      PIA_DNS: ${PIA_DNS}               # Configure DNS, true or false
-      PIA_USER: ${PIA_USER}             # Set PIA username
-      PIA_PASS: ${PIA_PASS}             # Set PIA password
+      VPN_PROTOCOL: ${PIA_VPN_PROTOCOL}  # VPN configuration, WireGuard or openvpn
+      DISABLE_IPV6: ${PIA_DISABLE_IPV6}  # Toggle using IPV6, yes or no
+      DIP_TOKEN: ${PIA_DIP_TOKEN}        # Optional PIA dedicated IP token, token or no
+      AUTOCONNECT: ${PIA_AUTOCONNECT}    # Test and select server with the lowest latency, true or false
+      PIA_CONF_PATH: ${PIA_CONF_PATH}    # Path of WireGuard config file to be written
+      PIA_CONNECT: ${PIA_CONNECT}        # Connect to VPN after config has been created, true or false
+      PIA_PF: ${PIA_PF}                  # Configure port forwarding, true or false
+      PIA_DNS: ${PIA_DNS}                # Configure DNS, true or false
+      PIA_USER: ${PIA_USER}              # Set PIA username
+      PIA_PASS: ${PIA_PASS}              # Set PIA password
 
     # Mount host directories into the container
     volumes:
-      - ${PRIVATEERR_WIREGUARD_CONFIG}:/${PIA_CONF_PATH}:rw # Mount the WireGuard configuration file
+      - ${PRIVATEERR_WIREGUARD_CONFIG}:/${PIA_CONF_PATH}:rw  # Mount the WireGuard configuration file
 
   #
   # Define the 'gluetun' service to route traffic through a WireGuard VPN connection
   #
   gluetun:
     # Docker image and container information
-    <<: *default-container                 # Pull in default container config
-    image: qmcgaw/gluetun:${GLUETUN_TAG}   # Run using the specified tag
-    container_name: gluetun-${GLUETUN_TAG} # Append Docker image tag to container name
-    hostname: gluetun                      # Set the container hostname
-    cap_add:                               # Add additional linux capabilities
-      - NET_ADMIN                          # Allow modification of network interfaces
+    <<: *default-container                  # Pull in default container config
+    image: qmcgaw/gluetun:${GLUETUN_TAG}    # Run using the specified tag
+    container_name: gluetun-${GLUETUN_TAG}  # Append Docker image tag to container name
+    hostname: gluetun                       # Set the container hostname
+    cap_add:                                # Add additional linux capabilities
+      - NET_ADMIN                           # Allow modification of network interfaces
 
     # Add container devices
     devices:
-      - /dev/net/tun:/dev/net/tun # Allow container to handle encrypted VPN traffic directly
+      - /dev/net/tun:/dev/net/tun  # Allow container to handle encrypted VPN traffic directly
 
     # Add container labels
     labels:
-      - "com.centurylinklabs.watchtower.enable=false" # Exclude VPN container from Watchtower
+      - "com.centurylinklabs.watchtower.enable=false"  # Exclude VPN container from Watchtower
 
     # Define the container environment
     environment:
-      <<: *default-environment                              # Pull in the default environment information
-      VPN_SERVICE_PROVIDER: ${GLUETUN_VPN_SERVICE_PROVIDER} # The VPN service provider, e.g. custom
-      VPN_TYPE: ${GLUETUN_VPN_TYPE}                         # The VPN type, e.g. wireguard
+      <<: *default-environment                               # Pull in the default environment information
+      VPN_SERVICE_PROVIDER: ${GLUETUN_VPN_SERVICE_PROVIDER}  # The VPN service provider, e.g. custom
+      VPN_TYPE: ${GLUETUN_VPN_TYPE}                          # The VPN type, e.g. wireguard
 
     # Define the host and container ports
     ports:
-      - ${QBITTORRENT_TCP_PORT}:6881     # qBittorrent TCP connection port
-      - ${QBITTORRENT_UDP_PORT}:6881/udp # qBittorrent UDP connection port
-      - ${QBITTORRENT_WEBUI_PORT}:8080   # qBittorrent web UI port
-      - ${PROWLARR_WEBUI_PORT}:9696      # Prowlarr web UI port
-      - ${RADARR_WEBUI_PORT}:7878        # Radarr web UI port
-      - ${SONARR_WEBUI_PORT}:8989        # Sonarr web UI port
-      - ${BAZARR_WEBUI_PORT}:6767        # Bazarr web UI port
-      - ${READARR_WEBUI_PORT}:8787       # Readarr web UI port
+      - ${QBITTORRENT_TCP_PORT}:6881      # qBittorrent TCP connection port
+      - ${QBITTORRENT_UDP_PORT}:6881/udp  # qBittorrent UDP connection port
+      - ${QBITTORRENT_WEBUI_PORT}:8080    # qBittorrent web UI port
+      - ${PROWLARR_WEBUI_PORT}:9696       # Prowlarr web UI port
+      - ${RADARR_WEBUI_PORT}:7878         # Radarr web UI port
+      - ${SONARR_WEBUI_PORT}:8989         # Sonarr web UI port
+      - ${BAZARR_WEBUI_PORT}:6767         # Bazarr web UI port
+      - ${READARR_WEBUI_PORT}:8787        # Readarr web UI port
 
     # Mount host directories into the container
     volumes:
-      - ${GLUETUN_CONFIG_PATH}:/gluetun:rw # Configuration files including WireGuard config at gluetun/wireguard/wg0.conf
+      - ${GLUETUN_CONFIG_PATH}:/gluetun:rw  # Configuration files including WireGuard config at gluetun/wireguard/wg0.conf
 
     # Specify container service dependencies
     depends_on:
-      privateerr:                                 # Depends on privateer to generate the WireGuard config
-        condition: service_completed_successfully # Wait for container to exit successfully
+      privateerr:                                  # Depends on privateer to generate the WireGuard config
+        condition: service_completed_successfully  # Wait for container to exit successfully
 
   #
   # Define the 'flaresolverr' service to bypass Cloudflare and DDoS-GUARD protection
   #
   flaresolverr:
     # Docker image and container information
-    <<: *default-container                                       # Pull in default container config
-    image: ghcr.io/flaresolverr/flaresolverr:${FLARESOLVERR_TAG} # Run using the specified tag
-    container_name: flaresolverr-${FLARESOLVERR_TAG}             # Append Docker image tag to container name
-    hostname: flaresolverr                                       # Set the container hostname
+    <<: *default-container                                        # Pull in default container config
+    image: ghcr.io/flaresolverr/flaresolverr:${FLARESOLVERR_TAG}  # Run using the specified tag
+    container_name: flaresolverr-${FLARESOLVERR_TAG}              # Append Docker image tag to container name
+    hostname: flaresolverr                                        # Set the container hostname
 
     # Define the host and container ports
     ports:
-      - ${FLARESOLVERR_PORT}:8191 # Port to listen for requests
+      - ${FLARESOLVERR_PORT}:8191  # Port to listen for requests
 
     # Define the container environment
     environment:
-      <<: *default-environment                       # Pull in the default environment information
-      LOG_LEVEL: ${FLARESOLVERR_LOG_LEVEL}           # Container log level
-      LOG_HTML: ${FLARESOLVERR_LOG_HTML}             # Toggle HTML logging
-      CAPTCHA_SOLVER: ${FLARESOLVERR_CAPTCHA_SOLVER} # Specify captcha solver
+      <<: *default-environment                        # Pull in the default environment information
+      LOG_LEVEL: ${FLARESOLVERR_LOG_LEVEL}            # Container log level
+      LOG_HTML: ${FLARESOLVERR_LOG_HTML}              # Toggle HTML logging
+      CAPTCHA_SOLVER: ${FLARESOLVERR_CAPTCHA_SOLVER}  # Specify captcha solver
 
   #
   # Define the 'prowlarr' service for managing indexers
   #
   prowlarr:
     # Docker image and container information
-    <<: *arr-stack-container                            # Pull in arr-stack container config
-    image: lscr.io/linuxserver/prowlarr:${PROWLARR_TAG} # Run using the specified tag
-    container_name: prowlarr-${PROWLARR_TAG}            # Append Docker image tag to container name
-    network_mode: service:gluetun                       # Route network traffic through gluetun
+    <<: *arr-stack-container                             # Pull in arr-stack container config
+    image: lscr.io/linuxserver/prowlarr:${PROWLARR_TAG}  # Run using the specified tag
+    container_name: prowlarr-${PROWLARR_TAG}             # Append Docker image tag to container name
+    network_mode: service:gluetun                        # Route network traffic through gluetun
 
     # Mount host directories into the container
     volumes:
-      - ${PROWLARR_CONFIG_PATH}:/config:rw # Database and Prowlarr configs
+      - ${PROWLARR_CONFIG_PATH}:/config:rw  # Database and Prowlarr configs
 
     # Specify container service dependencies
     depends_on:
@@ -200,31 +200,31 @@ services:
   #
   qbittorrent:
     # Docker image and container information
-    <<: *arr-stack-container                                  # Pull in arr-stack container config
-    image: lscr.io/linuxserver/qbittorrent:${QBITTORRENT_TAG} # Run using the specified tag
-    container_name: qbittorrent-${QBITTORRENT_TAG}            # Append Docker image tag to container name
-    network_mode: service:gluetun                             # Route network traffic through gluetun
+    <<: *arr-stack-container                                   # Pull in arr-stack container config
+    image: lscr.io/linuxserver/qbittorrent:${QBITTORRENT_TAG}  # Run using the specified tag
+    container_name: qbittorrent-${QBITTORRENT_TAG}             # Append Docker image tag to container name
+    network_mode: service:gluetun                              # Route network traffic through gluetun
 
     # Mount host directories into the container
     volumes:
-      - ${QBITTORRENT_CONFIG_PATH}:/config:rw # Configuration files
-      - ${HOST_DOWNLOADS_PATH}:/downloads:rw  # Location of download managers output directory
+      - ${QBITTORRENT_CONFIG_PATH}:/config:rw  # Configuration files
+      - ${HOST_DOWNLOADS_PATH}:/downloads:rw   # Location of download managers output directory
 
   #
   # Define the 'radarr' service for managing movies
   #
   radarr:
     # Docker image and container information
-    <<: *arr-stack-container                        # Pull in arr-stack container config
-    image: lscr.io/linuxserver/radarr:${RADARR_TAG} # Run using the specified tag
-    container_name: radarr-${RADARR_TAG}            # Append Docker image tag to container name
-    network_mode: service:gluetun                   # Route network traffic through gluetun
+    <<: *arr-stack-container                         # Pull in arr-stack container config
+    image: lscr.io/linuxserver/radarr:${RADARR_TAG}  # Run using the specified tag
+    container_name: radarr-${RADARR_TAG}             # Append Docker image tag to container name
+    network_mode: service:gluetun                    # Route network traffic through gluetun
 
     # Mount host directories into the container
     volumes:
-      - ${RADARR_CONFIG_PATH}:/config:rw     # Database and Radarr configs
-      - ${HOST_DOWNLOADS_PATH}:/downloads:rw # Location of download managers output directory
-      - ${HOST_MOVIES_PATH}:/movies:rw       # Location of movie library on disk
+      - ${RADARR_CONFIG_PATH}:/config:rw      # Database and Radarr configs
+      - ${HOST_DOWNLOADS_PATH}:/downloads:rw  # Location of download managers output directory
+      - ${HOST_MOVIES_PATH}:/movies:rw        # Location of movie library on disk
 
     # Specify container service dependencies
     depends_on:
@@ -237,16 +237,16 @@ services:
   #
   sonarr:
     # Docker image and container information
-    <<: *arr-stack-container                        # Pull in arr-stack container config
-    image: lscr.io/linuxserver/sonarr:${SONARR_TAG} # Run using the specified tag
-    container_name: sonarr-${SONARR_TAG}            # Append Docker image tag to container name
-    network_mode: service:gluetun                   # Route network traffic through gluetun
+    <<: *arr-stack-container                         # Pull in arr-stack container config
+    image: lscr.io/linuxserver/sonarr:${SONARR_TAG}  # Run using the specified tag
+    container_name: sonarr-${SONARR_TAG}             # Append Docker image tag to container name
+    network_mode: service:gluetun                    # Route network traffic through gluetun
 
     # Mount host directories into the container
     volumes:
-      - ${SONARR_CONFIG_PATH}:/config:rw     # Database and Sonarr configs
-      - ${HOST_DOWNLOADS_PATH}:/downloads:rw # Location of download managers output directory
-      - ${HOST_TV_PATH}:/tv:rw               # Location of TV library on disk
+      - ${SONARR_CONFIG_PATH}:/config:rw      # Database and Sonarr configs
+      - ${HOST_DOWNLOADS_PATH}:/downloads:rw  # Location of download managers output directory
+      - ${HOST_TV_PATH}:/tv:rw                # Location of TV library on disk
 
     # Specify container service dependencies
     depends_on:
@@ -259,16 +259,16 @@ services:
   #
   bazarr:
     # Docker image and container information
-    <<: *arr-stack-container                        # Pull in arr-stack container config
-    image: lscr.io/linuxserver/bazarr:${BAZARR_TAG} # Run using the specified tag
-    container_name: bazarr-${BAZARR_TAG}            # Append Docker image tag to container name
-    network_mode: service:gluetun                   # Route network traffic through gluetun
+    <<: *arr-stack-container                         # Pull in arr-stack container config
+    image: lscr.io/linuxserver/bazarr:${BAZARR_TAG}  # Run using the specified tag
+    container_name: bazarr-${BAZARR_TAG}             # Append Docker image tag to container name
+    network_mode: service:gluetun                    # Route network traffic through gluetun
 
     # Mount host directories into the container
     volumes:
-      - ${BAZARR_CONFIG_PATH}:/config:rw # Persistent config files
-      - ${HOST_MOVIES_PATH}:/movies:rw   # Location of movies library on disk
-      - ${HOST_TV_PATH}:/tv:rw           # Location of TV library on disk
+      - ${BAZARR_CONFIG_PATH}:/config:rw  # Persistent config files
+      - ${HOST_MOVIES_PATH}:/movies:rw    # Location of movies library on disk
+      - ${HOST_TV_PATH}:/tv:rw            # Location of TV library on disk
 
     # Specify container service dependencies
     depends_on:
@@ -280,16 +280,16 @@ services:
   #
   readarr:
     # Docker image and container information
-    <<: *arr-stack-container                          # Pull in arr-stack container config
-    image: lscr.io/linuxserver/readarr:${READARR_TAG} # Run using the specified tag
-    container_name: readarr-${READARR_TAG}            # Append Docker image tag to container name
-    network_mode: service:gluetun                     # Route network traffic through gluetun
+    <<: *arr-stack-container                           # Pull in arr-stack container config
+    image: lscr.io/linuxserver/readarr:${READARR_TAG}  # Run using the specified tag
+    container_name: readarr-${READARR_TAG}             # Append Docker image tag to container name
+    network_mode: service:gluetun                      # Route network traffic through gluetun
 
     # Mount host directories into the container
     volumes:
-      - ${READARR_CONFIG_PATH}:/config:rw    # Database and Readarr configs
-      - ${HOST_DOWNLOADS_PATH}:/downloads:rw # Location of download managers output directory
-      - ${HOST_BOOKS_PATH}:/books:rw         # Location of book library on disk
+      - ${READARR_CONFIG_PATH}:/config:rw     # Database and Readarr configs
+      - ${HOST_DOWNLOADS_PATH}:/downloads:rw  # Location of download managers output directory
+      - ${HOST_BOOKS_PATH}:/books:rw          # Location of book library on disk
 
     # Specify container service dependencies
     depends_on:
@@ -302,10 +302,10 @@ services:
   #
   overseerr:
     # Docker image and container information
-    <<: *arr-stack-container                              # Pull in arr-stack container config
-    image: lscr.io/linuxserver/overseerr:${OVERSEERR_TAG} # Run using the specified tag
-    container_name: overseerr-${OVERSEERR_TAG}            # Append Docker image tag to container name
-    hostname: overseerr                                   # Set the container hostname
+    <<: *arr-stack-container                               # Pull in arr-stack container config
+    image: lscr.io/linuxserver/overseerr:${OVERSEERR_TAG}  # Run using the specified tag
+    container_name: overseerr-${OVERSEERR_TAG}             # Append Docker image tag to container name
+    hostname: overseerr                                    # Set the container hostname
 
     # Define the host and container ports
     ports:
@@ -313,111 +313,111 @@ services:
 
     # Mount host directories into the container
     volumes:
-      - ${OVERSEERR_CONFIG_PATH}:/config:rw # Persistent config files
+      - ${OVERSEERR_CONFIG_PATH}:/config:rw  # Persistent config files
 
   #
   # Define the 'speedtest-tracker' service for tracking internet speeds
   #
   speedtest-tracker:
     # Docker image and container information
-    <<: *default-container                                                # Pull in the default container information
-    image: lscr.io/linuxserver/speedtest-tracker:${SPEEDTEST_TRACKER_TAG} # Run using the specified tag
-    container_name: speedtest-tracker-${SPEEDTEST_TRACKER_TAG}            # Append Docker image tag to container name
-    hostname: speedtest-tracker                                           # Set the container hostname
+    <<: *default-container                                                 # Pull in the default container information
+    image: lscr.io/linuxserver/speedtest-tracker:${SPEEDTEST_TRACKER_TAG}  # Run using the specified tag
+    container_name: speedtest-tracker-${SPEEDTEST_TRACKER_TAG}             # Append Docker image tag to container name
+    hostname: speedtest-tracker                                            # Set the container hostname
 
     # Define the container environment
     environment:
-      <<: *arr-stack-environment                           # Pull in the arr-stack environment
-      APP_KEY: ${SPEEDTEST_TRACKER_APP_KEY}                # App key for encrypting stored data from https://speedtest-tracker.dev
-      DB_CONNECTION: ${SPEEDTEST_TRACKER_DB_CONNECTION}    # Set the database type to use, e.g. sqlite, pgsql, or mysql
-      SPEEDTEST_SCHEDULE: ${SPEEDTEST_TRACKER_SCHEDULE}    # Set the test schedule in cron format
-      SPEEDTEST_SERVERS: ${SPEEDTEST_TRACKER_SERVERS}      # Comma-separated list of server IDs to test against
-      DISPLAY_TIMEZONE: ${TZ}                              # Timezone for the UI
-      PRUNE_RESULTS_OLDER_THAN: ${SPEEDTEST_TRACKER_PRUNE} # Days to keep test results
+      <<: *arr-stack-environment                            # Pull in the arr-stack environment
+      APP_KEY: ${SPEEDTEST_TRACKER_APP_KEY}                 # App key for encrypting stored data from https://speedtest-tracker.dev
+      DB_CONNECTION: ${SPEEDTEST_TRACKER_DB_CONNECTION}     # Set the database type to use, e.g. sqlite, pgsql, or mysql
+      SPEEDTEST_SCHEDULE: ${SPEEDTEST_TRACKER_SCHEDULE}     # Set the test schedule in cron format
+      SPEEDTEST_SERVERS: ${SPEEDTEST_TRACKER_SERVERS}       # Comma-separated list of server IDs to test against
+      DISPLAY_TIMEZONE: ${TZ}                               # Timezone for the UI
+      PRUNE_RESULTS_OLDER_THAN: ${SPEEDTEST_TRACKER_PRUNE}  # Days to keep test results
 
     # Define the host and container ports
     ports:
-      - ${SPEEDTEST_TRACKER_WEBUI_PORT}:80 # Speedtest Tracker web UI port
+      - ${SPEEDTEST_TRACKER_WEBUI_PORT}:80  # Speedtest Tracker web UI port
 
     # Mount host directories into the container
     volumes:
-      - ${SPEEDTEST_TRACKER_CONFIG_PATH}:/config:rw # Contains all relevant configuration files
+      - ${SPEEDTEST_TRACKER_CONFIG_PATH}:/config:rw  # Contains all relevant configuration files
 
   #
   # Define the 'duplicati' service for managing backups
   #
   duplicati:
     # Docker image and container information
-    <<: *arr-stack-container                              # Pull in arr-stack container config
-    image: lscr.io/linuxserver/duplicati:${DUPLICATI_TAG} # Run using the specified tag
-    container_name: duplicati-${DUPLICATI_TAG}            # Append Docker image tag to container name
-    hostname: duplicati                                   # Set the container hostname
+    <<: *arr-stack-container                               # Pull in arr-stack container config
+    image: lscr.io/linuxserver/duplicati:${DUPLICATI_TAG}  # Run using the specified tag
+    container_name: duplicati-${DUPLICATI_TAG}             # Append Docker image tag to container name
+    hostname: duplicati                                    # Set the container hostname
 
     # Define the host and container ports
     ports:
-      - ${DUPLICATI_WEBUI_PORT}:8200 # Duplicati web UI port
+      - ${DUPLICATI_WEBUI_PORT}:8200  # Duplicati web UI port
 
     # Mount host directories into the container
     volumes:
-      - ${DUPLICATI_CONFIG_PATH}:/config:rw   # Contains all relevant configuration files
-      - ${DUPLICATI_BACKUPS_PATH}:/backups:rw # Path to store local backups
-      - ${DUPLICATI_SOURCE_PATH}:/source:rw   # Path to source for files to backup
+      - ${DUPLICATI_CONFIG_PATH}:/config:rw    # Contains all relevant configuration files
+      - ${DUPLICATI_BACKUPS_PATH}:/backups:rw  # Path to store local backups
+      - ${DUPLICATI_SOURCE_PATH}:/source:rw    # Path to source for files to backup
 
   #
   # Define the 'homepage' service for highly customizable application dashboard
   #
   homepage:
     # Docker image and container information
-    <<: *default-container                              # Pull in the default container information
-    image: ghcr.io/gethomepage/homepage:${HOMEPAGE_TAG} # Run using the specified tag
-    container_name: homepage-${HOMEPAGE_TAG}            # Append Docker image tag to container name
-    hostname: homepage                                  # Set the container hostname
+    <<: *default-container                               # Pull in the default container information
+    image: ghcr.io/gethomepage/homepage:${HOMEPAGE_TAG}  # Run using the specified tag
+    container_name: homepage-${HOMEPAGE_TAG}             # Append Docker image tag to container name
+    hostname: homepage                                   # Set the container hostname
 
     # Define the container environment
     environment:
-      <<: *default-environment                                                                  # Pull in the default environment
-      HOMEPAGE_LOG_LEVEL: ${HOMEPAGE_LOG_LEVEL}                                                 # Set log level verbosity
-      HOMEPAGE_VAR_TITLE: ${HOMEPAGE_VAR_TITLE}                                                 # Title of the homepage
-      HOMEPAGE_VAR_SEARCH_PROVIDER: ${HOMEPAGE_VAR_SEARCH_PROVIDER}                             # Homepage search provider
-      HOMEPAGE_VAR_WEATHER_CITY: ${HOMEPAGE_VAR_WEATHER_CITY}                                   # Homepage weather city name
-      HOMEPAGE_VAR_WEATHER_LAT: ${HOMEPAGE_VAR_WEATHER_LAT}                                     # Homepage weather city latitude
-      HOMEPAGE_VAR_WEATHER_LONG: ${HOMEPAGE_VAR_WEATHER_LONG}                                   # Homepage weather city longitude
-      HOMEPAGE_VAR_WEATHER_TZ: ${HOMEPAGE_VAR_WEATHER_TZ}                                       # Homepage weather time zone
-      HOMEPAGE_VAR_WEATHER_UNIT: ${HOMEPAGE_VAR_WEATHER_UNIT}                                   # Homepage weather unit, metric or imperial
-      HOMEPAGE_VAR_HOST_URL: ${HOMEPAGE_VAR_HOST_URL}                                           # Homepage base host URL, Synology DSM host
-      HOMEPAGE_VAR_DSM2_URL: ${HOMEPAGE_VAR_DSM2_URL}                                           # Homepage extra DSM host
-      HOMEPAGE_VAR_WIKI_URL: ${HOMEPAGE_VAR_WIKI_URL}                                           # Homepage wiki URL
-      HOMEPAGE_VAR_PLEX_URL: ${HOMEPAGE_VAR_PLEX_URL}:${PLEX_WEBUI_PORT}                        # Plex internal URL for widget
-      HOMEPAGE_VAR_PLEX_TOKEN: ${HOMEPAGE_VAR_PLEX_TOKEN}                                       # Plex token for widget
-      HOMEPAGE_VAR_TAUTULLI_URL: ${HOMEPAGE_VAR_TAUTULLI_URL}:${TAUTULLI_WEBUI_PORT}            # Tautulli internal URL for widget
-      HOMEPAGE_VAR_TAUTULLI_KEY: ${HOMEPAGE_VAR_TAUTULLI_KEY}                                   # Tautulli api key for widget
-      HOMEPAGE_VAR_RADARR_URL: ${HOMEPAGE_VAR_RADARR_URL}:${RADARR_WEBUI_PORT}                  # Radarr internal URL for widget
-      HOMEPAGE_VAR_RADARR_KEY: ${HOMEPAGE_VAR_RADARR_KEY}                                       # Radarr api key for widget
-      HOMEPAGE_VAR_SONARR_URL: ${HOMEPAGE_VAR_SONARR_URL}:${SONARR_WEBUI_PORT}                  # Sonarr internal URL for widget
-      HOMEPAGE_VAR_SONARR_KEY: ${HOMEPAGE_VAR_SONARR_KEY}                                       # Sonarr api key for widget
-      HOMEPAGE_VAR_BAZARR_URL: ${HOMEPAGE_VAR_BAZARR_URL}:${BAZARR_WEBUI_PORT}                  # Bazarr internal URL for widget
-      HOMEPAGE_VAR_BAZARR_KEY: ${HOMEPAGE_VAR_BAZARR_KEY}                                       # Bazarr api key for widget
-      HOMEPAGE_VAR_READARR_URL: ${HOMEPAGE_VAR_READARR_URL}:${READARR_WEBUI_PORT}               # Readarr internal URL for widget
-      HOMEPAGE_VAR_READARR_KEY: ${HOMEPAGE_VAR_READARR_KEY}                                     # Readarr api key for widget
-      HOMEPAGE_VAR_OVERSEERR_URL: ${HOMEPAGE_VAR_OVERSEERR_URL}:${OVERSEERR_WEBUI_PORT}         # Overseerr internal URL for widget
-      HOMEPAGE_VAR_OVERSEERR_KEY: ${HOMEPAGE_VAR_OVERSEERR_KEY}                                 # Overseerr api key for widget
-      HOMEPAGE_VAR_PROWLARR_URL: ${HOMEPAGE_VAR_PROWLARR_URL}:${PROWLARR_WEBUI_PORT}            # Prowlarr internal URL for widget
-      HOMEPAGE_VAR_PROWLARR_KEY: ${HOMEPAGE_VAR_PROWLARR_KEY}                                   # Prowlarr api key for widget
-      HOMEPAGE_VAR_QBITTORRENT_URL: ${HOMEPAGE_VAR_QBITTORRENT_URL}:${QBITTORRENT_WEBUI_PORT}   # qBittorrent internal URL for widget
-      HOMEPAGE_VAR_QBITTORRENT_USER: ${HOMEPAGE_VAR_QBITTORRENT_USER}                           # qBittorrent username for widget
-      HOMEPAGE_VAR_QBITTORRENT_PASS: ${HOMEPAGE_VAR_QBITTORRENT_PASS}                           # qBittorrent password for widget
-      HOMEPAGE_VAR_SPEEDTEST_URL: ${HOMEPAGE_VAR_SPEEDTEST_URL}:${SPEEDTEST_TRACKER_WEBUI_PORT} # Speedtest Tracker internal URL for widget
+      <<: *default-environment                                                                   # Pull in the default environment
+      HOMEPAGE_LOG_LEVEL: ${HOMEPAGE_LOG_LEVEL}                                                  # Set log level verbosity
+      HOMEPAGE_VAR_TITLE: ${HOMEPAGE_VAR_TITLE}                                                  # Title of the homepage
+      HOMEPAGE_VAR_SEARCH_PROVIDER: ${HOMEPAGE_VAR_SEARCH_PROVIDER}                              # Homepage search provider
+      HOMEPAGE_VAR_WEATHER_CITY: ${HOMEPAGE_VAR_WEATHER_CITY}                                    # Homepage weather city name
+      HOMEPAGE_VAR_WEATHER_LAT: ${HOMEPAGE_VAR_WEATHER_LAT}                                      # Homepage weather city latitude
+      HOMEPAGE_VAR_WEATHER_LONG: ${HOMEPAGE_VAR_WEATHER_LONG}                                    # Homepage weather city longitude
+      HOMEPAGE_VAR_WEATHER_TZ: ${HOMEPAGE_VAR_WEATHER_TZ}                                        # Homepage weather time zone
+      HOMEPAGE_VAR_WEATHER_UNIT: ${HOMEPAGE_VAR_WEATHER_UNIT}                                    # Homepage weather unit, metric or imperial
+      HOMEPAGE_VAR_HOST_URL: ${HOMEPAGE_VAR_HOST_URL}                                            # Homepage base host URL, Synology DSM host
+      HOMEPAGE_VAR_DSM2_URL: ${HOMEPAGE_VAR_DSM2_URL}                                            # Homepage extra DSM host
+      HOMEPAGE_VAR_WIKI_URL: ${HOMEPAGE_VAR_WIKI_URL}                                            # Homepage wiki URL
+      HOMEPAGE_VAR_PLEX_URL: ${HOMEPAGE_VAR_PLEX_URL}:${PLEX_WEBUI_PORT}                         # Plex internal URL for widget
+      HOMEPAGE_VAR_PLEX_TOKEN: ${HOMEPAGE_VAR_PLEX_TOKEN}                                        # Plex token for widget
+      HOMEPAGE_VAR_TAUTULLI_URL: ${HOMEPAGE_VAR_TAUTULLI_URL}:${TAUTULLI_WEBUI_PORT}             # Tautulli internal URL for widget
+      HOMEPAGE_VAR_TAUTULLI_KEY: ${HOMEPAGE_VAR_TAUTULLI_KEY}                                    # Tautulli api key for widget
+      HOMEPAGE_VAR_RADARR_URL: ${HOMEPAGE_VAR_RADARR_URL}:${RADARR_WEBUI_PORT}                   # Radarr internal URL for widget
+      HOMEPAGE_VAR_RADARR_KEY: ${HOMEPAGE_VAR_RADARR_KEY}                                        # Radarr api key for widget
+      HOMEPAGE_VAR_SONARR_URL: ${HOMEPAGE_VAR_SONARR_URL}:${SONARR_WEBUI_PORT}                   # Sonarr internal URL for widget
+      HOMEPAGE_VAR_SONARR_KEY: ${HOMEPAGE_VAR_SONARR_KEY}                                        # Sonarr api key for widget
+      HOMEPAGE_VAR_BAZARR_URL: ${HOMEPAGE_VAR_BAZARR_URL}:${BAZARR_WEBUI_PORT}                   # Bazarr internal URL for widget
+      HOMEPAGE_VAR_BAZARR_KEY: ${HOMEPAGE_VAR_BAZARR_KEY}                                        # Bazarr api key for widget
+      HOMEPAGE_VAR_READARR_URL: ${HOMEPAGE_VAR_READARR_URL}:${READARR_WEBUI_PORT}                # Readarr internal URL for widget
+      HOMEPAGE_VAR_READARR_KEY: ${HOMEPAGE_VAR_READARR_KEY}                                      # Readarr api key for widget
+      HOMEPAGE_VAR_OVERSEERR_URL: ${HOMEPAGE_VAR_OVERSEERR_URL}:${OVERSEERR_WEBUI_PORT}          # Overseerr internal URL for widget
+      HOMEPAGE_VAR_OVERSEERR_KEY: ${HOMEPAGE_VAR_OVERSEERR_KEY}                                  # Overseerr api key for widget
+      HOMEPAGE_VAR_PROWLARR_URL: ${HOMEPAGE_VAR_PROWLARR_URL}:${PROWLARR_WEBUI_PORT}             # Prowlarr internal URL for widget
+      HOMEPAGE_VAR_PROWLARR_KEY: ${HOMEPAGE_VAR_PROWLARR_KEY}                                    # Prowlarr api key for widget
+      HOMEPAGE_VAR_QBITTORRENT_URL: ${HOMEPAGE_VAR_QBITTORRENT_URL}:${QBITTORRENT_WEBUI_PORT}    # qBittorrent internal URL for widget
+      HOMEPAGE_VAR_QBITTORRENT_USER: ${HOMEPAGE_VAR_QBITTORRENT_USER}                            # qBittorrent username for widget
+      HOMEPAGE_VAR_QBITTORRENT_PASS: ${HOMEPAGE_VAR_QBITTORRENT_PASS}                            # qBittorrent password for widget
+      HOMEPAGE_VAR_SPEEDTEST_URL: ${HOMEPAGE_VAR_SPEEDTEST_URL}:${SPEEDTEST_TRACKER_WEBUI_PORT}  # Speedtest Tracker internal URL for widget
 
     # Define the host and container ports
     ports:
-      - ${HOMEPAGE_WEBUI_PORT}:3000 # Homepage web UI port
+      - ${HOMEPAGE_WEBUI_PORT}:3000  # Homepage web UI port
 
     # Mount host directories into the container
     volumes:
-      - ${HOMEPAGE_CONFIG_PATH}:/app/config:rw        # Local config files directory
-      - ${HOMEPAGE_IMAGES_PATH}:/app/public/images:rw # Local public files directory
-      - ${HOMEPAGE_DATA_ROOT_PATH}:/data:rw           # Local directory to monitor disk space
-      - /var/run/docker.sock:/var/run/docker.sock:rw  # Allow container to talk to host Docker API
+      - ${HOMEPAGE_CONFIG_PATH}:/app/config:rw         # Local config files directory
+      - ${HOMEPAGE_IMAGES_PATH}:/app/public/images:rw  # Local public files directory
+      - ${HOMEPAGE_DATA_ROOT_PATH}:/data:rw            # Local directory to monitor disk space
+      - /var/run/docker.sock:/var/run/docker.sock:rw   # Allow container to talk to host Docker API
 
 #
 # Define the networks section
@@ -425,10 +425,10 @@ services:
 networks:
   # Configure the default network
   default:
-    name: ${COMPOSE_PROJECT_NAME} # Use the name of the compose project
-    ipam:                         # IP Address Management
-      driver: default             # Use the default driver
+    name: ${COMPOSE_PROJECT_NAME}  # Use the name of the compose project
+    ipam:                          # IP Address Management
+      driver: default              # Use the default driver
       config:
-        - subnet: ${COMPOSE_NETWORK_SUBNET}     # Subnet in CIDR format that represents a network segment
-          ip_range: ${COMPOSE_NETWORK_IP_RANGE} # Range of IPs from which to allocate container IPs
-          gateway: ${COMPOSE_NETWORK_GATEWAY}   # Gateway for the master subnet
+        - subnet: ${COMPOSE_NETWORK_SUBNET}      # Subnet in CIDR format that represents a network segment
+          ip_range: ${COMPOSE_NETWORK_IP_RANGE}  # Range of IPs from which to allocate container IPs
+          gateway: ${COMPOSE_NETWORK_GATEWAY}    # Gateway for the master subnet
