@@ -39,6 +39,10 @@ cp example.env .env
 # Open .env file and adjust the values to yer requirements
 ```
 
+For more details, see the example env configuration here:
+
+- 📜️ [View `example.env`](./example.env)
+
 ### Setting Sail on the Docker Seas 🌊🐋
 
 See the Docker Compose [IPAM](https://docs.docker.com/compose/compose-file/06-networks/#ipam) documentation fer more information on configurin' the followin' [IP address information](https://github.com/scottgigawatt/plundarr/blob/main/example.env#L9-L11) fer the compose stack. Ye can plunder the example config straight from the Docker Compose scrolls!
@@ -103,7 +107,9 @@ To make sure the `/dev/net/tun` device be present on Synology Disk Station for u
 
 This ensures that the `/dev/net/tun` device be available whenever yer Synology NAS boots up, so ye can sail the seas with yer VPN secure and sound. Arrr! 🏴‍☠️
 
-For more details, see the script [here](scripts/tun.sh) 📜.
+For more details, see the script here:
+
+- 📜 [View `tun.sh`](scripts/tun.sh)
 
 ## Navigatin' Troubled Waters ‍️☠️🌊
 
@@ -136,6 +142,10 @@ Targets:
   run             - Alias for up, open, logs.
   help            - Displays this help message.
 ```
+
+For more details, see the Makefile here:
+
+- ⚙️️ [View `Makefile`](./Makefile)
 
 ## Ship's Log 🏝️
 
