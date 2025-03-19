@@ -372,25 +372,25 @@ services:
       DOWNLOADCLEANER__CATEGORIES__1__MAX_SEED_TIME: ${DOWNLOADCLEANER__CATEGORIES__1__MAX_SEED_TIME}  # Max number of hours to seed before removing
 
       # Cleanuperr qBittorrent environment variables
-      DOWNLOAD_CLIENT: ${DOWNLOAD_CLIENT}              # Name of download client
-      QBITTORRENT__URL: ${QBITTORRENT__URL}            # qBittorrent instance URL
-      QBITTORRENT__USERNAME: ${QBITTORRENT__USERNAME}  # Username for qBittorrent authentication
-      QBITTORRENT__PASSWORD: ${QBITTORRENT__PASSWORD}  # Password for qBittorrent authentication
+      DOWNLOAD_CLIENT: ${DOWNLOAD_CLIENT}                              # Name of download client
+      QBITTORRENT__URL: ${QBITTORRENT__URL}:${QBITTORRENT_WEBUI_PORT}  # qBittorrent instance URL
+      QBITTORRENT__USERNAME: ${QBITTORRENT__USERNAME}                  # Username for qBittorrent authentication
+      QBITTORRENT__PASSWORD: ${QBITTORRENT__PASSWORD}                  # Password for qBittorrent authentication
 
       # Cleanuperr Radarr environment variables
-      RADARR__ENABLED: ${RADARR__ENABLED}                            # Toggle Radarr cleanup
-      RADARR__BLOCK__TYPE: ${RADARR__BLOCK__TYPE}                    # Set file blocking for Radarr, blacklist or whitelist
-      RADARR__BLOCK__PATH: ${RADARR__BLOCK__PATH}                    # Path to the blocklist file (local file or URL)
-      RADARR__INSTANCES__0__URL: ${RADARR__INSTANCES__0__URL}        # Radarr instance URL
-      RADARR__INSTANCES__0__APIKEY: ${RADARR__INSTANCES__0__APIKEY}  # Radarr instance API key
+      RADARR__ENABLED: ${RADARR__ENABLED}                                           # Toggle Radarr cleanup
+      RADARR__BLOCK__TYPE: ${RADARR__BLOCK__TYPE}                                   # Set file blocking for Radarr, blacklist or whitelist
+      RADARR__BLOCK__PATH: ${RADARR__BLOCK__PATH}                                   # Path to the blocklist file (local file or URL)
+      RADARR__INSTANCES__0__URL: ${RADARR__INSTANCES__0__URL}:${RADARR_WEBUI_PORT}  # Radarr instance URL
+      RADARR__INSTANCES__0__APIKEY: ${RADARR__INSTANCES__0__APIKEY}                 # Radarr instance API key
 
       # Cleanuperr Sonarr environment variables
-      SONARR__ENABLED: ${SONARR__ENABLED}                            # Toggle Sonarr cleanup
-      SONARR__SEARCHTYPE: ${SONARR__SEARCHTYPE}                      # What to search after removing a queue item, Episode, Season, or Series
-      SONARR__BLOCK__TYPE: ${SONARR__BLOCK__TYPE}                    # Set file blocking for Sonarr, blacklist or whitelist
-      SONARR__BLOCK__PATH: ${SONARR__BLOCK__PATH}                    # Path to the blocklist file (local file or URL)
-      SONARR__INSTANCES__0__URL: ${SONARR__INSTANCES__0__URL}        # Sonarr instance URL
-      SONARR__INSTANCES__0__APIKEY: ${SONARR__INSTANCES__0__APIKEY}  # Sonarr instance API key
+      SONARR__ENABLED: ${SONARR__ENABLED}                                           # Toggle Sonarr cleanup
+      SONARR__SEARCHTYPE: ${SONARR__SEARCHTYPE}                                     # What to search after removing a queue item, Episode, Season, or Series
+      SONARR__BLOCK__TYPE: ${SONARR__BLOCK__TYPE}                                   # Set file blocking for Sonarr, blacklist or whitelist
+      SONARR__BLOCK__PATH: ${SONARR__BLOCK__PATH}                                   # Path to the blocklist file (local file or URL)
+      SONARR__INSTANCES__0__URL: ${SONARR__INSTANCES__0__URL}:${SONARR_WEBUI_PORT}  # Sonarr instance URL
+      SONARR__INSTANCES__0__APIKEY: ${SONARR__INSTANCES__0__APIKEY}                 # Sonarr instance API key
 
       # Cleanuperr Notifiarr environment variables
       NOTIFIARR__ON_IMPORT_FAILED_STRIKE: ${NOTIFIARR__ON_IMPORT_FAILED_STRIKE}  # Toggle notify on item receives failed import strike
