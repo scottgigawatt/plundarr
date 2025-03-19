@@ -20,13 +20,17 @@ Plundarr be a collection of Docker Compose configurations to run a shipshape arr
 | Bazarr            | 🦜 The parrot on yer shoulder squawkin' subtitles in many tongues fer all yer movies and TV shows.                                          | [More info](https://github.com/morpheus65535/bazarr)      |
 | Readarr           | 📚 The captain's log fer yer ebooks. Keep yer digital library well-organized and as neat as a pin.                                          | [More info](https://github.com/Readarr/Readarr)           |
 | Overseerr         | ⚓️ The quartermaster fer handlin' all yer crew's media requests, keepin' the ship runnin' smooth and the crew satisfied.                    | [More info](https://github.com/sct/overseerr)             |
+| Cleanuperr        | 🧹 The swabbie keepin' yer ship clean by removin' blocked or unwanted downloads from Sonarr, Radarr, and yer download mates like qBittorrent.  | [More info](https://github.com/flmorg/cleanuperr)         |
 | Speedtest Tracker | ⚡️ Keep a log of yer internet speed to make sure yer ISP ain't sellin' ye snake oil. Monitor yer connection and track yer speeds over time. | [More info](https://docs.speedtest-tracker.dev/)          |
 | Duplicati         | 💣 Guard yer precious booty with backups, lest the kraken strike and sink yer ship.                                                         | [More info](https://www.duplicati.com)                    |
 | Homepage          | 🏠 The captain's command deck fer all yer apps! A fully customizable, static dashboard fer keepin' tabs on all yer ship's systems.          | [More info](https://gethomepage.dev)                      |
 
 ## Hoist the Sails ⚓️
 
-Manage Docker configuration environment variables in the [`.env`](./example.env) file. Override these variables easily on the command line when startin' the Docker Compose stack. Before ye begin, copy the example environment configuration file and update it to suit yer needs:
+> [!NOTE] 🏴‍☠️
+> Before settin' sail, copy the example `.env` scroll and tweak it to yer own pirate code.
+
+Manage Docker configuration environment variables in the [`.env`](./example.env) file. Override these variables easily on the command line when startin' the Docker Compose stack:
 
 ```bash
 # Hoist the Jolly Roger and clone the repository with submodules
@@ -41,7 +45,7 @@ cp example.env .env
 
 For more details, see the example env configuration here:
 
-- 📜️ [View `example.env`](./example.env)
+- 📜️ [View example.env](./example.env)
 
 ### Setting Sail on the Docker Seas 🌊🐋
 
@@ -72,6 +76,9 @@ COMPOSE_NETWORK_GATEWAY="${COMPOSE_NETWORK_GATEWAY:-172.28.5.254}"
 
 ### ️Managing the Project with DSM Container Manager 📦
 
+> [!TIP] 🦜
+> If ye be usin' Synology DSM 7.2, the Container Manager Project feature be yer secret map to quicker plunderin'.
+
 To bring this booty into DSM 7.2 Container Manager's Project feature, follow these steps, ye sea dogs:
 
 1. SSH into yer Synology system.
@@ -84,6 +91,9 @@ To bring this booty into DSM 7.2 Container Manager's Project feature, follow the
 Check out the official Synology documentation [here](https://kb.synology.com/en-id/DSM/help/ContainerManager/docker_project?version=7) fer more on Container Manager Projects. Yo ho ho!
 
 ### Ensure Yer Tunnels Be Ready at Boot 🏴‍☠️⛏️
+
+> [!IMPORTANT] ⚓️
+> Without the `/dev/net/tun` device, yer VPN ship be sinkin’ at the docks! Make sure it be ready at boot, or face the kraken.
 
 To make sure the `/dev/net/tun` device be present on Synology Disk Station for use with VPN applications like Gluetun, follow these steps, me hearties:
 
@@ -109,9 +119,12 @@ This ensures that the `/dev/net/tun` device be available whenever yer Synology N
 
 For more details, see the script here:
 
-- 📜 [View `tun.sh`](scripts/tun.sh)
+- 📜 [View tun.sh](scripts/tun.sh)
 
 ## Navigatin' Troubled Waters ‍️☠️🌊
+
+> [!WARNING] ☠️
+> These configs be as wordy as an old sea dog's yarn! Use the Makefile commands if ye prefer smooth sailin’ with fewer scrolls.
 
 The `plundarr` repo be providin' ye with tools t' view an' manage the environment an' Docker Compose configuration details. While the configuration files be heavily documented t' assist with understandin' an' customization, some o' ye may prefer t' see the uncommented versions fer simplicity.
 
@@ -145,13 +158,16 @@ Targets:
 
 For more details, see the Makefile here:
 
-- ⚙️️ [View `Makefile`](./Makefile)
+- ⚙️️ [View Makefile](./Makefile)
 
 ## Ship's Log 🏝️
 
 Plundarr has been tested on Synology DS916+ running DSM 7.2.1-69057 Update 5. But fear not, me hearties! It should work on other lands as well.
 
 ## Articles of Agreement ⚖️
+
+> [!CAUTION] 🏴‍☠️⚖️
+> Mind the legal seas! Ye must honor both the Apache 2 License and the MIT License, or be prepared to walk the plank.
 
 This project be licensed under the Apache 2 License - see the [LICENSE](LICENSE) scroll for details.
 

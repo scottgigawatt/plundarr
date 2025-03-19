@@ -19,6 +19,7 @@
 # - bazarr: https://github.com/morpheus65535/bazarr
 # - readarr: https://github.com/Readarr/Readarr
 # - overseerr: https://github.com/sct/overseerr
+# - cleanuperr: https://github.com/flmorg/cleanuperr
 # - speedtest-tracker: https://docs.speedtest-tracker.dev
 # - duplicati: https://www.duplicati.com
 # - homepage: https://gethomepage.dev/latest
@@ -314,6 +315,95 @@ services:
     # Mount host directories into the container
     volumes:
       - ${OVERSEERR_CONFIG_PATH}:/config:rw  # Persistent config files
+
+  #
+  # Define the 'cleanuperr' service for Sonarr, Radarr, and qBittorrent file cleanup
+  #
+  cleanuperr:
+    # Docker image and container information
+    <<: *default-container                              # Pull in default container config
+    image: ghcr.io/flmorg/cleanuperr:${CLEANUPERR_TAG}  # Run using the specified tag
+    container_name: cleanuperr-${CLEANUPERR_TAG}        # Append Docker image tag to container name
+    hostname: cleanuperr                                # Set the container hostname
+
+    # Define the container environment
+    environment:
+      <<: *default-environment  # Pull in the default environment information
+
+      # Cleanuperr behavior environment variables
+      DRY_RUN: ${DRY_RUN}                                      # Toggle dry run for irreversible operations
+      LOGGING__LOGLEVEL: ${LOGGING__LOGLEVEL}                  # Set detail level of application logs
+      LOGGING__FILE__ENABLED: ${LOGGING__FILE__ENABLED}        # Toggle logging to a file
+      LOGGING__FILE__PATH: ${LOGGING__FILE__PATH}              # Directory where log files will be saved
+      LOGGING__ENHANCED: ${LOGGING__ENHANCED}                  # Enable detailed log descriptions
+      TRIGGERS__QUEUECLEANER: ${TRIGGERS__QUEUECLEANER}        # Cron schedule for the queue cleaner job
+      TRIGGERS__CONTENTBLOCKER: ${TRIGGERS__CONTENTBLOCKER}    # Cron schedule for the content blocker job
+      TRIGGERS__DOWNLOADCLEANER: ${TRIGGERS__DOWNLOADCLEANER}  # Cron schedule for the download cleaner job
+
+      # Cleanuperr queue cleaner environment variables
+      QUEUECLEANER__ENABLED: ${QUEUECLEANER__ENABLED}                                                      # Toggle queue cleaning functionality
+      QUEUECLEANER__IGNORED_DOWNLOADS_PATH: ${QUEUECLEANER__IGNORED_DOWNLOADS_PATH}                        # Local path to ignored downloads file
+      QUEUECLEANER__RUNSEQUENTIALLY: ${QUEUECLEANER__RUNSEQUENTIALLY}                                      # Toggle queue cleaner run sequential vs parallel
+      QUEUECLEANER__IMPORT_FAILED_MAX_STRIKES: ${QUEUECLEANER__IMPORT_FAILED_MAX_STRIKES}                  # Number of strikes before removing a failed import
+      QUEUECLEANER__IMPORT_FAILED_IGNORE_PRIVATE: ${QUEUECLEANER__IMPORT_FAILED_IGNORE_PRIVATE}            # Toggle ignore failed imports from private trackers
+      QUEUECLEANER__IMPORT_FAILED_DELETE_PRIVATE: ${QUEUECLEANER__IMPORT_FAILED_DELETE_PRIVATE}            # Toggle delete failed imports from private trackers
+      QUEUECLEANER__STALLED_MAX_STRIKES: ${QUEUECLEANER__STALLED_MAX_STRIKES}                              # Number of strikes before removing a stalled download
+      QUEUECLEANER__STALLED_RESET_STRIKES_ON_PROGRESS: ${QUEUECLEANER__STALLED_RESET_STRIKES_ON_PROGRESS}  # Toggle remove strikes if any progress is made
+      QUEUECLEANER__STALLED_IGNORE_PRIVATE: ${QUEUECLEANER__STALLED_IGNORE_PRIVATE}                        # Toggle ignore stalled downloads from private trackers
+      QUEUECLEANER__STALLED_DELETE_PRIVATE: ${QUEUECLEANER__STALLED_DELETE_PRIVATE}                        # Toggle delete stalled private downloads
+
+      # Cleanuperr content blocker environment variables
+      CONTENTBLOCKER__ENABLED: ${CONTENTBLOCKER__ENABLED}                                # Toggle content blocker functionality
+      CONTENTBLOCKER__IGNORED_DOWNLOADS_PATH: ${CONTENTBLOCKER__IGNORED_DOWNLOADS_PATH}  # Local path to ignored downloads file
+      CONTENTBLOCKER__IGNORE_PRIVATE: ${CONTENTBLOCKER__IGNORE_PRIVATE}                  # Toggle ignore downloads from private trackers
+      CONTENTBLOCKER__DELETE_PRIVATE: ${CONTENTBLOCKER__DELETE_PRIVATE}                  # Toggle delete private downloads that have all files blocked
+
+      # Cleanuperr download cleaner environment variables
+      DOWNLOADCLEANER__ENABLED: ${DOWNLOADCLEANER__ENABLED}                                            # Toggle download cleaner functionality
+      DOWNLOADCLEANER__IGNORED_DOWNLOADS_PATH: ${DOWNLOADCLEANER__IGNORED_DOWNLOADS_PATH}              # Local path to ignored downloads file
+      DOWNLOADCLEANER__DELETE_PRIVATE: ${DOWNLOADCLEANER__DELETE_PRIVATE}                              # Toggle delete private downloads
+      DOWNLOADCLEANER__CATEGORIES__0__NAME: ${DOWNLOADCLEANER__CATEGORIES__0__NAME}                    # Name of the category to clean
+      DOWNLOADCLEANER__CATEGORIES__0__MAX_RATIO: ${DOWNLOADCLEANER__CATEGORIES__0__MAX_RATIO}          # Max ratio to reach before removing
+      DOWNLOADCLEANER__CATEGORIES__0__MIN_SEED_TIME: ${DOWNLOADCLEANER__CATEGORIES__0__MIN_SEED_TIME}  # Min number hours to seed before removing, if ratio met
+      DOWNLOADCLEANER__CATEGORIES__0__MAX_SEED_TIME: ${DOWNLOADCLEANER__CATEGORIES__0__MAX_SEED_TIME}  # Max number of hours to seed before removing
+      DOWNLOADCLEANER__CATEGORIES__1__NAME: ${DOWNLOADCLEANER__CATEGORIES__1__NAME}                    # Name of the category to clean
+      DOWNLOADCLEANER__CATEGORIES__1__MAX_RATIO: ${DOWNLOADCLEANER__CATEGORIES__1__MAX_RATIO}          # Max ratio to reach before removing
+      DOWNLOADCLEANER__CATEGORIES__1__MIN_SEED_TIME: ${DOWNLOADCLEANER__CATEGORIES__1__MIN_SEED_TIME}  # Min number hours to seed before removing, if ratio met
+      DOWNLOADCLEANER__CATEGORIES__1__MAX_SEED_TIME: ${DOWNLOADCLEANER__CATEGORIES__1__MAX_SEED_TIME}  # Max number of hours to seed before removing
+
+      # Cleanuperr qBittorrent environment variables
+      DOWNLOAD_CLIENT: ${DOWNLOAD_CLIENT}              # Name of download client
+      QBITTORRENT__URL: ${QBITTORRENT__URL}            # qBittorrent instance URL
+      QBITTORRENT__USERNAME: ${QBITTORRENT__USERNAME}  # Username for qBittorrent authentication
+      QBITTORRENT__PASSWORD: ${QBITTORRENT__PASSWORD}  # Password for qBittorrent authentication
+
+      # Cleanuperr Radarr environment variables
+      RADARR__ENABLED: ${RADARR__ENABLED}                            # Toggle Radarr cleanup
+      RADARR__BLOCK__TYPE: ${RADARR__BLOCK__TYPE}                    # Set file blocking for Radarr, blacklist or whitelist
+      RADARR__BLOCK__PATH: ${RADARR__BLOCK__PATH}                    # Path to the blocklist file (local file or URL)
+      RADARR__INSTANCES__0__URL: ${RADARR__INSTANCES__0__URL}        # Radarr instance URL
+      RADARR__INSTANCES__0__APIKEY: ${RADARR__INSTANCES__0__APIKEY}  # Radarr instance API key
+
+      # Cleanuperr Sonarr environment variables
+      SONARR__ENABLED: ${SONARR__ENABLED}                            # Toggle Sonarr cleanup
+      SONARR__SEARCHTYPE: ${SONARR__SEARCHTYPE}                      # What to search after removing a queue item, Episode, Season, or Series
+      SONARR__BLOCK__TYPE: ${SONARR__BLOCK__TYPE}                    # Set file blocking for Sonarr, blacklist or whitelist
+      SONARR__BLOCK__PATH: ${SONARR__BLOCK__PATH}                    # Path to the blocklist file (local file or URL)
+      SONARR__INSTANCES__0__URL: ${SONARR__INSTANCES__0__URL}        # Sonarr instance URL
+      SONARR__INSTANCES__0__APIKEY: ${SONARR__INSTANCES__0__APIKEY}  # Sonarr instance API key
+
+      # Cleanuperr Notifiarr environment variables
+      NOTIFIARR__ON_IMPORT_FAILED_STRIKE: ${NOTIFIARR__ON_IMPORT_FAILED_STRIKE}  # Toggle notify on item receives failed import strike
+      NOTIFIARR__ON_STALLED_STRIKE: ${NOTIFIARR__ON_STALLED_STRIKE}              # Toggle notify on item receives stalled download strike
+      NOTIFIARR__ON_QUEUE_ITEM_DELETED: ${NOTIFIARR__ON_QUEUE_ITEM_DELETED}      # Toggle notify on queue item deleted
+      NOTIFIARR__ON_DOWNLOAD_CLEANED: ${NOTIFIARR__ON_DOWNLOAD_CLEANED}          # Toggle notify on download cleaned
+      NOTIFIARR__API_KEY: ${NOTIFIARR__API_KEY}                                  # Notifiarr instance API key
+      NOTIFIARR__CHANNEL_ID: ${NOTIFIARR__CHANNEL_ID}                            # Discord notification channel ID
+
+    # Mount host directories into the container
+    volumes:
+      - ${CLEANUPERR_LOGS_PATH}:/var/logs        # Directory where log files will be saved
+      - ${CLEANUPERR_IGNORED_PATH}:/ignored.txt  # File containing ignored downloads
 
   #
   # Define the 'speedtest-tracker' service for tracking internet speeds
