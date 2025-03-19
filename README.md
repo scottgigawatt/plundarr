@@ -27,8 +27,8 @@ Plundarr be a collection of Docker Compose configurations to run a shipshape arr
 
 ## Hoist the Sails ⚓️
 
-> [!NOTE] 🏴‍☠️
-> Before settin' sail, copy the example `.env` scroll and tweak it to yer own pirate code.
+> [!NOTE]
+> 🏴‍☠️ Before settin' sail, copy the example `.env` scroll and tweak it to yer own pirate code.
 
 Manage Docker configuration environment variables in the [`.env`](./example.env) file. Override these variables easily on the command line when startin' the Docker Compose stack:
 
@@ -76,8 +76,8 @@ COMPOSE_NETWORK_GATEWAY="${COMPOSE_NETWORK_GATEWAY:-172.28.5.254}"
 
 ### ️Managing the Project with DSM Container Manager 📦
 
-> [!TIP] 🦜
-> If ye be usin' Synology DSM 7.2, the Container Manager Project feature be yer secret map to quicker plunderin'.
+> [!TIP]
+> 🦜 If ye be usin' Synology DSM 7.2, the Container Manager Project feature be yer secret map to quicker plunderin'.
 
 To bring this booty into DSM 7.2 Container Manager's Project feature, follow these steps, ye sea dogs:
 
@@ -92,8 +92,8 @@ Check out the official Synology documentation [here](https://kb.synology.com/en-
 
 ### Ensure Yer Tunnels Be Ready at Boot 🏴‍☠️⛏️
 
-> [!IMPORTANT] ⚓️
-> Without the `/dev/net/tun` device, yer VPN ship be sinkin’ at the docks! Make sure it be ready at boot, or face the kraken.
+> [!IMPORTANT]
+> ⚓️ Without the `/dev/net/tun` device, yer VPN ship be sinkin’ at the docks! Make sure it be ready at boot, or face the kraken.
 
 To make sure the `/dev/net/tun` device be present on Synology Disk Station for use with VPN applications like Gluetun, follow these steps, me hearties:
 
@@ -123,8 +123,8 @@ For more details, see the script here:
 
 ## Navigatin' Troubled Waters ‍️☠️🌊
 
-> [!WARNING] ☠️
-> These configs be as wordy as an old sea dog's yarn! Use the Makefile commands if ye prefer smooth sailin’ with fewer scrolls.
+> [!WARNING]
+> ☠️ These configs be as wordy as an old sea dog's yarn! Use the Makefile commands if ye prefer smooth sailin’ with fewer scrolls.
 
 The `plundarr` repo be providin' ye with tools t' view an' manage the environment an' Docker Compose configuration details. While the configuration files be heavily documented t' assist with understandin' an' customization, some o' ye may prefer t' see the uncommented versions fer simplicity.
 
@@ -166,8 +166,8 @@ Plundarr has been tested on Synology DS916+ running DSM 7.2.1-69057 Update 5. Bu
 
 ## Articles of Agreement ⚖️
 
-> [!CAUTION] 🏴‍☠️⚖️
-> Mind the legal seas! Ye must honor both the Apache 2 License and the MIT License, or be prepared to walk the plank.
+> [!CAUTION]
+> 🏴‍☠️⚖️ Mind the legal seas! Ye must honor both the Apache 2 License and the MIT License, or be prepared to walk the plank.
 
 This project be licensed under the Apache 2 License - see the [LICENSE](LICENSE) scroll for details.
 
