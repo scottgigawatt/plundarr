@@ -405,6 +405,13 @@ services:
       - ${CLEANUPERR_LOGS_PATH}:/var/logs        # Directory where log files will be saved
       - ${CLEANUPERR_IGNORED_PATH}:/ignored.txt  # File containing ignored downloads
 
+    # Specify container service dependencies
+    depends_on:
+      - gluetun
+      - sonarr
+      - radarr
+      - qbittorrent
+
   #
   # Define the 'speedtest-tracker' service for tracking internet speeds
   #
