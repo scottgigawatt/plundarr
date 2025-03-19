@@ -121,7 +121,7 @@ For more details, see the script here:
 
 - 📜 [View tun.sh](scripts/tun.sh)
 
-## Navigatin' Troubled Waters ‍️☠️🌊
+## Navigatin' Troubled Waters ☠️🌊
 
 > [!WARNING]
 > ☠️ These configs be as wordy as an old sea dog's yarn! Use the Makefile commands if ye prefer smooth sailin’ with fewer scrolls.
