@@ -59,7 +59,7 @@ DEPENDENCIES=docker docker-compose
 # time the target is called or required.
 #
 .PHONY: $(ALL) $(DOWN) $(CLEAN) $(BUILD_DEPENDS) $(BUILD) $(UP) $(START) $(TEST_VPN) \
-		$(LOGS) $(OPEN) $(HELP) $(RUN) $(CONFIG) $(ENV) $(RINT_CONFIG) $(PRINT_ENV)
+		$(LOGS) $(OPEN) $(HELP) $(RUN) $(CONFIG) $(ENV) $(PRINT_CONFIG) $(PRINT_ENV)
 
 #
 # $(ALL): Default makefile target. Builds and starts the service stack.
