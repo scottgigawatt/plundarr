@@ -128,11 +128,11 @@ For more details, see the script here:
 > [!WARNING]
 > ☠️ These configs be as wordy as an old sea dog's yarn! Use the Makefile commands if ye prefer smooth sailin’ with fewer scrolls.
 
-The `plundarr` repo be providin' ye with tools t' view an' manage the environment an' Docker Compose configuration details. While the configuration files be heavily documented t' assist with understandin' an' customization, some o' ye may prefer t' see the uncommented versions fer simplicity.
+The `Makefile` be yer trusty first mate fer handlin' this project with ease. It’s packed with handy commands to hoist the stack, drop anchor, check yer VPN, inspect yer environment, and more—all without divin' through long scrolls.
 
 ### Cap'n's Commands 🦜💀
 
-The included `Makefile` contains targets t' help ye navigate these treacherous waters. Usin' these commands will provide ye with a clearer view o' the environment an' configuration details without the additional comments. Set sail with confidence, ye scurvy dogs! 🏴‍☠️
+Run `make help` to see the full treasure map o' commands, and let automation be the wind in yer sails! 🏴‍☠️
 
 ```console
 ❯ make help

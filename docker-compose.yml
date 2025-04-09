@@ -352,6 +352,15 @@ services:
       QUEUECLEANER__STALLED_IGNORE_PRIVATE: ${QUEUECLEANER__STALLED_IGNORE_PRIVATE}                        # Toggle ignore stalled downloads from private trackers
       QUEUECLEANER__STALLED_DELETE_PRIVATE: ${QUEUECLEANER__STALLED_DELETE_PRIVATE}                        # Toggle delete stalled private downloads
 
+      # Cleanuperr queue cleaner slow download environment variables
+      QUEUECLEANER__SLOW_MAX_STRIKES: ${QUEUECLEANER__SLOW_MAX_STRIKES}                              # Number of strikes before removing a slow download
+      QUEUECLEANER__SLOW_RESET_STRIKES_ON_PROGRESS: ${QUEUECLEANER__SLOW_RESET_STRIKES_ON_PROGRESS}  # Toggle remove strikes if not slow anymore
+      QUEUECLEANER__SLOW_IGNORE_PRIVATE: ${QUEUECLEANER__SLOW_IGNORE_PRIVATE}                        # Toggle ignore slow downloads from private trackers
+      QUEUECLEANER__SLOW_DELETE_PRIVATE: ${QUEUECLEANER__SLOW_DELETE_PRIVATE}                        # Toggle remove slow downloads from private trackers
+      QUEUECLEANER__SLOW_MIN_SPEED: ${QUEUECLEANER__SLOW_MIN_SPEED}                                  # Minimum speed a download should have
+      QUEUECLEANER__SLOW_MAX_TIME: ${QUEUECLEANER__SLOW_MAX_TIME}                                    # Maximum hours a download should take to finish
+      QUEUECLEANER__SLOW_IGNORE_ABOVE_SIZE: ${QUEUECLEANER__SLOW_IGNORE_ABOVE_SIZE}                  # Ignore slow downloads above this size
+
       # Cleanuperr content blocker environment variables
       CONTENTBLOCKER__ENABLED: ${CONTENTBLOCKER__ENABLED}                                # Toggle content blocker functionality
       CONTENTBLOCKER__IGNORED_DOWNLOADS_PATH: ${CONTENTBLOCKER__IGNORED_DOWNLOADS_PATH}  # Local path to ignored downloads file
