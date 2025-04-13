@@ -1,4 +1,4 @@
-# ⚓️ plundarr Config Booty
+# ⚓️ Config Booty
 
 Ahoy, ye scurvy devils! Welcome to the **`config`** directory of the grand vessel _Plundarr_. This here be the treasure chest holdin' all the config maps for every fine piece of software in our Docker stack. Clone this repo, chart yer own configs, and set sail with ease — _no scallywag left behind_! 🏴‍☠️
 
