@@ -341,12 +341,16 @@ services:
       TRIGGERS__DOWNLOADCLEANER: ${TRIGGERS__DOWNLOADCLEANER}  # Cron schedule for the download cleaner job
 
       # Cleanuperr queue cleaner environment variables
-      QUEUECLEANER__ENABLED: ${QUEUECLEANER__ENABLED}                                                      # Toggle queue cleaning functionality
-      QUEUECLEANER__IGNORED_DOWNLOADS_PATH: ${QUEUECLEANER__IGNORED_DOWNLOADS_PATH}                        # Local path to ignored downloads file
-      QUEUECLEANER__RUNSEQUENTIALLY: ${QUEUECLEANER__RUNSEQUENTIALLY}                                      # Toggle queue cleaner run sequential vs parallel
-      QUEUECLEANER__IMPORT_FAILED_MAX_STRIKES: ${QUEUECLEANER__IMPORT_FAILED_MAX_STRIKES}                  # Number of strikes before removing a failed import
-      QUEUECLEANER__IMPORT_FAILED_IGNORE_PRIVATE: ${QUEUECLEANER__IMPORT_FAILED_IGNORE_PRIVATE}            # Toggle ignore failed imports from private trackers
-      QUEUECLEANER__IMPORT_FAILED_DELETE_PRIVATE: ${QUEUECLEANER__IMPORT_FAILED_DELETE_PRIVATE}            # Toggle delete failed imports from private trackers
+      QUEUECLEANER__ENABLED: ${QUEUECLEANER__ENABLED}                                # Toggle queue cleaning functionality
+      QUEUECLEANER__IGNORED_DOWNLOADS_PATH: ${QUEUECLEANER__IGNORED_DOWNLOADS_PATH}  # Local path to ignored downloads file
+      QUEUECLEANER__RUNSEQUENTIALLY: ${QUEUECLEANER__RUNSEQUENTIALLY}                # Toggle queue cleaner run sequential vs parallel
+
+      # Cleanuperr queue cleaner import failure environment variables
+      QUEUECLEANER__IMPORT_FAILED_MAX_STRIKES: ${QUEUECLEANER__IMPORT_FAILED_MAX_STRIKES}        # Number of strikes before removing a failed import
+      QUEUECLEANER__IMPORT_FAILED_IGNORE_PRIVATE: ${QUEUECLEANER__IMPORT_FAILED_IGNORE_PRIVATE}  # Toggle ignore failed imports from private trackers
+      QUEUECLEANER__IMPORT_FAILED_DELETE_PRIVATE: ${QUEUECLEANER__IMPORT_FAILED_DELETE_PRIVATE}  # Toggle delete failed imports from private trackers
+
+      # Cleanuperr queue cleaner stalled download environment variables
       QUEUECLEANER__STALLED_MAX_STRIKES: ${QUEUECLEANER__STALLED_MAX_STRIKES}                              # Number of strikes before removing a stalled download
       QUEUECLEANER__STALLED_RESET_STRIKES_ON_PROGRESS: ${QUEUECLEANER__STALLED_RESET_STRIKES_ON_PROGRESS}  # Toggle remove strikes if any progress is made
       QUEUECLEANER__STALLED_IGNORE_PRIVATE: ${QUEUECLEANER__STALLED_IGNORE_PRIVATE}                        # Toggle ignore stalled downloads from private trackers

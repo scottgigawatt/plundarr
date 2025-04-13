@@ -76,7 +76,7 @@ COMPOSE_NETWORK_IP_RANGE="${COMPOSE_NETWORK_IP_RANGE:-172.28.5.0/24}"
 COMPOSE_NETWORK_GATEWAY="${COMPOSE_NETWORK_GATEWAY:-172.28.5.254}"
 ```
 
-### ️Managing the Project with DSM Container Manager 📦
+### ️Commandin' the Fleet with DSM Container Helm 🏴‍☠️
 
 > [!TIP]
 > 🦜 If ye be usin' Synology DSM 7.2, the Container Manager Project feature be yer secret map to quicker plunderin'.
