@@ -140,7 +140,7 @@ Targets:
 
 Dig deeper in the Cap'n's Makefile:
 
-- 🧭️️ [Peruse the Buildin' Blueprint](./Makefile)
+- 🔎 [Scour the Buildin' Blueprint](./Makefile)
 
 ## Ship's Log 🏝️
 

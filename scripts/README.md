@@ -18,7 +18,7 @@ This script ensures the `/dev/net/tun` device exists on Synology Disk Station fo
 - Creates the `/dev/net/tun` device node with the correct permissions.
 - Loads the `tun` module if it is not already loaded.
 
-📜 [View the tun.sh script](./tun.sh)
+📜 [Spy the tun.sh Scroll](./tun.sh)
 
 > [!TIP]
 > 🛠️ Settin' this script to run at boot keeps yer VPN tunnels shipshape without manual riggin'.
@@ -66,7 +66,7 @@ This script ensures Entware is properly set up on boot, so all Entware tools are
 - Checks if the Entware profile is included in the global profile; adds it if missing.
 - Updates the Entware package list to ensure the latest packages are available.
 
-📜 [View the entware.sh script](./entware.sh)
+🦜 [Peruse the entware.sh Parchment](./entware.sh)
 
 > [!TIP]
 > ⚙️ Automatin' this task on boot ensures yer Entware toolkit is always ready when ye need it.
