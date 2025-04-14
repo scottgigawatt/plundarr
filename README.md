@@ -119,7 +119,7 @@ Check out the official Synology documentation [here](https://kb.synology.com/en-
 > - 🦜 [Peruse the tun.sh Parchment](scripts/tun.sh)
 > - 🗺️ [Chart the Boot-Up Course](scripts/README.md#-tunsh--forge-the-vpn-passage)
 
-### 🔍 Spyglass Check
+### Spyglass Check 🔎
 
 To confirm yer VPN sails be catchin' wind:
 
