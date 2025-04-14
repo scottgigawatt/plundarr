@@ -1,5 +1,7 @@
 🏴‍☠️ _Enjoyin' the spoils? Drop us a ⭐️ an' let the whole crew know about this fine treasure!_
 
+![Docker](https://img.shields.io/badge/docker-ready-blue?logo=docker) ![VPN](https://img.shields.io/badge/VPN-PIA%20%7C%20WireGuard-green?logo=protonvpn) ![License](https://img.shields.io/github/license/scottgigawatt/plundarr?color=blue)
+
 # Plundarr 🏴‍☠️
 
 Ahoy, mateys! Welcome to Plundarr, the ultimate Docker Compose setup for all ye media needs. Manage yer favorite 'arr' apps and PIA VPN connections with ease, all while sailin' the high seas of secure and automated media management. ⚓️
@@ -7,6 +9,20 @@ Ahoy, mateys! Welcome to Plundarr, the ultimate Docker Compose setup for all ye 
 ## Captain's Log 📜
 
 Plundarr be a collection of Docker Compose configurations to run a shipshape array of 'arr' tools like Sonarr, Radarr, and more, all securely navigated through Private Internet Access with WireGuard, managed by Gluetun. Avast, set sail on the digital seas with yer media ship well-equipped! 🏴‍☠️
+
+## ⚡️ Quick Start
+
+In a rush to set sail? Here's all ye need:
+
+```bash
+git clone --recurse-submodules git@github.com:scottgigawatt/plundarr.git
+cd plundarr
+cp example.env .env
+vim .env  # Adjust yer settings
+make up   # Hoist the stack!
+```
+
+Run `make help` to spy all the commands at yer disposal.
 
 ## Treasure Map 🗺️
 
@@ -103,16 +119,26 @@ Check out the official Synology documentation [here](https://kb.synology.com/en-
 > - 🦜 [Peruse the tun.sh Parchment](scripts/tun.sh)
 > - 🗺️ [Chart the Boot-Up Course](scripts/README.md#-tunsh--forge-the-vpn-passage)
 
+### 🔍 Spyglass Check
+
+To confirm yer VPN sails be catchin' wind:
+
+```bash
+make test-vpn
+```
+
+Ye should see an IP that ain’t from yer home port. If not, batten down and check yer `.env` scroll.
+
 ## Navigatin' Troubled Waters ☠️🌊
 
 > [!WARNING]
 > ☠️ These configs be as wordy as an old sea dog's yarn! Use the Makefile commands if ye prefer smooth sailin' with fewer scrolls.
 
-The `Makefile` be yer trusty first mate fer handlin' this project with ease. It's packed with handy commands to hoist the stack, drop anchor, check yer VPN, inspect yer environment, and more—all without divin' through long scrolls.
+The `Makefile` be yer trusty first mate fer handlin' this project with ease. It's packed with handy commands to hoist the stack, drop anchor, chart logs, test yer VPN tunnels, and swab the decks.
 
 ### Cap'n's Commands 🦜💀
 
-Run `make help` to see the full treasure map o' commands, and let automation be the wind in yer sails! 🏴‍☠️
+Run `make help` to spy the full treasure map of commands. Let automation be the wind in yer sails—don't get marooned in manual seas.
 
 ```console
 ❯ make help
@@ -144,7 +170,7 @@ Dig deeper in the Cap'n's Makefile:
 
 ## Ship's Log 🏝️
 
-Plundarr has been tested on Synology DS916+ running DSM 7.2.1-69057 Update 5. But fear not, me hearties! It should work on other lands as well.
+Plundarr has been tested on Synology DS1522+ and DS916+ runnin' DSM 7.2. But fear not, me hearties—this treasure ain't just fer Synology! She oughta run smooth on other shores like macOS, Linux, an' any land where Docker sails free.
 
 ## Articles of Agreement ⚖️
 
@@ -156,5 +182,17 @@ This project be licensed under the Apache 2 License - see the [LICENSE](LICENSE)
 The PIA manual connection scripts used in this repository be licensed under the [MIT license](https://choosealicense.com/licenses/mit/), buried [here](https://github.com/pia-foss/manual-connections/blob/master/LICENSE).
 
 ---
+
+```
+           |    |    |
+          )_)  )_)  )_)
+         )___))___))___)\
+        )____)____)_____)\\
+      _____|____|____|____\\\__
+-----\                   /-----
+  ^^^^^ ^^^^^^^^^^^^^^^^^^^^^
+    ^^^^      ^^^^     ^^^    ^^
+         The Pirate's Docker Fleet ☠️
+```
 
 Contribute or provide feedback to improve Plundarr. Arrr, happy sailing! 🏴‍☠️
