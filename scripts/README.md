@@ -33,8 +33,11 @@ To ensure ye script be running on boot, follow these steps, ye salty dogs:
 
 2. **Create a Task for `tun.sh`:**
 
+    Open Synology's Control Panel and follow these steps to run the script on boot:
+
+    - Go to **Task Scheduler** 🗓️.
     - Click **Create** -> **Triggered Task** -> **User-defined script** ✍️.
-    - Name the task, e.g., 'Create Tunnel' 🌉.
+    - Give the task a name, e.g., 'Create Tunnel' 🌉.
     - Set the user to `root` 🧙.
     - Set the event to **Boot-up** 🚀.
     - Check **Enabled** ✅.

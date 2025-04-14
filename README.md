@@ -1,4 +1,4 @@
-🏴‍☠️ _Enjoyin' the spoils? Drop us a ⭐️ an’ let the whole crew know about this fine treasure!_
+🏴‍☠️ _Enjoyin' the spoils? Drop us a ⭐️ an' let the whole crew know about this fine treasure!_
 
 # Plundarr 🏴‍☠️
 
@@ -43,11 +43,12 @@ cd plundarr
 cp example.env .env
 
 # Open .env file and adjust the values to yer requirements
+vim .env
 ```
 
 For more details, see the example env configuration here:
 
-- 📜️ [View example.env](./example.env)
+- 🏴‍☠️ [Peek at the Pirate's Env Code](./example.env)
 
 ### Setting Sail on the Docker Seas 🌊🐋
 
@@ -76,7 +77,7 @@ COMPOSE_NETWORK_IP_RANGE="${COMPOSE_NETWORK_IP_RANGE:-172.28.5.0/24}"
 COMPOSE_NETWORK_GATEWAY="${COMPOSE_NETWORK_GATEWAY:-172.28.5.254}"
 ```
 
-### ️Commandin' the Fleet with DSM Container Helm 🏴‍☠️
+### ️Commandin' the Fleet with DSM Container Manager 🏴‍☠️
 
 > [!TIP]
 > 🦜 If ye be usin' Synology DSM 7.2, the Container Manager Project feature be yer secret map to quicker plunderin'.
@@ -95,40 +96,19 @@ Check out the official Synology documentation [here](https://kb.synology.com/en-
 ### Ensure Yer Tunnels Be Ready at Boot 🏴‍☠️⛏️
 
 > [!IMPORTANT]
-> ⚓️ Without the `/dev/net/tun` device, yer VPN ship be sinkin’ at the docks! Make sure it be ready at boot, or face the kraken.
-
-To make sure the `/dev/net/tun` device be present on Synology Disk Station for use with VPN applications like Gluetun, follow these steps, me hearties:
-
-1. **Setup Task Scheduler on Synology NAS:**
-
-    Open Synology's Control Panel and follow these steps to run the script on boot:
-
-    - Go to **Task Scheduler** 🗓️.
-    - Click **Create** -> **Triggered Task** -> **User-defined script** ✍️.
-    - Give the task a name, e.g., 'Create Tunnel' 🌉.
-    - Set the user to `root` 🧙.
-    - Set the event to **Boot-up** 🚀.
-    - Check **Enabled** ✅.
-    - Under **Task Settings**, enter the following command under **Run command** 💻:
-
-      ```bash
-      bash /volume1/docker/plundarr/scripts/tun.sh
-      ```
-
-    - Click **OK** to save the task 💾.
-
-This ensures that the `/dev/net/tun` device be available whenever yer Synology NAS boots up, so ye can sail the seas with yer VPN secure and sound. Arrr! 🏴‍☠️
-
-For more details, see the script here:
-
-- 📜 [View tun.sh](scripts/tun.sh)
+> ⚓️ Without the `/dev/net/tun` device, yer VPN ship be sinkin' at the docks! Make sure it be ready at boot, or face the kraken.
+>
+> 🏴‍☠️ Fer makin' sure `/dev/net/tun` be ready when yer Synology be wakin' from slumber, chart a course to the `tun.sh` scroll in the scripts hold an' follow the setup guide thar.
+>
+> - 🦜 [Peruse the tun.sh Parchment](scripts/tun.sh)
+> - 🗺️ [Chart the Boot-Up Course](scripts/README.md#-tunsh--forge-the-vpn-passage)
 
 ## Navigatin' Troubled Waters ☠️🌊
 
 > [!WARNING]
-> ☠️ These configs be as wordy as an old sea dog's yarn! Use the Makefile commands if ye prefer smooth sailin’ with fewer scrolls.
+> ☠️ These configs be as wordy as an old sea dog's yarn! Use the Makefile commands if ye prefer smooth sailin' with fewer scrolls.
 
-The `Makefile` be yer trusty first mate fer handlin' this project with ease. It’s packed with handy commands to hoist the stack, drop anchor, check yer VPN, inspect yer environment, and more—all without divin' through long scrolls.
+The `Makefile` be yer trusty first mate fer handlin' this project with ease. It's packed with handy commands to hoist the stack, drop anchor, check yer VPN, inspect yer environment, and more—all without divin' through long scrolls.
 
 ### Cap'n's Commands 🦜💀
 
@@ -158,9 +138,9 @@ Targets:
   help            - Displays this help message.
 ```
 
-For more details, see the Makefile here:
+Dig deeper in the Cap'n's Makefile:
 
-- ⚙️️ [View Makefile](./Makefile)
+- 🧭️️ [Peruse the Buildin' Blueprint](./Makefile)
 
 ## Ship's Log 🏝️
 
