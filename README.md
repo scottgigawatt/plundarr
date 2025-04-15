@@ -1,6 +1,6 @@
 🏴‍☠️ _Enjoyin' the spoils? Drop us a ⭐️ an' let the whole crew know about this fine treasure!_
 
-![Container: Ahoy!](https://img.shields.io/badge/Container-Ahoy%21-blue?logo=docker) ![Shrouded](https://img.shields.io/badge/Shrouded-by%20PIA%20%26%20WireGuard-green?logo=protonvpn) ![Pirate Code](https://img.shields.io/github/license/scottgigawatt/privateerr?label=Pirate%20Code&color=blue) ![Last Plunder](https://img.shields.io/github/last-commit/scottgigawatt/privateerr?label=Last%20Plunder&logo=git) ![Cargo Hold](https://img.shields.io/github/repo-size/scottgigawatt/privateerr?label=Cargo%20Hold) ![Sea-Tested](https://img.shields.io/badge/Sea--Tested-Synology%20%7C%20macOS-blue) ![Rum Supply](https://img.shields.io/badge/Rum%20Supply-Full-orange)
+![Containers: Ahoy!](https://img.shields.io/badge/Containers-Ahoy%21-blue?logo=docker) ![Cloaked](https://img.shields.io/badge/Cloaked-by%20PIA%20%26%20WireGuard-green?logo=protonvpn) ![Pirate Code](https://img.shields.io/github/license/scottgigawatt/privateerr?label=Pirate%20Code&color=blue) ![Last Plunder](https://img.shields.io/github/last-commit/scottgigawatt/privateerr?label=Last%20Plunder&logo=git) ![Cargo Hold](https://img.shields.io/github/repo-size/scottgigawatt/privateerr?label=Cargo%20Hold) ![Sea-Tested](https://img.shields.io/badge/Sea--Tested-Synology%20%7C%20macOS-blue) ![Rum Supply](https://img.shields.io/badge/Rum%20Supply-Full-orange)
 
 # Plundarr 🏴‍☠️
 
