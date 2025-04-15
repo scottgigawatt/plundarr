@@ -22,7 +22,8 @@ vim .env  # Adjust yer settings
 make up   # Hoist the stack!
 ```
 
-Run `make help` to spy all the commands at yer disposal.
+> [!TIP]
+> Run `make help` to spy all the commands at yer disposal.
 
 ## Treasure Map 🗺️
 
