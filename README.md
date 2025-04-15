@@ -146,7 +146,7 @@ docker run --rm --network=container:gluetun-latest alpine:3.18 sh -c "apk add wg
 ## Navigatin' Troubled Waters ☠️🌊
 
 > [!TIP]
-> ☠️ These configs be as wordy as an old sea dog's yarn! Use the Makefile commands if ye prefer smooth sailin' with fewer scrolls.
+> ️🧭🗺️ These configs be as wordy as an old sea dog's yarn! Use the Makefile commands if ye prefer less squawkin' 🦜 and cleaner decks 🧹.
 
 The `Makefile` be yer trusty first mate fer handlin' this project with ease. It's packed with handy commands to hoist the stack, drop anchor, chart logs, test yer VPN tunnels, and swab the decks.
 
@@ -198,15 +198,17 @@ The PIA manual connection scripts used in this repository be licensed under the 
 ---
 
 ```
-           |    |    |
-          )_)  )_)  )_)
-         )___))___))___)\
-        )____)____)_____)\\
-      _____|____|____|____\\\__
------\                   /-----
-  ^^^^^ ^^^^^^^^^^^^^^^^^^^^^
-    ^^^^      ^^^^     ^^^    ^^
-     The Plunderer's Docker Fleet ☠️⚔️🏴‍☠️
+               |    |    |
+              )_)  )_)  )_)
+             )___))___))___)\
+            )____)____)_____)\\
+         _____|____|____|____\\\__
+  ~~ ~~  \_______________________/  ~~ ~~
+  ~  ~   ~~~ ~~~~~ ~~~~~ ~~~ ~~~   ~  ~~
+      ~   ~   ~  ~~~  ~~~~ ~  ~~   ~ ~
+
+       🏴‍☠️  The Plunderer's Docker Fleet ☠️⚓️
+       "Code ho! Containers below deck!"
 ```
 
 Contribute or provide feedback to improve Plundarr. Arrr, happy sailing! 🏴‍☠️
