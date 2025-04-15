@@ -23,7 +23,7 @@ make up   # Hoist the stack!
 ```
 
 > [!TIP]
-> Run `make help` to spy all the commands at yer disposal.
+> Run `make help` to spy 🔎 all the commands at yer disposal.
 
 ## Treasure Map 🗺️
 
@@ -97,7 +97,7 @@ COMPOSE_NETWORK_GATEWAY="${COMPOSE_NETWORK_GATEWAY:-172.28.5.254}"
 ### ️Commandin' the Fleet with DSM Container Manager 🏴‍☠️
 
 > [!TIP]
-> 🦜 If ye be usin' Synology DSM 7.2, the Container Manager Project feature be yer secret map to quicker plunderin'.
+> 🦜 If ye be usin' Synology DSM 7.2, Container Manager Projects be yer secret map to quicker plunderin'.
 
 To bring this booty into DSM 7.2 Container Manager's Project feature, follow these steps, ye sea dogs:
 
@@ -120,19 +120,32 @@ Check out the official Synology documentation [here](https://kb.synology.com/en-
 > - 🦜 [Peruse the tun.sh Parchment](scripts/tun.sh)
 > - 🗺️ [Chart the Boot-Up Course](scripts/README.md#-tunsh--forge-the-vpn-passage)
 
-### Spyglass Check 🔎
+### 🔎 Spyglass Check
 
 To confirm yer VPN sails be catchin' wind:
 
 ```bash
-make test-vpn
+❯ make test-vpn
+docker run --rm --network=container:gluetun-latest alpine:3.18 sh -c "apk add wget && wget -qO- https://ipinfo.io"
+{
+  "ip": "xxx.xxx.xxx.xxx",
+  "city": "City",
+  "region": "Region",
+  "country": "Country",
+  "loc": "xx.xxxx,yy.yyyy",
+  "org": "Organization",
+  "postal": "ABC",
+  "timezone": "Time/Zone",
+  "readme": "https://ipinfo.io/missingauth"
+}
 ```
 
-Ye should see an IP that ain’t from yer home port. If not, batten down and check yer `.env` scroll.
+> [!CAUTION]
+> ⚠️☠️ Ye should see an IP that ain't from yer home port. If not, batten down and check yer `.env` scroll.
 
 ## Navigatin' Troubled Waters ☠️🌊
 
-> [!WARNING]
+> [!TIP]
 > ☠️ These configs be as wordy as an old sea dog's yarn! Use the Makefile commands if ye prefer smooth sailin' with fewer scrolls.
 
 The `Makefile` be yer trusty first mate fer handlin' this project with ease. It's packed with handy commands to hoist the stack, drop anchor, chart logs, test yer VPN tunnels, and swab the decks.
@@ -175,7 +188,7 @@ Plundarr has been tested on Synology DS1522+ and DS916+ runnin' DSM 7.2. But fea
 
 ## Articles of Agreement ⚖️
 
-> [!CAUTION]
+> [!WARNING]
 > 🏴‍☠️⚖️ Mind the legal seas! Ye must honor both the Apache 2 License and the MIT License, or be prepared to walk the plank.
 
 This project be licensed under the Apache 2 License - see the [LICENSE](LICENSE) scroll for details.
