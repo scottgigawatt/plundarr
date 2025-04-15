@@ -193,7 +193,7 @@ The PIA manual connection scripts used in this repository be licensed under the 
 -----\                   /-----
   ^^^^^ ^^^^^^^^^^^^^^^^^^^^^
     ^^^^      ^^^^     ^^^    ^^
-         The Pirate's Docker Fleet ☠️
+     The Plunderer's Docker Fleet ☠️⚔️🏴‍☠️
 ```
 
 Contribute or provide feedback to improve Plundarr. Arrr, happy sailing! 🏴‍☠️
