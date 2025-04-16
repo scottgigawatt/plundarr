@@ -87,7 +87,7 @@ services:
     container_name: privateerr-${PRIVATEERR_TAG}         # Append Docker image tag to container name
     restart: "no"                                        # Do not restart the container once it exits
     hostname: privateerr                                 # Set the container hostname
-    privileged: true                                     # Run in privileged mode
+    privileged: true                                     # Run with full host privileges
 
     # Add container labels
     labels:
@@ -119,10 +119,12 @@ services:
     image: qmcgaw/gluetun:${GLUETUN_TAG}    # Run using the specified tag
     container_name: gluetun-${GLUETUN_TAG}  # Append Docker image tag to container name
     hostname: gluetun                       # Set the container hostname
-    cap_add:                                # Add additional linux capabilities
-      - NET_ADMIN                           # Allow modification of network interfaces
 
-    # Add container devices
+    # Add additional linux capabilities
+    cap_add:
+      - NET_ADMIN  # Grant network admin capability for VPN and network interface configuration
+
+    # Pass host devices into the container for direct hardware access
     devices:
       - /dev/net/tun:/dev/net/tun  # Allow container to handle encrypted VPN traffic directly
 
