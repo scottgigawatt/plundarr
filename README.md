@@ -8,7 +8,7 @@ Ahoy, mateys! Welcome to Plundarr, the ultimate Docker Compose setup for all ye 
 
 ## Captain's Log 📜
 
-Plundarr be a collection of Docker Compose configurations to run a shipshape array of 'arr' tools like Sonarr, Radarr, and more, all securely navigated through Private Internet Access with WireGuard, managed by Gluetun. Avast, set sail on the digital seas with yer media ship well-equipped! 🏴‍☠️
+Plundarr be a collection of Docker Compose configurations to run a shipshape array of 'arr' tools like Sonarr, Radarr, and more, all securely navigated through Private Internet Access with WireGuard, managed by Gluetun. Avast, set sail on the digital seas with yer med on a deserted isle! 🏝️
 
 ## ⚡️ Quick Start
 
@@ -67,48 +67,19 @@ For more details, see the example env configuration here:
 
 - 🏴‍☠️ [Peek at the Pirate's Env Code](./example.env)
 
-### Setting Sail on the Docker Seas 🌊🐋
+### 📜 Important Setup Scroll! ☠️
 
-See the Docker Compose [IPAM](https://docs.docker.com/compose/compose-file/06-networks/#ipam) documentation fer more information on configurin' the followin' [IP address information](https://github.com/scottgigawatt/plundarr/blob/main/example.env#L9-L11) fer the compose stack. Ye can plunder the example config straight from the Docker Compose scrolls!
+> [!IMPORTANT]
+> ⚓️ Before hoistin' the sails, make sure to scour the [Docker Project Setup](./SETUP.md) scroll! It charts the course fer proper Docker networkin', Synology tweaks, firewall rules, and launchin' with Container Manager. Missin' these steps might leave yer ship dead in the water!
 
-```bash
-#
-# Chart the usable IP waters for this here subnet: 172.28.0.1 - 172.28.255.254
-# Total number of scallywag hosts: 65,536
-# Number of seaworthy hosts: 65,534
-# Subnet mask (or should I say, pirate's mask): 255.255.0.0
-#
-COMPOSE_NETWORK_SUBNET="${COMPOSE_NETWORK_SUBNET:-172.28.0.0/16}"
+The [Docker Project Setup](./SETUP.md) parchment covers:
 
-#
-# Plot the IP course for the containers: 172.28.5.1 - 172.28.5.254
-# Total number of seadogs: 256
-# Number of usable scurvy dogs: 254
-# Subnet mask: 255.255.255.0 (aye, the smallest o' the masks)
-#
-COMPOSE_NETWORK_IP_RANGE="${COMPOSE_NETWORK_IP_RANGE:-172.28.5.0/24}"
+- 🌍🔧 [Configuring Docker Networking](./SETUP.md#chartin-the-docker-network-waters-)
+- 🖥️🔧 [Synology Configuration](./SETUP.md#batten-down-the-hatches-️)
+  - 🔥🛡️ [Updating Firewall Settings](./SETUP.md#guardin-the-ship-️)
+  - 📦🚀 [Deploying With Container Manager](./SETUP.md#launchin-yer-fleet-)
 
-#
-# Set sail with the network gateway at the last IP address, the final port o' call
-#
-COMPOSE_NETWORK_GATEWAY="${COMPOSE_NETWORK_GATEWAY:-172.28.5.254}"
-```
-
-### ️Commandin' the Fleet with DSM Container Manager 🏴‍☠️
-
-> [!TIP]
-> 🦜 If ye be usin' Synology DSM 7.2, Container Manager Projects be yer secret map to quicker plunderin'.
-
-To bring this booty into DSM 7.2 Container Manager's Project feature, follow these steps, ye sea dogs:
-
-1. SSH into yer Synology system.
-2. Recursively clone this repository with submodules, e.g., to `/volume1/docker/plundarr`.
-3. In Container Manager, click **Project** then **Create**.
-4. Provide a title, e.g., **plundarr**.
-5. Set the path to the cloned repository.
-6. Navigate through the UI prompts t' finish creatin' the project.
-
-Check out the official Synology documentation [here](https://kb.synology.com/en-id/DSM/help/ContainerManager/docker_project?version=7) fer more on Container Manager Projects. Yo ho ho!
+Mind these steps, lest ye be marooned on a deserted isle! 🏝️
 
 ### Ensure Yer Tunnels Be Ready at Boot 🏴‍☠️⛏️
 
@@ -128,15 +99,15 @@ To confirm yer VPN sails be catchin' wind:
 ❯ make test-vpn
 docker run --rm --network=container:gluetun-latest alpine:3.18 sh -c "apk add wget && wget -qO- https://ipinfo.io"
 {
-  "ip": "xxx.xxx.xxx.xxx",
-  "city": "City",
-  "region": "Region",
-  "country": "Country",
-  "loc": "xx.xxxx,yy.yyyy",
-  "org": "Organization",
-  "postal": "ABC",
-  "timezone": "Time/Zone",
-  "readme": "https://ipinfo.io/missingauth"
+  "ip": "172.16.0.42",
+  "city": "Tortuga",
+  "region": "Caribbean",
+  "country": "High Seas",
+  "loc": "13.4443,-144.7937",
+  "org": "Black Pearl Privateers",
+  "postal": "ARR123",
+  "timezone": "Rum/Somewhere",
+  "readme": "https://ipinfo.io/blackpearl"
 }
 ```
 
