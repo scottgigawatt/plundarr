@@ -162,7 +162,7 @@ Plundarr has been tested on Synology DS1522+ and DS916+ runnin' DSM 7.2. But fea
 > [!WARNING]
 > 🏴‍☠️⚖️ Mind the legal seas! Ye must honor both the Apache 2 License and the MIT License, or be prepared to walk the plank.
 
-This project be licensed under the Apache 2 License - see the [LICENSE](LICENSE) scroll for details.
+This project be licensed under the Apache 2 License—see the [LICENSE](LICENSE) scroll for details.
 
 The PIA manual connection scripts used in this repository be licensed under the [MIT license](https://choosealicense.com/licenses/mit/), buried [here](https://github.com/pia-foss/manual-connections/blob/master/LICENSE).
 
