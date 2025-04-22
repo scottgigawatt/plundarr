@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Containers-Ahoy%21-blue?logo=docker" alt="Containers: Ahoy!" />
+  <img src="https://img.shields.io/badge/Containers-Ahoy%21-blue?logo=docker" alt="Containers Ahoy" />
   <img src="https://img.shields.io/badge/Cloaked-by%20PIA%20%26%20WireGuard-green?logo=protonvpn" alt="Cloaked" />
   <img src="https://img.shields.io/github/license/scottgigawatt/privateerr?label=Pirate%20Code&color=blue" alt="Pirate Code" />
   <img src="https://img.shields.io/github/last-commit/scottgigawatt/privateerr?label=Last%20Plunder&logo=git" alt="Last Plunder" />
