@@ -1,4 +1,4 @@
----
+<hr />
 
 <p align="center">
   <em>🏴‍☠️ Enjoyin' the spoils? Drop us a ⭐️ an' let the whole crew know about this fine treasure!</em>
@@ -14,7 +14,7 @@
   <img src="https://img.shields.io/badge/Rum%20Supply-Full-orange" alt="Rum Supply" />
 </p>
 
----
+<hr />
 
 # Plundarr 🏴‍☠️
 
