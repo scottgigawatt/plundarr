@@ -31,16 +31,22 @@
 version: "2.9"
 
 #
+# Setup base properties for all or most containers
+#
+x-base-container: &base-container  # YAML anchor for base container
+  pull_policy: always              # Ensure that the image is always pulled
+  logging:                         # Configure container logging options
+    driver: "json-file"            # Use JSON file logging driver
+    options:
+      max-size: ${LOG_MAX_SIZE}    # Maximum file size for logs files
+      max-file: ${LOG_MAX_FILE}    # Maximum number of log files to retain
+
+#
 # Setup default properties for all or most containers
 #
 x-default-container: &default-container  # YAML anchor for default container
-  pull_policy: always                    # Ensure that the image is always pulled
+  <<: *base-container                    # Pull in the base container information
   restart: unless-stopped                # Restart the container unless explicitly stopped
-  logging:                               # Configure container logging options
-    driver: "json-file"                  # Use JSON file logging driver
-    options:
-      max-size: ${LOG_MAX_SIZE}          # Maximum file size for logs files
-      max-file: ${LOG_MAX_FILE}          # Maximum number of log files to retain
 
 #
 # Setup default variables for all or most containers
@@ -75,6 +81,7 @@ services:
   #
   privateerr:
     # Docker image build and container information
+    <<: *base-container                           # Pull in base container config (with no restart policy)
     image: ${PRIVATEERR_IMAGE}:${PRIVATEERR_TAG}  # Pull image (use docker-compose.build.yml for local build override)
     container_name: privateerr-${PRIVATEERR_TAG}  # Append Docker image tag to container name
     restart: "no"                                 # Do not restart the container once it exits
