@@ -75,23 +75,15 @@ services:
   #
   privateerr:
     # Docker image build and container information
-    image: ${PRIVATEERR_IMAGE}:${PRIVATEERR_TAG}         # Set build image name and tag
-    build:                                               # Build to install required packages
-      context: config/privateerr/docker                  # Docker build context
-      dockerfile: Dockerfile                             # Dockerfile to use for the build
-      args:                                              # Build arguments passed to Dockerfile
-        PRIVATEERR_BASE_IMAGE: ${PRIVATEERR_BASE_IMAGE}  # Specify build argument for FROM base image
-        PRIVATEERR_BASE_TAG: ${PRIVATEERR_BASE_TAG}      # Specify build argument for FROM base image tag
-        TZ: ${TZ}                                        # Specify build argument for time zone
-        PIA_APP_HOME: ${PIA_APP_HOME}                    # Specify build argument for PIA scripts path
-    container_name: privateerr-${PRIVATEERR_TAG}         # Append Docker image tag to container name
-    restart: "no"                                        # Do not restart the container once it exits
-    hostname: privateerr                                 # Set the container hostname
-    privileged: true                                     # Run with full host privileges
+    image: ${PRIVATEERR_IMAGE}:${PRIVATEERR_TAG}  # Pull image (use docker-compose.build.yml for local build override)
+    container_name: privateerr-${PRIVATEERR_TAG}  # Append Docker image tag to container name
+    restart: "no"                                 # Do not restart the container once it exits
+    hostname: privateerr                          # Set the container hostname
+    privileged: true                              # Run with full host privileges
 
     # Add container labels
     labels:
-      - "com.centurylinklabs.watchtower.enable=false"  # Exclude local init container from Watchtower
+      - "com.centurylinklabs.watchtower.enable=false"  # Exclude init container from Watchtower
 
     # Define the container environment
     environment:

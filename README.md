@@ -125,8 +125,21 @@ docker run --rm --network=container:gluetun-latest alpine:3.18 sh -c "apk add wg
 }
 ```
 
-> [!CAUTION]
+> [!WARNING]
 > ⚠️☠️ Ye should see an IP that ain't from yer home port. If not, batten down and check yer `.env` scroll.
+
+> [!NOTE]
+> 🏴‍☠️ The `privateerr` image be used to generate the sacred PIA WireGuard config scroll that powers yer Gluetun VPN sails. By default, Plundarr pulls this image straight from GitHub Container Registry (GHCR), no buildin' required.
+>
+> But if the winds be against ye—or ye fancy testin' custom changes—ye can chart a local build instead using the `docker-compose.build.yml` override scroll.
+>
+> To build `privateerr` locally:
+>
+> ```bash
+> docker-compose -f docker-compose.yml -f docker-compose.build.yml up --build
+> ```
+>
+> This override be swappin' the pull fer a local build usin' yer own Dockerfile and variables from the `.env` scroll. Use it when the registry be unreachable or ye need to tinker with the hull below deck.
 
 ## Navigatin' Troubled Waters ☠️🌊
 
@@ -173,7 +186,7 @@ Plundarr has been tested on Synology DS1522+ and DS916+ runnin' DSM 7.2. But fea
 
 ## Articles of Agreement ⚖️
 
-> [!WARNING]
+> [!CAUTION]
 > 🏴‍☠️⚖️ Mind the legal seas! Ye must honor both the Apache 2 License and the MIT License, or be prepared to walk the plank.
 
 This project be licensed under the Apache 2 License—see the [LICENSE](LICENSE) scroll for details.

@@ -1,0 +1,34 @@
+---
+#
+# docker-compose.build.yml: Optional override Compose file for local builds.
+#
+# This file defines an alternate configuration for the `privateerr` service.
+# Instead of pulling the pre-built image from GitHub Container Registry,
+# this configuration builds the container locally from source using the
+# provided Dockerfile and build arguments.
+#
+# Use this file when testing local changes or if the image is unavailable from GHCR.
+#
+# To activate:
+#   docker-compose -f docker-compose.yml -f docker-compose.build.yml up --build
+#
+# Service included:
+# - privateerr: https://github.com/scottgigawatt/privateerr
+#
+
+#
+# Define the services section
+#
+services:
+  #
+  # Define the 'privateerr' service as a local build override for use when image cannot be pulled from GHCR
+  #
+  privateerr:
+    build:                                               # Build to install required packages
+      context: config/privateerr/docker                  # Docker build context
+      dockerfile: Dockerfile                             # Dockerfile to use for the build
+      args:                                              # Build arguments passed to Dockerfile
+        PRIVATEERR_BASE_IMAGE: ${PRIVATEERR_BASE_IMAGE}  # Specify build argument for FROM base image
+        PRIVATEERR_BASE_TAG: ${PRIVATEERR_BASE_TAG}      # Specify build argument for FROM base image tag
+        TZ: ${TZ}                                        # Specify build argument for time zone
+        PIA_APP_HOME: ${PIA_APP_HOME}                    # Specify build argument for PIA scripts path
