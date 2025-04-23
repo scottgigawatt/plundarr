@@ -22,7 +22,7 @@ Ahoy, mateys! Welcome to Plundarr, the ultimate Docker Compose setup for all ye 
 
 ## Captain's Log 📜
 
-Plundarr be a collection of Docker Compose configurations to run a shipshape array of 'arr' tools like Sonarr, Radarr, and more, all securely navigated through Private Internet Access with WireGuard, managed by Gluetun. Avast, set sail on the digital seas with yer med on a deserted isle! 🏝️
+Plundarr be a collection of Docker Compose configurations to run a shipshape array of 'arr' tools like Sonarr, Radarr, and more, all securely navigated through Private Internet Access with WireGuard, managed by Gluetun. Avast, set sail on the digital seas with yer media safe from pryin' eyes—tucked away like treasure on a deserted isle! 🏝️
 
 ## ⚡️ Quick Start
 
