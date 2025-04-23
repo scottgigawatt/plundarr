@@ -136,7 +136,7 @@ docker run --rm --network=container:gluetun-latest alpine:3.18 sh -c "apk add wg
 > To build `privateerr` locally:
 >
 > ```bash
-> make build-up
+> make build
 > ```
 >
 > This override be swappin' the pull fer a local build usin' yer own Dockerfile and variables from the `.env` scroll. Use it when the registry be unreachable or ye need to tinker with the hull below deck.
@@ -162,8 +162,9 @@ Targets:
   stop            - Stops running containers without removing them.
   down            - Stops and removes containers.
   clean           - Stops and removes containers, networks, volumes, and images.
+  build           - Builds a local image of the privateerr service for use when it cannot be pulled from GHCR.
   up              - (Re)creates and starts containers for services.
-  build-up        - Builds, (re)creates, and starts containers for services.
+  build-up        - Alias for build, up.
   start           - Starts existing containers for a service.
   test-vpn        - Obtain the VPN IP address and ensure the connection is working.
   config          - Renders the actual data model to be applied on the Docker Engine.

@@ -12,6 +12,7 @@ STOP=stop
 DOWN=down
 CLEAN=clean
 BUILD_DEPENDS=build-depends
+BUILD=build
 UP=up
 BUILD_UP=build-up
 START=start
@@ -60,7 +61,7 @@ DEPENDENCIES=docker docker-compose
 # Targets that are not files (i.e. never up-to-date); these will run every
 # time the target is called or required.
 #
-.PHONY: $(ALL) $(DOWN) $(CLEAN) $(BUILD_DEPENDS) $(BUILD) $(UP) $(START) $(TEST_VPN) \
+.PHONY: $(ALL) $(DOWN) $(CLEAN) $(BUILD_DEPENDS) $(BUILD) $(UP) $(BUILD_UP) $(START) $(TEST_VPN) \
 		$(LOGS) $(OPEN) $(HELP) $(RUN) $(CONFIG) $(ENV) $(PRINT_CONFIG) $(PRINT_ENV)
 
 #
@@ -100,6 +101,13 @@ $(CLEAN): $(BUILD_DEPENDS)
 	docker images -q "$(DOCKER_VPN_TEST_IMAGE)" | xargs -r docker rmi -f || true
 
 #
+# $(BUILD): Builds a local image of the privateerr service for use when it cannot be pulled from GHCR.
+#
+$(BUILD): $(BUILD_DEPENDS)
+	@echo "\nBuilding local image for compose service: $(COMPOSE_PRIVATEERR_SERVICE)"
+	docker-compose -f $(COMPOSE_FILE) -f $(COMPOSE_BUILD_FILE) build $(COMPOSE_BUILD_OPTIONS) $(COMPOSE_PRIVATEERR_SERVICE)
+
+#
 # $(UP): (Re)creates and starts containers for services.
 #
 $(UP): $(BUILD_DEPENDS)
@@ -107,14 +115,10 @@ $(UP): $(BUILD_DEPENDS)
 	docker-compose -f $(COMPOSE_FILE) up $(COMPOSE_UP_OPTIONS)
 
 #
-# $(BUILD_UP): Builds, (re)creates, and starts containers for services.
+# $(BUILD_UP): Alias for build, up.
 #
-$(BUILD_UP): $(BUILD_DEPENDS)
-	@echo "\nBuilding local image for compose service: $(COMPOSE_PRIVATEERR_SERVICE)"
-	docker-compose -f $(COMPOSE_FILE) -f $(COMPOSE_BUILD_FILE) build $(COMPOSE_BUILD_OPTIONS) $(COMPOSE_PRIVATEERR_SERVICE)
-
-	@echo "\nStarting compose services"
-	docker-compose -f $(COMPOSE_FILE) -f $(COMPOSE_BUILD_FILE) up $(COMPOSE_UP_OPTIONS)
+$(BUILD_UP): $(BUILD)
+	@$(MAKE) $(UP)
 
 #
 # $(START): Starts existing containers for a service.
@@ -207,8 +211,9 @@ $(HELP):
 	@echo "  $(STOP)            - Stops running containers without removing them."
 	@echo "  $(DOWN)            - Stops and removes containers."
 	@echo "  $(CLEAN)           - Stops and removes containers, networks, volumes, and images."
+	@echo "  $(BUILD)           - Builds a local image of the privateerr service for use when it cannot be pulled from GHCR."
 	@echo "  $(UP)              - (Re)creates and starts containers for services."
-	@echo "  $(BUILD_UP)        - Builds, (re)creates, and starts containers for services."
+	@echo "  $(BUILD_UP)        - Alias for $(BUILD), $(UP)."
 	@echo "  $(START)           - Starts existing containers for a service."
 	@echo "  $(TEST_VPN)        - Obtain the VPN IP address and ensure the connection is working."
 	@echo "  $(CONFIG)          - Renders the actual data model to be applied on the Docker Engine."
