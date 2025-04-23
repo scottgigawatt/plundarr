@@ -131,12 +131,12 @@ docker run --rm --network=container:gluetun-latest alpine:3.18 sh -c "apk add wg
 > [!NOTE]
 > 🏴‍☠️ The `privateerr` image be used to generate the sacred PIA WireGuard config scroll that powers yer Gluetun VPN sails. By default, Plundarr pulls this image straight from GitHub Container Registry (GHCR), no buildin' required.
 >
-> But if the winds be against ye—or ye fancy testin' custom changes—ye can chart a local build instead using the `docker-compose.build.yml` override scroll.
+> But if the winds be against ye—or ye fancy testin' custom changes—ye can chart a local build instead using the [`docker-compose.build.yml`](./docker-compose.build.yml) override scroll.
 >
 > To build `privateerr` locally:
 >
 > ```bash
-> docker-compose -f docker-compose.yml -f docker-compose.build.yml up --build
+> make build-up
 > ```
 >
 > This override be swappin' the pull fer a local build usin' yer own Dockerfile and variables from the `.env` scroll. Use it when the registry be unreachable or ye need to tinker with the hull below deck.
@@ -162,8 +162,8 @@ Targets:
   stop            - Stops running containers without removing them.
   down            - Stops and removes containers.
   clean           - Stops and removes containers, networks, volumes, and images.
-  build           - Builds the service stack.
-  up              - Builds, (re)creates, and starts containers for services.
+  up              - (Re)creates and starts containers for services.
+  build-up        - Builds, (re)creates, and starts containers for services.
   start           - Starts existing containers for a service.
   test-vpn        - Obtain the VPN IP address and ensure the connection is working.
   config          - Renders the actual data model to be applied on the Docker Engine.

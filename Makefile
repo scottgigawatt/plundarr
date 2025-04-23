@@ -12,8 +12,8 @@ STOP=stop
 DOWN=down
 CLEAN=clean
 BUILD_DEPENDS=build-depends
-BUILD=build
 UP=up
+BUILD_UP=build-up
 START=start
 TEST_VPN=test-vpn
 CONFIG=config
@@ -28,19 +28,21 @@ RUN=run
 #
 # Docker Compose options
 #
-COMPOSE_FILE              ?= docker-compose.yml
-COMPOSE_ENV_FILE          ?= example.env
-COMPOSE_GLUETUN_SERVICE   ?= gluetun
-COMPOSE_DUPLICATI_SERVICE ?= duplicati
-COMPOSE_OVERSEERR_SERVICE ?= overseerr
-COMPOSE_HOMEPAGE_SERVICE  ?= homepage
-COMPOSE_TIMEOUT           ?= 30
-COMPOSE_STOP_OPTIONS      ?= --timeout $(COMPOSE_TIMEOUT)
-COMPOSE_DOWN_OPTIONS      ?= --timeout $(COMPOSE_TIMEOUT)
-COMPOSE_CLEAN_OPTIONS     ?= --timeout $(COMPOSE_TIMEOUT) --rmi all --volumes
-COMPOSE_BUILD_OPTIONS     ?= --pull --no-cache
-COMPOSE_UP_OPTIONS        ?= --build --force-recreate --pull always --detach
-COMPOSE_LOGS_OPTIONS      ?= --follow
+COMPOSE_FILE               ?= docker-compose.yml
+COMPOSE_BUILD_FILE         ?= docker-compose.build.yml
+COMPOSE_ENV_FILE           ?= example.env
+COMPOSE_PRIVATEERR_SERVICE ?= privateerr
+COMPOSE_GLUETUN_SERVICE    ?= gluetun
+COMPOSE_DUPLICATI_SERVICE  ?= duplicati
+COMPOSE_OVERSEERR_SERVICE  ?= overseerr
+COMPOSE_HOMEPAGE_SERVICE   ?= homepage
+COMPOSE_TIMEOUT            ?= 30
+COMPOSE_STOP_OPTIONS       ?= --timeout $(COMPOSE_TIMEOUT)
+COMPOSE_DOWN_OPTIONS       ?= --timeout $(COMPOSE_TIMEOUT)
+COMPOSE_CLEAN_OPTIONS      ?= --timeout $(COMPOSE_TIMEOUT) --rmi all --volumes
+COMPOSE_BUILD_OPTIONS      ?= --pull --no-cache
+COMPOSE_UP_OPTIONS         ?= --force-recreate --pull always --detach
+COMPOSE_LOGS_OPTIONS       ?= --follow
 
 #
 # Testing options
@@ -98,18 +100,21 @@ $(CLEAN): $(BUILD_DEPENDS)
 	docker images -q "$(DOCKER_VPN_TEST_IMAGE)" | xargs -r docker rmi -f || true
 
 #
-# $(BUILD): Builds the service stack.
-#
-$(BUILD): $(BUILD_DEPENDS)
-	@echo "\nBuilding compose services"
-	docker-compose build $(COMPOSE_BUILD_OPTIONS)
-
-#
-# $(UP): Builds, (re)creates, and starts containers for services.
+# $(UP): (Re)creates and starts containers for services.
 #
 $(UP): $(BUILD_DEPENDS)
-	@echo "\nBuilding and starting compose services"
-	docker-compose up $(COMPOSE_UP_OPTIONS)
+	@echo "\nStarting compose services"
+	docker-compose -f $(COMPOSE_FILE) up $(COMPOSE_UP_OPTIONS)
+
+#
+# $(BUILD_UP): Builds, (re)creates, and starts containers for services.
+#
+$(BUILD_UP): $(BUILD_DEPENDS)
+	@echo "\nBuilding local image for compose service: $(COMPOSE_PRIVATEERR_SERVICE)"
+	docker-compose -f $(COMPOSE_FILE) -f $(COMPOSE_BUILD_FILE) build $(COMPOSE_BUILD_OPTIONS) $(COMPOSE_PRIVATEERR_SERVICE)
+
+	@echo "\nStarting compose services"
+	docker-compose -f $(COMPOSE_FILE) -f $(COMPOSE_BUILD_FILE) up $(COMPOSE_UP_OPTIONS)
 
 #
 # $(START): Starts existing containers for a service.
@@ -202,8 +207,8 @@ $(HELP):
 	@echo "  $(STOP)            - Stops running containers without removing them."
 	@echo "  $(DOWN)            - Stops and removes containers."
 	@echo "  $(CLEAN)           - Stops and removes containers, networks, volumes, and images."
-	@echo "  $(BUILD)           - Builds the service stack."
-	@echo "  $(UP)              - Builds, (re)creates, and starts containers for services."
+	@echo "  $(UP)              - (Re)creates and starts containers for services."
+	@echo "  $(BUILD_UP)        - Builds, (re)creates, and starts containers for services."
 	@echo "  $(START)           - Starts existing containers for a service."
 	@echo "  $(TEST_VPN)        - Obtain the VPN IP address and ensure the connection is working."
 	@echo "  $(CONFIG)          - Renders the actual data model to be applied on the Docker Engine."
