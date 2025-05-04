@@ -347,18 +347,19 @@ services:
       QUEUECLEANER__RUNSEQUENTIALLY: ${QUEUECLEANER__RUNSEQUENTIALLY}                # Toggle queue cleaner run sequential vs parallel
 
       # Cleanuperr queue cleaner import failure environment variables
-      QUEUECLEANER__IMPORT_FAILED_MAX_STRIKES: ${QUEUECLEANER__IMPORT_FAILED_MAX_STRIKES}        # Number of strikes before removing a failed import
+      QUEUECLEANER__IMPORT_FAILED_MAX_STRIKES: ${QUEUECLEANER__IMPORT_FAILED_MAX_STRIKES}        # Strikes before removing a failed import
       QUEUECLEANER__IMPORT_FAILED_IGNORE_PRIVATE: ${QUEUECLEANER__IMPORT_FAILED_IGNORE_PRIVATE}  # Toggle ignore failed imports from private trackers
       QUEUECLEANER__IMPORT_FAILED_DELETE_PRIVATE: ${QUEUECLEANER__IMPORT_FAILED_DELETE_PRIVATE}  # Toggle delete failed imports from private trackers
 
       # Cleanuperr queue cleaner stalled download environment variables
-      QUEUECLEANER__STALLED_MAX_STRIKES: ${QUEUECLEANER__STALLED_MAX_STRIKES}                              # Number of strikes before removing a stalled download
+      QUEUECLEANER__STALLED_MAX_STRIKES: ${QUEUECLEANER__STALLED_MAX_STRIKES}                              # Strikes before removing a stalled download
       QUEUECLEANER__STALLED_RESET_STRIKES_ON_PROGRESS: ${QUEUECLEANER__STALLED_RESET_STRIKES_ON_PROGRESS}  # Toggle remove strikes if any progress is made
       QUEUECLEANER__STALLED_IGNORE_PRIVATE: ${QUEUECLEANER__STALLED_IGNORE_PRIVATE}                        # Toggle ignore stalled downloads from private trackers
       QUEUECLEANER__STALLED_DELETE_PRIVATE: ${QUEUECLEANER__STALLED_DELETE_PRIVATE}                        # Toggle delete stalled private downloads
+      QUEUECLEANER__DOWNLOADING_METADATA_MAX_STRIKES: ${QUEUECLEANER__DOWNLOADING_METADATA_MAX_STRIKES}    # Strikes before removing a download stuck downloading metadata
 
       # Cleanuperr queue cleaner slow download environment variables
-      QUEUECLEANER__SLOW_MAX_STRIKES: ${QUEUECLEANER__SLOW_MAX_STRIKES}                              # Number of strikes before removing a slow download
+      QUEUECLEANER__SLOW_MAX_STRIKES: ${QUEUECLEANER__SLOW_MAX_STRIKES}                              # Strikes before removing a slow download
       QUEUECLEANER__SLOW_RESET_STRIKES_ON_PROGRESS: ${QUEUECLEANER__SLOW_RESET_STRIKES_ON_PROGRESS}  # Toggle remove strikes if not slow anymore
       QUEUECLEANER__SLOW_IGNORE_PRIVATE: ${QUEUECLEANER__SLOW_IGNORE_PRIVATE}                        # Toggle ignore slow downloads from private trackers
       QUEUECLEANER__SLOW_DELETE_PRIVATE: ${QUEUECLEANER__SLOW_DELETE_PRIVATE}                        # Toggle remove slow downloads from private trackers
