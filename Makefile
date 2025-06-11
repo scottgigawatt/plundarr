@@ -143,7 +143,7 @@ $(CONFIG):
 # $(ENV): Prints the evaluated docker compose default env configuration.
 #
 $(ENV):
-	@source $(COMPOSE_ENV_FILE) && \
+	@. ./$(COMPOSE_ENV_FILE) && \
 	awk -F '=' '/^[^#]/ { \
 		gsub(/^[[:space:]]+|[[:space:]]+$$/, ""); \
 		value = ENVIRON[$$1]; \
