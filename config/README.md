@@ -11,7 +11,7 @@ Ahoy, ye scurvy devils! Welcome to the **`config`** directory of the grand vesse
 |------------------|------------------------------------------------------|
 | 🏴‍☠️ `bazarr`         | Subtitle swabbie, makin' sure ye always read what's said |
 | 🧹 `cleanuperr`     | Cleans up the seas of orphaned files and debris     |
-| 💾 `duplicati`      | Backup ye booty — protect it from Davey Jones       |
+| 💾 `duplicati`      | Backup ye booty — protect it from Davy Jones        |
 | 🌩️ `flaresolverr`   | Bypasses cloudflare storms to get yer bounty        |
 | 🛡️ `gluetun`        | VPN shieldin' yer traffic from nosy navies          |
 | 🗺️ `homepage`       | Central map to all yer ports — a true dashboard     |
