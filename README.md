@@ -99,16 +99,19 @@ Mind these steps, lest ye be marooned on a deserted isle! 🏝️
 
 > [!IMPORTANT]
 > ⚓️ Without the `/dev/net/tun` device, yer VPN ship be sinkin' at the docks! Make sure it be ready at boot, or face the kraken.
->
-> 🏴‍☠️ Fer makin' sure `/dev/net/tun` be ready when yer Synology be wakin' from slumber, chart a course to the `tun.sh` scroll in the scripts hold an' follow the setup guide thar.
->
-> - 🦜 [Peruse the tun.sh Parchment](scripts/tun.sh)
-> - 🗺️ [Chart the Boot-Up Course](scripts/README.md#-tunsh--forge-the-vpn-passage)
->
+
+🏴‍☠️ Fer makin' sure `/dev/net/tun` be ready when yer Synology be wakin' from slumber, chart a course to the `tun.sh` scroll in the scripts hold an' follow the setup guide thar.
+
+- 🦜 [Peruse the tun.sh Parchment](scripts/tun.sh)
+- 🗺️ [Chart the Boot-Up Course](scripts/README.md#-tunsh--forge-the-vpn-passage)
+
+> [!NOTE]
 > 🧰 And if ye run into mutiny where yer containers don't hoist in proper order on reboot, call upon the `compose_restart.sh` scroll! This script tears down an' rebuilds yer Docker fleet clean and proper, ensurin' each ship sets sail in the right sequence after a stormy system reboot.
->
-> - ⚙️ [Inspect the compose_restart.sh Scroll](scripts/compose_restart.sh)
-> - ⏱️ [Schedule the Crew with Task Scheduler](scripts/README.md#️-command-the-fleet-to-rise-on-boot)
+
+To keep yer containers from stumblin' outta their hammocks in the wrong order 🛏️➡️🪝, study the scrolls below like a map to buried booty 🗺️💰☠️, yarrr!
+
+- ⚙️ [Inspect the compose_restart.sh Scroll](scripts/compose_restart.sh)
+- ⏱️ [Schedule the Crew with Task Scheduler](scripts/README.md#️-command-the-fleet-to-rise-on-boot)
 
 ### 🔎 Spyglass Check
 
