@@ -95,7 +95,7 @@ The [Docker Project Setup](./SETUP.md) parchment covers:
 
 Mind these steps, lest ye be marooned on a deserted isle! 🏝️
 
-### Ensure Yer Tunnels Be Ready at Boot 🏴‍☠️⛏️
+### Prep the Ship at Boot: Tunnels & Containers 🏴‍☠️⚙️
 
 > [!IMPORTANT]
 > ⚓️ Without the `/dev/net/tun` device, yer VPN ship be sinkin' at the docks! Make sure it be ready at boot, or face the kraken.
@@ -104,6 +104,11 @@ Mind these steps, lest ye be marooned on a deserted isle! 🏝️
 >
 > - 🦜 [Peruse the tun.sh Parchment](scripts/tun.sh)
 > - 🗺️ [Chart the Boot-Up Course](scripts/README.md#-tunsh--forge-the-vpn-passage)
+>
+> 🧰 And if ye run into mutiny where yer containers don't hoist in proper order on reboot, call upon the `compose_restart.sh` scroll! This script tears down an' rebuilds yer Docker fleet clean and proper, ensurin' each ship sets sail in the right sequence after a stormy system reboot.
+>
+> - ⚙️ [Inspect the compose_restart.sh Scroll](scripts/compose_restart.sh)
+> - ⏱️ [Schedule the Crew with Task Scheduler](scripts/README.md#️-command-the-fleet-to-rise-on-boot)
 
 ### 🔎 Spyglass Check
 

@@ -96,4 +96,57 @@ To ensure the script runs on boot, follow these steps:
 
 ---
 
+### 🔁 `compose_restart.sh` – Raise Any Fleet from the Depths
+
+This script be the mighty call to arms for rebuildin' any Docker fleet from scratch, not just Plundarr's!
+
+**Features:**
+
+- Stops all containers and scuttles volumes with `docker compose down --volumes` 🧨.
+- Rebuilds and restarts yer containers in the right order, nice and tidy ⚓.
+- Blocks until the deed is done — no async sea serpents here 🐍❌.
+
+🦜 [Consult the compose_restart.sh Codex](./compose_restart.sh)
+
+> [!TIP]
+> 🔄 Useful when ye be updatin' configurations or need to purge the bilge and start anew.
+
+#### 🧙‍♂️ Make the Deckhands Run It Manually (or on Command)
+
+To run this script whenever the seas get rough, just hoist this flag:
+
+```sh
+sh /volume1/docker/plundarr/scripts/compose_restart.sh /volume1/docker/plundarr
+```
+
+#### 🧙‍♂️ Command the Fleet to Rise on Boot
+
+To ensure the Docker fleet sets sail in the right order after every reboot, set this script to run automatically at boot:
+
+1. **Open Synology's Task Scheduler:**
+
+    - Go to **Control Panel** -> **Task Scheduler** 🗓️.
+
+2. **Create a Task for `compose_restart.sh`:**
+
+    - Click **Create** -> **Triggered Task** -> **User-defined script** ✍️.
+    - Name the task, e.g., 'Restart Docker Stack' 🛳️.
+    - Set the user to `root` 🧙.
+    - Set the event to **Boot-up** 🚀.
+    - Check **Enabled** ✅.
+    - Under **Task Settings**, enter the following command under **Run command** 💻:
+
+      ```sh
+      sh /volume1/docker/plundarr/scripts/compose_restart.sh /volume1/docker/plundarr
+      ```
+
+    - Click **OK** to save the task 💾.
+
+> [!TIP]
+> 🏴‍☠️ This makes sure yer containers always rise in proper order after a restart, without liftin’ a finger.
+
+---
+
 May yer setup be swift and yer configurations flawless! 🌊🏴‍☠️
+
+May this scroll guide all yer Docker fleets to set sail true and in order! ⚓🏴‍☠️
