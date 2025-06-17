@@ -26,13 +26,23 @@ cd "$PROJECT_DIR" || {
 # Extract the last part of the directory path to use as a human-readable name
 PROJECT_NAME=$(basename "$PROJECT_DIR")
 
+# Detect whether to use 'docker compose' or 'docker-compose'
+if docker compose version >/dev/null 2>&1; then
+    COMPOSE_CMD="docker compose"
+elif command -v docker-compose >/dev/null 2>&1; then
+    COMPOSE_CMD="docker-compose"
+else
+    echo "ERROR: Neither 'docker compose' nor 'docker-compose' was found on this system."
+    exit 1
+fi
+
 # Tear down the running stack, including named volumes
 echo "Stopping and removing current containers and volumes for '$PROJECT_NAME'..."
-docker compose down --volumes
+$COMPOSE_CMD down -v
 
 # Rebuild and start the stack in detached mode
 echo "Rebuilding and starting containers for '$PROJECT_NAME' with enforced startup order..."
-docker compose up -d
+$COMPOSE_CMD up -d
 
 # Report success
 echo "'$PROJECT_NAME' stack restarted successfully."
