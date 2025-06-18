@@ -152,6 +152,14 @@ services:
     volumes:
       - ${GLUETUN_CONFIG_PATH}:/gluetun:rw  # Configuration files including WireGuard config at gluetun/wireguard/wg0.conf
 
+    # Define container healthcheck to verify VPN connectivity
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s --max-time 10 https://ipinfo.io | grep -q 'ip'"]  # Check if public IP is reachable
+      interval: ${GLUETUN_HEALTHCHECK_INTERVAL}                                      # Run the check at this interval
+      timeout: ${GLUETUN_HEALTHCHECK_TIMEOUT}                                        # Fail if it exceeds this duration
+      start_period: ${GLUETUN_HEALTHCHECK_START_PERIOD}                              # Grace period before checks start
+      retries: 5                                                                     # Mark as unhealthy after 5 failures
+
     # Specify container service dependencies
     depends_on:
       privateerr:                                  # Depends on privateer to generate the WireGuard config
@@ -194,8 +202,10 @@ services:
 
     # Specify container service dependencies
     depends_on:
-      - gluetun
-      - flaresolverr
+      gluetun:
+        condition: service_healthy  # Wait until Gluetun reports healthy VPN connection
+      flaresolverr:
+        condition: service_started  # Ensure FlareSolverr is started
 
   #
   # Define the 'qbittorrent' service for managing torrents
@@ -211,6 +221,11 @@ services:
     volumes:
       - ${QBITTORRENT_CONFIG_PATH}:/config:rw  # Configuration files
       - ${HOST_DOWNLOADS_PATH}:/downloads:rw   # Location of download managers output directory
+
+    # Specify container service dependencies
+    depends_on:
+      gluetun:
+        condition: service_healthy  # Wait until Gluetun reports healthy VPN connection
 
   #
   # Define the 'radarr' service for managing movies
@@ -230,9 +245,12 @@ services:
 
     # Specify container service dependencies
     depends_on:
-      - gluetun
-      - prowlarr
-      - qbittorrent
+      gluetun:
+        condition: service_healthy  # Wait until Gluetun reports healthy VPN connection
+      prowlarr:
+        condition: service_started  # Ensure Prowlarr is started
+      qbittorrent:
+        condition: service_started  # Ensure qBittorrent is started
 
   #
   # Define the 'sonarr' service for managing tv shows
@@ -252,9 +270,12 @@ services:
 
     # Specify container service dependencies
     depends_on:
-      - gluetun
-      - prowlarr
-      - qbittorrent
+      gluetun:
+        condition: service_healthy  # Wait until Gluetun reports healthy VPN connection
+      prowlarr:
+        condition: service_started  # Ensure Prowlarr is started
+      qbittorrent:
+        condition: service_started  # Ensure qBittorrent is started
 
   #
   # Define the 'bazarr' service for managing subtitles
@@ -274,8 +295,12 @@ services:
 
     # Specify container service dependencies
     depends_on:
-      - sonarr
-      - radarr
+      gluetun:
+        condition: service_healthy  # Wait until Gluetun reports healthy VPN connection
+      sonarr:
+        condition: service_started  # Ensure Sonarr is started
+      radarr:
+        condition: service_started  # Ensure Radarr is started
 
   #
   # Define the 'readarr' service for managing ebooks
@@ -295,9 +320,12 @@ services:
 
     # Specify container service dependencies
     depends_on:
-      - gluetun
-      - prowlarr
-      - qbittorrent
+      gluetun:
+        condition: service_healthy  # Wait until Gluetun reports healthy VPN connection
+      prowlarr:
+        condition: service_started  # Ensure Prowlarr is started
+      qbittorrent:
+        condition: service_started  # Ensure qBittorrent is started
 
   #
   # Define the 'overseerr' service for managing media library requests
@@ -422,10 +450,14 @@ services:
 
     # Specify container service dependencies
     depends_on:
-      - gluetun
-      - sonarr
-      - radarr
-      - qbittorrent
+      gluetun:
+        condition: service_healthy  # Wait until Gluetun reports healthy VPN connection
+      sonarr:
+        condition: service_started  # Ensure Sonarr is started
+      radarr:
+        condition: service_started  # Ensure Radarr is started
+      qbittorrent:
+        condition: service_started  # Ensure qBittorrent is started
 
   #
   # Define the 'speedtest-tracker' service for tracking internet speeds

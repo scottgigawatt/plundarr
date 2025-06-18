@@ -49,6 +49,8 @@ To ensure ye script be running on boot, follow these steps, ye salty dogs:
 
     - Click **OK** to save the task 💾.
 
+---
+
 ### ⚙️ `entware.sh` – Summon the Tools o' the Deep
 
 > [!NOTE]
@@ -144,6 +146,28 @@ To ensure the Docker fleet sets sail in the right order after every reboot, set 
 
 > [!TIP]
 > 🏴‍☠️ This makes sure yer containers always rise in proper order after a restart, without liftin’ a finger.
+
+---
+
+### 🕵️‍☠️ `test_vpn.sh` – Spyglass into the VPN Abyss
+
+This script helps ye confirm whether yer VPN tunnel be secure and active by comparin' the public IP and location from inside a container with that o' the host.
+
+**Features:**
+
+- Runs a container hooked into yer VPN network (like Gluetun).
+- Fetches the container's public IP and location via `ipinfo.io`.
+- Compares it against the host's own info to spot any leaks.
+- Uses `jq` to pretty-print responses if installed, or falls back to a plaintext method.
+
+🦜 [Unfurl the test_vpn.sh Chart](./test_vpn.sh)
+
+> [!TIP]
+> 🔍 Useful fer confirm'n that yer containers be masked and the host be hidin' in the fog! Call it straight from the Makefile with:
+>
+> ```sh
+> make test-vpn
+> ```
 
 ---
 

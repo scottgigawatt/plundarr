@@ -119,18 +119,38 @@ To confirm yer VPN sails be catchin' wind:
 
 ```bash
 ❯ make test-vpn
-docker run --rm --network=container:gluetun-latest alpine:3.18 sh -c "apk add wget && wget -qO- https://ipinfo.io"
+sh scripts/test_vpn.sh
+Running VPN container test...
+Step 1: Running Docker container with VPN network:
+docker run --rm --network=container:gluetun-latest alpine:latest sh -c 'apk add --no-cache wget >/dev/null 2>&1 && wget -qO- https://ipinfo.io'
+Step 2: Received container response:
 {
-  "ip": "172.16.0.42",
+  "ip": "172.16.88.88",
   "city": "Tortuga",
-  "region": "Caribbean",
-  "country": "High Seas",
-  "loc": "13.4443,-144.7937",
-  "org": "Black Pearl Privateers",
-  "postal": "ARR123",
-  "timezone": "Rum/Somewhere",
-  "readme": "https://ipinfo.io/blackpearl"
+  "region": "Rum Islands",
+  "country": "XP",
+  "loc": "21.4200,-71.1419",
+  "org": "AS7777 The Jolly Rogers",
+  "postal": "00000",
+  "timezone": "Ocean/HighSeas",
+  "readme": "https://ipinfo.io/missingauth"
 }
+Step 3: Getting host IP info from ipinfo.io...
+Step 4: Received host response:
+{
+  "ip": "10.42.42.42",
+  "hostname": "flagship.plundarr.local",
+  "city": "Port Royal",
+  "region": "Skull Coast",
+  "country": "XP",
+  "loc": "17.9355,-76.8419",
+  "org": "AS1492 Blackbeard’s Backbone Ltd.",
+  "postal": "99999",
+  "timezone": "Ocean/SkullBay",
+  "readme": "https://ipinfo.io/missingauth"
+}
+Step 5: Comparing container and host IPs...
+VPN is active. Container IP: 172.16.88.88 (Tortuga, Rum Islands XP), Host IP: 10.42.42.42 (Port Royal, Skull Coast XP).
 ```
 
 > [!WARNING]

@@ -46,11 +46,9 @@ COMPOSE_UP_OPTIONS         ?= --force-recreate --pull always --detach
 COMPOSE_LOGS_OPTIONS       ?= --follow
 
 #
-# Testing options
+# Testing commands
 #
-DOCKER_VPN_CONTAINER  ?= $(COMPOSE_GLUETUN_SERVICE)-latest
-DOCKER_VPN_TEST_IMAGE ?= alpine:3.18
-DOCKER_VPN_TEST_CMD   ?= sh -c "apk add wget && wget -qO- https://ipinfo.io"
+DOCKER_VPN_TEST_CMD ?= sh scripts/test_vpn.sh
 
 #
 # Build dependencies
@@ -130,7 +128,7 @@ $(START): $(BUILD_DEPENDS)
 # $(TEST_VPN): Obtains the VPN IP address and ensure the connection is working.
 #
 $(TEST_VPN):
-	docker run --rm --network=container:$(DOCKER_VPN_CONTAINER) $(DOCKER_VPN_TEST_IMAGE) $(DOCKER_VPN_TEST_CMD)
+	$(DOCKER_VPN_TEST_CMD)
 
 #
 # $(CONFIG): Renders the actual data model to be applied on the Docker Engine.
