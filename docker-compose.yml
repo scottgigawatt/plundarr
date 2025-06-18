@@ -154,11 +154,11 @@ services:
 
     # Define container healthcheck to verify VPN connectivity
     healthcheck:
-      test: ["CMD-SHELL", "curl -s --max-time 10 https://ipinfo.io | grep -q 'ip'"]  # Check if public IP is reachable
-      interval: ${GLUETUN_HEALTHCHECK_INTERVAL}                                      # Run the check at this interval
-      timeout: ${GLUETUN_HEALTHCHECK_TIMEOUT}                                        # Fail if it exceeds this duration
-      start_period: ${GLUETUN_HEALTHCHECK_START_PERIOD}                              # Grace period before checks start
-      retries: 5                                                                     # Mark as unhealthy after 5 failures
+      test: ["CMD-SHELL", "wget -qO- https://ipinfo.io | grep -q 'ip'"]  # Check if public IP is reachable
+      interval: ${GLUETUN_HEALTHCHECK_INTERVAL}                          # Run the check at this interval
+      timeout: ${GLUETUN_HEALTHCHECK_TIMEOUT}                            # Fail if it exceeds this duration
+      start_period: ${GLUETUN_HEALTHCHECK_START_PERIOD}                  # Grace period before checks start
+      retries: 5                                                         # Mark as unhealthy after 5 failures
 
     # Specify container service dependencies
     depends_on:
