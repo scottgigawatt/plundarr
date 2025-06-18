@@ -148,7 +148,7 @@ $(ENV):
 		if (!value) { \
 			split($$2, parts, /:-/); \
 			if (length(parts) > 1) { \
-				sub(/\"*}\"$$/, "", parts[2]); \
+				gsub(/[{}"]/,"", parts[2]); \
 				value = parts[2]; \
 			} \
 		} \
