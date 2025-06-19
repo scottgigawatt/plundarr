@@ -210,11 +210,11 @@ services:
 
     # Define container healthcheck to verify Prowlarr connectivity
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:9696 | grep -q '<title>Prowlarr</title>'"]  # Check if Prowlarr web UI is up
-      interval: ${PROWLARR_HEALTHCHECK_INTERVAL}                                                  # Run the check at this interval
-      timeout: ${PROWLARR_HEALTHCHECK_TIMEOUT}                                                    # Fail if it exceeds this duration
-      start_period: ${PROWLARR_HEALTHCHECK_START_PERIOD}                                          # Grace period before checks start
-      retries: 5                                                                                  # Mark as unhealthy after 5 failures
+      test: ["CMD-SHELL", "wget -qO- http://localhost:9696 | grep -q '<title>Login - Prowlarr</title>'"]  # Check if Prowlarr web UI is up
+      interval: ${PROWLARR_HEALTHCHECK_INTERVAL}                                                          # Run the check at this interval
+      timeout: ${PROWLARR_HEALTHCHECK_TIMEOUT}                                                            # Fail if it exceeds this duration
+      start_period: ${PROWLARR_HEALTHCHECK_START_PERIOD}                                                  # Grace period before checks start
+      retries: 5                                                                                          # Mark as unhealthy after 5 failures
 
     # Specify container service dependencies
     depends_on:
@@ -240,11 +240,11 @@ services:
 
     # Define container healthcheck to verify qBittorrent connectivity
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:8080 | grep -q '<title>qBittorrent</title>'"]  # Check if qBittorrent web UI is reachable
-      interval: ${QBITTORRENT_HEALTHCHECK_INTERVAL}                                                  # Run the check at this interval
-      timeout: ${QBITTORRENT_HEALTHCHECK_TIMEOUT}                                                    # Fail if it exceeds this duration
-      start_period: ${QBITTORRENT_HEALTHCHECK_START_PERIOD}                                          # Grace period before checks start
-      retries: 5                                                                                     # Mark as unhealthy after 5 failures
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080 | grep -q '<title>qBittorrent WebUI</title>'"]  # Check if qBittorrent web UI is reachable
+      interval: ${QBITTORRENT_HEALTHCHECK_INTERVAL}                                                        # Run the check at this interval
+      timeout: ${QBITTORRENT_HEALTHCHECK_TIMEOUT}                                                          # Fail if it exceeds this duration
+      start_period: ${QBITTORRENT_HEALTHCHECK_START_PERIOD}                                                # Grace period before checks start
+      retries: 5                                                                                           # Mark as unhealthy after 5 failures
 
     # Specify container service dependencies
     depends_on:
