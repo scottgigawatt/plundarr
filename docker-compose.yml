@@ -188,11 +188,11 @@ services:
 
     # Define container healthcheck to verify FlareSolverr connectivity
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:8191 | grep -q 'FlareSolverr'"]  # Check if FlareSolverr UI is reachable
-      interval: ${FLARESOLVERR_HEALTHCHECK_INTERVAL}                                   # Run the check at this interval
-      timeout: ${FLARESOLVERR_HEALTHCHECK_TIMEOUT}                                     # Fail if it exceeds this duration
-      start_period: ${FLARESOLVERR_HEALTHCHECK_START_PERIOD}                           # Grace period before checks start
-      retries: 5                                                                       # Mark as unhealthy after 5 failures
+      test: ["CMD-SHELL", "curl -s http://localhost:8191 | grep -q 'FlareSolverr'"]  # Check if FlareSolverr UI is reachable
+      interval: ${FLARESOLVERR_HEALTHCHECK_INTERVAL}                                 # Run the check at this interval
+      timeout: ${FLARESOLVERR_HEALTHCHECK_TIMEOUT}                                   # Fail if it exceeds this duration
+      start_period: ${FLARESOLVERR_HEALTHCHECK_START_PERIOD}                         # Grace period before checks start
+      retries: 5                                                                     # Mark as unhealthy after 5 failures
 
   #
   # Define the 'prowlarr' service for managing indexers
