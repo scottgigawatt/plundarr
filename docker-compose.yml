@@ -194,8 +194,8 @@ services:
 
     # Define container healthcheck to verify FlareSolverr connectivity
     healthcheck:
-      test: ["CMD-SHELL", "curl -s http://localhost:8191 | grep -q 'FlareSolverr'"]  # Check if FlareSolverr UI is reachable
-      <<: *default-healthcheck-settings                                              # Pull in default healthcheck settings
+      test: ["CMD-SHELL", "curl -s http://localhost:${FLARESOLVERR_PORT} | grep -q 'FlareSolverr'"]  # Check if FlareSolverr UI is reachable
+      <<: *default-healthcheck-settings                                                              # Pull in default healthcheck settings
 
   #
   # Define the 'prowlarr' service for managing indexers
@@ -266,8 +266,8 @@ services:
 
     # Define container healthcheck to verify Radarr connectivity
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:7878 | grep -q 'Radarr'"]  # Check if Radarr web UI is reachable
-      <<: *default-healthcheck-settings                                          # Pull in default healthcheck settings
+      test: ["CMD-SHELL", "wget -qO- http://localhost:${RADARR_WEBUI_PORT} | grep -q 'Radarr'"]  # Check if Radarr web UI is reachable
+      <<: *default-healthcheck-settings                                                          # Pull in default healthcheck settings
 
     # Specify container service dependencies
     depends_on:
@@ -326,8 +326,8 @@ services:
 
     # Define container healthcheck to verify Bazarr connectivity
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:6767 | grep -q 'Bazarr'"]  # Check if Bazarr web UI is reachable
-      <<: *default-healthcheck-settings                                          # Pull in default healthcheck settings
+      test: ["CMD-SHELL", "wget -qO- http://localhost:${BAZARR_WEBUI_PORT} | grep -q 'Bazarr'"]  # Check if Bazarr web UI is reachable
+      <<: *default-healthcheck-settings                                                          # Pull in default healthcheck settings
 
     # Specify container service dependencies
     depends_on:
