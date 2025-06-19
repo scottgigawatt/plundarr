@@ -53,7 +53,19 @@ DOCKER_VPN_TEST_CMD ?= sh scripts/test_vpn.sh
 #
 # Build dependencies
 #
-DEPENDENCIES=docker docker-compose
+DEPENDENCIES=docker
+
+#
+# Determine which Docker Compose command is available
+#
+ifeq (, $(shell which docker-compose 2> /dev/null))
+    ifeq (, $(shell docker compose version 2> /dev/null))
+        $(error "Neither 'docker-compose' nor 'docker compose' is available in PATH.")
+    endif
+    COMPOSE=docker compose
+else
+    COMPOSE=docker-compose
+endif
 
 #
 # Targets that are not files (i.e. never up-to-date); these will run every
@@ -79,21 +91,21 @@ $(BUILD_DEPENDS):
 #
 $(STOP): $(BUILD_DEPENDS)
 	@echo "\nStopping compose service containers"
-	docker-compose stop $(COMPOSE_STOP_OPTIONS)
+	$(COMPOSE) stop $(COMPOSE_STOP_OPTIONS)
 
 #
 # $(DOWN): Stops and removes containers.
 #
 $(DOWN): $(BUILD_DEPENDS)
 	@echo "\nStopping compose services and removing containers"
-	docker-compose down $(COMPOSE_DOWN_OPTIONS)
+	$(COMPOSE) down $(COMPOSE_DOWN_OPTIONS)
 
 #
 # $(CLEAN): Stops containers and removes containers, networks, volumes, and images created by up.
 #
 $(CLEAN): $(BUILD_DEPENDS)
 	@echo "\nStopping compose services and removing containers, networks, volumes, and images"
-	docker-compose down $(COMPOSE_CLEAN_OPTIONS)
+	$(COMPOSE) down $(COMPOSE_CLEAN_OPTIONS)
 
 	@echo "\nRemoving images based on test image $(DOCKER_VPN_TEST_IMAGE)"
 	docker images -q "$(DOCKER_VPN_TEST_IMAGE)" | xargs -r docker rmi -f || true
@@ -103,14 +115,14 @@ $(CLEAN): $(BUILD_DEPENDS)
 #
 $(BUILD): $(BUILD_DEPENDS)
 	@echo "\nBuilding local image for compose service: $(COMPOSE_PRIVATEERR_SERVICE)"
-	docker-compose -f $(COMPOSE_FILE) -f $(COMPOSE_BUILD_FILE) build $(COMPOSE_BUILD_OPTIONS) $(COMPOSE_PRIVATEERR_SERVICE)
+	$(COMPOSE) -f $(COMPOSE_FILE) -f $(COMPOSE_BUILD_FILE) build $(COMPOSE_BUILD_OPTIONS) $(COMPOSE_PRIVATEERR_SERVICE)
 
 #
 # $(UP): (Re)creates and starts containers for services.
 #
 $(UP): $(BUILD_DEPENDS)
 	@echo "\nStarting compose services"
-	docker-compose -f $(COMPOSE_FILE) up $(COMPOSE_UP_OPTIONS)
+	$(COMPOSE) -f $(COMPOSE_FILE) up $(COMPOSE_UP_OPTIONS)
 
 #
 # $(BUILD_UP): Alias for build, up.
@@ -122,7 +134,7 @@ $(BUILD_UP): $(BUILD)
 # $(START): Starts existing containers for a service.
 #
 $(START): $(BUILD_DEPENDS)
-	docker-compose start
+	$(COMPOSE) start
 
 #
 # $(TEST_VPN): Obtains the VPN IP address and ensure the connection is working.
@@ -135,7 +147,7 @@ $(TEST_VPN):
 # Resolves variables in the Compose file and expands short-notation into the canonical format.
 #
 $(CONFIG):
-	docker-compose config
+	$(COMPOSE) config
 
 #
 # $(ENV): Prints the evaluated docker compose default env configuration.
@@ -180,22 +192,22 @@ $(PRINT_ENV):
 #
 $(LOGS):
 	@echo "\nGetting logs for services"
-	docker-compose logs $(COMPOSE_LOGS_OPTIONS)
+	$(COMPOSE) logs $(COMPOSE_LOGS_OPTIONS)
 
 #
 # $(OPEN): Opens the compose services in the default web browser.
 #
 $(OPEN):
 	@echo "\nOpening compose services in default browser"
-	open "http://localhost:`docker-compose port $(COMPOSE_GLUETUN_SERVICE) 8080 | cut -d: -f2`" \
-		"http://localhost:`docker-compose port $(COMPOSE_GLUETUN_SERVICE) 9696 | cut -d: -f2`" \
-		"http://localhost:`docker-compose port $(COMPOSE_GLUETUN_SERVICE) 7878 | cut -d: -f2`" \
-		"http://localhost:`docker-compose port $(COMPOSE_GLUETUN_SERVICE) 8989 | cut -d: -f2`" \
-		"http://localhost:`docker-compose port $(COMPOSE_GLUETUN_SERVICE) 6767 | cut -d: -f2`" \
-		"http://localhost:`docker-compose port $(COMPOSE_GLUETUN_SERVICE) 8787 | cut -d: -f2`" \
-		"http://localhost:`docker-compose port $(COMPOSE_DUPLICATI_SERVICE) 8200 | cut -d: -f2`" \
-		"http://localhost:`docker-compose port $(COMPOSE_OVERSEERR_SERVICE) 5055 | cut -d: -f2`" \
-		"http://localhost:`docker-compose port $(COMPOSE_HOMEPAGE_SERVICE) 3000 | cut -d: -f2`"
+	open "http://localhost:`$(COMPOSE) port $(COMPOSE_GLUETUN_SERVICE) 8080 | cut -d: -f2`" \
+		"http://localhost:`$(COMPOSE) port $(COMPOSE_GLUETUN_SERVICE) 9696 | cut -d: -f2`" \
+		"http://localhost:`$(COMPOSE) port $(COMPOSE_GLUETUN_SERVICE) 7878 | cut -d: -f2`" \
+		"http://localhost:`$(COMPOSE) port $(COMPOSE_GLUETUN_SERVICE) 8989 | cut -d: -f2`" \
+		"http://localhost:`$(COMPOSE) port $(COMPOSE_GLUETUN_SERVICE) 6767 | cut -d: -f2`" \
+		"http://localhost:`$(COMPOSE) port $(COMPOSE_GLUETUN_SERVICE) 8787 | cut -d: -f2`" \
+		"http://localhost:`$(COMPOSE) port $(COMPOSE_DUPLICATI_SERVICE) 8200 | cut -d: -f2`" \
+		"http://localhost:`$(COMPOSE) port $(COMPOSE_OVERSEERR_SERVICE) 5055 | cut -d: -f2`" \
+		"http://localhost:`$(COMPOSE) port $(COMPOSE_HOMEPAGE_SERVICE) 3000 | cut -d: -f2`"
 
 #
 # $(HELP): Print help information.

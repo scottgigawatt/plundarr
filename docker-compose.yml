@@ -186,6 +186,14 @@ services:
       LOG_HTML: ${FLARESOLVERR_LOG_HTML}              # Toggle HTML logging
       CAPTCHA_SOLVER: ${FLARESOLVERR_CAPTCHA_SOLVER}  # Specify captcha solver
 
+    # Define container healthcheck to verify FlareSolverr connectivity
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8191 | grep -q 'FlareSolverr'"]  # Check if FlareSolverr UI is reachable
+      interval: ${FLARESOLVERR_HEALTHCHECK_INTERVAL}                                   # Run the check at this interval
+      timeout: ${FLARESOLVERR_HEALTHCHECK_TIMEOUT}                                     # Fail if it exceeds this duration
+      start_period: ${FLARESOLVERR_HEALTHCHECK_START_PERIOD}                           # Grace period before checks start
+      retries: 5                                                                       # Mark as unhealthy after 5 failures
+
   #
   # Define the 'prowlarr' service for managing indexers
   #
@@ -200,12 +208,20 @@ services:
     volumes:
       - ${PROWLARR_CONFIG_PATH}:/config:rw  # Database and Prowlarr configs
 
+    # Define container healthcheck to verify Prowlarr connectivity
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:9696 | grep -q '<title>Prowlarr</title>'"]  # Check if Prowlarr web UI is up
+      interval: ${PROWLARR_HEALTHCHECK_INTERVAL}                                                  # Run the check at this interval
+      timeout: ${PROWLARR_HEALTHCHECK_TIMEOUT}                                                    # Fail if it exceeds this duration
+      start_period: ${PROWLARR_HEALTHCHECK_START_PERIOD}                                          # Grace period before checks start
+      retries: 5                                                                                  # Mark as unhealthy after 5 failures
+
     # Specify container service dependencies
     depends_on:
       gluetun:
         condition: service_healthy  # Wait until Gluetun reports healthy VPN connection
       flaresolverr:
-        condition: service_started  # Ensure FlareSolverr is started
+        condition: service_healthy  # Wait until FlareSolverr is healthy
 
   #
   # Define the 'qbittorrent' service for managing torrents
@@ -221,6 +237,14 @@ services:
     volumes:
       - ${QBITTORRENT_CONFIG_PATH}:/config:rw  # Configuration files
       - ${HOST_DOWNLOADS_PATH}:/downloads:rw   # Location of download managers output directory
+
+    # Define container healthcheck to verify qBittorrent connectivity
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080 | grep -q '<title>qBittorrent</title>'"]  # Check if qBittorrent web UI is reachable
+      interval: ${QBITTORRENT_HEALTHCHECK_INTERVAL}                                                  # Run the check at this interval
+      timeout: ${QBITTORRENT_HEALTHCHECK_TIMEOUT}                                                    # Fail if it exceeds this duration
+      start_period: ${QBITTORRENT_HEALTHCHECK_START_PERIOD}                                          # Grace period before checks start
+      retries: 5                                                                                     # Mark as unhealthy after 5 failures
 
     # Specify container service dependencies
     depends_on:
@@ -243,14 +267,22 @@ services:
       - ${HOST_DOWNLOADS_PATH}:/downloads:rw  # Location of download managers output directory
       - ${HOST_MOVIES_PATH}:/movies:rw        # Location of movie library on disk
 
+    # Define container healthcheck to verify Radarr connectivity
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:7878 | grep -q '<title>Radarr</title>'"]  # Check if Radarr web UI is reachable
+      interval: ${RADARR_HEALTHCHECK_INTERVAL}                                                  # Run the check at this interval
+      timeout: ${RADARR_HEALTHCHECK_TIMEOUT}                                                    # Fail if it exceeds this duration
+      start_period: ${RADARR_HEALTHCHECK_START_PERIOD}                                          # Grace period before checks start
+      retries: 5                                                                                # Mark as unhealthy after 5 failures
+
     # Specify container service dependencies
     depends_on:
       gluetun:
         condition: service_healthy  # Wait until Gluetun reports healthy VPN connection
       prowlarr:
-        condition: service_started  # Ensure Prowlarr is started
+        condition: service_healthy  # Wait until Prowlarr is healthy
       qbittorrent:
-        condition: service_started  # Ensure qBittorrent is started
+        condition: service_healthy  # Wait until qBittorrent is healthy
 
   #
   # Define the 'sonarr' service for managing tv shows
@@ -268,14 +300,22 @@ services:
       - ${HOST_DOWNLOADS_PATH}:/downloads:rw  # Location of download managers output directory
       - ${HOST_TV_PATH}:/tv:rw                # Location of TV library on disk
 
+    # Define container healthcheck to verify Sonarr connectivity
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8989 | grep -q '<title>Sonarr</title>'"]  # Check if Sonarr web UI is reachable
+      interval: ${SONARR_HEALTHCHECK_INTERVAL}                                                  # Run the check at this interval
+      timeout: ${SONARR_HEALTHCHECK_TIMEOUT}                                                    # Fail if it exceeds this duration
+      start_period: ${SONARR_HEALTHCHECK_START_PERIOD}                                          # Grace period before checks start
+      retries: 5                                                                                # Mark as unhealthy after 5 failures
+
     # Specify container service dependencies
     depends_on:
       gluetun:
         condition: service_healthy  # Wait until Gluetun reports healthy VPN connection
       prowlarr:
-        condition: service_started  # Ensure Prowlarr is started
+        condition: service_healthy  # Wait until Prowlarr is healthy
       qbittorrent:
-        condition: service_started  # Ensure qBittorrent is started
+        condition: service_healthy  # Wait until qBittorrent is healthy
 
   #
   # Define the 'bazarr' service for managing subtitles
@@ -293,14 +333,22 @@ services:
       - ${HOST_MOVIES_PATH}:/movies:rw    # Location of movies library on disk
       - ${HOST_TV_PATH}:/tv:rw            # Location of TV library on disk
 
+    # Define container healthcheck to verify Bazarr connectivity
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:6767 | grep -q '<title>Bazarr</title>'"]  # Check if Bazarr web UI is reachable
+      interval: ${BAZARR_HEALTHCHECK_INTERVAL}                                                  # Run the check at this interval
+      timeout: ${BAZARR_HEALTHCHECK_TIMEOUT}                                                    # Fail if it exceeds this duration
+      start_period: ${BAZARR_HEALTHCHECK_START_PERIOD}                                          # Grace period before checks start
+      retries: 5                                                                                # Mark as unhealthy after 5 failures
+
     # Specify container service dependencies
     depends_on:
       gluetun:
         condition: service_healthy  # Wait until Gluetun reports healthy VPN connection
       sonarr:
-        condition: service_started  # Ensure Sonarr is started
+        condition: service_healthy  # Wait until Sonarr is healthy
       radarr:
-        condition: service_started  # Ensure Radarr is started
+        condition: service_healthy  # Wait until Radarr is healthy
 
   #
   # Define the 'readarr' service for managing ebooks
@@ -318,14 +366,22 @@ services:
       - ${HOST_DOWNLOADS_PATH}:/downloads:rw  # Location of download managers output directory
       - ${HOST_BOOKS_PATH}:/books:rw          # Location of book library on disk
 
+    # Define container healthcheck to verify Readarr connectivity
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8787 | grep -q '<title>Readarr</title>'"]  # Check if Readarr web UI is reachable
+      interval: ${READARR_HEALTHCHECK_INTERVAL}                                                  # Run the check at this interval
+      timeout: ${READARR_HEALTHCHECK_TIMEOUT}                                                    # Fail if it exceeds this duration
+      start_period: ${READARR_HEALTHCHECK_START_PERIOD}                                          # Grace period before checks start
+      retries: 5                                                                                 # Mark as unhealthy after 5 failures
+
     # Specify container service dependencies
     depends_on:
       gluetun:
         condition: service_healthy  # Wait until Gluetun reports healthy VPN connection
       prowlarr:
-        condition: service_started  # Ensure Prowlarr is started
+        condition: service_healthy  # Wait until Prowlarr is healthy
       qbittorrent:
-        condition: service_started  # Ensure qBittorrent is started
+        condition: service_healthy  # Wait until qBittorrent is healthy
 
   #
   # Define the 'overseerr' service for managing media library requests
@@ -453,11 +509,11 @@ services:
       gluetun:
         condition: service_healthy  # Wait until Gluetun reports healthy VPN connection
       sonarr:
-        condition: service_started  # Ensure Sonarr is started
+        condition: service_healthy  # Wait until Sonarr is healthy
       radarr:
-        condition: service_started  # Ensure Radarr is started
+        condition: service_healthy  # Wait until Radarr is healthy
       qbittorrent:
-        condition: service_started  # Ensure qBittorrent is started
+        condition: service_healthy  # Wait until qBittorrent is healthy
 
   #
   # Define the 'speedtest-tracker' service for tracking internet speeds
