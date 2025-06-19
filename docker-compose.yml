@@ -73,6 +73,15 @@ x-arr-stack-container: &arr-stack-container  # YAML anchor for arr-stack contain
     <<: *arr-stack-environment               # Pull in the arr-stack environment information
 
 #
+# Standard healthcheck timing settings
+#
+x-default-healthcheck-settings: &default-healthcheck-settings  # YAML anchor for healthcheck settings
+  interval: ${DEFAULT_HEALTHCHECK_INTERVAL}                    # Run the check at this interval
+  timeout: ${DEFAULT_HEALTHCHECK_TIMEOUT}                      # Fail if it exceeds this duration
+  start_period: ${DEFAULT_HEALTHCHECK_START_PERIOD}            # Grace period before checks start
+  retries: 5                                                   # Mark as unhealthy after 5 failures
+
+#
 # Define the services section
 #
 services:
@@ -155,10 +164,7 @@ services:
     # Define container healthcheck to verify VPN connectivity
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- https://ipinfo.io | grep -q 'ip'"]  # Check if public IP is reachable
-      interval: ${GLUETUN_HEALTHCHECK_INTERVAL}                          # Run the check at this interval
-      timeout: ${GLUETUN_HEALTHCHECK_TIMEOUT}                            # Fail if it exceeds this duration
-      start_period: ${GLUETUN_HEALTHCHECK_START_PERIOD}                  # Grace period before checks start
-      retries: 5                                                         # Mark as unhealthy after 5 failures
+      <<: *default-healthcheck-settings                                  # Pull in default healthcheck settings
 
     # Specify container service dependencies
     depends_on:
@@ -189,10 +195,7 @@ services:
     # Define container healthcheck to verify FlareSolverr connectivity
     healthcheck:
       test: ["CMD-SHELL", "curl -s http://localhost:8191 | grep -q 'FlareSolverr'"]  # Check if FlareSolverr UI is reachable
-      interval: ${FLARESOLVERR_HEALTHCHECK_INTERVAL}                                 # Run the check at this interval
-      timeout: ${FLARESOLVERR_HEALTHCHECK_TIMEOUT}                                   # Fail if it exceeds this duration
-      start_period: ${FLARESOLVERR_HEALTHCHECK_START_PERIOD}                         # Grace period before checks start
-      retries: 5                                                                     # Mark as unhealthy after 5 failures
+      <<: *default-healthcheck-settings                                              # Pull in default healthcheck settings
 
   #
   # Define the 'prowlarr' service for managing indexers
@@ -210,11 +213,8 @@ services:
 
     # Define container healthcheck to verify Prowlarr connectivity
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:9696 | grep -q '<title>Login - Prowlarr</title>'"]  # Check if Prowlarr web UI is up
-      interval: ${PROWLARR_HEALTHCHECK_INTERVAL}                                                          # Run the check at this interval
-      timeout: ${PROWLARR_HEALTHCHECK_TIMEOUT}                                                            # Fail if it exceeds this duration
-      start_period: ${PROWLARR_HEALTHCHECK_START_PERIOD}                                                  # Grace period before checks start
-      retries: 5                                                                                          # Mark as unhealthy after 5 failures
+      test: ["CMD-SHELL", "wget -qO- http://localhost:${PROWLARR_WEBUI_PORT} | grep -q 'Prowlarr'"]  # Check if Prowlarr web UI is up
+      <<: *default-healthcheck-settings                                                              # Pull in default healthcheck settings
 
     # Specify container service dependencies
     depends_on:
@@ -240,11 +240,8 @@ services:
 
     # Define container healthcheck to verify qBittorrent connectivity
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:8080 | grep -q '<title>qBittorrent WebUI</title>'"]  # Check if qBittorrent web UI is reachable
-      interval: ${QBITTORRENT_HEALTHCHECK_INTERVAL}                                                        # Run the check at this interval
-      timeout: ${QBITTORRENT_HEALTHCHECK_TIMEOUT}                                                          # Fail if it exceeds this duration
-      start_period: ${QBITTORRENT_HEALTHCHECK_START_PERIOD}                                                # Grace period before checks start
-      retries: 5                                                                                           # Mark as unhealthy after 5 failures
+      test: ["CMD-SHELL", "wget -qO- http://localhost:${QBITTORRENT_WEBUI_PORT} | grep -q 'qBittorrent'"]  # Check if qBittorrent web UI is reachable
+      <<: *default-healthcheck-settings                                                                    # Pull in default healthcheck settings
 
     # Specify container service dependencies
     depends_on:
@@ -269,11 +266,8 @@ services:
 
     # Define container healthcheck to verify Radarr connectivity
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:7878 | grep -q '<title>Radarr</title>'"]  # Check if Radarr web UI is reachable
-      interval: ${RADARR_HEALTHCHECK_INTERVAL}                                                  # Run the check at this interval
-      timeout: ${RADARR_HEALTHCHECK_TIMEOUT}                                                    # Fail if it exceeds this duration
-      start_period: ${RADARR_HEALTHCHECK_START_PERIOD}                                          # Grace period before checks start
-      retries: 5                                                                                # Mark as unhealthy after 5 failures
+      test: ["CMD-SHELL", "wget -qO- http://localhost:7878 | grep -q 'Radarr'"]  # Check if Radarr web UI is reachable
+      <<: *default-healthcheck-settings                                          # Pull in default healthcheck settings
 
     # Specify container service dependencies
     depends_on:
@@ -302,11 +296,8 @@ services:
 
     # Define container healthcheck to verify Sonarr connectivity
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:8989 | grep -q '<title>Sonarr</title>'"]  # Check if Sonarr web UI is reachable
-      interval: ${SONARR_HEALTHCHECK_INTERVAL}                                                  # Run the check at this interval
-      timeout: ${SONARR_HEALTHCHECK_TIMEOUT}                                                    # Fail if it exceeds this duration
-      start_period: ${SONARR_HEALTHCHECK_START_PERIOD}                                          # Grace period before checks start
-      retries: 5                                                                                # Mark as unhealthy after 5 failures
+      test: ["CMD-SHELL", "wget -qO- http://localhost:${SONARR_WEBUI_PORT} | grep -q 'Sonarr'"]  # Check if Sonarr web UI is reachable
+      <<: *default-healthcheck-settings                                                          # Pull in default healthcheck settings
 
     # Specify container service dependencies
     depends_on:
@@ -335,11 +326,8 @@ services:
 
     # Define container healthcheck to verify Bazarr connectivity
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:6767 | grep -q '<title>Bazarr</title>'"]  # Check if Bazarr web UI is reachable
-      interval: ${BAZARR_HEALTHCHECK_INTERVAL}                                                  # Run the check at this interval
-      timeout: ${BAZARR_HEALTHCHECK_TIMEOUT}                                                    # Fail if it exceeds this duration
-      start_period: ${BAZARR_HEALTHCHECK_START_PERIOD}                                          # Grace period before checks start
-      retries: 5                                                                                # Mark as unhealthy after 5 failures
+      test: ["CMD-SHELL", "wget -qO- http://localhost:6767 | grep -q 'Bazarr'"]  # Check if Bazarr web UI is reachable
+      <<: *default-healthcheck-settings                                          # Pull in default healthcheck settings
 
     # Specify container service dependencies
     depends_on:
@@ -368,11 +356,8 @@ services:
 
     # Define container healthcheck to verify Readarr connectivity
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:8787 | grep -q '<title>Readarr</title>'"]  # Check if Readarr web UI is reachable
-      interval: ${READARR_HEALTHCHECK_INTERVAL}                                                  # Run the check at this interval
-      timeout: ${READARR_HEALTHCHECK_TIMEOUT}                                                    # Fail if it exceeds this duration
-      start_period: ${READARR_HEALTHCHECK_START_PERIOD}                                          # Grace period before checks start
-      retries: 5                                                                                 # Mark as unhealthy after 5 failures
+      test: ["CMD-SHELL", "wget -qO- http://localhost:${READARR_WEBUI_PORT} | grep -q 'Readarr'"]  # Check if Readarr web UI is reachable
+      <<: *default-healthcheck-settings                                                            # Pull in default healthcheck settings
 
     # Specify container service dependencies
     depends_on:
