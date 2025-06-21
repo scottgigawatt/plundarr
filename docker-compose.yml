@@ -118,6 +118,14 @@ services:
     volumes:
       - ${PRIVATEERR_WIREGUARD_CONFIG}:/${PIA_CONF_PATH}:rw  # Mount the WireGuard configuration file
 
+    # Run setup script, create marker file, and keep container alive to prevent Synology from marking project as degraded
+    command: sh -c "${PRIVATEERR_RUN_SETUP} && touch ${PRIVATEERR_HEALTHCHECK_MARKER} && tail -f /dev/null"
+
+    # Define container healthcheck to verify Privateer has completed setup
+    healthcheck:
+      test: ["CMD-SHELL", "[ -f ${PRIVATEERR_HEALTHCHECK_MARKER} ]"]  # Healthy when healthcheck marker file exists
+      <<: *default-healthcheck-settings                               # Pull in default healthcheck settings
+
   #
   # Define the 'gluetun' service to route traffic through a WireGuard VPN connection
   #
@@ -168,8 +176,8 @@ services:
 
     # Specify container service dependencies
     depends_on:
-      privateerr:                                  # Depends on privateer to generate the WireGuard config
-        condition: service_completed_successfully  # Wait for container to exit successfully
+      privateerr:
+        condition: service_healthy  # Wait for Privateer to generate the WireGuard config and report healthy
 
   #
   # Define the 'flaresolverr' service to bypass Cloudflare and DDoS-GUARD protection
