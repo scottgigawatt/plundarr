@@ -48,7 +48,8 @@ COMPOSE_LOGS_OPTIONS       ?= --follow
 #
 # Testing commands
 #
-DOCKER_VPN_TEST_CMD ?= sh scripts/test_vpn.sh
+DOCKER_VPN_TEST_CMD   ?= sh scripts/test_vpn.sh
+DOCKER_VPN_TEST_IMAGE ?= alpine:latest
 
 #
 # Build dependencies
@@ -108,7 +109,7 @@ $(CLEAN): $(BUILD_DEPENDS)
 	$(COMPOSE) down $(COMPOSE_CLEAN_OPTIONS)
 
 	@echo "\nRemoving images based on test image $(DOCKER_VPN_TEST_IMAGE)"
-	docker images -q "$(DOCKER_VPN_TEST_IMAGE)" | xargs -r docker rmi -f || true
+	docker images -q "$(DOCKER_VPN_TEST_IMAGE)" | xargs docker rmi -f || true
 
 #
 # $(BUILD): Builds a local image of the privateerr service for use when it cannot be pulled from GHCR.
