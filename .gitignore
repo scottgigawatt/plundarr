@@ -4,7 +4,7 @@
 servers.json
 config/*/*
 !config/*/*.md
-!config/cleanuperr/*
+!config/cleanuparr/*
 !config/gluetun/wireguard
 !config/homepage/*
 config/homepage/logs

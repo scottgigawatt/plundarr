@@ -10,7 +10,7 @@ Ahoy, ye scurvy devils! Welcome to the **`config`** directory of the grand vesse
 | Tool Name        | Purpose on the High Seas                             |
 |------------------|------------------------------------------------------|
 | 🏴‍☠️ `bazarr`         | Subtitle swabbie, makin' sure ye always read what's said |
-| 🧹 `cleanuperr`     | Cleans up the seas of orphaned files and debris     |
+| 🧹 `cleanuparr`     | Cleans up the seas of orphaned files and debris     |
 | 💾 `duplicati`      | Backup ye booty — protect it from Davy Jones        |
 | 🌩️ `flaresolverr`   | Bypasses cloudflare storms to get yer bounty        |
 | 🛡️ `gluetun`        | VPN shieldin' yer traffic from nosy navies          |
