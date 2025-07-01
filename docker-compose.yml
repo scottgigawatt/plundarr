@@ -387,6 +387,11 @@ services:
     volumes:
       - ${CLEANUPARR_CONFIG_PATH}:/config  # Persistent config files
 
+    # Define container healthcheck to verify Cleanuparr connectivity
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${CLEANUPARR_WEBUI_PORT}/health"]  # Check if Cleanuparr web UI is reachable
+      <<: *default-healthcheck-settings                                                # Pull in default healthcheck settings
+
     # Specify container service dependencies
     depends_on:
       sonarr:
