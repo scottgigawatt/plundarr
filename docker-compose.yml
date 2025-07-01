@@ -17,7 +17,6 @@
 # - radarr: https://github.com/Radarr/Radarr
 # - sonarr: https://github.com/Sonarr/Sonarr
 # - bazarr: https://github.com/morpheus65535/bazarr
-# - readarr: https://github.com/Readarr/Readarr
 # - overseerr: https://github.com/sct/overseerr
 # - cleanuparr: https://github.com/Cleanuparr/Cleanuparr
 # - speedtest-tracker: https://docs.speedtest-tracker.dev
@@ -164,7 +163,6 @@ services:
       - ${RADARR_WEBUI_PORT}:7878         # Radarr web UI port
       - ${SONARR_WEBUI_PORT}:8989         # Sonarr web UI port
       - ${BAZARR_WEBUI_PORT}:6767         # Bazarr web UI port
-      - ${READARR_WEBUI_PORT}:8787        # Readarr web UI port
 
     # Mount host directories into the container
     volumes:
@@ -348,36 +346,6 @@ services:
         condition: service_healthy  # Wait until Radarr is healthy
 
   #
-  # Define the 'readarr' service for managing ebooks
-  #
-  readarr:
-    # Docker image and container information
-    <<: *arr-stack-container                           # Pull in arr-stack container config
-    image: lscr.io/linuxserver/readarr:${READARR_TAG}  # Run using the specified tag
-    container_name: readarr-${READARR_TAG}             # Append Docker image tag to container name
-    network_mode: service:gluetun                      # Route network traffic through gluetun
-
-    # Mount host directories into the container
-    volumes:
-      - ${READARR_CONFIG_PATH}:/config:rw     # Database and Readarr configs
-      - ${HOST_DOWNLOADS_PATH}:/downloads:rw  # Location of download managers output directory
-      - ${HOST_BOOKS_PATH}:/books:rw          # Location of book library on disk
-
-    # Define container healthcheck to verify Readarr connectivity
-    healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:${READARR_WEBUI_PORT} | grep -q 'Readarr'"]  # Check if Readarr web UI is reachable
-      <<: *default-healthcheck-settings                                                            # Pull in default healthcheck settings
-
-    # Specify container service dependencies
-    depends_on:
-      gluetun:
-        condition: service_healthy  # Wait until Gluetun reports healthy VPN connection
-      prowlarr:
-        condition: service_healthy  # Wait until Prowlarr is healthy
-      qbittorrent:
-        condition: service_healthy  # Wait until qBittorrent is healthy
-
-  #
   # Define the 'overseerr' service for managing media library requests
   #
   overseerr:
@@ -516,8 +484,6 @@ services:
       HOMEPAGE_VAR_SONARR_KEY: ${HOMEPAGE_VAR_SONARR_KEY}                                        # Sonarr api key for widget
       HOMEPAGE_VAR_BAZARR_URL: ${HOMEPAGE_VAR_BAZARR_URL}:${BAZARR_WEBUI_PORT}                   # Bazarr internal URL for widget
       HOMEPAGE_VAR_BAZARR_KEY: ${HOMEPAGE_VAR_BAZARR_KEY}                                        # Bazarr api key for widget
-      HOMEPAGE_VAR_READARR_URL: ${HOMEPAGE_VAR_READARR_URL}:${READARR_WEBUI_PORT}                # Readarr internal URL for widget
-      HOMEPAGE_VAR_READARR_KEY: ${HOMEPAGE_VAR_READARR_KEY}                                      # Readarr api key for widget
       HOMEPAGE_VAR_OVERSEERR_URL: ${HOMEPAGE_VAR_OVERSEERR_URL}:${OVERSEERR_WEBUI_PORT}          # Overseerr internal URL for widget
       HOMEPAGE_VAR_OVERSEERR_KEY: ${HOMEPAGE_VAR_OVERSEERR_KEY}                                  # Overseerr api key for widget
       HOMEPAGE_VAR_PROWLARR_URL: ${HOMEPAGE_VAR_PROWLARR_URL}:${PROWLARR_WEBUI_PORT}             # Prowlarr internal URL for widget

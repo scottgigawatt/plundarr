@@ -20,7 +20,6 @@ Ahoy, ye scurvy devils! Welcome to the **`config`** directory of the grand vesse
 | 🧭 `prowlarr`       | Jack of all trackers, finder of torrents            |
 | ⚓ `qbittorrent`    | Torrentin' machine — yer cargo hauler               |
 | 🎬 `radarr`         | Movies! Add ‘em, find ‘em, automate ‘em             |
-| 📚 `readarr`        | For book-lovin' pirates — track and grab yer tomes |
 | 📺 `sonarr`         | TV shows, season packs, binge treasures             |
 | 🌬️ `speedtest-tracker` | Measure the wind in yer sails (or yer bandwidth) |
 

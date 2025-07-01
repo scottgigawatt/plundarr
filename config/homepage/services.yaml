@@ -47,16 +47,6 @@
           url: {{HOMEPAGE_VAR_BAZARR_URL}}
           key: {{HOMEPAGE_VAR_BAZARR_KEY}}
 
-    - Readarr:
-        icon: readarr.svg
-        href: https://readarr.{{HOMEPAGE_VAR_HOST_URL}}
-        description: Ebooks management
-        container: readarr-develop
-        widget:
-          type: readarr
-          url: {{HOMEPAGE_VAR_READARR_URL}}
-          key: {{HOMEPAGE_VAR_READARR_KEY}}
-
     - Overseerr:
         icon: overseerr.svg
         href: https://overseerr.{{HOMEPAGE_VAR_HOST_URL}}
@@ -87,12 +77,6 @@
               service_group: Media
               service_name: Sonarr
               color: teal
-              params:
-                unmonitored: true
-            - type: readarr
-              service_group: Media
-              service_name: Readarr
-              color: pink
               params:
                 unmonitored: true
 
