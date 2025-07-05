@@ -24,15 +24,17 @@ fi
 
 PROJECT_DIR="$1"
 
-# Wait for Docker to become available (max 60 seconds)
-echo "Checking if Docker is available..."
+# Wait for Docker daemon to become available (max 60 seconds)
+echo "Checking if Docker daemon is available..."
 WAIT_TIME=0
-until command -v docker >/dev/null 2>&1; do
-    if [ "$WAIT_TIME" -ge 60 ]; then
-        echo "ERROR: Docker did not become available after 60 seconds."
+MAX_WAIT=60
+
+while ! docker info >/dev/null 2>&1; do
+    if [ "$WAIT_TIME" -ge "$MAX_WAIT" ]; then
+        echo "ERROR: Docker daemon did not become available after $MAX_WAIT seconds."
         exit 1
     fi
-    echo "Docker not found. Waiting..."
+    echo "Docker daemon not ready. Waiting..."
     sleep 2
     WAIT_TIME=$((WAIT_TIME + 2))
 done
