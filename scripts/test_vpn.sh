@@ -1,20 +1,18 @@
 #!/bin/sh
 
 #
-# test_vpn.sh
+# test_vpn.sh: This script verifies whether a Docker container using a VPN network
+#              (such as with Gluetun) is routing traffic properly. It compares the
+#              public IP and location of the container with that of the host system.
 #
-# Purpose:
-#   This script verifies whether a Docker container using a VPN network
-#   (such as with Gluetun) is routing traffic properly. It compares the
-#   public IP and location of the container with that of the host system.
+# The script:
+#   - Runs a temporary Alpine container using the VPN network
+#   - Installs wget inside the container
+#   - Retrieves the container's public IP and location via ipinfo.io
+#   - Retrieves the host's public IP and location via ipinfo.io
+#   - Compares the two IP addresses to determine if the VPN is active
+#   - Pretty-prints all JSON responses, using jq if available
 #
-#   The script:
-#     - Runs a temporary Alpine container using the VPN network
-#     - Installs wget inside the container
-#     - Retrieves the container's public IP and location via ipinfo.io
-#     - Retrieves the host's public IP and location via ipinfo.io
-#     - Compares the two IP addresses to determine if the VPN is active
-#     - Pretty-prints all JSON responses, using jq if available
 
 # Constants
 CONTAINER_NAME="gluetun-latest"

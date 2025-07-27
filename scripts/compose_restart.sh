@@ -1,17 +1,17 @@
 #!/bin/sh
 
 #
-# This script is designed for Synology NAS (or any Linux system)
-# to fully stop, clean, and rebuild a Docker Compose project in a predictable and reliable way.
+# compose_restart.sh: This script is designed for Synology NAS (or any Linux system) to fully stop,
+#                     clean, and rebuild a Docker Compose project in a predictable and reliable way.
 #
-# Key behaviors:
-# - Accepts a single argument: the path to a Docker Compose project directory.
-# - Waits up to 60 seconds for the Docker CLI to become available (on boot).
-# - Navigates to the specified project directory and extracts a project name.
-# - Detects whether to use 'docker compose' (v2) or 'docker-compose' (v1).
-# - Shuts down all containers and removes volumes using 'down -v'.
-# - Rebuilds and starts the stack using 'up -d'.
-# - Logs status messages throughout for visibility and debugging.
+# The script:
+#   - Accepts a single argument: the path to a Docker Compose project directory.
+#   - Waits up to 60 seconds for the Docker CLI to become available (on boot).
+#   - Navigates to the specified project directory and extracts a project name.
+#   - Detects whether to use 'docker compose' (v2) or 'docker-compose' (v1).
+#   - Shuts down all containers and removes volumes using 'down -v'.
+#   - Rebuilds and starts the stack using 'up -d'.
+#   - Logs status messages throughout for visibility and debugging.
 #
 # Usage: sh compose_restart.sh /path/to/project
 #

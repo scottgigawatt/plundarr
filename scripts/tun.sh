@@ -1,9 +1,15 @@
 #!/bin/sh
 
 #
-# This script ensures the /dev/net/tun device exists on Synology Disk Station for use with VPN applications like gluetun.
-# The /dev/net/tun device is a virtual network device that implements point-to-point network tunnels. It is essential for
-# VPNs as it allows the encapsulation of packets, creating a secure and private connection over the internet.
+# tun.sh: Ensures the /dev/net/tun device exists and is properly configured
+#         on Synology Disk Station for use with VPN applications like Gluetun.
+#
+# The script:
+#   - Verifies if /dev/net/tun exists and creates it if missing
+#   - Creates the /dev/net directory if it doesn't exist
+#   - Creates the tun device node with the correct major/minor numbers
+#   - Sets the appropriate permissions on the device node
+#   - Loads the tun kernel module if it's not already loaded
 #
 
 echo "Starting script to ensure /dev/net/tun exists and is configured properly."

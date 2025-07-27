@@ -59,10 +59,10 @@ make up   # Hoist the stack!
 
 ## Hoist the Sails ⚓️
 
-> [!NOTE]
-> 🏴‍☠️ Before settin' sail, copy the example `.env` scroll and tweak it to yer own pirate code.
+> [!IMPORTANT]
+> 🏴‍☠️ Before settin' sail, copy [`example.env`](./example.env) to `.env` and tweak it to yer own pirate code.
 
-Manage Docker configuration environment variables in the [`.env`](./example.env) file. Override these variables easily on the command line when startin' the Docker Compose stack:
+Manage Docker configuration environment variables in the `.env` file. Override these variables easily on the command line when startin' the Docker Compose stack:
 
 ```bash
 # Hoist the Jolly Roger and clone the repository with submodules
@@ -76,13 +76,13 @@ cp example.env .env
 vim .env
 ```
 
-For more details, see the example env configuration here:
+For more details, see the example environment configuration here:
 
 - 🏴‍☠️ [Peek at the Pirate's Env Code](./example.env)
 
 ### 📜 Important Setup Scroll! ☠️
 
-> [!IMPORTANT]
+> [!WARNING]
 > ⚓️ Before hoistin' the sails, make sure to scour the [Docker Project Setup](./SETUP.md) scroll! It charts the course fer proper Docker networkin', Synology tweaks, firewall rules, and launchin' with Container Manager. Missin' these steps might leave yer ship dead in the water!
 
 The [Docker Project Setup](./SETUP.md) parchment covers:
@@ -96,7 +96,7 @@ Mind these steps, lest ye be marooned on a deserted isle! 🏝️
 
 ### Prep the Ship at Boot: Tunnels & Containers 🏴‍☠️⚙️
 
-> [!IMPORTANT]
+> [!CAUTION]
 > ⚓️ Without the `/dev/net/tun` device, yer VPN ship be sinkin' at the docks! Make sure it be ready at boot, or face the kraken.
 
 🏴‍☠️ Fer makin' sure `/dev/net/tun` be ready when yer Synology be wakin' from slumber, chart a course to the `tun.sh` scroll in the scripts hold an' follow the setup guide thar.
@@ -104,7 +104,7 @@ Mind these steps, lest ye be marooned on a deserted isle! 🏝️
 - 🦜 [Peruse the tun.sh Parchment](scripts/tun.sh)
 - 🗺️ [Chart the Boot-Up Course](scripts/README.md#-tunsh--forge-the-vpn-passage)
 
-> [!NOTE]
+> [!TIP]
 > 🧰 And if ye run into mutiny where yer containers don't hoist in proper order on reboot, call upon the `compose_restart.sh` scroll! This script tears down an' rebuilds yer Docker fleet clean and proper, ensurin' each ship sets sail in the right sequence after a stormy system reboot.
 
 To keep yer containers from stumblin' outta their hammocks in the wrong order 🛏️➡️🪝, study the scrolls below like a map to buried booty 🗺️💰☠️, yarrr!
@@ -213,9 +213,6 @@ Dig deeper in the Cap'n's Makefile:
 Plundarr has been tested on Synology DS1522+ and DS916+ runnin' DSM 7.2. But fear not, me hearties—this treasure ain't just fer Synology! She oughta run smooth on other shores like macOS, Linux, an' any land where Docker sails free.
 
 ## Articles of Agreement ⚖️
-
-> [!CAUTION]
-> 🏴‍☠️⚖️ Mind the legal seas! Ye must honor both the Apache 2 License and the MIT License, or be prepared to walk the plank.
 
 This project be licensed under the Apache 2 License—see the [LICENSE](LICENSE) scroll for details.
 
