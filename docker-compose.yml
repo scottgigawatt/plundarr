@@ -30,28 +30,31 @@
 version: "2.20"
 
 #
-# Setup base properties for all or most containers
-#
-x-base-container: &base-container  # YAML anchor for base container
-  pull_policy: always              # Ensure that the image is always pulled
-  logging:                         # Configure container logging options
-    driver: "json-file"            # Use JSON file logging driver
-    options:
-      max-size: ${LOG_MAX_SIZE}    # Maximum file size for logs files
-      max-file: ${LOG_MAX_FILE}    # Maximum number of log files to retain
-
-#
 # Setup default properties for all or most containers
 #
 x-default-container: &default-container  # YAML anchor for default container
-  <<: *base-container                    # Pull in the base container information
+  pull_policy: always                    # Ensure that the image is always pulled
   restart: unless-stopped                # Restart the container unless explicitly stopped
+  logging:                               # Configure container logging options
+    driver: "json-file"                  # Use JSON file logging driver
+    options:
+      max-size: ${LOG_MAX_SIZE}          # Maximum file size for logs files
+      max-file: ${LOG_MAX_FILE}          # Maximum number of log files to retain
 
 #
 # Setup default variables for all or most containers
 #
 x-default-environment: &default-environment  # YAML anchor for default environment
     TZ: ${TZ}                                # Set the appropriate timezone
+
+#
+# Setup default healthcheck timing settings for all or most containers
+#
+x-default-healthcheck-settings: &default-healthcheck-settings  # YAML anchor for healthcheck settings
+  interval: ${DEFAULT_HEALTHCHECK_INTERVAL}                    # Run the check at this interval
+  timeout: ${DEFAULT_HEALTHCHECK_TIMEOUT}                      # Fail if it exceeds this duration
+  start_period: ${DEFAULT_HEALTHCHECK_START_PERIOD}            # Grace period before checks start
+  retries: 5                                                   # Mark as unhealthy after 5 failures
 
 #
 # Setup default variables for arr-stack containers
@@ -73,29 +76,18 @@ x-arr-stack-container: &arr-stack-container  # YAML anchor for arr-stack contain
     <<: *arr-stack-environment               # Pull in the arr-stack environment information
 
 #
-# Standard healthcheck timing settings
-#
-x-default-healthcheck-settings: &default-healthcheck-settings  # YAML anchor for healthcheck settings
-  interval: ${DEFAULT_HEALTHCHECK_INTERVAL}                    # Run the check at this interval
-  timeout: ${DEFAULT_HEALTHCHECK_TIMEOUT}                      # Fail if it exceeds this duration
-  start_period: ${DEFAULT_HEALTHCHECK_START_PERIOD}            # Grace period before checks start
-  retries: 5                                                   # Mark as unhealthy after 5 failures
-
-#
 # Define the services section
 #
 services:
   #
-  # Define the 'privateerr' service to generate the PIA manual WireGuard configuration
+  # Define the 'privateerr' service to generate the PIA manual WireGuard configuration file
   #
   privateerr:
-    # Docker image build and container information
-    <<: *base-container                           # Pull in base container config (with no restart policy)
+    # Docker image and container information
+    <<: *default-container                        # Pull in default container config
     image: ${PRIVATEERR_IMAGE}:${PRIVATEERR_TAG}  # Pull image (use docker-compose.build.yml for local build override)
     container_name: privateerr-${PRIVATEERR_TAG}  # Append Docker image tag to container name
-    restart: "no"                                 # Do not restart the container once it exits
     hostname: privateerr                          # Set the container hostname
-    privileged: true                              # Run with full host privileges
 
     # Add container labels
     labels:
