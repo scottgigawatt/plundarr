@@ -17,7 +17,7 @@
 <p align="center">─── ⛧ ───</p>
 
 <p align="center">
-    <em>🔥 Got questions, dark bargains, or forbidden server scripts? Cross the Styx and <strong>Enter 🔥HADES🔥</strong>.</em>
+    <em>☠️ Questions or cursed code? Cross the Styx — <strong>Enter 🔥HADES🔥</strong>.</em>
 </p>
 
 <p align="center">
