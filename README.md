@@ -14,6 +14,18 @@
   <img src="https://img.shields.io/badge/Rum%20Supply-Full-orange" alt="Rum Supply" />
 </p>
 
+<p align="center">─── ⛧ ───</p>
+
+<p align="center">
+    <em>🔥 Got questions, dark bargains, or forbidden server scripts? Cross the Styx and <strong>Enter 🔥HADES🔥</strong>.</em>
+</p>
+
+<p align="center">
+  <a href="https://discord.gg/BpEGzWwGYf">
+    <img src="https://img.shields.io/discord/1403601106315116626?label=%F0%9F%94%A5HADES%F0%9F%94%A5&logo=discord&logoColor=white&color=5865F2" alt="🔥HADES🔥 Discord" />
+  </a>
+</p>
+
 <hr />
 
 # Plundarr 🏴‍☠️
