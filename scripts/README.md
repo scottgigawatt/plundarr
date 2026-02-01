@@ -171,6 +171,48 @@ This script helps ye confirm whether yer VPN tunnel be secure and active by comp
 
 ---
 
+### 🧭 `set-inotify-limits.sh` – Strengthen the Watchtowers
+
+This script raises Linux inotify limits on Synology so Plex can keep watch over massive media hoards without droppin’ the spyglass. When the watch limit be too small, Plex can’t track every folder and starts hollerin’ about “No space left on device,” even when the hold be full o’ storage.
+
+**Features:**
+
+- Raises inotify watch limits for large Plex libraries 🏰.
+- Verifies the new values be applied proper and true ⚖️.
+- Writes a persistent sysctl config when supported 📜.
+- Safe for high‑RAM ships like the DS1522+ and other beefy vessels 💪.
+
+🦜 [Study the set-inotify-limits.sh Map](./set-inotify-limits.sh)
+
+> [!TIP]
+> 🧭 Perfect fer pirates with giant media empires. More folders mean more watchtowers, and this script makes sure Plex never runs out o’ eyes.
+
+#### 🧙‍♂️ Raise the Watchtowers at Boot
+
+To keep yer limits high after every reboot, set the script to run at boot:
+
+1. **Open Synology’s Task Scheduler:**
+
+   - Go to **Control Panel** -> **Task Scheduler** 🗓️.
+
+2. **Create a Task for `set-inotify-limits.sh`:**
+
+   - Click **Create** -> **Triggered Task** -> **User-defined script** ✍️.
+   - Name the task, e.g., ‘Raise Watch Limits’ 🏰.
+   - Set the user to `root` 🧙.
+   - Set the event to **Boot-up** 🚀.
+   - Check **Enabled** ✅.
+   - Under **Task Settings**, enter the following command under **Run command** 💻:
+
+     ```sh
+     sh /volume1/docker/plundarr/scripts/set-inotify-limits.sh
+     ```
+
+   - Click **OK** to save the task 💾.
+
+> [!TIP]
+> 🏴‍☠️ This keeps Plex watchin’ every corner of yer library without missin’ a single crate o’ loot.
+
 May yer setup be swift and yer configurations flawless! 🌊🏴‍☠️
 
 May this scroll guide all yer Docker fleets to set sail true and in order! ⚓🏴‍☠️
