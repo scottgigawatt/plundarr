@@ -213,6 +213,8 @@ To keep yer limits high after every reboot, set the script to run at boot:
 > [!TIP]
 > 🏴‍☠️ This keeps Plex watchin’ every corner of yer library without missin’ a single crate o’ loot.
 
+---
+
 May yer setup be swift and yer configurations flawless! 🌊🏴‍☠️
 
 May this scroll guide all yer Docker fleets to set sail true and in order! ⚓🏴‍☠️
