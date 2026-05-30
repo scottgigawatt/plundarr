@@ -35,7 +35,7 @@ COMPOSE_ENV_FILE           ?= example.env
 COMPOSE_PRIVATEERR_SERVICE ?= privateerr
 COMPOSE_GLUETUN_SERVICE    ?= gluetun
 COMPOSE_DUPLICATI_SERVICE  ?= duplicati
-COMPOSE_OVERSEERR_SERVICE  ?= overseerr
+COMPOSE_SEERR_SERVICE      ?= seerr
 COMPOSE_HOMEPAGE_SERVICE   ?= homepage
 COMPOSE_TIMEOUT            ?= 30
 COMPOSE_STOP_OPTIONS       ?= --timeout $(COMPOSE_TIMEOUT)
@@ -207,7 +207,7 @@ $(OPEN):
 		"http://localhost:`$(COMPOSE) port $(COMPOSE_GLUETUN_SERVICE) 6767 | cut -d: -f2`" \
 		"http://localhost:`$(COMPOSE) port $(COMPOSE_GLUETUN_SERVICE) 8787 | cut -d: -f2`" \
 		"http://localhost:`$(COMPOSE) port $(COMPOSE_DUPLICATI_SERVICE) 8200 | cut -d: -f2`" \
-		"http://localhost:`$(COMPOSE) port $(COMPOSE_OVERSEERR_SERVICE) 5055 | cut -d: -f2`" \
+		"http://localhost:`$(COMPOSE) port $(COMPOSE_SEERR_SERVICE) 5055 | cut -d: -f2`" \
 		"http://localhost:`$(COMPOSE) port $(COMPOSE_HOMEPAGE_SERVICE) 3000 | cut -d: -f2`"
 
 #

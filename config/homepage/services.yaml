@@ -47,15 +47,15 @@
           url: {{HOMEPAGE_VAR_BAZARR_URL}}
           key: {{HOMEPAGE_VAR_BAZARR_KEY}}
 
-    - Overseerr:
-        icon: overseerr.svg
-        href: https://overseerr.{{HOMEPAGE_VAR_HOST_URL}}
+    - Seerr:
+        icon: seerr.svg
+        href: https://seerr.{{HOMEPAGE_VAR_HOST_URL}}
         description: Requests management
-        container: overseerr-latest
+        container: seerr-latest
         widget:
-          type: overseerr
-          url: {{HOMEPAGE_VAR_OVERSEERR_URL}}
-          key: {{HOMEPAGE_VAR_OVERSEERR_KEY}}
+          type: seerr
+          url: {{HOMEPAGE_VAR_SEERR_URL}}
+          key: {{HOMEPAGE_VAR_SEERR_KEY}}
 
 - Data:
     - Calendar:

@@ -18,7 +18,7 @@
 # - sonarr: https://github.com/Sonarr/Sonarr
 # - bazarr: https://github.com/morpheus65535/bazarr
 # - ~~readarr~~ (scuttled) → use Calibre Web Automated: https://github.com/scottgigawatt/calibre-web-automated
-# - overseerr: https://github.com/sct/overseerr
+# - seerr: https://github.com/seerr-team/seerr
 # - cleanuparr: https://github.com/Cleanuparr/Cleanuparr
 # - speedtest-tracker: https://docs.speedtest-tracker.dev
 # - duplicati: https://www.duplicati.com
@@ -339,22 +339,34 @@ services:
         condition: service_healthy  # Wait until Radarr is healthy
 
   #
-  # Define the 'overseerr' service for managing media library requests
+  # Define the 'seerr' service for managing media library requests
   #
-  overseerr:
+  seerr:
     # Docker image and container information
-    <<: *arr-stack-container                               # Pull in arr-stack container config
-    image: lscr.io/linuxserver/overseerr:${OVERSEERR_TAG}  # Run using the specified tag
-    container_name: overseerr-${OVERSEERR_TAG}             # Append Docker image tag to container name
-    hostname: overseerr                                    # Set the container hostname
+    <<: *default-container              # Pull in default container config
+    image: ${SEERR_IMAGE}:${SEERR_TAG}  # Run using the specified image and tag
+    container_name: seerr-${SEERR_TAG}  # Append Docker image tag to container name
+    hostname: seerr                     # Set the container hostname
+    init: true                          # Use Docker's init process for signal handling
+
+    # Define the container environment
+    environment:
+      <<: *default-environment       # Pull in the default environment information
+      LOG_LEVEL: ${SEERR_LOG_LEVEL}  # Container log level
+      PORT: ${SEERR_PORT}            # Seerr internal web UI port
 
     # Define the host and container ports
     ports:
-      - ${OVERSEERR_WEBUI_PORT}:5055  # Overseerr web UI port
+      - ${SEERR_WEBUI_PORT}:${SEERR_PORT}  # Seerr web UI port
 
     # Mount host directories into the container
     volumes:
-      - ${OVERSEERR_CONFIG_PATH}:/config:rw  # Persistent config files
+      - ${SEERR_CONFIG_PATH}:/app/config:rw  # Persistent config files
+
+    # Define container healthcheck to verify Seerr connectivity
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:${SEERR_PORT}/api/v1/settings/public || exit 1"]  # Check if Seerr web UI is reachable
+      <<: *default-healthcheck-settings                                                                                            # Pull in default healthcheck settings
 
   #
   # Define the 'cleanuparr' service for Sonarr, Radarr, and qBittorrent file cleanup
@@ -477,8 +489,8 @@ services:
       HOMEPAGE_VAR_SONARR_KEY: ${HOMEPAGE_VAR_SONARR_KEY}                                        # Sonarr api key for widget
       HOMEPAGE_VAR_BAZARR_URL: ${HOMEPAGE_VAR_BAZARR_URL}:${BAZARR_WEBUI_PORT}                   # Bazarr internal URL for widget
       HOMEPAGE_VAR_BAZARR_KEY: ${HOMEPAGE_VAR_BAZARR_KEY}                                        # Bazarr api key for widget
-      HOMEPAGE_VAR_OVERSEERR_URL: ${HOMEPAGE_VAR_OVERSEERR_URL}:${OVERSEERR_WEBUI_PORT}          # Overseerr internal URL for widget
-      HOMEPAGE_VAR_OVERSEERR_KEY: ${HOMEPAGE_VAR_OVERSEERR_KEY}                                  # Overseerr api key for widget
+      HOMEPAGE_VAR_SEERR_URL: ${HOMEPAGE_VAR_SEERR_URL}:${SEERR_WEBUI_PORT}                      # Seerr internal URL for widget
+      HOMEPAGE_VAR_SEERR_KEY: ${HOMEPAGE_VAR_SEERR_KEY}                                          # Seerr api key for widget
       HOMEPAGE_VAR_PROWLARR_URL: ${HOMEPAGE_VAR_PROWLARR_URL}:${PROWLARR_WEBUI_PORT}             # Prowlarr internal URL for widget
       HOMEPAGE_VAR_PROWLARR_KEY: ${HOMEPAGE_VAR_PROWLARR_KEY}                                    # Prowlarr api key for widget
       HOMEPAGE_VAR_QBITTORRENT_URL: ${HOMEPAGE_VAR_QBITTORRENT_URL}:${QBITTORRENT_WEBUI_PORT}    # qBittorrent internal URL for widget
