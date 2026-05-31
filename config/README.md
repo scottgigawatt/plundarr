@@ -15,7 +15,7 @@ Ahoy, ye scurvy devils! Welcome to the **`config`** directory of the grand vesse
 | 🌩️ `flaresolverr`   | Bypasses cloudflare storms to get yer bounty        |
 | 🛡️ `gluetun`        | VPN shieldin' yer traffic from nosy navies          |
 | 🗺️ `homepage`       | Central map to all yer ports — a true dashboard     |
-| 📜 `overseerr`      | Request board for new treasures — media requests ahoy |
+| 📜 `seerr`          | Request board for new treasures — media requests ahoy |
 | 🕵️‍♂️ `privateerr`     | Private index sailing — keepin' yer loot secret     |
 | 🧭 `prowlarr`       | Jack of all trackers, finder of torrents            |
 | ⚓ `qbittorrent`    | Torrentin' machine — yer cargo hauler               |
