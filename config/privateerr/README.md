@@ -1,23 +1,16 @@
 # 🏴‍☠️ Privateerr Configuration ☠️
 
-Greetings, swashbucklers! This be the config directory for **Privateerr**, yer trusty Docker Compose setup for Private Internet Access VPN connections with WireGuard.
+Greetings, swashbucklers! This be the config directory for **Privateerr**, the service that generates Private Internet Access WireGuard config and port-forwarding metadata for Gluetun in Plundarr.
 
 ## Purpose 🦜⚓️
 
 > [!NOTE]
-> 🏴‍☠️ This here setup bundles the PIA scripts with WireGuard tools into a Docker image ready to chart safe VPN waters!
+> 🏴‍☠️ Plundarr pulls the published Privateerr image from GHCR. The PIA manual connection scripts live upstream in Privateerr, not in this repo.
 
-Privateerr be a Docker Compose configuration fer buildin' Private Internet Access manual connection scripts into a Docker image with the required WireGuard tools. It also generates a configuration file for native WireGuard connections. Hoist the sails and set yer course for secure VPN connections, crew!
-
-> [!TIP]
-> 🦜 The PIA scripts come pre-loaded in this treasure chest via a handy submodule—no extra scavengin’ needed!
-
-This repo includes the [PIA manual-connections](https://github.com/pia-foss/manual-connections) repository as a submodule at `config/privateerr/docker/pia`, so it be included in the image build.
-
-Ye can use the output WireGuard configuration file to configure a VPN client like Gluetun for secure connections.
+Privateerr generates [`../gluetun/wireguard/wg0.conf`](../gluetun/wireguard/wg0.conf) and [`../gluetun/wireguard/privateerr.env`](../gluetun/wireguard/privateerr.env). Gluetun consumes both files when the stack starts so PIA WireGuard and port forwarding can sail together.
 
 > [!IMPORTANT]
-> ⚓️ The generated `wg0.conf` be yer golden ticket to secure VPN tunnels—guard it like yer finest loot!
+> ⚓️ The generated `wg0.conf` and `privateerr.env` can contain live VPN and port-forwarding details. Guard them like yer finest loot.
 
 ## Instructions 🗺️
 
@@ -26,11 +19,11 @@ Ye can use the output WireGuard configuration file to configure a VPN client lik
 
 To use this directory:
 
-1. Run Privateerr and start the container.
-2. Wait for the setup to complete and the [`config/gluetun/wireguard/wg0.conf`](../gluetun/wireguard/wg0.conf) file to be updated with the new configuration.
-3. Find yer treasure map in this directory.
+1. Copy [`../../example.env`](../../example.env) to `.env` and set yer PIA values.
+2. Run `make up`.
+3. Wait for Privateerr to update [`../gluetun/wireguard/wg0.conf`](../gluetun/wireguard/wg0.conf) and [`../gluetun/wireguard/privateerr.env`](../gluetun/wireguard/privateerr.env).
 
-Ye can then use this file to configure a VPN client like Gluetun for secure connections.
+The files in this directory are for Privateerr logs and service state. The WireGuard treasure map and port-forwarding metadata land under `config/gluetun/wireguard`.
 
 > [!CAUTION]
 > 🏴‍☠️⚠️ Forgettin’ to check the generated config file could leave yer ship exposed to unwanted eyes!

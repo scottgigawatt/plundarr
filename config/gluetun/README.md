@@ -4,7 +4,12 @@ Greetings, pirate crew! This be the treasure trove holdin' the configuration fil
 
 ## Purpose 🌊
 
-Gluetun be yer steadfast mate, providin' secure VPN connections to ensure yer online activities be safe from pryin' eyes and treacherous waters.
+Gluetun be yer steadfast mate, providin' secure PIA WireGuard VPN connections and port forwarding to ensure yer online activities be safe from pryin' eyes and treacherous waters.
+
+Privateerr writes `wireguard/wg0.conf` and `wireguard/privateerr.env` before Gluetun starts. The wrapper at [`scripts/gluetun-entrypoint-wrapper.sh`](scripts/gluetun-entrypoint-wrapper.sh) waits for that metadata, exports `PIA_WG_SERVER_NAME` as Gluetun's `SERVER_NAMES`, and then starts Gluetun's original entrypoint so PIA port forwarding can claim the right harbor.
+
+> [!TIP]
+> PIA port forwarding needs `SERVER_NAMES` when Gluetun runs with `VPN_SERVICE_PROVIDER=custom`, `VPN_TYPE=wireguard`, and `VPN_PORT_FORWARDING=on`.
 
 Fer more information, cast yer eye on the [docker-compose.yml](../../docker-compose.yml) file in the root of the repository.
 

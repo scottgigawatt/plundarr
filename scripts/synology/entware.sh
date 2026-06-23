@@ -1,7 +1,12 @@
 #!/bin/sh
 
 #
-# entware.sh: This script ensures that Entware is properly set up on boot for Synology NAS.
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# entware.sh: This script is intended to run directly on Synology NAS to
+#             ensure Entware is mounted, started, and refreshed on boot.
 #
 # The script:
 #   - Creates the /opt directory if it does not exist and mounts Entware to /opt.
@@ -10,12 +15,16 @@
 #   - Updates the Entware package list.
 #
 
-# Mount/Start Entware
-mkdir -p /opt  # Create /opt directory if it does not exist
-mount -o bind "/volume1/@Entware/opt" /opt
-/opt/etc/init.d/rc.unslung start
+#
+# Mount and start Entware.
+#
+mkdir -p /opt                               # Create /opt directory if it does not exist
+mount -o bind "/volume1/@Entware/opt" /opt  # Mount Entware to /opt
+/opt/etc/init.d/rc.unslung start            # Start Entware services
 
-# Add Entware Profile in Global Profile
+#
+# Add the Entware profile to the global profile when it is not already included.
+#
 if grep -qF '/opt/etc/profile' /etc/profile; then
     echo "Confirmed: Entware Profile in Global Profile"
 else
@@ -27,5 +36,7 @@ else
 EOF
 fi
 
-# Update Entware List
+#
+# Update the Entware package list.
+#
 /opt/bin/opkg update

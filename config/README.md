@@ -1,6 +1,6 @@
 # ⚓️ Config Booty
 
-Ahoy, ye scurvy devils! Welcome to the **`config`** directory of the grand vessel _Plundarr_. This here be the treasure chest holdin' all the config maps for every fine piece of software in our Docker stack. Clone this repo, chart yer own configs, and set sail with ease — _no scallywag left behind_! 🏴‍☠️
+Ahoy, ye scurvy devils! Welcome to the **`config`** directory of the grand vessel _Plundarr_. This here be the treasure chest holdin' all the config maps for every fine piece of software in our Docker stack, includin' PIA WireGuard and port-forwarding scrolls. Clone this repo, chart yer own configs, and set sail with ease — _no scallywag left behind_! 🏴‍☠️
 
 > [!IMPORTANT]
 > Every tool has its own subfolder in `config/`, ready to drop anchor with persistent volumes. Ye need only fill in the blanks, and hoist the docker-compose sails!
@@ -13,10 +13,10 @@ Ahoy, ye scurvy devils! Welcome to the **`config`** directory of the grand vesse
 | 🧹 `cleanuparr`     | Cleans up the seas of orphaned files and debris     |
 | 💾 `duplicati`      | Backup ye booty — protect it from Davy Jones        |
 | 🌩️ `flaresolverr`   | Bypasses cloudflare storms to get yer bounty        |
-| 🛡️ `gluetun`        | VPN shieldin' yer traffic from nosy navies          |
+| 🛡️ `gluetun`        | PIA WireGuard tunnel and port-forwarding quartermaster |
 | 🗺️ `homepage`       | Central map to all yer ports — a true dashboard     |
 | 📜 `seerr`          | Request board for new treasures — media requests ahoy |
-| 🕵️‍♂️ `privateerr`     | Private index sailing — keepin' yer loot secret     |
+| 🕵️‍♂️ `privateerr`     | PIA WireGuard and port-forwarding mapmaker for Gluetun |
 | 🧭 `prowlarr`       | Jack of all trackers, finder of torrents            |
 | ⚓ `qbittorrent`    | Torrentin' machine — yer cargo hauler               |
 | 🎬 `radarr`         | Movies! Add ‘em, find ‘em, automate ‘em             |

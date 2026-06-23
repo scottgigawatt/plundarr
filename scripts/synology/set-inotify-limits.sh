@@ -1,8 +1,13 @@
 #!/bin/sh
 
 #
-# set-inotify-limits.sh: Raises Linux inotify limits on Synology to support
-#                        large Plex media libraries.
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# set-inotify-limits.sh: This script is intended to run directly on Synology
+#                        NAS to raise Linux inotify limits for large Plex
+#                        media libraries.
 #
 # Plex uses inotify watches to monitor folders for changes. When the default
 # limits are too low, Plex can fail to watch all directories and may log
@@ -19,25 +24,37 @@
 # actually in use, so increasing the ceiling does not force full allocation.
 #
 # The script:
-#   - Detects a usable sysctl binary
-#   - Raises inotify watch, instance, and queue limits immediately
-#   - Verifies the values were applied
-#   - Writes a persistent sysctl drop-in if supported
+#   - Detects a usable sysctl binary.
+#   - Raises inotify watch, instance, and queue limits immediately.
+#   - Verifies the values were applied.
+#   - Writes a persistent sysctl drop-in if supported.
 #
 
 echo "Starting script to raise inotify limits for Plex."
 
+#
+# Default values for inotify limits. These can be overridden by setting
+# environment variables before running the script.
+#
 WATCHES_DEFAULT="262144"
 INSTANCES_DEFAULT="2048"
 QUEUED_EVENTS_DEFAULT="65536"
 
+#
+# Read environment variables or use defaults.
+#
 WATCHES="${WATCHES:-$WATCHES_DEFAULT}"
 INSTANCES="${INSTANCES:-$INSTANCES_DEFAULT}"
 QUEUED_EVENTS="${QUEUED_EVENTS:-$QUEUED_EVENTS_DEFAULT}"
 
+#
+# Initialize sysctl binary path variable.
+#
 SYSCTL_BIN=""
 
-# Find sysctl in common Synology locations
+#
+# Find sysctl in common Synology locations.
+#
 if [ -x /sbin/sysctl ]; then
     SYSCTL_BIN="/sbin/sysctl"
 elif [ -x /usr/sbin/sysctl ]; then
@@ -48,27 +65,37 @@ elif [ -x /usr/bin/sysctl ]; then
     SYSCTL_BIN="/usr/bin/sysctl"
 fi
 
-# Ensure script is running as root
+#
+# Ensure script is running as root.
+#
 if [ "$(id -u)" != "0" ]; then
     echo "This script must run as root."
     exit 1
 fi
 
-# Ensure sysctl exists
+#
+# Ensure sysctl exists.
+#
 if [ -z "$SYSCTL_BIN" ]; then
     echo "sysctl binary not found."
     exit 1
 fi
 
+#
+# Function to set and verify sysctl values.
+#
 set_and_verify() {
     KEY="$1"
     VALUE="$2"
 
+    # Set the sysctl value.
     echo "Setting $KEY to $VALUE."
     "$SYSCTL_BIN" -w "$KEY=$VALUE" >/dev/null 2>&1
 
+    # Verify the value was set correctly.
     CURRENT="$("$SYSCTL_BIN" -n "$KEY" 2>/dev/null)"
 
+    # Check if the current value matches the expected value.
     if [ "$CURRENT" != "$VALUE" ]; then
         echo "Failed to set $KEY. Expected $VALUE but got $CURRENT."
         exit 1
@@ -77,12 +104,16 @@ set_and_verify() {
     echo "$KEY successfully set to $CURRENT."
 }
 
-# Apply settings immediately
+#
+# Apply settings immediately.
+#
 set_and_verify "fs.inotify.max_user_watches" "$WATCHES"
 set_and_verify "fs.inotify.max_user_instances" "$INSTANCES"
 set_and_verify "fs.inotify.max_queued_events" "$QUEUED_EVENTS"
 
-# Persist configuration if sysctl.d exists
+#
+# Persist configuration if sysctl.d exists.
+#
 if [ -d /etc/sysctl.d ]; then
     CONF_FILE="/etc/sysctl.d/99-plundarr-inotify.conf"
 
@@ -101,6 +132,9 @@ else
     echo "/etc/sysctl.d not found. Skipping persistent configuration."
 fi
 
+#
+# Display final values for confirmation.
+#
 echo "Final inotify values:"
 "$SYSCTL_BIN" fs.inotify.max_user_watches 2>/dev/null
 "$SYSCTL_BIN" fs.inotify.max_user_instances 2>/dev/null

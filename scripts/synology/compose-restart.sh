@@ -1,8 +1,13 @@
 #!/bin/sh
 
 #
-# compose_restart.sh: This script is designed for Synology NAS (or any Linux system) to fully stop,
-#                     clean, and rebuild a Docker Compose project in a predictable and reliable way.
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# compose-restart.sh: This script is intended to run directly on Synology NAS
+#                     to fully stop, clean, and rebuild a Docker Compose
+#                     project in a predictable and reliable way.
 #
 # The script:
 #   - Accepts a single argument: the path to a Docker Compose project directory.
@@ -13,10 +18,12 @@
 #   - Rebuilds and starts the stack using 'up -d'.
 #   - Logs status messages throughout for visibility and debugging.
 #
-# Usage: sh compose_restart.sh /path/to/project
+# Usage: sh compose-restart.sh /path/to/project
 #
 
-# Check if a directory path was provided as an argument
+#
+# Check if a directory path was provided as an argument.
+#
 if [ -z "$1" ]; then
     echo "Usage: $0 /path/to/compose/project"
     exit 1
@@ -24,12 +31,18 @@ fi
 
 PROJECT_DIR="$1"
 
-# Wait for Docker daemon to become available (max 60 seconds)
+#
+# Wait for Docker daemon to become available.
+#
 echo "Checking if Docker daemon is available..."
 WAIT_TIME=0
 MAX_WAIT=60
 
+#
+# Loop until Docker is available or the maximum wait time is reached.
+#
 while ! docker info >/dev/null 2>&1; do
+    # If the wait time exceeds the maximum, exit with an error.
     if [ "$WAIT_TIME" -ge "$MAX_WAIT" ]; then
         echo "ERROR: Docker daemon did not become available after $MAX_WAIT seconds."
         exit 1
@@ -39,16 +52,22 @@ while ! docker info >/dev/null 2>&1; do
     WAIT_TIME=$((WAIT_TIME + 2))
 done
 
-# Change to the specified project directory, or exit with error if not found
+#
+# Change to the specified project directory, or exit with error if not found.
+#
 cd "$PROJECT_DIR" || {
     echo "ERROR: Could not find project directory at $PROJECT_DIR"
     exit 1
 }
 
-# Extract the last part of the directory path to use as a human-readable name
+#
+# Extract the last part of the directory path to use as a human-readable name.
+#
 PROJECT_NAME=$(basename "$PROJECT_DIR")
 
-# Detect whether to use 'docker compose' or 'docker-compose'
+#
+# Detect whether to use 'docker compose' or 'docker-compose'.
+#
 if docker compose version >/dev/null 2>&1; then
     COMPOSE_CMD="docker compose"
 elif command -v docker-compose >/dev/null 2>&1; then
@@ -58,13 +77,19 @@ else
     exit 1
 fi
 
-# Tear down the running stack, including named volumes
+#
+# Tear down the running stack, including named volumes.
+#
 echo "Stopping and removing current containers and volumes for '$PROJECT_NAME'..."
 $COMPOSE_CMD down -v
 
-# Rebuild and start the stack in detached mode
+#
+# Rebuild and start the stack in detached mode.
+#
 echo "Rebuilding and starting containers for '$PROJECT_NAME' with enforced startup order..."
 $COMPOSE_CMD up -d
 
-# Report success
+#
+# Report success.
+#
 echo "'$PROJECT_NAME' stack restarted successfully."
