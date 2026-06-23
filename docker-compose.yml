@@ -13,19 +13,19 @@
 # environment-specific settings for a seamless VPN setup.
 #
 # Services included:
-#   - privateerr: https://github.com/scottgigawatt/privateerr
-#   - gluetun: https://github.com/qdm12/gluetun
-#   - flaresolverr: https://github.com/FlareSolverr/FlareSolverr
-#   - prowlarr: https://github.com/Prowlarr/Prowlarr
-#   - qbittorrent: https://github.com/qbittorrent/qBittorrent
-#   - radarr: https://github.com/Radarr/Radarr
-#   - sonarr: https://github.com/Sonarr/Sonarr
-#   - bazarr: https://github.com/morpheus65535/bazarr
-#   - seerr: https://github.com/seerr-team/seerr
-#   - cleanuparr: https://github.com/Cleanuparr/Cleanuparr
-#   - speedtest-tracker: https://docs.speedtest-tracker.dev
-#   - duplicati: https://www.duplicati.com
-#   - homepage: https://gethomepage.dev/latest
+#   - privateerr:         https://github.com/scottgigawatt/privateerr
+#   - gluetun:            https://github.com/qdm12/gluetun
+#   - flaresolverr:       https://github.com/FlareSolverr/FlareSolverr
+#   - prowlarr:           https://github.com/Prowlarr/Prowlarr
+#   - qbittorrent:        https://github.com/qbittorrent/qBittorrent
+#   - radarr:             https://github.com/Radarr/Radarr
+#   - sonarr:             https://github.com/Sonarr/Sonarr
+#   - bazarr:             https://github.com/morpheus65535/bazarr
+#   - seerr:              https://github.com/seerr-team/seerr
+#   - cleanuparr:         https://github.com/Cleanuparr/Cleanuparr
+#   - speedtest-tracker:  https://docs.speedtest-tracker.dev
+#   - duplicati:          https://www.duplicati.com
+#   - homepage:           https://gethomepage.dev/latest
 #
 
 #
