@@ -136,39 +136,22 @@ To keep yer containers from stumblin' outta their hammocks in the wrong order �
 
 ### 🔎 Spyglass Check
 
-To confirm yer VPN sails be catchin' wind:
+Basic test voyages:
 
 ```bash
-❯ make test-vpn
-Inspectin' the VPN tunnel and port-forwarding loot.
-[plundarr-vpn-test.sh] Inspecting Privateerr container.
-[plundarr-vpn-test.sh] Inspecting Gluetun container.
-[plundarr-vpn-test.sh] Inspecting generated WireGuard config.
-[plundarr-vpn-test.sh] Inspecting generated Gluetun metadata.
-[plundarr-vpn-test.sh] Checking Gluetun VPN status inside Gluetun.
-[plundarr-vpn-test.sh] Checking Gluetun forwarded port.
-[plundarr-vpn-test.sh] Forwarded port is 12345.
-[plundarr-vpn-test.sh] All checks passed. The WireGuard map floats, the tunnel breathes, and the port be plundered.
-```
-
-> [!WARNING]
-> ⚠️☠️ `make test-vpn` expects the stack to be running and Gluetun to have produced a valid forwarded port. If it fails, batten down and check yer `.env` scroll, Gluetun logs, and [`test/README.md`](./test/README.md).
-
-For a smaller VPN-only voyage, run:
-
-```bash
+make test-vpn
 make test-e2e
-```
-
-That target starts only `privateerr` and `gluetun`, waits for health, validates VPN output, brings the stack down, and restores example config.
-
-For the full broadside, run:
-
-```bash
 make test-stack
 ```
 
-That target starts the entire stack, waits for every healthcheck-enabled service, validates VPN output, confirms Gluetun's forwarded port, and verifies qBittorrent is listening on that same port.
+> [!WARNING]
+> ⚠️☠️ VPN tests can use real PIA credentials from `.env`. Read the full testing chart before a live voyage: [`test/README.md`](./test/README.md).
+
+To scrub generated service config back to a fresh-clone state without deleting `.env`, run:
+
+```bash
+make reset-service-configs
+```
 
 > [!NOTE]
 > 🏴‍☠️ The `privateerr` image generates the sacred PIA WireGuard config and port-forwarding metadata scroll that powers yer Gluetun VPN sails. Plundarr pulls this image straight from GitHub Container Registry (GHCR), no buildin' or submodule cargo required.
@@ -195,29 +178,30 @@ Run `make help` to spy the full treasure map of commands. Let automation be the 
 Usage: make [TARGET]
 
 Targets:
-  all             Starts the service stack.
-  build-depends   Ensures build dependencies are installed.
-  check-env       Ensures .env exists before Compose-backed targets run.
-  down            Stops and removes the service stack.
-  clean           Stops the stack and restores example config files.
-  nuke            Removes containers, images, generated files, and restores example config.
-  reset-config    Restores example wg0.conf and privateerr.env files.
-  test-vpn        Validates running Privateerr and Gluetun VPN runtime state.
-  test-e2e        Starts Privateerr, Gluetun, and qBittorrent, validates VPN state, then removes them.
-  test-stack      Starts every service, waits for health, then validates VPN and qBittorrent state.
-  test-down       Stops the stack and restores example config files.
-  test-logs       Shows logs for the service stack.
-  up              (Re)creates and starts every service.
-  config          Renders the Docker Compose model.
-  env             Prints the evaluated docker compose default env configuration.
-  print-config    Prints the raw uncommented docker compose yaml configuration.
-  print-env       Prints the raw uncommented docker compose env configuration.
-  logs            Shows logs for the service stack.
-  open            Opens the service sites in the default web browser.
-  run             Alias for up, open, logs.
-  start           Alias for up.
-  stop            Alias for down.
-  help            Displays this help message.
+  all                    Starts the service stack.
+  build-depends          Ensures build dependencies are installed.
+  check-env              Ensures .env exists before Compose-backed targets run.
+  down                   Stops and removes the service stack.
+  clean                  Stops the stack and restores example config files.
+  nuke                   Removes containers, images, generated files, and restores example config.
+  reset-config           Restores example wg0.conf and privateerr.env files.
+  reset-service-configs  Removes ignored generated service config files without deleting .env.
+  test-vpn               Validates running Privateerr and Gluetun VPN runtime state.
+  test-e2e               Starts Privateerr, Gluetun, and qBittorrent, validates VPN state, then removes them.
+  test-stack             Starts every service, waits for health, then validates VPN and qBittorrent state.
+  test-down              Stops the stack and restores example config files.
+  test-logs              Shows logs for the service stack.
+  up                     (Re)creates and starts every service.
+  config                 Renders the Docker Compose model.
+  env                    Prints the evaluated docker compose default env configuration.
+  print-config           Prints the raw uncommented docker compose yaml configuration.
+  print-env              Prints the raw uncommented docker compose env configuration.
+  logs                   Shows logs for the service stack.
+  open                   Opens the service sites in the default web browser.
+  run                    Alias for up, open, logs.
+  start                  Alias for up.
+  stop                   Alias for down.
+  help                   Displays this help message.
 ```
 
 Dig deeper in the Cap'n's Makefile:

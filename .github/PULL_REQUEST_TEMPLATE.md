@@ -18,6 +18,7 @@
 - [ ] `make test-e2e` if VPN, Privateerr, Gluetun, or qBittorrent behavior changed
 - [ ] `make test-stack` if Compose healthchecks, service wiring, or full-stack behavior changed
 - [ ] `make reset-config` restored example generated config
+- [ ] `make reset-service-configs` if generated service config needs a fresh-clone scrub
 - [ ] `pre-commit run --all-files`
 
 ## Secrets check 🛡️

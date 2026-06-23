@@ -30,6 +30,7 @@ make config
 make test-vpn
 make test-e2e
 make test-stack
+make reset-service-configs
 pre-commit run --all-files
 ```
 
@@ -48,3 +49,4 @@ Anything else that might help track down the bug.
 - [ ] No live `wg0.conf`.
 - [ ] No live `privateerr.env`.
 - [ ] No private logs.
+- [ ] No live Duplicati encryption key or Web UI password.

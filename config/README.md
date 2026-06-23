@@ -26,6 +26,16 @@ Ahoy, ye scurvy devils! Welcome to the **`config`** directory of the grand vesse
 > [!TIP]
 > Each folder follows the same general format. Config files go in, persistent storage stays. If ye be usin' `docker-compose`, these mounts be auto-mapped for ye.
 
+## Reset the Hold 🧽
+
+To scrub generated service config back to a fresh-clone state without deleting yer local `.env`, run:
+
+```bash
+make reset-service-configs
+```
+
+This removes ignored generated files under `config/`, leaves tracked README files and seed config aboard, and restores the example WireGuard and Privateerr metadata files.
+
 > [!CAUTION]
 > Don't commit any sensitive keys, secrets, or VPN credentials to this here public code — or the sharks'll be on ye in no time.
 

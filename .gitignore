@@ -16,6 +16,7 @@ config/*/*
 !config/gluetun/wireguard/privateerr.env
 !config/gluetun/scripts/
 !config/gluetun/scripts/gluetun-entrypoint-wrapper.sh
+!config/gluetun/scripts/qbittorrent-port-forwarding.sh
 !config/homepage/*
 !config/privateerr/*
 config/homepage/logs/

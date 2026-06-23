@@ -17,6 +17,7 @@ NUKE=nuke
 BUILD_DEPENDS=build-depends
 CHECK_ENV=check-env
 RESET_CONFIG=reset-config
+RESET_SERVICE_CONFIGS=reset-service-configs
 TEST_VPN=test-vpn
 TEST_E2E=test-e2e
 TEST_STACK=test-stack
@@ -98,7 +99,7 @@ DEPENDENCIES=docker
 # Targets that are not files (i.e. never up-to-date); these will run every
 # time the target is called or required.
 #
-.PHONY: $(ALL) $(DOWN) $(CLEAN) $(NUKE) $(BUILD_DEPENDS) $(CHECK_ENV) $(RESET_CONFIG) $(TEST_VPN) $(TEST_E2E) $(TEST_STACK) $(TEST_DOWN) $(TEST_LOGS) $(UP) $(CONFIG) $(ENV) $(PRINT_CONFIG) $(PRINT_ENV) $(LOGS) $(OPEN) $(HELP) $(RUN) $(START) $(STOP)
+.PHONY: $(ALL) $(DOWN) $(CLEAN) $(NUKE) $(BUILD_DEPENDS) $(CHECK_ENV) $(RESET_CONFIG) $(RESET_SERVICE_CONFIGS) $(TEST_VPN) $(TEST_E2E) $(TEST_STACK) $(TEST_DOWN) $(TEST_LOGS) $(UP) $(CONFIG) $(ENV) $(PRINT_CONFIG) $(PRINT_ENV) $(LOGS) $(OPEN) $(HELP) $(RUN) $(START) $(STOP)
 
 #
 # $(ALL): Default makefile target. Starts the service stack.
@@ -146,6 +147,19 @@ $(RESET_CONFIG):
 	@echo "\nRestorin' example maps for safe check-in. 🧭"
 	cp $(PRIVATEERR_EXAMPLE_WG_CONFIG) $(PRIVATEERR_GENERATED_WG_CONFIG)
 	cp $(PRIVATEERR_EXAMPLE_METADATA) $(PRIVATEERR_GENERATED_METADATA)
+
+#
+# $(RESET_SERVICE_CONFIGS): Stops the stack when possible and removes ignored generated service config files.
+#
+$(RESET_SERVICE_CONFIGS):
+	@echo "\nScrubbin' generated service config back to a fresh clone. 🧽"
+	@if [ -f "$(ENV_FILE)" ]; then \
+		$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) down $(COMPOSE_DOWN_OPTIONS); \
+	else \
+		echo "No $(ENV_FILE) found. Skippin' container stop and scrubbin' files only. 🗺️"; \
+	fi
+	git clean -fdX config
+	@$(MAKE) --no-print-directory $(RESET_CONFIG)
 
 #
 # $(TEST_VPN): Validates a running stack's Privateerr and Gluetun VPN runtime state.
@@ -352,29 +366,30 @@ $(HELP):
 	@echo "Usage: make [TARGET]"
 	@echo ""
 	@echo "Targets:"
-	@echo "  $(ALL)             Starts the service stack."
-	@echo "  $(BUILD_DEPENDS)   Ensures build dependencies are installed."
-	@echo "  $(CHECK_ENV)       Ensures $(ENV_FILE) exists before Compose-backed targets run."
-	@echo "  $(DOWN)            Stops and removes the service stack."
-	@echo "  $(CLEAN)           Stops the stack and restores example config files."
-	@echo "  $(NUKE)            Removes containers, images, generated files, and restores example config."
-	@echo "  $(RESET_CONFIG)    Restores example wg0.conf and privateerr.env files."
-	@echo "  $(TEST_VPN)        Validates running Privateerr and Gluetun VPN runtime state."
-	@echo "  $(TEST_E2E)        Starts Privateerr, Gluetun, and qBittorrent, validates VPN state, then removes them."
-	@echo "  $(TEST_STACK)      Starts every service, waits for health, then validates VPN and qBittorrent state."
-	@echo "  $(TEST_DOWN)       Stops the stack and restores example config files."
-	@echo "  $(TEST_LOGS)       Shows logs for the service stack."
-	@echo "  $(UP)              (Re)creates and starts every service."
-	@echo "  $(CONFIG)          Renders the Docker Compose model."
-	@echo "  $(ENV)             Prints the evaluated docker compose default env configuration."
-	@echo "  $(PRINT_CONFIG)    Prints the raw uncommented docker compose yaml configuration."
-	@echo "  $(PRINT_ENV)       Prints the raw uncommented docker compose env configuration."
-	@echo "  $(LOGS)            Shows logs for the service stack."
-	@echo "  $(OPEN)            Opens the service sites in the default web browser."
-	@echo "  $(RUN)             Alias for $(UP), $(OPEN), $(LOGS)."
-	@echo "  $(START)           Alias for $(UP)."
-	@echo "  $(STOP)            Alias for $(DOWN)."
-	@echo "  $(HELP)            Displays this help message."
+	@echo "  $(ALL)                    Starts the service stack."
+	@echo "  $(BUILD_DEPENDS)          Ensures build dependencies are installed."
+	@echo "  $(CHECK_ENV)              Ensures $(ENV_FILE) exists before Compose-backed targets run."
+	@echo "  $(DOWN)                   Stops and removes the service stack."
+	@echo "  $(CLEAN)                  Stops the stack and restores example config files."
+	@echo "  $(NUKE)                   Removes containers, images, generated files, and restores example config."
+	@echo "  $(RESET_CONFIG)           Restores example wg0.conf and privateerr.env files."
+	@echo "  $(RESET_SERVICE_CONFIGS)  Removes ignored generated service config files without deleting .env."
+	@echo "  $(TEST_VPN)               Validates running Privateerr and Gluetun VPN runtime state."
+	@echo "  $(TEST_E2E)               Starts Privateerr, Gluetun, and qBittorrent, validates VPN state, then removes them."
+	@echo "  $(TEST_STACK)             Starts every service, waits for health, then validates VPN and qBittorrent state."
+	@echo "  $(TEST_DOWN)              Stops the stack and restores example config files."
+	@echo "  $(TEST_LOGS)              Shows logs for the service stack."
+	@echo "  $(UP)                     (Re)creates and starts every service."
+	@echo "  $(CONFIG)                 Renders the Docker Compose model."
+	@echo "  $(ENV)                    Prints the evaluated docker compose default env configuration."
+	@echo "  $(PRINT_CONFIG)           Prints the raw uncommented docker compose yaml configuration."
+	@echo "  $(PRINT_ENV)              Prints the raw uncommented docker compose env configuration."
+	@echo "  $(LOGS)                   Shows logs for the service stack."
+	@echo "  $(OPEN)                   Opens the service sites in the default web browser."
+	@echo "  $(RUN)                    Alias for $(UP), $(OPEN), $(LOGS)."
+	@echo "  $(START)                  Alias for $(UP)."
+	@echo "  $(STOP)                   Alias for $(DOWN)."
+	@echo "  $(HELP)                   Displays this help message."
 
 #
 # Alias for test-down.
