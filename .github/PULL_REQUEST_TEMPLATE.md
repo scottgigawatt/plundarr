@@ -15,7 +15,7 @@
 - [ ] `make config`
 - [ ] `make env` if `.env` formatting changed
 - [ ] `make test-vpn` if validating an already-running Privateerr/Gluetun pair
-- [ ] `make test-e2e` if VPN, Privateerr, Gluetun, or qBittorrent behavior changed
+- [ ] `make test-e2e` if VPN, Privateerr, Gluetun, qBittorrent, or SABnzbd behavior changed
 - [ ] `make test-stack` if Compose healthchecks, service wiring, or full-stack behavior changed
 - [ ] `make reset-config` restored example generated config
 - [ ] `make reset-service-configs` if generated service config needs a fresh-clone scrub

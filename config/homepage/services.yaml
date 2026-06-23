@@ -115,6 +115,16 @@
           username: {{HOMEPAGE_VAR_QBITTORRENT_USER}}
           password: {{HOMEPAGE_VAR_QBITTORRENT_PASS}}
 
+    - SABnzbd:
+        icon: sabnzbd.svg
+        href: {{HOMEPAGE_VAR_SABNZBD_HREF}}
+        description: Usenet downloads management
+        container: sabnzbd-latest
+        widget:
+          type: sabnzbd
+          url: {{HOMEPAGE_VAR_SABNZBD_URL}}
+          key: {{HOMEPAGE_VAR_SABNZBD_KEY}}
+
     - Speedtest Tracker:
         icon: mdi-rabbit
         href: {{HOMEPAGE_VAR_SPEEDTEST_HREF}}

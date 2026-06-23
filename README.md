@@ -58,6 +58,7 @@ Plundarr be a collection of Docker Compose configurations to run a shipshape arr
 | FlareSolverr      | 🔥 Outsmart them scurvy web defenses and keep yer plunderin' smooth as a fine barrel o' rum.                                                                | [More info](https://github.com/FlareSolverr/FlareSolverr)            |
 | Prowlarr          | 🐾 The savvy first mate fer wranglin' all yer indexers, keepin' yer treasure map up-to-date with the latest and greatest booty.                             | [More info](https://github.com/Prowlarr/Prowlarr)                    |
 | qBittorrent       | 🌊 Yer trusty first mate fer torrentin', hoist the colors and download with the might of a thousand cannons.                                                | [More info](https://github.com/qbittorrent/qBittorrent)              |
+| SABnzbd           | 📰 Usenet cargo runner fer grabbin' NZBs, repairin' the haul, and droppin' finished loot into the same download hold.                                      | [More info](https://sabnzbd.org)                                     |
 | Radarr            | 🎥 Chart yer course fer cinematic riches! Automatically plunder new films and keep yer ship's library filled to the brim.                                   | [More info](https://github.com/Radarr/Radarr)                        |
 | Sonarr            | 📺 Set sail on the seas of TV shows! Fetch new episodes and keep yer watchlist shipshape and Bristol fashion.                                               | [More info](https://github.com/Sonarr/Sonarr)                        |
 | Bazarr            | 🦜 The parrot on yer shoulder squawkin' subtitles in many tongues fer all yer movies and TV shows.                                                          | [More info](https://github.com/morpheus65535/bazarr)                 |
@@ -120,7 +121,7 @@ Mind these steps, lest ye be marooned on a deserted isle! 🏝️
 
 To keep yer containers from stumblin' outta their hammocks in the wrong order 🛏️➡️🪝, study the scrolls below like a map to buried booty 🗺️💰☠️, yarrr!
 
-- ⚙️ [Inspect the compose-restart.sh Scroll](scripts/synology/compose-restart.sh)
+- ⚙️ [Inspect the compose-restart.sh Scroll](scripts/compose-restart.sh)
 - ⏱️ [Schedule the Crew with Task Scheduler](scripts/README.md)
 
 ### 🔎 Spyglass Check
@@ -176,7 +177,7 @@ Targets:
   reset-config           Restores example wg0.conf and privateerr.env files.
   reset-service-configs  Removes ignored generated service config files without deleting .env.
   test-vpn               Validates running Privateerr and Gluetun VPN runtime state.
-  test-e2e               Starts Privateerr, Gluetun, and qBittorrent, validates VPN state, then removes them.
+  test-e2e               Starts Privateerr, Gluetun, qBittorrent, and SABnzbd, validates VPN state, then removes them.
   test-stack             Starts every service, waits for health, then validates VPN and qBittorrent state.
   test-down              Stops the stack and restores example config files.
   test-logs              Shows logs for the service stack.

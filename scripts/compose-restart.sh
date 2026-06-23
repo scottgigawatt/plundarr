@@ -5,9 +5,9 @@
 #
 # Licensed under the Apache License, Version 2.0.
 #
-# compose-restart.sh: This script is intended to run directly on Synology NAS
-#                     to fully stop, clean, and rebuild a Docker Compose
-#                     project in a predictable and reliable way.
+# compose-restart.sh: This script is intended to run directly on a host with
+#                     Docker Compose to stop and restart a Compose project in
+#                     a predictable way.
 #
 # The script:
 #   - Accepts a single argument: the path to a Docker Compose project directory.

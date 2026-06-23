@@ -8,11 +8,23 @@ Radarr be yer trusty mate, helpin' ye manage and organize yer movie collection, 
 
 ## Downloads and Movie Imports 📦
 
-Radarr sees qBittorrent downloads at `/downloads` and yer movie library at `/movies`. In Plundarr, `/downloads` maps to the same `HOST_DOWNLOADS_PATH` used by qBittorrent, and `/movies` maps to `HOST_MOVIES_PATH`.
+Radarr sees qBittorrent and SABnzbd downloads at `/downloads` and yer movie library at `/movies`. In Plundarr, `/downloads` maps to `HOST_DOWNLOADS_PATH`, while qBittorrent writes under `/downloads/torrents` and SABnzbd writes under `/downloads/usenet`.
 
-Keep Radarr's download client path pointed at `/downloads`. That shared path lets Radarr import completed movie downloads cleanly and use hardlinks when the host filesystem supports them.
+Keep Radarr's download client paths pointed at `/downloads`. That shared path lets Radarr import completed movie downloads cleanly and use hardlinks when the host filesystem supports them.
 
 If ye keep seeding, leave the original torrent payload in `/downloads` so qBittorrent can keep sharing it while Radarr manages the imported movie in `/movies`.
+
+Use these download client categories:
+
+```text
+qBittorrent category: radarr
+qBittorrent category save path: /downloads/torrents/movies
+
+SABnzbd category: radarr
+SABnzbd category folder/path: movies
+```
+
+For Usenet, point SABnzbd completed jobs at `/downloads/usenet` and temporary jobs at `/downloads/usenet/incomplete`; the `radarr` category then lands movie jobs in `/downloads/usenet/movies`.
 
 Fer more details, set yer spyglass on the [docker-compose.yml](../../docker-compose.yml) file in the root of the repository.
 

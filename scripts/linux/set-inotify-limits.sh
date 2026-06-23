@@ -5,9 +5,9 @@
 #
 # Licensed under the Apache License, Version 2.0.
 #
-# set-inotify-limits.sh: This script is intended to run directly on Synology
-#                        NAS to raise Linux inotify limits for large Plex
-#                        media libraries.
+# set-inotify-limits.sh: This script is intended to run directly on a Linux
+#                        host to raise inotify limits for large Plex media
+#                        libraries.
 #
 # Plex uses inotify watches to monitor folders for changes. When the default
 # limits are too low, Plex can fail to watch all directories and may log
@@ -53,7 +53,7 @@ QUEUED_EVENTS="${QUEUED_EVENTS:-$QUEUED_EVENTS_DEFAULT}"
 SYSCTL_BIN=""
 
 #
-# Find sysctl in common Synology locations.
+# Find sysctl in common Linux locations.
 #
 if [ -x /sbin/sysctl ]; then
     SYSCTL_BIN="/sbin/sysctl"
