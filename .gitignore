@@ -18,3 +18,5 @@ config/*/*
 !config/gluetun/scripts/gluetun-entrypoint-wrapper.sh
 !config/homepage/*
 !config/privateerr/*
+config/homepage/logs/
+config/privateerr/logs/

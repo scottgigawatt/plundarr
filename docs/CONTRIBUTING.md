@@ -39,9 +39,14 @@ Edit `.env` with yer own values. Keep that file private.
 Useful commands:
 
 ```bash
-docker compose config --quiet
+make check-env
+make config
+make env
 make up
 make test-vpn
+make test-e2e
+make test-stack
+make reset-config
 pre-commit run --all-files
 ```
 
@@ -63,7 +68,7 @@ pre-commit run --all-files
 Before opening a pull request:
 
 - Run relevant `make` targets.
-- Run `docker compose config --quiet`.
+- Run `make config`.
 - Run `pre-commit run --all-files` if hooks are installed.
 - Confirm no secrets, live VPN configs, or logs slipped into the hold.
 - Explain what changed and why.
@@ -72,6 +77,6 @@ Tiny pull requests be easier to review than a kraken-sized rewrite with six unre
 
 ## Security Reports 🛡️
 
-Do not report security problems in public issues or pull requests. Use the [security policy](SECURITY.md), or hail the captain in [🔥HADES🔥 Discord](https://discord.gg/BpEGzWwGYf) for a safer channel.
+Do not report security problems in public issues or pull requests. Use the [security policy](SECURITY.md), or hail the captain in [🔥HADES🔥](https://discord.gg/BpEGzWwGYf) Discord for a safer channel.
 
 Fair winds, clean diffs, and may yer YAML indent on the first try. ☠️

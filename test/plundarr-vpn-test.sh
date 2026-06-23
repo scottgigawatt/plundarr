@@ -16,6 +16,7 @@
 #   - Verifies Privateerr generated privateerr.env.
 #   - Checks Gluetun's unauthenticated health endpoint inside Gluetun.
 #   - Checks Gluetun's forwarded_port file when port forwarding is required.
+#   - Checks qBittorrent port-forwarding state when requested.
 #   - Writes validation output to stdout and the Plundarr test log file.
 #
 
@@ -30,9 +31,11 @@ set -euo pipefail
 : "${PLUNDARR_COMPOSE_FILE:=docker-compose.yml}"
 : "${PLUNDARR_PRIVATEERR_SERVICE:=privateerr}"
 : "${PLUNDARR_GLUETUN_SERVICE:=gluetun}"
+: "${PLUNDARR_QBITTORRENT_SERVICE:=}"
 : "${PLUNDARR_CONFIG_PATH:=config/gluetun/wireguard}"
 : "${PLUNDARR_GLUETUN_PATH:=config/gluetun}"
 : "${PLUNDARR_HEALTH_URL:=http://127.0.0.1:9999}"
+: "${PLUNDARR_QBITTORRENT_URL:=http://127.0.0.1:8080}"
 : "${PLUNDARR_REQUIRE_PORT_FORWARD:=true}"
 : "${PLUNDARR_WAIT_SECONDS:=0}"
 : "${PLUNDARR_LOG_PATH:=test/logs/plundarr-vpn-test.log}"
@@ -151,6 +154,21 @@ wait_for_healthy_container() {
 }
 
 #
+# Extract a basic scalar value from qBittorrent's preferences JSON.
+#
+json_value() {
+    json_payload="$1"
+    json_key="$2"
+
+    printf '%s\n' "${json_payload}" \
+        | grep -o "\"${json_key}\"[[:space:]]*:[[:space:]]*\"[^\"]*\"\\|\"${json_key}\"[[:space:]]*:[[:space:]]*true\\|\"${json_key}\"[[:space:]]*:[[:space:]]*false\\|\"${json_key}\"[[:space:]]*:[[:space:]]*[0-9][0-9]*" \
+        | head -n 1 \
+        | cut -d ':' -f 2- \
+        | tr -d '[:space:]' \
+        | tr -d '"'
+}
+
+#
 # Resolve and validate the target service containers.
 #
 privateerr_container_id="$(container_id_for_service "${PLUNDARR_PRIVATEERR_SERVICE}")"
@@ -224,6 +242,61 @@ if [[ "${PLUNDARR_REQUIRE_PORT_FORWARD}" == "true" ]]; then
     fi
 
     log "Forwarded port is ${forwarded_port}."
+fi
+
+#
+# Confirm qBittorrent picked up Gluetun's forwarded port when requested.
+#
+if [[ -n "${PLUNDARR_QBITTORRENT_SERVICE}" ]]; then
+    qbittorrent_container_id="$(container_id_for_service "${PLUNDARR_QBITTORRENT_SERVICE}")"
+
+    log "Inspecting qBittorrent container."
+    require_running_container "${qbittorrent_container_id}" "${PLUNDARR_QBITTORRENT_SERVICE}"
+    if [[ "${PLUNDARR_WAIT_SECONDS}" -gt 0 ]]; then
+        wait_for_healthy_container "${qbittorrent_container_id}" "${PLUNDARR_QBITTORRENT_SERVICE}"
+    else
+        require_healthy_container "${qbittorrent_container_id}" "${PLUNDARR_QBITTORRENT_SERVICE}"
+    fi
+
+    if [[ "${PLUNDARR_REQUIRE_PORT_FORWARD}" != "true" ]]; then
+        log "qBittorrent validation requires port forwarding."
+        exit 1
+    fi
+
+    log "Checking qBittorrent port-forwarding preferences."
+    qbittorrent_preferences="$(
+        docker exec \
+            -e PLUNDARR_QBITTORRENT_URL="${PLUNDARR_QBITTORRENT_URL}" \
+            "${gluetun_container_id}" \
+            sh -ec 'wget -qO- "${PLUNDARR_QBITTORRENT_URL}/api/v2/app/preferences"'
+    )"
+
+    qbittorrent_listen_port="$(json_value "${qbittorrent_preferences}" "listen_port")"
+    qbittorrent_random_port="$(json_value "${qbittorrent_preferences}" "random_port")"
+    qbittorrent_upnp="$(json_value "${qbittorrent_preferences}" "upnp")"
+    qbittorrent_network_interface="$(json_value "${qbittorrent_preferences}" "current_network_interface")"
+
+    if [[ "${qbittorrent_listen_port}" != "${forwarded_port}" ]]; then
+        log "qBittorrent listen_port is ${qbittorrent_listen_port}, expected ${forwarded_port}."
+        exit 1
+    fi
+
+    if [[ "${qbittorrent_random_port}" != "false" ]]; then
+        log "qBittorrent random_port is ${qbittorrent_random_port}, expected false."
+        exit 1
+    fi
+
+    if [[ "${qbittorrent_upnp}" != "false" ]]; then
+        log "qBittorrent upnp is ${qbittorrent_upnp}, expected false."
+        exit 1
+    fi
+
+    if [[ -z "${qbittorrent_network_interface}" ]] || [[ "${qbittorrent_network_interface}" == "lo" ]]; then
+        log "qBittorrent current_network_interface is invalid: ${qbittorrent_network_interface}."
+        exit 1
+    fi
+
+    log "qBittorrent listens on forwarded port ${qbittorrent_listen_port}."
 fi
 
 log "All checks passed. The WireGuard map floats, the tunnel breathes, and the port be plundered."

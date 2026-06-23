@@ -162,10 +162,20 @@ make test-e2e
 
 That target starts only `privateerr` and `gluetun`, waits for health, validates VPN output, brings the stack down, and restores example config.
 
+For the full broadside, run:
+
+```bash
+make test-stack
+```
+
+That target starts the entire stack, waits for every healthcheck-enabled service, validates VPN output, confirms Gluetun's forwarded port, and verifies qBittorrent is listening on that same port.
+
 > [!NOTE]
 > 🏴‍☠️ The `privateerr` image generates the sacred PIA WireGuard config and port-forwarding metadata scroll that powers yer Gluetun VPN sails. Plundarr pulls this image straight from GitHub Container Registry (GHCR), no buildin' or submodule cargo required.
 >
 > Privateerr writes [`config/gluetun/wireguard/wg0.conf`](./config/gluetun/wireguard/wg0.conf) and [`config/gluetun/wireguard/privateerr.env`](./config/gluetun/wireguard/privateerr.env). Gluetun starts through [`config/gluetun/scripts/gluetun-entrypoint-wrapper.sh`](./config/gluetun/scripts/gluetun-entrypoint-wrapper.sh), reads `PIA_WG_SERVER_NAME`, exports `SERVER_NAMES`, and then hands control back to Gluetun so PIA port forwarding can dock proper.
+>
+> Gluetun also calls [`config/gluetun/scripts/qbittorrent-port-forwarding.sh`](./config/gluetun/scripts/qbittorrent-port-forwarding.sh) when PIA assigns or removes a forwarded port. That script updates qBittorrent's listening port through the local Web API so yer torrent sails catch the right wind.
 >
 > This keeps Synology DSM Container Manager on one main `docker-compose.yml` voyage: Privateerr, Gluetun, and the downstream services all set sail together.
 
@@ -187,12 +197,14 @@ Usage: make [TARGET]
 Targets:
   all             Starts the service stack.
   build-depends   Ensures build dependencies are installed.
+  check-env       Ensures .env exists before Compose-backed targets run.
   down            Stops and removes the service stack.
   clean           Stops the stack and restores example config files.
   nuke            Removes containers, images, generated files, and restores example config.
   reset-config    Restores example wg0.conf and privateerr.env files.
   test-vpn        Validates running Privateerr and Gluetun VPN runtime state.
-  test-e2e        Starts Privateerr and Gluetun, validates VPN state, then removes them.
+  test-e2e        Starts Privateerr, Gluetun, and qBittorrent, validates VPN state, then removes them.
+  test-stack      Starts every service, waits for health, then validates VPN and qBittorrent state.
   test-down       Stops the stack and restores example config files.
   test-logs       Shows logs for the service stack.
   up              (Re)creates and starts every service.

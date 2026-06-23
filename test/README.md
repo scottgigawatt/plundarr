@@ -4,13 +4,14 @@ Welcome to the test hold, where Plundarr checks that Privateerr and Gluetun left
 
 ## What Gets Tested 🦜
 
-The VPN test script does not use a throwaway test image. It validates the actual Privateerr and Gluetun Compose containers:
+The VPN test script does not use a throwaway test image. It validates the actual Privateerr, Gluetun, and qBittorrent Compose containers:
 
 - Privateerr generated PIA WireGuard `wg0.conf`.
 - Privateerr generated PIA port-forwarding metadata in `privateerr.env`.
 - Privateerr and Gluetun containers are running and healthy.
 - Gluetun is reachable through its unauthenticated health endpoint from inside the Gluetun container.
 - PIA port forwarding produced a usable forwarded port when required.
+- qBittorrent listens on Gluetun's forwarded port when qBittorrent validation is enabled.
 
 ## Test Voyages 🧭
 
@@ -24,9 +25,9 @@ make test-vpn
 
 This checks the existing Privateerr and Gluetun containers, then verifies generated files and port forwarding.
 
-### Privateerr + Gluetun E2E
+### Privateerr + Gluetun + qBittorrent E2E
 
-Use this when ye want Make to launch only the VPN pair, validate it, then clean up:
+Use this when ye want Make to launch only the VPN pair plus qBittorrent, validate it, then clean up:
 
 ```bash
 make test-e2e
@@ -35,11 +36,29 @@ make test-e2e
 This target:
 
 1. Restores example config.
-2. Starts only `privateerr` and `gluetun` with Docker Compose.
-3. Waits for both services to report healthy.
+2. Starts only `privateerr`, `gluetun`, and `qbittorrent` with Docker Compose.
+3. Waits for those services to report healthy.
 4. Runs `test/plundarr-vpn-test.sh`.
 5. Brings the Compose stack down.
 6. Restores example config again.
+
+### Full Stack Test
+
+Use this when ye want Make to launch every service, wait for health, and validate the full port-forwarding chain:
+
+```bash
+make test-stack
+```
+
+This target:
+
+1. Restores example config.
+2. Starts every Compose service.
+3. Waits for healthcheck-enabled containers to report healthy.
+4. Verifies Privateerr output, Gluetun health, Gluetun forwarded port, and qBittorrent port sync.
+5. Leaves the stack running on success.
+6. Prints Compose status and recent logs on failure.
+7. Restores example config after validation.
 
 > [!WARNING]
 > 🧨 VPN tests can involve real PIA credentials in `.env`. Do not commit live credentials, generated VPN configs, forwarded ports, or logs from yer secret treasure chest.
