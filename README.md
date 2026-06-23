@@ -1,5 +1,7 @@
+<!-- markdownlint-disable-next-line MD033 MD041 -->
 <hr />
 
+<!-- markdownlint-disable MD033 -->
 <p align="center">
   <em>🏴‍☠️ Enjoyin' the spoils? Drop us a ⭐️ an' let the whole crew know about this fine treasure!</em>
 </p>
@@ -31,6 +33,8 @@
   </a>
 </p>
 
+<!-- markdownlint-enable MD033 -->
+<!-- markdownlint-disable-next-line MD033 -->
 <hr />
 
 # Plundarr 🏴‍☠️
@@ -44,21 +48,6 @@ Plundarr be a collection of Docker Compose configurations to run a shipshape arr
 - [Contributing](./docs/CONTRIBUTING.md)
 - [Keep to the Code](./docs/CODE_OF_CONDUCT.md)
 - [Security Policy](./docs/SECURITY.md)
-
-## ⚡️ Quick Start
-
-In a rush to set sail? Here's all ye need:
-
-```bash
-git clone git@github.com:scottgigawatt/plundarr.git
-cd plundarr
-cp example.env .env
-vim .env  # Adjust yer settings
-make up   # Hoist the stack!
-```
-
-> [!TIP]
-> Run `make help` to spy 🔎 all the commands at yer disposal.
 
 ## Treasure Map 🗺️
 
@@ -154,7 +143,7 @@ make reset-service-configs
 ```
 
 > [!NOTE]
-> 🏴‍☠️ The `privateerr` image generates the sacred PIA WireGuard config and port-forwarding metadata scroll that powers yer Gluetun VPN sails. Plundarr pulls this image straight from GitHub Container Registry (GHCR), no buildin' or submodule cargo required.
+> 🏴‍☠️ The `privateerr` image generates the sacred PIA WireGuard config and port-forwarding metadata scroll that powers yer Gluetun VPN sails. Plundarr pulls this image straight from GitHub Container Registry (GHCR).
 >
 > Privateerr writes [`config/gluetun/wireguard/wg0.conf`](./config/gluetun/wireguard/wg0.conf) and [`config/gluetun/wireguard/privateerr.env`](./config/gluetun/wireguard/privateerr.env). Gluetun starts through [`config/gluetun/scripts/gluetun-entrypoint-wrapper.sh`](./config/gluetun/scripts/gluetun-entrypoint-wrapper.sh), reads `PIA_WG_SERVER_NAME`, exports `SERVER_NAMES`, and then hands control back to Gluetun so PIA port forwarding can dock proper.
 >
@@ -220,7 +209,7 @@ Privateerr uses the unmodified upstream [PIA manual-connections](https://github.
 
 ---
 
-```
+```text
                |    |    |
               )_)  )_)  )_)
              )___))___))___)\

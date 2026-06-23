@@ -498,9 +498,9 @@ services:
 
     # Define the container environment
     environment:
-      <<: *arr-stack-environment                                           # Pull in the arr-stack environment
-      SETTINGS_ENCRYPTION_KEY: ${DUPLICATI_SETTINGS_ENCRYPTION_KEY}        # Required settings database encryption key
-      DUPLICATI__WEBSERVICE_PASSWORD: ${DUPLICATI_WEBSERVICE_PASSWORD}     # Web UI password
+      <<: *arr-stack-environment                                        # Pull in the arr-stack environment
+      SETTINGS_ENCRYPTION_KEY: ${DUPLICATI_SETTINGS_ENCRYPTION_KEY}     # Required settings database encryption key
+      DUPLICATI__WEBSERVICE_PASSWORD: ${DUPLICATI_WEBSERVICE_PASSWORD}  # Web UI password
 
     # Define the host and container ports
     ports:
