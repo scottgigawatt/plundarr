@@ -233,6 +233,7 @@ $(RESET_SERVICE_CONFIGS):
 	else \
 		echo "No $(ENV_FILE) found. Skippin' container stop and scrubbin' files only. 🗺️"; \
 	fi
+
 	git clean -fdX config
 	@$(MAKE) --no-print-directory $(RESET_CONFIG)
 
