@@ -1,6 +1,6 @@
 # Plundarr Docker Setup Guide ⚓🐳🏴‍☠️
 
-Avast ye! This here be the guide for riggin' up yer Docker Compose fleet. It covers the treacherous waters of Synology DiskStations with DSM 7.2 or later, but landlubbers usin' Linux and macOS can sail by these charts too! 🏴‍☠️
+Avast ye! This here be the guide for riggin' up yer Docker Compose fleet with PIA WireGuard and port-forwarding support. It covers the treacherous waters of Synology DiskStations with DSM 7.2 or later, but landlubbers usin' Linux and macOS can sail by these charts too! 🏴‍☠️
 
 ## Chartin' the Docker Network Waters 🌍🧭
 
@@ -53,7 +53,7 @@ If your Synology DiskStation firewall is enabled, allow traffic for the custom D
    - ✅ **Action**: Select `Allow`
 4. 💾 Click **OK** to apply.
 
-This allows containers to communicate internally within the defined Docker network.
+This allows containers to communicate internally within the defined Docker network while Gluetun hauls the VPN and port-forwarding traffic through the proper PIA tunnel.
 
 ### Launchin' Yer Fleet 📦🚀
 

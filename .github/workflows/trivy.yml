@@ -1,0 +1,38 @@
+name: "Scour the Cargo Hold for Curses 🔎"
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: "17 9 * * 1"
+  workflow_dispatch:
+
+jobs:
+  trivy:
+    name: "Sniff the Bilge for Bad Juju 🧪"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+      - name: "Grab the Treasure Map 🗺️"
+        uses: actions/checkout@v7.0.0
+
+      - name: "Sweep the Hold with Trivy 🔦"
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln,secret,misconfig
+          format: sarif
+          output: trivy-results.sarif
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+
+      - name: "Hoist the Curse Ledger 📜"
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: trivy-results.sarif

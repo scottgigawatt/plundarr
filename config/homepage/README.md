@@ -12,6 +12,15 @@ More info about **Homepage** can be found [here](https://gethomepage.dev/latest/
 
 When ye run the Docker container, this here directory will be mounted as the configuration folder. Tweak it to yer heart's content to make yer navigation smooth and shipshape!
 
+## 🧭 LAN Links and Widget URLs
+
+Homepage uses two kinds of URL variables:
+
+- `HOMEPAGE_VAR_*_HREF` controls where a dashboard card sends yer browser.
+- `HOMEPAGE_VAR_*_URL` controls where a Homepage widget talks to the service API.
+
+For a simple LAN with no reverse proxy, set the `HREF` values to full IP-and-port links, like `http://192.168.1.210:7878`. Keep widget `URL` values pointed at the service endpoint Homepage can reach from inside Docker.
+
 Fer more details, consult the ship's log in the main repository: [docker-compose.yml](../../docker-compose.yml).
 
 ## 📜 Useful Links

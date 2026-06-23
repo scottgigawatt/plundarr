@@ -1,0 +1,33 @@
+name: "Batten Down the PR Hatches 🏴‍☠️"
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  validate:
+    name: "Shake the YAML Riggin' 🧭"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: "Grab the Treasure Map 🗺️"
+        uses: actions/checkout@v7.0.0
+
+      - name: "Copy the Env Scroll 📜"
+        run: cp example.env .env
+
+      - name: "Interrogate the Compose Cannons 💣"
+        run: docker compose --env-file example.env config --quiet
+
+      - name: "Restore the Decoy Maps 🧭"
+        run: make reset-config
+
+      - name: "Check for Stowaway Secrets 🕵️"
+        run: git diff --exit-code -- config/gluetun/wireguard test/examples
+
+      - name: "Fire the Pre-Commit Cannons 💥"
+        uses: pre-commit/action@v3.0.1

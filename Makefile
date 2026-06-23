@@ -1,22 +1,29 @@
 #
-# Makefile for managing Docker Compose services.
-# This Makefile includes targets for building, starting, stopping, and cleaning Docker services.
-# It ensures that necessary dependencies are installed and Docker images are built with specified options.
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# Makefile: Automation for managing Plundarr Docker Compose services, config
+#           resets, VPN validation, logs, and local convenience commands.
 #
 
 #
 # Makefile target names
 #
 ALL=all
-STOP=stop
 DOWN=down
 CLEAN=clean
+NUKE=nuke
 BUILD_DEPENDS=build-depends
-BUILD=build
-UP=up
-BUILD_UP=build-up
-START=start
+CHECK_ENV=check-env
+RESET_CONFIG=reset-config
+RESET_SERVICE_CONFIGS=reset-service-configs
 TEST_VPN=test-vpn
+TEST_E2E=test-e2e
+TEST_STACK=test-stack
+TEST_DOWN=test-down
+TEST_LOGS=test-logs
+UP=up
 CONFIG=config
 ENV=env
 PRINT_CONFIG=print-config
@@ -25,31 +32,63 @@ LOGS=logs
 OPEN=open
 HELP=help
 RUN=run
+START=start
+STOP=stop
+
+#
+# Docker Compose service names
+#
+PRIVATEERR_SERVICE  ?= privateerr
+GLUETUN_SERVICE     ?= gluetun
+QBITTORRENT_SERVICE ?= qbittorrent
+DUPLICATI_SERVICE   ?= duplicati
+SEERR_SERVICE       ?= seerr
+HOMEPAGE_SERVICE    ?= homepage
+
+#
+# Config reset paths
+#
+PRIVATEERR_EXAMPLE_WG_CONFIG   ?= test/examples/example-wg0.conf
+PRIVATEERR_EXAMPLE_METADATA    ?= test/examples/example-privateerr.env
+PRIVATEERR_GENERATED_WG_CONFIG ?= config/gluetun/wireguard/wg0.conf
+PRIVATEERR_GENERATED_METADATA  ?= config/gluetun/wireguard/privateerr.env
+PLUNDARR_GENERATED_PATHS       ?= config/privateerr/logs \
+	config/gluetun/forwarded_port \
+	config/gluetun/ip \
+	config/gluetun/piaportforward.json \
+	config/gluetun/servers \
+	test/logs
 
 #
 # Docker Compose options
 #
-COMPOSE_FILE               ?= docker-compose.yml
-COMPOSE_BUILD_FILE         ?= docker-compose.build.yml
-COMPOSE_ENV_FILE           ?= example.env
-COMPOSE_PRIVATEERR_SERVICE ?= privateerr
-COMPOSE_GLUETUN_SERVICE    ?= gluetun
-COMPOSE_DUPLICATI_SERVICE  ?= duplicati
-COMPOSE_SEERR_SERVICE      ?= seerr
-COMPOSE_HOMEPAGE_SERVICE   ?= homepage
-COMPOSE_TIMEOUT            ?= 30
-COMPOSE_STOP_OPTIONS       ?= --timeout $(COMPOSE_TIMEOUT)
-COMPOSE_DOWN_OPTIONS       ?= --timeout $(COMPOSE_TIMEOUT)
-COMPOSE_CLEAN_OPTIONS      ?= --timeout $(COMPOSE_TIMEOUT) --rmi all --volumes
-COMPOSE_BUILD_OPTIONS      ?= --pull --no-cache
-COMPOSE_UP_OPTIONS         ?= --force-recreate --pull always --detach
-COMPOSE_LOGS_OPTIONS       ?= --follow
+COMPOSE_FILE          ?= docker-compose.yml
+ENV_FILE              ?= .env
+EXAMPLE_ENV_FILE      ?= example.env
+COMPOSE_ENV_FILE      ?= $(ENV_FILE)
+COMPOSE_DOWN_TIMEOUT  ?= 30
+COMPOSE_DOWN_OPTIONS  ?= --timeout $(COMPOSE_DOWN_TIMEOUT) --remove-orphans
+COMPOSE_CLEAN_OPTIONS ?= --timeout $(COMPOSE_DOWN_TIMEOUT) --volumes --remove-orphans
+COMPOSE_UP_OPTIONS    ?= --force-recreate --pull always --detach --remove-orphans
+COMPOSE_E2E_OPTIONS   ?= --force-recreate --pull always --detach --remove-orphans
+COMPOSE_E2E_WAIT      ?= 300
+COMPOSE_STACK_WAIT    ?= 600
+COMPOSE_LOGS_OPTIONS  ?= --follow
 
 #
 # Testing commands
 #
-DOCKER_VPN_TEST_CMD   ?= sh scripts/test_vpn.sh
-DOCKER_VPN_TEST_IMAGE ?= alpine:latest
+PLUNDARR_VPN_TEST_CMD   ?= test/plundarr-vpn-test.sh
+PLUNDARR_STACK_WAIT_CMD ?= test/plundarr-stack-wait.sh
+
+#
+# Docker Compose command compatible with 'docker compose' (v2) and 'docker-compose' (v1).
+#
+DOCKER_COMPOSE := $(shell if docker compose version >/dev/null 2>&1; then echo "docker compose"; elif command -v docker-compose >/dev/null 2>&1; then echo "docker-compose"; else echo ""; fi)
+
+ifeq ($(DOCKER_COMPOSE),)
+    $(error "Neither 'docker compose' nor 'docker-compose' is available. Please install Docker Compose.")
+endif
 
 #
 # Build dependencies
@@ -57,26 +96,16 @@ DOCKER_VPN_TEST_IMAGE ?= alpine:latest
 DEPENDENCIES=docker
 
 #
-# Determine which Docker Compose command is available
-#
-ifeq (, $(shell which docker-compose 2> /dev/null))
-    ifeq (, $(shell docker compose version 2> /dev/null))
-        $(error "Neither 'docker-compose' nor 'docker compose' is available in PATH.")
-    endif
-    COMPOSE=docker compose
-else
-    COMPOSE=docker-compose
-endif
-
-#
 # Targets that are not files (i.e. never up-to-date); these will run every
 # time the target is called or required.
 #
-.PHONY: $(ALL) $(DOWN) $(CLEAN) $(BUILD_DEPENDS) $(BUILD) $(UP) $(BUILD_UP) $(START) $(TEST_VPN) \
-		$(LOGS) $(OPEN) $(HELP) $(RUN) $(CONFIG) $(ENV) $(PRINT_CONFIG) $(PRINT_ENV)
+.PHONY: $(ALL) $(DOWN) $(CLEAN) $(NUKE) $(BUILD_DEPENDS) $(CHECK_ENV) $(RESET_CONFIG) $(RESET_SERVICE_CONFIGS) $(TEST_VPN) $(TEST_E2E) $(TEST_STACK) $(TEST_DOWN) $(TEST_LOGS) $(UP) $(CONFIG) $(ENV) $(PRINT_CONFIG) $(PRINT_ENV) $(LOGS) $(OPEN) $(HELP) $(RUN) $(START) $(STOP)
 
 #
-# $(ALL): Default makefile target. Builds and starts the service stack.
+# $(ALL): Default makefile target. Starts the service stack.
+#
+# Dependencies:
+#   $(UP) - Start the service stack.
 #
 $(ALL): $(UP)
 
@@ -86,74 +115,176 @@ $(ALL): $(UP)
 $(BUILD_DEPENDS):
 	$(foreach exe,$(DEPENDENCIES), \
 		$(if $(shell which $(exe) 2> /dev/null),,$(error "No $(exe) in PATH")))
+	@# Verify Docker Compose availability.
+	@$(DOCKER_COMPOSE) version >/dev/null 2>&1 || (echo "Docker Compose be missin'. Install docker compose or docker-compose. 🧭" && exit 1)
 
 #
-# $(STOP): Stops running containers without removing them.
+# $(CHECK_ENV): Ensure the project environment file exists.
 #
-$(STOP): $(BUILD_DEPENDS)
-	@echo "\nStopping compose service containers"
-	$(COMPOSE) stop $(COMPOSE_STOP_OPTIONS)
+$(CHECK_ENV):
+	@if [ ! -f "$(ENV_FILE)" ]; then \
+		echo "\nNo $(ENV_FILE) found. The ship needs a chart before it sails. 🗺️"; \
+		echo "Copy $(EXAMPLE_ENV_FILE) to $(ENV_FILE), then update yer voyage settings."; \
+		echo "Run: cp $(EXAMPLE_ENV_FILE) $(ENV_FILE)"; \
+		exit 1; \
+	fi
 
 #
-# $(DOWN): Stops and removes containers.
+# $(DOWN): Stops containers and removes containers and networks.
 #
-$(DOWN): $(BUILD_DEPENDS)
-	@echo "\nStopping compose services and removing containers"
-	$(COMPOSE) down $(COMPOSE_DOWN_OPTIONS)
+# Dependencies:
+#   $(BUILD_DEPENDS) - Ensure build dependencies are installed.
+#   $(CHECK_ENV) - Ensure the environment file exists.
+#
+$(DOWN): $(BUILD_DEPENDS) $(CHECK_ENV)
+	@echo "\nDroppin' anchor for the Plundarr fleet. ⚓"
+	$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) down $(COMPOSE_DOWN_OPTIONS)
 
 #
-# $(CLEAN): Stops containers and removes containers, networks, volumes, and images created by up.
+# $(RESET_CONFIG): Restores checked-in example config files after live tests.
 #
-$(CLEAN): $(BUILD_DEPENDS)
-	@echo "\nStopping compose services and removing containers, networks, volumes, and images"
-	$(COMPOSE) down $(COMPOSE_CLEAN_OPTIONS)
-
-	@echo "\nRemoving images based on test image $(DOCKER_VPN_TEST_IMAGE)"
-	docker images -q "$(DOCKER_VPN_TEST_IMAGE)" | xargs docker rmi -f || true
+$(RESET_CONFIG):
+	@echo "\nRestorin' example maps for safe check-in. 🧭"
+	cp $(PRIVATEERR_EXAMPLE_WG_CONFIG) $(PRIVATEERR_GENERATED_WG_CONFIG)
+	cp $(PRIVATEERR_EXAMPLE_METADATA) $(PRIVATEERR_GENERATED_METADATA)
 
 #
-# $(BUILD): Builds a local image of the privateerr service for use when it cannot be pulled from GHCR.
+# $(RESET_SERVICE_CONFIGS): Stops the stack when possible and removes ignored generated service config files.
 #
-$(BUILD): $(BUILD_DEPENDS)
-	@echo "\nBuilding local image for compose service: $(COMPOSE_PRIVATEERR_SERVICE)"
-	$(COMPOSE) -f $(COMPOSE_FILE) -f $(COMPOSE_BUILD_FILE) build $(COMPOSE_BUILD_OPTIONS) $(COMPOSE_PRIVATEERR_SERVICE)
+$(RESET_SERVICE_CONFIGS):
+	@echo "\nScrubbin' generated service config back to a fresh clone. 🧽"
+	@if [ -f "$(ENV_FILE)" ]; then \
+		$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) down $(COMPOSE_DOWN_OPTIONS); \
+	else \
+		echo "No $(ENV_FILE) found. Skippin' container stop and scrubbin' files only. 🗺️"; \
+	fi
+	git clean -fdX config
+	@$(MAKE) --no-print-directory $(RESET_CONFIG)
 
 #
-# $(UP): (Re)creates and starts containers for services.
+# $(TEST_VPN): Validates a running stack's Privateerr and Gluetun VPN runtime state.
 #
-$(UP): $(BUILD_DEPENDS)
-	@echo "\nStarting compose services"
-	$(COMPOSE) -f $(COMPOSE_FILE) up $(COMPOSE_UP_OPTIONS)
+# Dependencies:
+#   $(BUILD_DEPENDS) - Ensure build dependencies are installed.
+#   $(CHECK_ENV) - Ensure the environment file exists.
+#
+$(TEST_VPN): $(BUILD_DEPENDS) $(CHECK_ENV)
+	@echo "\nInspectin' the VPN tunnel and port-forwarding loot. 🔎"
+	PLUNDARR_COMPOSE_FILE=$(COMPOSE_FILE) \
+	PLUNDARR_PRIVATEERR_SERVICE=$(PRIVATEERR_SERVICE) \
+	PLUNDARR_GLUETUN_SERVICE=$(GLUETUN_SERVICE) \
+	PLUNDARR_QBITTORRENT_SERVICE=$(QBITTORRENT_SERVICE) \
+	$(PLUNDARR_VPN_TEST_CMD)
 
 #
-# $(BUILD_UP): Alias for build, up.
+# $(TEST_E2E): Starts Privateerr, Gluetun, and qBittorrent, validates VPN state, then removes them.
 #
-$(BUILD_UP): $(BUILD)
-	@$(MAKE) $(UP)
+# Dependencies:
+#   $(BUILD_DEPENDS) - Ensure build dependencies are installed.
+#   $(CHECK_ENV) - Ensure the environment file exists.
+#   $(RESET_CONFIG) - Restore example config files.
+#
+$(TEST_E2E): $(BUILD_DEPENDS) $(CHECK_ENV) $(RESET_CONFIG)
+	@echo "\nLaunching Privateerr, Gluetun, and qBittorrent for one clean test voyage. 🌊"
+	@status=0; \
+	$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) up $(COMPOSE_E2E_OPTIONS) $(PRIVATEERR_SERVICE) $(GLUETUN_SERVICE) $(QBITTORRENT_SERVICE) || status=$$?; \
+	if [ "$$status" -eq 0 ]; then \
+		PLUNDARR_COMPOSE_FILE=$(COMPOSE_FILE) \
+		PLUNDARR_PRIVATEERR_SERVICE=$(PRIVATEERR_SERVICE) \
+		PLUNDARR_GLUETUN_SERVICE=$(GLUETUN_SERVICE) \
+		PLUNDARR_QBITTORRENT_SERVICE=$(QBITTORRENT_SERVICE) \
+		PLUNDARR_WAIT_SECONDS=$(COMPOSE_E2E_WAIT) \
+		$(PLUNDARR_VPN_TEST_CMD) || status=$$?; \
+	fi; \
+	$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) down $(COMPOSE_DOWN_OPTIONS); \
+	$(MAKE) --no-print-directory $(RESET_CONFIG); \
+	exit "$$status"
 
 #
-# $(START): Starts existing containers for a service.
+# $(TEST_STACK): Starts every service, waits for health, validates VPN and qBittorrent state.
 #
-$(START): $(BUILD_DEPENDS)
-	$(COMPOSE) start
+# Dependencies:
+#   $(BUILD_DEPENDS) - Ensure build dependencies are installed.
+#   $(CHECK_ENV) - Ensure the environment file exists.
+#   $(RESET_CONFIG) - Restore example config files.
+#
+$(TEST_STACK): $(BUILD_DEPENDS) $(CHECK_ENV) $(RESET_CONFIG)
+	@echo "\nLaunching the whole Plundarr fleet for a full-stack test voyage. 🏴‍☠️"
+	@status=0; \
+	$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) up $(COMPOSE_UP_OPTIONS) || status=$$?; \
+	if [ "$$status" -eq 0 ]; then \
+		PLUNDARR_COMPOSE_FILE=$(COMPOSE_FILE) \
+		PLUNDARR_STACK_WAIT_SECONDS=$(COMPOSE_STACK_WAIT) \
+		$(PLUNDARR_STACK_WAIT_CMD) || status=$$?; \
+	fi; \
+	if [ "$$status" -eq 0 ]; then \
+		PLUNDARR_COMPOSE_FILE=$(COMPOSE_FILE) \
+		PLUNDARR_PRIVATEERR_SERVICE=$(PRIVATEERR_SERVICE) \
+		PLUNDARR_GLUETUN_SERVICE=$(GLUETUN_SERVICE) \
+		PLUNDARR_QBITTORRENT_SERVICE=$(QBITTORRENT_SERVICE) \
+		PLUNDARR_WAIT_SECONDS=$(COMPOSE_STACK_WAIT) \
+		$(PLUNDARR_VPN_TEST_CMD) || status=$$?; \
+	fi; \
+	if [ "$$status" -ne 0 ]; then \
+		$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) ps; \
+		$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) logs --tail=120; \
+	fi; \
+	$(MAKE) --no-print-directory $(RESET_CONFIG); \
+	exit "$$status"
 
 #
-# $(TEST_VPN): Obtains the VPN IP address and ensure the connection is working.
+# $(TEST_DOWN): Stops and removes containers, then restores example config files.
 #
-$(TEST_VPN):
-	$(DOCKER_VPN_TEST_CMD)
+# Dependencies:
+#   $(DOWN) - Stop and remove the stack.
+#   $(RESET_CONFIG) - Restore example config files.
+#
+$(TEST_DOWN): $(DOWN) $(RESET_CONFIG)
+
+#
+# $(NUKE): Removes containers, images, generated files, and resets example config.
+#
+# Dependencies:
+#   $(BUILD_DEPENDS) - Ensure build dependencies are installed.
+#   $(CHECK_ENV) - Ensure the environment file exists.
+#
+$(NUKE): $(BUILD_DEPENDS) $(CHECK_ENV)
+	@echo "\nFirin' the clean broadside. Repo-safe files stay aboard. 💣"
+	$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) down $(COMPOSE_CLEAN_OPTIONS) --rmi all
+
+	@echo "Scrubbin' generated logs and Gluetun state. 🧽"
+	rm -rf $(PLUNDARR_GENERATED_PATHS)
+
+	@$(MAKE) --no-print-directory $(RESET_CONFIG)
+
+#
+# $(UP): (Re)creates and starts every service in the stack.
+#
+# Dependencies:
+#   $(BUILD_DEPENDS) - Ensure build dependencies are installed.
+#   $(CHECK_ENV) - Ensure the environment file exists.
+#
+$(UP): $(BUILD_DEPENDS) $(CHECK_ENV)
+	@echo "\nRaisin' the whole Plundarr fleet. 🏴‍☠️"
+	$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) up $(COMPOSE_UP_OPTIONS)
 
 #
 # $(CONFIG): Renders the actual data model to be applied on the Docker Engine.
-# Resolves variables in the Compose file and expands short-notation into the canonical format.
 #
-$(CONFIG):
-	$(COMPOSE) config
+# Dependencies:
+#   $(BUILD_DEPENDS) - Ensure build dependencies are installed.
+#   $(CHECK_ENV) - Ensure the environment file exists.
+#
+$(CONFIG): $(BUILD_DEPENDS) $(CHECK_ENV)
+	$(DOCKER_COMPOSE) --env-file $(COMPOSE_ENV_FILE) -f $(COMPOSE_FILE) config
 
 #
 # $(ENV): Prints the evaluated docker compose default env configuration.
 #
-$(ENV):
+# Dependencies:
+#   $(CHECK_ENV) - Ensure the environment file exists.
+#
+$(ENV): $(CHECK_ENV)
 	@. ./$(COMPOSE_ENV_FILE) && \
 	awk -F '=' '/^[^#]/ { \
 		gsub(/^[[:space:]]+|[[:space:]]+$$/, ""); \
@@ -181,7 +312,10 @@ $(PRINT_CONFIG):
 #
 # $(PRINT_ENV): Prints the raw uncommented docker compose env configuration.
 #
-$(PRINT_ENV):
+# Dependencies:
+#   $(CHECK_ENV) - Ensure the environment file exists.
+#
+$(PRINT_ENV): $(CHECK_ENV)
 	@awk '{ \
 		sub(/#.*/, ""); \
 		sub(/[[:space:]]+$$/, ""); \
@@ -189,26 +323,41 @@ $(PRINT_ENV):
 	}' $(COMPOSE_ENV_FILE)
 
 #
-# $(LOGS): View output from containers.
+# $(LOGS): View output from stack containers.
 #
-$(LOGS):
-	@echo "\nGetting logs for services"
-	$(COMPOSE) logs $(COMPOSE_LOGS_OPTIONS)
+# Dependencies:
+#   $(BUILD_DEPENDS) - Ensure build dependencies are installed.
+#   $(CHECK_ENV) - Ensure the environment file exists.
+#
+$(LOGS): $(BUILD_DEPENDS) $(CHECK_ENV)
+	@echo "\nReadin' logs for the fleet. 🔎"
+	$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) logs $(COMPOSE_LOGS_OPTIONS)
+
+#
+# $(TEST_LOGS): View output from stack containers.
+#
+# Dependencies:
+#   $(LOGS) - Show logs for the service stack.
+#
+$(TEST_LOGS): $(LOGS)
 
 #
 # $(OPEN): Opens the compose services in the default web browser.
 #
-$(OPEN):
+# Dependencies:
+#   $(BUILD_DEPENDS) - Ensure build dependencies are installed.
+#   $(CHECK_ENV) - Ensure the environment file exists.
+#
+$(OPEN): $(BUILD_DEPENDS) $(CHECK_ENV)
 	@echo "\nOpening compose services in default browser"
-	open "http://localhost:`$(COMPOSE) port $(COMPOSE_GLUETUN_SERVICE) 8080 | cut -d: -f2`" \
-		"http://localhost:`$(COMPOSE) port $(COMPOSE_GLUETUN_SERVICE) 9696 | cut -d: -f2`" \
-		"http://localhost:`$(COMPOSE) port $(COMPOSE_GLUETUN_SERVICE) 7878 | cut -d: -f2`" \
-		"http://localhost:`$(COMPOSE) port $(COMPOSE_GLUETUN_SERVICE) 8989 | cut -d: -f2`" \
-		"http://localhost:`$(COMPOSE) port $(COMPOSE_GLUETUN_SERVICE) 6767 | cut -d: -f2`" \
-		"http://localhost:`$(COMPOSE) port $(COMPOSE_GLUETUN_SERVICE) 8787 | cut -d: -f2`" \
-		"http://localhost:`$(COMPOSE) port $(COMPOSE_DUPLICATI_SERVICE) 8200 | cut -d: -f2`" \
-		"http://localhost:`$(COMPOSE) port $(COMPOSE_SEERR_SERVICE) 5055 | cut -d: -f2`" \
-		"http://localhost:`$(COMPOSE) port $(COMPOSE_HOMEPAGE_SERVICE) 3000 | cut -d: -f2`"
+	open "http://localhost:`$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) port $(GLUETUN_SERVICE) 8080 | cut -d: -f2`" \
+		"http://localhost:`$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) port $(GLUETUN_SERVICE) 9696 | cut -d: -f2`" \
+		"http://localhost:`$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) port $(GLUETUN_SERVICE) 7878 | cut -d: -f2`" \
+		"http://localhost:`$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) port $(GLUETUN_SERVICE) 8989 | cut -d: -f2`" \
+		"http://localhost:`$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) port $(GLUETUN_SERVICE) 6767 | cut -d: -f2`" \
+		"http://localhost:`$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) port $(DUPLICATI_SERVICE) 8200 | cut -d: -f2`" \
+		"http://localhost:`$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) port $(SEERR_SERVICE) 5055 | cut -d: -f2`" \
+		"http://localhost:`$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) port $(HOMEPAGE_SERVICE) 3000 | cut -d: -f2`"
 
 #
 # $(HELP): Print help information.
@@ -217,28 +366,61 @@ $(HELP):
 	@echo "Usage: make [TARGET]"
 	@echo ""
 	@echo "Targets:"
-	@echo "  $(ALL)             - Builds and starts the service stack."
-	@echo "  $(BUILD_DEPENDS)   - Ensures build dependencies are installed."
-	@echo "  $(STOP)            - Stops running containers without removing them."
-	@echo "  $(DOWN)            - Stops and removes containers."
-	@echo "  $(CLEAN)           - Stops and removes containers, networks, volumes, and images."
-	@echo "  $(BUILD)           - Builds a local image of the privateerr service for use when it cannot be pulled from GHCR."
-	@echo "  $(UP)              - (Re)creates and starts containers for services."
-	@echo "  $(BUILD_UP)        - Alias for $(BUILD), $(UP)."
-	@echo "  $(START)           - Starts existing containers for a service."
-	@echo "  $(TEST_VPN)        - Obtain the VPN IP address and ensure the connection is working."
-	@echo "  $(CONFIG)          - Renders the actual data model to be applied on the Docker Engine."
-	@echo "  $(ENV)             - Prints the evaluated docker compose default env configuration."
-	@echo "  $(PRINT_CONFIG)    - Print the raw uncommented docker compose yaml configuration."
-	@echo "  $(PRINT_ENV)       - Print the raw uncommented docker compose env configuration."
-	@echo "  $(LOGS)            - Shows logs for the service."
-	@echo "  $(OPEN)            - Opens the service site in the default web browser."
-	@echo "  $(RUN)             - Alias for $(UP), $(OPEN), $(LOGS)."
-	@echo "  $(HELP)            - Displays this help message."
+	@echo "  $(ALL)                    Starts the service stack."
+	@echo "  $(BUILD_DEPENDS)          Ensures build dependencies are installed."
+	@echo "  $(CHECK_ENV)              Ensures $(ENV_FILE) exists before Compose-backed targets run."
+	@echo "  $(DOWN)                   Stops and removes the service stack."
+	@echo "  $(CLEAN)                  Stops the stack and restores example config files."
+	@echo "  $(NUKE)                   Removes containers, images, generated files, and restores example config."
+	@echo "  $(RESET_CONFIG)           Restores example wg0.conf and privateerr.env files."
+	@echo "  $(RESET_SERVICE_CONFIGS)  Removes ignored generated service config files without deleting .env."
+	@echo "  $(TEST_VPN)               Validates running Privateerr and Gluetun VPN runtime state."
+	@echo "  $(TEST_E2E)               Starts Privateerr, Gluetun, and qBittorrent, validates VPN state, then removes them."
+	@echo "  $(TEST_STACK)             Starts every service, waits for health, then validates VPN and qBittorrent state."
+	@echo "  $(TEST_DOWN)              Stops the stack and restores example config files."
+	@echo "  $(TEST_LOGS)              Shows logs for the service stack."
+	@echo "  $(UP)                     (Re)creates and starts every service."
+	@echo "  $(CONFIG)                 Renders the Docker Compose model."
+	@echo "  $(ENV)                    Prints the evaluated docker compose default env configuration."
+	@echo "  $(PRINT_CONFIG)           Prints the raw uncommented docker compose yaml configuration."
+	@echo "  $(PRINT_ENV)              Prints the raw uncommented docker compose env configuration."
+	@echo "  $(LOGS)                   Shows logs for the service stack."
+	@echo "  $(OPEN)                   Opens the service sites in the default web browser."
+	@echo "  $(RUN)                    Alias for $(UP), $(OPEN), $(LOGS)."
+	@echo "  $(START)                  Alias for $(UP)."
+	@echo "  $(STOP)                   Alias for $(DOWN)."
+	@echo "  $(HELP)                   Displays this help message."
 
 #
-# $(RUN): Alias for up, open, logs
+# Alias for test-down.
+#
+# Dependencies:
+#   $(TEST_DOWN) - Stop the stack and restore example config files.
+#
+$(CLEAN): $(TEST_DOWN)
+
+#
+# Alias for up.
+#
+# Dependencies:
+#   $(UP) - Start the service stack.
+#
+$(START): $(UP)
+
+#
+# Alias for down.
+#
+# Dependencies:
+#   $(DOWN) - Stop and remove the stack.
+#
+$(STOP): $(DOWN)
+
+#
+# Alias for up, open, logs.
+#
+# Dependencies:
+#   $(UP) - Start the service stack.
 #
 $(RUN): $(UP)
-	@$(MAKE) $(OPEN)
-	@$(MAKE) $(LOGS)
+	@$(MAKE) --no-print-directory $(OPEN)
+	@$(MAKE) --no-print-directory $(LOGS)
