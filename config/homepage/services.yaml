@@ -7,7 +7,7 @@
     - Plex:
         id: 100
         icon: plex.svg
-        href: https://plex.{{HOMEPAGE_VAR_HOST_URL}}
+        href: {{HOMEPAGE_VAR_PLEX_HREF}}
         description: Plex Media Server
         widget:
           type: plex
@@ -17,7 +17,7 @@
 
     - Radarr:
         icon: radarr.svg
-        href: https://radarr.{{HOMEPAGE_VAR_HOST_URL}}
+        href: {{HOMEPAGE_VAR_RADARR_HREF}}
         description: Movies management
         container: radarr-latest
         widget:
@@ -28,7 +28,7 @@
 
     - Sonarr:
         icon: sonarr.svg
-        href: https://sonarr.{{HOMEPAGE_VAR_HOST_URL}}
+        href: {{HOMEPAGE_VAR_SONARR_HREF}}
         description: Series management
         container: sonarr-latest
         widget:
@@ -39,7 +39,7 @@
 
     - Bazarr:
         icon: bazarr.svg
-        href: https://bazarr.{{HOMEPAGE_VAR_HOST_URL}}
+        href: {{HOMEPAGE_VAR_BAZARR_HREF}}
         description: Subtitles management
         container: bazarr-latest
         widget:
@@ -49,7 +49,7 @@
 
     - Seerr:
         icon: seerr.svg
-        href: https://seerr.{{HOMEPAGE_VAR_HOST_URL}}
+        href: {{HOMEPAGE_VAR_SEERR_HREF}}
         description: Requests management
         container: seerr-latest
         widget:
@@ -82,7 +82,7 @@
 
     - Tautulli:
         icon: tautulli.svg
-        href: https://tautulli.{{HOMEPAGE_VAR_HOST_URL}}
+        href: {{HOMEPAGE_VAR_TAUTULLI_HREF}}
         description: Plex monitoring
         container: tautulli-latest
         widget:
@@ -96,7 +96,7 @@
 - Downloads:
     - Prowlarr:
         icon: prowlarr.svg
-        href: https://prowlarr.{{HOMEPAGE_VAR_HOST_URL}}
+        href: {{HOMEPAGE_VAR_PROWLARR_HREF}}
         description: Indexers management
         container: prowlarr-latest
         widget:
@@ -106,7 +106,7 @@
 
     - qBittorrent:
         icon: qbittorrent.svg
-        href: https://qbittorrent.{{HOMEPAGE_VAR_HOST_URL}}
+        href: {{HOMEPAGE_VAR_QBITTORRENT_HREF}}
         description: Torrents management
         container: qbittorrent-latest
         widget:
@@ -117,7 +117,7 @@
 
     - Speedtest Tracker:
         icon: mdi-rabbit
-        href: https://speedtest.{{HOMEPAGE_VAR_HOST_URL}}
+        href: {{HOMEPAGE_VAR_SPEEDTEST_HREF}}
         description: Internet speed monitoring
         container: speedtest-tracker-latest
         widget:

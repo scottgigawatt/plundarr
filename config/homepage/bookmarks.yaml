@@ -11,15 +11,15 @@
 
     - Hera:
         - icon: synology-dsm.svg
-          href: https://{{HOMEPAGE_VAR_HOST_URL}}
+          href: {{HOMEPAGE_VAR_DSM_HREF}}
           description: Gateway to the Gods 🏛️
 
     - Codex:
         - icon: mkdocs.svg
-          href: https://{{HOMEPAGE_VAR_WIKI_URL}}
+          href: {{HOMEPAGE_VAR_WIKI_HREF}}
           description: Wisdom of the Stars ✨
 
     - Cetus:
         - icon: synology-dsm.svg
-          href: https://{{HOMEPAGE_VAR_DSM2_URL}}
+          href: {{HOMEPAGE_VAR_DSM2_HREF}}
           description: Portal to the Abyss 🌊
