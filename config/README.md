@@ -19,6 +19,7 @@ Ahoy, ye scurvy devils! Welcome to the **`config`** directory of the grand vesse
 | 🕵️‍♂️ `privateerr`     | PIA WireGuard and port-forwarding mapmaker for Gluetun |
 | 🧭 `prowlarr`       | Jack of all trackers, finder of torrents            |
 | ⚓ `qbittorrent`    | Torrentin' machine — yer cargo hauler               |
+| 📰 `sabnzbd`        | Usenet download runner for NZB treasure             |
 | 🎬 `radarr`         | Movies! Add ‘em, find ‘em, automate ‘em             |
 | 📺 `sonarr`         | TV shows, season packs, binge treasures             |
 | 🌬️ `speedtest-tracker` | Measure the wind in yer sails (or yer bandwidth) |

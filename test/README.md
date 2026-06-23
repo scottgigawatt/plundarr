@@ -25,9 +25,9 @@ make test-vpn
 
 This checks the existing Privateerr and Gluetun containers, then verifies generated files and port forwarding.
 
-### Privateerr + Gluetun + qBittorrent E2E
+### Privateerr + Gluetun + qBittorrent + SABnzbd E2E
 
-Use this when ye want Make to launch only the VPN pair plus qBittorrent, validate it, then clean up:
+Use this when ye want Make to launch only the VPN pair plus download clients, validate it, then clean up:
 
 ```bash
 make test-e2e
@@ -36,11 +36,13 @@ make test-e2e
 This target:
 
 1. Restores example config.
-2. Starts only `privateerr`, `gluetun`, and `qbittorrent` with Docker Compose.
+2. Starts only `privateerr`, `gluetun`, `qbittorrent`, and `sabnzbd` with Docker Compose.
 3. Waits for those services to report healthy.
 4. Runs `test/plundarr-vpn-test.sh`.
 5. Brings the Compose stack down.
 6. Restores example config again.
+
+SABnzbd is included here to catch shared Gluetun namespace port conflicts before they reach the full-stack voyage.
 
 ### Full Stack Test
 

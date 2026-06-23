@@ -6,15 +6,34 @@ Avast, me hearties! This be the treasure trove holdin' the configuration files f
 
 qBittorrent be yer steadfast mate, helpin' ye manage and organize yer downloads with ease, plunderin' the digital depths for all yer desired treasures.
 
-## Shared Download Hold 📦
+## Torrent Download Hold 📦
 
-qBittorrent writes downloads to `/downloads` inside the container. In Plundarr, that path maps to `HOST_DOWNLOADS_PATH` on the host. Radarr and Sonarr mount that same host path at `/downloads` too, so all three containers see the same files at the same container path.
+qBittorrent writes downloads under `/downloads/torrents` inside the container. In Plundarr, that path maps to `HOST_TORRENTS_DOWNLOADS_PATH` on the host. Radarr and Sonarr mount the broader `HOST_DOWNLOADS_PATH` at `/downloads`, so they see the same completed torrent files at `/downloads/torrents/...`.
 
-Keep qBittorrent, Radarr, and Sonarr aligned on `/downloads`. If qBittorrent saves to a different path that Radarr or Sonarr cannot see, imports can fail or copy files instead of using hardlinks.
+Keep qBittorrent, Radarr, and Sonarr aligned under `/downloads`. If qBittorrent saves to a different path that Radarr or Sonarr cannot see, imports can fail or copy files instead of using hardlinks.
+
+With SABnzbd aboard, keep torrent cargo in its own lane:
+
+```text
+Default Save Path: /downloads/torrents
+Keep incomplete torrents in: /downloads/torrents/incomplete
+```
+
+Create qBittorrent categories so Radarr and Sonarr can sort downloads by library type:
+
+```text
+Category: radarr
+Save path: /downloads/torrents/movies
+
+Category: sonarr
+Save path: /downloads/torrents/tv
+```
+
+Then set the qBittorrent download client category in Radarr to `radarr` and in Sonarr to `sonarr`.
 
 ## Seeding and Imports ⚓
 
-If ye seed torrents, qBittorrent needs the original downloaded payload to remain in `/downloads`. Radarr and Sonarr can import media into `/movies` or `/tv` while qBittorrent keeps seeding from `/downloads`.
+If ye seed torrents, qBittorrent needs the original downloaded payload to remain under `/downloads/torrents`. Radarr and Sonarr can import media into `/movies` or `/tv` while qBittorrent keeps seeding from `/downloads/torrents`.
 
 If ye do not plan to seed, configure qBittorrent, Radarr, and Sonarr cleanup behavior intentionally so completed torrents do not pile up in the download hold after import.
 
