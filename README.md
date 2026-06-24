@@ -85,11 +85,26 @@ cd plundarr
 # Copy the example environment file
 cp example.env .env
 
-# Open .env file and adjust the values to yer requirements
+# Open .env and adjust the few settings that steer yer voyage
 vim .env
 ```
 
-For more details, see the example environment configuration here:
+Most settings can stay at their defaults. Start with these:
+
+| Setting | Why Ye Care |
+|---------|-------------|
+| `PIA_USER` / `PIA_PASS` | Required for Private Internet Access and Gluetun port forwarding |
+| `HOST_DOWNLOADS_PATH` | Shared download hold visible to Radarr, Sonarr, and download clients |
+| `HOST_TORRENTS_DOWNLOADS_PATH` | qBittorrent cargo path when using the torrent addon |
+| `HOST_USENET_DOWNLOADS_PATH` | SABnzbd cargo path when using the Usenet addon |
+| `HOST_MOVIES_PATH` | Radarr movie library root |
+| `HOST_TV_PATH` | Sonarr TV library root |
+| `HOST_ANIME_TV_PATH` | Sonarr Anime library root when using the anime addon |
+| `*_WEBUI_PORT` | Change only when a host port conflicts |
+| `HOMEPAGE_VAR_*_HREF` | Browser click targets shown in Homepage |
+| `HOMEPAGE_VAR_*_KEY` | API keys for Homepage widgets after apps are configured |
+
+For every available variable, see:
 
 - 🏴‍☠️ [Peek at the Pirate's Env Code](./example.env)
 
@@ -113,13 +128,13 @@ Start here if ye just want to try the default voyage:
 
 ```bash
 make ship
-docker compose -f dist/docker-compose.yml config --services
+make services
 ```
 
 Deploy that generated chart with Docker Compose:
 
 ```bash
-docker compose -f dist/docker-compose.yml up -d
+make up
 ```
 
 Or select `dist/docker-compose.yml` in Synology Container Manager.
@@ -145,43 +160,18 @@ After switching addon choices, run `make ship` again before `docker compose up` 
 To inspect without launchin' containers:
 
 ```bash
-docker compose -f dist/docker-compose.yml config --services
-docker compose -f dist/docker-compose.yml config
+make services
+make config
 ```
 
 By default, the VPN tunnel protects selected download-client addons. Prowlarr, Radarr, Sonarr, and Bazarr sail on the normal Docker network to avoid indexer bans, Cloudflare snarls, and upstream API weirdness.
 
-### 📜 Important Setup Scroll! ☠️
+### Synology Notes 📦
 
-> [!WARNING]
-> ⚓️ Before hoistin' the sails, make sure to scour the [Docker Project Setup](./docs/SETUP.md) scroll! It charts the course fer proper Docker networkin', Synology tweaks, firewall rules, and launchin' with Container Manager. Missin' these steps might leave yer ship dead in the water!
+Running on Synology? Read the setup scroll before launchin':
 
-The [Docker Project Setup](./docs/SETUP.md) parchment covers:
-
-- 🌍🔧 [Configuring Docker Networking](./docs/SETUP.md#chartin-the-docker-network-waters-)
-- 🖥️🔧 [Synology Configuration](./docs/SETUP.md#batten-down-the-hatches-️)
-  - 🔥🛡️ [Updating Firewall Settings](./docs/SETUP.md#guardin-the-ship-️)
-  - 📦🚀 [Deploying With Container Manager](./docs/SETUP.md#launchin-yer-fleet-)
-
-Mind these steps, lest ye be marooned on a deserted isle! 🏝️
-
-### Prep the Ship at Boot: Tunnels & Containers 🏴‍☠️⚙️
-
-> [!CAUTION]
-> ⚓️ Without the `/dev/net/tun` device, yer VPN ship be sinkin' at the docks! Make sure it be ready at boot, or face the kraken.
-
-🏴‍☠️ Fer makin' sure `/dev/net/tun` be ready when yer Synology be wakin' from slumber, chart a course to the `tun.sh` scroll in the scripts hold an' follow the setup guide thar.
-
-- 🦜 [Peruse the tun.sh Parchment](scripts/synology/tun.sh)
-- 🗺️ [Chart the Synology Script Hold](scripts/README.md)
-
-> [!TIP]
-> 🧰 And if ye run into mutiny where yer containers don't hoist in proper order on reboot, call upon the `compose-restart.sh` scroll! This script tears down an' rebuilds yer Docker fleet clean and proper, ensurin' each ship sets sail in the right sequence after a stormy system reboot.
-
-To keep yer containers from stumblin' outta their hammocks in the wrong order 🛏️➡️🪝, study the scrolls below like a map to buried booty 🗺️💰☠️, yarrr!
-
-- ⚙️ [Inspect the compose-restart.sh Scroll](scripts/compose-restart.sh)
-- ⏱️ [Schedule the Crew with Task Scheduler](scripts/README.md)
+- 🖥️ [Docker Project Setup](./docs/SETUP.md)
+- 🦜 [Synology helper scripts](scripts/README.md)
 
 ### 🔎 Spyglass Check
 
@@ -203,61 +193,28 @@ make reset-service-configs
 ```
 
 > [!NOTE]
-> 🏴‍☠️ The `privateerr` image generates the sacred PIA WireGuard config and port-forwarding metadata scroll that powers yer Gluetun VPN sails. Plundarr pulls this image straight from GitHub Container Registry (GHCR).
->
-> Privateerr writes [`config/gluetun/wireguard/wg0.conf`](./config/gluetun/wireguard/wg0.conf) and [`config/gluetun/wireguard/privateerr.env`](./config/gluetun/wireguard/privateerr.env). Gluetun starts through [`config/gluetun/scripts/gluetun-entrypoint-wrapper.sh`](./config/gluetun/scripts/gluetun-entrypoint-wrapper.sh), reads `PIA_WG_SERVER_NAME`, exports `SERVER_NAMES`, and then hands control back to Gluetun so PIA port forwarding can dock proper.
->
-> Gluetun also calls [`config/gluetun/scripts/qbittorrent-port-forwarding.sh`](./config/gluetun/scripts/qbittorrent-port-forwarding.sh) when PIA assigns or removes a forwarded port. That script updates qBittorrent's listening port through the local Web API so yer torrent sails catch the right wind.
->
-> This keeps Synology DSM Container Manager on one final `dist/docker-compose.yml` voyage: Privateerr, Gluetun, selected addons, and the downstream services all set sail together.
+> 🏴‍☠️ Privateerr writes PIA WireGuard and port-forwarding metadata for Gluetun, then Gluetun runs the VPN tunnel. When qBittorrent is selected, Gluetun calls [`qbittorrent-port-forwarding.sh`](./config/gluetun/scripts/qbittorrent-port-forwarding.sh) to keep qBittorrent's listening port aligned with PIA's forwarded port.
 
 ## Navigatin' Troubled Waters ☠️🌊
 
 > [!TIP]
 > ️🧭🗺️ These configs be as wordy as an old sea dog's yarn! Use the Makefile commands if ye prefer less squawkin' 🦜 and cleaner decks 🧹.
 
-The `Makefile` be yer trusty first mate fer handlin' this project with ease. It's packed with handy commands to hoist the stack, drop anchor, chart logs, test yer VPN tunnels, and swab the decks.
+The `Makefile` be yer trusty first mate. These are the commands ye will actually use most often:
 
-### Cap'n's Commands 🦜💀
+| Command | What It Does |
+|---------|--------------|
+| 🗺️ `make ship` | Builds `dist/docker-compose.yml` and Homepage cards from selected addons |
+| 🧾 `make services` | Lists services in the rendered Compose file |
+| 🔎 `make config` | Prints the full rendered Compose model |
+| 🚀 `make up` | Runs `docker compose -f dist/docker-compose.yml up ...` |
+| ⚓ `make down` | Stops and removes the rendered stack |
+| 📊 `make ps` | Shows running stack containers |
+| 📜 `make logs` | Tails stack logs |
+| 🧪 `make test-e2e` | Starts VPN plus selected download addons, validates, then cleans up |
+| 🧽 `make reset-service-configs` | Scrubs generated service config files back to a fresh clone |
 
-Run `make help` to spy the full treasure map of commands. Let automation be the wind in yer sails—don't get marooned in manual seas.
-
-```console
-❯ make help
-Usage: make [TARGET]
-
-Targets:
-  all                    Starts the service stack.
-  build-depends          Ensures build dependencies are installed.
-  check-env              Ensures .env exists before Compose-backed targets run.
-  down                   Stops and removes the service stack.
-  clean                  Stops the stack and restores example config files.
-  nuke                   Removes containers, images, generated files, and restores example config.
-  reset-config           Restores example wg0.conf and privateerr.env files.
-  check-rendered         Ensures dist/docker-compose.yml exists.
-  reset-service-configs  Removes ignored generated service config files without deleting .env.
-  test-vpn               Validates running Privateerr and Gluetun VPN runtime state.
-  test-e2e               Tests VPN plus selected download addons.
-  test-stack             Starts every service, waits for health, then validates VPN and qBittorrent state.
-  test-down              Stops the stack and restores example config files.
-  test-logs              Shows logs for the service stack.
-  up                     (Re)creates and starts every service.
-  ship                   Renders dist/docker-compose.yml from base plus addons.
-  config                 Renders the Docker Compose model.
-  env                    Prints the evaluated docker compose default env configuration.
-  print-config           Prints the raw uncommented docker compose yaml configuration.
-  print-env              Prints the raw uncommented docker compose env configuration.
-  logs                   Shows logs for the service stack.
-  open                   Opens the service sites in the default web browser.
-  run                    Alias for up, open, logs.
-  start                  Alias for up.
-  stop                   Alias for down.
-  help                   Displays this help message.
-```
-
-Dig deeper in the Cap'n's Makefile:
-
-- 🔎 [Scour the Buildin' Blueprint](./Makefile)
+Need the whole chart? Run `make help`.
 
 ## Ship's Log 🏝️
 
