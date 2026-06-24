@@ -93,16 +93,22 @@ Most settings can stay at their defaults. Start with these:
 
 | Setting | Why Ye Care |
 |---------|-------------|
-| `PIA_USER` / `PIA_PASS` | Required for Private Internet Access and Gluetun port forwarding |
-| `HOST_DOWNLOADS_PATH` | Shared download hold visible to Radarr, Sonarr, and download clients |
-| `HOST_TORRENTS_DOWNLOADS_PATH` | qBittorrent cargo path when using the torrent addon |
-| `HOST_USENET_DOWNLOADS_PATH` | SABnzbd cargo path when using the Usenet addon |
-| `HOST_MOVIES_PATH` | Radarr movie library root |
-| `HOST_TV_PATH` | Sonarr TV library root |
-| `HOST_ANIME_TV_PATH` | Sonarr Anime library root when using the anime addon |
-| `*_WEBUI_PORT` | Change only when a host port conflicts |
-| `HOMEPAGE_VAR_*_HREF` | Browser click targets shown in Homepage |
-| `HOMEPAGE_VAR_*_KEY` | API keys for Homepage widgets after apps are configured |
+| 🔐 `PIA_USER` / `PIA_PASS` | Required for Private Internet Access and Gluetun port forwarding |
+| 📦 `HOST_DOWNLOADS_PATH` | Shared download hold visible to Radarr, Sonarr, and download clients |
+| 🌊 `HOST_TORRENTS_DOWNLOADS_PATH` | qBittorrent cargo path when using the torrent addon |
+| 📰 `HOST_USENET_DOWNLOADS_PATH` | SABnzbd cargo path when using the Usenet addon |
+| 🎥 `HOST_MOVIES_PATH` | Radarr movie library root |
+| 📺 `HOST_TV_PATH` | Sonarr TV library root |
+| 🍜 `HOST_ANIME_TV_PATH` | Sonarr Anime library root when using the anime addon |
+| 🚪 `*_WEBUI_PORT` | Change only when a host port conflicts |
+| 🏠 `HOMEPAGE_VAR_*_HREF` | Browser click targets shown in Homepage |
+| 🔑 `HOMEPAGE_VAR_*_KEY` | API keys for Homepage widgets after apps are configured |
+
+Ye can also override settings for one command without editing `.env`:
+
+```bash
+PIA_USER=p1234567 PIA_PASS=abc123 make ship
+```
 
 For every available variable, see:
 
@@ -131,7 +137,7 @@ make ship
 make services
 ```
 
-Deploy that generated chart with Docker Compose:
+Launch that generated chart:
 
 ```bash
 make up
@@ -143,19 +149,19 @@ Choose optional cargo with `ADDONS`. Addons are comma-separated, with no spaces:
 
 | Voyage | Command | What Ye Get |
 |---------|---------|-------------|
-| Default torrent fleet | `make ship` | qBittorrent, Cleanuparr, and core apps |
-| SABnzbd only | `make ship ADDONS=sabnzbd` | SABnzbd and core apps, no qBittorrent |
-| Both download mates | `make ship ADDONS=qbittorrent,sabnzbd,cleanuparr` | qBittorrent, SABnzbd, Cleanuparr, and core apps |
-| Anime Sonarr | `make ship ADDONS=qbittorrent,cleanuparr,sonarr-anime` | Default fleet plus second Sonarr on port `8990` |
-| Full cargo hold | `make ship ADDONS=qbittorrent,sabnzbd,cleanuparr,sonarr-anime` | qBittorrent, SABnzbd, Cleanuparr, Sonarr Anime, and core apps |
+| 🌊 Default torrent fleet | `make ship` | qBittorrent, Cleanuparr, and core apps |
+| 📰 SABnzbd only | `make ship ADDONS=sabnzbd` | SABnzbd and core apps, no qBittorrent |
+| ⚓ Both download mates | `make ship ADDONS=qbittorrent,sabnzbd,cleanuparr` | qBittorrent, SABnzbd, Cleanuparr, and core apps |
+| 🍜 Anime Sonarr | `make ship ADDONS=qbittorrent,cleanuparr,sonarr-anime` | Default fleet plus second Sonarr on port `8990` |
+| 💰 Full cargo hold | `make ship ADDONS=qbittorrent,sabnzbd,cleanuparr,sonarr-anime` | qBittorrent, SABnzbd, Cleanuparr, Sonarr Anime, and core apps |
 
-The default voyage is:
+`make ship` uses the default voyage:
 
 ```bash
 make ship ADDONS=qbittorrent,cleanuparr
 ```
 
-After switching addon choices, run `make ship` again before `docker compose up` so `dist/docker-compose.yml` and Homepage cards match yer chosen fleet.
+After switching addon choices, run `make ship` again before `make up` so `dist/docker-compose.yml` and Homepage cards match yer chosen fleet.
 
 To inspect without launchin' containers:
 
