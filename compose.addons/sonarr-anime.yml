@@ -8,12 +8,12 @@
 
 services:
   #
-  # Define the 'sonarr-anime' service for managing anime tv shows.
+  # Define the 'sonarr-anime' service for managing anime TV shows.
   #
   sonarr-anime:
     # Docker image and container information
-    image: lscr.io/linuxserver/sonarr:${SONARR_ANIME_TAG:-latest}  # Run using the specified tag
-    container_name: sonarr-anime-${SONARR_ANIME_TAG:-latest}       # Append Docker image tag to container name
+    image: lscr.io/linuxserver/sonarr:${SONARR_ANIME_TAG}  # Run using the specified tag
+    container_name: sonarr-anime-${SONARR_ANIME_TAG}       # Append Docker image tag to container name
     hostname: sonarr-anime                                 # Set the container hostname
     pull_policy: always                                    # Ensure that the image is always pulled
     restart: unless-stopped                                # Restart the container unless explicitly stopped
@@ -27,20 +27,20 @@ services:
 
     # Define the container environment
     environment:
-      TZ: ${TZ}                    # Set the appropriate timezone
-      PUID: ${DEFAULT_PUID}        # Default user id mapping for containers
-      PGID: ${DEFAULT_PGID}        # Default group id mapping for containers
-      UMASK: ${DEFAULT_UMASK}      # Default file creation mask for containers
+      TZ: ${TZ}                # Set the appropriate timezone
+      PUID: ${DEFAULT_PUID}    # Default user id mapping for containers
+      PGID: ${DEFAULT_PGID}    # Default group id mapping for containers
+      UMASK: ${DEFAULT_UMASK}  # Default file creation mask for containers
 
     # Define the host and container ports
     ports:
-      - ${SONARR_ANIME_WEBUI_PORT:-8990}:8989  # Sonarr Anime web UI port
+      - ${SONARR_ANIME_WEBUI_PORT}:8989  # Sonarr Anime web UI port
 
     # Mount host directories into the container
     volumes:
-      - ${SONARR_ANIME_CONFIG_PATH:-./config/sonarr-anime}:/config:rw  # Database and Sonarr Anime configs
-      - ${HOST_DOWNLOADS_PATH}:/downloads:rw                           # Location of download managers output directory
-      - ${HOST_ANIME_TV_PATH:-/volume1/plex/anime-tv}:/tv:rw           # Location of anime TV library on disk
+      - ${SONARR_ANIME_CONFIG_PATH}:/config:rw  # Database and Sonarr Anime configs
+      - ${HOST_DOWNLOADS_PATH}:/downloads:rw    # Location of download managers output directory
+      - ${HOST_ANIME_TV_PATH}:/tv:rw            # Location of anime TV library on disk
 
     # Define container healthcheck to verify Sonarr Anime connectivity
     healthcheck:
