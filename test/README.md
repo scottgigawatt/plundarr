@@ -10,7 +10,7 @@ The VPN test script does not use a throwaway test image. It validates the actual
 - Privateerr generated PIA port-forwarding metadata in `privateerr.env`.
 - Privateerr and Gluetun containers are running and healthy.
 - Gluetun is reachable through its unauthenticated health endpoint from inside the Gluetun container.
-- PIA port forwarding produced a usable forwarded port when required.
+- PIA port-forwarding produced a usable forwarded port when required.
 - qBittorrent listens on Gluetun's forwarded port when qBittorrent validation is enabled.
 
 ## Test Voyages 🧭
@@ -25,9 +25,9 @@ make test-vpn
 
 This checks the existing Privateerr and Gluetun containers, then verifies generated files and port forwarding.
 
-### Privateerr + Gluetun + Download Mates E2E
+### Privateerr + Gluetun + Download E2E
 
-Use this when ye want Make to launch only the VPN pair plus download clients, validate it, then clean up:
+Use this when ye want `Make` to launch only the VPN pair plus download clients, validate it, then clean up:
 
 ```bash
 make test-e2e
@@ -68,7 +68,9 @@ This target:
 7. Restores example config after validation.
 
 > [!WARNING]
-> 🧨 VPN tests can involve real PIA credentials in `.env`. Do not commit live credentials, generated VPN configs, forwarded ports, or logs from yer secret treasure chest.
+> 🧨 VPN tests can involve real PIA credentials in `.env`. 🧨
+>
+> Do not commit live credentials, generated WireGuard VPN configs, forwarded ports, or logs from yer secret treasure chest. 🪎
 
 ## Example Files 📜
 
@@ -88,4 +90,4 @@ make nuke
 ```
 
 > [!TIP]
-> 🏴‍☠️ Run cleanup before committing after any real VPN voyage. Future ye will thank past ye for not smuggling secrets into the cargo hold.
+> 🏴‍☠️ Run cleanup before committing after any real VPN voyage. _Future ye will thank past ye!_
