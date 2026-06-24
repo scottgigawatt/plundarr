@@ -101,10 +101,19 @@ Plundarr source files be modular, but deployment still sails from one complete C
 make ship
 ```
 
-That writes:
+That writes the final deployable chart:
 
 ```text
 dist/docker-compose.yml
+```
+
+Every `make ship` run also rewrites Homepage service cards so the dashboard matches selected addons.
+
+Start here if ye just want to try the default voyage:
+
+```bash
+make ship
+docker compose -f dist/docker-compose.yml config --services
 ```
 
 Deploy that generated chart with Docker Compose:
@@ -115,18 +124,29 @@ docker compose -f dist/docker-compose.yml up -d
 
 Or select `dist/docker-compose.yml` in Synology Container Manager.
 
-Choose optional cargo with `ADDONS`:
+Choose optional cargo with `ADDONS`. Addons are comma-separated, with no spaces:
 
-```bash
-make ship ADDONS=sabnzbd
-make ship ADDONS=qbittorrent,sabnzbd
-make ship ADDONS=qbittorrent,cleanuparr,sonarr-anime
-```
+| Voyage | Command | What Ye Get |
+|---------|---------|-------------|
+| Default torrent fleet | `make ship` | qBittorrent, Cleanuparr, and core apps |
+| SABnzbd only | `make ship ADDONS=sabnzbd` | SABnzbd and core apps, no qBittorrent |
+| Both download mates | `make ship ADDONS=qbittorrent,sabnzbd,cleanuparr` | qBittorrent, SABnzbd, Cleanuparr, and core apps |
+| Anime Sonarr | `make ship ADDONS=qbittorrent,cleanuparr,sonarr-anime` | Default fleet plus second Sonarr on port `8990` |
+| Full cargo hold | `make ship ADDONS=qbittorrent,sabnzbd,cleanuparr,sonarr-anime` | qBittorrent, SABnzbd, Cleanuparr, Sonarr Anime, and core apps |
 
 The default voyage is:
 
 ```bash
 make ship ADDONS=qbittorrent,cleanuparr
+```
+
+After switching addon choices, run `make ship` again before `docker compose up` so `dist/docker-compose.yml` and Homepage cards match yer chosen fleet.
+
+To inspect without launchin' containers:
+
+```bash
+docker compose -f dist/docker-compose.yml config --services
+docker compose -f dist/docker-compose.yml config
 ```
 
 By default, the VPN tunnel protects selected download-client addons. Prowlarr, Radarr, Sonarr, and Bazarr sail on the normal Docker network to avoid indexer bans, Cloudflare snarls, and upstream API weirdness.
