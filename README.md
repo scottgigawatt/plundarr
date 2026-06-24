@@ -39,21 +39,17 @@
 
 # Plundarr 🏴‍☠️
 
-Ahoy, mateys! Welcome to Plundarr, the ultimate Docker Compose setup for all ye media needs. Manage yer favorite 'arr' apps, PIA WireGuard VPN, and port-forwarded download routes with ease, all while sailin' the high seas of secure and automated media management. ⚓️
+Ahoy, mateys! Welcome to Plundarr, the ultimate Docker Compose setup for all yer media needs. Manage yer favorite 'arr' apps, Private Internet Access (PIA) WireGuard VPN, and port-forwarded download routes with ease, all while sailin' the high seas of secure and automated media management. ⚓️
 
 ## Captain's Log 📜
 
-Plundarr be a collection of Docker Compose configurations to run a shipshape array of 'arr' tools like Sonarr, Radarr, and more, all securely navigated through Private Internet Access with WireGuard and port forwarding, managed by Gluetun. Avast, set sail on the digital seas with yer media safe from pryin' eyes—tucked away like treasure on a deserted isle! 🏝️
-
-- [Contributing](./docs/CONTRIBUTING.md)
-- [Keep to the Code](./docs/CODE_OF_CONDUCT.md)
-- [Security Policy](./docs/SECURITY.md)
+Plundarr be a collection of Compose configurations to run a shipshape array of 'arr' tools like Sonarr, Radarr, and more, all securely navigated through PIA with WireGuard and port forwarding, managed by Gluetun. Avast, set sail on the digital seas with yer media safe from pryin' eyes—tucked away like treasure on a deserted isle! 🏝️
 
 ## Treasure Map 🗺️
 
 | Shipmate          | What It Be                                                                                       | Yo Ho Ho and More Info                                               |
 |-------------------|--------------------------------------------------------------------------------------------------|----------------------------------------------------------------------|
-| Privateerr        | 🏴‍☠️ Generates PIA WireGuard config and Gluetun port-forwarding metadata.                       | [More info](https://github.com/scottgigawatt/privateerr)             |
+| Privateerr        | 🏴‍☠️ Generates PIA WireGuard config and Gluetun port metadata.                                      | [More info](https://github.com/scottgigawatt/privateerr)             |
 | Gluetun           | 🌊 Runs the VPN tunnel and PIA port forwarding.                                                   | [More info](https://github.com/qdm12/gluetun)                        |
 | FlareSolverr      | 🔥 Helps Prowlarr sail past Cloudflare storms.                                                    | [More info](https://github.com/FlareSolverr/FlareSolverr)            |
 | Prowlarr          | 🐾 Manages indexers for yer 'arr apps.                                                            | [More info](https://github.com/Prowlarr/Prowlarr)                    |
@@ -63,7 +59,7 @@ Plundarr be a collection of Docker Compose configurations to run a shipshape arr
 | Sonarr            | 📺 Finds, tracks, and organizes TV shows.                                                        | [More info](https://github.com/Sonarr/Sonarr)                        |
 | Sonarr Anime      | 🍜 Optional second Sonarr for anime TV cargo.                                                     | [More info](https://github.com/Sonarr/Sonarr)                        |
 | Bazarr            | 🦜 Fetches subtitles for movies and TV shows.                                                     | [More info](https://github.com/morpheus65535/bazarr)                 |
-| **~~Readarr~~**   | ❌ Scuttled; use Calibre Web Automated instead.                                            | [Set Sail ⚓](https://github.com/scottgigawatt/calibre-web-automated) |
+| **~~Readarr~~**   | ❌ Scuttled; use Calibre Web Automated instead.                                                  | [Set Sail ⚓](https://github.com/scottgigawatt/calibre-web-automated) |
 | Seerr             | ⚓️ Handles media requests for yer crew.                                                          | [More info](https://github.com/seerr-team/seerr)                     |
 | Cleanuparr        | 🧹 Removes blocked or unwanted downloads.                                                        | [More info](https://github.com/Cleanuparr/Cleanuparr)                |
 | Speedtest Tracker | ⚡️ Tracks internet speed over time.                                                              | [More info](https://docs.speedtest-tracker.dev/)                     |
@@ -245,4 +241,12 @@ Privateerr uses the unmodified upstream [PIA manual-connections](https://github.
        "Code ho! Containers below deck!"
 ```
 
-Contribute or provide feedback to improve Plundarr. Arrr, happy sailing! 🏴‍☠️
+## Crew Scrolls 🧭
+
+Got a patch, a bug report, or a cursed sea tale? Grab a quill and join the crew:
+
+- 🛠️ [Contributin' Code Booty](./docs/CONTRIBUTING.md) — send fixes without sinkin' the ship.
+- 🤝 [The Pirate Code](./docs/CODE_OF_CONDUCT.md) — no mutiny, no keelhaul-worthy behavior.
+- 🛡️ [Security Parley](./docs/SECURITY.md) — report leaks before the sharks smell blood.
+
+Fair winds, clean logs, and may yer containers never mutiny. 🏴‍☠️
