@@ -16,6 +16,7 @@ CLEAN=clean
 NUKE=nuke
 BUILD_DEPENDS=build-depends
 CHECK_ENV=check-env
+CHECK_RENDERED=check-rendered
 RESET_CONFIG=reset-config
 RESET_SERVICE_CONFIGS=reset-service-configs
 TEST_VPN=test-vpn
@@ -24,6 +25,7 @@ TEST_STACK=test-stack
 TEST_DOWN=test-down
 TEST_LOGS=test-logs
 UP=up
+SHIP=ship
 CONFIG=config
 ENV=env
 PRINT_CONFIG=print-config
@@ -42,6 +44,7 @@ TARGETS= \
 	$(NUKE) \
 	$(BUILD_DEPENDS) \
 	$(CHECK_ENV) \
+	$(CHECK_RENDERED) \
 	$(RESET_CONFIG) \
 	$(RESET_SERVICE_CONFIGS) \
 	$(TEST_VPN) \
@@ -50,6 +53,7 @@ TARGETS= \
 	$(TEST_DOWN) \
 	$(TEST_LOGS) \
 	$(UP) \
+	$(SHIP) \
 	$(CONFIG) \
 	$(ENV) \
 	$(PRINT_CONFIG) \
@@ -66,29 +70,16 @@ TARGETS= \
 #
 PRIVATEERR_SERVICE  ?= privateerr
 GLUETUN_SERVICE     ?= gluetun
+PROWLARR_SERVICE    ?= prowlarr
+RADARR_SERVICE      ?= radarr
+SONARR_SERVICE      ?= sonarr
+BAZARR_SERVICE      ?= bazarr
 QBITTORRENT_SERVICE ?= qbittorrent
 SABNZBD_SERVICE     ?= sabnzbd
+CLEANUPARR_SERVICE  ?= cleanuparr
 DUPLICATI_SERVICE   ?= duplicati
 SEERR_SERVICE       ?= seerr
 HOMEPAGE_SERVICE    ?= homepage
-
-#
-# End-to-end test services.
-#
-E2E_SERVICES ?= \
-	$(PRIVATEERR_SERVICE) \
-	$(GLUETUN_SERVICE) \
-	$(QBITTORRENT_SERVICE) \
-	$(SABNZBD_SERVICE)
-
-#
-# Web ports for services.
-#
-GLUETUN_WEB_PORTS ?= 8080 8081 9696 7878 8989 6767
-DIRECT_WEB_PORTS  ?= \
-	$(DUPLICATI_SERVICE):8200 \
-	$(SEERR_SERVICE):5055 \
-	$(HOMEPAGE_SERVICE):3000
 
 #
 # Config reset paths.
@@ -107,7 +98,11 @@ PLUNDARR_GENERATED_PATHS       ?= config/privateerr/logs \
 #
 # Docker Compose options.
 #
-COMPOSE_FILE          ?= docker-compose.yml
+COMPOSE_SOURCE_FILE   ?= docker-compose.yml
+COMPOSE_ADDONS_DIR    ?= compose.addons
+ADDONS                ?= qbittorrent,cleanuparr
+RENDERED_COMPOSE_FILE ?= dist/docker-compose.yml
+COMPOSE_FILE          ?= $(RENDERED_COMPOSE_FILE)
 ENV_FILE              ?= .env
 EXAMPLE_ENV_FILE      ?= example.env
 COMPOSE_ENV_FILE      ?= $(ENV_FILE)
@@ -119,6 +114,43 @@ COMPOSE_E2E_OPTIONS   ?= --force-recreate --pull always --detach --remove-orphan
 COMPOSE_E2E_WAIT      ?= 300
 COMPOSE_STACK_WAIT    ?= 600
 COMPOSE_LOGS_OPTIONS  ?= --follow
+
+#
+# Rendered Compose source selection.
+#
+empty :=
+space := $(empty) $(empty)
+comma := ,
+SELECTED_ADDONS         := $(strip $(subst $(comma),$(space),$(ADDONS)))
+ADDON_COMPOSE_FILES     := $(foreach addon,$(SELECTED_ADDONS),$(COMPOSE_ADDONS_DIR)/$(addon).yml)
+SOURCE_COMPOSE_FILES    := $(COMPOSE_SOURCE_FILE) $(ADDON_COMPOSE_FILES)
+SOURCE_COMPOSE_ARGS     := $(foreach file,$(SOURCE_COMPOSE_FILES),-f $(file))
+VPN_QBITTORRENT_SERVICE ?= $(if $(filter qbittorrent,$(SELECTED_ADDONS)),$(QBITTORRENT_SERVICE),)
+E2E_DOWNLOAD_SERVICES   ?= $(if $(filter qbittorrent,$(SELECTED_ADDONS)),$(QBITTORRENT_SERVICE),) \
+	$(if $(filter sabnzbd,$(SELECTED_ADDONS)),$(SABNZBD_SERVICE),)
+ADDON_GLUETUN_WEB_PORTS ?= $(if $(filter qbittorrent,$(SELECTED_ADDONS)),8080,) \
+	$(if $(filter sabnzbd,$(SELECTED_ADDONS)),8081,)
+
+#
+# End-to-end test services.
+#
+E2E_SERVICES ?= \
+	$(PRIVATEERR_SERVICE) \
+	$(GLUETUN_SERVICE) \
+	$(E2E_DOWNLOAD_SERVICES)
+
+#
+# Web ports for services.
+#
+GLUETUN_WEB_PORTS ?= $(ADDON_GLUETUN_WEB_PORTS)
+DIRECT_WEB_PORTS  ?= \
+	$(PROWLARR_SERVICE):9696 \
+	$(RADARR_SERVICE):7878 \
+	$(SONARR_SERVICE):8989 \
+	$(BAZARR_SERVICE):6767 \
+	$(DUPLICATI_SERVICE):8200 \
+	$(SEERR_SERVICE):5055 \
+	$(HOMEPAGE_SERVICE):3000
 
 #
 # Testing commands.
@@ -204,13 +236,30 @@ $(CHECK_ENV):
 	fi
 
 #
+# $(CHECK_RENDERED): Ensure the deployable Compose file exists.
+#
+$(CHECK_RENDERED):
+	@if [ ! -f "$(COMPOSE_FILE)" ]; then \
+		echo "\nNo $(COMPOSE_FILE) found. The fleet needs one final chart. 🗺️"; \
+		echo "Run: make $(SHIP) ADDONS=$(ADDONS)"; \
+		exit 1; \
+	fi; \
+	if [ "$(COMPOSE_FILE)" = "$(RENDERED_COMPOSE_FILE)" ] && \
+		! grep -Fqx "# Rebuild with: make $(SHIP) ADDONS=$(ADDONS)" "$(COMPOSE_FILE)"; then \
+		echo "\n$(COMPOSE_FILE) was rendered with different addons. 🧭"; \
+		echo "Run: make $(SHIP) ADDONS=$(ADDONS)"; \
+		exit 1; \
+	fi
+
+#
 # $(DOWN): Stops containers and removes containers and networks.
 #
 # Dependencies:
 #   $(BUILD_DEPENDS) - Ensure build dependencies are installed.
 #   $(CHECK_ENV) - Ensure the environment file exists.
+#   $(CHECK_RENDERED) - Ensure the rendered Compose file exists.
 #
-$(DOWN): $(BUILD_DEPENDS) $(CHECK_ENV)
+$(DOWN): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 	@echo "\nDroppin' anchor for the Plundarr fleet. ⚓"
 	$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) down $(COMPOSE_DOWN_OPTIONS)
 
@@ -228,7 +277,7 @@ $(RESET_CONFIG):
 #
 $(RESET_SERVICE_CONFIGS):
 	@echo "\nScrubbin' generated service config back to a fresh clone. 🧽"
-	@if [ -f "$(ENV_FILE)" ]; then \
+	@if [ -f "$(ENV_FILE)" ] && [ -f "$(COMPOSE_FILE)" ]; then \
 		$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) down $(COMPOSE_DOWN_OPTIONS); \
 	else \
 		echo "No $(ENV_FILE) found. Skippin' container stop and scrubbin' files only. 🗺️"; \
@@ -243,13 +292,14 @@ $(RESET_SERVICE_CONFIGS):
 # Dependencies:
 #   $(BUILD_DEPENDS) - Ensure build dependencies are installed.
 #   $(CHECK_ENV) - Ensure the environment file exists.
+#   $(CHECK_RENDERED) - Ensure the rendered Compose file exists.
 #
-$(TEST_VPN): $(BUILD_DEPENDS) $(CHECK_ENV)
+$(TEST_VPN): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 	@echo "\nInspectin' the VPN tunnel and port-forwarding loot. 🔎"
 	PLUNDARR_COMPOSE_FILE=$(COMPOSE_FILE) \
 	PLUNDARR_PRIVATEERR_SERVICE=$(PRIVATEERR_SERVICE) \
 	PLUNDARR_GLUETUN_SERVICE=$(GLUETUN_SERVICE) \
-	PLUNDARR_QBITTORRENT_SERVICE=$(QBITTORRENT_SERVICE) \
+	PLUNDARR_QBITTORRENT_SERVICE=$(VPN_QBITTORRENT_SERVICE) \
 	$(PLUNDARR_VPN_TEST_CMD)
 
 #
@@ -258,10 +308,11 @@ $(TEST_VPN): $(BUILD_DEPENDS) $(CHECK_ENV)
 # Dependencies:
 #   $(BUILD_DEPENDS) - Ensure build dependencies are installed.
 #   $(CHECK_ENV) - Ensure the environment file exists.
+#   $(CHECK_RENDERED) - Ensure the rendered Compose file exists.
 #   $(RESET_CONFIG) - Restore example config files.
 #
-$(TEST_E2E): $(BUILD_DEPENDS) $(CHECK_ENV) $(RESET_CONFIG)
-	@echo "\nLaunching Privateerr, Gluetun, qBittorrent, and SABnzbd for one clean test voyage. 🌊"
+$(TEST_E2E): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED) $(RESET_CONFIG)
+	@echo "\nLaunching Privateerr, Gluetun, and selected download mates for one clean test voyage. 🌊"
 	@status=0; \
 	$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) \
 		up $(COMPOSE_E2E_OPTIONS) $(E2E_SERVICES) || status=$$?; \
@@ -269,7 +320,7 @@ $(TEST_E2E): $(BUILD_DEPENDS) $(CHECK_ENV) $(RESET_CONFIG)
 		PLUNDARR_COMPOSE_FILE=$(COMPOSE_FILE) \
 		PLUNDARR_PRIVATEERR_SERVICE=$(PRIVATEERR_SERVICE) \
 		PLUNDARR_GLUETUN_SERVICE=$(GLUETUN_SERVICE) \
-		PLUNDARR_QBITTORRENT_SERVICE=$(QBITTORRENT_SERVICE) \
+		PLUNDARR_QBITTORRENT_SERVICE=$(VPN_QBITTORRENT_SERVICE) \
 		PLUNDARR_WAIT_SECONDS=$(COMPOSE_E2E_WAIT) \
 		$(PLUNDARR_VPN_TEST_CMD) || status=$$?; \
 	fi; \
@@ -283,9 +334,10 @@ $(TEST_E2E): $(BUILD_DEPENDS) $(CHECK_ENV) $(RESET_CONFIG)
 # Dependencies:
 #   $(BUILD_DEPENDS) - Ensure build dependencies are installed.
 #   $(CHECK_ENV) - Ensure the environment file exists.
+#   $(CHECK_RENDERED) - Ensure the rendered Compose file exists.
 #   $(RESET_CONFIG) - Restore example config files.
 #
-$(TEST_STACK): $(BUILD_DEPENDS) $(CHECK_ENV) $(RESET_CONFIG)
+$(TEST_STACK): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED) $(RESET_CONFIG)
 	@echo "\nLaunching the whole Plundarr fleet for a full-stack test voyage. 🏴‍☠️"
 	@status=0; \
 	$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) up $(COMPOSE_UP_OPTIONS) || status=$$?; \
@@ -298,7 +350,7 @@ $(TEST_STACK): $(BUILD_DEPENDS) $(CHECK_ENV) $(RESET_CONFIG)
 		PLUNDARR_COMPOSE_FILE=$(COMPOSE_FILE) \
 		PLUNDARR_PRIVATEERR_SERVICE=$(PRIVATEERR_SERVICE) \
 		PLUNDARR_GLUETUN_SERVICE=$(GLUETUN_SERVICE) \
-		PLUNDARR_QBITTORRENT_SERVICE=$(QBITTORRENT_SERVICE) \
+		PLUNDARR_QBITTORRENT_SERVICE=$(VPN_QBITTORRENT_SERVICE) \
 		PLUNDARR_WAIT_SECONDS=$(COMPOSE_STACK_WAIT) \
 		$(PLUNDARR_VPN_TEST_CMD) || status=$$?; \
 	fi; \
@@ -324,8 +376,9 @@ $(TEST_DOWN): $(DOWN) $(RESET_CONFIG)
 # Dependencies:
 #   $(BUILD_DEPENDS) - Ensure build dependencies are installed.
 #   $(CHECK_ENV) - Ensure the environment file exists.
+#   $(CHECK_RENDERED) - Ensure the rendered Compose file exists.
 #
-$(NUKE): $(BUILD_DEPENDS) $(CHECK_ENV)
+$(NUKE): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 	@echo "\nFirin' the clean broadside. Repo-safe files stay aboard. 💣"
 	$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) down $(COMPOSE_CLEAN_OPTIONS) --rmi all
 
@@ -340,10 +393,36 @@ $(NUKE): $(BUILD_DEPENDS) $(CHECK_ENV)
 # Dependencies:
 #   $(BUILD_DEPENDS) - Ensure build dependencies are installed.
 #   $(CHECK_ENV) - Ensure the environment file exists.
+#   $(CHECK_RENDERED) - Ensure the rendered Compose file exists.
 #
-$(UP): $(BUILD_DEPENDS) $(CHECK_ENV)
+$(UP): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 	@echo "\nRaisin' the whole Plundarr fleet. 🏴‍☠️"
 	$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) up $(COMPOSE_UP_OPTIONS)
+
+#
+# $(SHIP): Renders and validates the deployable Docker Compose file.
+#
+# Dependencies:
+#   $(BUILD_DEPENDS) - Ensure build dependencies are installed.
+#   $(CHECK_ENV) - Ensure the environment file exists.
+#
+$(SHIP): $(BUILD_DEPENDS) $(CHECK_ENV)
+	@echo "\nRenderin' the final Plundarr chart. 🗺️"
+	@for file in $(SOURCE_COMPOSE_FILES); do \
+		if [ ! -f "$$file" ]; then \
+			echo "Missing Compose source: $$file"; \
+			exit 1; \
+		fi; \
+	done
+	@mkdir -p "$(dir $(RENDERED_COMPOSE_FILE))"
+	@{ \
+		printf '# Generated by Plundarr. Do not edit this file directly.\n'; \
+		printf '# Source files: $(SOURCE_COMPOSE_FILES)\n'; \
+		printf '# Rebuild with: make $(SHIP) ADDONS=$(ADDONS)\n\n'; \
+		$(DOCKER_COMPOSE) --env-file $(COMPOSE_ENV_FILE) $(SOURCE_COMPOSE_ARGS) config; \
+	} > "$(RENDERED_COMPOSE_FILE)"
+	$(DOCKER_COMPOSE) -f "$(RENDERED_COMPOSE_FILE)" config >/dev/null
+	@echo "Final chart ready: $(RENDERED_COMPOSE_FILE)"
 
 #
 # $(CONFIG): Renders the actual data model to be applied on the Docker Engine.
@@ -353,7 +432,7 @@ $(UP): $(BUILD_DEPENDS) $(CHECK_ENV)
 #   $(CHECK_ENV) - Ensure the environment file exists.
 #
 $(CONFIG): $(BUILD_DEPENDS) $(CHECK_ENV)
-	$(DOCKER_COMPOSE) --env-file $(COMPOSE_ENV_FILE) -f $(COMPOSE_FILE) config
+	$(DOCKER_COMPOSE) --env-file $(COMPOSE_ENV_FILE) $(SOURCE_COMPOSE_ARGS) config
 
 #
 # $(ENV): Prints the evaluated docker compose default env configuration.
@@ -379,7 +458,7 @@ $(ENV): $(CHECK_ENV)
 #
 # $(PRINT_CONFIG): Prints the raw uncommented docker compose yaml configuration.
 #
-$(PRINT_CONFIG):
+$(PRINT_CONFIG): $(CHECK_RENDERED)
 	@awk '{ \
 		sub(/#.*/, ""); \
 		sub(/[[:space:]]+$$/, ""); \
@@ -405,8 +484,9 @@ $(PRINT_ENV): $(CHECK_ENV)
 # Dependencies:
 #   $(BUILD_DEPENDS) - Ensure build dependencies are installed.
 #   $(CHECK_ENV) - Ensure the environment file exists.
+#   $(CHECK_RENDERED) - Ensure the rendered Compose file exists.
 #
-$(LOGS): $(BUILD_DEPENDS) $(CHECK_ENV)
+$(LOGS): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 	@echo "\nReadin' logs for the fleet. 🔎"
 	$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) logs $(COMPOSE_LOGS_OPTIONS)
 
@@ -424,8 +504,9 @@ $(TEST_LOGS): $(LOGS)
 # Dependencies:
 #   $(BUILD_DEPENDS) - Ensure build dependencies are installed.
 #   $(CHECK_ENV) - Ensure the environment file exists.
+#   $(CHECK_RENDERED) - Ensure the rendered Compose file exists.
 #
-$(OPEN): $(BUILD_DEPENDS) $(CHECK_ENV)
+$(OPEN): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 	@echo "\nOpening compose services in default browser"
 	open \
 		$(foreach port,$(GLUETUN_WEB_PORTS), \
@@ -445,17 +526,19 @@ $(HELP):
 	$(call help_line,$(ALL),Starts the service stack.)
 	$(call help_line,$(BUILD_DEPENDS),Ensures build dependencies are installed.)
 	$(call help_line,$(CHECK_ENV),Ensures $(ENV_FILE) exists.)
+	$(call help_line,$(CHECK_RENDERED),Ensures $(COMPOSE_FILE) exists.)
 	$(call help_line,$(DOWN),Stops and removes the service stack.)
 	$(call help_line,$(CLEAN),Stops the stack and restores example config files.)
 	$(call help_line,$(NUKE),Removes containers plus images and generated files.)
 	$(call help_line,$(RESET_CONFIG),Restores example VPN config files.)
 	$(call help_line,$(RESET_SERVICE_CONFIGS),Removes ignored service config files.)
 	$(call help_line,$(TEST_VPN),Validates the VPN runtime state.)
-	$(call help_line,$(TEST_E2E),Tests the core VPN/download services.)
+	$(call help_line,$(TEST_E2E),Tests VPN plus selected download addons.)
 	$(call help_line,$(TEST_STACK),Tests the full stack health and VPN state.)
 	$(call help_line,$(TEST_DOWN),Stops the stack and restores example configs.)
 	$(call help_line,$(TEST_LOGS),Shows logs for the service stack.)
 	$(call help_line,$(UP),(Re)creates and starts every service.)
+	$(call help_line,$(SHIP),Renders $(COMPOSE_FILE) from base plus addons.)
 	$(call help_line,$(CONFIG),Renders the Docker Compose model.)
 	$(call help_line,$(ENV),Prints evaluated Compose env values.)
 	$(call help_line,$(PRINT_CONFIG),Prints uncommented Compose yaml.)

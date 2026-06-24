@@ -57,8 +57,8 @@ Plundarr be a collection of Docker Compose configurations to run a shipshape arr
 | Gluetun           | 🌊 Batten down the hatches! Secure yer VPN route with WireGuard and PIA port forwarding, keepin' yer online doin's hidden from pryin' landlubber eyes.      | [More info](https://github.com/qdm12/gluetun)                        |
 | FlareSolverr      | 🔥 Outsmart them scurvy web defenses and keep yer plunderin' smooth as a fine barrel o' rum.                                                                | [More info](https://github.com/FlareSolverr/FlareSolverr)            |
 | Prowlarr          | 🐾 The savvy first mate fer wranglin' all yer indexers, keepin' yer treasure map up-to-date with the latest and greatest booty.                             | [More info](https://github.com/Prowlarr/Prowlarr)                    |
-| qBittorrent       | 🌊 Yer trusty first mate fer torrentin', hoist the colors and download with the might of a thousand cannons.                                                | [More info](https://github.com/qbittorrent/qBittorrent)              |
-| SABnzbd           | 📰 Usenet cargo runner fer grabbin' NZBs, repairin' the haul, and droppin' finished loot into the same download hold.                                      | [More info](https://sabnzbd.org)                                     |
+| qBittorrent       | 🌊 Default addon fer torrentin', hoist the colors and download with the might of a thousand cannons.                                                       | [More info](https://github.com/qbittorrent/qBittorrent)              |
+| SABnzbd           | 📰 Optional addon fer Usenet cargo, grabbin' NZBs, repairin' the haul, and droppin' finished loot into the same download hold.                             | [More info](https://sabnzbd.org)                                     |
 | Radarr            | 🎥 Chart yer course fer cinematic riches! Automatically plunder new films and keep yer ship's library filled to the brim.                                   | [More info](https://github.com/Radarr/Radarr)                        |
 | Sonarr            | 📺 Set sail on the seas of TV shows! Fetch new episodes and keep yer watchlist shipshape and Bristol fashion.                                               | [More info](https://github.com/Sonarr/Sonarr)                        |
 | Bazarr            | 🦜 The parrot on yer shoulder squawkin' subtitles in many tongues fer all yer movies and TV shows.                                                          | [More info](https://github.com/morpheus65535/bazarr)                 |
@@ -91,6 +91,43 @@ vim .env
 For more details, see the example environment configuration here:
 
 - 🏴‍☠️ [Peek at the Pirate's Env Code](./example.env)
+
+### Render the Final Chart 🗺️
+
+Plundarr source files be modular, but deployment still sails from one complete Compose chart:
+
+```bash
+make ship
+```
+
+That writes:
+
+```text
+dist/docker-compose.yml
+```
+
+Deploy that generated chart with Docker Compose:
+
+```bash
+docker compose -f dist/docker-compose.yml up -d
+```
+
+Or select `dist/docker-compose.yml` in Synology Container Manager.
+
+Choose optional cargo with `ADDONS`:
+
+```bash
+make ship ADDONS=sabnzbd
+make ship ADDONS=qbittorrent,sabnzbd
+```
+
+The default voyage is:
+
+```bash
+make ship ADDONS=qbittorrent,cleanuparr
+```
+
+By default, the VPN tunnel protects selected download-client addons. Prowlarr, Radarr, Sonarr, and Bazarr sail on the normal Docker network to avoid indexer bans, Cloudflare snarls, and upstream API weirdness.
 
 ### 📜 Important Setup Scroll! ☠️
 
@@ -150,7 +187,7 @@ make reset-service-configs
 >
 > Gluetun also calls [`config/gluetun/scripts/qbittorrent-port-forwarding.sh`](./config/gluetun/scripts/qbittorrent-port-forwarding.sh) when PIA assigns or removes a forwarded port. That script updates qBittorrent's listening port through the local Web API so yer torrent sails catch the right wind.
 >
-> This keeps Synology DSM Container Manager on one main `docker-compose.yml` voyage: Privateerr, Gluetun, and the downstream services all set sail together.
+> This keeps Synology DSM Container Manager on one final `dist/docker-compose.yml` voyage: Privateerr, Gluetun, selected addons, and the downstream services all set sail together.
 
 ## Navigatin' Troubled Waters ☠️🌊
 
@@ -175,13 +212,15 @@ Targets:
   clean                  Stops the stack and restores example config files.
   nuke                   Removes containers, images, generated files, and restores example config.
   reset-config           Restores example wg0.conf and privateerr.env files.
+  check-rendered         Ensures dist/docker-compose.yml exists.
   reset-service-configs  Removes ignored generated service config files without deleting .env.
   test-vpn               Validates running Privateerr and Gluetun VPN runtime state.
-  test-e2e               Starts Privateerr, Gluetun, qBittorrent, and SABnzbd, validates VPN state, then removes them.
+  test-e2e               Tests VPN plus selected download addons.
   test-stack             Starts every service, waits for health, then validates VPN and qBittorrent state.
   test-down              Stops the stack and restores example config files.
   test-logs              Shows logs for the service stack.
   up                     (Re)creates and starts every service.
+  ship                   Renders dist/docker-compose.yml from base plus addons.
   config                 Renders the Docker Compose model.
   env                    Prints the evaluated docker compose default env configuration.
   print-config           Prints the raw uncommented docker compose yaml configuration.

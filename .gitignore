@@ -9,6 +9,8 @@ config/gluetun/servers/
 config/privateerr/logs/
 config/homepage/logs/
 test/logs/
+dist/*
+!dist/.gitkeep
 config/*/*
 !config/*/*.md
 !config/gluetun/wireguard/

@@ -4,7 +4,7 @@ Ahoy, matey! This be the config hold for **SABnzbd**, Plundarr's Usenet download
 
 ## Purpose 🌊
 
-SABnzbd gives the stack a Usenet path alongside qBittorrent's torrent path. It runs through Gluetun with the rest of the arr-stack download tools and writes only under `/downloads/usenet`, while Radarr and Sonarr mount the broader `/downloads` path for imports.
+SABnzbd gives the stack a Usenet path alongside qBittorrent's torrent path. The SABnzbd addon routes it through Gluetun and writes only under `/downloads/usenet`, while Radarr and Sonarr mount the broader `/downloads` path for imports.
 
 ## Download Folders 📦
 

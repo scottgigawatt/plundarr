@@ -53,7 +53,7 @@ If your Synology DiskStation firewall is enabled, allow traffic for the custom D
    - ✅ **Action**: Select `Allow`
 4. 💾 Click **OK** to apply.
 
-This allows containers to communicate internally within the defined Docker network while Gluetun hauls the VPN and port-forwarding traffic through the proper PIA tunnel.
+This allows containers to communicate internally within the defined Docker network while Gluetun hauls selected download-client traffic and port-forwarding through the proper PIA tunnel.
 
 ### Launchin' Yer Fleet 📦🚀
 
@@ -63,11 +63,13 @@ This allows containers to communicate internally within the defined Docker netwo
 To deploy a project using Synology Container Manager:
 
 1. 🔑 Log in to the Synology DSM web interface.
-2. 📦 Open **Container Manager** and navigate to the **Project** tab 📂.
-3. 🆕 Click **Create** and configure:
+2. 🗺️ Run `make ship` from the cloned repository to render `dist/docker-compose.yml`.
+3. 📦 Open **Container Manager** and navigate to the **Project** tab 📂.
+4. 🆕 Click **Create** and configure:
    - 🏷️ **Project Name**: (e.g., `plundarr`)
    - 📂 **Project Path**: Path to the cloned repository.
-4. 🚀 Review and confirm the settings to deploy the project.
+   - 📜 **Compose File**: `dist/docker-compose.yml`
+5. 🚀 Review and confirm the settings to deploy the project.
 
 Refer to the [official Synology documentation](https://kb.synology.com/en-id/DSM/help/ContainerManager/docker_project?version=7) for further details.
 

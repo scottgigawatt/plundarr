@@ -1,0 +1,61 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# sabnzbd.yml: Optional SABnzbd addon for Plundarr's rendered Compose fleet.
+#
+
+services:
+  #
+  # Add SABnzbd ports to the Gluetun service.
+  #
+  gluetun:
+    # Define SABnzbd host and container ports
+    ports:
+      - ${SABNZBD_WEBUI_PORT}:8085  # SABnzbd web UI port
+
+  #
+  # Define the 'sabnzbd' service for managing Usenet downloads.
+  #
+  sabnzbd:
+    # Docker image and container information
+    image: lscr.io/linuxserver/sabnzbd:${SABNZBD_TAG}  # Run using the specified tag
+    container_name: sabnzbd-${SABNZBD_TAG}             # Append Docker image tag to container name
+    network_mode: service:gluetun                      # Route network traffic through gluetun
+    pull_policy: always                                # Ensure that the image is always pulled
+    restart: unless-stopped                            # Restart the container unless explicitly stopped
+    group_add:                                         # Add additional user groups
+      - ${DEFAULT_GROUP}                               # Default group used to manage write permissions
+    logging:                                           # Configure container logging options
+      driver: "json-file"                              # Use JSON file logging driver
+      options:                                         # Logging options for the JSON file driver
+        max-size: ${LOG_MAX_SIZE}                      # Maximum file size for logs files
+        max-file: ${LOG_MAX_FILE}                      # Maximum number of log files to retain
+
+    # Define the container environment
+    environment:
+      TZ: ${TZ}                # Set the appropriate timezone
+      PUID: ${DEFAULT_PUID}    # Default user id mapping for containers
+      PGID: ${DEFAULT_PGID}    # Default group id mapping for containers
+      UMASK: ${DEFAULT_UMASK}   Default file creation mask for containers
+
+    # Mount host directories into the container
+    volumes:
+      - ${SABNZBD_CONFIG_PATH}:/config:rw                   # Configuration files
+      - ${HOST_USENET_DOWNLOADS_PATH}:/downloads/usenet:rw  # Usenet downloads only
+
+    # Define container healthcheck to verify SABnzbd connectivity
+    healthcheck:
+      interval: ${DEFAULT_HEALTHCHECK_INTERVAL}          # Run the check at this interval
+      timeout: ${DEFAULT_HEALTHCHECK_TIMEOUT}            # Fail if it exceeds this duration
+      start_period: ${DEFAULT_HEALTHCHECK_START_PERIOD}  # Grace period before checks start
+      retries: ${DEFAULT_HEALTHCHECK_RETRIES}            # Mark as unhealthy after this many failures
+      test:                                              # Check SABnzbd web server
+        - CMD-SHELL
+        - wget --no-verbose --tries=1 --spider "http://127.0.0.1:8085/" || exit 1
+
+    # Specify container service dependencies
+    depends_on:
+      gluetun:
+        condition: service_healthy  # Wait until Gluetun reports healthy VPN connection

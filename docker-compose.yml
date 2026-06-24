@@ -17,13 +17,10 @@
 #   - gluetun:            https://github.com/qdm12/gluetun
 #   - flaresolverr:       https://github.com/FlareSolverr/FlareSolverr
 #   - prowlarr:           https://github.com/Prowlarr/Prowlarr
-#   - qbittorrent:        https://github.com/qbittorrent/qBittorrent
-#   - sabnzbd:            https://sabnzbd.org
 #   - radarr:             https://github.com/Radarr/Radarr
 #   - sonarr:             https://github.com/Sonarr/Sonarr
 #   - bazarr:             https://github.com/morpheus65535/bazarr
 #   - seerr:              https://github.com/seerr-team/seerr
-#   - cleanuparr:         https://github.com/Cleanuparr/Cleanuparr
 #   - speedtest-tracker:  https://docs.speedtest-tracker.dev
 #   - duplicati:          https://www.duplicati.com
 #   - homepage:           https://gethomepage.dev/latest
@@ -177,21 +174,6 @@ services:
       PRIVATEERR_METADATA_PATH: ${PRIVATEERR_METADATA_PATH}
       PRIVATEERR_GLUETUN_METADATA_WAIT_SECONDS: ${PRIVATEERR_GLUETUN_METADATA_WAIT_SECONDS}
 
-      # Define the commands to run when port forwarding is enabled or disabled
-      VPN_PORT_FORWARDING_UP_COMMAND: /bin/sh -c "${GLUETUN_QBITTORRENT_PORT_FORWARDING_SCRIPT} up {{PORT}} {{VPN_INTERFACE}}"
-      VPN_PORT_FORWARDING_DOWN_COMMAND: /bin/sh -c "${GLUETUN_QBITTORRENT_PORT_FORWARDING_SCRIPT} down"
-
-    # Define the host and container ports
-    ports:
-      - ${QBITTORRENT_TCP_PORT}:6881      # qBittorrent TCP connection port
-      - ${QBITTORRENT_UDP_PORT}:6881/udp  # qBittorrent UDP connection port
-      - ${QBITTORRENT_WEBUI_PORT}:8080    # qBittorrent web UI port
-      - ${SABNZBD_WEBUI_PORT}:8085        # SABnzbd web UI port
-      - ${PROWLARR_WEBUI_PORT}:9696       # Prowlarr web UI port
-      - ${RADARR_WEBUI_PORT}:7878         # Radarr web UI port
-      - ${SONARR_WEBUI_PORT}:8989         # Sonarr web UI port
-      - ${BAZARR_WEBUI_PORT}:6767         # Bazarr web UI port
-
     # Mount host directories into the container
     volumes:
       - ${GLUETUN_CONFIG_PATH}:/gluetun:rw                               # Gluetun config directory
@@ -246,7 +228,11 @@ services:
     <<: *arr-stack-container                             # Pull in arr-stack container config
     image: lscr.io/linuxserver/prowlarr:${PROWLARR_TAG}  # Run using the specified tag
     container_name: prowlarr-${PROWLARR_TAG}             # Append Docker image tag to container name
-    network_mode: service:gluetun                        # Route network traffic through gluetun
+    hostname: prowlarr                                   # Set the container hostname
+
+    # Define the host and container ports
+    ports:
+      - ${PROWLARR_WEBUI_PORT}:9696  # Prowlarr web UI port
 
     # Mount host directories into the container
     volumes:
@@ -261,64 +247,8 @@ services:
 
     # Specify container service dependencies
     depends_on:
-      gluetun:
-        condition: service_started  # Let Gluetun start before Prowlarr joins its network namespace
       flaresolverr:
         condition: service_healthy  # Wait until FlareSolverr is healthy
-
-  #
-  # Define the 'qbittorrent' service for managing torrents.
-  #
-  qbittorrent:
-    # Docker image and container information
-    <<: *arr-stack-container                                   # Pull in arr-stack container config
-    image: lscr.io/linuxserver/qbittorrent:${QBITTORRENT_TAG}  # Run using the specified tag
-    container_name: qbittorrent-${QBITTORRENT_TAG}             # Append Docker image tag to container name
-    network_mode: service:gluetun                              # Route network traffic through gluetun
-
-    # Mount host directories into the container
-    volumes:
-      - ${QBITTORRENT_CONFIG_PATH}:/config:rw                   # Configuration files
-      - ${HOST_TORRENTS_DOWNLOADS_PATH}:/downloads/torrents:rw  # Torrent downloads only
-
-    # Define container healthcheck to verify qBittorrent connectivity
-    healthcheck:
-      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
-      test:                              # Check qBittorrent web server
-        - CMD-SHELL
-        - wget --no-verbose --tries=1 --spider "http://127.0.0.1:8080/" || exit 1
-
-    # Specify container service dependencies
-    depends_on:
-      gluetun:
-        condition: service_healthy  # Wait until Gluetun reports healthy VPN connection
-
-  #
-  # Define the 'sabnzbd' service for managing Usenet downloads.
-  #
-  sabnzbd:
-    # Docker image and container information
-    <<: *arr-stack-container                           # Pull in arr-stack container config
-    image: lscr.io/linuxserver/sabnzbd:${SABNZBD_TAG}  # Run using the specified tag
-    container_name: sabnzbd-${SABNZBD_TAG}             # Append Docker image tag to container name
-    network_mode: service:gluetun                      # Route network traffic through gluetun
-
-    # Mount host directories into the container
-    volumes:
-      - ${SABNZBD_CONFIG_PATH}:/config:rw                   # Configuration files
-      - ${HOST_USENET_DOWNLOADS_PATH}:/downloads/usenet:rw  # Usenet downloads only
-
-    # Define container healthcheck to verify SABnzbd connectivity
-    healthcheck:
-      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
-      test:                              # Check SABnzbd web server
-        - CMD-SHELL
-        - wget --no-verbose --tries=1 --spider "http://127.0.0.1:8085/" || exit 1
-
-    # Specify container service dependencies
-    depends_on:
-      gluetun:
-        condition: service_healthy  # Wait until Gluetun reports healthy VPN connection
 
   #
   # Define the 'radarr' service for managing movies.
@@ -328,7 +258,11 @@ services:
     <<: *arr-stack-container                         # Pull in arr-stack container config
     image: lscr.io/linuxserver/radarr:${RADARR_TAG}  # Run using the specified tag
     container_name: radarr-${RADARR_TAG}             # Append Docker image tag to container name
-    network_mode: service:gluetun                    # Route network traffic through gluetun
+    hostname: radarr                                 # Set the container hostname
+
+    # Define the host and container ports
+    ports:
+      - ${RADARR_WEBUI_PORT}:7878  # Radarr web UI port
 
     # Mount host directories into the container
     volumes:
@@ -345,14 +279,8 @@ services:
 
     # Specify container service dependencies
     depends_on:
-      gluetun:
-        condition: service_healthy  # Wait until Gluetun reports healthy VPN connection
       prowlarr:
         condition: service_healthy  # Wait until Prowlarr is healthy
-      qbittorrent:
-        condition: service_healthy  # Wait until qBittorrent is healthy
-      sabnzbd:
-        condition: service_healthy  # Wait until SABnzbd is healthy
 
   #
   # Define the 'sonarr' service for managing tv shows.
@@ -362,7 +290,11 @@ services:
     <<: *arr-stack-container                         # Pull in arr-stack container config
     image: lscr.io/linuxserver/sonarr:${SONARR_TAG}  # Run using the specified tag
     container_name: sonarr-${SONARR_TAG}             # Append Docker image tag to container name
-    network_mode: service:gluetun                    # Route network traffic through gluetun
+    hostname: sonarr                                 # Set the container hostname
+
+    # Define the host and container ports
+    ports:
+      - ${SONARR_WEBUI_PORT}:8989  # Sonarr web UI port
 
     # Mount host directories into the container
     volumes:
@@ -379,14 +311,8 @@ services:
 
     # Specify container service dependencies
     depends_on:
-      gluetun:
-        condition: service_healthy  # Wait until Gluetun reports healthy VPN connection
       prowlarr:
         condition: service_healthy  # Wait until Prowlarr is healthy
-      qbittorrent:
-        condition: service_healthy  # Wait until qBittorrent is healthy
-      sabnzbd:
-        condition: service_healthy  # Wait until SABnzbd is healthy
 
   #
   # Define the 'bazarr' service for managing subtitles.
@@ -396,7 +322,11 @@ services:
     <<: *arr-stack-container                         # Pull in arr-stack container config
     image: lscr.io/linuxserver/bazarr:${BAZARR_TAG}  # Run using the specified tag
     container_name: bazarr-${BAZARR_TAG}             # Append Docker image tag to container name
-    network_mode: service:gluetun                    # Route network traffic through gluetun
+    hostname: bazarr                                 # Set the container hostname
+
+    # Define the host and container ports
+    ports:
+      - ${BAZARR_WEBUI_PORT}:6767  # Bazarr web UI port
 
     # Mount host directories into the container
     volumes:
@@ -413,8 +343,6 @@ services:
 
     # Specify container service dependencies
     depends_on:
-      gluetun:
-        condition: service_healthy  # Wait until Gluetun reports healthy VPN connection
       sonarr:
         condition: service_healthy  # Wait until Sonarr is healthy
       radarr:
@@ -450,45 +378,6 @@ services:
       test:                              # Check Seerr public settings endpoint
         - CMD-SHELL
         - wget --no-verbose --tries=1 --spider "http://127.0.0.1:5055/api/v1/settings/public" || exit 1
-
-  #
-  # Define the 'cleanuparr' service for Sonarr, Radarr, and qBittorrent file cleanup.
-  #
-  cleanuparr:
-    # Docker image and container information
-    <<: *default-container                                  # Pull in default container config
-    image: ghcr.io/cleanuparr/cleanuparr:${CLEANUPARR_TAG}  # Run using the specified tag
-    container_name: cleanuparr-${CLEANUPARR_TAG}            # Append Docker image tag to container name
-    hostname: cleanuparr                                    # Set the container hostname
-
-    # Define the container environment
-    environment:
-      <<: *arr-stack-environment          # Pull in the arr-stack environment
-      BASE_PATH: ${CLEANUPARR_BASE_PATH}  # Base path for reverse proxy setups
-
-    # Define the host and container ports
-    ports:
-      - ${CLEANUPARR_WEBUI_PORT}:11011  # Cleanuparr web UI port
-
-    # Mount host directories into the container
-    volumes:
-      - ${CLEANUPARR_CONFIG_PATH}:/config  # Persistent config files
-
-    # Define container healthcheck to verify Cleanuparr connectivity
-    healthcheck:
-      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
-      test:                              # Check Cleanuparr health endpoint
-        - CMD-SHELL
-        - curl -fsS "http://127.0.0.1:11011/health" >/dev/null || exit 1
-
-    # Specify container service dependencies
-    depends_on:
-      sonarr:
-        condition: service_healthy  # Wait until Sonarr is healthy
-      radarr:
-        condition: service_healthy  # Wait until Radarr is healthy
-      qbittorrent:
-        condition: service_healthy  # Wait until qBittorrent is healthy
 
   #
   # Define the 'speedtest-tracker' service for tracking internet speeds.
