@@ -22,6 +22,7 @@ Ahoy, ye scurvy devils! Welcome to the **`config`** directory of the grand vesse
 | 📰 `sabnzbd`        | Usenet download runner for NZB treasure             |
 | 🎬 `radarr`         | Movies! Add ‘em, find ‘em, automate ‘em             |
 | 📺 `sonarr`         | TV shows, season packs, binge treasures             |
+| 🍜 `sonarr-anime`   | Optional anime TV captain with its own library hold |
 | 🌬️ `speedtest-tracker` | Measure the wind in yer sails (or yer bandwidth) |
 
 > [!TIP]

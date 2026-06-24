@@ -61,6 +61,7 @@ Plundarr be a collection of Docker Compose configurations to run a shipshape arr
 | SABnzbd           | 📰 Optional addon fer Usenet cargo, grabbin' NZBs, repairin' the haul, and droppin' finished loot into the same download hold.                             | [More info](https://sabnzbd.org)                                     |
 | Radarr            | 🎥 Chart yer course fer cinematic riches! Automatically plunder new films and keep yer ship's library filled to the brim.                                   | [More info](https://github.com/Radarr/Radarr)                        |
 | Sonarr            | 📺 Set sail on the seas of TV shows! Fetch new episodes and keep yer watchlist shipshape and Bristol fashion.                                               | [More info](https://github.com/Sonarr/Sonarr)                        |
+| Sonarr Anime      | 🍜 Optional second Sonarr addon fer anime TV cargo with its own port, config hold, and library root.                                                        | [More info](https://github.com/Sonarr/Sonarr)                        |
 | Bazarr            | 🦜 The parrot on yer shoulder squawkin' subtitles in many tongues fer all yer movies and TV shows.                                                          | [More info](https://github.com/morpheus65535/bazarr)                 |
 | **~~Readarr~~**   | ❌ Scuttled, matey—she sails no more. Hoist 📚 [Calibre Web Automated](https://github.com/scottgigawatt/calibre-web-automated) fer smooth e-book plunderin'. | [Set Sail ⚓](https://github.com/scottgigawatt/calibre-web-automated) |
 | Seerr             | ⚓️ The quartermaster fer handlin' all yer crew's media requests, keepin' the ship runnin' smooth and the crew satisfied.                                    | [More info](https://github.com/seerr-team/seerr)                     |
@@ -119,6 +120,7 @@ Choose optional cargo with `ADDONS`:
 ```bash
 make ship ADDONS=sabnzbd
 make ship ADDONS=qbittorrent,sabnzbd
+make ship ADDONS=qbittorrent,cleanuparr,sonarr-anime
 ```
 
 The default voyage is:

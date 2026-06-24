@@ -9,6 +9,7 @@ Use `make ship ADDONS=...` to build `dist/docker-compose.yml`.
 - `qbittorrent` - Torrent download client and Gluetun port-forwarding hook.
 - `sabnzbd` - Usenet download client.
 - `cleanuparr` - Cleanup service for the default qBittorrent voyage.
+- `sonarr-anime` - Second Sonarr instance for anime TV cargo.
 
 ## Examples
 
@@ -17,6 +18,7 @@ make ship
 make ship ADDONS=sabnzbd
 make ship ADDONS=qbittorrent,sabnzbd
 make ship ADDONS=qbittorrent,cleanuparr
+make ship ADDONS=qbittorrent,cleanuparr,sonarr-anime
 ```
 
 Deploy only the rendered file:

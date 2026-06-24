@@ -28,9 +28,9 @@ Plundarr needs to keep one big deployable `docker-compose.yml` artifact for Dock
 
 ## Later PRs
 
-1. Add `compose.addons/sonarr-anime.yml`.
-2. Add `SONARR_ANIME_*` and `HOST_ANIME_TV_PATH` variables.
-3. Add `config/sonarr-anime/README.md`.
+1. Add `compose.addons/sonarr-anime.yml`. Done on this branch.
+2. Add `SONARR_ANIME_*` and `HOST_ANIME_TV_PATH` variables. Done on this branch.
+3. Add `config/sonarr-anime/README.md`. Done on this branch.
 4. Decide whether Homepage config should be generated from addon fragments.
 5. Decide whether Cleanuparr needs downloader-specific addons.
 6. Decide whether optional `prowlarr-vpn` or direct `sabnzbd` addons are useful.
