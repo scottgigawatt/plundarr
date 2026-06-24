@@ -1,0 +1,11 @@
+
+    - qBittorrent:
+        icon: qbittorrent.svg
+        href: {{HOMEPAGE_VAR_QBITTORRENT_HREF}}
+        description: Torrents management
+        container: qbittorrent-latest
+        widget:
+          type: qbittorrent
+          url: {{HOMEPAGE_VAR_QBITTORRENT_URL}}
+          username: {{HOMEPAGE_VAR_QBITTORRENT_USER}}
+          password: {{HOMEPAGE_VAR_QBITTORRENT_PASS}}

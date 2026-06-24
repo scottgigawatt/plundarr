@@ -1,0 +1,10 @@
+
+    - Speedtest Tracker:
+        icon: mdi-rabbit
+        href: {{HOMEPAGE_VAR_SPEEDTEST_HREF}}
+        description: Internet speed monitoring
+        container: speedtest-tracker-latest
+        widget:
+          type: speedtest
+          url: {{HOMEPAGE_VAR_SPEEDTEST_URL}}
+          bitratePrecision: 3

@@ -12,6 +12,10 @@ More info about **Homepage** can be found [here](https://gethomepage.dev/latest/
 
 When ye run the Docker container, this here directory will be mounted as the configuration folder. Tweak it to yer heart's content to make yer navigation smooth and shipshape!
 
+Homepage service cards are charted from `services.base.yaml`, selected addon fragments in `addons/`, and `services.footer.yaml` when ye run `make ship`. The generated `services.yaml` is the file Homepage reads at runtime.
+
+If ye edit service cards, update the source fragment instead of only editing `services.yaml`, or yer change may be washed overboard on the next render.
+
 ## 🧭 LAN Links and Widget URLs
 
 Homepage uses two kinds of URL variables:

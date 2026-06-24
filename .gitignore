@@ -20,6 +20,8 @@ config/*/*
 !config/gluetun/scripts/gluetun-entrypoint-wrapper.sh
 !config/gluetun/scripts/qbittorrent-port-forwarding.sh
 !config/homepage/*
+!config/homepage/addons/
+!config/homepage/addons/*
 !config/privateerr/*
 !config/sabnzbd/
 !config/sabnzbd/README.md
