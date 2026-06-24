@@ -74,7 +74,7 @@ Plundarr be a collection of Docker Compose configurations to run a shipshape arr
 
 Manage Docker configuration environment variables in the `.env` file.
 
-```bash
+```console
 # Hoist the Jolly Roger and clone the repository
 ❯ git clone git@github.com:scottgigawatt/plundarr.git
 ❯ cd plundarr
