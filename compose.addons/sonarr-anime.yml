@@ -13,9 +13,9 @@ services:
   homepage:
     # Define the Homepage environment variables for Sonarr Anime
     environment:
-      HOMEPAGE_VAR_SONARR_ANIME_HREF: ${HOMEPAGE_VAR_SONARR_ANIME_HREF}
-      HOMEPAGE_VAR_SONARR_ANIME_URL: ${HOMEPAGE_VAR_SONARR_ANIME_URL}:${SONARR_ANIME_WEBUI_PORT}
-      HOMEPAGE_VAR_SONARR_ANIME_KEY: ${HOMEPAGE_VAR_SONARR_ANIME_KEY}
+      HOMEPAGE_VAR_SONARR_ANIME_HREF: ${HOMEPAGE_VAR_SONARR_ANIME_HREF}                           # Homepage Sonarr Anime click target
+      HOMEPAGE_VAR_SONARR_ANIME_URL: ${HOMEPAGE_VAR_SONARR_ANIME_URL}:${SONARR_ANIME_WEBUI_PORT}  # Homepage Sonarr Anime widget URL
+      HOMEPAGE_VAR_SONARR_ANIME_KEY: ${HOMEPAGE_VAR_SONARR_ANIME_KEY}                             # Homepage Sonarr Anime API key
 
   #
   # Define the 'sonarr-anime' service for managing anime TV shows.

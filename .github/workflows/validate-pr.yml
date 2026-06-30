@@ -6,6 +6,8 @@ on:
       - main
   pull_request:
 
+permissions: read-all
+
 jobs:
   validate:
     name: "Shake the YAML Riggin' 🧭"
@@ -15,7 +17,9 @@ jobs:
 
     steps:
       - name: "Grab the Treasure Map 🗺️"
-        uses: actions/checkout@v7.0.0
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+        with:
+          persist-credentials: false
 
       - name: "Copy the Env Scroll 📜"
         run: cp example.env .env
@@ -30,4 +34,4 @@ jobs:
         run: git diff --exit-code -- config/gluetun/wireguard test/examples
 
       - name: "Fire the Pre-Commit Cannons 💥"
-        uses: pre-commit/action@v3.0.1
+        uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd  # v3.0.1
