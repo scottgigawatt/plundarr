@@ -150,12 +150,11 @@ jobs:
               exit 0
           fi
 
-          embed_colors=(16711884 15961002 11685080 10181046 15844367 16738740)
-          color="${embed_colors[$((RANDOM % ${#embed_colors[@]}))]}"
+          color=3447003
 
           payload="$(jq -n \
-              --arg title "🏴‍☠️ Maraudarr entered the shipyard, divas" \
-              --arg description "${WORKFLOW_NAME} slapped on a tricorn and ordered a multi-arch fleet. OSHA has left the chat." \
+              --arg title "🏴‍☠️ Shipyard doors are open" \
+              --arg description "${WORKFLOW_NAME} is building the fleet. Keep hands, feet, and cursed YAML inside the workflow." \
               --arg url "${RUN_URL}" \
               --arg repository "${REPOSITORY}" \
               --arg ref "${REF_NAME}" \
@@ -172,14 +171,14 @@ jobs:
                   url: $url,
                   color: $color,
                   fields: [
-                    {name: "🗺️ Gossip Map", value: $repository, inline: true},
-                    {name: "🌿 Serving Ref", value: $ref, inline: true},
-                    {name: "💅 Chaos Commodore", value: $actor, inline: true},
-                    {name: "🧱 Three-Way Fleet", value: $platforms, inline: false},
-                    {name: "📦 GHCR Treasure Chest", value: $ghcr, inline: false},
-                    {name: "🐳 Docker Hub Cruise", value: $dockerhub, inline: false}
+                    {name: "🗺️ Repository", value: $repository, inline: true},
+                    {name: "🌿 Ref", value: $ref, inline: true},
+                    {name: "🧑‍✈️ Captain", value: $actor, inline: true},
+                    {name: "🧱 Platforms", value: $platforms, inline: false},
+                    {name: "📦 GHCR", value: $ghcr, inline: false},
+                    {name: "🐳 Docker Hub", value: $dockerhub, inline: false}
                   ],
-                  footer: {text: "Maraudarr shipyard: queer, seaworthy, over-accessorized"},
+                  footer: {text: "Maraudarr Shipyard • bolts tightened, YAML questioned"},
                   timestamp: now | todate
                 }]
               }')"
@@ -209,12 +208,11 @@ jobs:
               exit 0
           fi
 
-          embed_colors=(16711884 15961002 11685080 10181046 15844367 16738740)
-          color="${embed_colors[$((RANDOM % ${#embed_colors[@]}))]}"
+          color=10181046
 
           payload="$(jq -n \
-              --arg title "🦑 The kraken put on eyeliner. Build time." \
-              --arg description "${WORKFLOW_NAME} sashayed into dry dock with a cutlass, a blueprint, and absolutely no indoor voice." \
+              --arg title "🦑 Kraken clocked in" \
+              --arg description "${WORKFLOW_NAME} started a multi-arch build. The kraken found the button and accepted no training." \
               --arg url "${RUN_URL}" \
               --arg repository "${REPOSITORY}" \
               --arg ref "${REF_NAME}" \
@@ -231,14 +229,14 @@ jobs:
                   url: $url,
                   color: $color,
                   fields: [
-                    {name: "⚓ Wet Little Repo", value: $repository, inline: true},
-                    {name: "💄 Glossy Ref", value: $ref, inline: true},
-                    {name: "🧜 Summoning Siren", value: $actor, inline: true},
-                    {name: "🧱 Tentacle Rack", value: $platforms, inline: false},
-                    {name: "📦 GHCR Booty", value: $ghcr, inline: false},
-                    {name: "🐳 Docker Diva Dock", value: $dockerhub, inline: false}
+                    {name: "⚓ Repository", value: $repository, inline: true},
+                    {name: "🌿 Ref", value: $ref, inline: true},
+                    {name: "🔘 Button Pusher", value: $actor, inline: true},
+                    {name: "🧱 Platforms", value: $platforms, inline: false},
+                    {name: "📦 GHCR", value: $ghcr, inline: false},
+                    {name: "🐳 Docker Hub", value: $dockerhub, inline: false}
                   ],
-                  footer: {text: "Kraken Build Bureau: salty, sparkly, OCI-compliant"},
+                  footer: {text: "Kraken Build Bureau • too many arms, adequate supervision"},
                   timestamp: now | todate
                 }]
               }')"
@@ -390,7 +388,7 @@ jobs:
       # Report the final job state to both optional Discord destinations. These
       # steps run on success or failure so a broken voyage never disappears.
       #
-      - name: "Notify Discord: fleet gossip 📣"
+      - name: "Notify Discord: build verdict 📣"
         if: always()
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
@@ -410,14 +408,14 @@ jobs:
           fi
 
           if [ "${JOB_STATUS}" = "success" ]; then
-              title="✅ Fleet launched. Wig secured."
-              description="Fresh Maraudarr images are serving multi-arch realness. The registries have been boarded and nobody chipped a nail."
+              title="✅ Fleet launched"
+              description="Maraudarr reached both registries. The manifests agree, which is more than the crew can say."
+              color=3066993
           else
-              title="💥 Shipwreck, but make it fashion"
-              description="The Maraudarr voyage ended ${JOB_STATUS}. Somebody fetch the logs, the lifeboats, and a stronger setting spray."
+              title="💥 Build hit a reef"
+              description="Maraudarr ended ${JOB_STATUS}. The logs have been asked to explain themselves."
+              color=15158332
           fi
-          embed_colors=(16711884 15961002 11685080 10181046 15844367 16738740)
-          color="${embed_colors[$((RANDOM % ${#embed_colors[@]}))]}"
 
           formatted_tags="$(printf '%s\n' "${PUBLISHED_TAGS:-none}" \
               | sed '/^$/d; s#^'"${GHCR_IMAGE}"':##; s/^/• /')"
@@ -444,14 +442,14 @@ jobs:
                   url: $url,
                   color: $color,
                   fields: [
-                    {name: "🗺️ Ship Manifest", value: $repository, inline: true},
-                    {name: "🌿 Drama Ref", value: $ref, inline: true},
-                    {name: "🏷️ Fresh Lewks", value: $tags, inline: false},
-                    {name: "🧾 Registry Fingerprint", value: $digest, inline: false},
-                    {name: "📦 GHCR Treasure Room", value: $ghcrUrl, inline: false},
-                    {name: "🐳 Docker Hub Cabaret", value: $dockerhubUrl, inline: false}
+                    {name: "🗺️ Repository", value: $repository, inline: true},
+                    {name: "🌿 Ref", value: $ref, inline: true},
+                    {name: "🏷️ Tags", value: $tags, inline: false},
+                    {name: "🧾 Digest", value: $digest, inline: false},
+                    {name: "📦 GHCR", value: $ghcrUrl, inline: false},
+                    {name: "🐳 Docker Hub", value: $dockerhubUrl, inline: false}
                   ],
-                  footer: {text: "Maraudarr: plundered, powdered, published"},
+                  footer: {text: "Maraudarr Shipyard • receipts attached"},
                   timestamp: now | todate
                 }]
               }')"
@@ -484,14 +482,14 @@ jobs:
           fi
 
           if [ "${JOB_STATUS}" = "success" ]; then
-              title="🌈 Kraken approved the fit"
-              description="Maraudarr escaped the shipyard polished, published, and offensively buoyant. Every architecture got an invite."
+              title="🦑 Kraken stamped approved"
+              description="Images published on every architecture. The kraken requests credit for standing nearby."
+              color=3066993
           else
-              title="🦑 Kraken ate the build"
-              description="The registry ritual ended ${JOB_STATUS}. The tentacles deny everything; the logs know better."
+              title="🦑 Kraken misplaced the build"
+              description="Publication ended ${JOB_STATUS}. All tentacles point at the logs."
+              color=15158332
           fi
-          embed_colors=(16711884 15961002 11685080 10181046 15844367 16738740)
-          color="${embed_colors[$((RANDOM % ${#embed_colors[@]}))]}"
 
           formatted_tags="$(printf '%s\n' "${PUBLISHED_TAGS:-none}" \
               | sed '/^$/d; s#^'"${GHCR_IMAGE}"':##; s/^/• /')"
@@ -518,14 +516,14 @@ jobs:
                   url: $url,
                   color: $color,
                   fields: [
-                    {name: "⚓ Moisturized Manifest", value: $repository, inline: true},
-                    {name: "💄 Glossy Ref", value: $ref, inline: true},
-                    {name: "🏷️ Hemmed Tags", value: $tags, inline: false},
-                    {name: "🧾 Salty Sigil", value: $digest, inline: false},
-                    {name: "📦 GHCR Booty Call", value: $ghcrUrl, inline: false},
-                    {name: "🐳 Docker Diva Dock", value: $dockerhubUrl, inline: false}
+                    {name: "⚓ Repository", value: $repository, inline: true},
+                    {name: "🌿 Ref", value: $ref, inline: true},
+                    {name: "🏷️ Tags", value: $tags, inline: false},
+                    {name: "🧾 Digest", value: $digest, inline: false},
+                    {name: "📦 GHCR", value: $ghcrUrl, inline: false},
+                    {name: "🐳 Docker Hub", value: $dockerhubUrl, inline: false}
                   ],
-                  footer: {text: "Kraken Build Bureau: gay panic, zero-downtime"},
+                  footer: {text: "Kraken Build Bureau • eight arms, one incident report"},
                   timestamp: now | todate
                 }]
               }')"
