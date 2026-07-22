@@ -36,14 +36,16 @@ RUN pip install \
       --require-hashes \
       --requirement /tmp/maraudarr/requirements.txt
 
-COPY README.md pyproject.toml /tmp/maraudarr/
 COPY src /tmp/maraudarr/src
 
-RUN pip install \
-      --disable-pip-version-check \
-      --no-build-isolation \
-      --no-deps \
-      /tmp/maraudarr && \
+RUN site_packages="$(python3 -c 'import site; print(site.getsitepackages()[0])')" && \
+    mkdir -p "${site_packages}/maraudarr" && \
+    cp -a /tmp/maraudarr/src/maraudarr/. "${site_packages}/maraudarr/" && \
+    printf '%s\n' \
+      '#!/bin/sh' \
+      'exec python3 -m maraudarr.cli "$@"' \
+      > "${MARAUDARR_BIN_HOME}/venv/bin/maraudarr" && \
+    chmod +x "${MARAUDARR_BIN_HOME}/venv/bin/maraudarr" && \
     pip uninstall --yes setuptools pip && \
     rm -rf /tmp/maraudarr
 
