@@ -56,6 +56,23 @@ run_case() {
 run_case plundarr --preset plundarr
 
 #
+# Compose environment inspection must accept valid .env values that are not
+# valid shell syntax. This catches accidental attempts to source the file.
+#
+plundarr_env="${TEST_ROOT}/plundarr/.env"
+sed \
+    "s|^HOMEPAGE_VAR_TITLE=.*|HOMEPAGE_VAR_TITLE=\"\${HOMEPAGE_VAR_TITLE:-Scott's NAS}\"|" \
+    "${plundarr_env}" > "${plundarr_env}.tmp"
+mv "${plundarr_env}.tmp" "${plundarr_env}"
+make \
+    --directory "${REPOSITORY_ROOT}" \
+    --no-print-directory \
+    env \
+    ENV_FILE="${plundarr_env}" \
+    COMPOSE_FILE="${TEST_ROOT}/plundarr/docker-compose.yml" \
+    >/dev/null
+
+#
 # Usenet-only Plundarr voyage.
 #
 run_case usenet \

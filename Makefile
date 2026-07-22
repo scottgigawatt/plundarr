@@ -592,25 +592,24 @@ $(COMPOSE_SERVICES): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 	$(PLUNDARR_COMPOSE) config --services
 
 #
-# $(ENV): Prints the evaluated docker compose default env configuration.
+# $(ENV): Prints the environment Docker Compose uses for interpolation.
 #
 # Dependencies:
+#   $(BUILD_DEPENDS) - Ensure build dependencies are installed.
 #   $(CHECK_ENV) - Ensure the environment file exists.
+#   $(CHECK_RENDERED) - Ensure the rendered Compose file exists.
 #
-$(ENV): $(CHECK_ENV)
-	@. ./$(COMPOSE_ENV_FILE) && \
-	awk -F '=' '/^[^#]/ { \
-		gsub(/^[[:space:]]+|[[:space:]]+$$/, ""); \
-		value = ENVIRON[$$1]; \
-		if (!value) { \
-			split($$2, parts, /:-/); \
-			if (length(parts) > 1) { \
-				gsub(/[{}"]/,"", parts[2]); \
-				value = parts[2]; \
-			} \
+$(ENV): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
+	@$(PLUNDARR_COMPOSE) config --environment | \
+	awk -F '=' ' \
+		NR == FNR { \
+			if ($$0 ~ /^[A-Za-z_][A-Za-z0-9_]*=/) values[$$1] = $$0; \
+			next; \
 		} \
-		printf "%s=%s\n", $$1, value \
-	}' $(COMPOSE_ENV_FILE)
+		$$0 ~ /^[A-Za-z_][A-Za-z0-9_]*=/ && $$1 in values { \
+			print values[$$1] \
+		} \
+	' - $(COMPOSE_ENV_FILE)
 
 #
 # $(PRINT_CONFIG): Prints the raw uncommented docker compose yaml configuration.
