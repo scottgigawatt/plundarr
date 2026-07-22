@@ -4,7 +4,7 @@
 servers.json
 
 # Generated Plundarr service configuration and runtime state.
-config/
+/config/
 
 # Timestamped config archives created by make backup-config.
 backups/

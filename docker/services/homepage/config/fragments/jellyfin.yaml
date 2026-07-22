@@ -1,0 +1,10 @@
+    - Jellyfin:
+        icon: jellyfin.png
+        href: {{HOMEPAGE_VAR_JELLYFIN_HREF}}
+        description: Media streaming
+        widget:
+          type: jellyfin
+          url: {{HOMEPAGE_VAR_JELLYFIN_URL}}
+          key: {{HOMEPAGE_VAR_JELLYFIN_KEY}}
+          enableBlocks: true
+          enableNowPlaying: true
