@@ -261,13 +261,13 @@ Privateerr uses the unmodified upstream
 scripts under their upstream MIT license. Plundarr consumes the published
 Privateerr image and does not vendor those scripts.
 
-## Crew Scrolls 🧭
+### 🧭 Crew Charts & Codes
 
-Got a patch, a bug report, or a cursed sea tale? Grab a quill and join the crew:
-
-- 🛠️ [Contributin' Code Booty](./docs/CONTRIBUTING.md) — send fixes without sinkin' the ship.
-- 🤝 [The Pirate Code](./docs/CODE_OF_CONDUCT.md) — no mutiny, no keelhaul-worthy behavior.
-- 🛡️ [Security Parley](./docs/SECURITY.md) — report leaks before the sharks smell blood.
+| 📜 Shipboard Scroll                                  | ⚓ What It Helps Ye Do                                                     |
+| ---------------------------------------------------- | -------------------------------------------------------------------------- |
+| 🛠️ [Patch the Hull](docs/CONTRIBUTING.md)            | Bring fixes and bright ideas aboard without springing leaks below deck.         |
+| 🤝 [The Crewmate Compact](docs/CODE_OF_CONDUCT.md)   | Keep the deck welcoming, useful, and free of plank-walking nonsense.       |
+| 🔐 [Whisper to the Quartermaster](docs/SECURITY.md)  | Report dangerous leaks privately before the sharks catch their scent.      |
 
 ---
 
