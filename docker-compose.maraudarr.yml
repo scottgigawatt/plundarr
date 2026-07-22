@@ -13,7 +13,7 @@ services:
   #
   maraudarr:
     # Docker image build and container information
-    image: ghcr.io/scottgigawatt/maraudarr:${MARAUDARR_TAG}  # Published image and configurable tag
+    image: ${MARAUDARR_IMAGE}                               # Published or locally built image reference
     build:                                                   # Local development image settings
       context: docker                                        # Complete Maraudarr build context
       dockerfile: Dockerfile                                 # Maraudarr image recipe

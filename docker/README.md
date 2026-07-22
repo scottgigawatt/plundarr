@@ -37,20 +37,25 @@ command before Maraudarr leaves port.
 
 | Command                    | What It Does                                                                 |
 | -------------------------- | ---------------------------------------------------------------------------- |
-| `make ship`                | Pulls the published Maraudarr image and generates the default Plundarr stack |
+| `make ship`                | Prepares Maraudarr and generates the default Plundarr stack                  |
 | `make configure`           | Opens the interactive preset and service picker                              |
 | `make presets`             | Lists every preset and its exact defaults                                    |
 | `make services`            | Lists every selectable service                                               |
+| `make update-maraudarr`    | Refreshes the published Maraudarr image from GHCR                            |
 | `make build-maraudarr`     | Builds the Maraudarr image locally from this directory                       |
 | `make test-maraudarr-unit` | Runs Maraudarr's Python unit tests                                           |
 | `make test-maraudarr`      | Runs unit tests and the real Compose matrix                                  |
 | `make build-multiarch`     | Verifies all published CPU architectures                                     |
 
-Use a local build of Maraudarr:
+Maraudarr uses a matching local image first. When none exists, Make tries GHCR
+and automatically builds from this checkout if the published image is not yet
+available. No pull-skip variable be needed.
+
+Refresh or rebuild Maraudarr explicitly when ye want a different image:
 
 ```bash
+make update-maraudarr
 make build-maraudarr
-MARAUDARR_SKIP_PULL=true make ship
 ```
 
 Add optional cargo without opening the interactive prompts:

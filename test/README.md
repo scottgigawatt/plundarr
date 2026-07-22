@@ -15,6 +15,19 @@ The VPN test script does not use a throwaway test image. It validates the actual
 
 ## Test Voyages 🧭
 
+### Maraudarr Generator Checks
+
+Use the complete Maraudarr test target while changing image resolution,
+presets, service charts, or generated config seeds:
+
+```bash
+make test-maraudarr
+```
+
+These checks simulate local-image discovery, a successful GHCR pull, a local
+fallback build, and a complete retrieval failure without contacting a registry.
+They also run the Python unit suite and generate representative Compose charts.
+
 ### Running Stack Check
 
 Use this when the full Plundarr stack is already running:

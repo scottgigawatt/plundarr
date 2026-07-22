@@ -20,6 +20,8 @@ CHECK_RENDERED=check-rendered
 BUILD=build
 BUILD_MARAUDARR=build-maraudarr
 BUILD_MULTIARCH=build-multiarch
+ENSURE_MARAUDARR_IMAGE=ensure-maraudarr-image
+UPDATE_MARAUDARR=update-maraudarr
 RESET_CONFIG=reset-config
 BACKUP_CONFIG=backup-config
 CLEAN_CONFIG=clean-config
@@ -59,6 +61,8 @@ TARGETS= \
 	$(BUILD) \
 	$(BUILD_MARAUDARR) \
 	$(BUILD_MULTIARCH) \
+	$(ENSURE_MARAUDARR_IMAGE) \
+	$(UPDATE_MARAUDARR) \
 	$(RESET_CONFIG) \
 	$(BACKUP_CONFIG) \
 	$(CLEAN_CONFIG) \
@@ -135,10 +139,10 @@ COMPOSE_E2E_WAIT          ?= 300
 COMPOSE_STACK_WAIT        ?= 600
 COMPOSE_LOGS_OPTIONS      ?= --follow
 MARAUDARR_IMAGE           ?= ghcr.io/scottgigawatt/maraudarr:latest
-MARAUDARR_SKIP_PULL       ?= false
 MARAUDARR_COMPOSE_FILE    ?= docker-compose.maraudarr.yml
 MARAUDARR_ENV_FILE        ?= example.maraudarr.env
 MARAUDARR_OUTPUT          ?= /output
+MARAUDARR_BUILD_OPTIONS   ?= --pull --no-cache
 MARAUDARR_BUILD_PLATFORMS ?= linux/amd64,linux/arm64,linux/arm/v7
 MARAUDARR_MULTIARCH_IMAGE ?= maraudarr:multiarch-local
 MARAUDARR_TEST_OUTPUT     ?= /tmp/maraudarr-matrix
@@ -182,8 +186,9 @@ DIRECT_WEB_PORTS  ?= \
 #
 # Testing commands.
 #
-PLUNDARR_VPN_TEST_CMD   ?= test/plundarr-vpn-test.sh
-PLUNDARR_STACK_WAIT_CMD ?= test/plundarr-stack-wait.sh
+PLUNDARR_VPN_TEST_CMD    ?= test/plundarr-vpn-test.sh
+PLUNDARR_STACK_WAIT_CMD  ?= test/plundarr-stack-wait.sh
+MARAUDARR_IMAGE_TEST_CMD ?= test/test-maraudarr-image.sh
 
 #
 # Docker Compose command compatible with 'docker compose' (v2) and 'docker-compose' (v1).
@@ -206,7 +211,8 @@ PLUNDARR_COMPOSE = $(DOCKER_COMPOSE) --env-file $(COMPOSE_ENV_FILE) -f $(COMPOSE
 # Docker Compose command used to build Maraudarr from its self-contained image
 # context. This file and environment pair never replace generated Plundarr files.
 #
-MARAUDARR_COMPOSE = $(DOCKER_COMPOSE) --env-file $(MARAUDARR_ENV_FILE) -f $(MARAUDARR_COMPOSE_FILE)
+MARAUDARR_COMPOSE = MARAUDARR_IMAGE="$(MARAUDARR_IMAGE)" \
+	$(DOCKER_COMPOSE) --env-file $(MARAUDARR_ENV_FILE) -f $(MARAUDARR_COMPOSE_FILE)
 
 #
 # Hardened Docker options shared by every published Maraudarr image command.
@@ -227,6 +233,7 @@ MARAUDARR_RUN_OPTIONS ?= \
 #
 MARAUDARR_RUN = docker run $(MARAUDARR_RUN_OPTIONS) $(MARAUDARR_IMAGE)
 MARAUDARR_RUN_INTERACTIVE = docker run --interactive --tty $(MARAUDARR_RUN_OPTIONS) $(MARAUDARR_IMAGE)
+MARAUDARR_BUILD = $(MARAUDARR_COMPOSE) build $(MARAUDARR_BUILD_OPTIONS) maraudarr
 
 #
 # Localhost URL helper function.
@@ -470,15 +477,49 @@ $(UP): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 	$(PLUNDARR_COMPOSE) up $(COMPOSE_UP_OPTIONS)
 
 #
-# $(SHIP): Generates the comment-rich Compose and environment files.
+# $(ENSURE_MARAUDARR_IMAGE): Uses a local Maraudarr image, pulls the published
+#                            image when missing, or builds from this checkout.
 #
 # Dependencies:
 #   $(BUILD_DEPENDS) - Ensure build dependencies are installed.
 #
-$(SHIP): $(BUILD_DEPENDS)
-	@if [ "$(MARAUDARR_SKIP_PULL)" != "true" ]; then \
-		docker pull "$(MARAUDARR_IMAGE)"; \
+$(ENSURE_MARAUDARR_IMAGE): $(BUILD_DEPENDS)
+	@if docker image inspect "$(MARAUDARR_IMAGE)" >/dev/null 2>&1; then \
+		echo "⚓ Found Maraudarr aboard locally: $(MARAUDARR_IMAGE)"; \
+	else \
+		echo "🌊 No local Maraudarr image found. Checking GHCR..."; \
+		if docker pull "$(MARAUDARR_IMAGE)" >/dev/null 2>&1; then \
+			echo "✅ Published Maraudarr image is ready."; \
+		else \
+			echo "🛠️ Published image unavailable. Building from this checkout..."; \
+			$(MARAUDARR_BUILD) || { \
+				echo "☠️ Maraudarr could not be pulled or built."; \
+				exit 1; \
+			}; \
+		fi; \
 	fi
+	@docker image inspect "$(MARAUDARR_IMAGE)" >/dev/null 2>&1 || { \
+		echo "☠️ Maraudarr image is still missing: $(MARAUDARR_IMAGE)"; \
+		exit 1; \
+	}
+
+#
+# $(UPDATE_MARAUDARR): Refreshes the published Maraudarr image from GHCR.
+#
+# Dependencies:
+#   $(BUILD_DEPENDS) - Ensure build dependencies are installed.
+#
+$(UPDATE_MARAUDARR): $(BUILD_DEPENDS)
+	@echo "🌊 Fetching the newest published Maraudarr image..."
+	docker pull "$(MARAUDARR_IMAGE)"
+
+#
+# $(SHIP): Generates the comment-rich Compose and environment files.
+#
+# Dependencies:
+#   $(ENSURE_MARAUDARR_IMAGE) - Prepare a local Maraudarr image.
+#
+$(SHIP): $(ENSURE_MARAUDARR_IMAGE)
 
 	$(MARAUDARR_RUN) build \
 		--preset "$(PRESET)" \
@@ -490,13 +531,9 @@ $(SHIP): $(BUILD_DEPENDS)
 # $(CONFIGURE): Opens Maraudarr's interactive preset and service configurator.
 #
 # Dependencies:
-#   $(BUILD_DEPENDS) - Ensure Docker and Docker Compose are installed.
+#   $(ENSURE_MARAUDARR_IMAGE) - Prepare a local Maraudarr image.
 #
-$(CONFIGURE): $(BUILD_DEPENDS)
-	@if [ "$(MARAUDARR_SKIP_PULL)" != "true" ]; then \
-		docker pull "$(MARAUDARR_IMAGE)"; \
-	fi
-
+$(CONFIGURE): $(ENSURE_MARAUDARR_IMAGE)
 	$(MARAUDARR_RUN_INTERACTIVE) configure --output "$(MARAUDARR_OUTPUT)"
 
 #
@@ -506,7 +543,7 @@ $(CONFIGURE): $(BUILD_DEPENDS)
 #   $(BUILD_DEPENDS) - Ensure Docker and Docker Compose are installed.
 #
 $(BUILD_MARAUDARR): $(BUILD_DEPENDS)
-	$(MARAUDARR_COMPOSE) build --pull --no-cache maraudarr
+	$(MARAUDARR_BUILD)
 
 #
 # $(BUILD): Alias for build-maraudarr to match the related Privateerr project.
@@ -547,27 +584,26 @@ $(TEST_MARAUDARR_UNIT):
 #   $(TEST_MARAUDARR_UNIT) - Run Maraudarr's Python unit tests.
 #
 $(TEST_MARAUDARR): $(BUILD_DEPENDS) $(TEST_MARAUDARR_UNIT)
+	$(MARAUDARR_IMAGE_TEST_CMD)
 	MARAUDARR_TEST_OUTPUT="$(MARAUDARR_TEST_OUTPUT)" \
 		test/test-maraudarr-matrix.sh
 
 #
 # $(PRESETS): Lists presets and their exact default services.
 #
-$(PRESETS):
-	@if [ "$(MARAUDARR_SKIP_PULL)" != "true" ]; then \
-		docker pull "$(MARAUDARR_IMAGE)"; \
-	fi
-
+# Dependencies:
+#   $(ENSURE_MARAUDARR_IMAGE) - Prepare a local Maraudarr image.
+#
+$(PRESETS): $(ENSURE_MARAUDARR_IMAGE)
 	$(MARAUDARR_RUN) --plain presets
 
 #
 # $(AVAILABLE_SERVICES): Lists every selectable Plundarr service.
 #
-$(AVAILABLE_SERVICES):
-	@if [ "$(MARAUDARR_SKIP_PULL)" != "true" ]; then \
-		docker pull "$(MARAUDARR_IMAGE)"; \
-	fi
-
+# Dependencies:
+#   $(ENSURE_MARAUDARR_IMAGE) - Prepare a local Maraudarr image.
+#
+$(AVAILABLE_SERVICES): $(ENSURE_MARAUDARR_IMAGE)
 	$(MARAUDARR_RUN) --plain services
 
 #
@@ -697,6 +733,7 @@ $(HELP):
 	$(call help_line,$(BUILD),Builds the local Maraudarr image.)
 	$(call help_line,$(BUILD_MARAUDARR),Builds Maraudarr from the docker context.)
 	$(call help_line,$(BUILD_MULTIARCH),Checks every published image architecture.)
+	$(call help_line,$(UPDATE_MARAUDARR),Refreshes the published Maraudarr image.)
 	$(call help_line,$(DOWN),Stops and removes the service stack.)
 	$(call help_line,$(CLEAN),Stops the stack and restores example config files.)
 	$(call help_line,$(NUKE),Removes containers plus images and generated files.)

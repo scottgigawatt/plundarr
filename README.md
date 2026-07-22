@@ -88,8 +88,9 @@ inspect the riggin' before anything leaves port.
 ## Hoist the Sails ⚓️
 
 The default Plundarr voyage uses qBittorrent and needs no setup questions.
-`make ship` pulls the published Maraudarr image, then generates the complete
-Plundarr stack in this repository:
+`make ship` uses Maraudarr locally when available, pulls it when missing, and
+builds it from this checkout when no published image is available. It then
+generates the complete Plundarr stack in this repository:
 
 ```bash
 # Hoist the Jolly Roger, clone the repo, and chart the default stack
@@ -216,17 +217,18 @@ make test-stack
 
 | Command                         | What It Does                                             |
 | ------------------------------- | -------------------------------------------------------- |
-| 🗺️ `make ship`                  | Pulls the published Maraudarr image and generates Plundarr |
+| 🗺️ `make ship`                  | Prepares Maraudarr and generates the Plundarr stack      |
 | 🧭 `make configure`             | Opens Maraudarr's interactive configurator               |
 | 📜 `make presets`               | Lists presets and their exact default services           |
 | 📦 `make services`              | Lists every service Maraudarr can select                 |
+| 🌊 `make update-maraudarr`      | Refreshes the published Maraudarr image                  |
 | 🧾 `make compose-services`      | Lists services in the generated Plundarr chart           |
 | 🔎 `make config`                | Prints Docker Compose's validated model                  |
 | 🚀 `make up`                    | Starts the complete generated stack                      |
 | ⚓ `make down`                  | Stops and removes the generated stack                    |
 | 💾 `make backup-config`         | Archives `config/` with a collision-safe timestamp       |
 | ☠️ `make clean-config`          | Deletes the complete generated config directory          |
-| 🐍 `make test-maraudarr-unit`   | Runs Maraudarr's Python unit tests                       |
+| 🐍 `make test-maraudarr-unit`   | Runs Maraudarr's Python unit tests                        |
 | 🧪 `make test-maraudarr`        | Tests presets and generated Compose combinations         |
 | ⚒️ `make build-maraudarr`       | Builds the Maraudarr image locally from this repository  |
 
