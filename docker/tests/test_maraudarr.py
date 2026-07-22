@@ -295,7 +295,7 @@ class MaraudarrTests(unittest.TestCase):
     def test_write_stack_creates_only_selected_config_directories(self) -> None:
         plan = self.catalog.resolve(
             "custom",
-            selected={"homepage", "jellyfin"},
+            selected={"homepage", "jellyfin", "qbittorrent"},
         )
 
         with tempfile.TemporaryDirectory() as temporary_directory:
@@ -313,6 +313,14 @@ class MaraudarrTests(unittest.TestCase):
             self.assertTrue((config_path / "homepage" / "README.md").is_file())
             self.assertTrue((config_path / "homepage" / "services.yaml").is_file())
             self.assertTrue((config_path / "jellyfin" / "README.md").is_file())
+            self.assertTrue(
+                (
+                    config_path
+                    / "qbittorrent"
+                    / "qBittorrent"
+                    / "qBittorrent.conf"
+                ).is_file()
+            )
             self.assertFalse((config_path / "plex").exists())
 
 
