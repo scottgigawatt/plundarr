@@ -19,8 +19,8 @@ services:
 
     # Define the container environment
     environment:
-      <<: *arr-stack-environment           # Pull in the arr-stack environment
-      BASE_PATH: ${CLEANUPARR_BASE_PATH}   # Base path for reverse proxy setups
+      <<: *arr-stack-environment          # Pull in the arr-stack environment
+      BASE_PATH: ${CLEANUPARR_BASE_PATH}  # Base path for reverse proxy setups
 
     # Define the host and container ports
     ports:
