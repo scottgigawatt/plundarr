@@ -79,7 +79,7 @@ inspect the riggin' before anything leaves port.
 | Jellyfin          | 🎞️ Streams movies, television, and anime.              | [More info](https://jellyfin.org)                                    |
 | Cleanuparr        | 🧹 Removes blocked or unwanted downloads.              | [More info](https://github.com/Cleanuparr/Cleanuparr)                |
 | Speedtest Tracker | ⚡️ Tracks internet speed over time.                    | [More info](https://docs.speedtest-tracker.dev/)                     |
-| Apprise           | 📯 Delivers notifications without another public UI.  | [More info](https://github.com/caronc/apprise-api)                   |
+| Apprise           | 📯 Delivers notifications without another public UI.   | [More info](https://github.com/caronc/apprise-api)                   |
 | Duplicati         | 💣 Backs up yer precious booty.                        | [More info](https://www.duplicati.com)                               |
 | Homepage          | 🏠 Provides a dashboard for the whole fleet.           | [More info](https://gethomepage.dev)                                 |
 | Watchtower        | 🔭 Checks selected containers for image updates.       | [More info](https://github.com/containrrr/watchtower)                |
@@ -147,21 +147,21 @@ Choose a preset, inspect its cargo, add or remove services, and approve the
 final manifest. The prompts stay friendly, lightly pirate, and very clear about
 what will be written.
 
-| Voyage         | Default Cargo |
-| -------------- | ------------- |
-| 🏴‍☠️ `plundarr` | Privateerr, Gluetun, FlareSolverr, Prowlarr, qBittorrent, Radarr, Sonarr, Bazarr, Seerr, Cleanuparr, Speedtest Tracker, Duplicati, and Homepage |
-| 🔞 `boudoirr`  | Privateerr, Gluetun, FlareSolverr, Prowlarr, qBittorrent, SABnzbd, Whisparr, Cleanuparr, and Watchtower |
-| 🧩 `custom`    | An empty hold; choose every service yerself |
+| Voyage           | Default Cargo                                                                                                                                   |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| 🏴‍☠️ `plundarr`    | Privateerr, Gluetun, FlareSolverr, Prowlarr, qBittorrent, Radarr, Sonarr, Bazarr, Seerr, Cleanuparr, Speedtest Tracker, Duplicati, and Homepage |
+| 🔞 `boudoirr`    | Privateerr, Gluetun, FlareSolverr, Prowlarr, qBittorrent, SABnzbd, Whisparr, Cleanuparr, and Watchtower                                         |
+| 🧩 `custom`      | An empty hold; choose every service yerself                                                                                                     |
 
 Useful commands for captains who already know the route:
 
-| Command                                                                    | What It Does                            |
-| -------------------------------------------------------------------------- | --------------------------------------- |
-| 🗺️ `make presets`                                                          | Shows each preset and its default cargo |
-| 📦 `make services`                                                         | Lists every service Maraudarr can add   |
-| ⚓ `make ship OPTIONAL_SERVICES=qbittorrent,cleanuparr,apprise,jellyfin`    | Adds Apprise and Jellyfin               |
-| 🎬 `make ship OPTIONAL_SERVICES=qbittorrent,cleanuparr,plex`                | Adds containerized Plex                 |
-| 🔞 `make ship PRESET=boudoirr OPTIONAL_SERVICES=qbittorrent,sabnzbd,cleanuparr,watchtower` | Charts the Boudoirr voyage |
+| Command                                                                                    | What It Does                            |
+| ------------------------------------------------------------------------------------------ | --------------------------------------- |
+| 🗺️ `make presets`                                                                          | Shows each preset and its default cargo |
+| 📦 `make services`                                                                         | Lists every service Maraudarr can add   |
+| ⚓ `make ship OPTIONAL_SERVICES=qbittorrent,cleanuparr,apprise,jellyfin`                   | Adds Apprise and Jellyfin               |
+| 🎬 `make ship OPTIONAL_SERVICES=qbittorrent,cleanuparr,plex`                               | Adds containerized Plex                 |
+| 🔞 `make ship PRESET=boudoirr OPTIONAL_SERVICES=qbittorrent,sabnzbd,cleanuparr,watchtower` | Charts the Boudoirr voyage              |
 
 Switch the default Plundarr voyage from torrents to Usenet:
 
@@ -226,7 +226,7 @@ make test-stack
 | ⚓ `make down`                  | Stops and removes the generated stack                    |
 | 💾 `make backup-config`         | Archives `config/` with a collision-safe timestamp       |
 | ☠️ `make clean-config`          | Deletes the complete generated config directory          |
-| 🐍 `make test-maraudarr-unit`   | Runs Maraudarr's Python unit tests                        |
+| 🐍 `make test-maraudarr-unit`   | Runs Maraudarr's Python unit tests                       |
 | 🧪 `make test-maraudarr`        | Tests presets and generated Compose combinations         |
 | ⚒️ `make build-maraudarr`       | Builds the Maraudarr image locally from this repository  |
 
@@ -234,14 +234,14 @@ Need the whole command chart? Run `make help`.
 
 ## More Treasure Maps 🗺️
 
-| Scroll                                             | When Ye Need It                                      |
-| -------------------------------------------------- | ---------------------------------------------------- |
-| ⚒️ [Inside Maraudarr](docker/README.md)             | Image commands, security, tags, and architecture     |
-| 🖥️ [Synology Setup](docs/SETUP.md)                  | Container Manager and host-path preparation          |
-| 🧪 [Testing Hold](test/README.md)                   | VPN, end-to-end, and stack validation                |
-| 🛠️ [Contributin' Code Booty](docs/CONTRIBUTING.md) | Repository standards and pull requests               |
-| 🤝 [The Pirate Code](docs/CODE_OF_CONDUCT.md)       | Expectations for every member of the crew            |
-| 🛡️ [Security Parley](docs/SECURITY.md)              | Private vulnerability reporting                      |
+| Scroll                                              | When Ye Need It                                  |
+| --------------------------------------------------- | ------------------------------------------------ |
+| ⚒️ [Inside Maraudarr](docker/README.md)             | Image commands, security, tags, and architecture |
+| 🖥️ [Synology Setup](docs/SETUP.md)                  | Container Manager and host-path preparation      |
+| 🧪 [Testing Hold](test/README.md)                   | VPN, end-to-end, and stack validation            |
+| 🛠️ [Contributin' Code Booty](docs/CONTRIBUTING.md)  | Repository standards and pull requests           |
+| 🤝 [The Pirate Code](docs/CODE_OF_CONDUCT.md)       | Expectations for every member of the crew        |
+| 🛡️ [Security Parley](docs/SECURITY.md)              | Private vulnerability reporting                  |
 
 ## Ship's Log 🏝️
 
