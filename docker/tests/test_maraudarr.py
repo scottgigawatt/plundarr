@@ -199,7 +199,12 @@ class MaraudarrTests(unittest.TestCase):
                 second_environment,
             )
             self.assertIn(expected_value, second_environment)
-            env_path.write_text(second_environment)
+            env_path.write_text(
+                "#\n"
+                "# Preserved values for services not selected in this stack\n"
+                "#\n"
+                f"{expected_value}\n"
+            )
 
             restored_environment = render_environment(self.catalog, plundarr, env_path)
             self.assertIn(expected_value, restored_environment)
