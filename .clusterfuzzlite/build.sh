@@ -4,16 +4,17 @@
 #
 # Licensed under the Apache License, Version 2.0.
 #
-# build.sh: Install Maraudarr and compile its ClusterFuzzLite targets.
+# build.sh: Expose Maraudarr source and compile its ClusterFuzzLite targets.
 #
 
 set -eu
 
 #
-# Install only Maraudarr itself. Its interactive dependencies are unnecessary
-# because the fuzz target imports the dependency-free text helper module.
+# Import Maraudarr directly from its checked-in source tree. Avoiding a local
+# pip install keeps the fuzz build dependency-free and prevents Scorecard from
+# treating the project itself as an unhashed package dependency.
 #
-python3 -m pip install --no-deps "${SRC}/plundarr/docker"
+export PYTHONPATH="${SRC}/plundarr/docker/src${PYTHONPATH:+:${PYTHONPATH}}"
 
 #
 # Package the Atheris harness as the executable expected by ClusterFuzzLite.
