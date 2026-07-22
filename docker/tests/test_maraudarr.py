@@ -187,28 +187,23 @@ class MaraudarrTests(unittest.TestCase):
     def test_unselected_service_values_survive_preset_changes(self) -> None:
         plundarr = self.catalog.resolve("plundarr")
         boudoirr = self.catalog.resolve("boudoirr")
+        expected_value = 'DUPLICATI_TAG="preserve-this-tag"'
 
         with tempfile.TemporaryDirectory() as temporary_directory:
             env_path = Path(temporary_directory) / ".env"
-            first_environment = render_environment(self.catalog, plundarr, env_path)
-            env_path.write_text(first_environment)
-            expected_key = next(
-                line
-                for line in first_environment.splitlines()
-                if line.startswith("DUPLICATI_SETTINGS_ENCRYPTION_KEY=")
-            )
+            env_path.write_text(expected_value + "\n")
 
             second_environment = render_environment(self.catalog, boudoirr, env_path)
             self.assertIn(
                 "# Preserved values for services not selected in this stack",
                 second_environment,
             )
-            self.assertIn(expected_key, second_environment)
+            self.assertIn(expected_value, second_environment)
             env_path.write_text(second_environment)
 
             restored_environment = render_environment(self.catalog, plundarr, env_path)
-            self.assertIn(expected_key, restored_environment)
-            self.assertEqual(restored_environment.count(expected_key), 1)
+            self.assertIn(expected_value, restored_environment)
+            self.assertEqual(restored_environment.count(expected_value), 1)
 
     def test_homepage_fragments_join_the_correct_service_groups(self) -> None:
         plan = self.catalog.resolve(

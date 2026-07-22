@@ -11,6 +11,41 @@
 # Default Alpine image tag that can be overridden using build arguments.
 #
 ARG ALPINE_TAG=3.24@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6eec434943f8b
+ARG MARAUDARR_BIN_HOME=/maraudarr
+
+#
+# Build the isolated Python environment separately so package-management tools
+# and their transitive dependencies never enter the published runtime image.
+#
+FROM alpine:${ALPINE_TAG} AS build
+
+ARG MARAUDARR_BIN_HOME
+
+ENV PATH=${MARAUDARR_BIN_HOME}/venv/bin:${PATH}
+
+RUN apk add --no-cache \
+      py3-pip \
+      python3 && \
+    python3 -m venv "${MARAUDARR_BIN_HOME}/venv"
+
+COPY requirements.txt /tmp/maraudarr/requirements.txt
+
+RUN pip install \
+      --disable-pip-version-check \
+      --no-cache-dir \
+      --require-hashes \
+      --requirement /tmp/maraudarr/requirements.txt
+
+COPY README.md pyproject.toml /tmp/maraudarr/
+COPY src /tmp/maraudarr/src
+
+RUN pip install \
+      --disable-pip-version-check \
+      --no-build-isolation \
+      --no-deps \
+      /tmp/maraudarr && \
+    pip uninstall --yes setuptools pip && \
+    rm -rf /tmp/maraudarr
 
 #
 # Use the specified version of the Alpine image.
@@ -61,35 +96,23 @@ LABEL org.opencontainers.image.title="Maraudarr" \
 
 #
 # Install only the Python runtime and Docker Compose parser required by
-# Maraudarr, then create an isolated virtual environment for pinned packages.
+# Maraudarr. Python package-management tools remain in the build stage.
 #
 RUN apk add --no-cache \
       docker-cli-compose \
-      py3-pip \
-      python3 && \
-    python3 -m venv "${MARAUDARR_BIN_HOME}/venv"
+      python3
 
 #
-# Copy dependency metadata first so dependency installation remains cacheable.
+# Copy the installed application and exact, hash-verified dependencies from
+# the disposable build stage.
 #
-COPY requirements.txt /tmp/maraudarr/requirements.txt
-
-#
-# Install exact, hash-verified Python dependency versions.
-#
-RUN pip install \
-      --disable-pip-version-check \
-      --no-cache-dir \
-      --require-hashes \
-      --requirement /tmp/maraudarr/requirements.txt
+COPY --from=build ${MARAUDARR_BIN_HOME}/venv ${MARAUDARR_BIN_HOME}/venv
 
 #
 # Copy Maraudarr source, service charts, config seeds, metadata, and license.
 # The Docker build context is intentionally limited to this directory.
 #
 COPY LICENSE /LICENSE
-COPY README.md pyproject.toml /tmp/maraudarr/
-COPY src /tmp/maraudarr/src
 COPY catalog ${MARAUDARR_BIN_HOME}/catalog
 COPY config ${MARAUDARR_BIN_HOME}/config
 COPY services ${MARAUDARR_BIN_HOME}/services
@@ -97,16 +120,10 @@ COPY templates ${MARAUDARR_BIN_HOME}/templates
 COPY maraudarr-entrypoint.sh ${MARAUDARR_BIN_HOME}/maraudarr-entrypoint.sh
 
 #
-# Install Maraudarr without resolving dependencies a second time, then create
-# the configurable unprivileged runtime account and secure the entrypoint.
+# Create the configurable unprivileged runtime account and secure the
+# project-owned entrypoint.
 #
-RUN pip install \
-      --disable-pip-version-check \
-      --no-build-isolation \
-      --no-deps \
-      /tmp/maraudarr && \
-    rm -rf /tmp/maraudarr && \
-    addgroup -S -g "${MARAUDARR_GID}" maraudarr && \
+RUN addgroup -S -g "${MARAUDARR_GID}" maraudarr && \
     adduser -S -D -H -u "${MARAUDARR_UID}" -G maraudarr maraudarr && \
     chmod +x "${MARAUDARR_BIN_HOME}/maraudarr-entrypoint.sh"
 
