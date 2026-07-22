@@ -2,6 +2,13 @@ name: "Inspect the Crow's Nest 🦜"
 
 on:
     branch_protection_rule:
+    push:
+        branches:
+            - main
+        paths:
+            - ".github/workflows/**"
+            - ".github/renovate.json"
+            - "renovate.json"
     schedule:
         - cron: "29 8 * * 1"
     workflow_dispatch:
