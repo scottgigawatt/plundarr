@@ -1,0 +1,105 @@
+---
+#
+# For more information see: https://gethomepage.dev/latest/configs/services
+#
+
+- Media:
+    - Plex:
+        id: 100
+        icon: plex.svg
+        href: {{HOMEPAGE_VAR_PLEX_HREF}}
+        description: Plex Media Server
+        widget:
+          type: plex
+          fields: ["streams", "movies", "tv"]
+          url: {{HOMEPAGE_VAR_PLEX_URL}}
+          key: {{HOMEPAGE_VAR_PLEX_TOKEN}}
+
+    - Radarr:
+        icon: radarr.svg
+        href: {{HOMEPAGE_VAR_RADARR_HREF}}
+        description: Movies management
+        container: radarr-latest
+        widget:
+          type: radarr
+          fields: ["wanted", "queued"]
+          url: {{HOMEPAGE_VAR_RADARR_URL}}
+          key: {{HOMEPAGE_VAR_RADARR_KEY}}
+
+    - Sonarr:
+        icon: sonarr.svg
+        href: {{HOMEPAGE_VAR_SONARR_HREF}}
+        description: Series management
+        container: sonarr-latest
+        widget:
+          type: sonarr
+          fields: ["wanted", "queued"]
+          url: {{HOMEPAGE_VAR_SONARR_URL}}
+          key: {{HOMEPAGE_VAR_SONARR_KEY}}
+
+    - Bazarr:
+        icon: bazarr.svg
+        href: {{HOMEPAGE_VAR_BAZARR_HREF}}
+        description: Subtitles management
+        container: bazarr-latest
+        widget:
+          type: bazarr
+          url: {{HOMEPAGE_VAR_BAZARR_URL}}
+          key: {{HOMEPAGE_VAR_BAZARR_KEY}}
+
+    - Seerr:
+        icon: seerr.svg
+        href: {{HOMEPAGE_VAR_SEERR_HREF}}
+        description: Requests management
+        container: seerr-latest
+        widget:
+          type: seerr
+          url: {{HOMEPAGE_VAR_SEERR_URL}}
+          key: {{HOMEPAGE_VAR_SEERR_KEY}}
+
+- Data:
+    - Calendar:
+        icon: mdi-calendar-month
+        widget:
+          type: calendar
+          firstDayInWeek: sunday
+          view: monthly
+          maxEvents: 10
+          showTime: true
+          integrations:
+            - type: radarr
+              service_group: Media
+              service_name: Radarr
+              color: amber
+              params:
+                unmonitored: true
+            - type: sonarr
+              service_group: Media
+              service_name: Sonarr
+              color: teal
+              params:
+                unmonitored: true
+
+    - Tautulli:
+        icon: tautulli.svg
+        href: {{HOMEPAGE_VAR_TAUTULLI_HREF}}
+        description: Plex monitoring
+        container: tautulli-latest
+        widget:
+          type: tautulli
+          url: {{HOMEPAGE_VAR_TAUTULLI_URL}}
+          key: {{HOMEPAGE_VAR_TAUTULLI_KEY}}
+          enableUser: true
+          showEpisodeNumber: true
+          expandOneStreamToTwoRows: false
+
+- Downloads:
+    - Prowlarr:
+        icon: prowlarr.svg
+        href: {{HOMEPAGE_VAR_PROWLARR_HREF}}
+        description: Indexers management
+        container: prowlarr-latest
+        widget:
+          type: prowlarr
+          url: {{HOMEPAGE_VAR_PROWLARR_URL}}
+          key: {{HOMEPAGE_VAR_PROWLARR_KEY}}

@@ -1,0 +1,40 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# compose.yml: Maraudarr service chart for Whisparr.
+#
+
+services:
+  #
+  # Define the 'whisparr' service for managing adult media.
+  #
+  whisparr:
+    # Docker image and container information
+    <<: *arr-stack-container                       # Pull in arr-stack container config
+    image: ghcr.io/hotio/whisparr:${WHISPARR_TAG}  # Run using the specified tag
+    container_name: whisparr-${WHISPARR_TAG}       # Append Docker image tag to container name
+    hostname: whisparr                             # Set the container hostname
+
+    # Define the host and container ports
+    ports:
+      - ${WHISPARR_WEBUI_PORT}:6969  # Whisparr web UI port
+
+    # Mount host directories into the container
+    volumes:
+      - ${WHISPARR_CONFIG_PATH}:/config:rw    # Persistent Whisparr configuration
+      - ${WHISPARR_DATA_PATH}:/data:rw        # Adult media library root
+      - ${HOST_DOWNLOADS_PATH}:/downloads:rw  # Shared download tree for imports and hardlinks
+
+    # Define container healthcheck to verify Whisparr connectivity
+    healthcheck:
+      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
+      test:                              # Check Whisparr login page
+        - CMD-SHELL
+        - wget -qO- "http://127.0.0.1:6969/login" | grep -q "Whisparr" || exit 1
+
+    # Specify container service dependencies
+    depends_on:
+      prowlarr:
+        condition: service_healthy  # Wait until Prowlarr is healthy

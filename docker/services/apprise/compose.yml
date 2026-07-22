@@ -1,0 +1,37 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# compose.yml: Maraudarr service chart for the Apprise API.
+#
+
+services:
+  #
+  # Define the 'apprise' service for delivering notifications.
+  #
+  apprise:
+    # Docker image and container information
+    <<: *default-container                  # Pull in the default container information
+    image: caronc/apprise:${APPRISE_TAG}    # Run using the specified tag
+    container_name: apprise-${APPRISE_TAG}  # Append Docker image tag to container name
+    hostname: apprise                       # Set the container hostname
+    read_only: true                         # Keep the API container filesystem immutable
+
+    # Drop privileges that are not needed by the notification API
+    cap_drop:
+      - ALL  # Remove every optional Linux capability
+    security_opt:
+      - no-new-privileges:true  # Prevent processes from gaining privileges
+
+    # Define the container environment
+    environment:
+      <<: *default-environment                         # Pull in the default environment
+      APPRISE_API_ONLY: ${APPRISE_API_ONLY}            # Disable the web configuration interface
+      APPRISE_STATEFUL_MODE: ${APPRISE_STATEFUL_MODE}  # Keep notification configuration external
+      APPRISE_WORKER_COUNT: ${APPRISE_WORKER_COUNT}    # Run only the workers needed for this stack
+      APPRISE_ATTACH_SIZE: ${APPRISE_ATTACH_SIZE}      # Disable notification attachments
+
+    # Provide writable ephemeral storage required by Nginx and API workers
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=32m  # Store temporary API runtime data in memory

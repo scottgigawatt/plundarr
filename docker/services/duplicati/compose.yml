@@ -1,0 +1,41 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# compose.yml: Maraudarr service chart for Duplicati.
+#
+
+services:
+  #
+  # Define the 'duplicati' service for managing backups.
+  #
+  duplicati:
+    # Docker image and container information
+    <<: *arr-stack-container                               # Pull in arr-stack container config
+    image: lscr.io/linuxserver/duplicati:${DUPLICATI_TAG}  # Run using the specified tag
+    container_name: duplicati-${DUPLICATI_TAG}             # Append Docker image tag to container name
+    hostname: duplicati                                    # Set the container hostname
+
+    # Define the container environment
+    environment:
+      <<: *arr-stack-environment                                        # Pull in the arr-stack environment
+      SETTINGS_ENCRYPTION_KEY: ${DUPLICATI_SETTINGS_ENCRYPTION_KEY}     # Required settings database encryption key
+      DUPLICATI__WEBSERVICE_PASSWORD: ${DUPLICATI_WEBSERVICE_PASSWORD}  # Web UI password
+
+    # Define the host and container ports
+    ports:
+      - ${DUPLICATI_WEBUI_PORT}:8200  # Duplicati web UI port
+
+    # Mount host directories into the container
+    volumes:
+      - ${DUPLICATI_CONFIG_PATH}:/config:rw    # Contains all relevant configuration files
+      - ${DUPLICATI_BACKUPS_PATH}:/backups:rw  # Path to store local backups
+      - ${DUPLICATI_SOURCE_PATH}:/source:rw    # Path to source files for backup
+
+    # Define container healthcheck to verify Duplicati connectivity
+    healthcheck:
+      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
+      test:                              # Check Duplicati web server
+        - CMD-SHELL
+        - wget --no-verbose --tries=1 --spider "http://127.0.0.1:8200/" || exit 1

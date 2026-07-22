@@ -1,33 +1,81 @@
-name: "Batten Down the PR Hatches 🏴‍☠️"
+name: "Inspect the Boarding Pass 🧪🏴‍☠️"
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
+    pull_request:
+        branches:
+            - main
+        paths:
+            - "**"
+
+permissions:
+    contents: read
 
 jobs:
-  validate:
-    name: "Shake the YAML Riggin' 🧭"
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
+    validate-pr:
+        name: "Validate the Plundarr and Maraudarr Charts 🧭"
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
 
-    steps:
-      - name: "Grab the Treasure Map 🗺️"
-        uses: actions/checkout@v7.0.0
+        steps:
+            - name: "Grab the Treasure Map 🗺️"
+              uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+              with:
+                  persist-credentials: false
 
-      - name: "Copy the Env Scroll 📜"
-        run: cp example.env .env
+            - name: "Summon Cross-Arch Cannons 🧨"
+              uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8  # v4
 
-      - name: "Interrogate the Compose Cannons 💣"
-        run: docker compose --env-file example.env config --quiet
+            - name: "Sharpen the Build Axe 🪓"
+              uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c  # v4.2.0
 
-      - name: "Restore the Decoy Maps 🧭"
-        run: make reset-config
+            - name: "Interrogate the Default Plundarr Chart 💣"
+              run: docker compose --env-file example.env config --quiet
 
-      - name: "Check for Stowaway Secrets 🕵️"
-        run: git diff --exit-code -- config/gluetun/wireguard test/examples
+            - name: "Test Maraudarr's Charts 🧰"
+              run: make test-maraudarr
 
-      - name: "Fire the Pre-Commit Cannons 💥"
-        uses: pre-commit/action@v3.0.1
+            - name: "Build the Published Maraudarr Shape 📦"
+              run: |
+                  docker build \
+                    --pull \
+                    --tag maraudarr:pr \
+                    --file docker/Dockerfile \
+                    docker
+
+            - name: "Smoke-Test Containerized Maraudarr ⚓"
+              run: |
+                  mkdir -p "${RUNNER_TEMP}/plundarr-output"
+                  docker run \
+                    --rm \
+                    --read-only \
+                    --network none \
+                    --cap-drop ALL \
+                    --security-opt no-new-privileges:true \
+                    --tmpfs /tmp:rw,noexec,nosuid,size=64m \
+                    --user "$(id -u):$(id -g)" \
+                    --mount "type=bind,src=${RUNNER_TEMP}/plundarr-output,dst=/output" \
+                    maraudarr:pr \
+                    --plain build --preset boudoirr
+                  test -s "${RUNNER_TEMP}/plundarr-output/config/README.md"
+                  docker compose \
+                    --env-file "${RUNNER_TEMP}/plundarr-output/.env" \
+                    -f "${RUNNER_TEMP}/plundarr-output/docker-compose.yml" \
+                    config \
+                    --quiet
+
+            - name: "Test the Three-Deck Hull Plan 🛠️"
+              run: make build-multiarch
+
+            - name: "Scan Maraudarr for Bilge Rot 🔍"
+              uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25  # v0.36.0
+              with:
+                  image-ref: maraudarr:pr
+                  format: table
+                  vuln-type: os,library
+                  severity: CRITICAL,HIGH
+                  ignore-unfixed: true
+                  exit-code: 1
+
+            - name: "Fire the Pre-Commit Cannons 💥"
+              uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd  # v3.0.1

@@ -1,0 +1,40 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# compose.yml: Maraudarr service chart for Plex Media Server.
+#
+
+services:
+  #
+  # Define the 'plex' service for streaming media libraries.
+  #
+  plex:
+    # Docker image and container information
+    <<: *arr-stack-container                     # Pull in arr-stack container config
+    image: lscr.io/linuxserver/plex:${PLEX_TAG}  # Run using the specified tag
+    container_name: plex-${PLEX_TAG}             # Append Docker image tag to container name
+    hostname: plex                               # Set the container hostname
+    network_mode: host                           # Allow local discovery and direct media connections
+
+    # Define Plex-specific environment values
+    environment:
+      <<: *arr-stack-environment  # Pull in the arr-stack environment
+      VERSION: ${PLEX_VERSION}    # Select the Plex Media Server update channel
+      PLEX_CLAIM: ${PLEX_CLAIM}   # Optional claim token used during initial setup
+
+    # Mount host directories into the container
+    volumes:
+      - ${PLEX_CONFIG_PATH}:/config:rw        # Persistent Plex database and settings
+      - ${PLEX_TRANSCODE_PATH}:/transcode:rw  # Temporary transcode working directory
+      - ${HOST_MOVIES_PATH}:/movies:ro        # Movie library
+      - ${HOST_TV_PATH}:/tv:ro                # Television library
+      - ${HOST_ANIME_TV_PATH}:/anime:ro       # Anime television library
+
+    # Define container healthcheck to verify Plex connectivity
+    healthcheck:
+      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
+      test:                              # Check the local Plex identity endpoint
+        - CMD-SHELL
+        - curl -fsS "http://127.0.0.1:32400/identity" >/dev/null || exit 1

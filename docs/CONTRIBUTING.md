@@ -31,7 +31,7 @@ Questionable cargo includes:
 ```bash
 git clone git@github.com:scottgigawatt/plundarr.git
 cd plundarr
-cp example.env .env
+make ship
 ```
 
 Edit `.env` with yer own values. Keep that file private.
@@ -42,6 +42,7 @@ Useful commands:
 make check-env
 make config
 make env
+make test-maraudarr
 make up
 make test-vpn
 make test-e2e
@@ -59,7 +60,7 @@ pre-commit run --all-files
 - Code comments should use plain English.
 - Shell scripts written for host use should use `#!/bin/sh` where possible.
 - Shell scripts should use four spaces for indentation.
-- Docker Compose values should come from `.env` defaults instead of inline fallback soup.
+- Docker Compose values should come from `.env` instead of inline fallback soup.
 - Keep service config directories aligned with service names.
 - Let Privateerr own the upstream PIA manual connection scripts.
 

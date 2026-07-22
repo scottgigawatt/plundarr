@@ -1,0 +1,40 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# compose.yml: Maraudarr service chart for Radarr.
+#
+
+services:
+  #
+  # Define the 'radarr' service for managing movies.
+  #
+  radarr:
+    # Docker image and container information
+    <<: *arr-stack-container                         # Pull in arr-stack container config
+    image: lscr.io/linuxserver/radarr:${RADARR_TAG}  # Run using the specified tag
+    container_name: radarr-${RADARR_TAG}             # Append Docker image tag to container name
+    hostname: radarr                                 # Set the container hostname
+
+    # Define the host and container ports
+    ports:
+      - ${RADARR_WEBUI_PORT}:7878  # Radarr web UI port
+
+    # Mount host directories into the container
+    volumes:
+      - ${RADARR_CONFIG_PATH}:/config:rw      # Database and Radarr configs
+      - ${HOST_DOWNLOADS_PATH}:/downloads:rw  # Location of download managers output directory
+      - ${HOST_MOVIES_PATH}:/movies:rw        # Location of movie library on disk
+
+    # Define container healthcheck to verify Radarr connectivity
+    healthcheck:
+      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
+      test:                              # Check Radarr ping endpoint
+        - CMD-SHELL
+        - wget --no-verbose --tries=1 --spider "http://127.0.0.1:7878/ping" || exit 1
+
+    # Specify container service dependencies
+    depends_on:
+      prowlarr:
+        condition: service_healthy  # Wait until Prowlarr is healthy

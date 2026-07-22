@@ -1,0 +1,36 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# compose.yml: Maraudarr service chart for FlareSolverr.
+#
+
+services:
+  #
+  # Define the 'flaresolverr' service to handle supported anti-bot challenges.
+  #
+  flaresolverr:
+    # Docker image and container information
+    <<: *default-container                                        # Pull in default container config
+    image: ghcr.io/flaresolverr/flaresolverr:${FLARESOLVERR_TAG}  # Run using the specified tag
+    container_name: flaresolverr-${FLARESOLVERR_TAG}              # Append Docker image tag to container name
+    hostname: flaresolverr                                        # Set the container hostname
+
+    # Define the host and container ports
+    ports:
+      - ${FLARESOLVERR_PORT}:8191  # Port to listen for requests
+
+    # Define the container environment
+    environment:
+      <<: *default-environment                        # Pull in the default environment information
+      LOG_LEVEL: ${FLARESOLVERR_LOG_LEVEL}            # Container log level
+      LOG_HTML: ${FLARESOLVERR_LOG_HTML}              # Toggle HTML logging
+      CAPTCHA_SOLVER: ${FLARESOLVERR_CAPTCHA_SOLVER}  # Specify captcha solver
+
+    # Define container healthcheck to verify FlareSolverr connectivity
+    healthcheck:
+      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
+      test:                              # Check FlareSolverr health endpoint
+        - CMD-SHELL
+        - curl -fsS "http://127.0.0.1:8191/health" >/dev/null || exit 1

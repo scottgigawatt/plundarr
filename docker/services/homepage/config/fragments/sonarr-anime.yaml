@@ -1,0 +1,11 @@
+
+    - Sonarr Anime:
+        icon: sonarr.svg
+        href: {{HOMEPAGE_VAR_SONARR_ANIME_HREF}}
+        description: Anime series management
+        container: sonarr-anime-latest
+        widget:
+          type: sonarr
+          fields: ["wanted", "queued"]
+          url: {{HOMEPAGE_VAR_SONARR_ANIME_URL}}
+          key: {{HOMEPAGE_VAR_SONARR_ANIME_KEY}}

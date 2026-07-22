@@ -1,0 +1,64 @@
+{
+    // Renovate schema and shared safe defaults.
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "extends": [
+        "config:recommended",
+        "helpers:pinGitHubActionDigests"
+    ],
+
+    // Keep dependency work predictable for a single-maintainer repository.
+    "timezone": "America/New_York",
+    "schedule": ["before 8am on monday"],
+    "dependencyDashboard": true,
+    "labels": ["dependencies"],
+    "assignees": ["scottgigawatt"],
+    "reviewers": ["scottgigawatt"],
+
+    // Renovate owns updates that Dependabot previously duplicated.
+    "enabledManagers": [
+        "docker-compose",
+        "dockerfile",
+        "github-actions",
+        "pep621",
+        "pip_requirements"
+    ],
+
+    // Track the digest-pinned Alpine build argument used by Maraudarr.
+    "customManagers": [
+        {
+            "customType": "regex",
+            "managerFilePatterns": [
+                "/^docker/Dockerfile$/",
+                "/^example\\.maraudarr\\.env$/"
+            ],
+            "matchStrings": [
+                "ALPINE_TAG[=:]\\s*(?<currentValue>[^@\\s]+)@(?<currentDigest>sha256:[a-f0-9]+)",
+                "ALPINE_TAG=\"\\$\\{ALPINE_TAG:-(?<currentValue>[^@\\s}]+)@(?<currentDigest>sha256:[a-f0-9]+)\\}\""
+            ],
+            "depNameTemplate": "alpine",
+            "datasourceTemplate": "docker",
+            "versioningTemplate": "docker"
+        }
+    ],
+
+    // Keep related update types grouped and dependency pins deterministic.
+    "packageRules": [
+        {
+            "matchManagers": ["docker-compose", "dockerfile", "custom.regex"],
+            "pinDigests": true
+        },
+        {
+            "groupName": "GitHub Actions",
+            "matchManagers": ["github-actions"]
+        },
+        {
+            "groupName": "Docker images",
+            "matchManagers": ["docker-compose", "dockerfile"]
+        },
+        {
+            "description": "Keep Maraudarr Python dependencies pinned exactly",
+            "matchManagers": ["pep621", "pip_requirements"],
+            "rangeStrategy": "pin"
+        }
+    ]
+}

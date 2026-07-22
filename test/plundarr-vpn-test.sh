@@ -29,6 +29,9 @@ set -euo pipefail
 # Default script settings.
 #
 : "${PLUNDARR_COMPOSE_FILE:=docker-compose.yml}"
+if [[ -z "${PLUNDARR_ENV_FILE:-}" ]]; then
+    PLUNDARR_ENV_FILE="$(dirname "${PLUNDARR_COMPOSE_FILE}")/.env"
+fi
 : "${PLUNDARR_PRIVATEERR_SERVICE:=privateerr}"
 : "${PLUNDARR_GLUETUN_SERVICE:=gluetun}"
 : "${PLUNDARR_QBITTORRENT_SERVICE:=}"
@@ -56,6 +59,11 @@ else
     printf '[%s] Docker Compose is missing.\n' "${plundarr_test_script_name}" >&2
     exit 1
 fi
+
+#
+# Bind every Compose command to the generated deployment pair.
+#
+docker_compose+=(--env-file "${PLUNDARR_ENV_FILE}" -f "${PLUNDARR_COMPOSE_FILE}")
 
 #
 # Ensure the log directory exists before writing validation output.
@@ -90,7 +98,7 @@ require_file() {
 container_id_for_service() {
     service_name="$1"
 
-    "${docker_compose[@]}" -f "${PLUNDARR_COMPOSE_FILE}" ps -q "${service_name}" \
+    "${docker_compose[@]}" ps -q "${service_name}" \
         | tail -n 1
 }
 

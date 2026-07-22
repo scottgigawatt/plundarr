@@ -1,0 +1,47 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# compose.yml: Maraudarr service chart for Cleanuparr.
+#
+
+services:
+  #
+  # Define the 'cleanuparr' service for Sonarr, Radarr, and qBittorrent file cleanup.
+  #
+  cleanuparr:
+    # Docker image and container information
+    <<: *arr-stack-container                                # Pull in arr-stack container config
+    image: ghcr.io/cleanuparr/cleanuparr:${CLEANUPARR_TAG}  # Run using the specified tag
+    container_name: cleanuparr-${CLEANUPARR_TAG}            # Append Docker image tag to container name
+    hostname: cleanuparr                                    # Set the container hostname
+
+    # Define the container environment
+    environment:
+      <<: *arr-stack-environment          # Pull in the arr-stack environment
+      BASE_PATH: ${CLEANUPARR_BASE_PATH}  # Base path for reverse proxy setups
+
+    # Define the host and container ports
+    ports:
+      - ${CLEANUPARR_WEBUI_PORT}:11011  # Cleanuparr web UI port
+
+    # Mount host directories into the container
+    volumes:
+      - ${CLEANUPARR_CONFIG_PATH}:/config  # Persistent config files
+
+    # Define container healthcheck to verify Cleanuparr connectivity
+    healthcheck:
+      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
+      test:                              # Check Cleanuparr health endpoint
+        - CMD-SHELL
+        - curl -fsS "http://127.0.0.1:11011/health" >/dev/null || exit 1
+
+    # Specify container service dependencies
+    depends_on:
+      sonarr:
+        condition: service_healthy  # Wait until Sonarr is healthy
+      radarr:
+        condition: service_healthy  # Wait until Radarr is healthy
+      qbittorrent:
+        condition: service_healthy  # Wait until qBittorrent is healthy

@@ -6,11 +6,11 @@ Ahoy, security-minded sailor. If ye spot a cursed leak, a leaky hull, or a suspi
 
 Plundarr sails mostly by the `main` branch. Since this project be a small vessel, security fixes target the newest chart instead of older treasure maps.
 
-| Version | Supported |
-| ------- | --------- |
-| `main` branch | ✅ |
-| Older local copies | ❌ |
-| Forked or modified PIA scripts | ❌ |
+| Version                        | Supported |
+| ------------------------------ | --------- |
+| `main` branch                  | ✅        |
+| Older local copies             | ❌        |
+| Forked or modified PIA scripts | ❌        |
 
 > [!IMPORTANT]
 > 🧭 Plundarr consumes the published Privateerr image for PIA WireGuard config and port-forwarding metadata. Privateerr uses upstream PIA manual connection scripts, and issues in those scripts should also be reported to the PIA project.
@@ -40,7 +40,7 @@ Helpful reports include:
 - Any safe logs with secrets removed.
 
 > [!WARNING]
-> 💣 Never include real PIA usernames, passwords, WireGuard private keys, generated `wg0.conf` files, forwarded ports, or live `privateerr.env` metadata in a public report.
+> 💣 Never include real usernames, passwords, WireGuard private keys, generated `wg0.conf` files, forwarded ports, or live `privateerr.env` metadata in a public report.
 
 ## Response Expectations 🕰️
 

@@ -1,0 +1,37 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# compose.yml: Maraudarr service chart for Watchtower.
+#
+
+services:
+  #
+  # Define the 'watchtower' service for controlled image updates.
+  #
+  watchtower:
+    # Docker image and container information
+    <<: *default-container                          # Pull in the default container information
+    image: containrrr/watchtower:${WATCHTOWER_TAG}  # Run using the specified tag
+    container_name: watchtower-${WATCHTOWER_TAG}    # Append Docker image tag to container name
+    hostname: watchtower                            # Set the container hostname
+
+    # Do not let Watchtower update its own running container
+    labels: *disable-watchtower-updates
+
+    # Define the container environment
+    environment:
+      <<: *default-environment                                     # Pull in the default environment
+      DOCKER_API_VERSION: ${WATCHTOWER_DOCKER_API_VERSION}         # Docker daemon API version
+      WATCHTOWER_POLL_INTERVAL: ${WATCHTOWER_POLL_INTERVAL}        # Seconds between update checks
+      WATCHTOWER_CLEANUP: ${WATCHTOWER_CLEANUP}                    # Clean old images after updates
+      WATCHTOWER_INCLUDE_STOPPED: ${WATCHTOWER_INCLUDE_STOPPED}    # Update stopped containers as well
+      WATCHTOWER_REVIVE_STOPPED: ${WATCHTOWER_REVIVE_STOPPED}      # Start stopped containers after update
+      WATCHTOWER_NOTIFICATIONS: ${WATCHTOWER_NOTIFICATIONS}        # Send notifications for updates
+      WATCHTOWER_NOTIFICATION_URL: ${WATCHTOWER_NOTIFICATION_URL}  # URL for webhook notifications
+
+    # Mount host directories into the container
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:rw  # Allow access to the host Docker API
+      - /etc/localtime:/etc/localtime:ro              # Use the host timezone data
