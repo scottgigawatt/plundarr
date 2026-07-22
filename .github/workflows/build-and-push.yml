@@ -1,5 +1,18 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# build-and-push.yml: Validate, publish, attest, mirror, and announce Maraudarr.
+#
+
 name: "Hoist Maraudarr to the Registry 🏴‍☠️"
 
+#
+# Publish changed builds from main and semantic-version tags. The weekly run
+# refreshes the moving edge image even when the repository source is unchanged.
+# Manual dispatch remains available for an explicit rebuild or recovery run.
+#
 on:
   push:
     branches:
@@ -25,6 +38,10 @@ permissions:
   contents: read
 
 jobs:
+  #
+  # Prove that the generator, image, hardened runtime, and dependency scan all
+  # pass before any registry receives a new manifest.
+  #
   test-image:
     name: "Inspect Maraudarr's Tools 🧪"
     runs-on: ubuntu-latest
@@ -32,6 +49,10 @@ jobs:
       contents: read
 
     steps:
+      #
+      # Check out without retaining credentials, then exercise the same local
+      # test entrypoint contributors use before building the image.
+      #
       - name: "Grab the Treasure Map 🗺️"
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
         with:
@@ -40,6 +61,10 @@ jobs:
       - name: "Test the Stack Charts 🔎"
         run: make test-maraudarr
 
+      #
+      # Build one local architecture for runtime and vulnerability inspection.
+      # The later publishing job owns the multi-architecture registry build.
+      #
       - name: "Build the Local Maraudarr Image ⚒️"
         run: |
           docker build \
@@ -69,6 +94,10 @@ jobs:
             config \
             --quiet
 
+      #
+      # Keep HIGH and CRITICAL fixed vulnerabilities out of the published image.
+      # Repository exceptions remain path-scoped and time-limited separately.
+      #
       - name: "Scan Maraudarr for Bilge Rot 🔍"
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25  # v0.36.0
         with:
@@ -80,6 +109,10 @@ jobs:
           trivyignores: .trivyignore.yaml
           exit-code: 1
 
+  #
+  # Publish only after validation succeeds. This job owns registry credentials,
+  # OCI metadata, provenance, cross-registry mirroring, and release notices.
+  #
   publish-image:
     name: "Publish the Multi-Arch Fleet 📦"
     if: github.event_name != 'pull_request'
@@ -96,6 +129,10 @@ jobs:
       IMAGE_PLATFORMS: linux/amd64,linux/arm64,linux/arm/v7
 
     steps:
+      #
+      # Announce the start independently to each configured Discord destination.
+      # Missing optional webhooks deliberately skip without failing publication.
+      #
       - name: "Notify Discord: shipyard opened 📣"
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
@@ -214,6 +251,10 @@ jobs:
               --data "${payload}" \
               "${DISCORD_HADES_HOOK_URL}"
 
+      #
+      # Prepare the checked-out source and emulation toolchain used to produce a
+      # single manifest list for every supported Maraudarr architecture.
+      #
       - name: "Grab the Treasure Map 🗺️"
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
         with:
@@ -232,6 +273,10 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      #
+      # Derive edge, commit, semantic-version, and latest tags from the ref. The
+      # timestamp step supplies reproducible OCI release metadata to the build.
+      #
       - name: "Chart Stable and Edge Tags 🏷️"
         id: metadata
         uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302  # v6
@@ -249,6 +294,10 @@ jobs:
         id: build-data
         run: echo "created=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> "${GITHUB_OUTPUT}"
 
+      #
+      # Build once, push the multi-architecture result to GHCR, attach SBOM and
+      # provenance data, and publish a registry-backed build attestation.
+      #
       - name: "Publish the Maraudarr Image 🚢"
         id: publish
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a  # v7
@@ -280,6 +329,10 @@ jobs:
           subject-digest: ${{ steps.publish.outputs.digest }}
           push-to-registry: true
 
+      #
+      # Copy every generated GHCR tag to Docker Hub without rebuilding. Digest
+      # comparison then proves both registries expose the same manifest content.
+      #
       - name: "Install the Registry Mirror 🪞"
         run: |
           sudo apt-get update
@@ -320,6 +373,10 @@ jobs:
           test "${ghcr_digest}" = "${dockerhub_digest}"
           echo "Registry manifests match at ${ghcr_digest}."
 
+      #
+      # Keep the Docker Hub landing page synchronized with the checked-in public
+      # image documentation after the registry contents have been verified.
+      #
       - name: "Update the Docker Hub Chart 📘"
         uses: peter-evans/dockerhub-description@1b9a80c056b620d92cedb9d9b5a223409c68ddfa  # v5.0.0
         with:
@@ -329,6 +386,10 @@ jobs:
           short-description: "Generate polished Plundarr Docker Compose stacks from presets and selectable services."
           readme-filepath: ./docs/DOCKERHUB_README.md
 
+      #
+      # Report the final job state to both optional Discord destinations. These
+      # steps run on success or failure so a broken voyage never disappears.
+      #
       - name: "Notify Discord: fleet gossip 📣"
         if: always()
         env:
