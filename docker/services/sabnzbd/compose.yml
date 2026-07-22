@@ -1,0 +1,35 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# compose.yml: Maraudarr service chart for SABnzbd.
+#
+
+services:
+  #
+  # Define the 'sabnzbd' service for managing Usenet downloads.
+  #
+  sabnzbd:
+    # Docker image and container information
+    <<: *arr-stack-container                           # Pull in arr-stack container config
+    image: lscr.io/linuxserver/sabnzbd:${SABNZBD_TAG}  # Run using the specified tag
+    container_name: sabnzbd-${SABNZBD_TAG}             # Append Docker image tag to container name
+    network_mode: service:gluetun                      # Route network traffic through gluetun
+
+    # Mount host directories into the container
+    volumes:
+      - ${SABNZBD_CONFIG_PATH}:/config:rw                   # Configuration files
+      - ${HOST_USENET_DOWNLOADS_PATH}:/downloads/usenet:rw  # Usenet downloads only
+
+    # Define container healthcheck to verify SABnzbd connectivity
+    healthcheck:
+      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
+      test:                              # Check SABnzbd web server
+        - CMD-SHELL
+        - wget --no-verbose --tries=1 --spider "http://127.0.0.1:8085/" || exit 1
+
+    # Specify container service dependencies
+    depends_on:
+      gluetun:
+        condition: service_healthy  # Wait until Gluetun reports healthy VPN connection

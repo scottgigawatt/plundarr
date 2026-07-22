@@ -5,11 +5,11 @@ Avast ye! This here be the guide for riggin' up yer Docker Compose fleet with PI
 ## Chartin' the Docker Network Waters 🌍🧭
 
 > [!IMPORTANT]
-> ⚓️ Set yer IPAM settings right in yer `.env` before settin' sail, or ye'll find yerself adrift in a sea of network woes!
+> ⚓️ Set yer IPAM settings right in `.env` before settin' sail, or ye'll find yerself adrift in a sea of network woes!
 
 Docker IPAM (IP Address Management) lets ye carve out yer own slice of the subnet seas, makin' yer fleet easier to command and troubleshoot 🛠️.
 
-Update these settings in your `.env` file:
+Update these settings in yer generated `.env` file:
 
 ```bash
 #
@@ -63,12 +63,12 @@ This allows containers to communicate internally within the defined Docker netwo
 To deploy a project using Synology Container Manager:
 
 1. 🔑 Log in to the Synology DSM web interface.
-2. 🗺️ Run `make ship` from the cloned repository to render `dist/docker-compose.yml`.
+2. 🗺️ Run `make ship` from the cloned repository to chart `docker-compose.yml`, `.env`, and the selected `config/` directories.
 3. 📦 Open **Container Manager** and navigate to the **Project** tab 📂.
 4. 🆕 Click **Create** and configure:
    - 🏷️ **Project Name**: (e.g., `plundarr`)
    - 📂 **Project Path**: Path to the cloned repository.
-   - 📜 **Compose File**: `dist/docker-compose.yml`
+   - 📜 **Compose File**: `docker-compose.yml`
 5. 🚀 Review and confirm the settings to deploy the project.
 
 Refer to the [official Synology documentation](https://kb.synology.com/en-id/DSM/help/ContainerManager/docker_project?version=7) for further details.

@@ -24,6 +24,9 @@ set -euo pipefail
 # Default script settings.
 #
 : "${PLUNDARR_COMPOSE_FILE:=docker-compose.yml}"
+if [[ -z "${PLUNDARR_ENV_FILE:-}" ]]; then
+    PLUNDARR_ENV_FILE="$(dirname "${PLUNDARR_COMPOSE_FILE}")/.env"
+fi
 : "${PLUNDARR_STACK_WAIT_SECONDS:=600}"
 
 #
@@ -44,6 +47,11 @@ else
 fi
 
 #
+# Bind every Compose command to the generated deployment pair.
+#
+docker_compose+=(--env-file "${PLUNDARR_ENV_FILE}" -f "${PLUNDARR_COMPOSE_FILE}")
+
+#
 # Print a consistent status line.
 #
 log() {
@@ -56,7 +64,7 @@ log() {
 container_id_for_service() {
     service_name="$1"
 
-    "${docker_compose[@]}" -f "${PLUNDARR_COMPOSE_FILE}" ps -q "${service_name}" \
+    "${docker_compose[@]}" ps -q "${service_name}" \
         | tail -n 1
 }
 
@@ -93,7 +101,7 @@ all_services_are_healthy() {
             log "${service_name} health is ${health_status}."
             all_healthy=false
         fi
-    done < <("${docker_compose[@]}" -f "${PLUNDARR_COMPOSE_FILE}" config --services)
+    done < <("${docker_compose[@]}" config --services)
 
     [[ "${all_healthy}" == "true" ]]
 }

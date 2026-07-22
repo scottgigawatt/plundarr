@@ -1,0 +1,38 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# compose.yml: Maraudarr service chart for Prowlarr.
+#
+
+services:
+  #
+  # Define the 'prowlarr' service for managing indexers.
+  #
+  prowlarr:
+    # Docker image and container information
+    <<: *arr-stack-container                             # Pull in arr-stack container config
+    image: lscr.io/linuxserver/prowlarr:${PROWLARR_TAG}  # Run using the specified tag
+    container_name: prowlarr-${PROWLARR_TAG}             # Append Docker image tag to container name
+    hostname: prowlarr                                   # Set the container hostname
+
+    # Define the host and container ports
+    ports:
+      - ${PROWLARR_WEBUI_PORT}:9696  # Prowlarr web UI port
+
+    # Mount host directories into the container
+    volumes:
+      - ${PROWLARR_CONFIG_PATH}:/config:rw  # Database and Prowlarr configs
+
+    # Define container healthcheck to verify Prowlarr connectivity
+    healthcheck:
+      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
+      test:                              # Check Prowlarr ping endpoint
+        - CMD-SHELL
+        - wget --no-verbose --tries=1 --spider "http://127.0.0.1:9696/ping" || exit 1
+
+    # Specify container service dependencies
+    depends_on:
+      flaresolverr:
+        condition: service_healthy  # Wait until FlareSolverr is healthy

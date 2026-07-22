@@ -1,0 +1,108 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# compose.yml: Maraudarr service chart for Homepage.
+#
+
+services:
+  #
+  # Define the 'homepage' service for a customizable application dashboard.
+  #
+  homepage:
+    # Docker image and container information
+    <<: *default-container                               # Pull in the default container information
+    image: ghcr.io/gethomepage/homepage:${HOMEPAGE_TAG}  # Run using the specified tag
+    container_name: homepage-${HOMEPAGE_TAG}             # Append Docker image tag to container name
+    hostname: homepage                                   # Set the container hostname
+
+    # Define the container environment
+    environment:
+      <<: *default-environment  # Pull in the default environment
+
+      # Homepage container and dashboard basics
+      HOMEPAGE_LOG_LEVEL: ${HOMEPAGE_LOG_LEVEL}
+      HOMEPAGE_ALLOWED_HOSTS: ${HOMEPAGE_ALLOWED_HOSTS}
+      HOMEPAGE_VAR_TITLE: ${HOMEPAGE_VAR_TITLE}
+      HOMEPAGE_VAR_SEARCH_PROVIDER: ${HOMEPAGE_VAR_SEARCH_PROVIDER}
+
+      # Homepage weather widget
+      HOMEPAGE_VAR_WEATHER_CITY: ${HOMEPAGE_VAR_WEATHER_CITY}
+      HOMEPAGE_VAR_WEATHER_LAT: ${HOMEPAGE_VAR_WEATHER_LAT}
+      HOMEPAGE_VAR_WEATHER_LONG: ${HOMEPAGE_VAR_WEATHER_LONG}
+      HOMEPAGE_VAR_WEATHER_TZ: ${HOMEPAGE_VAR_WEATHER_TZ}
+      HOMEPAGE_VAR_WEATHER_UNIT: ${HOMEPAGE_VAR_WEATHER_UNIT}
+
+      # Homepage bookmark click targets
+      HOMEPAGE_VAR_DSM_HREF: ${HOMEPAGE_VAR_DSM_HREF}
+      HOMEPAGE_VAR_DSM2_HREF: ${HOMEPAGE_VAR_DSM2_HREF}
+      HOMEPAGE_VAR_WIKI_HREF: ${HOMEPAGE_VAR_WIKI_HREF}
+
+      # Homepage Plex click target and widget
+      HOMEPAGE_VAR_PLEX_HREF: ${HOMEPAGE_VAR_PLEX_HREF}
+      HOMEPAGE_VAR_PLEX_URL: ${HOMEPAGE_VAR_PLEX_URL}:${PLEX_WEBUI_PORT}
+      HOMEPAGE_VAR_PLEX_TOKEN: ${HOMEPAGE_VAR_PLEX_TOKEN}
+
+      # Homepage Tautulli click target and widget
+      HOMEPAGE_VAR_TAUTULLI_HREF: ${HOMEPAGE_VAR_TAUTULLI_HREF}
+      HOMEPAGE_VAR_TAUTULLI_URL: ${HOMEPAGE_VAR_TAUTULLI_URL}:${TAUTULLI_WEBUI_PORT}
+      HOMEPAGE_VAR_TAUTULLI_KEY: ${HOMEPAGE_VAR_TAUTULLI_KEY}
+
+      # Homepage Radarr click target and widget
+      HOMEPAGE_VAR_RADARR_HREF: ${HOMEPAGE_VAR_RADARR_HREF}
+      HOMEPAGE_VAR_RADARR_URL: ${HOMEPAGE_VAR_RADARR_URL}:${RADARR_WEBUI_PORT}
+      HOMEPAGE_VAR_RADARR_KEY: ${HOMEPAGE_VAR_RADARR_KEY}
+
+      # Homepage Sonarr click target and widget
+      HOMEPAGE_VAR_SONARR_HREF: ${HOMEPAGE_VAR_SONARR_HREF}
+      HOMEPAGE_VAR_SONARR_URL: ${HOMEPAGE_VAR_SONARR_URL}:${SONARR_WEBUI_PORT}
+      HOMEPAGE_VAR_SONARR_KEY: ${HOMEPAGE_VAR_SONARR_KEY}
+
+      # Homepage Bazarr click target and widget
+      HOMEPAGE_VAR_BAZARR_HREF: ${HOMEPAGE_VAR_BAZARR_HREF}
+      HOMEPAGE_VAR_BAZARR_URL: ${HOMEPAGE_VAR_BAZARR_URL}:${BAZARR_WEBUI_PORT}
+      HOMEPAGE_VAR_BAZARR_KEY: ${HOMEPAGE_VAR_BAZARR_KEY}
+
+      # Homepage Seerr click target and widget
+      HOMEPAGE_VAR_SEERR_HREF: ${HOMEPAGE_VAR_SEERR_HREF}
+      HOMEPAGE_VAR_SEERR_URL: ${HOMEPAGE_VAR_SEERR_URL}:${SEERR_WEBUI_PORT}
+      HOMEPAGE_VAR_SEERR_KEY: ${HOMEPAGE_VAR_SEERR_KEY}
+
+      # Homepage Prowlarr click target and widget
+      HOMEPAGE_VAR_PROWLARR_HREF: ${HOMEPAGE_VAR_PROWLARR_HREF}
+      HOMEPAGE_VAR_PROWLARR_URL: ${HOMEPAGE_VAR_PROWLARR_URL}:${PROWLARR_WEBUI_PORT}
+      HOMEPAGE_VAR_PROWLARR_KEY: ${HOMEPAGE_VAR_PROWLARR_KEY}
+
+      # Homepage qBittorrent click target and widget
+      HOMEPAGE_VAR_QBITTORRENT_HREF: ${HOMEPAGE_VAR_QBITTORRENT_HREF}
+      HOMEPAGE_VAR_QBITTORRENT_URL: ${HOMEPAGE_VAR_QBITTORRENT_URL}:${QBITTORRENT_WEBUI_PORT}
+      HOMEPAGE_VAR_QBITTORRENT_USER: ${HOMEPAGE_VAR_QBITTORRENT_USER}
+      HOMEPAGE_VAR_QBITTORRENT_PASS: ${HOMEPAGE_VAR_QBITTORRENT_PASS}
+
+      # Homepage SABnzbd click target and widget
+      HOMEPAGE_VAR_SABNZBD_HREF: ${HOMEPAGE_VAR_SABNZBD_HREF}
+      HOMEPAGE_VAR_SABNZBD_URL: ${HOMEPAGE_VAR_SABNZBD_URL}:8085
+      HOMEPAGE_VAR_SABNZBD_KEY: ${HOMEPAGE_VAR_SABNZBD_KEY}
+
+      # Homepage Speedtest Tracker click target and widget
+      HOMEPAGE_VAR_SPEEDTEST_HREF: ${HOMEPAGE_VAR_SPEEDTEST_HREF}
+      HOMEPAGE_VAR_SPEEDTEST_URL: ${HOMEPAGE_VAR_SPEEDTEST_URL}:${SPEEDTEST_TRACKER_WEBUI_PORT}
+
+    # Define the host and container ports
+    ports:
+      - ${HOMEPAGE_WEBUI_PORT}:3000  # Homepage web UI port
+
+    # Mount host directories into the container
+    volumes:
+      - ${HOMEPAGE_CONFIG_PATH}:/app/config:rw         # Local config files directory
+      - ${HOMEPAGE_IMAGES_PATH}:/app/public/images:rw  # Local public files directory
+      - ${HOMEPAGE_DATA_ROOT_PATH}:/data:rw            # Local directory to monitor disk space
+      - /var/run/docker.sock:/var/run/docker.sock:rw   # Allow container to talk to host Docker API
+
+    # Define container healthcheck to verify Homepage connectivity
+    healthcheck:
+      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
+      test:                              # Check Homepage web server
+        - CMD-SHELL
+        - wget --no-verbose --tries=1 --spider "http://127.0.0.1:3000/" || exit 1

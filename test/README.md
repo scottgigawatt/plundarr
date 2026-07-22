@@ -36,17 +36,17 @@ make test-e2e
 This target:
 
 1. Restores example config.
-2. Starts only `privateerr`, `gluetun`, and selected download addons with Docker Compose.
+2. Starts only `privateerr`, `gluetun`, and selected download services with Docker Compose.
 3. Waits for those services to report healthy.
 4. Runs `test/plundarr-vpn-test.sh`.
 5. Brings the Compose stack down.
 6. Restores example config again.
 
-Use `ADDONS` to choose the download mates for the test voyage:
+Use `OPTIONAL_SERVICES` to choose the download mates for the test voyage:
 
 ```bash
-make ship ADDONS=sabnzbd
-make test-e2e ADDONS=sabnzbd
+make ship OPTIONAL_SERVICES=sabnzbd
+make test-e2e OPTIONAL_SERVICES=sabnzbd
 ```
 
 ### Full Stack Test

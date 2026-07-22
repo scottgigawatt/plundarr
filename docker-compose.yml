@@ -17,10 +17,12 @@
 #   - gluetun:            https://github.com/qdm12/gluetun
 #   - flaresolverr:       https://github.com/FlareSolverr/FlareSolverr
 #   - prowlarr:           https://github.com/Prowlarr/Prowlarr
+#   - qbittorrent:        https://github.com/qbittorrent/qBittorrent
 #   - radarr:             https://github.com/Radarr/Radarr
 #   - sonarr:             https://github.com/Sonarr/Sonarr
 #   - bazarr:             https://github.com/morpheus65535/bazarr
 #   - seerr:              https://github.com/seerr-team/seerr
+#   - cleanuparr:         https://github.com/Cleanuparr/Cleanuparr
 #   - speedtest-tracker:  https://docs.speedtest-tracker.dev
 #   - duplicati:          https://www.duplicati.com
 #   - homepage:           https://gethomepage.dev/latest
@@ -49,12 +51,12 @@ x-default-environment: &default-environment  # YAML anchor for default environme
 #
 x-arr-stack-environment: &arr-stack-environment  # YAML anchor for arr-stack environment
   <<: *default-environment                       # Pull in the default environment information
-  PUID: ${DEFAULT_PUID}                          # Default user id mapping for containers
-  PGID: ${DEFAULT_PGID}                          # Default group id mapping for containers
+  PUID: ${DEFAULT_PUID}                          # Default user ID mapping for containers
+  PGID: ${DEFAULT_PGID}                          # Default group ID mapping for containers
   UMASK: ${DEFAULT_UMASK}                        # Default file creation mask for containers
 
 #
-# Containers on the arr-stack network.
+# Containers using common arr-stack settings.
 #
 x-arr-stack-container: &arr-stack-container  # YAML anchor for arr-stack container
   <<: *default-container                     # Pull in the default container information
@@ -126,7 +128,7 @@ services:
       - ${PRIVATEERR_GLUETUN_CONFIG_PATH}:/gluetun:rw    # Gluetun config output consumed by Gluetun
       - ${PRIVATEERR_CONFIG_PATH}:/privateerr-config:rw  # Privateerr service config directory
 
-    # Define container healthcheck to verify Privateer has completed setup
+    # Define container healthcheck to verify Privateerr has completed setup
     healthcheck:
       <<: *default-healthcheck-settings  # Pull in default healthcheck settings
       test:                              # Healthy when healthcheck marker file exists
@@ -174,6 +176,16 @@ services:
       PRIVATEERR_METADATA_PATH: ${PRIVATEERR_METADATA_PATH}
       PRIVATEERR_GLUETUN_METADATA_WAIT_SECONDS: ${PRIVATEERR_GLUETUN_METADATA_WAIT_SECONDS}
 
+      # Define downloader port-forwarding commands for Gluetun
+      VPN_PORT_FORWARDING_UP_COMMAND: /bin/sh -c "${GLUETUN_QBITTORRENT_PORT_FORWARDING_SCRIPT} up {{PORT}} {{VPN_INTERFACE}}"  # Update qBittorrent when PIA assigns a forwarded port
+      VPN_PORT_FORWARDING_DOWN_COMMAND: /bin/sh -c "${GLUETUN_QBITTORRENT_PORT_FORWARDING_SCRIPT} down"                         # Clear qBittorrent's forwarded port during shutdown
+
+    # Define downloader host and container ports
+    ports:
+      - ${QBITTORRENT_TCP_PORT}:6881      # qBittorrent TCP connection port
+      - ${QBITTORRENT_UDP_PORT}:6881/udp  # qBittorrent UDP connection port
+      - ${QBITTORRENT_WEBUI_PORT}:8080    # qBittorrent web UI port
+
     # Mount host directories into the container
     volumes:
       - ${GLUETUN_CONFIG_PATH}:/gluetun:rw                               # Gluetun config directory
@@ -193,7 +205,7 @@ services:
         condition: service_healthy  # Wait for Privateerr to generate the WireGuard config and report healthy
 
   #
-  # Define the 'flaresolverr' service to bypass Cloudflare and DDoS-GUARD protection.
+  # Define the 'flaresolverr' service to handle supported anti-bot challenges.
   #
   flaresolverr:
     # Docker image and container information
@@ -251,6 +263,33 @@ services:
         condition: service_healthy  # Wait until FlareSolverr is healthy
 
   #
+  # Define the 'qbittorrent' service for managing torrents.
+  #
+  qbittorrent:
+    # Docker image and container information
+    <<: *arr-stack-container                                   # Pull in arr-stack container config
+    image: lscr.io/linuxserver/qbittorrent:${QBITTORRENT_TAG}  # Run using the specified tag
+    container_name: qbittorrent-${QBITTORRENT_TAG}             # Append Docker image tag to container name
+    network_mode: service:gluetun                              # Route network traffic through gluetun
+
+    # Mount host directories into the container
+    volumes:
+      - ${QBITTORRENT_CONFIG_PATH}:/config:rw                   # Configuration files
+      - ${HOST_TORRENTS_DOWNLOADS_PATH}:/downloads/torrents:rw  # Torrent downloads only
+
+    # Define container healthcheck to verify qBittorrent connectivity
+    healthcheck:
+      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
+      test:                              # Check qBittorrent web server
+        - CMD-SHELL
+        - wget --no-verbose --tries=1 --spider "http://127.0.0.1:8080/" || exit 1
+
+    # Specify container service dependencies
+    depends_on:
+      gluetun:
+        condition: service_healthy  # Wait until Gluetun reports healthy VPN connection
+
+  #
   # Define the 'radarr' service for managing movies.
   #
   radarr:
@@ -283,7 +322,7 @@ services:
         condition: service_healthy  # Wait until Prowlarr is healthy
 
   #
-  # Define the 'sonarr' service for managing tv shows.
+  # Define the 'sonarr' service for managing television shows.
   #
   sonarr:
     # Docker image and container information
@@ -353,7 +392,7 @@ services:
   #
   seerr:
     # Docker image and container information
-    <<: *default-container                        # Pull in default container config
+    <<: *default-container                        # Pull in the default container information
     image: ghcr.io/seerr-team/seerr:${SEERR_TAG}  # Run using the specified tag
     container_name: seerr-${SEERR_TAG}            # Append Docker image tag to container name
     hostname: seerr                               # Set the container hostname
@@ -380,6 +419,36 @@ services:
         - wget --no-verbose --tries=1 --spider "http://127.0.0.1:5055/api/v1/settings/public" || exit 1
 
   #
+  # Define the 'cleanuparr' service for Sonarr, Radarr, and qBittorrent file cleanup.
+  #
+  cleanuparr:
+    # Docker image and container information
+    <<: *arr-stack-container                                # Pull in arr-stack container config
+    image: ghcr.io/cleanuparr/cleanuparr:${CLEANUPARR_TAG}  # Run using the specified tag
+    container_name: cleanuparr-${CLEANUPARR_TAG}            # Append Docker image tag to container name
+    hostname: cleanuparr                                    # Set the container hostname
+
+    # Define the container environment
+    environment:
+      <<: *arr-stack-environment           # Pull in the arr-stack environment
+      BASE_PATH: ${CLEANUPARR_BASE_PATH}   # Base path for reverse proxy setups
+
+    # Define the host and container ports
+    ports:
+      - ${CLEANUPARR_WEBUI_PORT}:11011  # Cleanuparr web UI port
+
+    # Mount host directories into the container
+    volumes:
+      - ${CLEANUPARR_CONFIG_PATH}:/config  # Persistent config files
+
+    # Define container healthcheck to verify Cleanuparr connectivity
+    healthcheck:
+      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
+      test:                              # Check Cleanuparr health endpoint
+        - CMD-SHELL
+        - curl -fsS "http://127.0.0.1:11011/health" >/dev/null || exit 1
+
+  #
   # Define the 'speedtest-tracker' service for tracking internet speeds.
   #
   speedtest-tracker:
@@ -392,12 +461,12 @@ services:
     # Define the container environment
     environment:
       <<: *arr-stack-environment                            # Pull in the arr-stack environment
-      APP_KEY: ${SPEEDTEST_TRACKER_APP_KEY}                 # App key for encrypting stored data from https://speedtest-tracker.dev
-      DB_CONNECTION: ${SPEEDTEST_TRACKER_DB_CONNECTION}     # Set the database type to use, e.g. sqlite, pgsql, or mysql
-      SPEEDTEST_SCHEDULE: ${SPEEDTEST_TRACKER_SCHEDULE}     # Set the test schedule in cron format
-      SPEEDTEST_SERVERS: ${SPEEDTEST_TRACKER_SERVERS}       # Comma-separated list of server IDs to test against
+      APP_KEY: ${SPEEDTEST_TRACKER_APP_KEY}                 # Application encryption key
+      DB_CONNECTION: ${SPEEDTEST_TRACKER_DB_CONNECTION}     # Database type, e.g. sqlite, pgsql, or mysql
+      SPEEDTEST_SCHEDULE: ${SPEEDTEST_TRACKER_SCHEDULE}     # Test schedule in cron format
+      SPEEDTEST_SERVERS: ${SPEEDTEST_TRACKER_SERVERS}       # Comma-separated server IDs
       DISPLAY_TIMEZONE: ${TZ}                               # Timezone for the UI
-      PRUNE_RESULTS_OLDER_THAN: ${SPEEDTEST_TRACKER_PRUNE}  # Days to keep test results
+      PRUNE_RESULTS_OLDER_THAN: ${SPEEDTEST_TRACKER_PRUNE}  # Days of results to retain
 
     # Define the host and container ports
     ports:
@@ -405,7 +474,7 @@ services:
 
     # Mount host directories into the container
     volumes:
-      - ${SPEEDTEST_TRACKER_CONFIG_PATH}:/config:rw  # Contains all relevant configuration files
+      - ${SPEEDTEST_TRACKER_CONFIG_PATH}:/config:rw  # Persistent configuration and database
 
     # Define container healthcheck to verify Speedtest Tracker connectivity
     healthcheck:
@@ -438,7 +507,7 @@ services:
     volumes:
       - ${DUPLICATI_CONFIG_PATH}:/config:rw    # Contains all relevant configuration files
       - ${DUPLICATI_BACKUPS_PATH}:/backups:rw  # Path to store local backups
-      - ${DUPLICATI_SOURCE_PATH}:/source:rw    # Path to source for files to backup
+      - ${DUPLICATI_SOURCE_PATH}:/source:rw    # Path to source files for backup
 
     # Define container healthcheck to verify Duplicati connectivity
     healthcheck:
@@ -448,7 +517,7 @@ services:
         - wget --no-verbose --tries=1 --spider "http://127.0.0.1:8200/" || exit 1
 
   #
-  # Define the 'homepage' service for highly customizable application dashboard.
+  # Define the 'homepage' service for a customizable application dashboard.
   #
   homepage:
     # Docker image and container information
@@ -520,11 +589,6 @@ services:
       HOMEPAGE_VAR_QBITTORRENT_USER: ${HOMEPAGE_VAR_QBITTORRENT_USER}
       HOMEPAGE_VAR_QBITTORRENT_PASS: ${HOMEPAGE_VAR_QBITTORRENT_PASS}
 
-      # Homepage SABnzbd click target and widget
-      HOMEPAGE_VAR_SABNZBD_HREF: ${HOMEPAGE_VAR_SABNZBD_HREF}
-      HOMEPAGE_VAR_SABNZBD_URL: ${HOMEPAGE_VAR_SABNZBD_URL}:8085
-      HOMEPAGE_VAR_SABNZBD_KEY: ${HOMEPAGE_VAR_SABNZBD_KEY}
-
       # Homepage Speedtest Tracker click target and widget
       HOMEPAGE_VAR_SPEEDTEST_HREF: ${HOMEPAGE_VAR_SPEEDTEST_HREF}
       HOMEPAGE_VAR_SPEEDTEST_URL: ${HOMEPAGE_VAR_SPEEDTEST_URL}:${SPEEDTEST_TRACKER_WEBUI_PORT}
@@ -553,10 +617,10 @@ services:
 networks:
   # Configure the default network
   default:
-    name: ${COMPOSE_PROJECT_NAME}  # Use the name of the compose project
+    name: ${COMPOSE_PROJECT_NAME}  # Use the name of the Compose project
     ipam:                          # IP Address Management
       driver: default              # Use the default driver
       config:
         - subnet: ${COMPOSE_NETWORK_SUBNET}      # Subnet in CIDR format that represents a network segment
-          ip_range: ${COMPOSE_NETWORK_IP_RANGE}  # Range of IPs from which to allocate container IPs
-          gateway: ${COMPOSE_NETWORK_GATEWAY}    # Gateway for the master subnet
+          ip_range: ${COMPOSE_NETWORK_IP_RANGE}  # Range from which container IP addresses are allocated
+          gateway: ${COMPOSE_NETWORK_GATEWAY}    # Gateway for the default network

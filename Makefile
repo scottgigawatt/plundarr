@@ -17,8 +17,12 @@ NUKE=nuke
 BUILD_DEPENDS=build-depends
 CHECK_ENV=check-env
 CHECK_RENDERED=check-rendered
+BUILD=build
+BUILD_MARAUDARR=build-maraudarr
+BUILD_MULTIARCH=build-multiarch
 RESET_CONFIG=reset-config
-RESET_SERVICE_CONFIGS=reset-service-configs
+BACKUP_CONFIG=backup-config
+CLEAN_CONFIG=clean-config
 TEST_VPN=test-vpn
 TEST_E2E=test-e2e
 TEST_STACK=test-stack
@@ -26,8 +30,13 @@ TEST_DOWN=test-down
 TEST_LOGS=test-logs
 UP=up
 SHIP=ship
+CONFIGURE=configure
+TEST_MARAUDARR_UNIT=test-maraudarr-unit
+TEST_MARAUDARR=test-maraudarr
+PRESETS=presets
+AVAILABLE_SERVICES=services
 CONFIG=config
-SERVICES=services
+COMPOSE_SERVICES=compose-services
 ENV=env
 PRINT_CONFIG=print-config
 PRINT_ENV=print-env
@@ -47,8 +56,12 @@ TARGETS= \
 	$(BUILD_DEPENDS) \
 	$(CHECK_ENV) \
 	$(CHECK_RENDERED) \
+	$(BUILD) \
+	$(BUILD_MARAUDARR) \
+	$(BUILD_MULTIARCH) \
 	$(RESET_CONFIG) \
-	$(RESET_SERVICE_CONFIGS) \
+	$(BACKUP_CONFIG) \
+	$(CLEAN_CONFIG) \
 	$(TEST_VPN) \
 	$(TEST_E2E) \
 	$(TEST_STACK) \
@@ -56,8 +69,13 @@ TARGETS= \
 	$(TEST_LOGS) \
 	$(UP) \
 	$(SHIP) \
+	$(CONFIGURE) \
+	$(TEST_MARAUDARR_UNIT) \
+	$(TEST_MARAUDARR) \
+	$(PRESETS) \
+	$(AVAILABLE_SERVICES) \
 	$(CONFIG) \
-	$(SERVICES) \
+	$(COMPOSE_SERVICES) \
 	$(ENV) \
 	$(PRINT_CONFIG) \
 	$(PRINT_ENV) \
@@ -102,43 +120,43 @@ PLUNDARR_GENERATED_PATHS       ?= config/privateerr/logs \
 #
 # Docker Compose options.
 #
-COMPOSE_SOURCE_FILE   ?= docker-compose.yml
-COMPOSE_ADDONS_DIR    ?= compose.addons
-ADDONS                ?= qbittorrent,cleanuparr
-RENDERED_COMPOSE_FILE ?= dist/docker-compose.yml
-COMPOSE_FILE             ?= $(RENDERED_COMPOSE_FILE)
-ENV_FILE                 ?= .env
-EXAMPLE_ENV_FILE         ?= example.env
-COMPOSE_ENV_FILE         ?= $(ENV_FILE)
-COMPOSE_DOWN_TIMEOUT     ?= 30
-COMPOSE_DOWN_OPTIONS     ?= --timeout $(COMPOSE_DOWN_TIMEOUT) --remove-orphans
-COMPOSE_CLEAN_OPTIONS    ?= --timeout $(COMPOSE_DOWN_TIMEOUT) --volumes --remove-orphans
-COMPOSE_UP_OPTIONS       ?= --force-recreate --pull always --detach --remove-orphans
-COMPOSE_E2E_OPTIONS      ?= --force-recreate --pull always --detach --remove-orphans
-COMPOSE_E2E_WAIT         ?= 300
-COMPOSE_STACK_WAIT       ?= 600
-COMPOSE_LOGS_OPTIONS     ?= --follow
-HOMEPAGE_SERVICES_FILE   ?= config/homepage/services.yaml
-HOMEPAGE_SERVICES_BASE   ?= config/homepage/services.base.yaml
-HOMEPAGE_SERVICES_FOOTER ?= config/homepage/services.footer.yaml
-HOMEPAGE_ADDONS_DIR      ?= config/homepage/addons
+OPTIONAL_SERVICES         ?= qbittorrent,cleanuparr
+PRESET                    ?= plundarr
+RENDERED_COMPOSE_FILE     ?= docker-compose.yml
+COMPOSE_FILE              ?= $(RENDERED_COMPOSE_FILE)
+ENV_FILE                  ?= .env
+COMPOSE_ENV_FILE          ?= $(ENV_FILE)
+COMPOSE_DOWN_TIMEOUT      ?= 30
+COMPOSE_DOWN_OPTIONS      ?= --timeout $(COMPOSE_DOWN_TIMEOUT) --remove-orphans
+COMPOSE_CLEAN_OPTIONS     ?= --timeout $(COMPOSE_DOWN_TIMEOUT) --volumes --remove-orphans
+COMPOSE_UP_OPTIONS        ?= --force-recreate --pull always --detach --remove-orphans
+COMPOSE_E2E_OPTIONS       ?= --force-recreate --pull always --detach --remove-orphans
+COMPOSE_E2E_WAIT          ?= 300
+COMPOSE_STACK_WAIT        ?= 600
+COMPOSE_LOGS_OPTIONS      ?= --follow
+MARAUDARR_IMAGE           ?= ghcr.io/scottgigawatt/maraudarr:latest
+MARAUDARR_SKIP_PULL       ?= false
+MARAUDARR_COMPOSE_FILE    ?= docker-compose.maraudarr.yml
+MARAUDARR_ENV_FILE        ?= example.maraudarr.env
+MARAUDARR_OUTPUT          ?= /output
+MARAUDARR_BUILD_PLATFORMS ?= linux/amd64,linux/arm64,linux/arm/v7
+MARAUDARR_MULTIARCH_IMAGE ?= maraudarr:multiarch-local
+MARAUDARR_TEST_OUTPUT     ?= /tmp/maraudarr-matrix
+CONFIG_PATH               ?= config
+CONFIG_BACKUP_PATH        ?= backups
 
 #
-# Rendered Compose source selection.
+# Optional service selection used by Maraudarr and runtime tests.
 #
 empty :=
 space := $(empty) $(empty)
 comma := ,
-SELECTED_ADDONS         := $(strip $(subst $(comma),$(space),$(ADDONS)))
-ADDON_COMPOSE_FILES     := $(foreach addon,$(SELECTED_ADDONS),$(COMPOSE_ADDONS_DIR)/$(addon).yml)
-SOURCE_COMPOSE_FILES    := $(COMPOSE_SOURCE_FILE) $(ADDON_COMPOSE_FILES)
-SOURCE_COMPOSE_ARGS     := $(foreach file,$(SOURCE_COMPOSE_FILES),-f $(file))
-HOMEPAGE_ADDON_FILES    := $(wildcard $(foreach addon,$(SELECTED_ADDONS),$(HOMEPAGE_ADDONS_DIR)/$(addon).yaml))
-VPN_QBITTORRENT_SERVICE ?= $(if $(filter qbittorrent,$(SELECTED_ADDONS)),$(QBITTORRENT_SERVICE),)
-E2E_DOWNLOAD_SERVICES   ?= $(if $(filter qbittorrent,$(SELECTED_ADDONS)),$(QBITTORRENT_SERVICE),) \
-	$(if $(filter sabnzbd,$(SELECTED_ADDONS)),$(SABNZBD_SERVICE),)
-ADDON_GLUETUN_WEB_PORTS ?= $(if $(filter qbittorrent,$(SELECTED_ADDONS)),8080,) \
-	$(if $(filter sabnzbd,$(SELECTED_ADDONS)),8081,)
+SELECTED_OPTIONAL_SERVICES := $(strip $(subst $(comma),$(space),$(OPTIONAL_SERVICES)))
+VPN_QBITTORRENT_SERVICE    ?= $(if $(filter qbittorrent,$(SELECTED_OPTIONAL_SERVICES)),$(QBITTORRENT_SERVICE),)
+E2E_DOWNLOAD_SERVICES      ?= $(if $(filter qbittorrent,$(SELECTED_OPTIONAL_SERVICES)),$(QBITTORRENT_SERVICE),) \
+	$(if $(filter sabnzbd,$(SELECTED_OPTIONAL_SERVICES)),$(SABNZBD_SERVICE),)
+GLUETUN_DOWNLOADER_PORTS   ?= $(if $(filter qbittorrent,$(SELECTED_OPTIONAL_SERVICES)),8080,) \
+	$(if $(filter sabnzbd,$(SELECTED_OPTIONAL_SERVICES)),8081,)
 
 #
 # End-to-end test services.
@@ -151,7 +169,7 @@ E2E_SERVICES ?= \
 #
 # Web ports for services.
 #
-GLUETUN_WEB_PORTS ?= $(ADDON_GLUETUN_WEB_PORTS)
+GLUETUN_WEB_PORTS ?= $(GLUETUN_DOWNLOADER_PORTS)
 DIRECT_WEB_PORTS  ?= \
 	$(PROWLARR_SERVICE):9696 \
 	$(RADARR_SERVICE):7878 \
@@ -180,10 +198,41 @@ DOCKER_COMPOSE := $(shell \
 	fi)
 
 #
+# Always bind Compose interpolation to the generated environment file.
+#
+PLUNDARR_COMPOSE = $(DOCKER_COMPOSE) --env-file $(COMPOSE_ENV_FILE) -f $(COMPOSE_FILE)
+
+#
+# Docker Compose command used to build Maraudarr from its self-contained image
+# context. This file and environment pair never replace generated Plundarr files.
+#
+MARAUDARR_COMPOSE = $(DOCKER_COMPOSE) --env-file $(MARAUDARR_ENV_FILE) -f $(MARAUDARR_COMPOSE_FILE)
+
+#
+# Hardened Docker options shared by every published Maraudarr image command.
+# The host identity keeps generated files editable by the invoking user.
+#
+MARAUDARR_RUN_OPTIONS ?= \
+	--rm \
+	--read-only \
+	--network none \
+	--cap-drop ALL \
+	--security-opt no-new-privileges:true \
+	--tmpfs /tmp:rw,noexec,nosuid,size=64m \
+	--user "$$(id -u):$$(id -g)" \
+	--volume "$(CURDIR):$(MARAUDARR_OUTPUT):rw"
+
+#
+# Non-interactive and interactive Maraudarr image commands.
+#
+MARAUDARR_RUN = docker run $(MARAUDARR_RUN_OPTIONS) $(MARAUDARR_IMAGE)
+MARAUDARR_RUN_INTERACTIVE = docker run --interactive --tty $(MARAUDARR_RUN_OPTIONS) $(MARAUDARR_IMAGE)
+
+#
 # Localhost URL helper function.
 #
 define localhost_url
-"http://localhost:`$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) port $(1) $(2) | cut -d: -f2`"
+"http://localhost:`$(PLUNDARR_COMPOSE) port $(1) $(2) | cut -d: -f2`"
 endef
 
 #
@@ -239,8 +288,7 @@ $(BUILD_DEPENDS):
 $(CHECK_ENV):
 	@if [ ! -f "$(ENV_FILE)" ]; then \
 		echo "\nNo $(ENV_FILE) found. The ship needs a chart before it sails. 🗺️"; \
-		echo "Copy $(EXAMPLE_ENV_FILE) to $(ENV_FILE), then update yer voyage settings."; \
-		echo "Run: cp $(EXAMPLE_ENV_FILE) $(ENV_FILE)"; \
+		echo "Run: make $(SHIP)"; \
 		exit 1; \
 	fi
 
@@ -250,13 +298,7 @@ $(CHECK_ENV):
 $(CHECK_RENDERED):
 	@if [ ! -f "$(COMPOSE_FILE)" ]; then \
 		echo "\nNo $(COMPOSE_FILE) found. The fleet needs one final chart. 🗺️"; \
-		echo "Run: make $(SHIP) ADDONS=$(ADDONS)"; \
-		exit 1; \
-	fi; \
-	if [ "$(COMPOSE_FILE)" = "$(RENDERED_COMPOSE_FILE)" ] && \
-		! grep -Fqx "# Rebuild with: make $(SHIP) ADDONS=$(ADDONS)" "$(COMPOSE_FILE)"; then \
-		echo "\n$(COMPOSE_FILE) was rendered with different addons. 🧭"; \
-		echo "Run: make $(SHIP) ADDONS=$(ADDONS)"; \
+		echo "Run: make $(SHIP) OPTIONAL_SERVICES=$(OPTIONAL_SERVICES)"; \
 		exit 1; \
 	fi
 
@@ -270,30 +312,45 @@ $(CHECK_RENDERED):
 #
 $(DOWN): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 	@echo "\nDroppin' anchor for the Plundarr fleet. ⚓"
-	$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) down $(COMPOSE_DOWN_OPTIONS)
+	$(PLUNDARR_COMPOSE) down $(COMPOSE_DOWN_OPTIONS)
 
 #
 # $(RESET_CONFIG): Restores checked-in example config files after live tests.
 #
 $(RESET_CONFIG):
 	@echo "\nRestorin' example maps for safe check-in. 🧭"
+	mkdir -p $$(dirname $(PRIVATEERR_GENERATED_WG_CONFIG))
 	cp $(PRIVATEERR_EXAMPLE_WG_CONFIG) $(PRIVATEERR_GENERATED_WG_CONFIG)
 	cp $(PRIVATEERR_EXAMPLE_METADATA) $(PRIVATEERR_GENERATED_METADATA)
 
 #
-# $(RESET_SERVICE_CONFIGS): Stops the stack when possible and removes ignored
-#                          generated service config files.
+# $(BACKUP_CONFIG): Archives the complete config directory with a collision-safe
+#                   timestamped filename.
 #
-$(RESET_SERVICE_CONFIGS):
-	@echo "\nScrubbin' generated service config back to a fresh clone. 🧽"
-	@if [ -f "$(ENV_FILE)" ] && [ -f "$(COMPOSE_FILE)" ]; then \
-		$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) down $(COMPOSE_DOWN_OPTIONS); \
-	else \
-		echo "No $(ENV_FILE) found. Skippin' container stop and scrubbin' files only. 🗺️"; \
+$(BACKUP_CONFIG):
+	@if [ ! -d "$(CONFIG_PATH)" ]; then \
+		echo "No $(CONFIG_PATH) directory found to archive."; \
+		exit 1; \
 	fi
+	@mkdir -p "$(CONFIG_BACKUP_PATH)"
+	@timestamp=$$(date +%Y%m%d-%H%M%S); \
+	archive="$(CONFIG_BACKUP_PATH)/plundarr-config-$${timestamp}.tar.gz"; \
+	suffix=0; \
+	while [ -e "$$archive" ]; do \
+		suffix=$$((suffix + 1)); \
+		archive="$(CONFIG_BACKUP_PATH)/plundarr-config-$${timestamp}-$${suffix}.tar.gz"; \
+	done; \
+	tar -czf "$$archive" "$(CONFIG_PATH)"; \
+	echo "\nConfig cargo archived at $$archive. 📦"
 
-	git clean -fdX config
-	@$(MAKE) --no-print-directory $(RESET_CONFIG)
+#
+# $(CLEAN_CONFIG): Deletes the complete generated config directory. This target
+#                  is intentionally explicit because application state is lost.
+#
+$(CLEAN_CONFIG):
+	@echo "\nRemoving the complete Plundarr config hold. ☠️"
+	rm -rf "$(CONFIG_PATH)"
+	@echo "Run make $(SHIP) to regenerate selected service folders and seed files. 🗺️"
 
 #
 # $(TEST_VPN): Validates a running stack's Privateerr and Gluetun VPN runtime state.
@@ -306,6 +363,7 @@ $(RESET_SERVICE_CONFIGS):
 $(TEST_VPN): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 	@echo "\nInspectin' the VPN tunnel and port-forwarding loot. 🔎"
 	PLUNDARR_COMPOSE_FILE=$(COMPOSE_FILE) \
+	PLUNDARR_ENV_FILE=$(COMPOSE_ENV_FILE) \
 	PLUNDARR_PRIVATEERR_SERVICE=$(PRIVATEERR_SERVICE) \
 	PLUNDARR_GLUETUN_SERVICE=$(GLUETUN_SERVICE) \
 	PLUNDARR_QBITTORRENT_SERVICE=$(VPN_QBITTORRENT_SERVICE) \
@@ -323,17 +381,18 @@ $(TEST_VPN): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 $(TEST_E2E): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED) $(RESET_CONFIG)
 	@echo "\nLaunching Privateerr, Gluetun, and selected download mates for one clean test voyage. 🌊"
 	@status=0; \
-	$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) \
+	$(PLUNDARR_COMPOSE) \
 		up $(COMPOSE_E2E_OPTIONS) $(E2E_SERVICES) || status=$$?; \
 	if [ "$$status" -eq 0 ]; then \
 		PLUNDARR_COMPOSE_FILE=$(COMPOSE_FILE) \
+		PLUNDARR_ENV_FILE=$(COMPOSE_ENV_FILE) \
 		PLUNDARR_PRIVATEERR_SERVICE=$(PRIVATEERR_SERVICE) \
 		PLUNDARR_GLUETUN_SERVICE=$(GLUETUN_SERVICE) \
 		PLUNDARR_QBITTORRENT_SERVICE=$(VPN_QBITTORRENT_SERVICE) \
 		PLUNDARR_WAIT_SECONDS=$(COMPOSE_E2E_WAIT) \
 		$(PLUNDARR_VPN_TEST_CMD) || status=$$?; \
 	fi; \
-	$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) down $(COMPOSE_DOWN_OPTIONS); \
+	$(PLUNDARR_COMPOSE) down $(COMPOSE_DOWN_OPTIONS); \
 	$(MAKE) --no-print-directory $(RESET_CONFIG); \
 	exit "$$status"
 
@@ -349,14 +408,16 @@ $(TEST_E2E): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED) $(RESET_CONFIG)
 $(TEST_STACK): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED) $(RESET_CONFIG)
 	@echo "\nLaunching the whole Plundarr fleet for a full-stack test voyage. 🏴‍☠️"
 	@status=0; \
-	$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) up $(COMPOSE_UP_OPTIONS) || status=$$?; \
+	$(PLUNDARR_COMPOSE) up $(COMPOSE_UP_OPTIONS) || status=$$?; \
 	if [ "$$status" -eq 0 ]; then \
 		PLUNDARR_COMPOSE_FILE=$(COMPOSE_FILE) \
+		PLUNDARR_ENV_FILE=$(COMPOSE_ENV_FILE) \
 		PLUNDARR_STACK_WAIT_SECONDS=$(COMPOSE_STACK_WAIT) \
 		$(PLUNDARR_STACK_WAIT_CMD) || status=$$?; \
 	fi; \
 	if [ "$$status" -eq 0 ]; then \
 		PLUNDARR_COMPOSE_FILE=$(COMPOSE_FILE) \
+		PLUNDARR_ENV_FILE=$(COMPOSE_ENV_FILE) \
 		PLUNDARR_PRIVATEERR_SERVICE=$(PRIVATEERR_SERVICE) \
 		PLUNDARR_GLUETUN_SERVICE=$(GLUETUN_SERVICE) \
 		PLUNDARR_QBITTORRENT_SERVICE=$(VPN_QBITTORRENT_SERVICE) \
@@ -364,8 +425,8 @@ $(TEST_STACK): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED) $(RESET_CONFIG)
 		$(PLUNDARR_VPN_TEST_CMD) || status=$$?; \
 	fi; \
 	if [ "$$status" -ne 0 ]; then \
-		$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) ps; \
-		$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) logs --tail=120; \
+		$(PLUNDARR_COMPOSE) ps; \
+		$(PLUNDARR_COMPOSE) logs --tail=120; \
 	fi; \
 	$(MAKE) --no-print-directory $(RESET_CONFIG); \
 	exit "$$status"
@@ -389,7 +450,7 @@ $(TEST_DOWN): $(DOWN) $(RESET_CONFIG)
 #
 $(NUKE): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 	@echo "\nFirin' the clean broadside. Repo-safe files stay aboard. 💣"
-	$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) down $(COMPOSE_CLEAN_OPTIONS) --rmi all
+	$(PLUNDARR_COMPOSE) down $(COMPOSE_CLEAN_OPTIONS) --rmi all
 
 	@echo "Scrubbin' generated logs and Gluetun state. 🧽"
 	rm -rf $(PLUNDARR_GENERATED_PATHS)
@@ -406,35 +467,108 @@ $(NUKE): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 #
 $(UP): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 	@echo "\nRaisin' the whole Plundarr fleet. 🏴‍☠️"
-	$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) up $(COMPOSE_UP_OPTIONS)
+	$(PLUNDARR_COMPOSE) up $(COMPOSE_UP_OPTIONS)
 
 #
-# $(SHIP): Renders and validates the deployable Docker Compose file.
+# $(SHIP): Generates the comment-rich Compose and environment files.
 #
 # Dependencies:
 #   $(BUILD_DEPENDS) - Ensure build dependencies are installed.
-#   $(CHECK_ENV) - Ensure the environment file exists.
 #
-$(SHIP): $(BUILD_DEPENDS) $(CHECK_ENV)
-	@echo "\nRenderin' the final Plundarr chart. 🗺️"
-	@for file in $(SOURCE_COMPOSE_FILES) $(HOMEPAGE_SERVICES_BASE) $(HOMEPAGE_SERVICES_FOOTER); do \
-		if [ ! -f "$$file" ]; then \
-			echo "Missing Compose source: $$file"; \
-			exit 1; \
-		fi; \
-	done
-	@echo "Chartin' Homepage services. 🏠"
-	@cat $(HOMEPAGE_SERVICES_BASE) $(HOMEPAGE_ADDON_FILES) $(HOMEPAGE_SERVICES_FOOTER) > "$(HOMEPAGE_SERVICES_FILE)"
-	@mkdir -p "$(dir $(RENDERED_COMPOSE_FILE))"
-	@echo "$(DOCKER_COMPOSE) --env-file $(COMPOSE_ENV_FILE) $(SOURCE_COMPOSE_ARGS) config > $(RENDERED_COMPOSE_FILE)"
-	@{ \
-		printf '# Generated by Plundarr. Do not edit this file directly.\n'; \
-		printf '# Source files: $(SOURCE_COMPOSE_FILES)\n'; \
-		printf '# Rebuild with: make $(SHIP) ADDONS=$(ADDONS)\n\n'; \
-		$(DOCKER_COMPOSE) --env-file $(COMPOSE_ENV_FILE) $(SOURCE_COMPOSE_ARGS) config; \
-	} > "$(RENDERED_COMPOSE_FILE)"
-	$(DOCKER_COMPOSE) -f "$(RENDERED_COMPOSE_FILE)" config >/dev/null
-	@echo "Final chart ready: $(RENDERED_COMPOSE_FILE)"
+$(SHIP): $(BUILD_DEPENDS)
+	@if [ "$(MARAUDARR_SKIP_PULL)" != "true" ]; then \
+		docker pull "$(MARAUDARR_IMAGE)"; \
+	fi
+
+	$(MARAUDARR_RUN) build \
+		--preset "$(PRESET)" \
+		--remove qbittorrent,cleanuparr \
+		--add "$(OPTIONAL_SERVICES)" \
+		--output "$(MARAUDARR_OUTPUT)"
+
+#
+# $(CONFIGURE): Opens Maraudarr's interactive preset and service configurator.
+#
+# Dependencies:
+#   $(BUILD_DEPENDS) - Ensure Docker and Docker Compose are installed.
+#
+$(CONFIGURE): $(BUILD_DEPENDS)
+	@if [ "$(MARAUDARR_SKIP_PULL)" != "true" ]; then \
+		docker pull "$(MARAUDARR_IMAGE)"; \
+	fi
+
+	$(MARAUDARR_RUN_INTERACTIVE) configure --output "$(MARAUDARR_OUTPUT)"
+
+#
+# $(BUILD_MARAUDARR): Builds Maraudarr locally using its dedicated Compose chart.
+#
+# Dependencies:
+#   $(BUILD_DEPENDS) - Ensure Docker and Docker Compose are installed.
+#
+$(BUILD_MARAUDARR): $(BUILD_DEPENDS)
+	$(MARAUDARR_COMPOSE) build --pull --no-cache maraudarr
+
+#
+# $(BUILD): Alias for build-maraudarr to match the related Privateerr project.
+#
+# Dependencies:
+#   $(BUILD_MARAUDARR) - Build the local Maraudarr image.
+#
+$(BUILD): $(BUILD_MARAUDARR)
+
+#
+# $(BUILD_MULTIARCH): Verifies Maraudarr builds for every published architecture.
+#
+# Dependencies:
+#   $(BUILD_DEPENDS) - Ensure Docker and Docker Compose are installed.
+#
+$(BUILD_MULTIARCH): $(BUILD_DEPENDS)
+	docker buildx build \
+		--pull \
+		--platform "$(MARAUDARR_BUILD_PLATFORMS)" \
+		--tag "$(MARAUDARR_MULTIARCH_IMAGE)" \
+		--file docker/Dockerfile \
+		docker
+
+#
+# $(TEST_MARAUDARR_UNIT): Runs Maraudarr's Python unit tests.
+#
+$(TEST_MARAUDARR_UNIT):
+	PYTHONDONTWRITEBYTECODE=1 \
+	PYTHONPATH=docker/src \
+	MARAUDARR_CATALOG_ROOT=docker \
+		python3 -m unittest discover -s docker/tests -v
+
+#
+# $(TEST_MARAUDARR): Runs unit tests and the representative Compose matrix.
+#
+# Dependencies:
+#   $(BUILD_DEPENDS) - Ensure Docker and Docker Compose are installed.
+#   $(TEST_MARAUDARR_UNIT) - Run Maraudarr's Python unit tests.
+#
+$(TEST_MARAUDARR): $(BUILD_DEPENDS) $(TEST_MARAUDARR_UNIT)
+	MARAUDARR_TEST_OUTPUT="$(MARAUDARR_TEST_OUTPUT)" \
+		test/test-maraudarr-matrix.sh
+
+#
+# $(PRESETS): Lists presets and their exact default services.
+#
+$(PRESETS):
+	@if [ "$(MARAUDARR_SKIP_PULL)" != "true" ]; then \
+		docker pull "$(MARAUDARR_IMAGE)"; \
+	fi
+
+	$(MARAUDARR_RUN) --plain presets
+
+#
+# $(AVAILABLE_SERVICES): Lists every selectable Plundarr service.
+#
+$(AVAILABLE_SERVICES):
+	@if [ "$(MARAUDARR_SKIP_PULL)" != "true" ]; then \
+		docker pull "$(MARAUDARR_IMAGE)"; \
+	fi
+
+	$(MARAUDARR_RUN) --plain services
 
 #
 # $(CONFIG): Renders the actual data model to be applied on the Docker Engine.
@@ -443,19 +577,19 @@ $(SHIP): $(BUILD_DEPENDS) $(CHECK_ENV)
 #   $(BUILD_DEPENDS) - Ensure build dependencies are installed.
 #   $(CHECK_ENV) - Ensure the environment file exists.
 #
-$(CONFIG): $(BUILD_DEPENDS) $(CHECK_ENV)
-	$(DOCKER_COMPOSE) --env-file $(COMPOSE_ENV_FILE) $(SOURCE_COMPOSE_ARGS) config
+$(CONFIG): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
+	$(PLUNDARR_COMPOSE) config
 
 #
-# $(SERVICES): Lists services in the rendered Docker Compose file.
+# $(COMPOSE_SERVICES): Lists services in the rendered Docker Compose file.
 #
 # Dependencies:
 #   $(BUILD_DEPENDS) - Ensure build dependencies are installed.
 #   $(CHECK_ENV) - Ensure the environment file exists.
 #   $(CHECK_RENDERED) - Ensure the rendered Compose file exists.
 #
-$(SERVICES): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
-	$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) config --services
+$(COMPOSE_SERVICES): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
+	$(PLUNDARR_COMPOSE) config --services
 
 #
 # $(ENV): Prints the evaluated docker compose default env configuration.
@@ -511,7 +645,7 @@ $(PRINT_ENV): $(CHECK_ENV)
 #
 $(LOGS): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 	@echo "\nReadin' logs for the fleet. 🔎"
-	$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) logs $(COMPOSE_LOGS_OPTIONS)
+	$(PLUNDARR_COMPOSE) logs $(COMPOSE_LOGS_OPTIONS)
 
 #
 # $(PS): Shows current stack container status.
@@ -522,7 +656,7 @@ $(LOGS): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 #   $(CHECK_RENDERED) - Ensure the rendered Compose file exists.
 #
 $(PS): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
-	$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) ps
+	$(PLUNDARR_COMPOSE) ps
 
 #
 # $(TEST_LOGS): View output from stack containers.
@@ -561,20 +695,29 @@ $(HELP):
 	$(call help_line,$(BUILD_DEPENDS),Ensures build dependencies are installed.)
 	$(call help_line,$(CHECK_ENV),Ensures $(ENV_FILE) exists.)
 	$(call help_line,$(CHECK_RENDERED),Ensures $(COMPOSE_FILE) exists.)
+	$(call help_line,$(BUILD),Builds the local Maraudarr image.)
+	$(call help_line,$(BUILD_MARAUDARR),Builds Maraudarr from the docker context.)
+	$(call help_line,$(BUILD_MULTIARCH),Checks every published image architecture.)
 	$(call help_line,$(DOWN),Stops and removes the service stack.)
 	$(call help_line,$(CLEAN),Stops the stack and restores example config files.)
 	$(call help_line,$(NUKE),Removes containers plus images and generated files.)
 	$(call help_line,$(RESET_CONFIG),Restores example VPN config files.)
-	$(call help_line,$(RESET_SERVICE_CONFIGS),Removes ignored service config files.)
+	$(call help_line,$(BACKUP_CONFIG),Archives config with a unique timestamp.)
+	$(call help_line,$(CLEAN_CONFIG),Deletes the complete generated config tree.)
 	$(call help_line,$(TEST_VPN),Validates the VPN runtime state.)
-	$(call help_line,$(TEST_E2E),Tests VPN plus selected download addons.)
+	$(call help_line,$(TEST_E2E),Tests VPN plus selected download services.)
 	$(call help_line,$(TEST_STACK),Tests the full stack health and VPN state.)
 	$(call help_line,$(TEST_DOWN),Stops the stack and restores example configs.)
 	$(call help_line,$(TEST_LOGS),Shows logs for the service stack.)
 	$(call help_line,$(UP),(Re)creates and starts every service.)
-	$(call help_line,$(SHIP),Renders $(COMPOSE_FILE) from base plus addons.)
+	$(call help_line,$(SHIP),Generates the selected Plundarr preset and services.)
+	$(call help_line,$(CONFIGURE),Opens Maraudarr's interactive configurator.)
+	$(call help_line,$(TEST_MARAUDARR_UNIT),Runs Maraudarr's Python unit tests.)
+	$(call help_line,$(TEST_MARAUDARR),Tests Maraudarr and generated charts.)
+	$(call help_line,$(PRESETS),Lists presets and their default services.)
+	$(call help_line,$(AVAILABLE_SERVICES),Lists every selectable service.)
 	$(call help_line,$(CONFIG),Renders the Docker Compose model.)
-	$(call help_line,$(SERVICES),Lists rendered Compose services.)
+	$(call help_line,$(COMPOSE_SERVICES),Lists generated Compose services.)
 	$(call help_line,$(ENV),Prints evaluated Compose env values.)
 	$(call help_line,$(PRINT_CONFIG),Prints uncommented Compose yaml.)
 	$(call help_line,$(PRINT_ENV),Prints uncommented Compose env values.)

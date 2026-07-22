@@ -1,0 +1,67 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# compose.yml: Maraudarr service chart for Gluetun.
+#
+
+services:
+  #
+  # Define the 'gluetun' service to route traffic through a WireGuard VPN connection.
+  #
+  gluetun:
+    # Docker image and container information
+    <<: *default-container                                    # Pull in default container config
+    image: qmcgaw/gluetun:${GLUETUN_TAG}                      # Run using the specified tag
+    container_name: gluetun-${GLUETUN_TAG}                    # Append Docker image tag to container name
+    hostname: gluetun                                         # Set the container hostname
+    entrypoint: ["/bin/sh", "${GLUETUN_ENTRYPOINT_WRAPPER}"]  # Load Privateerr metadata before Gluetun starts
+
+    # Add additional linux capabilities
+    cap_add:
+      - NET_ADMIN  # Grant network admin capability for VPN and network interface configuration
+
+    # Pass host devices into the container for direct hardware access
+    devices:
+      - /dev/net/tun:/dev/net/tun  # Allow container to handle encrypted VPN traffic directly
+
+    # Add container labels
+    labels: *disable-watchtower-updates  # VPN tunnel component; update intentionally
+
+    # Define the container environment
+    environment:
+      <<: *default-environment                                               # Pull in the default environment information
+      VPN_SERVICE_PROVIDER: ${GLUETUN_VPN_SERVICE_PROVIDER}                  # The VPN service provider, e.g. custom
+      VPN_TYPE: ${GLUETUN_VPN_TYPE}                                          # The VPN type, e.g. wireguard
+      VPN_PORT_FORWARDING: ${GLUETUN_VPN_PORT_FORWARDING}                    # Enable VPN-side port forwarding
+      VPN_PORT_FORWARDING_PROVIDER: ${GLUETUN_VPN_PORT_FORWARDING_PROVIDER}  # PIA port-forwarding helper
+      VPN_PORT_FORWARDING_USERNAME: ${PIA_USER}                              # PIA username for Gluetun port forwarding
+      VPN_PORT_FORWARDING_PASSWORD: ${PIA_PASS}                              # PIA password for Gluetun port forwarding
+      HEALTH_TARGET_ADDRESSES: ${GLUETUN_HEALTH_TARGET_ADDRESSES}            # TCP/TLS targets Gluetun checks for VPN health
+      HEALTH_ICMP_TARGET_IPS: ${GLUETUN_HEALTH_ICMP_TARGET_IPS}              # ICMP targets Gluetun checks for VPN health
+      HEALTH_SERVER_ADDRESS: ${GLUETUN_HEALTH_SERVER_ADDRESS}                # Internal Gluetun health server address
+      HEALTH_RESTART_VPN: ${GLUETUN_HEALTH_RESTART_VPN}                      # Let Gluetun restart VPN when health checks fail
+      GLUETUN_DEFAULT_ENTRYPOINT: ${GLUETUN_DEFAULT_ENTRYPOINT}              # Original Gluetun entrypoint
+
+      # Define Privateerr metadata environment variables for Gluetun
+      PRIVATEERR_METADATA_PATH: ${PRIVATEERR_METADATA_PATH}
+      PRIVATEERR_GLUETUN_METADATA_WAIT_SECONDS: ${PRIVATEERR_GLUETUN_METADATA_WAIT_SECONDS}
+
+    # Mount host directories into the container
+    volumes:
+      - ${GLUETUN_CONFIG_PATH}:/gluetun:rw                               # Gluetun config directory
+      - ${GLUETUN_CONFIG_PATH}:/tmp/gluetun:rw                           # Gluetun runtime state directory
+      - ${GLUETUN_WRAPPER_SCRIPT_PATH}:${GLUETUN_ENTRYPOINT_WRAPPER}:ro  # Gluetun entrypoint wrapper script
+
+    # Define container healthcheck to verify VPN connectivity
+    healthcheck:
+      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
+      test:                              # Check Gluetun's internal health server
+        - CMD-SHELL
+        - wget -q -O /dev/null "http://127.0.0.1:9999" || exit 1
+
+    # Specify container service dependencies
+    depends_on:
+      privateerr:
+        condition: service_healthy  # Wait for Privateerr to generate the WireGuard config and report healthy

@@ -1,0 +1,47 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# docker-compose.maraudarr.yml: Docker Compose configuration for building and
+#                               running the Maraudarr generator image locally.
+#
+
+services:
+  #
+  # Build or run Maraudarr against the current Plundarr repository checkout.
+  #
+  maraudarr:
+    # Docker image build and container information
+    image: ghcr.io/scottgigawatt/maraudarr:${MARAUDARR_TAG}  # Published image and configurable tag
+    build:                                                   # Local development image settings
+      context: docker                                        # Complete Maraudarr build context
+      dockerfile: Dockerfile                                 # Maraudarr image recipe
+      args:                                                  # Configurable image build arguments
+        ALPINE_TAG: ${ALPINE_TAG}                            # Base Alpine image version and digest
+        MARAUDARR_BIN_HOME: ${MARAUDARR_BIN_HOME}            # Application install directory
+        MARAUDARR_UID: ${MARAUDARR_UID}                      # Default unprivileged runtime user ID
+        MARAUDARR_GID: ${MARAUDARR_GID}                      # Default unprivileged runtime group ID
+        IMAGE_CREATED: ${IMAGE_CREATED}                      # OCI image creation timestamp
+        IMAGE_REVISION: ${IMAGE_REVISION}                    # OCI source revision
+        IMAGE_VERSION: ${MARAUDARR_TAG}                      # OCI image version
+    container_name: maraudarr-${MARAUDARR_TAG}               # Container name including image tag
+    hostname: maraudarr                                      # Set the container hostname
+    network_mode: none                                       # Generation requires no network access
+    read_only: true                                          # Keep the image filesystem immutable
+    stdin_open: true                                         # Support interactive service selection
+    tty: true                                                # Render the interactive terminal correctly
+
+    # Drop every optional capability and prevent privilege escalation
+    cap_drop:
+      - ALL  # Maraudarr only reads templates and writes generated files
+    security_opt:
+      - no-new-privileges:true  # Prevent processes from gaining privileges
+
+    # Provide writable ephemeral storage for Compose validation and atomic files
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m  # Temporary generation workspace
+
+    # Mount this repository as Maraudarr's output directory
+    volumes:
+      - .:/output:rw  # Write Plundarr files into the repository root

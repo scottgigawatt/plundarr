@@ -1,0 +1,42 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# compose.yml: Maraudarr service chart for Bazarr.
+#
+
+services:
+  #
+  # Define the 'bazarr' service for managing subtitles.
+  #
+  bazarr:
+    # Docker image and container information
+    <<: *arr-stack-container                         # Pull in arr-stack container config
+    image: lscr.io/linuxserver/bazarr:${BAZARR_TAG}  # Run using the specified tag
+    container_name: bazarr-${BAZARR_TAG}             # Append Docker image tag to container name
+    hostname: bazarr                                 # Set the container hostname
+
+    # Define the host and container ports
+    ports:
+      - ${BAZARR_WEBUI_PORT}:6767  # Bazarr web UI port
+
+    # Mount host directories into the container
+    volumes:
+      - ${BAZARR_CONFIG_PATH}:/config:rw  # Persistent config files
+      - ${HOST_MOVIES_PATH}:/movies:rw    # Location of movies library on disk
+      - ${HOST_TV_PATH}:/tv:rw            # Location of TV library on disk
+
+    # Define container healthcheck to verify Bazarr connectivity
+    healthcheck:
+      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
+      test:                              # Check Bazarr web server
+        - CMD-SHELL
+        - wget --no-verbose --tries=1 --spider "http://127.0.0.1:6767/" || exit 1
+
+    # Specify container service dependencies
+    depends_on:
+      sonarr:
+        condition: service_healthy  # Wait until Sonarr is healthy
+      radarr:
+        condition: service_healthy  # Wait until Radarr is healthy

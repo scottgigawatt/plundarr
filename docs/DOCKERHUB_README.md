@@ -1,0 +1,44 @@
+# Maraudarr 🏴‍☠️⚒️
+
+Maraudarr is the short-lived generator image for
+[Plundarr](https://github.com/scottgigawatt/plundarr). It turns presets and
+selectable service charts into one commented Docker Compose file, one matching
+environment file, and the selected service config directories.
+
+> [!IMPORTANT]
+> Plundarr is the generated media stack. Maraudarr creates that stack and exits;
+> it is not a long-running media service.
+
+## Quick Voyage
+
+The repository Makefile supplies the hardened Docker invocation:
+
+```bash
+git clone https://github.com/scottgigawatt/plundarr.git
+cd plundarr
+make ship
+```
+
+Generated cargo lands in the repository root:
+
+```text
+docker-compose.yml
+example.env
+.env
+config/
+```
+
+Run `make configure` for the interactive preset and service picker, or
+`make services` to inspect every available service.
+
+## Image Details
+
+- Registries: `ghcr.io/scottgigawatt/maraudarr` and `scottgigawatt/maraudarr`
+- Platforms: `linux/amd64`, `linux/arm64`, and `linux/arm/v7`
+- Stable tag: `latest`
+- Main branch tag: `edge`
+- Security: non-root, read-only, no-network generation with dropped capabilities
+- Supply chain: Trivy scanning, SBOM, provenance, and OCI metadata
+
+Full commands, tag policy, architecture, and maintenance notes live in the
+[Maraudarr README](https://github.com/scottgigawatt/plundarr/tree/main/docker#readme).

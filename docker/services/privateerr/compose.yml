@@ -1,0 +1,55 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# compose.yml: Maraudarr service chart for Privateerr.
+#
+
+services:
+  #
+  # Define the 'privateerr' service to generate the PIA manual WireGuard configuration file.
+  #
+  privateerr:
+    # Docker image and container information
+    <<: *default-container                                     # Pull in default container config
+    image: ghcr.io/scottgigawatt/privateerr:${PRIVATEERR_TAG}  # Pull Privateerr from GHCR
+    container_name: privateerr-${PRIVATEERR_TAG}               # Append Docker image tag to container name
+    hostname: privateerr                                       # Set the container hostname
+    privileged: true                                           # Required for upstream IPv6 sysctl behavior
+
+    # Add container labels
+    labels: *disable-watchtower-updates  # VPN bootstrap component; update intentionally
+
+    # Define the container environment
+    environment:
+      # PIA manual connection environment variables
+      VPN_PROTOCOL: ${PIA_VPN_PROTOCOL}          # VPN configuration, WireGuard or openvpn
+      DISABLE_IPV6: ${PIA_DISABLE_IPV6}          # Toggle using IPV6, yes or no
+      DIP_TOKEN: ${PIA_DIP_TOKEN}                # Optional PIA dedicated IP token, token or no
+      AUTOCONNECT: ${PIA_AUTOCONNECT}            # Test and select server with the lowest latency, true or false
+      PIA_CONF_PATH: ${PIA_CONF_PATH}            # Path of WireGuard config file to be written
+      PIA_CONNECT: ${PIA_CONNECT}                # Connect to VPN after config has been created, true or false
+      PIA_PF: ${PIA_PF}                          # Configure port forwarding, true or false
+      PIA_DNS: ${PIA_DNS}                        # Configure DNS, true or false
+      PIA_WG_SERVER_NAME: ${PIA_WG_SERVER_NAME}  # Optional WireGuard server name fallback
+      PIA_USER: ${PIA_USER}                      # Set PIA username
+      PIA_PASS: ${PIA_PASS}                      # Set PIA password
+
+      # Privateerr environment variables
+      PRIVATEERR_METADATA_PATH: ${PRIVATEERR_METADATA_PATH}            # Path where Gluetun metadata will be generated
+      PRIVATEERR_HEALTHCHECK_MARKER: ${PRIVATEERR_HEALTHCHECK_MARKER}  # File written after successful generation
+      PRIVATEERR_KEEPALIVE: ${PRIVATEERR_KEEPALIVE}                    # Keep the container alive after successful generation
+      PRIVATEERR_LOG_PATH: ${PRIVATEERR_LOG_PATH}                      # Privateerr log file path
+
+    # Mount host directories into the container
+    volumes:
+      - ${PRIVATEERR_GLUETUN_CONFIG_PATH}:/gluetun:rw    # Gluetun config output consumed by Gluetun
+      - ${PRIVATEERR_CONFIG_PATH}:/privateerr-config:rw  # Privateerr service config directory
+
+    # Define container healthcheck to verify Privateerr has completed setup
+    healthcheck:
+      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
+      test:                              # Healthy when healthcheck marker file exists
+        - CMD-SHELL
+        - test -f "$${PRIVATEERR_HEALTHCHECK_MARKER}"

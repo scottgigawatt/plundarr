@@ -1,0 +1,258 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# catalog.toml: Maraudarr service metadata, dependency rules, output order,
+#               and named Plundarr stack presets.
+#
+
+#
+# Service table fields:
+#   title       - Human-readable name shown in the Maraudarr interface.
+#   description - Short explanation shown in service lists and prompts.
+#   category    - Prompt group used by the interactive configurator.
+#   url         - Upstream project URL added to the generated Compose header.
+#   order       - Stable numeric position in Compose and environment output.
+#   service     - Optional Compose service key when it differs from the ID.
+#   requires    - Services automatically added when this service is selected.
+#   recommended - Related services shown as guidance but not forced.
+#
+# Compose, environment, and config sources use this conventional layout:
+#   services/<service-id>/compose.yml
+#   services/<service-id>/environment.env
+#   services/<service-id>/config/
+#
+
+#
+# VPN foundation services.
+#
+[services.privateerr]
+title = "Privateerr"
+description = "Generates the PIA WireGuard configuration and Gluetun metadata."
+category = "VPN foundation"
+url = "https://github.com/scottgigawatt/privateerr"
+order = 100
+
+[services.gluetun]
+title = "Gluetun"
+description = "Runs the VPN tunnel and protects selected download clients."
+category = "VPN foundation"
+url = "https://github.com/qdm12/gluetun"
+order = 110
+requires = ["privateerr"]
+
+#
+# Indexing and download services.
+#
+[services.flaresolverr]
+title = "FlareSolverr"
+description = "Helps Prowlarr handle supported anti-bot challenges."
+category = "Indexing"
+url = "https://github.com/FlareSolverr/FlareSolverr"
+order = 200
+
+[services.prowlarr]
+title = "Prowlarr"
+description = "Manages indexers shared by the media automation services."
+category = "Indexing"
+url = "https://github.com/Prowlarr/Prowlarr"
+order = 210
+requires = ["flaresolverr"]
+
+[services.qbittorrent]
+title = "qBittorrent"
+description = "Downloads torrents through the Gluetun VPN tunnel."
+category = "Download clients"
+url = "https://github.com/qbittorrent/qBittorrent"
+order = 220
+requires = ["gluetun"]
+
+[services.sabnzbd]
+title = "SABnzbd"
+description = "Downloads Usenet cargo through the Gluetun VPN tunnel."
+category = "Download clients"
+url = "https://sabnzbd.org"
+order = 230
+requires = ["gluetun"]
+
+#
+# Media automation services.
+#
+[services.radarr]
+title = "Radarr"
+description = "Finds, tracks, and organizes movies."
+category = "Media automation"
+url = "https://github.com/Radarr/Radarr"
+order = 300
+requires = ["prowlarr"]
+
+[services.sonarr]
+title = "Sonarr"
+description = "Finds, tracks, and organizes television shows."
+category = "Media automation"
+url = "https://github.com/Sonarr/Sonarr"
+order = 310
+requires = ["prowlarr"]
+
+[services.sonarr-anime]
+title = "Sonarr Anime"
+description = "Runs a second Sonarr instance dedicated to anime television."
+category = "Media automation"
+url = "https://github.com/Sonarr/Sonarr"
+order = 320
+requires = ["prowlarr"]
+
+[services.whisparr]
+title = "Whisparr"
+description = "Finds, tracks, and organizes an adult media library."
+category = "Media automation"
+url = "https://github.com/Whisparr/Whisparr"
+order = 330
+requires = ["prowlarr"]
+recommended = ["qbittorrent"]
+
+[services.bazarr]
+title = "Bazarr"
+description = "Fetches subtitles for movie and television libraries."
+category = "Media automation"
+url = "https://github.com/morpheus65535/bazarr"
+order = 340
+requires = ["radarr", "sonarr"]
+
+#
+# Media request, playback, and dashboard services.
+#
+[services.seerr]
+title = "Seerr"
+description = "Accepts and manages media requests."
+category = "Media experience"
+url = "https://github.com/seerr-team/seerr"
+order = 400
+
+[services.plex]
+title = "Plex"
+description = "Streams selected media libraries with Plex Media Server."
+category = "Media servers"
+url = "https://www.plex.tv/media-server-downloads/"
+order = 410
+
+[services.jellyfin]
+title = "Jellyfin"
+description = "Streams selected media libraries with an open media server."
+category = "Media servers"
+url = "https://jellyfin.org"
+order = 420
+
+[services.homepage]
+title = "Homepage"
+description = "Provides a dashboard for the generated service fleet."
+category = "Media experience"
+url = "https://gethomepage.dev/latest"
+order = 800
+
+#
+# Cleanup, monitoring, notification, backup, and update services.
+#
+[services.cleanuparr]
+title = "Cleanuparr"
+description = "Removes blocked or unwanted downloads from configured clients."
+category = "Operations"
+url = "https://github.com/Cleanuparr/Cleanuparr"
+order = 500
+recommended = ["qbittorrent"]
+
+[services.speedtest-tracker]
+title = "Speedtest Tracker"
+description = "Measures and records internet performance over time."
+category = "Monitoring and notifications"
+url = "https://docs.speedtest-tracker.dev"
+order = 600
+
+[services.apprise]
+title = "Apprise"
+description = "Delivers Speedtest Tracker and other notifications."
+category = "Monitoring and notifications"
+url = "https://github.com/caronc/apprise-api"
+order = 610
+recommended = ["speedtest-tracker"]
+
+[services.duplicati]
+title = "Duplicati"
+description = "Backs up Plundarr configuration and other selected data."
+category = "Operations"
+url = "https://www.duplicati.com"
+order = 700
+
+[services.watchtower]
+title = "Watchtower"
+description = "Checks selected containers for image updates."
+category = "Operations"
+url = "https://github.com/containrrr/watchtower"
+order = 900
+
+#
+# Plundarr is the default general-purpose media automation voyage.
+#
+[presets.plundarr]
+title = "Plundarr"
+description = "Movies, television, subtitles, requests, monitoring, and a VPN-protected torrent client."
+compose_summary = [
+    "docker-compose.yml: Docker Compose configuration for running Plundarr's",
+    "                    media service stack with Privateerr-generated PIA",
+    "                    WireGuard config, PIA port forwarding, Gluetun VPN",
+    "                    routing, and the 'arr' applications.",
+    "",
+    "This configuration sets up default properties for all containers, integrates",
+    "PIA with native WireGuard connections and port forwarding, and provides",
+    "environment-specific settings for a seamless VPN setup.",
+]
+core = [
+    "privateerr",
+    "gluetun",
+    "flaresolverr",
+    "prowlarr",
+    "radarr",
+    "sonarr",
+    "bazarr",
+    "seerr",
+    "speedtest-tracker",
+    "duplicati",
+    "homepage",
+]
+defaults = ["qbittorrent", "cleanuparr"]
+
+#
+# Boudoirr reuses the same catalog for an adult-media-focused stack.
+#
+[presets.boudoirr]
+title = "Boudoirr"
+description = "Whisparr-focused automation with both VPN-protected download clients and controlled updates."
+compose_summary = [
+    "docker-compose.yml: Docker Compose configuration for running Boudoirr's",
+    "                    adult-media service stack with Privateerr-generated PIA",
+    "                    WireGuard config, PIA port forwarding, Gluetun VPN",
+    "                    routing, and the supporting applications.",
+    "",
+    "This configuration sets up default properties for all containers, integrates",
+    "PIA with native WireGuard connections and port forwarding, and provides",
+    "environment-specific settings for a seamless VPN setup.",
+]
+core = ["privateerr", "gluetun", "flaresolverr", "prowlarr", "whisparr"]
+defaults = ["qbittorrent", "sabnzbd", "cleanuparr", "watchtower"]
+
+#
+# Custom starts empty so every service choice is explicit.
+#
+[presets.custom]
+title = "Custom"
+description = "Begin with an empty cargo hold and select every service yourself."
+compose_summary = [
+    "docker-compose.yml: Docker Compose configuration generated from Maraudarr's",
+    "                    selectable media service catalog.",
+    "",
+    "This configuration contains the services selected for this custom stack and",
+    "uses environment variables for settings that may change after deployment.",
+]
+core = []
+defaults = []

@@ -1,0 +1,40 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# compose.yml: Maraudarr service chart for Sonarr.
+#
+
+services:
+  #
+  # Define the 'sonarr' service for managing television shows.
+  #
+  sonarr:
+    # Docker image and container information
+    <<: *arr-stack-container                         # Pull in arr-stack container config
+    image: lscr.io/linuxserver/sonarr:${SONARR_TAG}  # Run using the specified tag
+    container_name: sonarr-${SONARR_TAG}             # Append Docker image tag to container name
+    hostname: sonarr                                 # Set the container hostname
+
+    # Define the host and container ports
+    ports:
+      - ${SONARR_WEBUI_PORT}:8989  # Sonarr web UI port
+
+    # Mount host directories into the container
+    volumes:
+      - ${SONARR_CONFIG_PATH}:/config:rw      # Database and Sonarr configs
+      - ${HOST_DOWNLOADS_PATH}:/downloads:rw  # Location of download managers output directory
+      - ${HOST_TV_PATH}:/tv:rw                # Location of TV library on disk
+
+    # Define container healthcheck to verify Sonarr connectivity
+    healthcheck:
+      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
+      test:                              # Check Sonarr ping endpoint
+        - CMD-SHELL
+        - wget --no-verbose --tries=1 --spider "http://127.0.0.1:8989/ping" || exit 1
+
+    # Specify container service dependencies
+    depends_on:
+      prowlarr:
+        condition: service_healthy  # Wait until Prowlarr is healthy

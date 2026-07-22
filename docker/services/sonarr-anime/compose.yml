@@ -1,0 +1,40 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# compose.yml: Maraudarr service chart for a second anime-focused Sonarr.
+#
+
+services:
+  #
+  # Define the 'sonarr-anime' service for managing anime TV shows.
+  #
+  sonarr-anime:
+    # Docker image and container information
+    <<: *arr-stack-container                               # Pull in arr-stack container config
+    image: lscr.io/linuxserver/sonarr:${SONARR_ANIME_TAG}  # Run using the specified tag
+    container_name: sonarr-anime-${SONARR_ANIME_TAG}       # Append Docker image tag to container name
+    hostname: sonarr-anime                                 # Set the container hostname
+
+    # Define the host and container ports
+    ports:
+      - ${SONARR_ANIME_WEBUI_PORT}:8989  # Sonarr Anime web UI port
+
+    # Mount host directories into the container
+    volumes:
+      - ${SONARR_ANIME_CONFIG_PATH}:/config:rw  # Database and Sonarr Anime configs
+      - ${HOST_DOWNLOADS_PATH}:/downloads:rw    # Location of download managers output directory
+      - ${HOST_ANIME_TV_PATH}:/tv:rw            # Location of anime TV library on disk
+
+    # Define container healthcheck to verify Sonarr Anime connectivity
+    healthcheck:
+      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
+      test:                              # Check Sonarr Anime ping endpoint
+        - CMD-SHELL
+        - wget --no-verbose --tries=1 --spider "http://127.0.0.1:8989/ping" || exit 1
+
+    # Specify container service dependencies
+    depends_on:
+      prowlarr:
+        condition: service_healthy  # Wait until Prowlarr is healthy

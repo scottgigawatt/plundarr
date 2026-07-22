@@ -8,9 +8,9 @@ Plundarr sails mostly by the `main` branch. Since this project be a small vessel
 
 | Version                        | Supported |
 | ------------------------------ | --------- |
-| `main` branch                  | ✅         |
-| Older local copies             | ❌         |
-| Forked or modified PIA scripts | ❌         |
+| `main` branch                  | ✅        |
+| Older local copies             | ❌        |
+| Forked or modified PIA scripts | ❌        |
 
 > [!IMPORTANT]
 > 🧭 Plundarr consumes the published Privateerr image for PIA WireGuard config and port-forwarding metadata. Privateerr uses upstream PIA manual connection scripts, and issues in those scripts should also be reported to the PIA project.

@@ -1,0 +1,37 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# compose.yml: Maraudarr service chart for Jellyfin.
+#
+
+services:
+  #
+  # Define the 'jellyfin' service for streaming media libraries.
+  #
+  jellyfin:
+    # Docker image and container information
+    <<: *arr-stack-container                             # Pull in arr-stack container config
+    image: lscr.io/linuxserver/jellyfin:${JELLYFIN_TAG}  # Run using the specified tag
+    container_name: jellyfin-${JELLYFIN_TAG}             # Append Docker image tag to container name
+    hostname: jellyfin                                   # Set the container hostname
+
+    # Define the host and container ports
+    ports:
+      - ${JELLYFIN_WEBUI_PORT}:8096  # Jellyfin web UI port
+
+    # Mount host directories into the container
+    volumes:
+      - ${JELLYFIN_CONFIG_PATH}:/config:rw  # Persistent Jellyfin configuration
+      - ${JELLYFIN_CACHE_PATH}:/cache:rw    # Transcoding and image cache
+      - ${HOST_MOVIES_PATH}:/movies:ro      # Movie library
+      - ${HOST_TV_PATH}:/tv:ro              # Television library
+      - ${HOST_ANIME_TV_PATH}:/anime:ro     # Anime television library
+
+    # Define container healthcheck to verify Jellyfin connectivity
+    healthcheck:
+      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
+      test:                              # Check Jellyfin's public system endpoint
+        - CMD-SHELL
+        - curl -fsS "http://127.0.0.1:8096/System/Info/Public" >/dev/null || exit 1

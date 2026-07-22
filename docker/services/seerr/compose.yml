@@ -1,0 +1,39 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# compose.yml: Maraudarr service chart for Seerr.
+#
+
+services:
+  #
+  # Define the 'seerr' service for managing media library requests.
+  #
+  seerr:
+    # Docker image and container information
+    <<: *default-container                        # Pull in the default container information
+    image: ghcr.io/seerr-team/seerr:${SEERR_TAG}  # Run using the specified tag
+    container_name: seerr-${SEERR_TAG}            # Append Docker image tag to container name
+    hostname: seerr                               # Set the container hostname
+    init: true                                    # Use an init process to handle signals and zombie processes
+
+    # Define the container environment
+    environment:
+      <<: *default-environment       # Pull in the default environment information
+      LOG_LEVEL: ${SEERR_LOG_LEVEL}  # Container log level
+
+    # Define the host and container ports
+    ports:
+      - ${SEERR_WEBUI_PORT}:5055  # Seerr web UI port
+
+    # Mount host directories into the container
+    volumes:
+      - ${SEERR_CONFIG_PATH}:/app/config:rw  # Persistent config files
+
+    # Define container healthcheck to verify Seerr connectivity
+    healthcheck:
+      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
+      test:                              # Check Seerr public settings endpoint
+        - CMD-SHELL
+        - wget --no-verbose --tries=1 --spider "http://127.0.0.1:5055/api/v1/settings/public" || exit 1

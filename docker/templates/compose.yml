@@ -1,0 +1,83 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# compose.yml: Shared anchors, service section, and network footer used by
+#              Maraudarr when generating a complete Plundarr Compose file.
+#
+
+#
+# Setup default properties for all or most containers.
+#
+x-default-container: &default-container  # YAML anchor for default container
+  pull_policy: always                    # Ensure that the image is always pulled
+  restart: unless-stopped                # Restart the container unless explicitly stopped
+  logging:                               # Configure container logging options
+    driver: "json-file"                  # Use JSON file logging driver
+    options:                             # Logging options for the JSON file driver
+      max-size: ${LOG_MAX_SIZE}          # Maximum file size for logs files
+      max-file: ${LOG_MAX_FILE}          # Maximum number of log files to retain
+
+#
+# Setup default variables for all or most containers.
+#
+x-default-environment: &default-environment  # YAML anchor for default environment
+  TZ: ${TZ}                                  # Set the appropriate timezone
+
+#
+# Setup default variables for arr-stack containers.
+#
+x-arr-stack-environment: &arr-stack-environment  # YAML anchor for arr-stack environment
+  <<: *default-environment                       # Pull in the default environment information
+  PUID: ${DEFAULT_PUID}                          # Default user ID mapping for containers
+  PGID: ${DEFAULT_PGID}                          # Default group ID mapping for containers
+  UMASK: ${DEFAULT_UMASK}                        # Default file creation mask for containers
+
+#
+# Containers using common arr-stack settings.
+#
+x-arr-stack-container: &arr-stack-container  # YAML anchor for arr-stack container
+  <<: *default-container                     # Pull in the default container information
+  group_add:                                 # Add additional user groups
+    - ${DEFAULT_GROUP}                       # Default group used to manage write permissions
+  environment:                               # Define common arr-stack container variables
+    <<: *arr-stack-environment               # Pull in the arr-stack environment information
+
+#
+# Labels for containers that should not be updated unattended by Watchtower.
+#
+# Privateerr and Gluetun coordinate VPN configuration, tunnel startup, and
+# port-forwarding behavior. Update them intentionally after checking release
+# notes so the VPN bootstrap path changes under supervision.
+#
+x-disable-watchtower-updates: &disable-watchtower-updates  # Disable unattended Watchtower updates
+  - "com.centurylinklabs.watchtower.enable=false"          # Require intentional updates for this container
+
+#
+# Setup default healthcheck timing settings for all or most containers.
+#
+x-default-healthcheck-settings: &default-healthcheck-settings  # YAML anchor for healthcheck settings
+  interval: ${DEFAULT_HEALTHCHECK_INTERVAL}                    # Run the check at this interval
+  timeout: ${DEFAULT_HEALTHCHECK_TIMEOUT}                      # Fail if it exceeds this duration
+  start_period: ${DEFAULT_HEALTHCHECK_START_PERIOD}            # Grace period before checks start
+  retries: ${DEFAULT_HEALTHCHECK_RETRIES}                      # Mark as unhealthy after this many failures
+
+#
+# Define the services section.
+#
+services:
+
+#
+# Define the networks section.
+#
+networks:
+  # Configure the default network
+  default:
+    name: ${COMPOSE_PROJECT_NAME}  # Use the name of the Compose project
+    ipam:                          # IP Address Management
+      driver: default              # Use the default driver
+      config:
+        - subnet: ${COMPOSE_NETWORK_SUBNET}      # Subnet in CIDR format that represents a network segment
+          ip_range: ${COMPOSE_NETWORK_IP_RANGE}  # Range from which container IP addresses are allocated
+          gateway: ${COMPOSE_NETWORK_GATEWAY}    # Gateway for the default network

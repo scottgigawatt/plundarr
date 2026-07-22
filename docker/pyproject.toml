@@ -1,0 +1,47 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# pyproject.toml: Python package metadata and build settings for Maraudarr.
+#
+
+#
+# Use setuptools to build the Maraudarr wheel installed in the image.
+#
+[build-system]
+requires = ["setuptools==80.9.0"]
+build-backend = "setuptools.build_meta"
+
+#
+# Describe the Maraudarr application and its exact runtime dependencies.
+#
+[project]
+name = "maraudarr"
+version = "0.1.0"
+description = "Generate polished, reusable Plundarr Docker Compose stacks."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "Apache-2.0"
+authors = [
+    { name = "Scott Gigawatt" },
+]
+dependencies = [
+    "questionary==2.1.1",
+    "rich==15.0.0",
+]
+
+#
+# Install the public command used by the container entrypoint.
+#
+[project.scripts]
+maraudarr = "maraudarr.cli:main"
+
+#
+# Discover packages beneath the conventional src directory.
+#
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
