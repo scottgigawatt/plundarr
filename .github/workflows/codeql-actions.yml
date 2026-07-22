@@ -1,5 +1,17 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# codeql-actions.yml: Analyze Maraudarr Python and GitHub Actions source.
+#
+
 name: "Interrogate the Maraudarr Rigging 🔎"
 
+#
+# Inspect every change entering main, every resulting main commit, and any
+# manually requested security review.
+#
 on:
   push:
     branches:
@@ -13,6 +25,10 @@ permissions:
   contents: read
 
 jobs:
+  #
+  # Run the same CodeQL lifecycle independently for Python and workflow source.
+  # One language failure does not cancel the other language's useful results.
+  #
   codeql:
     name: "Inspect Python and Actions 🧪"
     runs-on: ubuntu-latest
@@ -29,6 +45,10 @@ jobs:
           - python
 
     steps:
+      #
+      # Checkout is read-only; CodeQL alone receives permission to publish its
+      # analysis results into GitHub code scanning.
+      #
       - name: "Grab the Treasure Map 🗺️"
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
         with:
@@ -39,6 +59,10 @@ jobs:
         with:
           languages: ${{ matrix.language }}
 
+      #
+      # Analyze the initialized language and keep findings separated by matrix
+      # category so Python and Actions results remain easy to distinguish.
+      #
       - name: "Read Maraudarr's Scrolls 📜"
         uses: github/codeql-action/analyze@7188fc363630916deb702c7fdcf4e481b751f97a  # v4
         with:
