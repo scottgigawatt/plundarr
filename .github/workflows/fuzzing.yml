@@ -1,0 +1,77 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# fuzzing.yml: Fuzz Maraudarr's text parsers on relevant pull requests.
+#
+
+name: "Rattle Maraudarr's Rigging 🐒"
+
+on:
+    pull_request:
+        branches:
+            - main
+        paths:
+            - ".clusterfuzzlite/**"
+            - ".github/workflows/fuzzing.yml"
+            - "docker/pyproject.toml"
+            - "docker/src/**"
+            - "docker/tests/fuzz/**"
+    workflow_dispatch:
+
+#
+# The actions need only read access. Crashes fail the check and remain available
+# in its artifacts, so this workflow does not need to publish SARIF results.
+#
+permissions:
+    contents: read
+
+jobs:
+    fuzz-maraudarr:
+        name: "Feed Strange Charts to Maraudarr 🗺️"
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+        concurrency:
+            group: ${{ github.workflow }}-${{ github.ref }}
+            cancel-in-progress: true
+
+        steps:
+            #
+            # Use a named checkout path so ClusterFuzzLite can distinguish the
+            # project from its own build and corpus working directories.
+            #
+            - name: "Grab the Treasure Map 🗺️"
+              uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+              with:
+                  path: plundarr
+                  persist-credentials: false
+
+            #
+            # Build the Python harness with AddressSanitizer instrumentation.
+            # The immutable commit resolves ClusterFuzzLite's signed v1 tag.
+            #
+            - name: "Pack the Fuzzing Cannon 🧨"
+              id: build
+              uses: google/clusterfuzzlite/actions/build_fuzzers@884713a6c30a92e5e8544c39945cd7cb630abcd1  # v1
+              with:
+                  language: python
+                  sanitizer: address
+                  project-src-path: plundarr
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
+
+            #
+            # Spend two focused minutes exploring changed parser paths. Any
+            # reproducible crash fails the job without granting write access.
+            #
+            - name: "Fire Random Bilge at the Parser 💥"
+              id: run
+              uses: google/clusterfuzzlite/actions/run_fuzzers@884713a6c30a92e5e8544c39945cd7cb630abcd1  # v1
+              with:
+                  language: python
+                  sanitizer: address
+                  mode: code-change
+                  fuzz-seconds: 120
+                  output-sarif: false
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
