@@ -75,6 +75,7 @@ jobs:
                   vuln-type: os,library
                   severity: CRITICAL,HIGH
                   ignore-unfixed: true
+                  trivyignores: .trivyignore.yaml
                   exit-code: 1
 
             - name: "Fire the Pre-Commit Cannons 💥"
