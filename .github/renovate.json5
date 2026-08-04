@@ -54,6 +54,21 @@
             "depNameTemplate": "docker",
             "datasourceTemplate": "docker",
             "versioningTemplate": "docker"
+        },
+        {
+            "customType": "regex",
+            "managerFilePatterns": [
+                "/^docker/Dockerfile$/",
+                "/^example\\.maraudarr\\.env$/",
+                "/^\\.github/workflows/build-and-push\\.yml$/"
+            ],
+            "matchStrings": [
+                "DOCKER_COMPOSE_TAG[=:]\\s*(?<currentValue>[^@\\s]+)@(?<currentDigest>sha256:[a-f0-9]+)",
+                "DOCKER_COMPOSE_TAG=\"\\$\\{DOCKER_COMPOSE_TAG:-(?<currentValue>[^@\\s}]+)@(?<currentDigest>sha256:[a-f0-9]+)\\}\""
+            ],
+            "depNameTemplate": "docker/compose-bin",
+            "datasourceTemplate": "docker",
+            "versioningTemplate": "docker"
         }
     ],
 

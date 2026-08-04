@@ -20,6 +20,7 @@ services:
       args:                                                  # Configurable image build arguments
         ALPINE_TAG: ${ALPINE_TAG}                            # Base Alpine image version and digest
         DOCKER_CLI_TAG: ${DOCKER_CLI_TAG}                    # Docker CLI donor image version and digest
+        DOCKER_COMPOSE_TAG: ${DOCKER_COMPOSE_TAG}            # Compose donor image version and digest
         MARAUDARR_BIN_HOME: ${MARAUDARR_BIN_HOME}            # Application install directory
         MARAUDARR_UID: ${MARAUDARR_UID}                      # Default unprivileged runtime user ID
         MARAUDARR_GID: ${MARAUDARR_GID}                      # Default unprivileged runtime group ID
