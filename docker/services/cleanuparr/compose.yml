@@ -34,8 +34,12 @@ services:
     healthcheck:
       <<: *default-healthcheck-settings  # Pull in default healthcheck settings
       test:                              # Check Cleanuparr health endpoint
-        - CMD-SHELL
-        - curl -fsS "http://127.0.0.1:11011/health" >/dev/null || exit 1
+        - CMD
+        - curl
+        - -fsS
+        - -o
+        - /dev/null
+        - http://127.0.0.1:11011/health
 
     # Specify container service dependencies
     depends_on:

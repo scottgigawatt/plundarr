@@ -31,8 +31,12 @@ services:
     healthcheck:
       <<: *default-healthcheck-settings  # Pull in default healthcheck settings
       test:                              # Check Bazarr web server
-        - CMD-SHELL
-        - wget --no-verbose --tries=1 --spider "http://127.0.0.1:6767/" || exit 1
+        - CMD
+        - wget
+        - --no-verbose
+        - --tries=1
+        - --spider
+        - http://127.0.0.1:6767/
 
     # Specify container service dependencies
     depends_on:

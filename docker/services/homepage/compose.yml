@@ -104,5 +104,9 @@ services:
     healthcheck:
       <<: *default-healthcheck-settings  # Pull in default healthcheck settings
       test:                              # Check Homepage web server
-        - CMD-SHELL
-        - wget --no-verbose --tries=1 --spider "http://127.0.0.1:3000/" || exit 1
+        - CMD
+        - wget
+        - --no-verbose
+        - --tries=1
+        - --spider
+        - http://127.0.0.1:3000/

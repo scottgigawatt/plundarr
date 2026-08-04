@@ -277,6 +277,23 @@ class MaraudarrTests(unittest.TestCase):
                         f"Service '{service.id}' does not reuse healthcheck settings.",
                     )
 
+    def test_healthchecks_use_shell_only_when_required(self) -> None:
+        shell_healthchecks = set()
+
+        for service in self.catalog.services.values():
+            compose = self.catalog.source_path(service.compose).read_text()
+            if "healthcheck:" not in compose:
+                continue
+
+            with self.subTest(service=service.id):
+                self.assertNotIn("|| exit 1", compose)
+                if "\n        - CMD-SHELL\n" in compose:
+                    shell_healthchecks.add(service.id)
+                else:
+                    self.assertIn("\n        - CMD\n", compose)
+
+        self.assertEqual(shell_healthchecks, {"privateerr", "whisparr"})
+
     def test_plex_and_jellyfin_are_independent_media_server_choices(self) -> None:
         plan = self.catalog.resolve(
             "custom",
