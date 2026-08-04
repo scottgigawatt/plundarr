@@ -36,5 +36,9 @@ services:
     healthcheck:
       <<: *default-healthcheck-settings  # Pull in default healthcheck settings
       test:                              # Check the local Plex identity endpoint
-        - CMD-SHELL
-        - curl -fsS -o /dev/null "http://127.0.0.1:32400/identity"
+        - CMD
+        - curl
+        - -fsS
+        - -o
+        - /dev/null
+        - http://127.0.0.1:32400/identity

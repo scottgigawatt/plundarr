@@ -33,5 +33,9 @@ services:
     healthcheck:
       <<: *default-healthcheck-settings  # Pull in default healthcheck settings
       test:                              # Check Jellyfin's public system endpoint
-        - CMD-SHELL
-        - curl -fsS -o /dev/null "http://127.0.0.1:8096/System/Info/Public"
+        - CMD
+        - curl
+        - -fsS
+        - -o
+        - /dev/null
+        - http://127.0.0.1:8096/System/Info/Public

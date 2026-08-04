@@ -196,8 +196,12 @@ services:
     healthcheck:
       <<: *default-healthcheck-settings  # Pull in default healthcheck settings
       test:                              # Check Gluetun's internal health server
-        - CMD-SHELL
-        - wget -q -O /dev/null "http://127.0.0.1:9999"
+        - CMD
+        - wget
+        - -q
+        - -O
+        - /dev/null
+        - http://127.0.0.1:9999
 
     # Specify container service dependencies
     depends_on:
@@ -229,8 +233,12 @@ services:
     healthcheck:
       <<: *default-healthcheck-settings  # Pull in default healthcheck settings
       test:                              # Check FlareSolverr health endpoint
-        - CMD-SHELL
-        - curl -fsS -o /dev/null "http://127.0.0.1:8191/health"
+        - CMD
+        - curl
+        - -fsS
+        - -o
+        - /dev/null
+        - http://127.0.0.1:8191/health
 
   #
   # Define the 'prowlarr' service for managing indexers.
@@ -254,8 +262,12 @@ services:
     healthcheck:
       <<: *default-healthcheck-settings  # Pull in default healthcheck settings
       test:                              # Check Prowlarr ping endpoint
-        - CMD-SHELL
-        - wget --no-verbose --tries=1 --spider "http://127.0.0.1:9696/ping"
+        - CMD
+        - wget
+        - --no-verbose
+        - --tries=1
+        - --spider
+        - http://127.0.0.1:9696/ping
 
     # Specify container service dependencies
     depends_on:
@@ -281,8 +293,12 @@ services:
     healthcheck:
       <<: *default-healthcheck-settings  # Pull in default healthcheck settings
       test:                              # Check qBittorrent web server
-        - CMD-SHELL
-        - wget --no-verbose --tries=1 --spider "http://127.0.0.1:8080/"
+        - CMD
+        - wget
+        - --no-verbose
+        - --tries=1
+        - --spider
+        - http://127.0.0.1:8080/
 
     # Specify container service dependencies
     depends_on:
@@ -313,8 +329,12 @@ services:
     healthcheck:
       <<: *default-healthcheck-settings  # Pull in default healthcheck settings
       test:                              # Check Radarr ping endpoint
-        - CMD-SHELL
-        - wget --no-verbose --tries=1 --spider "http://127.0.0.1:7878/ping"
+        - CMD
+        - wget
+        - --no-verbose
+        - --tries=1
+        - --spider
+        - http://127.0.0.1:7878/ping
 
     # Specify container service dependencies
     depends_on:
@@ -345,8 +365,12 @@ services:
     healthcheck:
       <<: *default-healthcheck-settings  # Pull in default healthcheck settings
       test:                              # Check Sonarr ping endpoint
-        - CMD-SHELL
-        - wget --no-verbose --tries=1 --spider "http://127.0.0.1:8989/ping"
+        - CMD
+        - wget
+        - --no-verbose
+        - --tries=1
+        - --spider
+        - http://127.0.0.1:8989/ping
 
     # Specify container service dependencies
     depends_on:
@@ -377,8 +401,12 @@ services:
     healthcheck:
       <<: *default-healthcheck-settings  # Pull in default healthcheck settings
       test:                              # Check Bazarr web server
-        - CMD-SHELL
-        - wget --no-verbose --tries=1 --spider "http://127.0.0.1:6767/"
+        - CMD
+        - wget
+        - --no-verbose
+        - --tries=1
+        - --spider
+        - http://127.0.0.1:6767/
 
     # Specify container service dependencies
     depends_on:
@@ -415,8 +443,12 @@ services:
     healthcheck:
       <<: *default-healthcheck-settings  # Pull in default healthcheck settings
       test:                              # Check Seerr public settings endpoint
-        - CMD-SHELL
-        - wget --no-verbose --tries=1 --spider "http://127.0.0.1:5055/api/v1/settings/public"
+        - CMD
+        - wget
+        - --no-verbose
+        - --tries=1
+        - --spider
+        - http://127.0.0.1:5055/api/v1/settings/public
 
   #
   # Define the 'cleanuparr' service for Sonarr, Radarr, and qBittorrent file cleanup.
@@ -445,8 +477,12 @@ services:
     healthcheck:
       <<: *default-healthcheck-settings  # Pull in default healthcheck settings
       test:                              # Check Cleanuparr health endpoint
-        - CMD-SHELL
-        - curl -fsS -o /dev/null "http://127.0.0.1:11011/health"
+        - CMD
+        - curl
+        - -fsS
+        - -o
+        - /dev/null
+        - http://127.0.0.1:11011/health
 
   #
   # Define the 'speedtest-tracker' service for tracking internet speeds.
@@ -480,8 +516,12 @@ services:
     healthcheck:
       <<: *default-healthcheck-settings  # Pull in default healthcheck settings
       test:                              # Check Speedtest Tracker web server
-        - CMD-SHELL
-        - wget --no-verbose --tries=1 --spider "http://127.0.0.1:80/"
+        - CMD
+        - wget
+        - --no-verbose
+        - --tries=1
+        - --spider
+        - http://127.0.0.1:80/
 
   #
   # Define the 'duplicati' service for managing backups.
@@ -513,8 +553,12 @@ services:
     healthcheck:
       <<: *default-healthcheck-settings  # Pull in default healthcheck settings
       test:                              # Check Duplicati web server
-        - CMD-SHELL
-        - wget --no-verbose --tries=1 --spider "http://127.0.0.1:8200/"
+        - CMD
+        - wget
+        - --no-verbose
+        - --tries=1
+        - --spider
+        - http://127.0.0.1:8200/
 
   #
   # Define the 'homepage' service for a customizable application dashboard.
@@ -608,8 +652,12 @@ services:
     healthcheck:
       <<: *default-healthcheck-settings  # Pull in default healthcheck settings
       test:                              # Check Homepage web server
-        - CMD-SHELL
-        - wget --no-verbose --tries=1 --spider "http://127.0.0.1:3000/"
+        - CMD
+        - wget
+        - --no-verbose
+        - --tries=1
+        - --spider
+        - http://127.0.0.1:3000/
 
 #
 # Define the networks section.

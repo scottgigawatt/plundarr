@@ -29,8 +29,12 @@ services:
     healthcheck:
       <<: *default-healthcheck-settings  # Pull in default healthcheck settings
       test:                              # Check Prowlarr ping endpoint
-        - CMD-SHELL
-        - wget --no-verbose --tries=1 --spider "http://127.0.0.1:9696/ping"
+        - CMD
+        - wget
+        - --no-verbose
+        - --tries=1
+        - --spider
+        - http://127.0.0.1:9696/ping
 
     # Specify container service dependencies
     depends_on:

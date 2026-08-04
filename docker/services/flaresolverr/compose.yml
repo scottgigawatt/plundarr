@@ -32,5 +32,9 @@ services:
     healthcheck:
       <<: *default-healthcheck-settings  # Pull in default healthcheck settings
       test:                              # Check FlareSolverr health endpoint
-        - CMD-SHELL
-        - curl -fsS -o /dev/null "http://127.0.0.1:8191/health"
+        - CMD
+        - curl
+        - -fsS
+        - -o
+        - /dev/null
+        - http://127.0.0.1:8191/health
