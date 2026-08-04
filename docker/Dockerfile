@@ -8,8 +8,7 @@
 #
 
 #
-# Default Alpine, Docker CLI, and Compose image tags that build arguments can
-# override.
+# Default Alpine, Docker CLI, and Compose image tags that build arguments can override.
 #
 ARG ALPINE_TAG=3.24@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6eec434943f8b
 ARG DOCKER_CLI_TAG=29.6.2-cli-alpine3.24@sha256:be132a9f282288de4afaf63379dff75711fda0147c6b72a9df44e51841402144
