@@ -25,13 +25,7 @@ services:
     # Define container healthcheck to verify qBittorrent connectivity
     healthcheck:
       <<: *default-healthcheck-settings  # Pull in default healthcheck settings
-      test:                              # Check qBittorrent web server
-        - CMD
-        - wget
-        - --no-verbose
-        - --tries=1
-        - --spider
-        - http://127.0.0.1:8080/
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:8080/"]  # Check qBittorrent web server
 
     # Specify container service dependencies
     depends_on:

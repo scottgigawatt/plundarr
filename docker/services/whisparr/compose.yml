@@ -30,9 +30,7 @@ services:
     # Define container healthcheck to verify Whisparr connectivity
     healthcheck:
       <<: *default-healthcheck-settings  # Pull in default healthcheck settings
-      test:                              # Check Whisparr login page
-        - CMD-SHELL
-        - wget -qO- "http://127.0.0.1:6969/login" | grep -q "Whisparr"
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:6969/ping"]  # Check Whisparr ping endpoint
 
     # Specify container service dependencies
     depends_on:

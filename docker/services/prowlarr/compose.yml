@@ -28,13 +28,7 @@ services:
     # Define container healthcheck to verify Prowlarr connectivity
     healthcheck:
       <<: *default-healthcheck-settings  # Pull in default healthcheck settings
-      test:                              # Check Prowlarr ping endpoint
-        - CMD
-        - wget
-        - --no-verbose
-        - --tries=1
-        - --spider
-        - http://127.0.0.1:9696/ping
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:9696/ping"]  # Check Prowlarr ping endpoint
 
     # Specify container service dependencies
     depends_on:

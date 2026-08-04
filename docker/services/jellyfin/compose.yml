@@ -32,10 +32,4 @@ services:
     # Define container healthcheck to verify Jellyfin connectivity
     healthcheck:
       <<: *default-healthcheck-settings  # Pull in default healthcheck settings
-      test:                              # Check Jellyfin's public system endpoint
-        - CMD
-        - curl
-        - -fsS
-        - -o
-        - /dev/null
-        - http://127.0.0.1:8096/System/Info/Public
+      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://127.0.0.1:8096/System/Info/Public"]  # Check Jellyfin's public system endpoint

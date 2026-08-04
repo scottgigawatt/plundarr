@@ -34,10 +34,4 @@ services:
     # Define container healthcheck to verify Seerr connectivity
     healthcheck:
       <<: *default-healthcheck-settings  # Pull in default healthcheck settings
-      test:                              # Check Seerr public settings endpoint
-        - CMD
-        - wget
-        - --no-verbose
-        - --tries=1
-        - --spider
-        - http://127.0.0.1:5055/api/v1/settings/public
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5055/api/v1/settings/public"]  # Check Seerr public settings endpoint

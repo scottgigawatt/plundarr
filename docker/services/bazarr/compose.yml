@@ -30,13 +30,7 @@ services:
     # Define container healthcheck to verify Bazarr connectivity
     healthcheck:
       <<: *default-healthcheck-settings  # Pull in default healthcheck settings
-      test:                              # Check Bazarr web server
-        - CMD
-        - wget
-        - --no-verbose
-        - --tries=1
-        - --spider
-        - http://127.0.0.1:6767/
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:6767/"]  # Check Bazarr web server
 
     # Specify container service dependencies
     depends_on:

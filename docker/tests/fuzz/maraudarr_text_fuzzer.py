@@ -41,6 +41,9 @@ MAX_SOURCE_CHARACTERS = 65_536
 MAX_NAME_CHARACTERS = 128
 
 
+#
+# Parser contract helper shared by every extraction boundary.
+#
 def _exercise_template_parser(
     parser: Callable[..., str],
     *arguments: str,
@@ -57,6 +60,9 @@ def _exercise_template_parser(
         raise AssertionError("A successful template extraction lost its newline.")
 
 
+#
+# Coverage-guided target that exercises every raw-text helper.
+#
 def fuzz_one_input(data: bytes) -> None:
     """Pass one coverage-guided byte sequence through every text boundary."""
 
@@ -82,6 +88,9 @@ def fuzz_one_input(data: bytes) -> None:
         raise AssertionError("An environment section lost its trailing newline.")
 
 
+#
+# Atheris harness entry point.
+#
 def main() -> None:
     """Register the Maraudarr target and hand control to Atheris."""
 

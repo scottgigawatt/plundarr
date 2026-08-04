@@ -35,10 +35,4 @@ services:
     # Define container healthcheck to verify Plex connectivity
     healthcheck:
       <<: *default-healthcheck-settings  # Pull in default healthcheck settings
-      test:                              # Check the local Plex identity endpoint
-        - CMD
-        - curl
-        - -fsS
-        - -o
-        - /dev/null
-        - http://127.0.0.1:32400/identity
+      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://127.0.0.1:32400/identity"]  # Check the local Plex identity endpoint

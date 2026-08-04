@@ -195,13 +195,7 @@ services:
     # Define container healthcheck to verify VPN connectivity
     healthcheck:
       <<: *default-healthcheck-settings  # Pull in default healthcheck settings
-      test:                              # Check Gluetun's internal health server
-        - CMD
-        - wget
-        - -q
-        - -O
-        - /dev/null
-        - http://127.0.0.1:9999
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:9999"]  # Check Gluetun's internal health server
 
     # Specify container service dependencies
     depends_on:
@@ -232,13 +226,7 @@ services:
     # Define container healthcheck to verify FlareSolverr connectivity
     healthcheck:
       <<: *default-healthcheck-settings  # Pull in default healthcheck settings
-      test:                              # Check FlareSolverr health endpoint
-        - CMD
-        - curl
-        - -fsS
-        - -o
-        - /dev/null
-        - http://127.0.0.1:8191/health
+      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://127.0.0.1:8191/health"]  # Check FlareSolverr health endpoint
 
   #
   # Define the 'prowlarr' service for managing indexers.
@@ -261,13 +249,7 @@ services:
     # Define container healthcheck to verify Prowlarr connectivity
     healthcheck:
       <<: *default-healthcheck-settings  # Pull in default healthcheck settings
-      test:                              # Check Prowlarr ping endpoint
-        - CMD
-        - wget
-        - --no-verbose
-        - --tries=1
-        - --spider
-        - http://127.0.0.1:9696/ping
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:9696/ping"]  # Check Prowlarr ping endpoint
 
     # Specify container service dependencies
     depends_on:
@@ -292,13 +274,7 @@ services:
     # Define container healthcheck to verify qBittorrent connectivity
     healthcheck:
       <<: *default-healthcheck-settings  # Pull in default healthcheck settings
-      test:                              # Check qBittorrent web server
-        - CMD
-        - wget
-        - --no-verbose
-        - --tries=1
-        - --spider
-        - http://127.0.0.1:8080/
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:8080/"]  # Check qBittorrent web server
 
     # Specify container service dependencies
     depends_on:
@@ -328,13 +304,7 @@ services:
     # Define container healthcheck to verify Radarr connectivity
     healthcheck:
       <<: *default-healthcheck-settings  # Pull in default healthcheck settings
-      test:                              # Check Radarr ping endpoint
-        - CMD
-        - wget
-        - --no-verbose
-        - --tries=1
-        - --spider
-        - http://127.0.0.1:7878/ping
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:7878/ping"]  # Check Radarr ping endpoint
 
     # Specify container service dependencies
     depends_on:
@@ -364,13 +334,7 @@ services:
     # Define container healthcheck to verify Sonarr connectivity
     healthcheck:
       <<: *default-healthcheck-settings  # Pull in default healthcheck settings
-      test:                              # Check Sonarr ping endpoint
-        - CMD
-        - wget
-        - --no-verbose
-        - --tries=1
-        - --spider
-        - http://127.0.0.1:8989/ping
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:8989/ping"]  # Check Sonarr ping endpoint
 
     # Specify container service dependencies
     depends_on:
@@ -400,13 +364,7 @@ services:
     # Define container healthcheck to verify Bazarr connectivity
     healthcheck:
       <<: *default-healthcheck-settings  # Pull in default healthcheck settings
-      test:                              # Check Bazarr web server
-        - CMD
-        - wget
-        - --no-verbose
-        - --tries=1
-        - --spider
-        - http://127.0.0.1:6767/
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:6767/"]  # Check Bazarr web server
 
     # Specify container service dependencies
     depends_on:
@@ -442,13 +400,7 @@ services:
     # Define container healthcheck to verify Seerr connectivity
     healthcheck:
       <<: *default-healthcheck-settings  # Pull in default healthcheck settings
-      test:                              # Check Seerr public settings endpoint
-        - CMD
-        - wget
-        - --no-verbose
-        - --tries=1
-        - --spider
-        - http://127.0.0.1:5055/api/v1/settings/public
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5055/api/v1/settings/public"]  # Check Seerr public settings endpoint
 
   #
   # Define the 'cleanuparr' service for Sonarr, Radarr, and qBittorrent file cleanup.
@@ -476,13 +428,7 @@ services:
     # Define container healthcheck to verify Cleanuparr connectivity
     healthcheck:
       <<: *default-healthcheck-settings  # Pull in default healthcheck settings
-      test:                              # Check Cleanuparr health endpoint
-        - CMD
-        - curl
-        - -fsS
-        - -o
-        - /dev/null
-        - http://127.0.0.1:11011/health
+      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://127.0.0.1:11011/health"]  # Check Cleanuparr health endpoint
 
   #
   # Define the 'speedtest-tracker' service for tracking internet speeds.
@@ -515,13 +461,7 @@ services:
     # Define container healthcheck to verify Speedtest Tracker connectivity
     healthcheck:
       <<: *default-healthcheck-settings  # Pull in default healthcheck settings
-      test:                              # Check Speedtest Tracker web server
-        - CMD
-        - wget
-        - --no-verbose
-        - --tries=1
-        - --spider
-        - http://127.0.0.1:80/
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:80/"]  # Check Speedtest Tracker web server
 
   #
   # Define the 'duplicati' service for managing backups.
@@ -552,13 +492,7 @@ services:
     # Define container healthcheck to verify Duplicati connectivity
     healthcheck:
       <<: *default-healthcheck-settings  # Pull in default healthcheck settings
-      test:                              # Check Duplicati web server
-        - CMD
-        - wget
-        - --no-verbose
-        - --tries=1
-        - --spider
-        - http://127.0.0.1:8200/
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:8200/"]  # Check Duplicati web server
 
   #
   # Define the 'homepage' service for a customizable application dashboard.
@@ -651,13 +585,7 @@ services:
     # Define container healthcheck to verify Homepage connectivity
     healthcheck:
       <<: *default-healthcheck-settings  # Pull in default healthcheck settings
-      test:                              # Check Homepage web server
-        - CMD
-        - wget
-        - --no-verbose
-        - --tries=1
-        - --spider
-        - http://127.0.0.1:3000/
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3000/"]  # Check Homepage web server
 
 #
 # Define the networks section.
