@@ -15,19 +15,3 @@ vulnerabilities:
     statement: >-
       Maraudarr invokes only docker compose config without a Docker socket;
       the vulnerable Moby daemon authorization-plugin path is unreachable.
-
-  - id: GHSA-hrxh-6v49-42gf
-    paths:
-      - usr/local/libexec/docker/cli-plugins/docker-compose
-    expired_at: 2026-08-31
-    statement: >-
-      Maraudarr runs with networking disabled and invokes only docker compose
-      config; the vulnerable gRPC xDS and HTTP/2 paths are unreachable.
-
-  - id: CVE-2026-39822
-    paths:
-      - usr/local/libexec/docker/cli-plugins/docker-compose
-    expired_at: 2026-08-31
-    statement: >-
-      Maraudarr validates its project-owned generated Compose file in an
-      isolated staging directory; the vulnerable os.Root path is unreachable.

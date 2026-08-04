@@ -265,7 +265,7 @@ Privateerr image and does not vendor those scripts.
 
 | 📜 Shipboard Scroll                                  | ⚓ What It Helps Ye Do                                                     |
 | ---------------------------------------------------- | -------------------------------------------------------------------------- |
-| 🛠️ [Patch the Hull](docs/CONTRIBUTING.md)            | Bring fixes and bright ideas aboard without springing leaks below deck.         |
+| 🛠️ [Patch the Hull](docs/CONTRIBUTING.md)            | Bring fixes and bright ideas aboard without springing leaks below deck.    |
 | 🤝 [The Crewmate Compact](docs/CODE_OF_CONDUCT.md)   | Keep the deck welcoming, useful, and free of plank-walking nonsense.       |
 | 🔐 [Whisper to the Quartermaster](docs/SECURITY.md)  | Report dangerous leaks privately before the sharks catch their scent.      |
 
