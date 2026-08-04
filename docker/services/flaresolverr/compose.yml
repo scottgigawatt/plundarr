@@ -31,4 +31,6 @@ services:
     # Define container healthcheck to verify FlareSolverr connectivity
     healthcheck:
       <<: *default-healthcheck-settings  # Pull in default healthcheck settings
-      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://127.0.0.1:8191/health"]  # Check FlareSolverr health endpoint
+      test:                              # Check FlareSolverr health endpoint
+        - CMD-SHELL
+        - curl -fsS -o /dev/null "http://127.0.0.1:8191/health"

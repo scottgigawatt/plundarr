@@ -57,7 +57,9 @@ services:
     # Define container healthcheck to verify VPN connectivity
     healthcheck:
       <<: *default-healthcheck-settings  # Pull in default healthcheck settings
-      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:9999"]  # Check Gluetun's internal health server
+      test:                              # Check Gluetun's internal health server
+        - CMD-SHELL
+        - wget -q -O /dev/null "http://127.0.0.1:9999"
 
     # Specify container service dependencies
     depends_on:

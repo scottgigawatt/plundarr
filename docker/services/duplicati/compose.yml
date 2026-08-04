@@ -36,4 +36,6 @@ services:
     # Define container healthcheck to verify Duplicati connectivity
     healthcheck:
       <<: *default-healthcheck-settings  # Pull in default healthcheck settings
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:8200/"]  # Check Duplicati web server
+      test:                              # Check Duplicati web server
+        - CMD-SHELL
+        - wget --no-verbose --tries=1 --spider "http://127.0.0.1:8200/"

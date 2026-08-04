@@ -30,7 +30,9 @@ services:
     # Define container healthcheck to verify Radarr connectivity
     healthcheck:
       <<: *default-healthcheck-settings  # Pull in default healthcheck settings
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:7878/ping"]  # Check Radarr ping endpoint
+      test:                              # Check Radarr ping endpoint
+        - CMD-SHELL
+        - wget --no-verbose --tries=1 --spider "http://127.0.0.1:7878/ping"
 
     # Specify container service dependencies
     depends_on:

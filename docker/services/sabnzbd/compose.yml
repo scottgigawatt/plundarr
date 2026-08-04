@@ -25,7 +25,9 @@ services:
     # Define container healthcheck to verify SABnzbd connectivity
     healthcheck:
       <<: *default-healthcheck-settings  # Pull in default healthcheck settings
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:8085/"]  # Check SABnzbd web server
+      test:                              # Check SABnzbd web server
+        - CMD-SHELL
+        - wget --no-verbose --tries=1 --spider "http://127.0.0.1:8085/"
 
     # Specify container service dependencies
     depends_on:

@@ -319,10 +319,8 @@ class MaraudarrTests(unittest.TestCase):
                         f"Service '{service.id}' does not reuse healthcheck settings.",
                     )
 
-    def test_healthchecks_use_shell_only_when_required(self) -> None:
-        """Use compact exec probes unless shell expansion is required."""
-
-        shell_healthchecks = set()
+    def test_healthchecks_use_compact_shell_commands(self) -> None:
+        """Keep each readable healthcheck command in one shell string."""
 
         for service in self.catalog.services.values():
             compose = self.catalog.source_path(service.compose).read_text()
@@ -331,12 +329,9 @@ class MaraudarrTests(unittest.TestCase):
 
             with self.subTest(service=service.id):
                 self.assertNotIn("|| exit 1", compose)
-                if "\n        - CMD-SHELL\n" in compose:
-                    shell_healthchecks.add(service.id)
-                else:
-                    self.assertRegex(compose, r'(?m)^      test: \["CMD", ')
-
-        self.assertEqual(shell_healthchecks, {"privateerr"})
+                self.assertIn("\n        - CMD-SHELL\n", compose)
+                self.assertRegex(compose, r'(?m)^        - (?:curl|test|wget) ')
+                self.assertNotRegex(compose, r'(?m)^        - --')
 
     #
     # Media-server selection and generated filesystem behavior.
