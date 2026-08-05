@@ -15,7 +15,7 @@ mdurl==0.1.2 \
     --hash=sha256:84008a41e51615a49fc9966191ff91509e3c40b939176e643fd50a5c2196b8f8
 
 # Terminal prompt engine used by Questionary.
-prompt-toolkit==3.0.52 \
+prompt-toolkit==3.0.53 \
     --hash=sha256:9aac639a3bbd33284347de5ad8d68ecc044b91a762dc39b7c21095fcd6a19955
 
 # Syntax highlighting used by Rich.
@@ -38,3 +38,6 @@ setuptools==83.0.0 \
 # Terminal-width support used by prompt-toolkit.
 wcwidth==0.8.2 \
     --hash=sha256:d63947694a0539a1d51e01eda7caf800c291020e6cdd7e28ad7b14dd33ad4f85
+prompt_toolkit==3.0.53 \
+    --hash=sha256:01c0891d7f9237d5e339f7d3e42cdae80b7534abb1c7c0e3352efba6231492f2 \
+    --hash=sha256:9ec8a0ad96d5c56148b3f914aa79c1564c3fde5d2e6b876e7bc327e353cf8fa6
