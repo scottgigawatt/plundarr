@@ -3,27 +3,53 @@
 #
 # Licensed under the Apache License, Version 2.0.
 #
-# docker-compose.demo.yml: Isolate VPN bootstrapping during README recording.
+# docker-compose.demo.yml: Docker Compose override for recording Maraudarr's
+#                          README animation without real PIA credentials or a
+#                          live VPN connection.
 #
-# This override is only for the disposable terminal-demo checkout. It replaces
-# Privateerr and Gluetun with inert healthy processes so the recording never
-# needs real PIA credentials or creates a VPN connection.
+# This configuration replaces only the Privateerr and Gluetun runtime commands
+# inside the disposable recording checkout. Every selected application service
+# still starts from the complete Maraudarr-generated Compose chart.
+#
+# Services overridden:
+#   - privateerr:  Creates its health marker without contacting PIA.
+#   - gluetun:     Keeps the shared downloader network namespace available.
 #
 
+#
+# Define the services section.
+#
 services:
+  #
+  # Override the 'privateerr' service for credential-free demonstration startup.
+  #
   privateerr:
-    privileged: false
-    entrypoint: ["/bin/sh", "-c"]
-    command:
+    # Override Docker container security and process settings
+    privileged: false               # Drop production privileges during recording
+    entrypoint: ["/bin/sh", "-c"]   # Run the demo-only shell command
+    command:                        # Create the marker and keep the container alive
       - |
         mkdir -p /healthcheck
         touch "$${PRIVATEERR_HEALTHCHECK_MARKER}"
         exec sleep 3600
-    healthcheck:
-      test: ["CMD-SHELL", "test -f \"$${PRIVATEERR_HEALTHCHECK_MARKER}\""]
 
-  gluetun:
-    entrypoint: ["/bin/sh", "-c"]
-    command: ["exec sleep 3600"]
+    # Define container healthcheck to verify demo bootstrap completion
     healthcheck:
-      test: ["CMD", "true"]
+      test:  # Check the Privateerr health marker
+        - CMD-SHELL
+        - test -f "$${PRIVATEERR_HEALTHCHECK_MARKER}"
+
+  #
+  # Override the 'gluetun' service for credential-free demonstration startup.
+  #
+  gluetun:
+    # Override Docker container process settings
+    entrypoint: ["/bin/sh", "-c"]   # Run the demo-only shell command
+    command:                        # Keep the downloader network namespace alive
+      - exec sleep 3600
+
+    # Define container healthcheck to verify demo network readiness
+    healthcheck:
+      test:  # Report the inert network namespace as ready
+        - CMD
+        - "true"
