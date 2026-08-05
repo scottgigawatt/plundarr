@@ -10,7 +10,7 @@
 # Use the official Python builder expected by ClusterFuzzLite. The digest keeps
 # the fuzzing toolchain deterministic while Renovate tracks future updates.
 #
-FROM gcr.io/oss-fuzz-base/base-builder-python:v1@sha256:6a3e2f6d0cd402285756257ccec0de734638ce7a955f6099de9a6f83a19b63bd
+FROM gcr.io/oss-fuzz-base/base-builder-python:v1@sha256:6b2b3a7e4a2da50de47f94925cffbe34747e1aae4f33d7f07ba6c681dd648b23
 
 #
 # Keep the complete checkout together so Maraudarr's self-contained Docker
