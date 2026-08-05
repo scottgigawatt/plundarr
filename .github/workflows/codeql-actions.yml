@@ -50,12 +50,12 @@ jobs:
       # analysis results into GitHub code scanning.
       #
       - name: "Grab the Treasure Map 🗺️"
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           persist-credentials: false
 
       - name: "Wake the CodeQL Spyglass 🔭"
-        uses: github/codeql-action/init@7188fc363630916deb702c7fdcf4e481b751f97a  # v4
+        uses: github/codeql-action/init@5595ccaf912efad79be6eef63a5619ff05969be3  # v4
         with:
           languages: ${{ matrix.language }}
 
@@ -64,6 +64,6 @@ jobs:
       # category so Python and Actions results remain easy to distinguish.
       #
       - name: "Read Maraudarr's Scrolls 📜"
-        uses: github/codeql-action/analyze@7188fc363630916deb702c7fdcf4e481b751f97a  # v4
+        uses: github/codeql-action/analyze@5595ccaf912efad79be6eef63a5619ff05969be3  # v4
         with:
           category: "/language:${{ matrix.language }}"
