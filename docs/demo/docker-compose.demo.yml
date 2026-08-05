@@ -1,0 +1,29 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# docker-compose.demo.yml: Isolate VPN bootstrapping during README recording.
+#
+# This override is only for the disposable terminal-demo checkout. It replaces
+# Privateerr and Gluetun with inert healthy processes so the recording never
+# needs real PIA credentials or creates a VPN connection.
+#
+
+services:
+  privateerr:
+    privileged: false
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        mkdir -p /healthcheck
+        touch "$${PRIVATEERR_HEALTHCHECK_MARKER}"
+        exec sleep 3600
+    healthcheck:
+      test: ["CMD-SHELL", "test -f \"$${PRIVATEERR_HEALTHCHECK_MARKER}\""]
+
+  gluetun:
+    entrypoint: ["/bin/sh", "-c"]
+    command: ["exec sleep 3600"]
+    healthcheck:
+      test: ["CMD", "true"]

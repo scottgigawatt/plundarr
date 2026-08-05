@@ -59,6 +59,26 @@ service by service. Maraudarr keeps the handwritten comments, resolves required
 shipmates, writes Plundarr into the repository root, and asks Docker Compose to
 inspect the riggin' before anything leaves port.
 
+## Maraudarr in Motion 🎬
+
+Watch Maraudarr chart a Plundarr voyage, load Jellyfin aboard, generate the
+complete configuration, and raise the Compose fleet:
+
+<!-- markdownlint-disable MD033 -->
+<p align="center">
+  <img src="./docs/assets/maraudarr-demo.gif" width="800" alt="Maraudarr generates and starts a Plundarr Docker Compose stack" />
+</p>
+<!-- markdownlint-enable MD033 -->
+
+The animation follows the real `make configure`, `make up`, and `make ps`
+workflow. Curious captains can inspect or replay the
+[recording source](./docs/demo/record-maraudarr-demo.sh).
+
+> [!NOTE]
+> The disposable recording uses inert VPN bootstrap stand-ins, so it needs no
+> PIA credentials and opens no tunnel. A normal `make up` launches Privateerr
+> and Gluetun from the generated chart.
+
 ## Treasure Map 🗺️
 
 | Shipmate          | What It Be                                             | Yo Ho Ho and More Info                                               |
