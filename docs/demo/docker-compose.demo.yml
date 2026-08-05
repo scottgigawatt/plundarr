@@ -25,9 +25,9 @@ services:
   #
   privateerr:
     # Override Docker container security and process settings
-    privileged: false               # Drop production privileges during recording
-    entrypoint: ["/bin/sh", "-c"]   # Run the demo-only shell command
-    command:                        # Create the marker and keep the container alive
+    privileged: false              # Drop production privileges during recording
+    entrypoint: ["/bin/sh", "-c"]  # Run the demo-only shell command
+    command:                       # Create the marker and keep the container alive
       - |
         mkdir -p /healthcheck
         touch "$${PRIVATEERR_HEALTHCHECK_MARKER}"
@@ -44,8 +44,8 @@ services:
   #
   gluetun:
     # Override Docker container process settings
-    entrypoint: ["/bin/sh", "-c"]   # Run the demo-only shell command
-    command:                        # Keep the downloader network namespace alive
+    entrypoint: ["/bin/sh", "-c"]  # Run the demo-only shell command
+    command:                       # Keep the downloader network namespace alive
       - exec sleep 3600
 
     # Define container healthcheck to verify demo network readiness
