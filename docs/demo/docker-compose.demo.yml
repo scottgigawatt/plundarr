@@ -36,8 +36,8 @@ services:
     # Define container healthcheck to verify demo bootstrap completion
     healthcheck:
       test:  # Check the Privateerr health marker
-        - CMD-SHELL
-        - test -f "$${PRIVATEERR_HEALTHCHECK_MARKER}"
+        - CMD
+        - privateerr-healthcheck
 
   #
   # Override the 'gluetun' service for credential-free demonstration startup.

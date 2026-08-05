@@ -132,8 +132,8 @@ services:
     healthcheck:
       <<: *default-healthcheck-settings  # Pull in default healthcheck settings
       test:                              # Healthy when healthcheck marker file exists
-        - CMD-SHELL
-        - test -f "$${PRIVATEERR_HEALTHCHECK_MARKER}"
+        - CMD
+        - privateerr-healthcheck
 
   #
   # Define the 'gluetun' service to route traffic through a WireGuard VPN connection.
