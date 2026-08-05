@@ -8,10 +8,11 @@
 #
 
 #
-# Default Alpine and Docker CLI image tags that build arguments can override.
+# Default Alpine, Docker CLI, and Compose image tags that build arguments can override.
 #
 ARG ALPINE_TAG=3.24@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6eec434943f8b
 ARG DOCKER_CLI_TAG=29.6.2-cli-alpine3.24@sha256:be132a9f282288de4afaf63379dff75711fda0147c6b72a9df44e51841402144
+ARG DOCKER_COMPOSE_TAG=v5.4.0@sha256:b03e46987ca4ebb41ca31b765ad7ba957388003f1ef1255fd68333a7b838d632
 ARG MARAUDARR_BIN_HOME=/maraudarr
 
 #
@@ -19,6 +20,7 @@ ARG MARAUDARR_BIN_HOME=/maraudarr
 # their Go dependencies are not limited by Alpine's stable package versions.
 #
 FROM docker:${DOCKER_CLI_TAG} AS docker-cli
+FROM docker/compose-bin:${DOCKER_COMPOSE_TAG} AS docker-compose
 
 #
 # Build the isolated Python environment separately so package-management tools
@@ -110,10 +112,10 @@ LABEL org.opencontainers.image.title="Maraudarr" \
 RUN apk add --no-cache python3
 
 #
-# Copy the current Docker CLI and Compose plugin from Docker's official image.
+# Copy the current Docker CLI and Compose plugin from their official images.
 #
 COPY --from=docker-cli /usr/local/bin/docker /usr/local/bin/docker
-COPY --from=docker-cli /usr/local/libexec/docker/cli-plugins/docker-compose /usr/local/libexec/docker/cli-plugins/docker-compose
+COPY --from=docker-compose /docker-compose /usr/local/libexec/docker/cli-plugins/docker-compose
 
 #
 # Copy the installed application and exact, hash-verified dependencies from

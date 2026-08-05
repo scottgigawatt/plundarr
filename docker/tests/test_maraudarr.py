@@ -29,9 +29,16 @@ class MaraudarrTests(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
+        """Load the shared service catalog once for this test class."""
+
         cls.catalog = Catalog(Path(__file__).resolve().parents[1])
 
+    #
+    # Preset and dependency resolution behavior.
+    #
     def test_plundarr_preset_matches_the_documented_default(self) -> None:
+        """Keep the Plundarr preset service order stable and documented."""
+
         plan = self.catalog.resolve("plundarr")
 
         self.assertEqual(
@@ -54,6 +61,8 @@ class MaraudarrTests(unittest.TestCase):
         )
 
     def test_boudoirr_preset_reuses_the_shared_service_catalog(self) -> None:
+        """Build Boudoirr from shared services without Plundarr-only edges."""
+
         plan = self.catalog.resolve("boudoirr")
         compose = render_compose(self.catalog, plan)
 
@@ -75,12 +84,16 @@ class MaraudarrTests(unittest.TestCase):
         self.assertNotIn("depends_on:", extract_service(compose, "whisparr"))
 
     def test_dependencies_are_added_before_the_requested_service(self) -> None:
+        """Auto-add required services before their selected dependent."""
+
         plan = self.catalog.resolve("custom", selected={"qbittorrent"})
 
         self.assertEqual(plan.service_ids, ("privateerr", "gluetun", "qbittorrent"))
         self.assertEqual(set(plan.auto_added), {"privateerr", "gluetun"})
 
     def test_explicit_addition_wins_over_preset_removal(self) -> None:
+        """Honor an explicit service addition when remove also names it."""
+
         plan = self.catalog.resolve(
             "plundarr",
             add={"qbittorrent", "cleanuparr"},
@@ -91,10 +104,17 @@ class MaraudarrTests(unittest.TestCase):
         self.assertIn("cleanuparr", plan.service_ids)
 
     def test_empty_custom_stack_is_rejected(self) -> None:
+        """Reject custom voyages that would produce no services."""
+
         with self.assertRaisesRegex(CatalogError, "at least one service"):
             self.catalog.resolve("custom", selected=set())
 
+    #
+    # Generated Compose and environment rendering behavior.
+    #
     def test_compose_keeps_comments_variables_and_selected_services(self) -> None:
+        """Preserve source comments and variables for selected services."""
+
         plan = self.catalog.resolve(
             "plundarr",
             add={"apprise", "jellyfin", "sabnzbd", "sonarr-anime"},
@@ -112,6 +132,8 @@ class MaraudarrTests(unittest.TestCase):
         self.assertIn("HOMEPAGE_VAR_SONARR_ANIME_KEY", compose)
 
     def test_environment_sections_follow_service_selection(self) -> None:
+        """Render environment sections only for the resolved stack plan."""
+
         plan = self.catalog.resolve("plundarr", add={"apprise"}, remove={"qbittorrent"})
 
         with tempfile.TemporaryDirectory() as temporary_directory:
@@ -125,6 +147,8 @@ class MaraudarrTests(unittest.TestCase):
         self.assertLess(environment.index("SPEEDTEST_TRACKER_TAG"), environment.index("APPRISE_TAG"))
 
     def test_existing_environment_values_survive_a_rebuild(self) -> None:
+        """Preserve user-managed environment values across regeneration."""
+
         plan = self.catalog.resolve("plundarr")
 
         with tempfile.TemporaryDirectory() as temporary_directory:
@@ -153,6 +177,8 @@ class MaraudarrTests(unittest.TestCase):
         )
 
     def test_new_environment_receives_secure_application_secrets(self) -> None:
+        """Generate non-placeholder secrets for a new environment file."""
+
         plan = self.catalog.resolve("plundarr")
 
         with tempfile.TemporaryDirectory() as temporary_directory:
@@ -185,6 +211,8 @@ class MaraudarrTests(unittest.TestCase):
         self.assertNotIn("changeme", duplicati_password)
 
     def test_unselected_service_values_survive_preset_changes(self) -> None:
+        """Carry inactive service values through preset changes and back."""
+
         plundarr = self.catalog.resolve("plundarr")
         boudoirr = self.catalog.resolve("boudoirr")
         expected_value = 'DUPLICATI_TAG="preserve-this-tag"'
@@ -210,7 +238,12 @@ class MaraudarrTests(unittest.TestCase):
             self.assertIn(expected_value, restored_environment)
             self.assertEqual(restored_environment.count(expected_value), 1)
 
+    #
+    # Homepage card and variable selection behavior.
+    #
     def test_homepage_fragments_join_the_correct_service_groups(self) -> None:
+        """Place selected Homepage cards in their intended service groups."""
+
         plan = self.catalog.resolve(
             "plundarr",
             add={"jellyfin", "sonarr-anime"},
@@ -225,6 +258,8 @@ class MaraudarrTests(unittest.TestCase):
         self.assertNotIn("- Jellyfin:", downloads_group)
 
     def test_custom_homepage_omits_unselected_cards_and_variables(self) -> None:
+        """Exclude cards and variables for services outside a custom plan."""
+
         plan = self.catalog.resolve("custom", selected={"homepage"})
 
         compose = render_compose(self.catalog, plan)
@@ -244,7 +279,12 @@ class MaraudarrTests(unittest.TestCase):
         self.assertNotIn("- Plex:", homepage)
         self.assertTrue(homepage.endswith("[]\n"))
 
+    #
+    # Catalog source and generated style enforcement.
+    #
     def test_inline_comments_have_two_spaces_before_the_hash(self) -> None:
+        """Require two spaces before every generated inline comment."""
+
         compose = render_compose(
             self.catalog,
             self.catalog.resolve("custom", selected=set(self.catalog.services)),
@@ -261,6 +301,8 @@ class MaraudarrTests(unittest.TestCase):
             )
 
     def test_service_charts_reuse_shared_anchors(self) -> None:
+        """Require service charts to inherit shared container settings."""
+
         for service in self.catalog.services.values():
             compose = self.catalog.source_path(service.compose).read_text()
 
@@ -277,7 +319,31 @@ class MaraudarrTests(unittest.TestCase):
                         f"Service '{service.id}' does not reuse healthcheck settings.",
                     )
 
+    def test_healthchecks_use_shell_only_when_required(self) -> None:
+        """Execute probes directly unless shell expansion is required."""
+
+        shell_healthchecks = set()
+
+        for service in self.catalog.services.values():
+            compose = self.catalog.source_path(service.compose).read_text()
+            if "healthcheck:" not in compose:
+                continue
+
+            with self.subTest(service=service.id):
+                self.assertNotIn("|| exit 1", compose)
+                if "\n        - CMD-SHELL\n" in compose:
+                    shell_healthchecks.add(service.id)
+                else:
+                    self.assertIn("\n        - CMD\n", compose)
+
+        self.assertEqual(shell_healthchecks, {"privateerr"})
+
+    #
+    # Media-server selection and generated filesystem behavior.
+    #
     def test_plex_and_jellyfin_are_independent_media_server_choices(self) -> None:
+        """Allow Plex and Jellyfin to be selected independently or together."""
+
         plan = self.catalog.resolve(
             "custom",
             selected={"homepage", "jellyfin", "plex"},
@@ -293,6 +359,8 @@ class MaraudarrTests(unittest.TestCase):
         self.assertIn("- Jellyfin:", homepage)
 
     def test_write_stack_creates_only_selected_config_directories(self) -> None:
+        """Create configuration directories only for selected services."""
+
         plan = self.catalog.resolve(
             "custom",
             selected={"homepage", "jellyfin", "qbittorrent"},

@@ -18,7 +18,13 @@ from maraudarr.text import aligned_yaml_lines, extract_service
 class TextTests(unittest.TestCase):
     """Verify comment-preserving text operations."""
 
+    #
+    # Service-block extraction behavior.
+    #
     def test_extract_service_keeps_intro_and_excludes_neighbor(self) -> None:
+        """Extract one service with its comments but not its neighbor."""
+
+        # Model adjacent service blocks so the boundary behavior is explicit.
         source = """services:
   #
   # First service
@@ -39,7 +45,12 @@ class TextTests(unittest.TestCase):
         self.assertIn("first:latest  # First image", first)
         self.assertNotIn("Second service", first)
 
+    #
+    # Inline-comment alignment behavior.
+    #
     def test_grouped_comments_are_aligned(self) -> None:
+        """Align grouped inline comments after differently sized values."""
+
         rendered = aligned_yaml_lines(
             [("ONE: 1", "First"), ("A_LONGER_NAME: 2", "Second")],
             indent=2,

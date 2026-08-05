@@ -35,5 +35,9 @@ services:
     healthcheck:
       <<: *default-healthcheck-settings  # Pull in default healthcheck settings
       test:                              # Check Seerr public settings endpoint
-        - CMD-SHELL
-        - wget --no-verbose --tries=1 --spider "http://127.0.0.1:5055/api/v1/settings/public" || exit 1
+        - CMD
+        - wget
+        - --no-verbose
+        - --tries=1
+        - --spider
+        - http://127.0.0.1:5055/api/v1/settings/public
