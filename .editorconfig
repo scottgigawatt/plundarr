@@ -1,0 +1,38 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# .editorconfig: Keep repository text files and source code consistently
+#                formatted across supported editors.
+#
+
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+
+[*.{md,yml,yaml}]
+indent_size = 2
+
+[.github/workflows/*.{yml,yaml}]
+indent_size = 4
+
+[*.{json,json5,py,sh,toml}]
+indent_size = 4
+
+[.gitleaks.toml]
+indent_size = 2
+
+[.secrets.baseline]
+indent_size = 2
+
+[Dockerfile]
+indent_size = 4
+
+[Makefile]
+indent_style = tab
