@@ -45,6 +45,15 @@ x-arr-stack-container: &arr-stack-container  # YAML anchor for arr-stack contain
     <<: *arr-stack-environment               # Pull in the arr-stack environment information
 
 #
+# Containers running directly as the configured unprivileged host identity.
+#
+x-rootless-container: &rootless-container  # YAML anchor for rootless containers
+  <<: *default-container                   # Pull in the default container information
+  user: ${DEFAULT_PUID}:${DEFAULT_PGID}    # Run as the configured host user and primary group
+  group_add:                               # Add the shared media-management group
+    - ${DEFAULT_GROUP}                     # Allow access to group-owned host files
+
+#
 # Labels for containers that should not be updated unattended by Watchtower.
 #
 # Privateerr and Gluetun coordinate VPN configuration, tunnel startup, and

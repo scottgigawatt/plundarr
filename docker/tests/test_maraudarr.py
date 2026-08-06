@@ -130,6 +130,8 @@ class MaraudarrTests(unittest.TestCase):
         self.assertIn("${JELLYFIN_WEBUI_PORT}:8096", compose)
         self.assertIn("${SABNZBD_WEBUI_PORT}:8085", compose)
         self.assertIn("HOMEPAGE_VAR_SONARR_ANIME_KEY", compose)
+        self.assertEqual(2, compose.count("<<: *rootless-container"))
+        self.assertIn("http://127.0.0.1:8000/status", compose)
 
     def test_environment_sections_follow_service_selection(self) -> None:
         """Render environment sections only for the resolved stack plan."""
@@ -309,7 +311,7 @@ class MaraudarrTests(unittest.TestCase):
             with self.subTest(service=service.id):
                 self.assertRegex(
                     compose,
-                    r"<<: \*(?:arr-stack|default)-container",
+                    r"<<: \*(?:arr-stack|default|rootless)-container",
                     f"Service '{service.id}' does not reuse a container anchor.",
                 )
                 if "healthcheck:" in compose:
