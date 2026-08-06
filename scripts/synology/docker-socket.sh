@@ -20,6 +20,9 @@
 #   - Assigns the socket to root:docker with group read/write access.
 #
 
+#
+# Exit immediately when a command fails or an unset variable is referenced.
+#
 set -eu
 
 echo "Starting script to configure Docker socket permissions."
