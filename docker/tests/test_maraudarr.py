@@ -335,8 +335,10 @@ class MaraudarrTests(unittest.TestCase):
                     shell_healthchecks.add(service.id)
                 else:
                     self.assertIn("\n        - CMD\n", compose)
+                if service.id == "privateerr":
+                    self.assertIn("\n        - privateerr-healthcheck\n", compose)
 
-        self.assertEqual(shell_healthchecks, {"privateerr"})
+        self.assertEqual(shell_healthchecks, set())
 
     #
     # Media-server selection and generated filesystem behavior.
