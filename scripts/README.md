@@ -56,3 +56,15 @@ Run at boot with Synology Task Scheduler:
 ```sh
 sh /volume1/docker/plundarr/scripts/synology/entware.sh
 ```
+
+### `synology/docker-socket.sh`
+
+Waits for Container Manager to create `/var/run/docker.sock`, then grants the `docker` group read/write access so trusted group members can run Docker commands without `sudo`.
+
+Before using the script, create a `docker` group in **DSM → Control Panel → User & Group → Group** and add each trusted Docker user to it. Membership in this group grants root-level control of the NAS through Docker.
+
+Create a boot-up task in Synology Task Scheduler, select `root` as the task user, and use this command:
+
+```sh
+sh /volume1/docker/plundarr/scripts/synology/docker-socket.sh
+```
