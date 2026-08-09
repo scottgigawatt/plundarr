@@ -89,6 +89,7 @@ workflow. Curious captains can inspect or replay the
 | Prowlarr          | 🐾 Manages indexers for the automation fleet.          | [More info](https://github.com/Prowlarr/Prowlarr)                    |
 | qBittorrent       | 🌊 Downloads torrents through Gluetun.                 | [More info](https://github.com/qbittorrent/qBittorrent)              |
 | SABnzbd           | 📰 Downloads Usenet cargo through Gluetun.             | [More info](https://sabnzbd.org)                                     |
+| NZBGet            | ⚡ Runs a lean Usenet downloader through Gluetun.           | [More info](https://nzbget.com)                                      |
 | Radarr            | 🎥 Finds, tracks, and organizes movies.                | [More info](https://github.com/Radarr/Radarr)                        |
 | Sonarr            | 📺 Finds, tracks, and organizes TV shows.              | [More info](https://github.com/Sonarr/Sonarr)                        |
 | Sonarr Anime      | 🍜 Runs a second Sonarr for anime TV cargo.            | [More info](https://github.com/Sonarr/Sonarr)                        |
@@ -182,6 +183,7 @@ Useful commands for captains who already know the route:
 | 📦 `make services`                                                                         | Lists every service Maraudarr can add   |
 | ⚓ `make ship OPTIONAL_SERVICES=qbittorrent,cleanuparr,apprise,jellyfin`                   | Adds Apprise and Jellyfin               |
 | 🎬 `make ship OPTIONAL_SERVICES=qbittorrent,cleanuparr,plex`                               | Adds containerized Plex                 |
+| 📰 `make ship OPTIONAL_SERVICES=nzbget`                                                    | Charts an NZBGet Usenet voyage          |
 | 🔞 `make ship PRESET=boudoirr OPTIONAL_SERVICES=qbittorrent,sabnzbd,cleanuparr,watchtower` | Charts the Boudoirr voyage              |
 
 Switch the default Plundarr voyage from torrents to Usenet:
@@ -190,10 +192,23 @@ Switch the default Plundarr voyage from torrents to Usenet:
 make ship PRESET=plundarr OPTIONAL_SERVICES=sabnzbd
 ```
 
+Or choose NZBGet as the Usenet runner:
+
+```bash
+make ship PRESET=plundarr OPTIONAL_SERVICES=nzbget
+```
+
+Both Usenet clients can sail together when ye want separate queues:
+
+```bash
+make ship PRESET=plundarr OPTIONAL_SERVICES=sabnzbd,nzbget
+```
+
 > [!NOTE]
 > 🧰 Rebuilds preserve existing values by variable name. Fresh voyages receive
-> strong Speedtest Tracker and Duplicati secrets, while values for temporarily
-> unselected services wait safely in a marked footer until that cargo returns.
+> strong Speedtest Tracker, Duplicati, and NZBGet secrets, while values for
+> temporarily unselected services wait safely in a marked footer until that
+> cargo returns.
 
 > [!NOTE]
 > 🌊 Only selected download clients share Gluetun's network namespace. Prowlarr,

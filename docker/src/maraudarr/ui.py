@@ -249,6 +249,7 @@ class UI:
                 "bazarr",
                 "duplicati",
                 "jellyfin",
+                "nzbget",
                 "plex",
                 "qbittorrent",
                 "radarr",

@@ -83,6 +83,8 @@ def _insert_gluetun_additions(block: str, selected: set[str]) -> str:
         )
     if "sabnzbd" in selected:
         port_entries.append(("- ${SABNZBD_WEBUI_PORT}:8085", "SABnzbd web UI port"))
+    if "nzbget" in selected:
+        port_entries.append(("- ${NZBGET_WEBUI_PORT}:6789", "NZBGet web UI port"))
 
     if environment_entries:
         anchor = (
@@ -129,6 +131,7 @@ def _prepare_service(
             "Homepage Prowlarr click target and widget": "prowlarr" in selected,
             "Homepage qBittorrent click target and widget": "qbittorrent" in selected,
             "Homepage SABnzbd click target and widget": "sabnzbd" in selected,
+            "Homepage NZBGet click target and widget": "nzbget" in selected,
             "Homepage Speedtest Tracker click target and widget": (
                 "speedtest-tracker" in selected
             ),
@@ -205,6 +208,7 @@ def _filter_homepage_env(
             "qbittorrent" in selected
         ),
         "Homepage SABnzbd click-target and widget variables": "sabnzbd" in selected,
+        "Homepage NZBGet click-target and widget variables": "nzbget" in selected,
         "Homepage Speedtest Tracker click-target and widget variables": (
             "speedtest-tracker" in selected
         ),
@@ -291,6 +295,7 @@ def _generate_first_run_secrets(rendered: str, existing: dict[str, str]) -> str:
         ),
         "DUPLICATI_SETTINGS_ENCRYPTION_KEY": secrets.token_urlsafe(32),
         "DUPLICATI_WEBSERVICE_PASSWORD": secrets.token_urlsafe(18),
+        "NZBGET_PASS": secrets.token_urlsafe(18),
     }
     for key, value in generated.items():
         if key in existing:
@@ -415,6 +420,7 @@ def render_homepage_services(catalog: Catalog, plan: StackPlan) -> str:
     for service_id, label in (
         ("qbittorrent", "qBittorrent"),
         ("sabnzbd", "SABnzbd"),
+        ("nzbget", "NZBGet"),
     ):
         if service_id in selected:
             fragment = homepage_root / "fragments" / f"{service_id}.yaml"
