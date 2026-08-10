@@ -19,13 +19,13 @@ services:
 
     # Define the container environment
     environment:
-      <<: *arr-stack-environment      # Pull in the arr-stack environment
-      NZBGET_USER: ${NZBGET_USER}     # Web UI and RPC control username
-      NZBGET_PASS: ${NZBGET_PASS}     # Web UI and RPC control password
+      <<: *arr-stack-environment   # Pull in the arr-stack environment
+      NZBGET_USER: ${NZBGET_USER}  # Web UI and RPC control username
+      NZBGET_PASS: ${NZBGET_PASS}  # Web UI and RPC control password
 
     # Mount host directories into the container
     volumes:
-      - ${NZBGET_CONFIG_PATH}:/config:rw                   # Configuration files
+      - ${NZBGET_CONFIG_PATH}:/config:rw                    # Configuration files
       - ${HOST_USENET_DOWNLOADS_PATH}:/downloads/usenet:rw  # Usenet downloads only
 
     # Define container healthcheck to verify NZBGet connectivity
