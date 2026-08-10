@@ -1,0 +1,136 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# mkdocs.yml: Plundarr developer site, Maraudarr guides, and generated Python
+#             API reference configuration.
+#
+
+# Use the Material schema for editor validation and completion.
+# yaml-language-server: $schema=https://squidfunk.github.io/mkdocs-material/schema.json
+
+site_name: Plundarr Developer Documentation
+site_description: Architecture, contributor guides, and Python API reference for Plundarr and Maraudarr.
+site_url: https://scottgigawatt.github.io/plundarr/
+copyright: Copyright &copy; 2025-2026 Scott Gigawatt
+
+repo_name: scottgigawatt/plundarr
+repo_url: https://github.com/scottgigawatt/plundarr
+edit_uri: edit/main/docs/
+
+nav:
+  - Chart Room: index.md
+  - Maraudarr:
+      - Developer Overview: development/maraudarr/index.md
+      - Architecture: development/maraudarr/architecture.md
+      - Add a Service: development/maraudarr/adding-a-service.md
+      - Documentation Style: development/maraudarr/documentation.md
+      - Testing: development/maraudarr/testing.md
+  - Python Reference:
+      - Reference Map: development/maraudarr/reference/index.md
+      - Catalog: development/maraudarr/reference/catalog.md
+      - Command Line: development/maraudarr/reference/cli.md
+      - Models: development/maraudarr/reference/models.md
+      - Rendering: development/maraudarr/reference/render.md
+      - Text Helpers: development/maraudarr/reference/text.md
+      - Terminal UI: development/maraudarr/reference/ui.md
+  - Project Guides:
+      - Synology Setup: SETUP.md
+      - Contributing: CONTRIBUTING.md
+      - Security: SECURITY.md
+      - Code of Conduct: CODE_OF_CONDUCT.md
+      - Registry README: DOCKERHUB_README.md
+
+theme:
+  name: material
+  language: en
+  font: false
+  icon:
+    repo: fontawesome/brands/github
+    edit: material/pencil
+    view: material/eye
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: amber
+      toggle:
+        icon: material/weather-night
+        name: Dim the lanterns
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: amber
+      toggle:
+        icon: material/white-balance-sunny
+        name: Raise the sun
+  features:
+    - content.action.edit
+    - content.action.view
+    - content.code.copy
+    - content.code.select
+    - navigation.footer
+    - navigation.indexes
+    - navigation.path
+    - navigation.sections
+    - navigation.tabs
+    - navigation.top
+    - search.highlight
+    - search.share
+    - search.suggest
+    - toc.follow
+
+plugins:
+  - search:
+      lang: en
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          paths:
+            - docker/src
+          options:
+            docstring_style: google
+            filters:
+              - "!^_"
+            heading_level: 2
+            inherited_members: false
+            members_order: source
+            merge_init_into_class: true
+            separate_signature: true
+            show_bases: true
+            show_if_no_docstring: false
+            show_root_full_path: false
+            show_root_heading: true
+            show_signature_annotations: true
+            show_source: true
+            show_symbol_type_heading: true
+            show_symbol_type_toc: true
+            signature_crossrefs: true
+
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+      title: On this chart
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true

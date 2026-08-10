@@ -22,8 +22,22 @@ class TemplateError(ValueError):
 
 
 def extract_service(source: str, service_name: str) -> str:
-    """Extract one service and its leading comments without parsing YAML."""
+    """Extract one Compose service with its leading project comments.
 
+    Args:
+        source: Complete Compose source containing a top-level services section.
+        service_name: Exact service key to extract.
+
+    Returns:
+        The selected service block with one trailing newline.
+
+    Raises:
+        TemplateError: If the services section or requested service is absent.
+
+    Note:
+        This intentionally avoids YAML parsing so operator-facing comments and
+        unresolved Compose variables survive generation verbatim.
+    """
     lines = source.splitlines(keepends=True)
     try:
         services_index = next(
@@ -32,6 +46,8 @@ def extract_service(source: str, service_name: str) -> str:
     except StopIteration as error:
         raise TemplateError("Compose source does not contain a services section.") from error
 
+    # Service declarations are the only two-space keys in the owned services
+    # section. Stop at the next top-level key instead of scanning unrelated YAML.
     declarations: list[tuple[str, int]] = []
     for index in range(services_index + 1, len(lines)):
         match = SERVICE_PATTERN.match(lines[index].rstrip("\n"))
@@ -46,6 +62,8 @@ def extract_service(source: str, service_name: str) -> str:
 
     position = names.index(service_name)
     declaration_index = declarations[position][1]
+    # Walk backward across only blank and service-indented comment lines so the
+    # selected service retains its purpose banner without stealing its neighbor.
     start = declaration_index
     while start > services_index + 1:
         previous = lines[start - 1]
@@ -74,8 +92,17 @@ def extract_service(source: str, service_name: str) -> str:
 
 
 def extract_foundation(source: str) -> str:
-    """Extract anchors and the opening services key from the base Compose file."""
+    """Extract shared anchors and the opening services key.
 
+    Args:
+        source: Complete project-owned base Compose template.
+
+    Returns:
+        Foundation text ending immediately after ``services:``.
+
+    Raises:
+        TemplateError: If either required structural marker is absent.
+    """
     marker = "#\n# Setup default properties for all or most containers.\n#\n"
     start = source.find(marker)
     if start < 0:
@@ -89,8 +116,17 @@ def extract_foundation(source: str) -> str:
 
 
 def extract_footer(source: str) -> str:
-    """Extract the networks section from the base Compose file."""
+    """Extract the final networks section from the base Compose template.
 
+    Args:
+        source: Complete project-owned base Compose template.
+
+    Returns:
+        Footer text beginning at the networks purpose comment.
+
+    Raises:
+        TemplateError: If the networks marker is absent.
+    """
     marker = "#\n# Define the networks section.\n#\nnetworks:\n"
     start = source.find(marker)
     if start < 0:
@@ -99,8 +135,17 @@ def extract_footer(source: str) -> str:
 
 
 def extract_env_preamble(source: str) -> str:
-    """Return the copyright and file-description block from example.env."""
+    """Extract the copyright and description preamble from an environment file.
 
+    Args:
+        source: Complete project-owned environment source.
+
+    Returns:
+        Preamble text ending before the first setting group.
+
+    Raises:
+        TemplateError: If the first setting marker is absent.
+    """
     first_setting = "#\n# Name of the project which adds namespace for all services and volumes.\n#\n"
     end = source.find(first_setting)
     if end < 0:
@@ -109,12 +154,21 @@ def extract_env_preamble(source: str) -> str:
 
 
 def extract_env_sections(source: str) -> dict[str, str]:
-    """Split framed environment sections while retaining comments verbatim."""
+    """Split framed environment sections while retaining comments verbatim.
 
+    Args:
+        source: Complete project-owned environment source.
+
+    Returns:
+        Ordered mapping of section titles to newline-terminated source blocks.
+        Copyright and file-description frames are excluded.
+    """
     matches = list(ENV_HEADER_PATTERN.finditer(source))
     sections: dict[str, str] = {}
     for position, match in enumerate(matches):
         title = match.group("title")
+        # Header frames share the same visual syntax as setting groups but are
+        # file metadata, not selectable environment content.
         if title.startswith(("Copyright ", "Licensed under ", ".env file:")):
             continue
         end = matches[position + 1].start() if position + 1 < len(matches) else len(source)
@@ -123,8 +177,15 @@ def extract_env_sections(source: str) -> dict[str, str]:
 
 
 def strip_yaml_key(block: str, key: str) -> str:
-    """Remove a four-space service key and its nested content."""
+    """Remove one service-level YAML key and its nested content.
 
+    Args:
+        block: Extracted Compose service block.
+        key: Exact four-space key name to remove.
+
+    Returns:
+        The normalized block, unchanged when the key is absent.
+    """
     lines = block.splitlines(keepends=True)
     start = None
     end = len(lines)
@@ -136,6 +197,8 @@ def strip_yaml_key(block: str, key: str) -> str:
     if start is None:
         return block
     key_start = start
+    # Include the key's immediately preceding comment banner and blank line so
+    # conditional removal does not leave misleading orphaned documentation.
     while start > 0 and lines[start - 1].startswith("    #"):
         start -= 1
     while start > 0 and lines[start - 1].strip() == "":
@@ -149,8 +212,15 @@ def strip_yaml_key(block: str, key: str) -> str:
 
 
 def remove_comment_group(block: str, heading: str) -> str:
-    """Remove one Homepage environment group beginning at a comment heading."""
+    """Remove one Homepage environment group identified by its heading.
 
+    Args:
+        block: Homepage Compose service block.
+        heading: Exact project-owned comment text introducing the group.
+
+    Returns:
+        The normalized block, unchanged when the heading is absent.
+    """
     marker = f"      # {heading}\n"
     start = block.find(marker)
     if start < 0:
@@ -164,8 +234,15 @@ def remove_comment_group(block: str, heading: str) -> str:
 
 
 def aligned_yaml_lines(entries: list[tuple[str, str]], indent: int) -> str:
-    """Format logically grouped YAML lines with aligned inline comments."""
+    """Format a logical YAML group with aligned inline comments.
 
+    Args:
+        entries: Ordered ``(code, comment)`` pairs without indentation.
+        indent: Number of leading spaces applied to every output line.
+
+    Returns:
+        Newline-separated YAML lines, or an empty string for no entries.
+    """
     if not entries:
         return ""
     prefix = " " * indent

@@ -13,3 +13,8 @@ rendering, config seeding, and the terminal interface.
 | `cli.py` | Public command parsing and orchestration |
 
 Run the package tests from the repository root with `make test-maraudarr`.
+
+The [Maraudarr developer guide](../../../docs/development/maraudarr/index.md)
+explains the complete generation flow. Public Python interfaces are rendered
+from their source docstrings in the
+[generated API reference](../../../docs/development/maraudarr/reference/index.md).

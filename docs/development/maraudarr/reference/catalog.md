@@ -1,0 +1,3 @@
+# Catalog API
+
+::: maraudarr.catalog

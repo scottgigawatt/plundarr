@@ -17,3 +17,6 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 .ruff_cache/
+
+# Generated MkDocs developer site.
+site/

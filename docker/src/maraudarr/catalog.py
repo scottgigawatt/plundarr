@@ -22,8 +22,12 @@ class CatalogError(ValueError):
 
 
 def default_catalog_root() -> Path:
-    """Locate Maraudarr assets in either the image or source checkout."""
+    """Locate Maraudarr assets in either the image or source checkout.
 
+    Returns:
+        The resolved ``MARAUDARR_CATALOG_ROOT`` override when configured;
+        otherwise, the package's owning ``docker`` directory.
+    """
     configured_root = os.environ.get("MARAUDARR_CATALOG_ROOT")
     if configured_root:
         return Path(configured_root).resolve()
@@ -32,9 +36,27 @@ def default_catalog_root() -> Path:
 
 
 class Catalog:
-    """Provide validated service metadata, presets, and source paths."""
+    """Provide validated service metadata, presets, and owned source paths.
+
+    Attributes:
+        root: Resolved directory containing catalog, template, and service data.
+        services: Service metadata keyed by stable catalog identifier.
+        presets: Preset metadata keyed by stable preset identifier.
+    """
 
     def __init__(self, root: Path | None = None) -> None:
+        """Load and validate one Maraudarr catalog tree.
+
+        Args:
+            root: Optional catalog root. The environment-aware default is used
+                when this value is absent.
+
+        Raises:
+            CatalogError: If files, dependencies, or preset references are
+                invalid.
+            OSError: If the catalog cannot be read from disk.
+            tomllib.TOMLDecodeError: If ``catalog.toml`` is malformed.
+        """
         self.root = (root or default_catalog_root()).resolve()
         catalog_path = self.root / "catalog" / "catalog.toml"
 
@@ -53,8 +75,7 @@ class Catalog:
 
     @staticmethod
     def _load_service(service_id: str, values: dict[str, object]) -> Service:
-        """Convert one TOML service table into a typed model."""
-
+        """Normalize one trusted TOML service table into a typed model."""
         service_name = str(values.get("service", service_id))
         base_path = f"services/{service_id}"
         return Service(
@@ -77,8 +98,7 @@ class Catalog:
 
     @staticmethod
     def _load_preset(preset_id: str, values: dict[str, object]) -> Preset:
-        """Convert one TOML preset table into a typed model."""
-
+        """Normalize one trusted TOML preset table into a typed model."""
         return Preset(
             id=preset_id,
             title=str(values["title"]),
@@ -89,8 +109,7 @@ class Catalog:
         )
 
     def _validate(self) -> None:
-        """Reject missing files and unknown dependency or preset references."""
-
+        """Reject missing sources and cross-references before resolution."""
         for service in self.services.values():
             for relative_path in (service.compose, service.environment):
                 if not self.source_path(relative_path).is_file():
@@ -113,8 +132,18 @@ class Catalog:
                 )
 
     def preset(self, preset_id: str) -> Preset:
-        """Return one preset or raise an error listing valid choices."""
+        """Return a named preset.
 
+        Args:
+            preset_id: Stable catalog identifier for the requested preset.
+
+        Returns:
+            The matching immutable preset.
+
+        Raises:
+            CatalogError: If the identifier is unknown. The message includes
+                every available preset identifier.
+        """
         try:
             return self.presets[preset_id]
         except KeyError as error:
@@ -130,8 +159,23 @@ class Catalog:
         remove: set[str] | None = None,
         selected: set[str] | None = None,
     ) -> StackPlan:
-        """Resolve dependencies and return a deterministically ordered plan."""
+        """Resolve one preset and service selection into a generation plan.
 
+        Args:
+            preset_id: Preset supplying stack identity and core services.
+            add: Service IDs explicitly added after the starting selection.
+            remove: Optional service IDs removed before additions are applied.
+            selected: Complete starting selection for interactive or custom
+                flows. Preset defaults are used when this value is absent.
+
+        Returns:
+            An immutable plan containing recursively resolved dependencies in
+            deterministic catalog order.
+
+        Raises:
+            CatalogError: If the preset or a requested service is unknown, or
+                if a custom selection would produce an empty stack.
+        """
         preset = self.preset(preset_id)
         requested = set(preset.services if selected is None else selected)
         requested.difference_update(remove or set())
@@ -145,6 +189,8 @@ class Catalog:
         if not requested:
             raise CatalogError("A custom stack must contain at least one service.")
 
+        # Record the user-visible selection before recursively adding required
+        # services so the UI can explain which dependencies joined the fleet.
         explicitly_requested = set(requested)
         pending = list(requested)
         while pending:
@@ -167,14 +213,32 @@ class Catalog:
         )
 
     def source_path(self, relative_path: str) -> Path:
-        """Resolve one path within Maraudarr's owned catalog root."""
+        """Resolve a path that must remain inside the catalog root.
 
+        Args:
+            relative_path: Catalog-root-relative source path.
+
+        Returns:
+            The normalized absolute source path.
+
+        Raises:
+            CatalogError: If normalization would escape the owned root.
+        """
         source_path = (self.root / relative_path).resolve()
         if self.root not in source_path.parents and source_path != self.root:
             raise CatalogError(f"Source path escapes Maraudarr root: {relative_path}.")
         return source_path
 
     def config_path(self, service: Service) -> Path:
-        """Return the optional config seed directory for one service."""
+        """Return the optional config seed directory for one service.
 
+        Args:
+            service: Service whose project-owned config seeds are requested.
+
+        Returns:
+            The normalized path beneath ``services/<id>/config``.
+
+        Raises:
+            CatalogError: If the derived source path escapes the catalog root.
+        """
         return self.source_path(f"services/{service.id}/config")

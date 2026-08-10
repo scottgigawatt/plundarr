@@ -20,6 +20,8 @@ CHECK_RENDERED=check-rendered
 BUILD=build
 BUILD_MARAUDARR=build-maraudarr
 BUILD_MULTIARCH=build-multiarch
+DOCS=docs
+DOCS_SERVE=docs-serve
 ENSURE_MARAUDARR_IMAGE=ensure-maraudarr-image
 UPDATE_MARAUDARR=update-maraudarr
 RESET_CONFIG=reset-config
@@ -61,6 +63,8 @@ TARGETS= \
 	$(BUILD) \
 	$(BUILD_MARAUDARR) \
 	$(BUILD_MULTIARCH) \
+	$(DOCS) \
+	$(DOCS_SERVE) \
 	$(ENSURE_MARAUDARR_IMAGE) \
 	$(UPDATE_MARAUDARR) \
 	$(RESET_CONFIG) \
@@ -149,6 +153,13 @@ MARAUDARR_MULTIARCH_IMAGE ?= maraudarr:multiarch-local
 MARAUDARR_TEST_OUTPUT     ?= /tmp/maraudarr-matrix
 CONFIG_PATH               ?= config
 CONFIG_BACKUP_PATH        ?= backups
+
+#
+# Developer documentation settings.
+#
+MKDOCS             ?= mkdocs
+DOCS_SITE_PATH     ?= site
+DOCS_SERVE_ADDRESS ?= 127.0.0.1:8000
 
 #
 # Optional service selection used by Maraudarr and runtime tests.
@@ -595,6 +606,32 @@ $(TEST_MARAUDARR): $(BUILD_DEPENDS) $(TEST_MARAUDARR_UNIT)
 		test/test-maraudarr-matrix.sh
 
 #
+# $(DOCS): Builds the strict Plundarr developer documentation site.
+#
+# Dependencies:
+#   requirements-docs.txt - Install the pinned MkDocs toolchain first.
+#
+$(DOCS):
+	@command -v $(MKDOCS) >/dev/null 2>&1 || { \
+		echo "MkDocs be missin'. Install requirements-docs.txt first. 📚"; \
+		exit 1; \
+	}
+	$(MKDOCS) build --strict --site-dir "$(DOCS_SITE_PATH)"
+
+#
+# $(DOCS_SERVE): Starts the local developer documentation preview server.
+#
+# Dependencies:
+#   requirements-docs.txt - Install the pinned MkDocs toolchain first.
+#
+$(DOCS_SERVE):
+	@command -v $(MKDOCS) >/dev/null 2>&1 || { \
+		echo "MkDocs be missin'. Install requirements-docs.txt first. 📚"; \
+		exit 1; \
+	}
+	$(MKDOCS) serve --dev-addr "$(DOCS_SERVE_ADDRESS)"
+
+#
 # $(PRESETS): Lists presets and their exact default services.
 #
 # Dependencies:
@@ -739,6 +776,8 @@ $(HELP):
 	$(call help_line,$(BUILD),Builds the local Maraudarr image.)
 	$(call help_line,$(BUILD_MARAUDARR),Builds Maraudarr from the docker context.)
 	$(call help_line,$(BUILD_MULTIARCH),Checks every published image architecture.)
+	$(call help_line,$(DOCS),Builds the strict developer documentation site.)
+	$(call help_line,$(DOCS_SERVE),Previews developer documentation locally.)
 	$(call help_line,$(UPDATE_MARAUDARR),Refreshes the published Maraudarr image.)
 	$(call help_line,$(DOWN),Stops and removes the service stack.)
 	$(call help_line,$(CLEAN),Stops the stack and restores example config files.)

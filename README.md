@@ -266,6 +266,8 @@ make test-stack
 | 🐍 `make test-maraudarr-unit`   | Runs Maraudarr's Python unit tests                        |
 | 🧪 `make test-maraudarr`        | Tests presets and generated Compose combinations         |
 | ⚒️ `make build-maraudarr`       | Builds the Maraudarr image locally from this repository  |
+| 📚 `make docs`                  | Builds the strict developer documentation site           |
+| 🔭 `make docs-serve`            | Previews developer documentation on localhost            |
 
 Need the whole command chart? Run `make help`.
 
@@ -273,6 +275,7 @@ Need the whole command chart? Run `make help`.
 
 | Scroll                                              | When Ye Need It                                  |
 | --------------------------------------------------- | ------------------------------------------------ |
+| 📚 [Developer Chart Room](https://scottgigawatt.github.io/plundarr/) | Architecture and generated Python reference      |
 | ⚒️ [Inside Maraudarr](docker/README.md)             | Image commands, security, tags, and architecture |
 | 🖥️ [Synology Setup](docs/SETUP.md)                  | Container Manager and host-path preparation      |
 | 🧪 [Testing Hold](test/README.md)                   | VPN, end-to-end, and stack validation            |

@@ -1,0 +1,3 @@
+# Rendering API
+
+::: maraudarr.render
