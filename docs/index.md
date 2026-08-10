@@ -7,14 +7,14 @@ existing user configuration.
 
 ## Choose Yer Route 🧭
 
-| Destination | Best for |
-|:--|:--|
-| [Maraudarr overview](development/maraudarr/index.md) | Understanding responsibilities and source layout |
-| [Architecture](development/maraudarr/architecture.md) | Following data from CLI input to generated files |
-| [Add a service](development/maraudarr/adding-a-service.md) | Extending the selectable service catalog safely |
+| Destination                                                   | Best for                                                  |
+| :------------------------------------------------------------ | :-------------------------------------------------------- |
+| [Maraudarr overview](development/maraudarr/index.md)          | Understanding responsibilities and source layout          |
+| [Architecture](development/maraudarr/architecture.md)         | Following data from CLI input to generated files          |
+| [Add a service](development/maraudarr/adding-a-service.md)    | Extending the selectable service catalog safely           |
 | [Documentation style](development/maraudarr/documentation.md) | Writing useful public docstrings and private-helper notes |
-| [Testing](development/maraudarr/testing.md) | Selecting the right validation voyage |
-| [Python reference](development/maraudarr/reference/index.md) | Looking up public classes and functions from source |
+| [Testing](development/maraudarr/testing.md)                   | Selecting the right validation voyage                     |
+| [Python reference](development/maraudarr/reference/index.md)  | Looking up public classes and functions from source       |
 
 !!! note
 

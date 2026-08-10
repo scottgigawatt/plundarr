@@ -24,14 +24,14 @@ configuration.
 
 ## Source Map
 
-| Module | Responsibility |
-|:--|:--|
-| `catalog.py` | Load, validate, and resolve services and presets |
-| `models.py` | Store immutable catalog and resolved-plan data |
-| `render.py` | Render and atomically write deployment artifacts |
-| `text.py` | Extract and format text while preserving comments |
-| `ui.py` | Present rich and plain terminal experiences |
-| `cli.py` | Parse commands and orchestrate one generator run |
+| Module       | Responsibility                                    |
+| :----------- | :------------------------------------------------ |
+| `catalog.py` | Load, validate, and resolve services and presets  |
+| `models.py`  | Store immutable catalog and resolved-plan data    |
+| `render.py`  | Render and atomically write deployment artifacts  |
+| `text.py`    | Extract and format text while preserving comments |
+| `ui.py`      | Present rich and plain terminal experiences       |
+| `cli.py`     | Parse commands and orchestrate one generator run  |
 
 The package uses the conventional `docker/src/maraudarr/` layout. Runtime
 dependencies and build metadata remain under `docker/` because that directory

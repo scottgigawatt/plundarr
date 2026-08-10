@@ -35,17 +35,17 @@ config/
 Run these commands from the repository root. Make prints the complete Docker
 command before Maraudarr leaves port.
 
-| Command                    | What It Does                                                                 |
-| -------------------------- | ---------------------------------------------------------------------------- |
-| `make ship`                | Prepares Maraudarr and generates the default Plundarr stack                  |
-| `make configure`           | Opens the interactive preset and service picker                              |
-| `make presets`             | Lists every preset and its exact defaults                                    |
-| `make services`            | Lists every selectable service                                               |
-| `make update-maraudarr`    | Refreshes the published Maraudarr image from GHCR                            |
-| `make build-maraudarr`     | Builds the Maraudarr image locally from this directory                       |
-| `make test-maraudarr-unit` | Runs Maraudarr's Python unit tests                                           |
-| `make test-maraudarr`      | Runs unit tests and the real Compose matrix                                  |
-| `make build-multiarch`     | Verifies all published CPU architectures                                     |
+| Command                    | What It Does                                                |
+| -------------------------- | ----------------------------------------------------------- |
+| `make ship`                | Prepares Maraudarr and generates the default Plundarr stack |
+| `make configure`           | Opens the interactive preset and service picker             |
+| `make presets`             | Lists every preset and its exact defaults                   |
+| `make services`            | Lists every selectable service                              |
+| `make update-maraudarr`    | Refreshes the published Maraudarr image from GHCR           |
+| `make build-maraudarr`     | Builds the Maraudarr image locally from this directory      |
+| `make test-maraudarr-unit` | Runs Maraudarr's Python unit tests                          |
+| `make test-maraudarr`      | Runs unit tests and the real Compose matrix                 |
+| `make build-multiarch`     | Verifies all published CPU architectures                    |
 
 Maraudarr uses a matching local image first. When none exists, Make tries GHCR
 and automatically builds from this checkout if the published image is not yet

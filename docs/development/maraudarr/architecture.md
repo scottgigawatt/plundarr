@@ -83,10 +83,10 @@ never replaced. Destructive cleanup belongs exclusively to the explicit
 
 ## Failure Boundaries
 
-| Error family | Meaning |
-|:--|:--|
-| `CatalogError` | Invalid catalog data or impossible service selection |
-| `TemplateError` | A source fragment no longer matches its documented structure |
-| `RenderError` | Required rendered content is missing or Compose validation failed |
-| `UserCancelled` | An intentional interactive exit, reported with status `130` |
-| `OSError` | Filesystem or process failure reported to the user with corrective guidance |
+| Error family    | Meaning                                                                     |
+| :-------------- | :-------------------------------------------------------------------------- |
+| `CatalogError`  | Invalid catalog data or impossible service selection                        |
+| `TemplateError` | A source fragment no longer matches its documented structure                |
+| `RenderError`   | Required rendered content is missing or Compose validation failed           |
+| `UserCancelled` | An intentional interactive exit, reported with status `130`                 |
+| `OSError`       | Filesystem or process failure reported to the user with corrective guidance |
