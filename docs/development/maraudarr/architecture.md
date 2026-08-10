@@ -68,7 +68,7 @@ footer, and first-run secrets replace placeholders only when no existing value
 is available. `COMPOSE_PROJECT_NAME` remains generator-owned so preset identity
 cannot drift accidentally.
 
-## 5. Stage, Validate, and Commit Output
+## 5. Stage, Validate, and Publish Output
 
 Compose and environment files are written to a temporary directory inside the
 requested output directory. Maraudarr asks Docker Compose to validate that

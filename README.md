@@ -89,7 +89,7 @@ workflow. Curious captains can inspect or replay the
 | Prowlarr          | 🐾 Manages indexers for the automation fleet.          | [More info](https://github.com/Prowlarr/Prowlarr)                    |
 | qBittorrent       | 🌊 Downloads torrents through Gluetun.                 | [More info](https://github.com/qbittorrent/qBittorrent)              |
 | SABnzbd           | 📰 Downloads Usenet cargo through Gluetun.             | [More info](https://sabnzbd.org)                                     |
-| NZBGet            | ⚡ Runs a lean Usenet downloader through Gluetun.           | [More info](https://nzbget.com)                                      |
+| NZBGet            | ⚡ Runs a lean Usenet downloader through Gluetun.       | [More info](https://nzbget.com)                                      |
 | Radarr            | 🎥 Finds, tracks, and organizes movies.                | [More info](https://github.com/Radarr/Radarr)                        |
 | Sonarr            | 📺 Finds, tracks, and organizes TV shows.              | [More info](https://github.com/Sonarr/Sonarr)                        |
 | Sonarr Anime      | 🍜 Runs a second Sonarr for anime TV cargo.            | [More info](https://github.com/Sonarr/Sonarr)                        |

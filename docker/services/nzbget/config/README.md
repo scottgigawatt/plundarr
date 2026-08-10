@@ -14,6 +14,13 @@ Maraudarr creates this directory and refreshes this README, but it does not
 seed or replace `nzbget.conf`. NZBGet owns that application state after its
 first launch.
 
+## Add Your Usenet Provider 🔐
+
+Before testing a download, open **Settings > News-Servers** and add the server
+hostname, port, encryption setting, username, and password supplied by your
+Usenet provider. These provider credentials belong in NZBGet's application
+configuration; `NZBGET_USER` and `NZBGET_PASS` protect only the Web UI.
+
 ## Download Folders 📦
 
 Plundarr maps `HOST_USENET_DOWNLOADS_PATH` to `/downloads/usenet` inside
