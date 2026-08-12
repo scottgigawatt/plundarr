@@ -46,6 +46,7 @@ nav:
       - Text Helpers: development/maraudarr/reference/text.md
       - Terminal UI: development/maraudarr/reference/ui.md
   - Project Guides:
+      - Guide Map: project-guides/index.md
       - Synology Setup: SETUP.md
       - Contributing: CONTRIBUTING.md
       - Security: SECURITY.md

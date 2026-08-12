@@ -1,3 +1,7 @@
+---
+icon: material/hammer-wrench
+---
+
 # Maraudarr Developer Overview ⚒️
 
 Maraudarr is the short-lived Python application that assembles a selected

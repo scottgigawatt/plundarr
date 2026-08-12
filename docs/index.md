@@ -1,3 +1,7 @@
+---
+icon: material/ship-wheel
+---
+
 # Plundarr Developer Chart Room 🏴‍☠️
 
 Welcome aboard the developer documentation for **Plundarr** and its generator,
