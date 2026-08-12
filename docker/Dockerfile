@@ -11,7 +11,7 @@
 # Default Alpine, Docker CLI, and Compose image tags that build arguments can override.
 #
 ARG ALPINE_TAG=3.24@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6eec434943f8b
-ARG DOCKER_CLI_TAG=29.7.1-cli-alpine3.24@sha256:27a51d5ab1cd38d9eeaba7b415b8c07bc10c31e1cf1ec8d78f6413fcfab3f44f
+ARG DOCKER_CLI_TAG=29.7.2-cli-alpine3.24@sha256:000bb62ff495f986c9f5578eb67cc2cb98b91138eda81d7762d5371eb8a497fe
 ARG DOCKER_COMPOSE_TAG=v5.4.0@sha256:b03e46987ca4ebb41ca31b765ad7ba957388003f1ef1255fd68333a7b838d632
 ARG MARAUDARR_BIN_HOME=/maraudarr
 
