@@ -1,0 +1,57 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# .markdownlint-cli2.yaml: Markdown style and file selection for public project
+#                          documentation and repository guidance.
+#
+
+#
+# Check every Markdown document while excluding generated or Git-owned files.
+# Markdownlint CLI2 uses a leading hash to negate matching glob patterns.
+#
+globs:
+  - "**/*.md"
+  - "#site/**"
+  - "#.git/**"
+
+#
+# Honor repository ignore rules so generated and local-only content stays out.
+#
+gitignore: true
+
+#
+# Start with the complete standard rule set, then document only intentional
+# exceptions required by GitHub templates, MkDocs, and the established voice.
+#
+config:
+  default: true
+  line-length: false
+  no-inline-html: false
+  first-line-h1: false
+  list-marker-space: false
+  code-block-style: false
+
+  #
+  # Consecutive GitHub callouts are separate blockquotes divided by a blank.
+  #
+  no-blanks-blockquote: false
+
+  #
+  # MkDocs pages may use front matter for the sole document title.
+  #
+  single-title:
+    front_matter_title: ""
+
+  #
+  # Repeated section names are acceptable when they belong to separate topics.
+  #
+  no-duplicate-heading:
+    siblings_only: true
+
+  #
+  # Keep table source padded to its rendered width, including emoji glyphs.
+  #
+  table-column-style:
+    style: aligned

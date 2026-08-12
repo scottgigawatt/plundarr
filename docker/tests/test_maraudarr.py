@@ -91,6 +91,14 @@ class MaraudarrTests(unittest.TestCase):
         self.assertEqual(plan.service_ids, ("privateerr", "gluetun", "qbittorrent"))
         self.assertEqual(set(plan.auto_added), {"privateerr", "gluetun"})
 
+    def test_nzbget_adds_the_vpn_foundation(self) -> None:
+        """Route a custom NZBGet selection through Privateerr and Gluetun."""
+
+        plan = self.catalog.resolve("custom", selected={"nzbget"})
+
+        self.assertEqual(plan.service_ids, ("privateerr", "gluetun", "nzbget"))
+        self.assertEqual(set(plan.auto_added), {"privateerr", "gluetun"})
+
     def test_explicit_addition_wins_over_preset_removal(self) -> None:
         """Honor an explicit service addition when remove also names it."""
 
@@ -117,7 +125,7 @@ class MaraudarrTests(unittest.TestCase):
 
         plan = self.catalog.resolve(
             "plundarr",
-            add={"apprise", "jellyfin", "sabnzbd", "sonarr-anime"},
+            add={"apprise", "jellyfin", "nzbget", "sabnzbd", "sonarr-anime"},
         )
 
         compose = render_compose(self.catalog, plan)
@@ -129,6 +137,9 @@ class MaraudarrTests(unittest.TestCase):
         self.assertIn("${APPRISE_API_ONLY}", compose)
         self.assertIn("${JELLYFIN_WEBUI_PORT}:8096", compose)
         self.assertIn("${SABNZBD_WEBUI_PORT}:8085", compose)
+        self.assertIn("${NZBGET_WEBUI_PORT}:6789", compose)
+        self.assertIn("/app/nzbget/nzbget", compose)
+        self.assertIn("HOMEPAGE_VAR_NZBGET_USER", compose)
         self.assertIn("HOMEPAGE_VAR_SONARR_ANIME_KEY", compose)
         self.assertEqual(2, compose.count("<<: *rootless-container"))
         self.assertIn("http://127.0.0.1:8000/status", compose)
@@ -145,13 +156,15 @@ class MaraudarrTests(unittest.TestCase):
         self.assertIn("# Apprise notification environment variables", environment)
         self.assertNotIn("# qBittorrent environment variables", environment)
         self.assertNotIn("HOMEPAGE_VAR_QBITTORRENT_HREF", environment)
+        self.assertNotIn("# NZBGet environment variables", environment)
+        self.assertNotIn("HOMEPAGE_VAR_NZBGET_HREF", environment)
         self.assertLess(environment.index("PROWLARR_TAG"), environment.index("RADARR_TAG"))
         self.assertLess(environment.index("SPEEDTEST_TRACKER_TAG"), environment.index("APPRISE_TAG"))
 
     def test_existing_environment_values_survive_a_rebuild(self) -> None:
         """Preserve user-managed environment values across regeneration."""
 
-        plan = self.catalog.resolve("plundarr")
+        plan = self.catalog.resolve("plundarr", add={"nzbget"})
 
         with tempfile.TemporaryDirectory() as temporary_directory:
             env_path = Path(temporary_directory) / ".env"
@@ -160,6 +173,7 @@ class MaraudarrTests(unittest.TestCase):
                 'TZ="Pacific/Honolulu"\n'
                 'SPEEDTEST_TRACKER_APP_KEY="base64:keep-this-key"\n'
                 'DUPLICATI_WEBSERVICE_PASSWORD="keep-this-password"\n'  # pragma: allowlist secret
+                'NZBGET_PASS="keep-this-nzbget-password"\n'  # pragma: allowlist secret
                 'SONARR_CONFIG_PATH="${SONARR_CONFIG_PATH:-./config/sonarr}"\n'
             )
             environment = render_environment(self.catalog, plan, env_path)
@@ -174,6 +188,10 @@ class MaraudarrTests(unittest.TestCase):
             environment,
         )
         self.assertIn(
+            'NZBGET_PASS="keep-this-nzbget-password"',  # pragma: allowlist secret
+            environment,
+        )
+        self.assertIn(
             'SONARR_CONFIG_PATH="${SONARR_CONFIG_PATH:-./config/sonarr}"',
             environment,
         )
@@ -181,7 +199,7 @@ class MaraudarrTests(unittest.TestCase):
     def test_new_environment_receives_secure_application_secrets(self) -> None:
         """Generate non-placeholder secrets for a new environment file."""
 
-        plan = self.catalog.resolve("plundarr")
+        plan = self.catalog.resolve("plundarr", add={"nzbget"})
 
         with tempfile.TemporaryDirectory() as temporary_directory:
             environment = render_environment(
@@ -205,12 +223,19 @@ class MaraudarrTests(unittest.TestCase):
             for line in environment.splitlines()
             if line.startswith("DUPLICATI_WEBSERVICE_PASSWORD=")
         )
+        nzbget_password = next(
+            line
+            for line in environment.splitlines()
+            if line.startswith("NZBGET_PASS=")
+        )
         self.assertRegex(
             speedtest_key,
             r'^SPEEDTEST_TRACKER_APP_KEY="base64:[A-Za-z0-9+/]{43}="$'
         )
         self.assertNotIn("change-me", duplicati_key)
         self.assertNotIn("changeme", duplicati_password)
+        self.assertRegex(nzbget_password, r'^NZBGET_PASS="[A-Za-z0-9_-]{20,}"$')
+        self.assertNotIn("changeme", nzbget_password)
 
     def test_unselected_service_values_survive_preset_changes(self) -> None:
         """Carry inactive service values through preset changes and back."""
@@ -248,7 +273,7 @@ class MaraudarrTests(unittest.TestCase):
 
         plan = self.catalog.resolve(
             "plundarr",
-            add={"jellyfin", "sonarr-anime"},
+            add={"jellyfin", "nzbget", "sonarr-anime"},
         )
         homepage = render_homepage_services(self.catalog, plan)
 
@@ -257,6 +282,7 @@ class MaraudarrTests(unittest.TestCase):
         self.assertIn("- Jellyfin:", media_group)
         self.assertIn("- Sonarr Anime:", media_group)
         self.assertIn("- qBittorrent:", downloads_group)
+        self.assertIn("- NZBGet:", downloads_group)
         self.assertNotIn("- Jellyfin:", downloads_group)
 
     def test_custom_homepage_omits_unselected_cards_and_variables(self) -> None:
@@ -275,10 +301,13 @@ class MaraudarrTests(unittest.TestCase):
 
         self.assertNotIn("HOMEPAGE_VAR_RADARR", compose)
         self.assertNotIn("HOMEPAGE_VAR_PLEX", compose)
+        self.assertNotIn("HOMEPAGE_VAR_NZBGET", compose)
         self.assertNotIn("HOMEPAGE_VAR_RADARR", environment)
         self.assertNotIn("HOMEPAGE_VAR_PLEX", environment)
+        self.assertNotIn("HOMEPAGE_VAR_NZBGET", environment)
         self.assertNotIn("- Radarr:", homepage)
         self.assertNotIn("- Plex:", homepage)
+        self.assertNotIn("- NZBGet:", homepage)
         self.assertTrue(homepage.endswith("[]\n"))
 
     #
@@ -339,6 +368,9 @@ class MaraudarrTests(unittest.TestCase):
                     self.assertIn("\n        - CMD\n", compose)
                 if service.id == "privateerr":
                     self.assertIn("\n        - privateerr-healthcheck\n", compose)
+                if service.id == "nzbget":
+                    self.assertIn("\n        - /app/nzbget/nzbget\n", compose)
+                    self.assertIn("\n        - /config/nzbget.conf\n", compose)
 
         self.assertEqual(shell_healthchecks, set())
 
@@ -367,7 +399,7 @@ class MaraudarrTests(unittest.TestCase):
 
         plan = self.catalog.resolve(
             "custom",
-            selected={"homepage", "jellyfin", "qbittorrent"},
+            selected={"homepage", "jellyfin", "nzbget", "qbittorrent"},
         )
 
         with tempfile.TemporaryDirectory() as temporary_directory:
@@ -385,6 +417,7 @@ class MaraudarrTests(unittest.TestCase):
             self.assertTrue((config_path / "homepage" / "README.md").is_file())
             self.assertTrue((config_path / "homepage" / "services.yaml").is_file())
             self.assertTrue((config_path / "jellyfin" / "README.md").is_file())
+            self.assertTrue((config_path / "nzbget" / "README.md").is_file())
             self.assertTrue(
                 (
                     config_path

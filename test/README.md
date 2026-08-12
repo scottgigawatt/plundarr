@@ -62,6 +62,13 @@ make ship OPTIONAL_SERVICES=sabnzbd
 make test-e2e OPTIONAL_SERVICES=sabnzbd
 ```
 
+Chart the same E2E voyage with NZBGet instead:
+
+```bash
+make ship OPTIONAL_SERVICES=nzbget
+make test-e2e OPTIONAL_SERVICES=nzbget
+```
+
 ### Full Stack Test
 
 Use this when ye want Make to launch every service, wait for health, and validate the full port-forwarding chain:

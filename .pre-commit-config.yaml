@@ -39,10 +39,20 @@ repos:
       - id: check-shebang-scripts-are-executable
       - id: check-toml
       - id: check-yaml
-        exclude: ^docker/services/(?:homepage/config/|[^/]+/compose\.yml$)
+        # MkDocs validates its trusted Python-tagged Mermaid formatter itself.
+        exclude: ^(?:mkdocs\.yml|docker/services/(?:homepage/config/.*|[^/]+/compose\.yml))$
       - id: end-of-file-fixer
       - id: trailing-whitespace
         args: ["--markdown-linebreak-ext=md"]
+
+  #
+  # Validate every Markdown document with the shared repository configuration.
+  #
+  - repo: https://github.com/DavidAnson/markdownlint-cli2
+    rev: v0.22.1
+    hooks:
+      - id: markdownlint-cli2
+        pass_filenames: false
 
   #
   # Enforce strict YAML style outside generated service template directories.

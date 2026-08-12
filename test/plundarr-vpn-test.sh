@@ -16,6 +16,7 @@
 #   - Verifies Privateerr generated privateerr.env.
 #   - Checks Gluetun's unauthenticated health endpoint inside Gluetun.
 #   - Checks Gluetun's forwarded_port file when port forwarding is required.
+#   - Checks selected download clients are running and healthy.
 #   - Checks qBittorrent port-forwarding state when requested.
 #   - Writes validation output to stdout and the Plundarr test log file.
 #
@@ -34,6 +35,7 @@ if [[ -z "${PLUNDARR_ENV_FILE:-}" ]]; then
 fi
 : "${PLUNDARR_PRIVATEERR_SERVICE:=privateerr}"
 : "${PLUNDARR_GLUETUN_SERVICE:=gluetun}"
+: "${PLUNDARR_DOWNLOAD_SERVICES:=}"
 : "${PLUNDARR_QBITTORRENT_SERVICE:=}"
 : "${PLUNDARR_CONFIG_PATH:=config/gluetun/wireguard}"
 : "${PLUNDARR_GLUETUN_PATH:=config/gluetun}"
@@ -199,6 +201,22 @@ else
 fi
 
 #
+# Confirm every selected download client is running and healthy.
+#
+read -r -a download_services <<< "${PLUNDARR_DOWNLOAD_SERVICES}"
+for download_service in "${download_services[@]}"; do
+    download_container_id="$(container_id_for_service "${download_service}")"
+
+    log "Inspecting ${download_service} container."
+    require_running_container "${download_container_id}" "${download_service}"
+    if [[ "${PLUNDARR_WAIT_SECONDS}" -gt 0 ]]; then
+        wait_for_healthy_container "${download_container_id}" "${download_service}"
+    else
+        require_healthy_container "${download_container_id}" "${download_service}"
+    fi
+done
+
+#
 # Confirm Privateerr produced the expected config and metadata files.
 #
 wg_config_path="${PLUNDARR_CONFIG_PATH}/wg0.conf"
@@ -256,16 +274,6 @@ fi
 # Confirm qBittorrent picked up Gluetun's forwarded port when requested.
 #
 if [[ -n "${PLUNDARR_QBITTORRENT_SERVICE}" ]]; then
-    qbittorrent_container_id="$(container_id_for_service "${PLUNDARR_QBITTORRENT_SERVICE}")"
-
-    log "Inspecting qBittorrent container."
-    require_running_container "${qbittorrent_container_id}" "${PLUNDARR_QBITTORRENT_SERVICE}"
-    if [[ "${PLUNDARR_WAIT_SECONDS}" -gt 0 ]]; then
-        wait_for_healthy_container "${qbittorrent_container_id}" "${PLUNDARR_QBITTORRENT_SERVICE}"
-    else
-        require_healthy_container "${qbittorrent_container_id}" "${PLUNDARR_QBITTORRENT_SERVICE}"
-    fi
-
     if [[ "${PLUNDARR_REQUIRE_PORT_FORWARD}" != "true" ]]; then
         log "qBittorrent validation requires port forwarding."
         exit 1

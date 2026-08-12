@@ -1,0 +1,11 @@
+
+    - NZBGet:
+        icon: nzbget.svg
+        href: {{HOMEPAGE_VAR_NZBGET_HREF}}
+        description: Usenet downloads management
+        container: nzbget-latest
+        widget:
+          type: nzbget
+          url: {{HOMEPAGE_VAR_NZBGET_URL}}
+          username: {{HOMEPAGE_VAR_NZBGET_USER}}
+          password: {{HOMEPAGE_VAR_NZBGET_PASS}}

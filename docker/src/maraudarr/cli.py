@@ -23,14 +23,12 @@ from maraudarr.ui import UI, UserCancelled
 
 
 def _comma_set(value: str | None) -> set[str]:
-    """Convert a comma-separated command value into normalized service IDs."""
-
+    """Normalize a comma-separated CLI value and discard empty entries."""
     return {item.strip() for item in (value or "").split(",") if item.strip()}
 
 
 def _parser() -> argparse.ArgumentParser:
-    """Create the complete Maraudarr command parser."""
-
+    """Create the parser shared by interactive and deterministic commands."""
     parser = argparse.ArgumentParser(
         prog="maraudarr",
         description="Generate a polished, reusable Plundarr Docker Compose stack.",
@@ -88,8 +86,7 @@ def _parser() -> argparse.ArgumentParser:
 
 
 def _write(catalog: Catalog, plan: StackPlan, output: Path, ui: UI) -> int:
-    """Confirm, generate, and report one resolved stack plan."""
-
+    """Confirm and generate one plan while reporting progress through the UI."""
     ui.show_plan(plan)
     if not ui.confirm():
         raise UserCancelled("Voyage cancelled before the stack was built.")
@@ -103,8 +100,7 @@ def _write(catalog: Catalog, plan: StackPlan, output: Path, ui: UI) -> int:
 
 
 def _interactive_plan(catalog: Catalog, ui: UI) -> StackPlan:
-    """Collect an interactive preset and service selection."""
-
+    """Collect an interactive selection and resolve its dependencies."""
     ui.welcome()
     presets = list(catalog.presets.values())
     ui.show_presets(presets, catalog.services)
@@ -121,9 +117,23 @@ def _interactive_plan(catalog: Catalog, ui: UI) -> StackPlan:
 
 
 def main(arguments: list[str] | None = None) -> int:
-    """Run Maraudarr and return a process-compatible status code."""
+    """Run the Maraudarr command-line application.
 
+    Args:
+        arguments: Optional argument vector excluding the executable name.
+            Process arguments are used when this value is absent.
+
+    Returns:
+        ``0`` after a successful command, ``1`` after a catalog, rendering, or
+        operating-system failure, or ``130`` after intentional cancellation.
+
+    Note:
+        Argument-parser usage errors and ``--version`` retain argparse's normal
+        ``SystemExit`` behavior.
+    """
     raw_arguments = list(sys.argv[1:] if arguments is None else arguments)
+    # Accept --plain before or after the subcommand even though argparse defines
+    # it globally, then restore the normalized flag on the parsed namespace.
     plain_requested = "--plain" in raw_arguments
     raw_arguments = [item for item in raw_arguments if item != "--plain"]
     arguments_namespace = _parser().parse_args(raw_arguments)

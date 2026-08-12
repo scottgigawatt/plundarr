@@ -76,6 +76,14 @@ url = "https://sabnzbd.org"
 order = 230
 requires = ["gluetun"]
 
+[services.nzbget]
+title = "NZBGet"
+description = "Downloads Usenet cargo efficiently through the Gluetun VPN tunnel."
+category = "Download clients"
+url = "https://nzbget.com"
+order = 240
+requires = ["gluetun"]
+
 #
 # Media automation services.
 #

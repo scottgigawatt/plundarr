@@ -4,7 +4,7 @@ Ahoy, improbable contributor. Plundarr is a Docker Compose fleet for media servi
 
 ## Before Ye Start ⚓
 
-- Read the [README](../README.md).
+- Read the [repository README](https://github.com/scottgigawatt/plundarr#readme).
 - Read the [security policy](SECURITY.md) before sharing logs or generated config.
 - Keep to the [Code](CODE_OF_CONDUCT.md).
 - Check existing issues before opening a duplicate treasure map.

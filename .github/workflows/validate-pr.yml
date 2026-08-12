@@ -116,3 +116,32 @@ jobs:
             #
             - name: "Fire the Pre-Commit Cannons 💥"
               uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd  # v3.0.1
+
+    #
+    # Build the source-derived Python reference separately so documentation
+    # dependencies never enter the published Maraudarr runtime image.
+    #
+    validate-docs:
+        name: "Validate the Developer Charts 📚"
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+
+        steps:
+            - name: "Grab the Source Charts 📖"
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+              with:
+                  persist-credentials: false
+
+            - name: "Ready the Python Quill 🪶"
+              uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7
+              with:
+                  python-version: "3.14"
+                  cache: pip
+                  cache-dependency-path: requirements-docs.txt
+
+            - name: "Load the Documentation Tools 🧰"
+              run: pip install --requirement requirements-docs.txt
+
+            - name: "Render Every Developer Chart 🔎"
+              run: mkdocs build --strict

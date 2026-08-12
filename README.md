@@ -81,29 +81,30 @@ workflow. Curious captains can inspect or replay the
 
 ## Treasure Map 🗺️
 
-| Shipmate          | What It Be                                             | Yo Ho Ho and More Info                                               |
-| ----------------- | ------------------------------------------------------ | -------------------------------------------------------------------- |
-| Privateerr        | 🏴‍☠️ Creates PIA WireGuard config and port metadata.     | [More info](https://github.com/scottgigawatt/privateerr)             |
-| Gluetun           | 🌊 Runs the VPN tunnel and PIA port forwarding.        | [More info](https://github.com/qdm12/gluetun)                        |
-| FlareSolverr      | 🔥 Helps Prowlarr through supported anti-bot storms.   | [More info](https://github.com/FlareSolverr/FlareSolverr)            |
-| Prowlarr          | 🐾 Manages indexers for the automation fleet.          | [More info](https://github.com/Prowlarr/Prowlarr)                    |
-| qBittorrent       | 🌊 Downloads torrents through Gluetun.                 | [More info](https://github.com/qbittorrent/qBittorrent)              |
-| SABnzbd           | 📰 Downloads Usenet cargo through Gluetun.             | [More info](https://sabnzbd.org)                                     |
-| Radarr            | 🎥 Finds, tracks, and organizes movies.                | [More info](https://github.com/Radarr/Radarr)                        |
-| Sonarr            | 📺 Finds, tracks, and organizes TV shows.              | [More info](https://github.com/Sonarr/Sonarr)                        |
-| Sonarr Anime      | 🍜 Runs a second Sonarr for anime TV cargo.            | [More info](https://github.com/Sonarr/Sonarr)                        |
-| Whisparr          | 🔞 Manages an adult media library.                     | [More info](https://github.com/Whisparr/Whisparr)                    |
-| Bazarr            | 🦜 Fetches subtitles for movies and TV shows.          | [More info](https://github.com/morpheus65535/bazarr)                 |
-| Seerr             | ⚓️ Handles media requests for yer crew.                | [More info](https://github.com/seerr-team/seerr)                     |
-| Plex              | 🎬 Streams selected libraries with Plex Media Server.  | [More info](https://www.plex.tv/media-server-downloads/)             |
-| Jellyfin          | 🎞️ Streams movies, television, and anime.              | [More info](https://jellyfin.org)                                    |
-| Cleanuparr        | 🧹 Removes blocked or unwanted downloads.              | [More info](https://github.com/Cleanuparr/Cleanuparr)                |
-| Speedtest Tracker | ⚡️ Tracks internet speed over time.                    | [More info](https://docs.speedtest-tracker.dev/)                     |
-| Apprise           | 📯 Delivers notifications without another public UI.   | [More info](https://github.com/caronc/apprise-api)                   |
-| Duplicati         | 💣 Backs up yer precious booty.                        | [More info](https://www.duplicati.com)                               |
-| Homepage          | 🏠 Provides a dashboard for the whole fleet.           | [More info](https://gethomepage.dev)                                 |
-| Watchtower        | 🔭 Checks selected containers for image updates.       | [More info](https://github.com/containrrr/watchtower)                |
-| **~~Readarr~~**   | ❌ Scuttled; use Calibre Web Automated instead.        | [Set Sail ⚓](https://github.com/scottgigawatt/calibre-web-automated) |
+| Shipmate          | What It Be                                            | Yo Ho Ho and More Info                                                |
+| ----------------- | ----------------------------------------------------- | --------------------------------------------------------------------- |
+| Privateerr        | 🏴‍☠️ Creates PIA WireGuard config and port metadata.    | [More info](https://github.com/scottgigawatt/privateerr)              |
+| Gluetun           | 🌊 Runs the VPN tunnel and PIA port forwarding.       | [More info](https://github.com/qdm12/gluetun)                         |
+| FlareSolverr      | 🔥 Helps Prowlarr through supported anti-bot storms.  | [More info](https://github.com/FlareSolverr/FlareSolverr)             |
+| Prowlarr          | 🐾 Manages indexers for the automation fleet.         | [More info](https://github.com/Prowlarr/Prowlarr)                     |
+| qBittorrent       | 🌊 Downloads torrents through Gluetun.                | [More info](https://github.com/qbittorrent/qBittorrent)               |
+| SABnzbd           | 📰 Downloads Usenet cargo through Gluetun.            | [More info](https://sabnzbd.org)                                      |
+| NZBGet            | ⚡ Runs a lean Usenet downloader through Gluetun.     | [More info](https://nzbget.com)                                       |
+| Radarr            | 🎥 Finds, tracks, and organizes movies.               | [More info](https://github.com/Radarr/Radarr)                         |
+| Sonarr            | 📺 Finds, tracks, and organizes TV shows.             | [More info](https://github.com/Sonarr/Sonarr)                         |
+| Sonarr Anime      | 🍜 Runs a second Sonarr for anime TV cargo.           | [More info](https://github.com/Sonarr/Sonarr)                         |
+| Whisparr          | 🔞 Manages an adult media library.                    | [More info](https://github.com/Whisparr/Whisparr)                     |
+| Bazarr            | 🦜 Fetches subtitles for movies and TV shows.         | [More info](https://github.com/morpheus65535/bazarr)                  |
+| Seerr             | ⚓️ Handles media requests for yer crew.               | [More info](https://github.com/seerr-team/seerr)                      |
+| Plex              | 🎬 Streams selected libraries with Plex Media Server. | [More info](https://www.plex.tv/media-server-downloads/)              |
+| Jellyfin          | 🎞️ Streams movies, television, and anime.             | [More info](https://jellyfin.org)                                     |
+| Cleanuparr        | 🧹 Removes blocked or unwanted downloads.             | [More info](https://github.com/Cleanuparr/Cleanuparr)                 |
+| Speedtest Tracker | ⚡️ Tracks internet speed over time.                   | [More info](https://docs.speedtest-tracker.dev/)                      |
+| Apprise           | 📯 Delivers notifications without another public UI.  | [More info](https://github.com/caronc/apprise-api)                    |
+| Duplicati         | 💣 Backs up yer precious booty.                       | [More info](https://www.duplicati.com)                                |
+| Homepage          | 🏠 Provides a dashboard for the whole fleet.          | [More info](https://gethomepage.dev)                                  |
+| Watchtower        | 🔭 Checks selected containers for image updates.      | [More info](https://github.com/containrrr/watchtower)                 |
+| **~~Readarr~~**   | ❌ Scuttled; use Calibre Web Automated instead.       | [Set Sail ⚓](https://github.com/scottgigawatt/calibre-web-automated) |
 
 ## Hoist the Sails ⚓️
 
@@ -134,16 +135,16 @@ config/
 
 ### Focus on These Settings ⚙️
 
-| Setting                              | Why Ye Care                                                   |
-| ------------------------------------ | ------------------------------------------------------------- |
-| 🔐 `PIA_USER` / `PIA_PASS`           | Required for PIA WireGuard and port forwarding                |
-| 👤 `DEFAULT_PUID` / `DEFAULT_PGID`   | Must be able to read and write the mounted files              |
-| 📦 `HOST_DOWNLOADS_PATH`             | Shared download root for the automation fleet                 |
-| 🎥 `HOST_MOVIES_PATH`                | Final movie library                                           |
-| 📺 `HOST_TV_PATH`                    | Final television library                                      |
-| 🍜 `HOST_ANIME_TV_PATH`              | Anime library when Sonarr Anime or Jellyfin needs it          |
-| 🕰️ `TZ`                              | Timezone used by the containers                               |
-| 🚪 `*_WEBUI_PORT`                    | Change only when a host port already be occupied              |
+| Setting                            | Why Ye Care                                          |
+| ---------------------------------- | ---------------------------------------------------- |
+| 🔐 `PIA_USER` / `PIA_PASS`         | Required for PIA WireGuard and port forwarding       |
+| 👤 `DEFAULT_PUID` / `DEFAULT_PGID` | Must be able to read and write the mounted files     |
+| 📦 `HOST_DOWNLOADS_PATH`           | Shared download root for the automation fleet        |
+| 🎥 `HOST_MOVIES_PATH`              | Final movie library                                  |
+| 📺 `HOST_TV_PATH`                  | Final television library                             |
+| 🍜 `HOST_ANIME_TV_PATH`            | Anime library when Sonarr Anime or Jellyfin needs it |
+| 🕰️ `TZ`                            | Timezone used by the containers                      |
+| 🚪 `*_WEBUI_PORT`                  | Change only when a host port already be occupied     |
 
 > [!TIP]
 > 🗺️ The defaults expect downloads under `/volume1/downloads`, movies under
@@ -168,11 +169,11 @@ Choose a preset, inspect its cargo, add or remove services, and approve the
 final manifest. The prompts stay friendly, lightly pirate, and very clear about
 what will be written.
 
-| Voyage           | Default Cargo                                                                                                                                   |
-| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| 🏴‍☠️ `plundarr`    | Privateerr, Gluetun, FlareSolverr, Prowlarr, qBittorrent, Radarr, Sonarr, Bazarr, Seerr, Cleanuparr, Speedtest Tracker, Duplicati, and Homepage |
-| 🔞 `boudoirr`    | Privateerr, Gluetun, FlareSolverr, Prowlarr, qBittorrent, SABnzbd, Whisparr, Cleanuparr, and Watchtower                                         |
-| 🧩 `custom`      | An empty hold; choose every service yerself                                                                                                     |
+| Voyage        | Default Cargo                                                                                                                                   |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| 🏴‍☠️ `plundarr` | Privateerr, Gluetun, FlareSolverr, Prowlarr, qBittorrent, Radarr, Sonarr, Bazarr, Seerr, Cleanuparr, Speedtest Tracker, Duplicati, and Homepage |
+| 🔞 `boudoirr` | Privateerr, Gluetun, FlareSolverr, Prowlarr, qBittorrent, SABnzbd, Whisparr, Cleanuparr, and Watchtower                                         |
+| 🧩 `custom`   | An empty hold; choose every service yerself                                                                                                     |
 
 Useful commands for captains who already know the route:
 
@@ -182,6 +183,7 @@ Useful commands for captains who already know the route:
 | 📦 `make services`                                                                         | Lists every service Maraudarr can add   |
 | ⚓ `make ship OPTIONAL_SERVICES=qbittorrent,cleanuparr,apprise,jellyfin`                   | Adds Apprise and Jellyfin               |
 | 🎬 `make ship OPTIONAL_SERVICES=qbittorrent,cleanuparr,plex`                               | Adds containerized Plex                 |
+| 📰 `make ship OPTIONAL_SERVICES=nzbget`                                                    | Charts an NZBGet Usenet voyage          |
 | 🔞 `make ship PRESET=boudoirr OPTIONAL_SERVICES=qbittorrent,sabnzbd,cleanuparr,watchtower` | Charts the Boudoirr voyage              |
 
 Switch the default Plundarr voyage from torrents to Usenet:
@@ -190,10 +192,23 @@ Switch the default Plundarr voyage from torrents to Usenet:
 make ship PRESET=plundarr OPTIONAL_SERVICES=sabnzbd
 ```
 
+Or choose NZBGet as the Usenet runner:
+
+```bash
+make ship PRESET=plundarr OPTIONAL_SERVICES=nzbget
+```
+
+Both Usenet clients can sail together when ye want separate queues:
+
+```bash
+make ship PRESET=plundarr OPTIONAL_SERVICES=sabnzbd,nzbget
+```
+
 > [!NOTE]
 > 🧰 Rebuilds preserve existing values by variable name. Fresh voyages receive
-> strong Speedtest Tracker and Duplicati secrets, while values for temporarily
-> unselected services wait safely in a marked footer until that cargo returns.
+> strong Speedtest Tracker, Duplicati, and NZBGet secrets, while values for
+> temporarily unselected services wait safely in a marked footer until that
+> cargo returns.
 
 > [!NOTE]
 > 🌊 Only selected download clients share Gluetun's network namespace. Prowlarr,
@@ -235,35 +250,38 @@ make test-stack
 > 🧭 Prefer a trusty first mate? The `Makefile` wraps the common Maraudarr and
 > Docker Compose commands while still printin' the complete command it runs.
 
-| Command                         | What It Does                                             |
-| ------------------------------- | -------------------------------------------------------- |
-| 🗺️ `make ship`                  | Prepares Maraudarr and generates the Plundarr stack      |
-| 🧭 `make configure`             | Opens Maraudarr's interactive configurator               |
-| 📜 `make presets`               | Lists presets and their exact default services           |
-| 📦 `make services`              | Lists every service Maraudarr can select                 |
-| 🌊 `make update-maraudarr`      | Refreshes the published Maraudarr image                  |
-| 🧾 `make compose-services`      | Lists services in the generated Plundarr chart           |
-| 🔎 `make config`                | Prints Docker Compose's validated model                  |
-| 🚀 `make up`                    | Starts the complete generated stack                      |
-| ⚓ `make down`                  | Stops and removes the generated stack                    |
-| 💾 `make backup-config`         | Archives `config/` with a collision-safe timestamp       |
-| ☠️ `make clean-config`          | Deletes the complete generated config directory          |
-| 🐍 `make test-maraudarr-unit`   | Runs Maraudarr's Python unit tests                        |
-| 🧪 `make test-maraudarr`        | Tests presets and generated Compose combinations         |
-| ⚒️ `make build-maraudarr`       | Builds the Maraudarr image locally from this repository  |
+| Command                       | What It Does                                            |
+| ----------------------------- | ------------------------------------------------------- |
+| 🗺️ `make ship`                | Prepares Maraudarr and generates the Plundarr stack     |
+| 🧭 `make configure`           | Opens Maraudarr's interactive configurator              |
+| 📜 `make presets`             | Lists presets and their exact default services          |
+| 📦 `make services`            | Lists every service Maraudarr can select                |
+| 🌊 `make update-maraudarr`    | Refreshes the published Maraudarr image                 |
+| 🧾 `make compose-services`    | Lists services in the generated Plundarr chart          |
+| 🔎 `make config`              | Prints Docker Compose's validated model                 |
+| 🚀 `make up`                  | Starts the complete generated stack                     |
+| ⚓ `make down`                | Stops and removes the generated stack                   |
+| 💾 `make backup-config`       | Archives `config/` with a collision-safe timestamp      |
+| ☠️ `make clean-config`        | Deletes the complete generated config directory         |
+| 🐍 `make test-maraudarr-unit` | Runs Maraudarr's Python unit tests                      |
+| 🧪 `make test-maraudarr`      | Tests presets and generated Compose combinations        |
+| ⚒️ `make build-maraudarr`     | Builds the Maraudarr image locally from this repository |
+| 📚 `make docs`                | Builds the strict developer documentation site          |
+| 🔭 `make docs-serve`          | Previews developer documentation on localhost           |
 
 Need the whole command chart? Run `make help`.
 
 ## More Treasure Maps 🗺️
 
-| Scroll                                              | When Ye Need It                                  |
-| --------------------------------------------------- | ------------------------------------------------ |
-| ⚒️ [Inside Maraudarr](docker/README.md)             | Image commands, security, tags, and architecture |
-| 🖥️ [Synology Setup](docs/SETUP.md)                  | Container Manager and host-path preparation      |
-| 🧪 [Testing Hold](test/README.md)                   | VPN, end-to-end, and stack validation            |
-| 🛠️ [Contributin' Code Booty](docs/CONTRIBUTING.md)  | Repository standards and pull requests           |
-| 🤝 [The Pirate Code](docs/CODE_OF_CONDUCT.md)       | Expectations for every member of the crew        |
-| 🛡️ [Security Parley](docs/SECURITY.md)              | Private vulnerability reporting                  |
+| Scroll                                                               | When Ye Need It                                  |
+| -------------------------------------------------------------------- | ------------------------------------------------ |
+| 📚 [Developer Chart Room](https://scottgigawatt.github.io/plundarr/) | Architecture and generated Python reference      |
+| ⚒️ [Inside Maraudarr](docker/README.md)                              | Image commands, security, tags, and architecture |
+| 🖥️ [Synology Setup](docs/SETUP.md)                                   | Container Manager and host-path preparation      |
+| 🧪 [Testing Hold](test/README.md)                                    | VPN, end-to-end, and stack validation            |
+| 🛠️ [Contributin' Code Booty](docs/CONTRIBUTING.md)                   | Repository standards and pull requests           |
+| 🤝 [The Pirate Code](docs/CODE_OF_CONDUCT.md)                        | Expectations for every member of the crew        |
+| 🛡️ [Security Parley](docs/SECURITY.md)                               | Private vulnerability reporting                  |
 
 ## Ship's Log 🏝️
 
@@ -283,11 +301,11 @@ Privateerr image and does not vendor those scripts.
 
 ### 🧭 Crew Charts & Codes
 
-| 📜 Shipboard Scroll                                  | ⚓ What It Helps Ye Do                                                     |
-| ---------------------------------------------------- | -------------------------------------------------------------------------- |
-| 🛠️ [Patch the Hull](docs/CONTRIBUTING.md)            | Bring fixes and bright ideas aboard without springing leaks below deck.    |
-| 🤝 [The Crewmate Compact](docs/CODE_OF_CONDUCT.md)   | Keep the deck welcoming, useful, and free of plank-walking nonsense.       |
-| 🔐 [Whisper to the Quartermaster](docs/SECURITY.md)  | Report dangerous leaks privately before the sharks catch their scent.      |
+| 📜 Shipboard Scroll                                 | ⚓ What It Helps Ye Do                                                  |
+| --------------------------------------------------- | ----------------------------------------------------------------------- |
+| 🛠️ [Patch the Hull](docs/CONTRIBUTING.md)           | Bring fixes and bright ideas aboard without springing leaks below deck. |
+| 🤝 [The Crewmate Compact](docs/CODE_OF_CONDUCT.md)  | Keep the deck welcoming, useful, and free of plank-walking nonsense.    |
+| 🔐 [Whisper to the Quartermaster](docs/SECURITY.md) | Report dangerous leaks privately before the sharks catch their scent.   |
 
 ---
 

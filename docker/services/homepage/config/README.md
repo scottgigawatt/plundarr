@@ -6,7 +6,7 @@ This be the sacred spot for configurin' yer **Homepage** service, the treasure m
 
 The `homepage` service be yer trusty startin' point, guidin' ye to all yer other services and keepin' the ship's logs in order. Customize it to suit yer needs and always know where yer goin' on the high seas!
 
-More info about **Homepage** can be found [here](https://gethomepage.dev/latest/).
+[Homepage's documentation](https://gethomepage.dev/latest/) has more information.
 
 ## 🏴‍☠️ How to Set Sail
 

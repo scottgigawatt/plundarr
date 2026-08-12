@@ -81,6 +81,14 @@ run_case usenet \
     --add sabnzbd
 
 #
+# NZBGet-only Usenet voyage verifies the alternative downloader and VPN port.
+#
+run_case nzbget-usenet \
+    --preset plundarr \
+    --remove qbittorrent,cleanuparr \
+    --add nzbget
+
+#
 # Public optional-service combination most users are likely to chart.
 #
 run_case full \
@@ -111,7 +119,7 @@ run_case custom-homepage \
 #
 run_case everything \
     --preset plundarr \
-    --add apprise,jellyfin,plex,sabnzbd,sonarr-anime,watchtower,whisparr
+    --add apprise,jellyfin,nzbget,plex,sabnzbd,sonarr-anime,watchtower,whisparr
 
 #
 # Report one clear success line after every Compose chart passes.

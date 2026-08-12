@@ -1,0 +1,45 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# compose.yml: Maraudarr service chart for NZBGet.
+#
+
+services:
+  #
+  # Define the 'nzbget' service for managing Usenet downloads.
+  #
+  nzbget:
+    # Docker image and container information
+    <<: *arr-stack-container                         # Pull in arr-stack container config
+    image: lscr.io/linuxserver/nzbget:${NZBGET_TAG}  # Run using the specified tag
+    container_name: nzbget-${NZBGET_TAG}             # Append Docker image tag to container name
+    network_mode: service:gluetun                    # Route network traffic through gluetun
+
+    # Define the container environment
+    environment:
+      <<: *arr-stack-environment   # Pull in the arr-stack environment
+      NZBGET_USER: ${NZBGET_USER}  # Web UI and RPC control username
+      NZBGET_PASS: ${NZBGET_PASS}  # Web UI and RPC control password
+
+    # Mount host directories into the container
+    volumes:
+      - ${NZBGET_CONFIG_PATH}:/config:rw                    # Configuration files
+      - ${HOST_USENET_DOWNLOADS_PATH}:/downloads/usenet:rw  # Usenet downloads only
+
+    # Define container healthcheck to verify NZBGet connectivity
+    healthcheck:
+      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
+      test:                              # Ask NZBGet for its server status
+        - CMD
+        - /app/nzbget/nzbget
+        - -c
+        - /config/nzbget.conf
+        - -L
+        - S
+
+    # Specify container service dependencies
+    depends_on:
+      gluetun:
+        condition: service_healthy  # Wait until Gluetun reports healthy VPN connection

@@ -20,6 +20,8 @@ CHECK_RENDERED=check-rendered
 BUILD=build
 BUILD_MARAUDARR=build-maraudarr
 BUILD_MULTIARCH=build-multiarch
+DOCS=docs
+DOCS_SERVE=docs-serve
 ENSURE_MARAUDARR_IMAGE=ensure-maraudarr-image
 UPDATE_MARAUDARR=update-maraudarr
 RESET_CONFIG=reset-config
@@ -61,6 +63,8 @@ TARGETS= \
 	$(BUILD) \
 	$(BUILD_MARAUDARR) \
 	$(BUILD_MULTIARCH) \
+	$(DOCS) \
+	$(DOCS_SERVE) \
 	$(ENSURE_MARAUDARR_IMAGE) \
 	$(UPDATE_MARAUDARR) \
 	$(RESET_CONFIG) \
@@ -102,6 +106,7 @@ SONARR_SERVICE      ?= sonarr
 BAZARR_SERVICE      ?= bazarr
 QBITTORRENT_SERVICE ?= qbittorrent
 SABNZBD_SERVICE     ?= sabnzbd
+NZBGET_SERVICE      ?= nzbget
 CLEANUPARR_SERVICE  ?= cleanuparr
 DUPLICATI_SERVICE   ?= duplicati
 SEERR_SERVICE       ?= seerr
@@ -150,6 +155,13 @@ CONFIG_PATH               ?= config
 CONFIG_BACKUP_PATH        ?= backups
 
 #
+# Developer documentation settings.
+#
+MKDOCS             ?= mkdocs
+DOCS_SITE_PATH     ?= site
+DOCS_SERVE_ADDRESS ?= 127.0.0.1:8000
+
+#
 # Optional service selection used by Maraudarr and runtime tests.
 #
 empty :=
@@ -158,9 +170,11 @@ comma := ,
 SELECTED_OPTIONAL_SERVICES := $(strip $(subst $(comma),$(space),$(OPTIONAL_SERVICES)))
 VPN_QBITTORRENT_SERVICE    ?= $(if $(filter qbittorrent,$(SELECTED_OPTIONAL_SERVICES)),$(QBITTORRENT_SERVICE),)
 E2E_DOWNLOAD_SERVICES      ?= $(if $(filter qbittorrent,$(SELECTED_OPTIONAL_SERVICES)),$(QBITTORRENT_SERVICE),) \
-	$(if $(filter sabnzbd,$(SELECTED_OPTIONAL_SERVICES)),$(SABNZBD_SERVICE),)
+	$(if $(filter sabnzbd,$(SELECTED_OPTIONAL_SERVICES)),$(SABNZBD_SERVICE),) \
+	$(if $(filter nzbget,$(SELECTED_OPTIONAL_SERVICES)),$(NZBGET_SERVICE),)
 GLUETUN_DOWNLOADER_PORTS   ?= $(if $(filter qbittorrent,$(SELECTED_OPTIONAL_SERVICES)),8080,) \
-	$(if $(filter sabnzbd,$(SELECTED_OPTIONAL_SERVICES)),8081,)
+	$(if $(filter sabnzbd,$(SELECTED_OPTIONAL_SERVICES)),8081,) \
+	$(if $(filter nzbget,$(SELECTED_OPTIONAL_SERVICES)),6789,)
 
 #
 # End-to-end test services.
@@ -373,6 +387,7 @@ $(TEST_VPN): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 	PLUNDARR_ENV_FILE=$(COMPOSE_ENV_FILE) \
 	PLUNDARR_PRIVATEERR_SERVICE=$(PRIVATEERR_SERVICE) \
 	PLUNDARR_GLUETUN_SERVICE=$(GLUETUN_SERVICE) \
+	PLUNDARR_DOWNLOAD_SERVICES="$(E2E_DOWNLOAD_SERVICES)" \
 	PLUNDARR_QBITTORRENT_SERVICE=$(VPN_QBITTORRENT_SERVICE) \
 	$(PLUNDARR_VPN_TEST_CMD)
 
@@ -395,6 +410,7 @@ $(TEST_E2E): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED) $(RESET_CONFIG)
 		PLUNDARR_ENV_FILE=$(COMPOSE_ENV_FILE) \
 		PLUNDARR_PRIVATEERR_SERVICE=$(PRIVATEERR_SERVICE) \
 		PLUNDARR_GLUETUN_SERVICE=$(GLUETUN_SERVICE) \
+		PLUNDARR_DOWNLOAD_SERVICES="$(E2E_DOWNLOAD_SERVICES)" \
 		PLUNDARR_QBITTORRENT_SERVICE=$(VPN_QBITTORRENT_SERVICE) \
 		PLUNDARR_WAIT_SECONDS=$(COMPOSE_E2E_WAIT) \
 		$(PLUNDARR_VPN_TEST_CMD) || status=$$?; \
@@ -427,6 +443,7 @@ $(TEST_STACK): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED) $(RESET_CONFIG)
 		PLUNDARR_ENV_FILE=$(COMPOSE_ENV_FILE) \
 		PLUNDARR_PRIVATEERR_SERVICE=$(PRIVATEERR_SERVICE) \
 		PLUNDARR_GLUETUN_SERVICE=$(GLUETUN_SERVICE) \
+		PLUNDARR_DOWNLOAD_SERVICES="$(E2E_DOWNLOAD_SERVICES)" \
 		PLUNDARR_QBITTORRENT_SERVICE=$(VPN_QBITTORRENT_SERVICE) \
 		PLUNDARR_WAIT_SECONDS=$(COMPOSE_STACK_WAIT) \
 		$(PLUNDARR_VPN_TEST_CMD) || status=$$?; \
@@ -589,6 +606,32 @@ $(TEST_MARAUDARR): $(BUILD_DEPENDS) $(TEST_MARAUDARR_UNIT)
 		test/test-maraudarr-matrix.sh
 
 #
+# $(DOCS): Builds the strict Plundarr developer documentation site.
+#
+# Dependencies:
+#   requirements-docs.txt - Install the pinned MkDocs toolchain first.
+#
+$(DOCS):
+	@command -v $(MKDOCS) >/dev/null 2>&1 || { \
+		echo "MkDocs be missin'. Install requirements-docs.txt first. 📚"; \
+		exit 1; \
+	}
+	$(MKDOCS) build --strict --site-dir "$(DOCS_SITE_PATH)"
+
+#
+# $(DOCS_SERVE): Starts the local developer documentation preview server.
+#
+# Dependencies:
+#   requirements-docs.txt - Install the pinned MkDocs toolchain first.
+#
+$(DOCS_SERVE):
+	@command -v $(MKDOCS) >/dev/null 2>&1 || { \
+		echo "MkDocs be missin'. Install requirements-docs.txt first. 📚"; \
+		exit 1; \
+	}
+	$(MKDOCS) serve --dev-addr "$(DOCS_SERVE_ADDRESS)"
+
+#
 # $(PRESETS): Lists presets and their exact default services.
 #
 # Dependencies:
@@ -733,6 +776,8 @@ $(HELP):
 	$(call help_line,$(BUILD),Builds the local Maraudarr image.)
 	$(call help_line,$(BUILD_MARAUDARR),Builds Maraudarr from the docker context.)
 	$(call help_line,$(BUILD_MULTIARCH),Checks every published image architecture.)
+	$(call help_line,$(DOCS),Builds the strict developer documentation site.)
+	$(call help_line,$(DOCS_SERVE),Previews developer documentation locally.)
 	$(call help_line,$(UPDATE_MARAUDARR),Refreshes the published Maraudarr image.)
 	$(call help_line,$(DOWN),Stops and removes the service stack.)
 	$(call help_line,$(CLEAN),Stops the stack and restores example config files.)

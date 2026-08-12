@@ -36,8 +36,14 @@ class RenderError(RuntimeError):
 
 
 def render_header(plan: StackPlan) -> str:
-    """Render the established Plundarr header with a dynamic service manifest."""
+    """Render the established header and selected-service manifest.
 
+    Args:
+        plan: Resolved stack plan supplying summary text and service order.
+
+    Returns:
+        Commented Compose header ending with one blank line.
+    """
     summary = "\n".join(f"# {line}" if line else "#" for line in plan.preset.compose_summary)
     service_width = max(len(service.service) + 1 for service in plan.services) + 2
     services = "\n".join(
@@ -59,6 +65,7 @@ def render_header(plan: StackPlan) -> str:
 
 
 def _insert_gluetun_additions(block: str, selected: set[str]) -> str:
+    """Insert downloader-specific Gluetun commands and published ports."""
     environment_entries: list[tuple[str, str]] = []
     port_entries: list[tuple[str, str]] = []
     if "qbittorrent" in selected:
@@ -83,6 +90,8 @@ def _insert_gluetun_additions(block: str, selected: set[str]) -> str:
         )
     if "sabnzbd" in selected:
         port_entries.append(("- ${SABNZBD_WEBUI_PORT}:8085", "SABnzbd web UI port"))
+    if "nzbget" in selected:
+        port_entries.append(("- ${NZBGET_WEBUI_PORT}:6789", "NZBGet web UI port"))
 
     if environment_entries:
         anchor = (
@@ -114,8 +123,11 @@ def _prepare_service(
     selected: set[str],
     include_native_plex: bool,
 ) -> str:
+    """Apply service-specific conditional edits to one extracted chart."""
     if service_id == "gluetun":
         block = _insert_gluetun_additions(block, selected)
+    # These applications can operate without their catalog recommendations;
+    # remove template dependencies that were intentionally left unselected.
     if service_id in {"cleanuparr", "whisparr"}:
         block = strip_yaml_key(block, "depends_on")
     if service_id == "homepage":
@@ -129,6 +141,7 @@ def _prepare_service(
             "Homepage Prowlarr click target and widget": "prowlarr" in selected,
             "Homepage qBittorrent click target and widget": "qbittorrent" in selected,
             "Homepage SABnzbd click target and widget": "sabnzbd" in selected,
+            "Homepage NZBGet click target and widget": "nzbget" in selected,
             "Homepage Speedtest Tracker click target and widget": (
                 "speedtest-tracker" in selected
             ),
@@ -162,8 +175,21 @@ def _prepare_service(
 
 
 def render_compose(catalog: Catalog, plan: StackPlan) -> str:
-    """Render the final comment-rich Compose file."""
+    """Render the complete comment-rich Compose file.
 
+    Args:
+        catalog: Validated source catalog containing templates and charts.
+        plan: Resolved service selection in deterministic output order.
+
+    Returns:
+        A single Compose document with unresolved environment variables and
+        project-owned comments preserved.
+
+    Raises:
+        TemplateError: If an owned Compose source no longer contains an
+            expected service, foundation, footer, or comment group.
+        OSError: If a required source file cannot be read.
+    """
     base_source = catalog.source_path("templates/compose.yml").read_text()
     selected = set(plan.service_ids)
     include_native_plex = plan.preset.id == "plundarr" or "plex" in selected
@@ -189,6 +215,7 @@ def _filter_homepage_env(
     selected: set[str],
     include_native_plex: bool,
 ) -> str:
+    """Remove Homepage environment groups for unavailable integrations."""
     groups = {
         "Homepage Plex click-target and widget variables": include_native_plex,
         "Homepage Tautulli click-target and widget variables": include_native_plex,
@@ -205,6 +232,7 @@ def _filter_homepage_env(
             "qbittorrent" in selected
         ),
         "Homepage SABnzbd click-target and widget variables": "sabnzbd" in selected,
+        "Homepage NZBGet click-target and widget variables": "nzbget" in selected,
         "Homepage Speedtest Tracker click-target and widget variables": (
             "speedtest-tracker" in selected
         ),
@@ -212,6 +240,8 @@ def _filter_homepage_env(
     for heading, keep in groups.items():
         if keep:
             continue
+        # Homepage environment groups use stable project-owned headings. Work
+        # between headings so comments and assignment order remain untouched.
         marker = f"# {heading}\n"
         start = section.find(marker)
         if start < 0:
@@ -223,6 +253,7 @@ def _filter_homepage_env(
 
 
 def _existing_values(path: Path) -> dict[str, str]:
+    """Index existing assignment lines without evaluating their values."""
     if not path.exists():
         return {}
     values: dict[str, str] = {}
@@ -235,11 +266,13 @@ def _existing_values(path: Path) -> dict[str, str]:
 
 
 def _assignment_keys(source: str) -> set[str]:
+    """Return assignment names found at the start of environment lines."""
     assignment = re.compile(r"^(?P<key>[A-Za-z_][A-Za-z0-9_]*)=", re.MULTILINE)
     return {match.group("key") for match in assignment.finditer(source)}
 
 
 def _preserve_values(rendered: str, existing: dict[str, str]) -> str:
+    """Replace rendered assignments with matching user-managed lines."""
     assignment = re.compile(r"^(?P<key>[A-Za-z_][A-Za-z0-9_]*)=")
     lines = []
     for line in rendered.splitlines():
@@ -260,8 +293,11 @@ def _preserve_inactive_values(
     existing: dict[str, str],
     known_keys: set[str],
 ) -> str:
-    """Keep known settings when their service is temporarily unselected."""
+    """Keep known settings when their service is temporarily unselected.
 
+    Only keys owned by current catalog sources are retained. Unknown or removed
+    settings are not carried forward indefinitely.
+    """
     active_keys = _assignment_keys(rendered)
     inactive = [
         line
@@ -283,14 +319,14 @@ def _preserve_inactive_values(
 
 
 def _generate_first_run_secrets(rendered: str, existing: dict[str, str]) -> str:
-    """Replace known placeholders only when creating a new environment file."""
-
+    """Replace known placeholders only when no existing assignment is present."""
     generated = {
         "SPEEDTEST_TRACKER_APP_KEY": (
             "base64:" + base64.b64encode(secrets.token_bytes(32)).decode("ascii")
         ),
         "DUPLICATI_SETTINGS_ENCRYPTION_KEY": secrets.token_urlsafe(32),
         "DUPLICATI_WEBSERVICE_PASSWORD": secrets.token_urlsafe(18),
+        "NZBGET_PASS": secrets.token_urlsafe(18),
     }
     for key, value in generated.items():
         if key in existing:
@@ -311,8 +347,22 @@ def render_environment(
     existing_path: Path | None,
     generate_secrets: bool = True,
 ) -> str:
-    """Render a structured environment file in service order."""
+    """Render the selected environment while preserving user-managed values.
 
+    Args:
+        catalog: Validated catalog containing environment source fragments.
+        plan: Resolved service selection in deterministic output order.
+        existing_path: Existing ``.env`` file whose assignment lines should be
+            preserved. No prior values are loaded when this value is absent.
+        generate_secrets: Whether known first-run placeholders should receive
+            cryptographically strong generated values.
+
+    Returns:
+        The complete environment document with a trailing newline.
+
+    Raises:
+        OSError: If a source or existing environment file cannot be read.
+    """
     base_source = catalog.source_path("templates/environment.env").read_text()
     selected = set(plan.service_ids)
     include_plex_homepage = plan.preset.id == "plundarr" or "plex" in selected
@@ -330,6 +380,8 @@ def render_environment(
     rendered = "\n\n".join(
         section.rstrip("\n") for section in rendered_sections
     )
+    # Project identity follows the selected product preset and intentionally
+    # remains generator-owned during preservation.
     project_name = "boudoirr" if plan.preset.id == "boudoirr" else "plundarr"
     rendered = rendered.replace(
         'COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-plundarr}"',
@@ -350,6 +402,7 @@ def render_environment(
 
 
 def _homepage_card(source: str, label: str) -> str:
+    """Extract one Homepage card by its project-owned display label."""
     marker = f"    - {label}:\n"
     start = source.find(marker)
     if start < 0:
@@ -363,6 +416,7 @@ def _homepage_card(source: str, label: str) -> str:
 
 
 def _filter_calendar(card: str, selected: set[str]) -> str:
+    """Remove calendar integrations whose backing services are unselected."""
     lines = []
     skip = False
     for line in card.splitlines():
@@ -375,8 +429,19 @@ def _filter_calendar(card: str, selected: set[str]) -> str:
 
 
 def render_homepage_services(catalog: Catalog, plan: StackPlan) -> str:
-    """Render Homepage cards for the selected services."""
+    """Render Homepage groups and cards for selected integrations.
 
+    Args:
+        catalog: Validated catalog used to locate Homepage source fragments.
+        plan: Resolved service selection controlling cards and calendar items.
+
+    Returns:
+        A complete Homepage ``services.yaml`` document.
+
+    Raises:
+        RenderError: If a required built-in card cannot be found.
+        OSError: If a Homepage source fragment cannot be read.
+    """
     homepage_root = catalog.source_path("services/homepage/config")
     source = (homepage_root / "services.base.yaml").read_text()
     source += (homepage_root / "services.footer.yaml").read_text()
@@ -415,6 +480,7 @@ def render_homepage_services(catalog: Catalog, plan: StackPlan) -> str:
     for service_id, label in (
         ("qbittorrent", "qBittorrent"),
         ("sabnzbd", "SABnzbd"),
+        ("nzbget", "NZBGet"),
     ):
         if service_id in selected:
             fragment = homepage_root / "fragments" / f"{service_id}.yaml"
@@ -435,8 +501,11 @@ def render_homepage_services(catalog: Catalog, plan: StackPlan) -> str:
 
 
 def _atomic_write(path: Path, content: str, mode: int | None = None) -> None:
-    """Replace one text file atomically with predictable permissions."""
+    """Replace one text file atomically with predictable permissions.
 
+    Temporary files are created beside the destination so ``os.replace`` stays
+    on one filesystem. Environment files default to owner-only permissions.
+    """
     path.parent.mkdir(parents=True, exist_ok=True)
     descriptor, temporary_name = tempfile.mkstemp(prefix=f".{path.name}.", dir=path.parent)
     temporary_path = Path(temporary_name)
@@ -451,8 +520,12 @@ def _atomic_write(path: Path, content: str, mode: int | None = None) -> None:
 
 
 def _seed_config_tree(source_root: Path, destination_root: Path) -> None:
-    """Copy missing config seeds while preserving existing application state."""
+    """Copy safe config seeds while preserving existing application state.
 
+    Generated Homepage assembly fragments never leave the source tree. Existing
+    application files win, while project-owned README files may be refreshed to
+    keep generated guidance current.
+    """
     if not source_root.is_dir():
         return
 
@@ -471,6 +544,8 @@ def _seed_config_tree(source_root: Path, destination_root: Path) -> None:
         if destination_path.exists() and source_path.name != "README.md":
             continue
 
+        # README files are documentation owned by Maraudarr rather than mutable
+        # application state, so regeneration may safely refresh their content.
         if source_path.name == "README.md":
             _atomic_write(
                 destination_path,
@@ -484,8 +559,20 @@ def _seed_config_tree(source_root: Path, destination_root: Path) -> None:
 
 
 def write_config(catalog: Catalog, plan: StackPlan, output_dir: Path) -> Path:
-    """Create selected service directories without replacing user-owned state."""
+    """Create selected config directories without replacing application state.
 
+    Args:
+        catalog: Validated catalog containing shared and service config seeds.
+        plan: Resolved service selection controlling generated directories.
+        output_dir: Plundarr project directory that owns ``config/``.
+
+    Returns:
+        Path to the generated or updated config root.
+
+    Raises:
+        RenderError: If a required Homepage card cannot be rendered.
+        OSError: If directories or seed files cannot be created or copied.
+    """
     config_path = output_dir / "config"
     config_path.mkdir(parents=True, exist_ok=True)
     _seed_config_tree(catalog.source_path("config"), config_path)
@@ -506,8 +593,19 @@ def write_config(catalog: Catalog, plan: StackPlan, output_dir: Path) -> Path:
 
 
 def validate_compose(output_dir: Path) -> None:
-    """Validate the generated pair when Docker Compose is available."""
+    """Ask Docker Compose to validate a generated project pair.
 
+    Args:
+        output_dir: Directory containing ``docker-compose.yml`` and ``.env``.
+
+    Raises:
+        RenderError: If an installed Docker Compose command rejects the project.
+
+    Note:
+        A missing Docker executable is tolerated so source-only environments
+        can still render output. Any installed command that returns failure is
+        treated as authoritative.
+    """
     command = [
         "docker",
         "compose",
@@ -532,8 +630,24 @@ def write_stack(
     plan: StackPlan,
     output_dir: Path,
 ) -> tuple[Path, Path, Path]:
-    """Generate, validate, and write the complete Plundarr project structure."""
+    """Generate, validate, and write a complete Plundarr project.
 
+    Compose and environment artifacts are staged and validated before their
+    public paths are atomically replaced. Config seeds are applied afterward
+    using preservation rules appropriate for application-owned state.
+
+    Args:
+        catalog: Validated catalog providing templates and service sources.
+        plan: Resolved service selection in deterministic generation order.
+        output_dir: Directory that receives the generated Plundarr project.
+
+    Returns:
+        Paths to ``docker-compose.yml``, ``.env``, and the config directory.
+
+    Raises:
+        RenderError: If rendering requirements or Compose validation fail.
+        OSError: If staging, writing, or replacing output files fails.
+    """
     compose_path = output_dir / "docker-compose.yml"
     env_path = output_dir / ".env"
     example_env_path = output_dir / "example.env"

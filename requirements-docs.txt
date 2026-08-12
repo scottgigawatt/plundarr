@@ -1,0 +1,17 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# requirements-docs.txt: Exact dependencies used to build Plundarr developer
+#                        documentation locally and on GitHub Pages.
+#
+
+# Material theme and Markdown toolchain for the static documentation site.
+mkdocs-material==9.7.7
+
+# Static Python API reference generation from Maraudarr source and docstrings.
+mkdocstrings-python==2.0.5
+
+# Deterministic signature formatting for generated Python reference pages.
+ruff==0.16.2

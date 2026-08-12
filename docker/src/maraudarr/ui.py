@@ -52,15 +52,28 @@ class UserCancelled(RuntimeError):
 
 
 class UI:
-    """Render Maraudarr output consistently in rich and plain terminals."""
+    """Render Maraudarr output consistently in rich and plain terminals.
+
+    Rich presentation is used only when optional dependencies are available,
+    styled output is allowed, and the caller did not request plain mode.
+
+    Attributes:
+        plain: Whether output uses dependency-free text presentation.
+        console: Rich console instance, or ``None`` in plain mode.
+    """
 
     def __init__(self, plain: bool = False) -> None:
+        """Create a terminal presenter.
+
+        Args:
+            plain: Force dependency-free output even when Rich is available.
+                The ``NO_COLOR`` environment variable also enables this mode.
+        """
         self.plain = plain or not RICH_AVAILABLE or bool(os.environ.get("NO_COLOR"))
         self.console = None if self.plain else Console()
 
     def welcome(self) -> None:
-        """Display Maraudarr's purpose before listing available cargo."""
-
+        """Display Maraudarr's purpose before listing available choices."""
         message = (
             "[bold]Choose a voyage, load the services, and chart one reusable "
             "Plundarr Docker Compose stack.[/bold]"
@@ -83,8 +96,12 @@ class UI:
         presets: list[Preset],
         service_lookup: dict[str, Service],
     ) -> None:
-        """List presets with their exact default services."""
+        """List presets with their exact default services.
 
+        Args:
+            presets: Presets to display in caller-supplied order.
+            service_lookup: Service metadata keyed by catalog identifier.
+        """
         if self.console:
             table = Table(
                 title="🗺️  Available Voyages",
@@ -113,8 +130,18 @@ class UI:
             print(f"{preset.id}: {preset.description}\n  Services: {cargo or 'Choose your own'}")
 
     def choose_preset(self, presets: list[Preset]) -> str:
-        """Prompt for one preset in an interactive terminal."""
+        """Prompt for one preset in an interactive terminal.
 
+        Args:
+            presets: Ordered choices presented to the user.
+
+        Returns:
+            Stable identifier of the selected preset.
+
+        Raises:
+            UserCancelled: If no interactive terminal is available or the user
+                exits without choosing a preset.
+        """
         if self.plain or not sys.stdin.isatty():
             raise UserCancelled("Interactive configuration requires a terminal.")
         answer = questionary.select(
@@ -128,8 +155,11 @@ class UI:
         return str(answer)
 
     def show_service_choices(self, services: list[Service]) -> None:
-        """Explain selectable services before interactive checkbox prompts."""
+        """Explain selectable services before interactive checkbox prompts.
 
+        Args:
+            services: Selectable services in desired presentation order.
+        """
         if self.console:
             table = Table(
                 title="🧩 Available Cargo",
@@ -153,8 +183,19 @@ class UI:
         services: list[Service],
         selected: set[str],
     ) -> set[str]:
-        """Collect service choices grouped by category."""
+        """Collect service choices grouped by category.
 
+        Args:
+            services: Selectable services in category and presentation order.
+            selected: Service IDs checked when each category prompt opens.
+
+        Returns:
+            Service IDs checked across every category.
+
+        Raises:
+            UserCancelled: If no interactive terminal is available or the user
+                exits any category prompt.
+        """
         if self.plain or not sys.stdin.isatty():
             raise UserCancelled("Interactive configuration requires a terminal.")
 
@@ -183,8 +224,11 @@ class UI:
         return chosen
 
     def show_plan(self, plan: StackPlan) -> None:
-        """Present the resolved service manifest before writing files."""
+        """Present the resolved service manifest before writing files.
 
+        Args:
+            plan: Fully resolved stack plan, including automatic dependencies.
+        """
         if self.console:
             summary = Table.grid(padding=(0, 2))
             summary.add_column(style="bold")
@@ -210,8 +254,14 @@ class UI:
         print("Services: " + ", ".join(service.id for service in plan.services))
 
     def confirm(self) -> bool:
-        """Confirm a plan when attached to an interactive terminal."""
+        """Confirm a plan when attached to an interactive terminal.
 
+        Returns:
+            ``True`` for a confirmed prompt or any non-interactive plain run.
+
+        Raises:
+            UserCancelled: If the user dismisses the confirmation prompt.
+        """
         if self.plain or not sys.stdin.isatty():
             return True
         answer = questionary.confirm(
@@ -224,8 +274,11 @@ class UI:
         return bool(answer)
 
     def progress(self, message: str) -> None:
-        """Print one generation progress message."""
+        """Print one generation progress message.
 
+        Args:
+            message: User-facing status text to display unchanged.
+        """
         if self.console:
             self.console.print(message)
         else:
@@ -238,8 +291,14 @@ class UI:
         env_path: str,
         config_path: str,
     ) -> None:
-        """Report generated artifacts and precise launch instructions."""
+        """Report generated artifacts and context-aware launch instructions.
 
+        Args:
+            plan: Generated plan used to select relevant follow-up steps.
+            compose_path: Display path to the generated Compose chart.
+            env_path: Display path to the generated environment file.
+            config_path: Display path to the generated config root.
+        """
         selected = set(plan.service_ids)
         steps = []
         if "privateerr" in selected:
@@ -249,6 +308,7 @@ class UI:
                 "bazarr",
                 "duplicati",
                 "jellyfin",
+                "nzbget",
                 "plex",
                 "qbittorrent",
                 "radarr",
@@ -282,8 +342,12 @@ class UI:
             print(f"{number}. {step}")
 
     def error(self, message: str, fix: str | None = None) -> None:
-        """Display a generator failure and an optional corrective action."""
+        """Display a generator failure and optional corrective action.
 
+        Args:
+            message: Concrete failure explanation.
+            fix: Optional next action that may correct the failure.
+        """
         body = message
         if fix:
             body += f"\n\n[bold]Fix:[/] {fix}"
@@ -297,8 +361,11 @@ class UI:
                 print(f"Fix: {fix}", file=sys.stderr)
 
     def cancelled(self, message: str) -> None:
-        """Display an intentional cancellation without reporting failure."""
+        """Display an intentional cancellation without reporting failure.
 
+        Args:
+            message: Cancellation reason to present to the user.
+        """
         if self.console:
             self.console.print(
                 Panel(message, title="⚓ Voyage Cancelled", border_style="#f2c14e")

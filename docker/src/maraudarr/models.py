@@ -15,7 +15,21 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class Service:
-    """Describe one selectable service and its Maraudarr-owned sources."""
+    """Describe one selectable service and its Maraudarr-owned sources.
+
+    Attributes:
+        id: Stable catalog identifier used by presets and CLI selections.
+        title: Human-readable service name displayed by Maraudarr.
+        description: Short explanation of the service's stack responsibility.
+        category: UI group used when presenting selectable services.
+        url: Upstream project or service information URL.
+        order: Primary deterministic position in generated output.
+        compose: Catalog-root-relative Compose source path.
+        environment: Catalog-root-relative environment source path.
+        service: Compose service key extracted from the source chart.
+        requires: Service IDs added automatically as hard dependencies.
+        recommended: Related service IDs shown as non-mandatory companions.
+    """
 
     id: str
     title: str
@@ -32,7 +46,16 @@ class Service:
 
 @dataclass(frozen=True)
 class Preset:
-    """Describe an opinionated starting selection for a stack."""
+    """Describe an opinionated starting selection for a stack.
+
+    Attributes:
+        id: Stable identifier accepted by the CLI.
+        title: Human-readable preset name displayed by Maraudarr.
+        description: Short explanation of the preset's intended voyage.
+        compose_summary: Comment lines inserted into the generated chart header.
+        core: Service IDs that cannot be removed from this preset.
+        defaults: Optional service IDs selected when the preset starts.
+    """
 
     id: str
     title: str
@@ -43,14 +66,23 @@ class Preset:
 
     @property
     def services(self) -> tuple[str, ...]:
-        """Return every service selected by default."""
+        """Return every core and optional service selected by default.
 
+        Returns:
+            Service IDs in preset declaration order, with core services first.
+        """
         return self.core + self.defaults
 
 
 @dataclass(frozen=True)
 class StackPlan:
-    """Store a resolved service selection in deterministic output order."""
+    """Store a resolved service selection in deterministic output order.
+
+    Attributes:
+        preset: Preset that supplied the plan's identity and core services.
+        services: Fully resolved services in stable generation order.
+        auto_added: Required service IDs absent from the explicit selection.
+    """
 
     preset: Preset
     services: tuple[Service, ...]
@@ -58,6 +90,9 @@ class StackPlan:
 
     @property
     def service_ids(self) -> tuple[str, ...]:
-        """Return selected service identifiers."""
+        """Return selected service identifiers in generation order.
 
+        Returns:
+            Service IDs matching the order of ``services``.
+        """
         return tuple(service.id for service in self.services)
