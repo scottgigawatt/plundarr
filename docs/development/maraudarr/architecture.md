@@ -5,22 +5,29 @@ writing so each boundary can be tested without launching the generated stack.
 
 ## Generation Flow
 
-```mermaid
-flowchart LR
-    CLI["CLI<br/>cli.py"]
-    Catalog["Catalog<br/>catalog.py"]
-    Plan["StackPlan<br/>models.py"]
-    Render["Renderers<br/>render.py + text.py"]
-    Stage["Temporary staging directory"]
-    Validate["docker compose config"]
-    Output["Plundarr<br/>Compose + env + config"]
+This is the path of one successful Maraudarr generation run, from the user's
+service choices to safely published Plundarr files and preserved application
+configuration. It describes project generation, not container startup.
 
-    CLI --> Catalog
-    Catalog --> Plan
-    Plan --> Render
-    Render --> Stage
-    Stage --> Validate
-    Validate --> Output
+```mermaid
+%%{init: {"flowchart": {"nodeSpacing": 40, "rankSpacing": 52}, "themeVariables": {"fontSize": "18px"}}}%%
+flowchart TB
+    CLI["🧭 Capture intent<br/><code>cli.py</code>"]
+    Catalog["📚 Resolve the catalog<br/><code>catalog.py</code>"]
+    Plan["📋 Build an immutable StackPlan<br/><code>models.py</code>"]
+    Render["🧩 Render selected fragments<br/><code>render.py + text.py</code>"]
+    Stage["📦 Stage candidate files<br/>temporary output directory"]
+    Validate["🔎 Validate the staged project<br/><code>docker compose config</code>"]
+    Publish["✅ Atomically publish files<br/>Compose + .env + example.env"]
+    Config["🛟 Seed config safely<br/>preserve existing application state"]
+
+    CLI -->|"preset + service choices"| Catalog
+    Catalog -->|"ordered services + dependencies"| Plan
+    Plan -->|"generation contract"| Render
+    Render -->|"candidate project files"| Stage
+    Stage -->|"staged Compose + environment"| Validate
+    Validate -->|"validation passes"| Publish
+    Publish -->|"then apply safe seeds"| Config
 ```
 
 ## 1. Parse Intent
