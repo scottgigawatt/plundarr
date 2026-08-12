@@ -7,19 +7,24 @@ assignees: scottgigawatt
 
 ---
 
-**☠️ What went wrong**
+## ☠️ What went wrong
+
 Tell me what broke in Plundarr. Keep it short and clear.
 
-**🪝 How to trigger the problem**
+## 🪝 How to trigger the problem
+
 List the steps so I can reproduce it.
+
 1.
 2.
 3.
 
-**🌊 What you expected**
+## 🌊 What you expected
+
 Tell me what should have happened instead.
 
-**📜 Logs or output**
+## 📜 Logs or output
+
 Share safe logs, error messages, or screenshots if you have them.
 
 Useful commands:
@@ -34,17 +39,20 @@ make reset-service-configs
 pre-commit run --all-files
 ```
 
-**🧩 Your setup**
+## 🧩 Your setup
+
 - Plundarr branch or commit:
 - OS and version:
 - Docker or Docker Compose version:
 - Privateerr image tag:
 - Gluetun image tag:
 
-**🧭 Extra details**
+## 🧭 Extra details
+
 Anything else that might help track down the bug.
 
-**🛡️ Secrets check**
+## 🛡️ Secrets check
+
 - [ ] No real PIA username or password.
 - [ ] No live `wg0.conf`.
 - [ ] No live `privateerr.env`.
