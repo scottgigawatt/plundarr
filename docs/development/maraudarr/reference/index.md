@@ -1,3 +1,7 @@
+---
+icon: material/language-python
+---
+
 # Python Reference Map 🐍
 
 These pages are generated from Maraudarr's public Python docstrings and type
