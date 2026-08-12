@@ -25,16 +25,27 @@
     ],
 
     // Track Maraudarr's digest-pinned donor images across every build entrypoint.
+    // Keep direct and shell-default forms separate so each pin is extracted once.
     "customManagers": [
         {
             "customType": "regex",
             "managerFilePatterns": [
                 "/^docker/Dockerfile$/",
-                "/^example\\.maraudarr\\.env$/",
                 "/^\\.github/workflows/build-and-push\\.yml$/"
             ],
             "matchStrings": [
-                "ALPINE_TAG[=:]\\s*(?<currentValue>[^@\\s]+)@(?<currentDigest>sha256:[a-f0-9]+)",
+                "ALPINE_TAG[=:]\\s*(?<currentValue>[^@\\s]+)@(?<currentDigest>sha256:[a-f0-9]+)"
+            ],
+            "depNameTemplate": "alpine",
+            "datasourceTemplate": "docker",
+            "versioningTemplate": "docker"
+        },
+        {
+            "customType": "regex",
+            "managerFilePatterns": [
+                "/^example\\.maraudarr\\.env$/"
+            ],
+            "matchStrings": [
                 "ALPINE_TAG=\"\\$\\{ALPINE_TAG:-(?<currentValue>[^@\\s}]+)@(?<currentDigest>sha256:[a-f0-9]+)\\}\""
             ],
             "depNameTemplate": "alpine",
@@ -45,11 +56,21 @@
             "customType": "regex",
             "managerFilePatterns": [
                 "/^docker/Dockerfile$/",
-                "/^example\\.maraudarr\\.env$/",
                 "/^\\.github/workflows/build-and-push\\.yml$/"
             ],
             "matchStrings": [
-                "DOCKER_CLI_TAG[=:]\\s*(?<currentValue>[^@\\s]+)@(?<currentDigest>sha256:[a-f0-9]+)",
+                "DOCKER_CLI_TAG[=:]\\s*(?<currentValue>[^@\\s]+)@(?<currentDigest>sha256:[a-f0-9]+)"
+            ],
+            "depNameTemplate": "docker",
+            "datasourceTemplate": "docker",
+            "versioningTemplate": "docker"
+        },
+        {
+            "customType": "regex",
+            "managerFilePatterns": [
+                "/^example\\.maraudarr\\.env$/"
+            ],
+            "matchStrings": [
                 "DOCKER_CLI_TAG=\"\\$\\{DOCKER_CLI_TAG:-(?<currentValue>[^@\\s}]+)@(?<currentDigest>sha256:[a-f0-9]+)\\}\""
             ],
             "depNameTemplate": "docker",
@@ -60,11 +81,21 @@
             "customType": "regex",
             "managerFilePatterns": [
                 "/^docker/Dockerfile$/",
-                "/^example\\.maraudarr\\.env$/",
                 "/^\\.github/workflows/build-and-push\\.yml$/"
             ],
             "matchStrings": [
-                "DOCKER_COMPOSE_TAG[=:]\\s*(?<currentValue>[^@\\s]+)@(?<currentDigest>sha256:[a-f0-9]+)",
+                "DOCKER_COMPOSE_TAG[=:]\\s*(?<currentValue>[^@\\s]+)@(?<currentDigest>sha256:[a-f0-9]+)"
+            ],
+            "depNameTemplate": "docker/compose-bin",
+            "datasourceTemplate": "docker",
+            "versioningTemplate": "docker"
+        },
+        {
+            "customType": "regex",
+            "managerFilePatterns": [
+                "/^example\\.maraudarr\\.env$/"
+            ],
+            "matchStrings": [
                 "DOCKER_COMPOSE_TAG=\"\\$\\{DOCKER_COMPOSE_TAG:-(?<currentValue>[^@\\s}]+)@(?<currentDigest>sha256:[a-f0-9]+)\\}\""
             ],
             "depNameTemplate": "docker/compose-bin",
