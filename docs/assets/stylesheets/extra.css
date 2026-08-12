@@ -55,10 +55,26 @@
   --plundarr-surface: rgb(9 35 44 / 76%);
 }
 
+/*
+ * Pin the decorative chart-room glow to the viewport so long documentation
+ * pages scroll over one continuous, non-repeating background.
+ */
 body {
+  isolation: isolate;
+}
+
+body::before {
   background-image:
     radial-gradient(circle at 10% 5%, rgb(45 212 191 / 8%), transparent 25rem),
     radial-gradient(circle at 92% 12%, rgb(214 168 75 / 8%), transparent 22rem);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  content: "";
+  inset: 0;
+  pointer-events: none;
+  position: fixed;
+  z-index: -1;
 }
 
 ::selection {
