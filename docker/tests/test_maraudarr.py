@@ -135,13 +135,15 @@ class MaraudarrTests(unittest.TestCase):
         self.assertIn("# Define the 'apprise' service", compose)
         self.assertIn("# Define the 'jellyfin' service", compose)
         self.assertIn("${APPRISE_API_ONLY}", compose)
+        self.assertIn("image: jellyfin/jellyfin:${JELLYFIN_TAG}", compose)
+        self.assertNotIn("lscr.io/linuxserver/jellyfin", compose)
         self.assertIn("${JELLYFIN_WEBUI_PORT}:8096", compose)
         self.assertIn("${SABNZBD_WEBUI_PORT}:8085", compose)
         self.assertIn("${NZBGET_WEBUI_PORT}:6789", compose)
         self.assertIn("/app/nzbget/nzbget", compose)
         self.assertIn("HOMEPAGE_VAR_NZBGET_USER", compose)
         self.assertIn("HOMEPAGE_VAR_SONARR_ANIME_KEY", compose)
-        self.assertEqual(2, compose.count("<<: *rootless-container"))
+        self.assertEqual(3, compose.count("<<: *rootless-container"))
         self.assertIn("http://127.0.0.1:8000/status", compose)
 
     def test_environment_sections_follow_service_selection(self) -> None:

@@ -12,10 +12,14 @@ services:
   #
   jellyfin:
     # Docker image and container information
-    <<: *arr-stack-container                             # Pull in arr-stack container config
-    image: lscr.io/linuxserver/jellyfin:${JELLYFIN_TAG}  # Run using the specified tag
-    container_name: jellyfin-${JELLYFIN_TAG}             # Append Docker image tag to container name
-    hostname: jellyfin                                   # Set the container hostname
+    <<: *rootless-container                   # Pull in rootless container config
+    image: jellyfin/jellyfin:${JELLYFIN_TAG}  # Run the official Jellyfin image
+    container_name: jellyfin-${JELLYFIN_TAG}  # Append Docker image tag to container name
+    hostname: jellyfin                        # Set the container hostname
+
+    # Define the container environment
+    environment:
+      <<: *default-environment  # Pull in the default environment information
 
     # Define the host and container ports
     ports:
