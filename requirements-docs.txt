@@ -11,7 +11,7 @@
 mkdocs-material==9.7.7
 
 # Static Python API reference generation from Maraudarr source and docstrings.
-mkdocstrings-python==2.0.5
+mkdocstrings-python==2.0.7
 
 # Deterministic signature formatting for generated Python reference pages.
 ruff==0.16.3
