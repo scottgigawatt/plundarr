@@ -17,7 +17,7 @@ flowchart TB
     Plan["📋 Build an immutable StackPlan<br/><code>models.py</code>"]
     Render["🧩 Render selected fragments<br/><code>render.py + text.py</code>"]
     Stage["📦 Stage candidate files<br/>temporary output directory"]
-    Validate["🔎 Validate the staged project<br/><code>docker compose config</code>"]
+    Validate["🔎 Validate the staged project<br/><code>docker-compose config</code>"]
     Publish["✅ Atomically publish files<br/>Compose + .env + example.env"]
     Config["🛟 Seed config safely<br/>preserve existing application state"]
 

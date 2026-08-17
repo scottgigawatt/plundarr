@@ -95,9 +95,10 @@ The published image and Make targets use a deliberately narrow runtime:
 | 🧾 Atomic output         | Compose and environment files replace their targets only after validation |
 | 🗃️ State preservation    | Existing application config files are never deleted during regeneration   |
 
-Maraudarr validates every generated pair with `docker compose config --quiet`
-before replacing root output. The explicit `make clean-config` target is the
-only normal path that removes the complete config hold.
+Maraudarr validates every generated pair with its bundled standalone
+`docker-compose config --quiet` command before replacing root output. The
+explicit `make clean-config` target is the only normal path that removes the
+complete config hold.
 
 ## Registry Charts 🗂️
 
