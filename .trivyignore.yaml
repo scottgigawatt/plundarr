@@ -4,7 +4,7 @@
 # Licensed under the Apache License, Version 2.0.
 #
 # .trivyignore.yaml: Temporary, path-scoped exceptions for vulnerabilities in
-#                    Maraudarr's upstream Docker Compose validation binary.
+#                    Maraudarr's upstream Docker validation binaries.
 #
 
 vulnerabilities:
@@ -15,3 +15,59 @@ vulnerabilities:
     statement: >-
       Maraudarr invokes only docker compose config without a Docker socket;
       the vulnerable Moby daemon authorization-plugin path is unreachable.
+  - id: CVE-2026-33818
+    paths:
+      - usr/local/bin/docker
+    expired_at: 2026-08-31
+    statement: >-
+      Maraudarr invokes only offline docker compose config validation; the
+      vulnerable Go parser is unreachable while the official CLI is rebuilt.
+  - id: CVE-2026-39821
+    paths:
+      - usr/local/bin/docker
+    expired_at: 2026-08-31
+    statement: >-
+      Maraudarr invokes only offline docker compose config validation; the
+      vulnerable Go network path is unreachable while the CLI is rebuilt.
+  - id: CVE-2026-46600
+    paths:
+      - usr/local/bin/docker
+    expired_at: 2026-08-31
+    statement: >-
+      Maraudarr invokes only offline docker compose config validation; the
+      vulnerable Go DNS parser is unreachable while the CLI is rebuilt.
+  - id: CVE-2026-56853
+    paths:
+      - usr/local/bin/docker
+    expired_at: 2026-08-31
+    statement: >-
+      Maraudarr invokes only offline docker compose config validation; the
+      vulnerable Go HTTP/2 path is unreachable while the CLI is rebuilt.
+  - id: CVE-2026-56858
+    paths:
+      - usr/local/bin/docker
+    expired_at: 2026-08-31
+    statement: >-
+      Maraudarr invokes only offline docker compose config validation; the
+      vulnerable Go template path is unreachable while the CLI is rebuilt.
+  - id: CVE-2026-56859
+    paths:
+      - usr/local/bin/docker
+    expired_at: 2026-08-31
+    statement: >-
+      Maraudarr invokes only offline docker compose config validation; the
+      vulnerable Go XML parser is unreachable while the CLI is rebuilt.
+  - id: CVE-2026-56860
+    paths:
+      - usr/local/bin/docker
+    expired_at: 2026-08-31
+    statement: >-
+      Maraudarr invokes only offline docker compose config validation; the
+      vulnerable Go URL parser is unreachable while the CLI is rebuilt.
+  - id: CVE-2026-56862
+    paths:
+      - usr/local/bin/docker
+    expired_at: 2026-08-31
+    statement: >-
+      Maraudarr invokes only offline docker compose config validation; the
+      vulnerable Go TLS path is unreachable while the CLI is rebuilt.
