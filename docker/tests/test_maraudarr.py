@@ -13,12 +13,16 @@ from __future__ import annotations
 import tempfile
 import unittest
 from pathlib import Path
+from subprocess import CompletedProcess
+from unittest.mock import Mock, patch
 
 from maraudarr.catalog import Catalog, CatalogError
 from maraudarr.render import (
+    RenderError,
     render_compose,
     render_environment,
     render_homepage_services,
+    validate_compose,
     write_stack,
 )
 from maraudarr.text import extract_service
@@ -266,6 +270,67 @@ class MaraudarrTests(unittest.TestCase):
             restored_environment = render_environment(self.catalog, plundarr, env_path)
             self.assertIn(expected_value, restored_environment)
             self.assertEqual(restored_environment.count(expected_value), 1)
+
+    #
+    # Docker Compose validation behavior.
+    #
+    @patch("maraudarr.render.subprocess.run")
+    def test_compose_validation_prefers_the_docker_plugin(self, run: Mock) -> None:
+        """Prefer the common Docker CLI plugin when it is installed."""
+
+        run.return_value = CompletedProcess([], 0, "", "")
+
+        validate_compose(Path("/tmp/plundarr-output"))
+
+        command = run.call_args.args[0]
+        self.assertEqual(command[:2], ["docker", "compose"])
+        self.assertEqual(command[-2:], ["config", "--quiet"])
+        run.assert_called_once()
+
+    @patch("maraudarr.render.subprocess.run")
+    def test_compose_validation_falls_back_to_the_standalone_binary(
+        self,
+        run: Mock,
+    ) -> None:
+        """Use standalone Compose when the Docker CLI is not installed."""
+
+        run.side_effect = [
+            FileNotFoundError,
+            CompletedProcess([], 0, "", ""),
+        ]
+
+        validate_compose(Path("/tmp/plundarr-output"))
+
+        self.assertEqual(run.call_count, 2)
+        plugin_command = run.call_args_list[0].args[0]
+        standalone_command = run.call_args_list[1].args[0]
+        self.assertEqual(plugin_command[:2], ["docker", "compose"])
+        self.assertEqual(standalone_command[0], "docker-compose")
+        self.assertEqual(plugin_command[2:], standalone_command[1:])
+
+    @patch("maraudarr.render.subprocess.run")
+    def test_compose_validation_tolerates_missing_executables(
+        self,
+        run: Mock,
+    ) -> None:
+        """Allow source-only rendering when neither Compose command exists."""
+
+        run.side_effect = FileNotFoundError
+
+        validate_compose(Path("/tmp/plundarr-output"))
+
+        self.assertEqual(run.call_count, 2)
+
+    @patch("maraudarr.render.subprocess.run")
+    def test_compose_validation_rejects_invalid_output(self, run: Mock) -> None:
+        """Treat a failure from an installed Compose command as authoritative."""
+
+        run.return_value = CompletedProcess([], 1, "", "invalid stack")
+
+        with self.assertRaisesRegex(RenderError, "invalid stack"):
+            validate_compose(Path("/tmp/plundarr-output"))
+
+        run.assert_called_once()
 
     #
     # Homepage card and variable selection behavior.

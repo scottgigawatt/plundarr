@@ -602,13 +602,11 @@ def validate_compose(output_dir: Path) -> None:
         RenderError: If an installed Docker Compose command rejects the project.
 
     Note:
-        A missing Docker executable is tolerated so source-only environments
-        can still render output. Any installed command that returns failure is
-        treated as authoritative.
+        Missing Docker Compose executables are tolerated so source-only
+        environments can still render output. Any installed command that
+        returns failure is treated as authoritative.
     """
-    command = [
-        "docker",
-        "compose",
+    arguments = [
         "--env-file",
         str(output_dir / ".env"),
         "-f",
@@ -616,13 +614,23 @@ def validate_compose(output_dir: Path) -> None:
         "config",
         "--quiet",
     ]
-    try:
-        result = subprocess.run(command, capture_output=True, text=True, check=False)
-    except FileNotFoundError:
+    commands = (["docker", "compose", *arguments], ["docker-compose", *arguments])
+    for command in commands:
+        try:
+            result = subprocess.run(
+                command,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+        except FileNotFoundError:
+            continue
+        if result.returncode:
+            message = result.stderr.strip() or result.stdout.strip()
+            raise RenderError(
+                f"Docker Compose rejected the generated stack: {message}"
+            )
         return
-    if result.returncode:
-        message = result.stderr.strip() or result.stdout.strip()
-        raise RenderError(f"Docker Compose rejected the generated stack: {message}")
 
 
 def write_stack(
