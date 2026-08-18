@@ -23,8 +23,11 @@ REPOSITORY_ROOT=$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd)
 TEST_ROOT=${MARAUDARR_TEST_OUTPUT:-/tmp/maraudarr-matrix}
 
 #
-# Generate one voyage and ask Docker Compose to validate the final deployment
-# pair. Each case receives an isolated output directory.
+# run_case: Generate one voyage and validate its final deployment pair.
+#
+# Parameters: $1 - Case name. Remaining arguments are Maraudarr build options.
+#
+# Returns:     0 when generation and Docker Compose validation succeed.
 #
 run_case() {
     case_name=$1
@@ -51,9 +54,11 @@ run_case() {
 }
 
 #
-# Generate several presets beneath one distribution root. This is the normal
-# user-facing mode: every preset owns an isolated Compose, environment, and
-# configuration directory while sharing the same checkout.
+# run_distribution_case: Generate one normal preset beneath a distribution root.
+#
+# Parameters: $1 - Preset name. Remaining arguments are Maraudarr build options.
+#
+# Returns:     0 when generation and Docker Compose validation succeed.
 #
 run_distribution_case() {
     preset=$1

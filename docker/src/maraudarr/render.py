@@ -449,7 +449,7 @@ def render_environment(
         remapped_ports: dict[str, str] = {}
         for variable in published_variables:
             assignment = re.compile(
-                rf'^{re.escape(variable)}="\$\{{{re.escape(variable)}:-(\d+)\}}"$',
+                rf'^{re.escape(variable)}="\$\{{{re.escape(variable)}:-(\d+)\}}"(?P<comment>\s+#.*)?$',
                 flags=re.MULTILINE,
             )
             match = assignment.search(rendered)
@@ -462,7 +462,7 @@ def render_environment(
                     f"Preset '{plan.preset.id}' offsets {variable} beyond port 65535."
                 )
             rendered = assignment.sub(
-                f'{variable}="${{{variable}:-{offset_port}}}"',
+                f'{variable}="${{{variable}:-{offset_port}}}"{match.group("comment") or ""}',
                 rendered,
                 count=1,
             )

@@ -1,12 +1,23 @@
+//
+// Copyright 2025-2026 Scott Gigawatt
+//
+// Licensed under the Apache License, Version 2.0.
+//
+// renovate.json5: Automated dependency update policy for Plundarr.
+//
 {
+    //
     // Renovate schema and shared safe defaults.
+    //
     "$schema": "https://docs.renovatebot.com/renovate-schema.json",
     "extends": [
         "config:recommended",
         "helpers:pinGitHubActionDigests"
     ],
 
+    //
     // Keep dependency work predictable for a single-maintainer repository.
+    //
     "timezone": "America/New_York",
     "schedule": ["before 8am on monday"],
     "dependencyDashboard": true,
@@ -14,7 +25,9 @@
     "assignees": ["scottgigawatt"],
     "reviewers": ["scottgigawatt"],
 
+    //
     // Renovate owns updates that Dependabot previously duplicated.
+    //
     "enabledManagers": [
         "custom.regex",
         "docker-compose",
@@ -24,8 +37,10 @@
         "pip_requirements"
     ],
 
+    //
     // Track Maraudarr's digest-pinned donor images across every build entrypoint.
     // Keep direct and shell-default forms separate so each pin is extracted once.
+    //
     "customManagers": [
         {
             "customType": "regex",
@@ -79,7 +94,9 @@
         }
     ],
 
+    //
     // Keep related update types grouped and dependency pins deterministic.
+    //
     "packageRules": [
         {
             "matchManagers": ["docker-compose", "dockerfile", "custom.regex"],

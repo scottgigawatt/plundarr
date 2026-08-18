@@ -52,14 +52,22 @@ fi
 docker_compose+=(--env-file "${PLUNDARR_ENV_FILE}" -f "${PLUNDARR_COMPOSE_FILE}")
 
 #
-# Print a consistent status line.
+# log: Print a consistent status line.
+#
+# Parameters: $* - Message fragments to write as one status line.
+#
+# Returns:     0 after writing the line.
 #
 log() {
     printf '[%s] %s\n' "${script_name}" "$*"
 }
 
 #
-# Resolve a Compose service to a container ID.
+# container_id_for_service: Resolve one Compose service to its container ID.
+#
+# Parameters: $1 - Compose service name.
+#
+# Returns:     0 and the newest container ID when found.
 #
 container_id_for_service() {
     service_name="$1"
@@ -69,7 +77,11 @@ container_id_for_service() {
 }
 
 #
-# Check whether every healthcheck-enabled service is healthy.
+# all_services_are_healthy: Check every healthcheck-enabled service.
+#
+# Parameters: None.
+#
+# Returns:     0 when all applicable services are healthy; 1 otherwise.
 #
 all_services_are_healthy() {
     all_healthy=true

@@ -28,7 +28,7 @@ Questionable cargo includes:
 
 ## Local Setup 🛠️
 
-```bash
+```sh
 git clone git@github.com:scottgigawatt/plundarr.git
 cd plundarr
 make ship
@@ -38,7 +38,7 @@ Edit `dist/plundarr/.env` with yer own values. Keep that file private.
 
 Useful commands:
 
-```bash
+```sh
 make check-env
 make config
 make env
@@ -62,6 +62,8 @@ pre-commit run --all-files
 - Code comments should use plain English.
 - Shell scripts written for host use should use `#!/bin/sh` where possible.
 - Shell scripts should use four spaces for indentation.
+- Shell functions document their purpose, parameters, and return behavior.
+- Copyable Markdown commands use `sh` fences without a shell prompt.
 - Docker Compose values should come from the selected preset's `.env` instead
   of inline fallback soup.
 - Keep service config directories aligned with service names.

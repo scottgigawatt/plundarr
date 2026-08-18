@@ -128,12 +128,22 @@ jobs:
 
     steps:
       #
+      # Check out without persistent credentials so the notification helper and
+      # release source are available before any registry action begins.
+      #
+      - name: "Grab the Treasure Map 🗺️"
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      #
       # Announce the start independently to each configured Discord destination.
       # Missing optional webhooks deliberately skip without failing publication.
       #
       - name: "Notify Discord: shipyard opened 📣"
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          DISCORD_TEMPLATE: shipyard
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           WORKFLOW_NAME: ${{ github.workflow }}
           REF_NAME: ${{ github.ref_name }}
@@ -142,56 +152,12 @@ jobs:
           GHCR_IMAGE: ${{ env.GHCR_IMAGE }}
           DOCKERHUB_IMAGE: ${{ env.DOCKERHUB_IMAGE }}
           IMAGE_PLATFORMS: ${{ env.IMAGE_PLATFORMS }}
-        run: |
-          if [ -z "${DISCORD_WEBHOOK_URL}" ]; then
-              echo "DISCORD_WEBHOOK_URL is not set; skipping Discord notification."
-              exit 0
-          fi
-
-          color=3447003
-
-          payload="$(jq -n \
-              --arg title "🏴‍☠️ Shipyard doors are open" \
-              --arg description "${WORKFLOW_NAME} is building the fleet. Keep hands, feet, and cursed YAML inside the workflow." \
-              --arg url "${RUN_URL}" \
-              --arg repository "${REPOSITORY}" \
-              --arg ref "${REF_NAME}" \
-              --arg actor "${ACTOR}" \
-              --arg platforms "${IMAGE_PLATFORMS}" \
-              --arg ghcr "${GHCR_IMAGE}" \
-              --arg dockerhub "${DOCKERHUB_IMAGE}" \
-              --argjson color "${color}" \
-              '{
-                username: "Maraudarr Deck Crew",
-                embeds: [{
-                  title: $title,
-                  description: $description,
-                  url: $url,
-                  color: $color,
-                  fields: [
-                    {name: "🗺️ Repository", value: $repository, inline: true},
-                    {name: "🌿 Ref", value: $ref, inline: true},
-                    {name: "🧑‍✈️ Captain", value: $actor, inline: true},
-                    {name: "🧱 Platforms", value: $platforms, inline: false},
-                    {name: "📦 GHCR", value: $ghcr, inline: false},
-                    {name: "🐳 Docker Hub", value: $dockerhub, inline: false}
-                  ],
-                  footer: {text: "Maraudarr Shipyard • bolts tightened, YAML questioned"},
-                  timestamp: now | todate
-                }]
-              }')"
-
-          curl \
-              --fail \
-              --silent \
-              --show-error \
-              --header "Content-Type: application/json" \
-              --data "${payload}" \
-              "${DISCORD_WEBHOOK_URL}"
+        run: sh .github/scripts/notify-discord.sh
 
       - name: "Notify Hades Discord: kraken awakened 🦑"
         env:
-          DISCORD_HADES_HOOK_URL: ${{ secrets.DISCORD_HADES_HOOK_URL }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_HADES_HOOK_URL }}
+          DISCORD_TEMPLATE: kraken
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           WORKFLOW_NAME: ${{ github.workflow }}
           REF_NAME: ${{ github.ref_name }}
@@ -200,61 +166,7 @@ jobs:
           GHCR_IMAGE: ${{ env.GHCR_IMAGE }}
           DOCKERHUB_IMAGE: ${{ env.DOCKERHUB_IMAGE }}
           IMAGE_PLATFORMS: ${{ env.IMAGE_PLATFORMS }}
-        run: |
-          if [ -z "${DISCORD_HADES_HOOK_URL}" ]; then
-              echo "DISCORD_HADES_HOOK_URL is not set; skipping Hades Discord notification."
-              exit 0
-          fi
-
-          color=10181046
-
-          payload="$(jq -n \
-              --arg title "🦑 Kraken clocked in" \
-              --arg description "${WORKFLOW_NAME} started a multi-arch build. The kraken found the button and accepted no training." \
-              --arg url "${RUN_URL}" \
-              --arg repository "${REPOSITORY}" \
-              --arg ref "${REF_NAME}" \
-              --arg actor "${ACTOR}" \
-              --arg platforms "${IMAGE_PLATFORMS}" \
-              --arg ghcr "${GHCR_IMAGE}" \
-              --arg dockerhub "${DOCKERHUB_IMAGE}" \
-              --argjson color "${color}" \
-              '{
-                username: "Kraken Build Bureau",
-                embeds: [{
-                  title: $title,
-                  description: $description,
-                  url: $url,
-                  color: $color,
-                  fields: [
-                    {name: "⚓ Repository", value: $repository, inline: true},
-                    {name: "🌿 Ref", value: $ref, inline: true},
-                    {name: "🔘 Button Pusher", value: $actor, inline: true},
-                    {name: "🧱 Platforms", value: $platforms, inline: false},
-                    {name: "📦 GHCR", value: $ghcr, inline: false},
-                    {name: "🐳 Docker Hub", value: $dockerhub, inline: false}
-                  ],
-                  footer: {text: "Kraken Build Bureau • too many arms, adequate supervision"},
-                  timestamp: now | todate
-                }]
-              }')"
-
-          curl \
-              --fail \
-              --silent \
-              --show-error \
-              --header "Content-Type: application/json" \
-              --data "${payload}" \
-              "${DISCORD_HADES_HOOK_URL}"
-
-      #
-      # Prepare the checked-out source and emulation toolchain used to produce a
-      # single manifest list for every supported Maraudarr architecture.
-      #
-      - name: "Grab the Treasure Map 🗺️"
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
-        with:
-          persist-credentials: false
+        run: sh .github/scripts/notify-discord.sh
 
       - name: "Summon Cross-Arch Cannons 🧨"
         uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8  # v4

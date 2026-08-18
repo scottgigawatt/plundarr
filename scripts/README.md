@@ -15,7 +15,8 @@ This directory keeps host-side helper scripts for Plundarr.
 
 ### `compose-restart.sh`
 
-Waits for Docker, stops a Compose project, removes volumes, and starts the stack again in detached mode.
+Waits for Docker, stops a Compose project while preserving named volumes, and
+starts the stack again in detached mode.
 
 Run manually or at boot:
 

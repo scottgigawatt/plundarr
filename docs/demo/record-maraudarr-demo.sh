@@ -39,7 +39,11 @@ DEMO_DATA="$DEMO_ROOT/data"
 MARAUDARR_IMAGE="maraudarr:readme-demo-$$"
 
 #
-# Stop the temporary generated project and remove the disposable checkout.
+# cleanup: Stop the temporary project and remove its disposable checkout.
+#
+# Parameters: None.
+#
+# Returns:     Always returns 0 so cleanup cannot hide the original result.
 #
 cleanup() {
     if [ -f "$DEMO_CHECKOUT/dist/plundarr/docker-compose.yml" ] && [ -f "$DEMO_CHECKOUT/dist/plundarr/.env" ]; then

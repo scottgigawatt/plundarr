@@ -74,7 +74,11 @@ mkdir -p "$(dirname "${PLUNDARR_LOG_PATH}")"
 : > "${PLUNDARR_LOG_PATH}"
 
 #
-# Print a consistent status line for CI logs and the persisted log file.
+# log: Print one status line for CI logs and the persisted log file.
+#
+# Parameters: $* - Message fragments to write as one status line.
+#
+# Returns:     tee's exit status.
 #
 log() {
     printf '[%s] %s\n' "${plundarr_test_script_name}" "$*" \
@@ -82,7 +86,11 @@ log() {
 }
 
 #
-# Make sure a file exists and is not empty.
+# require_file: Ensure a file exists and is not empty.
+#
+# Parameters: $1 - File path. $2 - Human-readable file label.
+#
+# Returns:     0 when the file exists; exits nonzero otherwise.
 #
 require_file() {
     file_path="$1"
@@ -95,7 +103,11 @@ require_file() {
 }
 
 #
-# Resolve a Compose service to a container ID.
+# container_id_for_service: Resolve one Compose service to its container ID.
+#
+# Parameters: $1 - Compose service name.
+#
+# Returns:     0 and the newest container ID when found.
 #
 container_id_for_service() {
     service_name="$1"
@@ -105,7 +117,11 @@ container_id_for_service() {
 }
 
 #
-# Check that a container is running.
+# require_running_container: Check that a resolved container is running.
+#
+# Parameters: $1 - Container ID. $2 - Compose service name.
+#
+# Returns:     0 when running; exits nonzero otherwise.
 #
 require_running_container() {
     container_id="$1"
@@ -123,7 +139,11 @@ require_running_container() {
 }
 
 #
-# Check Docker health status when a container defines a healthcheck.
+# require_healthy_container: Check a container's Docker health status.
+#
+# Parameters: $1 - Container ID. $2 - Compose service name.
+#
+# Returns:     0 when healthy; exits nonzero otherwise.
 #
 require_healthy_container() {
     container_id="$1"
@@ -138,7 +158,11 @@ require_healthy_container() {
 }
 
 #
-# Wait for a service container to become healthy.
+# wait_for_healthy_container: Wait for one container to become healthy.
+#
+# Parameters: $1 - Container ID. $2 - Compose service name.
+#
+# Returns:     0 when healthy; exits nonzero after the configured timeout.
 #
 wait_for_healthy_container() {
     container_id="$1"
@@ -164,7 +188,11 @@ wait_for_healthy_container() {
 }
 
 #
-# Extract a basic scalar value from qBittorrent's preferences JSON.
+# json_value: Extract a basic scalar value from qBittorrent preferences JSON.
+#
+# Parameters: $1 - JSON payload. $2 - JSON key.
+#
+# Returns:     0 and the scalar value when found.
 #
 json_value() {
     json_payload="$1"

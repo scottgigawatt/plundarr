@@ -6,13 +6,13 @@ Avast ye! This here be the guide for riggin' up yer Docker Compose fleet with PI
 
 Run the interactive generator from the cloned repository:
 
-```bash
+```sh
 make configure
 ```
 
 Or generate a known voyage directly:
 
-```bash
+```sh
 make ship
 make ship PRESET=boudoirr ADD_SERVICES=jellyfin
 make ship PRESET=jellyfin
@@ -24,7 +24,7 @@ Plundarr and Boudoirr use qBittorrent as their only default downloader.
 SABnzbd, NZBGet, and Watchtower remain optional choices. Use
 `ADD_SERVICES` and `REMOVE_SERVICES` for repeatable changes:
 
-```bash
+```sh
 # Usenet only
 make ship REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=sabnzbd
 
@@ -51,7 +51,7 @@ Docker IPAM (IP Address Management) lets ye carve out yer own slice of the subne
 
 Update these settings in yer generated `.env` file:
 
-```bash
+```sh
 #
 # Broad waters fer the subnet (Subnet range: 172.28.0.1 - 172.28.255.254)
 # Chart mask: 255.255.0.0
@@ -106,15 +106,19 @@ Fer them sailin' with Synology DiskStations, here be the riggin' details ye need
 
 If your Synology DiskStation firewall is enabled, allow traffic for the custom Docker network:
 
-1. 🛠️ Open **Control Panel** → **Security** (under Connectivity).
-2. 🛡️ Go to the **Firewall** tab → Click **Edit Rules**.
-3. ➕ Click **Create** to add a rule:
-   - 🎯 **Ports**: Select `All`
-   - 🌐 **Source IP**: Select `Specific IP`
-   - 🧩 Click `Select` → Choose `Subnet`
-   - 📝 Enter `172.28.0.0` for **IP Address** and `255.255.0.0` for **Subnet mask/Prefix length**
-   - ✅ **Action**: Select `Allow`
-4. 💾 Click **OK** to apply.
+1. Open **Control Panel** → **Security** → **Firewall**.
+2. Select **Edit Rules**, then select **Create**.
+3. Configure the rule with these values:
+
+| Setting | Value |
+| --- | --- |
+| Ports | `All` |
+| Source IP | `Specific IP` → `Subnet` |
+| IP address | `172.28.0.0` |
+| Subnet mask | `255.255.0.0` |
+| Action | `Allow` |
+
+1. Select **OK** to save the rule.
 
 This allows containers to communicate internally within the defined Docker network while Gluetun hauls selected download-client traffic and port-forwarding through the proper PIA tunnel.
 
@@ -125,29 +129,31 @@ This allows containers to communicate internally within the defined Docker netwo
 
 To deploy a project using Synology Container Manager:
 
-1. 🔑 Log in to the Synology DSM web interface.
-2. 🗺️ Run `make configure` from the cloned repository to chart the selected
+1. Log in to the Synology DSM web interface.
+2. Run `make configure` from the cloned repository to chart the selected
    `dist/<preset>/docker-compose.yml`, `.env`, and `config/` directories.
-3. 📦 Open **Container Manager** and navigate to the **Project** tab 📂.
-4. 🆕 Click **Create** and configure:
-   - 🏷️ **Project Name**: (e.g., `plundarr`)
-   - 📂 **Project Path**: Path to the selected `dist/<preset>` directory.
-   - 📜 **Compose File**: `docker-compose.yml`
-5. 🚀 Review and confirm the settings to deploy the project.
+3. Open **Container Manager**, then open the **Project** tab.
+4. Select **Create** and use these values:
+
+| Setting | Value |
+| --- | --- |
+| Project name | For example, `plundarr` |
+| Project path | The selected `dist/<preset>` directory |
+| Compose file | `docker-compose.yml` |
+
+1. Review the settings and deploy the project.
 
 Refer to the [official Synology documentation](https://kb.synology.com/en-id/DSM/help/ContainerManager/docker_project?version=7) for further details.
 
 ## Jellyfin and Plex Libraries 🎞️
 
-Jellyfin mounts `JELLYFIN_DATA_PATH` as writable `/data`, with separate
-persistent `/config` and `/cache` mounts. Add `/data/movies` and `/data/tv` as
-libraries for standalone Jellyfin or Plundarr. For Boudoirr, add
-`/data/movies` and `/data/scenes`, then point `WHISPARR_DATA_PATH` and
-`JELLYFIN_DATA_PATH` at the same high-level host directory. Logs persist under
-`/config/log` without a separate log mount.
-
-Plex uses separate read-only library mounts: movies, TV, and anime for
-Plundarr; movies and scenes for Boudoirr; movies and TV standalone.
+| Server | Host mount behavior | Libraries to add | Notes |
+| --- | --- | --- | --- |
+| Jellyfin with Plundarr or standalone | `JELLYFIN_DATA_PATH` mounts read/write at `/data` | `/data/movies`, `/data/tv` | Persistent `/config` and `/cache`; logs stay under `/config/log`. |
+| Jellyfin with Boudoirr | The shared Whisparr/Jellyfin high-level data root mounts read/write at `/data` | `/data/movies`, `/data/scenes` | Set `WHISPARR_DATA_PATH` and `JELLYFIN_DATA_PATH` to the same host directory. |
+| Plex with Plundarr | Separate read-only library mounts | Movies, TV, anime | Plex also has persistent config and transcode mounts. |
+| Plex with Boudoirr | Separate read-only library mounts | Movies, scenes | Choose Plex explicitly; it is not included by default. |
+| Plex standalone | Separate read-only library mounts | Movies, TV | Uses host networking. |
 
 ---
 

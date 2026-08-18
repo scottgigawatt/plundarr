@@ -38,6 +38,10 @@ Do not create separate "extra" or "addon" aggregate files. Keep service order,
 dependencies, source paths, and descriptions explicit and documented in
 `catalog/catalog.toml`.
 
+Keep the category comments and add a concise comment immediately above every
+service and preset table so catalog readers can understand both the group and
+the entry's role without reading the renderer.
+
 ## Rendering Rules
 
 Maraudarr preserves source comments and `${VARIABLES}`. Normal generation writes:

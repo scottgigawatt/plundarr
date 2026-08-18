@@ -86,6 +86,26 @@ runtime state belongs under `dist/<preset>/config/` and remains ignored.
 
 Do not remove or overwrite existing application state while regenerating a
 stack. The explicit `make clean-config` target owns destructive config cleanup.
+`make nuke` intentionally removes the selected stack's Docker resources. Both
+targets must remain clearly marked as destructive in `make help` and public
+documentation; `make clean-artifacts` must never touch deployments, `.env`
+files, configuration, backups, containers, volumes, or images.
+
+## Shell, Documentation, And Automation Style
+
+Every project-owned shell script begins with its interpreter, copyright block,
+filename summary, purpose, and usage. Document each shell function immediately
+above its declaration with its purpose, parameters, and return behavior. Use
+POSIX function syntax in `sh` scripts and Bash syntax only when Bash is needed.
+
+Markdown command snippets are copyable: use `sh` fences without prompt
+characters. Reserve `bash` for Bash-only syntax and `console` for real terminal
+transcripts. Generated environment fragments should give short, aligned
+end-of-line guidance for values novice operators need to change.
+
+Workflow YAML uses four-space indentation. Keep comments for non-obvious
+security, lifecycle, and integration decisions. Reusable workflow shell logic
+belongs in documented `.github` helpers instead of duplicated `run` blocks.
 
 ## Docker And Compose Rules
 

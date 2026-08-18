@@ -13,7 +13,7 @@ environment file, and the selected service config directories.
 
 The repository Makefile supplies the hardened Docker invocation:
 
-```bash
+```sh
 git clone https://github.com/scottgigawatt/plundarr.git
 cd plundarr
 make ship
@@ -32,7 +32,7 @@ dist/plundarr/
 Run `make configure` for the interactive preset and service picker, or choose a
 preset directly:
 
-```bash
+```sh
 make ship PRESET=jellyfin
 make ship PRESET=plex
 make ship PRESET=boudoirr ADD_SERVICES=jellyfin

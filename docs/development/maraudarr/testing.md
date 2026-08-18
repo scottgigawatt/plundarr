@@ -5,7 +5,7 @@ for generator, image, workflow, or documentation changes.
 
 ## Unit Tests
 
-```bash
+```sh
 make test-maraudarr-unit
 ```
 
@@ -16,7 +16,7 @@ not hide source behavior.
 
 ## Generation Matrix
 
-```bash
+```sh
 make test-maraudarr
 ```
 
@@ -30,7 +30,7 @@ project/service/tag container names, and published ports collision-free.
 
 ## Image Builds
 
-```bash
+```sh
 make build-maraudarr
 make build-multiarch
 ```
@@ -42,13 +42,13 @@ published CPU architecture: `linux/amd64`, `linux/arm64`, and `linux/arm/v7`.
 
 Install the isolated documentation toolchain once:
 
-```bash
+```sh
 python3 -m pip install --requirement requirements-docs.txt
 ```
 
 Build the warning-free site or start a local preview:
 
-```bash
+```sh
 make docs
 make docs-serve
 ```
@@ -60,7 +60,7 @@ the same strict build and publishes a fresh artifact from `main`.
 
 Finish with:
 
-```bash
+```sh
 pre-commit run --all-files
 git diff --check
 ```

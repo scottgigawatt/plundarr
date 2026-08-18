@@ -13,6 +13,7 @@
 ALL=all
 DOWN=down
 CLEAN=clean
+CLEAN_ARTIFACTS=clean-artifacts
 NUKE=nuke
 BUILD_DEPENDS=build-depends
 CHECK_ENV=check-env
@@ -56,6 +57,7 @@ TARGETS= \
 	$(ALL) \
 	$(DOWN) \
 	$(CLEAN) \
+	$(CLEAN_ARTIFACTS) \
 	$(NUKE) \
 	$(BUILD_DEPENDS) \
 	$(CHECK_ENV) \
@@ -173,6 +175,7 @@ endif
 MKDOCS             ?= mkdocs
 DOCS_SITE_PATH     ?= site
 DOCS_SERVE_ADDRESS ?= 127.0.0.1:8000
+DEVELOPER_ARTIFACTS ?= site .ruff_cache .pytest_cache test/logs
 
 #
 # Rendered service selection used by runtime tests.
@@ -384,6 +387,20 @@ $(CLEAN_CONFIG):
 	@echo "\nRemoving the complete Plundarr config hold. ☠️"
 	rm -rf "$(CONFIG_PATH)"
 	@echo "Run make $(SHIP) to regenerate selected service folders and seed files. 🗺️"
+
+#
+# $(CLEAN_ARTIFACTS): Removes only disposable developer artifacts. It never
+#                     reads or deletes dist/, generated configuration,
+#                     environment files, Docker resources, or backups.
+#
+$(CLEAN_ARTIFACTS):
+	@echo "\nScrubbin' disposable developer artifacts only. 🧽"
+	rm -rf $(DEVELOPER_ARTIFACTS)
+	find . -path './.git' -prune -o -path './dist' -prune -o \
+		-type d -name '__pycache__' -prune -exec rm -rf {} +
+	find . -path './.git' -prune -o -path './dist' -prune -o \
+		-type f \( -name '*.pyc' -o -name '*.pyo' -o -name '.DS_Store' \) -delete
+	@echo "Deployment charts, .env files, config, backups, containers, volumes, and images remain untouched. ⚓"
 
 #
 # $(TEST_VPN): Validates a running stack's Privateerr and Gluetun VPN runtime state.
@@ -753,7 +770,21 @@ $(LOGS): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 #   $(CHECK_RENDERED) - Ensure the rendered Compose file exists.
 #
 $(PS): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
-	$(PLUNDARR_COMPOSE) ps
+	@project_name="$${COMPOSE_PROJECT_NAME:-}"; \
+	if [ -z "$$project_name" ]; then \
+		project_name=$$(awk -F '=' '\
+			/^COMPOSE_PROJECT_NAME=/ { \
+				value=$$2; \
+				sub(/^"\$\${COMPOSE_PROJECT_NAME:-/, "", value); \
+				sub(/}"$$/, "", value); \
+				sub(/^"/, "", value); \
+				print value; \
+				exit; \
+			}' "$(COMPOSE_ENV_FILE)"); \
+	fi; \
+	docker ps \
+		--filter "label=com.docker.compose.project=$$project_name" \
+		--format 'table {{.Names}}\t{{.Label "com.docker.compose.service"}}\t{{.Status}}\t{{.Ports}}'
 
 #
 # $(TEST_LOGS): View output from stack containers.
@@ -785,49 +816,50 @@ $(OPEN): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 # $(HELP): Print help information.
 #
 $(HELP):
-	@echo "Usage: make [TARGET]"
+	@echo "Plundarr command chart"
+	@echo "Usage: make <target> [PRESET=<preset>] [ADD_SERVICES=id,...] [REMOVE_SERVICES=id,...]"
 	@echo ""
-	@echo "Targets:"
-	$(call help_line,$(ALL),Starts the service stack.)
-	$(call help_line,$(BUILD_DEPENDS),Ensures build dependencies are installed.)
-	$(call help_line,$(CHECK_ENV),Ensures $(ENV_FILE) exists.)
-	$(call help_line,$(CHECK_RENDERED),Ensures $(COMPOSE_FILE) exists.)
-	$(call help_line,$(BUILD),Builds the local Maraudarr image.)
-	$(call help_line,$(BUILD_MARAUDARR),Builds Maraudarr from the docker context.)
-	$(call help_line,$(BUILD_MULTIARCH),Checks every published image architecture.)
-	$(call help_line,$(DOCS),Builds the strict developer documentation site.)
-	$(call help_line,$(DOCS_SERVE),Previews developer documentation locally.)
-	$(call help_line,$(UPDATE_MARAUDARR),Refreshes the published Maraudarr image.)
-	$(call help_line,$(DOWN),Stops and removes the service stack.)
-	$(call help_line,$(CLEAN),Stops the stack and restores example config files.)
-	$(call help_line,$(NUKE),Removes containers plus images and generated files.)
-	$(call help_line,$(RESET_CONFIG),Restores example VPN config files.)
-	$(call help_line,$(BACKUP_CONFIG),Archives config with a unique timestamp.)
-	$(call help_line,$(CLEAN_CONFIG),Deletes the complete generated config tree.)
-	$(call help_line,$(TEST_VPN),Validates the VPN runtime state.)
-	$(call help_line,$(TEST_E2E),Tests VPN plus selected download services.)
-	$(call help_line,$(TEST_STACK),Tests the full stack health and VPN state.)
-	$(call help_line,$(TEST_DOWN),Stops the stack and restores example configs.)
-	$(call help_line,$(TEST_LOGS),Shows logs for the service stack.)
-	$(call help_line,$(UP),(Re)creates and starts every service.)
-	$(call help_line,$(SHIP),Generates the selected preset and services.)
-	$(call help_line,$(CONFIGURE),Opens Maraudarr's interactive configurator.)
-	$(call help_line,$(TEST_MARAUDARR_UNIT),Runs Maraudarr's Python unit tests.)
-	$(call help_line,$(TEST_MARAUDARR),Tests Maraudarr and generated charts.)
-	$(call help_line,$(PRESETS),Lists presets and their default services.)
-	$(call help_line,$(AVAILABLE_SERVICES),Lists every selectable service.)
-	$(call help_line,$(CONFIG),Renders the Docker Compose model.)
-	$(call help_line,$(COMPOSE_SERVICES),Lists generated Compose services.)
-	$(call help_line,$(ENV),Prints evaluated Compose env values.)
-	$(call help_line,$(PRINT_CONFIG),Prints uncommented Compose yaml.)
-	$(call help_line,$(PRINT_ENV),Prints uncommented Compose env values.)
-	$(call help_line,$(PS),Shows stack container status.)
-	$(call help_line,$(LOGS),Shows logs for the service stack.)
-	$(call help_line,$(OPEN),Opens service sites in the default browser.)
-	$(call help_line,$(RUN),Alias for $(UP) $(OPEN) and $(LOGS).)
-	$(call help_line,$(START),Alias for $(UP).)
-	$(call help_line,$(STOP),Alias for $(DOWN).)
-	$(call help_line,$(HELP),Displays this help message.)
+	@echo "🧭 Generate and discover"
+	$(call help_line,$(SHIP),Generate a preset deployment (default: plundarr).)
+	$(call help_line,$(CONFIGURE),Open the interactive preset and service selector.)
+	$(call help_line,$(PRESETS),List presets and their default services.)
+	$(call help_line,$(AVAILABLE_SERVICES),List every selectable service.)
+	@echo ""
+	@echo "🚀 Run the selected deployment"
+	$(call help_line,$(UP),Start or recreate the selected stack.)
+	$(call help_line,$(DOWN),Stop and remove selected-stack containers and networks.)
+	$(call help_line,$(PS),Show a compact container status table.)
+	$(call help_line,$(LOGS),Follow selected-stack logs.)
+	$(call help_line,$(OPEN),Open selected-stack web interfaces on macOS.)
+	@echo ""
+	@echo "🔎 Inspect generated output"
+	$(call help_line,$(CONFIG),Print Docker Compose's rendered configuration.)
+	$(call help_line,$(COMPOSE_SERVICES),List rendered Compose services.)
+	$(call help_line,$(ENV),Print rendered environment values.)
+	$(call help_line,$(PRINT_CONFIG),Print raw Compose configuration without comments.)
+	$(call help_line,$(PRINT_ENV),Print raw environment settings without comments.)
+	@echo ""
+	@echo "🧪 Test and build"
+	$(call help_line,$(TEST_MARAUDARR_UNIT),Run Maraudarr Python unit tests.)
+	$(call help_line,$(TEST_MARAUDARR),Run image fallback and Compose matrix tests.)
+	$(call help_line,$(TEST_VPN),Check a running VPN tunnel.)
+	$(call help_line,$(TEST_E2E),Run the focused VPN end-to-end test.)
+	$(call help_line,$(TEST_STACK),Run the complete stack test.)
+	$(call help_line,$(BUILD_MARAUDARR),Build Maraudarr from this checkout.)
+	$(call help_line,$(BUILD_MULTIARCH),Check every published image architecture.)
+	$(call help_line,$(DOCS),Build the strict developer documentation site.)
+	$(call help_line,$(DOCS_SERVE),Preview developer documentation locally.)
+	@echo ""
+	@echo "🧹 Maintenance"
+	$(call help_line,$(UPDATE_MARAUDARR),Refresh the published Maraudarr image.)
+	$(call help_line,$(BACKUP_CONFIG),Archive the selected preset config safely.)
+	$(call help_line,$(CLEAN_ARTIFACTS),Remove only disposable developer artifacts.)
+	$(call help_line,$(CLEAN),Stop the stack and restore example test config.)
+	$(call help_line,$(RESET_CONFIG),Restore example VPN config files for tests.)
+	$(call help_line,$(CLEAN_CONFIG),DANGER: delete the selected preset config tree.)
+	$(call help_line,$(NUKE),DANGER: remove selected-stack containers volumes and images.)
+	@echo ""
+	@echo "The destructive targets never run automatically. Back up config before using them."
 
 #
 # $(CLEAN): Alias for test-down.

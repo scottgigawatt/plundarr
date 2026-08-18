@@ -20,7 +20,7 @@ The VPN test script does not use a throwaway test image. It validates the actual
 Use the complete Maraudarr test target while changing image resolution,
 presets, service charts, or generated config seeds:
 
-```bash
+```sh
 make test-maraudarr
 ```
 
@@ -32,7 +32,7 @@ They also run the Python unit suite and generate representative Compose charts.
 
 Use this when the full Plundarr stack is already running:
 
-```bash
+```sh
 make test-vpn
 ```
 
@@ -42,7 +42,7 @@ This checks the existing Privateerr and Gluetun containers, then verifies genera
 
 Use this when ye want `Make` to launch only the VPN pair plus download clients, validate it, then clean up:
 
-```bash
+```sh
 make test-e2e
 ```
 
@@ -58,14 +58,14 @@ This target:
 Generate the downloader mode before the test voyage. Plundarr and Boudoirr use
 qBittorrent by default; switch to SABnzbd-only with:
 
-```bash
+```sh
 make ship REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=sabnzbd
 make test-e2e
 ```
 
 Chart the same E2E voyage with NZBGet instead:
 
-```bash
+```sh
 make ship REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=nzbget
 make test-e2e
 ```
@@ -77,7 +77,7 @@ types tested together, for example `make ship ADD_SERVICES=sabnzbd`.
 
 Use this when ye want Make to launch every service, wait for health, and validate the full port-forwarding chain:
 
-```bash
+```sh
 make test-stack
 ```
 
@@ -109,10 +109,15 @@ accidentally sneak into Git.
 
 Useful cleanup commands:
 
-```bash
+```sh
+#
+# Restore test fixtures or deliberately remove Docker resources after a test.
+# clean-config deletes the selected application-state directory.
+#
 make test-down
 make reset-config
 make nuke
+make clean-artifacts
 ```
 
 > [!TIP]

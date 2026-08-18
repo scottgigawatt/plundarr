@@ -54,14 +54,14 @@ available. No pull-skip variable be needed.
 
 Refresh or rebuild Maraudarr explicitly when ye want a different image:
 
-```bash
+```sh
 make update-maraudarr
 make build-maraudarr
 ```
 
 Add optional cargo without opening the interactive prompts:
 
-```bash
+```sh
 make ship PRESET=boudoirr ADD_SERVICES=jellyfin
 make ship PRESET=jellyfin
 make ship PRESET=plex
@@ -72,7 +72,7 @@ make ship ADD_SERVICES=sonarr-anime
 Plundarr and Boudoirr preselect qBittorrent as their only downloader; SABnzbd,
 NZBGet, and Watchtower remain ordinary opt-in choices:
 
-```bash
+```sh
 # Usenet only
 make ship REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=sabnzbd
 
@@ -147,13 +147,13 @@ critical image vulnerabilities.
 
 Run host-side tests while editing Python or service charts:
 
-```bash
+```sh
 make test-maraudarr-unit
 ```
 
 Then fire the complete checks:
 
-```bash
+```sh
 make test-maraudarr
 make build-maraudarr
 make build-multiarch

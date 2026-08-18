@@ -227,6 +227,21 @@ class MaraudarrTests(unittest.TestCase):
         self.assertLess(environment.index("PROWLARR_TAG"), environment.index("RADARR_TAG"))
         self.assertLess(environment.index("SPEEDTEST_TRACKER_TAG"), environment.index("APPRISE_TAG"))
 
+    def test_environment_keeps_operator_edit_guidance(self) -> None:
+        """Keep concise source guidance beside values novice operators change."""
+
+        environment = render_environment(
+            self.catalog,
+            self.catalog.resolve("plundarr"),
+            None,
+            generate_secrets=False,
+        )
+
+        self.assertIn("# Edit for your host: shared download root", environment)
+        self.assertIn("# Edit for your host: run `id -u`", environment)
+        self.assertIn("# Edit before launch: PIA account username", environment)
+        self.assertIn("# Change only for a host-port conflict", environment)
+
     def test_preset_environment_defaults_match_each_deployment(self) -> None:
         """Give fresh presets distinct identities, networks, and media roots."""
 
@@ -334,7 +349,7 @@ class MaraudarrTests(unittest.TestCase):
                 for variable in port_variables
                 if (
                     match := re.search(
-                        rf'^{re.escape(variable)}="\$\{{{re.escape(variable)}:-(\d+)\}}"$',
+                    rf'^{re.escape(variable)}="\$\{{{re.escape(variable)}:-(\d+)\}}"(?:\s+#.*)?$',
                         environment,
                         re.MULTILINE,
                     )
