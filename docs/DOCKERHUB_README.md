@@ -16,7 +16,7 @@ The repository Makefile supplies the hardened Docker invocation:
 ```bash
 git clone https://github.com/scottgigawatt/plundarr.git
 cd plundarr
-make ship
+make configure
 ```
 
 Generated cargo lands in the repository root:
@@ -28,16 +28,17 @@ example.env
 config/
 ```
 
-Run `make configure` for the interactive preset and service picker, or
-`make services` to inspect every available service.
-
-Focused and combined voyages use the same generator:
+Use `make ship` for the default Plundarr preset, or choose a preset directly:
 
 ```bash
 make ship PRESET=jellyfin
 make ship PRESET=plex
 make ship PRESET=boudoirr ADD_SERVICES=jellyfin
 ```
+
+Review the generated `.env`, then start the stack with `make up`. The complete
+beginner and Synology instructions live in the
+[Plundarr README](https://github.com/scottgigawatt/plundarr#readme).
 
 ## Image Details
 

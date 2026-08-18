@@ -4,7 +4,9 @@ icon: material/book-open-page-variant
 
 # Project Guides 📖
 
-Pick the chart that matches the work ahead:
+Deploying for the first time? Start with the
+[root quick start](https://github.com/scottgigawatt/plundarr#readme), then use
+the Synology guide if you run Container Manager.
 
 - [Set up Plundarr on Synology](../SETUP.md) ⚓
 - [Contribute to the project](../CONTRIBUTING.md) 🛠️

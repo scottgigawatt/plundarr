@@ -30,46 +30,28 @@ config/
 > **Plundarr** is the generated media stack. **Maraudarr** is only the tool that
 > builds it. The image does not run the selected media services.
 
-## Take the Quick Passage 🧭
+## Use the Generator 🧭
 
-Run these commands from the repository root. Make prints the complete Docker
-command before Maraudarr leaves port.
+Normal deployment starts in the [root quick start](../README.md).
+These commands are the generator interface:
 
-| Command                    | What It Does                                                |
-| -------------------------- | ----------------------------------------------------------- |
-| `make ship`                | Prepares Maraudarr and generates the default Plundarr stack |
-| `make configure`           | Opens the interactive preset and service picker             |
-| `make presets`             | Lists every preset and its exact defaults                   |
-| `make services`            | Lists every selectable service                              |
-| `make update-maraudarr`    | Refreshes the published Maraudarr image from GHCR           |
-| `make build-maraudarr`     | Builds the Maraudarr image locally from this directory      |
-| `make test-maraudarr-unit` | Runs Maraudarr's Python unit tests                          |
-| `make test-maraudarr`      | Runs unit tests and the real Compose matrix                 |
-| `make build-multiarch`     | Verifies all published CPU architectures                    |
+| Command          | Purpose                                    |
+| ---------------- | ------------------------------------------ |
+| `make configure` | Choose a preset and services interactively |
+| `make ship`      | Generate the default Plundarr preset       |
+| `make presets`   | List presets and their default services    |
+| `make services`  | List every selectable service              |
 
-Maraudarr uses a matching local image first. When none exists, Make tries GHCR
-and automatically builds from this checkout if the published image is not yet
-available. No pull-skip variable be needed.
-
-Refresh or rebuild Maraudarr explicitly when ye want a different image:
+For repeatable builds, pass the preset and service changes directly:
 
 ```bash
-make update-maraudarr
-make build-maraudarr
-```
-
-Add cargo without opening the interactive prompts:
-
-```bash
-make ship ADD_SERVICES=apprise,jellyfin
 make ship PRESET=boudoirr ADD_SERVICES=jellyfin
 make ship PRESET=jellyfin
 make ship PRESET=plex
 ```
 
-Use `REMOVE_SERVICES` to drop non-core preset defaults. The retired
-`OPTIONAL_SERVICES` variable is rejected so every scripted voyage uses the same
-unambiguous interface.
+`ADD_SERVICES` and `REMOVE_SERVICES` accept comma-separated service IDs. Make
+uses a matching local image, then GHCR, then a local build from this checkout.
 
 ## What Be in This Image? 📦
 
@@ -133,17 +115,12 @@ critical image vulnerabilities.
 
 ## Maintain the Riggin' 🛠️
 
-Run host-side tests while editing Python or service charts:
-
-```bash
-make test-maraudarr-unit
-```
-
-Then fire the complete checks:
+Run the complete checks after editing Python, presets, or service charts:
 
 ```bash
 make test-maraudarr
 make build-maraudarr
+make build-multiarch
 pre-commit run --all-files
 ```
 
