@@ -16,7 +16,7 @@ services:
     image: ghcr.io/scottgigawatt/privateerr:${PRIVATEERR_TAG}             # Pull Privateerr from GHCR
     container_name: ${COMPOSE_PROJECT_NAME}-privateerr-${PRIVATEERR_TAG}  # Namespace the container name by project and tag
     hostname: privateerr                                                  # Set the container hostname
-    privileged: true                                           # Required for upstream IPv6 sysctl behavior
+    privileged: true                                                      # Required for upstream IPv6 sysctl behavior
 
     # Add container labels
     labels: *disable-watchtower-updates  # VPN bootstrap component; update intentionally

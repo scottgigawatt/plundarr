@@ -16,7 +16,7 @@ services:
     image: caronc/apprise:${APPRISE_TAG}                            # Run using the specified tag
     container_name: ${COMPOSE_PROJECT_NAME}-apprise-${APPRISE_TAG}  # Namespace the container name by project and tag
     hostname: apprise                                               # Set the container hostname
-    read_only: true                         # Keep the API container filesystem immutable
+    read_only: true                                                 # Keep the API container filesystem immutable
 
     # Drop privileges that are not needed by the notification API
     cap_drop:

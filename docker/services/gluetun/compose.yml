@@ -16,7 +16,7 @@ services:
     image: qmcgaw/gluetun:${GLUETUN_TAG}                            # Run using the specified tag
     container_name: ${COMPOSE_PROJECT_NAME}-gluetun-${GLUETUN_TAG}  # Namespace the container name by project and tag
     hostname: gluetun                                               # Set the container hostname
-    entrypoint: ["/bin/sh", "${GLUETUN_ENTRYPOINT_WRAPPER}"]  # Load Privateerr metadata before Gluetun starts
+    entrypoint: ["/bin/sh", "${GLUETUN_ENTRYPOINT_WRAPPER}"]        # Load Privateerr metadata before Gluetun starts
 
     # Add additional linux capabilities
     cap_add:
