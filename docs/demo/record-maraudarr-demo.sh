@@ -73,8 +73,10 @@ done
 # Create the disposable checkout and copy its demo-only Compose override.
 #
 git clone --quiet --local "$REPOSITORY_ROOT" "$DEMO_CHECKOUT"
-git -C "$REPOSITORY_ROOT" diff --binary HEAD |
-    git -C "$DEMO_CHECKOUT" apply
+if ! git -C "$REPOSITORY_ROOT" diff --quiet HEAD; then
+    git -C "$REPOSITORY_ROOT" diff --binary HEAD |
+        git -C "$DEMO_CHECKOUT" apply
+fi
 cp "$SCRIPT_PATH/docker-compose.demo.yml" "$DEMO_CHECKOUT/docker-compose.demo.yml"
 
 #
