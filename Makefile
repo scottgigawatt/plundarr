@@ -966,8 +966,8 @@ $(HELP):
 	$(call help_line,$(CLEAN_ARTIFACTS),Remove only disposable developer artifacts.)
 	$(call help_line,$(CLEAN),Stop the stack and restore example test config.)
 	$(call help_line,$(RESET_CONFIG),Restore example VPN config files for tests.)
-	$(call help_line,$(CLEAN_CONFIG),DANGER: delete the selected preset config tree.)
-	$(call help_line,$(NUKE),DANGER: remove selected-stack containers volumes and images.)
+	$(call help_line,$(CLEAN_CONFIG),⚠️ DANGER: delete the selected preset config tree.)
+	$(call help_line,$(NUKE),⚠️ DANGER: remove selected-stack containers volumes and images.)
 	$(call announce_warning,⚠️  Destructive targets never run automatically. Back up config before using them.)
 
 #
