@@ -5,7 +5,6 @@ servers.json
 
 # Generated Plundarr deployment projects, configuration, and runtime state.
 /dist/
-/config/
 
 # Timestamped config archives created by make backup-config.
 backups/

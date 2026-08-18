@@ -227,14 +227,18 @@ DOCKER_COMPOSE := $(shell \
 #
 # Always bind Compose interpolation to the generated environment file.
 #
-PLUNDARR_COMPOSE = $(DOCKER_COMPOSE) --env-file $(COMPOSE_ENV_FILE) -f $(COMPOSE_FILE)
+PLUNDARR_COMPOSE = $(DOCKER_COMPOSE) \
+	--env-file $(COMPOSE_ENV_FILE) \
+	-f $(COMPOSE_FILE)
 
 #
 # Docker Compose command used to build Maraudarr from its self-contained image
 # context. This file and environment pair never replace generated Plundarr files.
 #
 MARAUDARR_COMPOSE = MARAUDARR_IMAGE="$(MARAUDARR_IMAGE)" \
-	$(DOCKER_COMPOSE) --env-file $(MARAUDARR_ENV_FILE) -f $(MARAUDARR_COMPOSE_FILE)
+	$(DOCKER_COMPOSE) \
+	--env-file $(MARAUDARR_ENV_FILE) \
+	-f $(MARAUDARR_COMPOSE_FILE)
 
 #
 # Hardened Docker options shared by every published Maraudarr image command.

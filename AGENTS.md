@@ -30,8 +30,6 @@ Keep the names distinct:
 - `example.maraudarr.env`: Maraudarr image build defaults.
 - `dist/`: Ignored generated Plundarr preset projects, each with Compose,
   environment, and runtime state.
-- `config/`: Ignored legacy exact-output state. Normal Make and Maraudarr
-  commands do not read or write it; do not treat it as a deployment directory.
 - `test/`: Plundarr runtime validation and Maraudarr generation matrix.
 - `docs/`: Supporting setup, contribution, security, and community documents.
 - `.github/`: Workflows, Renovate configuration, templates, and ownership.
@@ -85,10 +83,6 @@ environment, and config state together under `dist/<preset>/`.
 Never commit real credentials, API keys, generated application databases, or
 VPN state. Config seed files belong under `docker/services/*/config/`; generated
 runtime state belongs under `dist/<preset>/config/` and remains ignored.
-
-The ignored root `config/` directory may contain old application or VPN state.
-Do not delete it automatically; an operator must decide whether to preserve or
-discard that legacy state.
 
 Do not remove or overwrite existing application state while regenerating a
 stack. The explicit `make clean-config` target owns destructive config cleanup.

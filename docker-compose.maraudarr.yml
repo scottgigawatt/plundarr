@@ -36,9 +36,11 @@ services:
     stdin_open: true                               # Support interactive service selection
     tty: true                                      # Render the interactive terminal correctly
 
-    # Drop every optional capability and prevent privilege escalation
+    # Drop every optional capability from the container
     cap_drop:
       - ALL  # Maraudarr only reads templates and writes generated files
+
+    # Security options for the container
     security_opt:
       - no-new-privileges:true  # Prevent processes from gaining privileges
 

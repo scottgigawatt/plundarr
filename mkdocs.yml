@@ -7,7 +7,9 @@
 #             API reference configuration.
 #
 
+#
 # Use the Material schema for editor validation and completion.
+#
 # yaml-language-server: $schema=https://squidfunk.github.io/mkdocs-material/schema.json
 
 #
@@ -71,8 +73,10 @@ theme:
     edit: material/pencil
     view: material/eye
 
+  #
   # Follow the operating-system preference on first visit and retain the
   # accessible manual toggle. Custom colors are defined in extra.css.
+  #
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
