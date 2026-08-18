@@ -29,9 +29,7 @@ services:
     volumes:
       - ${JELLYFIN_CONFIG_PATH}:/config:rw  # Persistent Jellyfin configuration
       - ${JELLYFIN_CACHE_PATH}:/cache:rw    # Transcoding and image cache
-      - ${HOST_MOVIES_PATH}:/movies:ro      # Movie library
-      - ${HOST_TV_PATH}:/tv:ro              # Television library
-      - ${HOST_ANIME_TV_PATH}:/anime:ro     # Anime television library
+      - ${JELLYFIN_DATA_PATH}:/data:rw       # Media root containing library directories
 
     # Define container healthcheck to verify Jellyfin connectivity
     healthcheck:

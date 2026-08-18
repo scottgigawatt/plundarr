@@ -142,7 +142,9 @@ config/
 | 📦 `HOST_DOWNLOADS_PATH`           | Shared download root for the automation fleet        |
 | 🎥 `HOST_MOVIES_PATH`              | Final movie library                                  |
 | 📺 `HOST_TV_PATH`                  | Final television library                             |
-| 🍜 `HOST_ANIME_TV_PATH`            | Anime library when Sonarr Anime or Jellyfin needs it |
+| 🍜 `HOST_ANIME_TV_PATH`            | Anime library used by Sonarr Anime and Plundarr Plex |
+| 🎞️ `HOST_SCENES_PATH`              | Scene library used by Boudoirr Plex                  |
+| 🎞️ `JELLYFIN_DATA_PATH`            | Media root mounted at writable `/data`               |
 | 🕰️ `TZ`                            | Timezone used by the containers                      |
 | 🚪 `*_WEBUI_PORT`                  | Change only when a host port already be occupied     |
 
@@ -169,40 +171,69 @@ Choose a preset, inspect its cargo, add or remove services, and approve the
 final manifest. The prompts stay friendly, lightly pirate, and very clear about
 what will be written.
 
-| Voyage        | Default Cargo                                                                                                                                   |
-| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| 🏴‍☠️ `plundarr` | Privateerr, Gluetun, FlareSolverr, Prowlarr, qBittorrent, Radarr, Sonarr, Bazarr, Seerr, Cleanuparr, Speedtest Tracker, Duplicati, and Homepage |
-| 🔞 `boudoirr` | Privateerr, Gluetun, FlareSolverr, Prowlarr, qBittorrent, SABnzbd, Whisparr, Cleanuparr, and Watchtower                                         |
-| 🧩 `custom`   | An empty hold; choose every service yerself                                                                                                     |
+| Voyage          | Default Cargo                                                                                                                                   |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| 🏴‍☠️ `plundarr`   | Privateerr, Gluetun, FlareSolverr, Prowlarr, qBittorrent, Radarr, Sonarr, Bazarr, Seerr, Cleanuparr, Speedtest Tracker, Duplicati, and Homepage |
+| 🔞 `boudoirr`   | Privateerr, Gluetun, FlareSolverr, Prowlarr, qBittorrent, SABnzbd, Whisparr, Cleanuparr, and Watchtower; no media server                        |
+| 🪼 `jellyfin`   | Jellyfin alone, with `/data/movies` and `/data/tv` as the expected libraries                                                                    |
+| 🎬 `plex`       | Plex alone, with movie and television library mounts                                                                                            |
+| 🧩 `custom`     | An empty hold; choose every service yerself                                                                                                     |
 
 Useful commands for captains who already know the route:
 
-| Command                                                                                    | What It Does                            |
-| ------------------------------------------------------------------------------------------ | --------------------------------------- |
-| 🗺️ `make presets`                                                                          | Shows each preset and its default cargo |
-| 📦 `make services`                                                                         | Lists every service Maraudarr can add   |
-| ⚓ `make ship OPTIONAL_SERVICES=qbittorrent,cleanuparr,apprise,jellyfin`                   | Adds Apprise and Jellyfin               |
-| 🎬 `make ship OPTIONAL_SERVICES=qbittorrent,cleanuparr,plex`                               | Adds containerized Plex                 |
-| 📰 `make ship OPTIONAL_SERVICES=nzbget`                                                    | Charts an NZBGet Usenet voyage          |
-| 🔞 `make ship PRESET=boudoirr OPTIONAL_SERVICES=qbittorrent,sabnzbd,cleanuparr,watchtower` | Charts the Boudoirr voyage              |
+| Command                                                    | What It Does                                  |
+| ---------------------------------------------------------- | --------------------------------------------- |
+| 🗺️ `make presets`                                          | Shows each preset and its default cargo       |
+| 📦 `make services`                                         | Lists every service Maraudarr can add         |
+| 🪼 `make ship PRESET=jellyfin`                             | Charts standalone Jellyfin                    |
+| 🎬 `make ship PRESET=plex`                                 | Charts standalone Plex                        |
+| ⚓ `make ship ADD_SERVICES=jellyfin`                       | Adds Jellyfin to Plundarr                     |
+| ⚓ `make ship PRESET=boudoirr ADD_SERVICES=jellyfin`       | Adds Jellyfin to Boudoirr                     |
+| ⚓ `make ship PRESET=boudoirr ADD_SERVICES=plex`           | Adds Plex with movie and scene libraries      |
+| ⚓ `make ship PRESET=boudoirr REMOVE_SERVICES=watchtower`  | Removes a non-core default from Boudoirr      |
 
 Switch the default Plundarr voyage from torrents to Usenet:
 
 ```bash
-make ship PRESET=plundarr OPTIONAL_SERVICES=sabnzbd
+make ship PRESET=plundarr REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=sabnzbd
 ```
 
 Or choose NZBGet as the Usenet runner:
 
 ```bash
-make ship PRESET=plundarr OPTIONAL_SERVICES=nzbget
+make ship PRESET=plundarr REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=nzbget
 ```
 
 Both Usenet clients can sail together when ye want separate queues:
 
 ```bash
-make ship PRESET=plundarr OPTIONAL_SERVICES=sabnzbd,nzbget
+make ship PRESET=plundarr REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=sabnzbd,nzbget
 ```
+
+> [!IMPORTANT]
+> 🧭 `OPTIONAL_SERVICES` has been removed. `ADD_SERVICES` and
+> `REMOVE_SERVICES` are the only non-interactive service-selection interface;
+> using the retired variable stops immediately with a corrective error.
+
+### Jellyfin Storage 🪼
+
+Jellyfin uses the same three persistent mounts in every voyage:
+
+- `./config/jellyfin/config` to `/config:rw`
+- `./config/jellyfin/cache` to `/cache:rw`
+- `JELLYFIN_DATA_PATH` to `/data:rw`
+
+The standalone and Plundarr voyages expect `movies/` and `tv/` beneath that
+single data root. Boudoirr expects `movies/` and `scenes/`. Add those locations
+inside Jellyfin as `/data/movies`, `/data/tv`, or `/data/scenes`; there are no
+alternate per-library mounts to choose between. Boudoirr defaults both
+`WHISPARR_DATA_PATH` and `JELLYFIN_DATA_PATH` to `/volume1/jellyfin`, so
+Whisparr and Jellyfin see the same high-level library tree.
+
+Jellyfin writes application logs beneath `/config/log`, which is already
+persisted by the configuration mount. No separate `/logs` volume or log-path
+override is needed. The writable media root deliberately matches the former
+standalone deployment's behavior.
 
 > [!NOTE]
 > 🧰 Rebuilds preserve existing values by variable name. Fresh voyages receive

@@ -55,18 +55,19 @@ This target:
 5. Brings the Compose stack down.
 6. Restores example config again.
 
-Use `OPTIONAL_SERVICES` to choose the download mates for the test voyage:
+Generate the desired download mates first; the E2E target discovers them from
+the rendered Compose chart:
 
 ```bash
-make ship OPTIONAL_SERVICES=sabnzbd
-make test-e2e OPTIONAL_SERVICES=sabnzbd
+make ship REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=sabnzbd
+make test-e2e
 ```
 
 Chart the same E2E voyage with NZBGet instead:
 
 ```bash
-make ship OPTIONAL_SERVICES=nzbget
-make test-e2e OPTIONAL_SERVICES=nzbget
+make ship REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=nzbget
+make test-e2e
 ```
 
 ### Full Stack Test

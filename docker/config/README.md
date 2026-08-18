@@ -15,7 +15,7 @@ Ahoy, ye scurvy devils! Welcome to the **`config`** directory of the grand vesse
 | 🌩️ `flaresolverr`      | Bypasses cloudflare storms to get yer bounty             |
 | 🛡️ `gluetun`           | PIA WireGuard tunnel and port-forwarding quartermaster   |
 | 🗺️ `homepage`          | Central map to all yer ports — a true dashboard          |
-| 🎞️ `jellyfin`          | Open media server for movies, television, and anime      |
+| 🎞️ `jellyfin`          | Open media server using one movies, TV, or scenes root   |
 | 🎬 `plex`              | Containerized Plex Media Server option                   |
 | 📜 `seerr`             | Request board for new treasures — media requests ahoy    |
 | 🕵️‍♂️ `privateerr`        | PIA WireGuard and port-forwarding mapmaker for Gluetun   |

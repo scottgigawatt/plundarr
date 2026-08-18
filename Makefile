@@ -129,8 +129,9 @@ PLUNDARR_GENERATED_PATHS       ?= config/privateerr/logs \
 #
 # Docker Compose options.
 #
-OPTIONAL_SERVICES         ?= qbittorrent,cleanuparr
 PRESET                    ?= plundarr
+ADD_SERVICES              ?=
+REMOVE_SERVICES           ?=
 RENDERED_COMPOSE_FILE     ?= docker-compose.yml
 COMPOSE_FILE              ?= $(RENDERED_COMPOSE_FILE)
 ENV_FILE                  ?= .env
@@ -153,6 +154,15 @@ MARAUDARR_MULTIARCH_IMAGE ?= maraudarr:multiarch-local
 MARAUDARR_TEST_OUTPUT     ?= /tmp/maraudarr-matrix
 CONFIG_PATH               ?= config
 CONFIG_BACKUP_PATH        ?= backups
+PYTHON_BIN                ?= python3
+
+#
+# Reject the retired service-selection interface instead of silently producing
+# a different stack than the caller requested.
+#
+ifneq ($(origin OPTIONAL_SERVICES),undefined)
+$(error OPTIONAL_SERVICES was removed. Use ADD_SERVICES and REMOVE_SERVICES)
+endif
 
 #
 # Developer documentation settings.
@@ -162,19 +172,14 @@ DOCS_SITE_PATH     ?= site
 DOCS_SERVE_ADDRESS ?= 127.0.0.1:8000
 
 #
-# Optional service selection used by Maraudarr and runtime tests.
+# Rendered service selection used by runtime tests.
 #
-empty :=
-space := $(empty) $(empty)
-comma := ,
-SELECTED_OPTIONAL_SERVICES := $(strip $(subst $(comma),$(space),$(OPTIONAL_SERVICES)))
-VPN_QBITTORRENT_SERVICE    ?= $(if $(filter qbittorrent,$(SELECTED_OPTIONAL_SERVICES)),$(QBITTORRENT_SERVICE),)
-E2E_DOWNLOAD_SERVICES      ?= $(if $(filter qbittorrent,$(SELECTED_OPTIONAL_SERVICES)),$(QBITTORRENT_SERVICE),) \
-	$(if $(filter sabnzbd,$(SELECTED_OPTIONAL_SERVICES)),$(SABNZBD_SERVICE),) \
-	$(if $(filter nzbget,$(SELECTED_OPTIONAL_SERVICES)),$(NZBGET_SERVICE),)
-GLUETUN_DOWNLOADER_PORTS   ?= $(if $(filter qbittorrent,$(SELECTED_OPTIONAL_SERVICES)),8080,) \
-	$(if $(filter sabnzbd,$(SELECTED_OPTIONAL_SERVICES)),8081,) \
-	$(if $(filter nzbget,$(SELECTED_OPTIONAL_SERVICES)),6789,)
+SELECTED_COMPOSE_SERVICES = $(strip $(shell $(PLUNDARR_COMPOSE) config --services 2>/dev/null))
+VPN_QBITTORRENT_SERVICE   ?= $(filter $(QBITTORRENT_SERVICE),$(SELECTED_COMPOSE_SERVICES))
+E2E_DOWNLOAD_SERVICES     ?= $(filter $(QBITTORRENT_SERVICE) $(SABNZBD_SERVICE) $(NZBGET_SERVICE),$(SELECTED_COMPOSE_SERVICES))
+GLUETUN_DOWNLOADER_PORTS  ?= $(if $(filter $(QBITTORRENT_SERVICE),$(SELECTED_COMPOSE_SERVICES)),8080,) \
+	$(if $(filter $(SABNZBD_SERVICE),$(SELECTED_COMPOSE_SERVICES)),8081,) \
+	$(if $(filter $(NZBGET_SERVICE),$(SELECTED_COMPOSE_SERVICES)),6789,)
 
 #
 # End-to-end test services.
@@ -319,7 +324,7 @@ $(CHECK_ENV):
 $(CHECK_RENDERED):
 	@if [ ! -f "$(COMPOSE_FILE)" ]; then \
 		echo "\nNo $(COMPOSE_FILE) found. The fleet needs one final chart. 🗺️"; \
-		echo "Run: make $(SHIP) OPTIONAL_SERVICES=$(OPTIONAL_SERVICES)"; \
+		echo "Run: make $(SHIP)"; \
 		exit 1; \
 	fi
 
@@ -540,8 +545,8 @@ $(SHIP): $(ENSURE_MARAUDARR_IMAGE)
 
 	$(MARAUDARR_RUN) build \
 		--preset "$(PRESET)" \
-		--remove qbittorrent,cleanuparr \
-		--add "$(OPTIONAL_SERVICES)" \
+		--remove "$(REMOVE_SERVICES)" \
+		--add "$(ADD_SERVICES)" \
 		--output "$(MARAUDARR_OUTPUT)"
 
 #
@@ -591,7 +596,7 @@ $(TEST_MARAUDARR_UNIT):
 	PYTHONDONTWRITEBYTECODE=1 \
 	PYTHONPATH=docker/src \
 	MARAUDARR_CATALOG_ROOT=docker \
-		python3 -m unittest discover -s docker/tests -v
+		$(PYTHON_BIN) -m unittest discover -s docker/tests -v
 
 #
 # $(TEST_MARAUDARR): Runs unit tests and the representative Compose matrix.
@@ -603,6 +608,7 @@ $(TEST_MARAUDARR_UNIT):
 $(TEST_MARAUDARR): $(BUILD_DEPENDS) $(TEST_MARAUDARR_UNIT)
 	$(MARAUDARR_IMAGE_TEST_CMD)
 	MARAUDARR_TEST_OUTPUT="$(MARAUDARR_TEST_OUTPUT)" \
+	PYTHON_BIN="$(PYTHON_BIN)" \
 		test/test-maraudarr-matrix.sh
 
 #
@@ -791,7 +797,7 @@ $(HELP):
 	$(call help_line,$(TEST_DOWN),Stops the stack and restores example configs.)
 	$(call help_line,$(TEST_LOGS),Shows logs for the service stack.)
 	$(call help_line,$(UP),(Re)creates and starts every service.)
-	$(call help_line,$(SHIP),Generates the selected Plundarr preset and services.)
+	$(call help_line,$(SHIP),Generates the selected preset and services.)
 	$(call help_line,$(CONFIGURE),Opens Maraudarr's interactive configurator.)
 	$(call help_line,$(TEST_MARAUDARR_UNIT),Runs Maraudarr's Python unit tests.)
 	$(call help_line,$(TEST_MARAUDARR),Tests Maraudarr and generated charts.)

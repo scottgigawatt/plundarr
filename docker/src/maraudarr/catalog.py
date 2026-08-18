@@ -104,6 +104,12 @@ class Catalog:
             title=str(values["title"]),
             description=str(values["description"]),
             compose_summary=tuple(str(item) for item in values["compose_summary"]),
+            project_name=str(values["project_name"]),
+            network_subnet=str(values["network_subnet"]),
+            network_ip_range=str(values["network_ip_range"]),
+            network_gateway=str(values["network_gateway"]),
+            media_root=str(values["media_root"]),
+            plex_libraries=tuple(str(item) for item in values["plex_libraries"]),
             core=tuple(str(item) for item in values.get("core", [])),
             defaults=tuple(str(item) for item in values.get("defaults", [])),
         )
@@ -129,6 +135,18 @@ class Catalog:
                 names = ", ".join(sorted(unknown_services))
                 raise CatalogError(
                     f"Preset '{preset.id}' references unknown services: {names}."
+                )
+            unknown_libraries = set(preset.plex_libraries) - {
+                "anime",
+                "movies",
+                "scenes",
+                "tv",
+            }
+            if unknown_libraries:
+                names = ", ".join(sorted(unknown_libraries))
+                raise CatalogError(
+                    f"Preset '{preset.id}' references unknown Plex libraries: "
+                    f"{names}."
                 )
 
     def preset(self, preset_id: str) -> Preset:

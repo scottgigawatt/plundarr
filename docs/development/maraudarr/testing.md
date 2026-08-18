@@ -20,9 +20,10 @@ not hide source behavior.
 make test-maraudarr
 ```
 
-This includes unit tests, packaged-image fallback checks, and representative
-presets or optional-service combinations. Every generated Compose/environment
-pair is inspected by Docker Compose without starting application containers.
+This includes unit tests, packaged-image fallback checks, all product presets,
+Boudoirr's optional media-server combinations, and representative service
+additions and removals. Every generated Compose/environment pair is inspected
+by Docker Compose without starting application containers.
 
 ## Image Builds
 

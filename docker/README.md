@@ -58,11 +58,18 @@ make update-maraudarr
 make build-maraudarr
 ```
 
-Add optional cargo without opening the interactive prompts:
+Add cargo without opening the interactive prompts:
 
 ```bash
-make ship OPTIONAL_SERVICES=qbittorrent,cleanuparr,apprise,jellyfin
+make ship ADD_SERVICES=apprise,jellyfin
+make ship PRESET=boudoirr ADD_SERVICES=jellyfin
+make ship PRESET=jellyfin
+make ship PRESET=plex
 ```
+
+Use `REMOVE_SERVICES` to drop non-core preset defaults. The retired
+`OPTIONAL_SERVICES` variable is rejected so every scripted voyage uses the same
+unambiguous interface.
 
 ## What Be in This Image? 📦
 

@@ -31,6 +31,14 @@ config/
 Run `make configure` for the interactive preset and service picker, or
 `make services` to inspect every available service.
 
+Focused and combined voyages use the same generator:
+
+```bash
+make ship PRESET=jellyfin
+make ship PRESET=plex
+make ship PRESET=boudoirr ADD_SERVICES=jellyfin
+```
+
 ## Image Details
 
 - Registries: `ghcr.io/scottgigawatt/maraudarr` and `scottgigawatt/maraudarr`

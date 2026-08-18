@@ -63,13 +63,27 @@ This allows containers to communicate internally within the defined Docker netwo
 To deploy a project using Synology Container Manager:
 
 1. 🔑 Log in to the Synology DSM web interface.
-2. 🗺️ Run `make ship` from the cloned repository to chart `docker-compose.yml`, `.env`, and the selected `config/` directories.
+2. 🗺️ Generate the desired voyage from the cloned repository:
+   - `make ship` for the default Plundarr fleet.
+   - `make ship PRESET=boudoirr ADD_SERVICES=jellyfin` for Boudoirr with Jellyfin.
+   - `make ship PRESET=jellyfin` for standalone Jellyfin.
+   - `make ship PRESET=plex` for standalone Plex.
 3. 📦 Open **Container Manager** and navigate to the **Project** tab 📂.
 4. 🆕 Click **Create** and configure:
    - 🏷️ **Project Name**: (e.g., `plundarr`)
    - 📂 **Project Path**: Path to the cloned repository.
    - 📜 **Compose File**: `docker-compose.yml`
 5. 🚀 Review and confirm the settings to deploy the project.
+
+Fresh presets use separate project identities and private networks: Plundarr
+uses `172.28.0.0/16`, Boudoirr uses `172.29.0.0/16`, standalone Jellyfin uses
+`172.30.0.0/16`, and standalone Plex uses `172.31.0.0/16`. Review the generated
+`.env` and adjust any subnet that overlaps another network in yer harbor.
+
+When Jellyfin is selected, set `JELLYFIN_DATA_PATH` to the high-level directory
+that contains the media folders. Jellyfin always sees that directory as
+writable `/data`: use `/data/movies` and `/data/tv` normally, or
+`/data/movies` and `/data/scenes` with Boudoirr.
 
 Refer to the [official Synology documentation](https://kb.synology.com/en-id/DSM/help/ContainerManager/docker_project?version=7) for further details.
 

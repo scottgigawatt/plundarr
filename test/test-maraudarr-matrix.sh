@@ -103,9 +103,25 @@ run_case plex \
     --add plex
 
 #
+# Focused standalone media-server voyages.
+#
+run_case standalone-jellyfin --preset jellyfin
+run_case standalone-plex --preset plex
+
+#
 # Complete Boudoirr preset.
 #
 run_case boudoirr --preset boudoirr
+
+#
+# Boudoirr can choose either media server without gaining one by default.
+#
+run_case boudoirr-jellyfin \
+    --preset boudoirr \
+    --add jellyfin
+run_case boudoirr-plex \
+    --preset boudoirr \
+    --add plex
 
 #
 # Minimal custom voyage used to catch stale Homepage assumptions.

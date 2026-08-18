@@ -86,6 +86,14 @@ class MaraudarrTests(unittest.TestCase):
         )
         self.assertNotIn("depends_on:", extract_service(compose, "cleanuparr"))
         self.assertNotIn("depends_on:", extract_service(compose, "whisparr"))
+        self.assertNotIn("  jellyfin:", compose)
+        self.assertNotIn("  plex:", compose)
+
+    def test_standalone_media_server_presets_select_one_core_service(self) -> None:
+        """Keep the standalone Jellyfin and Plex presets deliberately focused."""
+
+        self.assertEqual(self.catalog.resolve("jellyfin").service_ids, ("jellyfin",))
+        self.assertEqual(self.catalog.resolve("plex").service_ids, ("plex",))
 
     def test_dependencies_are_added_before_the_requested_service(self) -> None:
         """Auto-add required services before their selected dependent."""
@@ -133,6 +141,7 @@ class MaraudarrTests(unittest.TestCase):
         )
 
         compose = render_compose(self.catalog, plan)
+        jellyfin = extract_service(compose, "jellyfin")
 
         self.assertTrue(compose.startswith("#\n# Copyright 2025-2026 Scott Gigawatt"))
         self.assertIn("# Services included:", compose)
@@ -142,6 +151,10 @@ class MaraudarrTests(unittest.TestCase):
         self.assertIn("image: jellyfin/jellyfin:${JELLYFIN_TAG}", compose)
         self.assertNotIn("lscr.io/linuxserver/jellyfin", compose)
         self.assertIn("${JELLYFIN_WEBUI_PORT}:8096", compose)
+        self.assertIn("${JELLYFIN_DATA_PATH}:/data:rw", jellyfin)
+        self.assertNotIn("${HOST_MOVIES_PATH}:/movies", jellyfin)
+        self.assertNotIn("${HOST_TV_PATH}:/tv", jellyfin)
+        self.assertNotIn("${HOST_ANIME_TV_PATH}:/anime", jellyfin)
         self.assertIn("${SABNZBD_WEBUI_PORT}:8085", compose)
         self.assertIn("${NZBGET_WEBUI_PORT}:6789", compose)
         self.assertIn("/app/nzbget/nzbget", compose)
@@ -166,6 +179,65 @@ class MaraudarrTests(unittest.TestCase):
         self.assertNotIn("HOMEPAGE_VAR_NZBGET_HREF", environment)
         self.assertLess(environment.index("PROWLARR_TAG"), environment.index("RADARR_TAG"))
         self.assertLess(environment.index("SPEEDTEST_TRACKER_TAG"), environment.index("APPRISE_TAG"))
+
+    def test_preset_environment_defaults_match_each_deployment(self) -> None:
+        """Give fresh presets distinct identities, networks, and media roots."""
+
+        cases = {
+            "plundarr": (
+                "plundarr",
+                "172.28.0.0/16",
+                "/volume1/plex",
+            ),
+            "boudoirr": (
+                "boudoirr",
+                "172.29.0.0/16",
+                "/volume1/jellyfin",
+            ),
+            "jellyfin": (
+                "jellyfin",
+                "172.30.0.0/16",
+                "/volume1/jellyfin",
+            ),
+            "plex": (
+                "plex",
+                "172.31.0.0/16",
+                "/volume1/plex",
+            ),
+        }
+
+        for preset_id, (project, subnet, media_root) in cases.items():
+            with self.subTest(preset=preset_id):
+                plan = self.catalog.resolve(preset_id)
+                environment = render_environment(
+                    self.catalog,
+                    plan,
+                    None,
+                    generate_secrets=False,
+                )
+
+                self.assertIn(
+                    f'COMPOSE_PROJECT_NAME="${{COMPOSE_PROJECT_NAME:-{project}}}"',
+                    environment,
+                )
+                self.assertIn(
+                    f'COMPOSE_NETWORK_SUBNET="${{COMPOSE_NETWORK_SUBNET:-{subnet}}}"',
+                    environment,
+                )
+                self.assertIn(
+                    f'HOST_MOVIES_PATH="${{HOST_MOVIES_PATH:-{media_root}/movies}}"',
+                    environment,
+                )
+                if "jellyfin" in plan.service_ids:
+                    self.assertIn(
+                        f'JELLYFIN_DATA_PATH="${{JELLYFIN_DATA_PATH:-{media_root}}}"',
+                        environment,
+                    )
+                if "whisparr" in plan.service_ids:
+                    self.assertIn(
+                        f'WHISPARR_DATA_PATH="${{WHISPARR_DATA_PATH:-{media_root}}}"',
+                        environment,
+                    )
 
     def test_existing_environment_values_survive_a_rebuild(self) -> None:
         """Preserve user-managed environment values across regeneration."""
@@ -461,6 +533,30 @@ class MaraudarrTests(unittest.TestCase):
         self.assertIn("- Plex:", homepage)
         self.assertIn("- Jellyfin:", homepage)
 
+    def test_plex_library_mounts_follow_the_selected_preset(self) -> None:
+        """Mount only the library set expected by each Plex deployment."""
+
+        cases = {
+            "plundarr": ({"movies", "tv", "anime"}, {"scenes"}),
+            "boudoirr": ({"movies", "scenes"}, {"tv", "anime"}),
+            "plex": ({"movies", "tv"}, {"anime", "scenes"}),
+        }
+        mounts = {
+            "movies": "${HOST_MOVIES_PATH}:/movies:ro",
+            "tv": "${HOST_TV_PATH}:/tv:ro",
+            "anime": "${HOST_ANIME_TV_PATH}:/anime:ro",
+            "scenes": "${HOST_SCENES_PATH}:/scenes:ro",
+        }
+
+        for preset_id, (included, excluded) in cases.items():
+            with self.subTest(preset=preset_id):
+                plan = self.catalog.resolve(preset_id, add={"plex"})
+                plex = extract_service(render_compose(self.catalog, plan), "plex")
+                for library in included:
+                    self.assertIn(mounts[library], plex)
+                for library in excluded:
+                    self.assertNotIn(mounts[library], plex)
+
     def test_write_stack_creates_only_selected_config_directories(self) -> None:
         """Create configuration directories only for selected services."""
 
@@ -484,6 +580,8 @@ class MaraudarrTests(unittest.TestCase):
             self.assertTrue((config_path / "homepage" / "README.md").is_file())
             self.assertTrue((config_path / "homepage" / "services.yaml").is_file())
             self.assertTrue((config_path / "jellyfin" / "README.md").is_file())
+            self.assertTrue((config_path / "jellyfin" / "config").is_dir())
+            self.assertTrue((config_path / "jellyfin" / "cache").is_dir())
             self.assertTrue((config_path / "nzbget" / "README.md").is_file())
             self.assertTrue(
                 (

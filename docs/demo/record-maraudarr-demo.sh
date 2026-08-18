@@ -148,7 +148,7 @@ export JELLYFIN_WEBUI_PORT="18096"
 #
 (
     cd "$DEMO_CHECKOUT"
-    make ship OPTIONAL_SERVICES=qbittorrent,cleanuparr,jellyfin \
+    make ship ADD_SERVICES=jellyfin \
         >/dev/null
     docker compose --env-file .env -f docker-compose.yml pull --quiet
 )

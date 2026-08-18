@@ -265,7 +265,7 @@ class UI:
         if self.plain or not sys.stdin.isatty():
             return True
         answer = questionary.confirm(
-            "⚒️  Build this Plundarr stack?",
+            "⚒️  Build this stack?",
             default=True,
             style=PIRATE_STYLE,
         ).ask()
@@ -330,14 +330,21 @@ class UI:
             table.add_row("Config cargo", config_path)
             table.add_row("Services", str(len(plan.services)))
             self.console.print(
-                Panel(table, title="✅ Plundarr Ready to Sail", border_style="#52b788")
+                Panel(
+                    table,
+                    title=f"✅ {plan.preset.title} Ready to Sail",
+                    border_style="#52b788",
+                )
             )
             self.console.print("\n[bold]Before launch:[/]")
             for number, step in enumerate(steps, start=1):
                 self.console.print(f"  {number}. {step}")
             return
 
-        print(f"Plundarr ready: {compose_path}, {env_path}, and {config_path}")
+        print(
+            f"{plan.preset.title} ready: "
+            f"{compose_path}, {env_path}, and {config_path}"
+        )
         for number, step in enumerate(steps, start=1):
             print(f"{number}. {step}")
 
