@@ -24,7 +24,7 @@
 #   services/<service-id>/config/
 #
 # Preset tables also define the generated project name, network defaults,
-# high-level media root, and the library mounts used when Plex is selected.
+# high-level media root, expected libraries, and optional host-port offset.
 #
 
 #
@@ -213,7 +213,8 @@ network_subnet = "172.28.0.0/16"
 network_ip_range = "172.28.5.0/24"
 network_gateway = "172.28.5.254"
 media_root = "/volume1/plex"
-plex_libraries = ["movies", "tv", "anime"]
+media_libraries = ["movies", "tv", "anime"]
+host_port_offset = 0
 compose_summary = [
     "docker-compose.yml: Docker Compose configuration for running Plundarr's",
     "                    media service stack with Privateerr-generated PIA",
@@ -250,7 +251,8 @@ network_subnet = "172.29.0.0/16"
 network_ip_range = "172.29.5.0/24"
 network_gateway = "172.29.5.254"
 media_root = "/volume1/jellyfin"
-plex_libraries = ["movies", "scenes"]
+media_libraries = ["movies", "scenes"]
+host_port_offset = 10000
 compose_summary = [
     "docker-compose.yml: Docker Compose configuration for running Boudoirr's",
     "                    adult-media service stack with Privateerr-generated PIA",
@@ -275,7 +277,8 @@ network_subnet = "172.30.0.0/16"
 network_ip_range = "172.30.5.0/24"
 network_gateway = "172.30.5.254"
 media_root = "/volume1/jellyfin"
-plex_libraries = ["movies", "tv"]
+media_libraries = ["movies", "tv"]
+host_port_offset = 0
 compose_summary = [
     "docker-compose.yml: Docker Compose configuration for running a standalone",
     "                    Jellyfin media server on Plundarr's shared foundation.",
@@ -297,7 +300,8 @@ network_subnet = "172.31.0.0/16"
 network_ip_range = "172.31.5.0/24"
 network_gateway = "172.31.5.254"
 media_root = "/volume1/plex"
-plex_libraries = ["movies", "tv"]
+media_libraries = ["movies", "tv"]
+host_port_offset = 0
 compose_summary = [
     "docker-compose.yml: Docker Compose configuration for running a standalone",
     "                    Plex Media Server on Plundarr's shared foundation.",
@@ -314,12 +318,13 @@ defaults = []
 [presets.custom]
 title = "Custom"
 description = "Begin with an empty cargo hold and select every service yourself."
-project_name = "plundarr"
-network_subnet = "172.28.0.0/16"
-network_ip_range = "172.28.5.0/24"
-network_gateway = "172.28.5.254"
+project_name = "custom"
+network_subnet = "172.27.0.0/16"
+network_ip_range = "172.27.5.0/24"
+network_gateway = "172.27.5.254"
 media_root = "/volume1/plex"
-plex_libraries = ["movies", "tv"]
+media_libraries = ["movies", "tv"]
+host_port_offset = 20000
 compose_summary = [
     "docker-compose.yml: Docker Compose configuration generated from Maraudarr's",
     "                    selectable media service catalog.",

@@ -10,9 +10,10 @@
 #
 # The script:
 #   - Verifies every command required to record and optimize the animation.
-#   - Clones the current repository into a temporary working directory.
+#   - Clones the current repository and applies tracked worktree edits.
 #   - Isolates Compose networking, storage paths, credentials, and host ports.
-#   - Generates Boudoirr with Jellyfin and pre-pulls its container images.
+#   - Builds a disposable Maraudarr image from the current checkout.
+#   - Generates the default Plundarr preset and pre-pulls its container images.
 #   - Records the interactive Maraudarr and Docker Compose workflow with VHS.
 #   - Optimizes the generated GIF for the repository's added-file size limit.
 #   - Stops the demonstration stack and removes all temporary files on exit.
@@ -35,6 +36,7 @@ ASSET_PATH="$REPOSITORY_ROOT/docs/assets/maraudarr-demo.gif"
 DEMO_ROOT=$(mktemp -d "${TMPDIR:-/tmp}/plundarr-readme-demo.XXXXXX")
 DEMO_CHECKOUT="$DEMO_ROOT/plundarr"
 DEMO_DATA="$DEMO_ROOT/data"
+MARAUDARR_IMAGE="maraudarr:readme-demo-$$"
 
 #
 # Stop the temporary Compose project and remove the disposable checkout.
@@ -48,6 +50,7 @@ cleanup() {
         ) >/dev/null 2>&1 || true
     fi
 
+    docker image rm --force "$MARAUDARR_IMAGE" >/dev/null 2>&1 || true
     rm -rf -- "$DEMO_ROOT"
 }
 
@@ -70,6 +73,8 @@ done
 # Create the disposable checkout and copy its demo-only Compose override.
 #
 git clone --quiet --local "$REPOSITORY_ROOT" "$DEMO_CHECKOUT"
+git -C "$REPOSITORY_ROOT" diff --binary HEAD |
+    git -C "$DEMO_CHECKOUT" apply
 cp "$SCRIPT_PATH/docker-compose.demo.yml" "$DEMO_CHECKOUT/docker-compose.demo.yml"
 
 #
@@ -81,17 +86,17 @@ mkdir -p \
     "$DEMO_DATA/downloads/usenet" \
     "$DEMO_DATA/media/anime-tv" \
     "$DEMO_DATA/media/movies" \
-    "$DEMO_DATA/media/scenes" \
     "$DEMO_DATA/media/tv"
 
 #
 # Isolate the demonstration project and Docker network from local deployments.
 #
 export PLUNDARR_DEMO_DIR="$DEMO_CHECKOUT"
+export MARAUDARR_IMAGE
 export COMPOSE_PROJECT_NAME="plundarr-readme-demo"
-export COMPOSE_NETWORK_SUBNET="172.31.0.0/16"
-export COMPOSE_NETWORK_IP_RANGE="172.31.5.0/24"
-export COMPOSE_NETWORK_GATEWAY="172.31.5.254"
+export COMPOSE_NETWORK_SUBNET="172.26.0.0/16"
+export COMPOSE_NETWORK_IP_RANGE="172.26.5.0/24"
+export COMPOSE_NETWORK_GATEWAY="172.26.5.254"
 export COMPOSE_UP_OPTIONS="--force-recreate --pull never --detach --remove-orphans"
 
 #
@@ -125,9 +130,6 @@ export HOST_USENET_DOWNLOADS_PATH="$DEMO_DATA/downloads/usenet"
 export HOST_MOVIES_PATH="$DEMO_DATA/media/movies"
 export HOST_TV_PATH="$DEMO_DATA/media/tv"
 export HOST_ANIME_TV_PATH="$DEMO_DATA/media/anime-tv"
-export HOST_SCENES_PATH="$DEMO_DATA/media/scenes"
-export WHISPARR_DATA_PATH="$DEMO_DATA/media"
-export JELLYFIN_DATA_PATH="$DEMO_DATA/media"
 export DUPLICATI_BACKUPS_PATH="$DEMO_DATA/backups"
 export HOMEPAGE_DATA_ROOT_PATH="$DEMO_DATA/media"
 
@@ -136,6 +138,8 @@ export HOMEPAGE_DATA_ROOT_PATH="$DEMO_DATA/media"
 #
 export FLARESOLVERR_PORT="18191"
 export PROWLARR_WEBUI_PORT="19696"
+export QBITTORRENT_TCP_PORT="16881"
+export QBITTORRENT_UDP_PORT="16881"
 export QBITTORRENT_WEBUI_PORT="18080"
 export RADARR_WEBUI_PORT="17878"
 export SONARR_WEBUI_PORT="18989"
@@ -145,16 +149,14 @@ export CLEANUPARR_WEBUI_PORT="11012"
 export SPEEDTEST_TRACKER_WEBUI_PORT="19080"
 export DUPLICATI_WEBUI_PORT="18200"
 export HOMEPAGE_WEBUI_PORT="13000"
-export JELLYFIN_WEBUI_PORT="18096"
-export WHISPARR_WEBUI_PORT="16969"
 
 #
-# Generate the demonstration stack and pre-pull images outside the recording.
+# Build Maraudarr, generate the stack, and pre-pull images outside the recording.
 #
 (
     cd "$DEMO_CHECKOUT"
-    make ship PRESET=boudoirr ADD_SERVICES=jellyfin \
-        >/dev/null
+    make build-maraudarr >/dev/null
+    make ship >/dev/null
     docker compose --env-file .env -f docker-compose.yml pull --quiet
 )
 

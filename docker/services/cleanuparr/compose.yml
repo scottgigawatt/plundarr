@@ -14,7 +14,7 @@ services:
     # Docker image and container information
     <<: *arr-stack-container                                # Pull in arr-stack container config
     image: ghcr.io/cleanuparr/cleanuparr:${CLEANUPARR_TAG}  # Run using the specified tag
-    container_name: cleanuparr-${CLEANUPARR_TAG}            # Append Docker image tag to container name
+    container_name: ${COMPOSE_PROJECT_NAME}-cleanuparr      # Namespace the stable container name by project
     hostname: cleanuparr                                    # Set the container hostname
 
     # Define the container environment

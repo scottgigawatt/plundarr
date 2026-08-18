@@ -14,7 +14,7 @@ services:
     # Docker image and container information
     <<: *default-container                          # Pull in the default container information
     image: containrrr/watchtower:${WATCHTOWER_TAG}  # Run using the specified tag
-    container_name: watchtower-${WATCHTOWER_TAG}    # Append Docker image tag to container name
+    container_name: ${COMPOSE_PROJECT_NAME}-watchtower  # Namespace the stable container name by project
     hostname: watchtower                            # Set the container hostname
 
     # Do not let Watchtower update its own running container

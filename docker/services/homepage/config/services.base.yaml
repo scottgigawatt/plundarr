@@ -19,7 +19,7 @@
         icon: radarr.svg
         href: {{HOMEPAGE_VAR_RADARR_HREF}}
         description: Movies management
-        container: radarr-latest
+        container: {{HOMEPAGE_VAR_CONTAINER_PREFIX}}-radarr
         widget:
           type: radarr
           fields: ["wanted", "queued"]
@@ -30,7 +30,7 @@
         icon: sonarr.svg
         href: {{HOMEPAGE_VAR_SONARR_HREF}}
         description: Series management
-        container: sonarr-latest
+        container: {{HOMEPAGE_VAR_CONTAINER_PREFIX}}-sonarr
         widget:
           type: sonarr
           fields: ["wanted", "queued"]
@@ -41,7 +41,7 @@
         icon: bazarr.svg
         href: {{HOMEPAGE_VAR_BAZARR_HREF}}
         description: Subtitles management
-        container: bazarr-latest
+        container: {{HOMEPAGE_VAR_CONTAINER_PREFIX}}-bazarr
         widget:
           type: bazarr
           url: {{HOMEPAGE_VAR_BAZARR_URL}}
@@ -51,7 +51,7 @@
         icon: seerr.svg
         href: {{HOMEPAGE_VAR_SEERR_HREF}}
         description: Requests management
-        container: seerr-latest
+        container: {{HOMEPAGE_VAR_CONTAINER_PREFIX}}-seerr
         widget:
           type: seerr
           url: {{HOMEPAGE_VAR_SEERR_URL}}
@@ -98,7 +98,7 @@
         icon: prowlarr.svg
         href: {{HOMEPAGE_VAR_PROWLARR_HREF}}
         description: Indexers management
-        container: prowlarr-latest
+        container: {{HOMEPAGE_VAR_CONTAINER_PREFIX}}-prowlarr
         widget:
           type: prowlarr
           url: {{HOMEPAGE_VAR_PROWLARR_URL}}

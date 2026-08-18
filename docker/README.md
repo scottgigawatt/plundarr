@@ -64,6 +64,7 @@ Add optional cargo without opening the interactive prompts:
 make ship PRESET=boudoirr ADD_SERVICES=jellyfin
 make ship PRESET=jellyfin
 make ship PRESET=plex
+make ship ADD_SERVICES=sonarr-anime
 ```
 
 `ADD_SERVICES` and `REMOVE_SERVICES` accept comma-separated service IDs.
@@ -77,6 +78,9 @@ make ship REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=sabnzbd
 # Torrents and Usenet, with optional update checks
 make ship PRESET=boudoirr ADD_SERVICES=sabnzbd,watchtower
 ```
+
+The default Plundarr voyage includes one Sonarr instance. `sonarr-anime` is an
+opt-in second instance with its own configuration and library path.
 
 ## What Be in This Image? 📦
 

@@ -24,7 +24,8 @@ This includes unit tests, packaged-image fallback checks, all product presets,
 Boudoirr's optional media-server combinations, torrent-only, Usenet-only, and
 combined downloader modes, plus opt-in Watchtower. Every generated
 Compose/environment pair is inspected by Docker Compose without starting
-application containers.
+application containers. Unit coverage also keeps preset project names, Docker
+networks, generated container names, and published ports collision-free.
 
 ## Image Builds
 

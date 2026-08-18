@@ -104,7 +104,7 @@ services:
     # Docker image and container information
     <<: *default-container                                     # Pull in default container config
     image: ghcr.io/scottgigawatt/privateerr:${PRIVATEERR_TAG}  # Pull Privateerr from GHCR
-    container_name: privateerr-${PRIVATEERR_TAG}               # Append Docker image tag to container name
+    container_name: ${COMPOSE_PROJECT_NAME}-privateerr         # Namespace the stable container name by project
     hostname: privateerr                                       # Set the container hostname
     privileged: true                                           # Required for upstream IPv6 sysctl behavior
 
@@ -151,7 +151,7 @@ services:
     # Docker image and container information
     <<: *default-container                                    # Pull in default container config
     image: qmcgaw/gluetun:${GLUETUN_TAG}                      # Run using the specified tag
-    container_name: gluetun-${GLUETUN_TAG}                    # Append Docker image tag to container name
+    container_name: ${COMPOSE_PROJECT_NAME}-gluetun           # Namespace the stable container name by project
     hostname: gluetun                                         # Set the container hostname
     entrypoint: ["/bin/sh", "${GLUETUN_ENTRYPOINT_WRAPPER}"]  # Load Privateerr metadata before Gluetun starts
 
@@ -224,7 +224,7 @@ services:
     # Docker image and container information
     <<: *default-container                                        # Pull in default container config
     image: ghcr.io/flaresolverr/flaresolverr:${FLARESOLVERR_TAG}  # Run using the specified tag
-    container_name: flaresolverr-${FLARESOLVERR_TAG}              # Append Docker image tag to container name
+    container_name: ${COMPOSE_PROJECT_NAME}-flaresolverr           # Namespace the stable container name by project
     hostname: flaresolverr                                        # Set the container hostname
 
     # Define the host and container ports
@@ -256,7 +256,7 @@ services:
     # Docker image and container information
     <<: *arr-stack-container                             # Pull in arr-stack container config
     image: lscr.io/linuxserver/prowlarr:${PROWLARR_TAG}  # Run using the specified tag
-    container_name: prowlarr-${PROWLARR_TAG}             # Append Docker image tag to container name
+    container_name: ${COMPOSE_PROJECT_NAME}-prowlarr     # Namespace the stable container name by project
     hostname: prowlarr                                   # Set the container hostname
 
     # Define the host and container ports
@@ -290,7 +290,7 @@ services:
     # Docker image and container information
     <<: *arr-stack-container                                   # Pull in arr-stack container config
     image: lscr.io/linuxserver/qbittorrent:${QBITTORRENT_TAG}  # Run using the specified tag
-    container_name: qbittorrent-${QBITTORRENT_TAG}             # Append Docker image tag to container name
+    container_name: ${COMPOSE_PROJECT_NAME}-qbittorrent        # Namespace the stable container name by project
     network_mode: service:gluetun                              # Route network traffic through gluetun
 
     # Mount host directories into the container
@@ -321,7 +321,7 @@ services:
     # Docker image and container information
     <<: *arr-stack-container                         # Pull in arr-stack container config
     image: lscr.io/linuxserver/radarr:${RADARR_TAG}  # Run using the specified tag
-    container_name: radarr-${RADARR_TAG}             # Append Docker image tag to container name
+    container_name: ${COMPOSE_PROJECT_NAME}-radarr   # Namespace the stable container name by project
     hostname: radarr                                 # Set the container hostname
 
     # Define the host and container ports
@@ -357,7 +357,7 @@ services:
     # Docker image and container information
     <<: *arr-stack-container                         # Pull in arr-stack container config
     image: lscr.io/linuxserver/sonarr:${SONARR_TAG}  # Run using the specified tag
-    container_name: sonarr-${SONARR_TAG}             # Append Docker image tag to container name
+    container_name: ${COMPOSE_PROJECT_NAME}-sonarr   # Namespace the stable container name by project
     hostname: sonarr                                 # Set the container hostname
 
     # Define the host and container ports
@@ -393,7 +393,7 @@ services:
     # Docker image and container information
     <<: *arr-stack-container                         # Pull in arr-stack container config
     image: lscr.io/linuxserver/bazarr:${BAZARR_TAG}  # Run using the specified tag
-    container_name: bazarr-${BAZARR_TAG}             # Append Docker image tag to container name
+    container_name: ${COMPOSE_PROJECT_NAME}-bazarr    # Namespace the stable container name by project
     hostname: bazarr                                 # Set the container hostname
 
     # Define the host and container ports
@@ -431,7 +431,7 @@ services:
     # Docker image and container information
     <<: *rootless-container                       # Pull in the rootless container information
     image: ghcr.io/seerr-team/seerr:${SEERR_TAG}  # Run using the specified tag
-    container_name: seerr-${SEERR_TAG}            # Append Docker image tag to container name
+    container_name: ${COMPOSE_PROJECT_NAME}-seerr  # Namespace the stable container name by project
     hostname: seerr                               # Set the container hostname
     init: true                                    # Use an init process to handle signals and zombie processes
 
@@ -466,7 +466,7 @@ services:
     # Docker image and container information
     <<: *arr-stack-container                                # Pull in arr-stack container config
     image: ghcr.io/cleanuparr/cleanuparr:${CLEANUPARR_TAG}  # Run using the specified tag
-    container_name: cleanuparr-${CLEANUPARR_TAG}            # Append Docker image tag to container name
+    container_name: ${COMPOSE_PROJECT_NAME}-cleanuparr      # Namespace the stable container name by project
     hostname: cleanuparr                                    # Set the container hostname
 
     # Define the container environment
@@ -500,7 +500,7 @@ services:
     # Docker image and container information
     <<: *default-container                                                 # Pull in the default container information
     image: lscr.io/linuxserver/speedtest-tracker:${SPEEDTEST_TRACKER_TAG}  # Run using the specified tag
-    container_name: speedtest-tracker-${SPEEDTEST_TRACKER_TAG}             # Append Docker image tag to container name
+    container_name: ${COMPOSE_PROJECT_NAME}-speedtest-tracker              # Namespace the stable container name by project
     hostname: speedtest-tracker                                            # Set the container hostname
 
     # Define the container environment
@@ -539,7 +539,7 @@ services:
     # Docker image and container information
     <<: *arr-stack-container                               # Pull in arr-stack container config
     image: lscr.io/linuxserver/duplicati:${DUPLICATI_TAG}  # Run using the specified tag
-    container_name: duplicati-${DUPLICATI_TAG}             # Append Docker image tag to container name
+    container_name: ${COMPOSE_PROJECT_NAME}-duplicati      # Namespace the stable container name by project
     hostname: duplicati                                    # Set the container hostname
 
     # Define the container environment
@@ -576,7 +576,7 @@ services:
     # Docker image and container information
     <<: *default-container                               # Pull in the default container information
     image: ghcr.io/gethomepage/homepage:${HOMEPAGE_TAG}  # Run using the specified tag
-    container_name: homepage-${HOMEPAGE_TAG}             # Append Docker image tag to container name
+    container_name: ${COMPOSE_PROJECT_NAME}-homepage     # Namespace the stable container name by project
     hostname: homepage                                   # Set the container hostname
 
     # Define the container environment
@@ -588,6 +588,7 @@ services:
       HOMEPAGE_ALLOWED_HOSTS: ${HOMEPAGE_ALLOWED_HOSTS}
       HOMEPAGE_VAR_TITLE: ${HOMEPAGE_VAR_TITLE}
       HOMEPAGE_VAR_SEARCH_PROVIDER: ${HOMEPAGE_VAR_SEARCH_PROVIDER}
+      HOMEPAGE_VAR_CONTAINER_PREFIX: ${COMPOSE_PROJECT_NAME}
 
       # Homepage weather widget
       HOMEPAGE_VAR_WEATHER_CITY: ${HOMEPAGE_VAR_WEATHER_CITY}

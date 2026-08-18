@@ -3,7 +3,7 @@
         icon: nzbget.svg
         href: {{HOMEPAGE_VAR_NZBGET_HREF}}
         description: Usenet downloads management
-        container: nzbget-latest
+        container: {{HOMEPAGE_VAR_CONTAINER_PREFIX}}-nzbget
         widget:
           type: nzbget
           url: {{HOMEPAGE_VAR_NZBGET_URL}}

@@ -14,7 +14,7 @@ services:
     # Docker image and container information
     <<: *arr-stack-container                         # Pull in arr-stack container config
     image: lscr.io/linuxserver/bazarr:${BAZARR_TAG}  # Run using the specified tag
-    container_name: bazarr-${BAZARR_TAG}             # Append Docker image tag to container name
+    container_name: ${COMPOSE_PROJECT_NAME}-bazarr    # Namespace the stable container name by project
     hostname: bazarr                                 # Set the container hostname
 
     # Define the host and container ports

@@ -14,7 +14,7 @@ services:
     # Docker image and container information
     <<: *default-container                                     # Pull in default container config
     image: ghcr.io/scottgigawatt/privateerr:${PRIVATEERR_TAG}  # Pull Privateerr from GHCR
-    container_name: privateerr-${PRIVATEERR_TAG}               # Append Docker image tag to container name
+    container_name: ${COMPOSE_PROJECT_NAME}-privateerr         # Namespace the stable container name by project
     hostname: privateerr                                       # Set the container hostname
     privileged: true                                           # Required for upstream IPv6 sysctl behavior
 

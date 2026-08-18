@@ -58,7 +58,7 @@ Plundarr has two clearly separate parts:
 <!-- markdownlint-disable MD060 -->
 | Component | What It Does | Where It Lives |
 | --------- | ------------ | -------------- |
-| **Maraudarr** | Short-lived generator that chooses services, resolves dependencies, validates the result, and exits | Published as [`ghcr.io/scottgigawatt/maraudarr`](https://github.com/scottgigawatt/plundarr/pkgs/container/maraudarr) and [`scottgigawatt/maraudarr`](https://hub.docker.com/r/scottgigawatt/maraudarr); source lives in [`docker/`](docker/README.md) |
+| **Maraudarr** | Short-lived generator that chooses services, resolves dependencies, validates the result, and exits | Published as [`ghcr.io/scottgigawatt/maraudarr`](https://github.com/scottgigawatt/plundarr/pkgs/container/maraudarr) and [`scottgigawatt/maraudarr`](https://hub.docker.com/r/scottgigawatt/maraudarr) |
 | **Plundarr** | The generated media stack that stays on yer host and runs the selected services | `docker-compose.yml`, `.env`, and `config/` in this repository |
 <!-- markdownlint-enable MD060 -->
 
@@ -70,8 +70,8 @@ port. It does not remain running with the generated fleet.
 
 ## Maraudarr in Motion 🎬
 
-Watch Maraudarr chart a Boudoirr voyage, load Jellyfin aboard, generate one
-complete configuration, and raise the merged Compose fleet:
+Watch Maraudarr chart the default Plundarr voyage, generate one complete
+configuration, and raise the Compose fleet:
 
 <!-- markdownlint-disable MD033 -->
 <p align="center">
@@ -203,6 +203,7 @@ Useful commands for captains who already know the route:
 | 🎞️ `make ship PRESET=jellyfin` | Generates standalone Jellyfin |
 | 🎬 `make ship PRESET=plex` | Generates standalone Plex |
 | 🔞 `make ship PRESET=boudoirr ADD_SERVICES=jellyfin` | Adds Jellyfin to Boudoirr |
+| 🍜 `make ship ADD_SERVICES=sonarr-anime` | Adds the optional second Sonarr instance |
 | 📰 `make ship REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=sabnzbd` | Switches the default Plundarr preset to Usenet only |
 | 🔭 `make ship PRESET=boudoirr ADD_SERVICES=sabnzbd,watchtower` | Adds Usenet and update checks to Boudoirr |
 <!-- markdownlint-enable MD060 -->
@@ -232,21 +233,8 @@ Preset core services cannot be removed. Default services can be unchecked in
 > [!NOTE]
 > 🌊 Only selected download clients share Gluetun's network namespace. Prowlarr,
 > Radarr, Sonarr, Bazarr, and the rest of the automation fleet use the normal
-> project network.
-
-### Jellyfin and Plex Libraries 🎞️
-
-Jellyfin always mounts `JELLYFIN_DATA_PATH` as one writable `/data` root, plus
-persistent `/config` and `/cache` paths. Configure `/data/movies` and
-`/data/tv` as libraries for standalone Jellyfin or Plundarr. With Boudoirr,
-configure `/data/movies` and `/data/scenes` instead and point
-`WHISPARR_DATA_PATH` and `JELLYFIN_DATA_PATH` at the same host directory.
-Jellyfin logs already persist under `/config/log`, so no fourth volume is
-needed.
-
-Plex keeps separate read-only library mounts. It receives movies, TV, and anime
-with Plundarr; movies and scenes with Boudoirr; and movies and TV when used
-standalone.
+> project network. See [Docker Project Setup](./docs/SETUP.md) for preset
+> networks, side-by-side deployments, and Jellyfin or Plex library paths.
 
 ### Synology Notes 📦
 

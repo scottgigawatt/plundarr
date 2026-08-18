@@ -17,6 +17,7 @@ make ship
 make ship PRESET=boudoirr ADD_SERVICES=jellyfin
 make ship PRESET=jellyfin
 make ship PRESET=plex
+make ship ADD_SERVICES=sonarr-anime
 ```
 
 Plundarr and Boudoirr use qBittorrent as their only default downloader.
@@ -30,6 +31,10 @@ make ship REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=sabnzbd
 # Torrents and Usenet, with optional update checks
 make ship PRESET=boudoirr ADD_SERVICES=sabnzbd,watchtower
 ```
+
+Default Plundarr includes one Sonarr instance for television. The separate
+Sonarr Anime instance appears only when selected through `make configure` or
+`ADD_SERVICES=sonarr-anime`.
 
 Maraudarr writes `docker-compose.yml`, `example.env`, `.env`, and the selected
 service directories under `config/`. Review `.env` before launch, especially
@@ -66,10 +71,28 @@ COMPOSE_NETWORK_GATEWAY="${COMPOSE_NETWORK_GATEWAY:-172.28.5.254}"
 
 For detailed documentation, refer to the [Docker Compose IPAM documentation](https://docs.docker.com/compose/compose-file/06-networks/#ipam).
 
-Fresh Plundarr, Boudoirr, Jellyfin, and Plex presets use `172.28.0.0/16`,
-`172.29.0.0/16`, `172.30.0.0/16`, and `172.31.0.0/16`, respectively. Use the
-matching generated values in `.env`, and change them when they overlap another
-Docker network, VPN, or LAN route.
+Fresh presets receive distinct project and network defaults:
+
+<!-- markdownlint-disable MD060 -->
+| Preset | Project | Subnet | Published Ports |
+| ------ | ------- | ------ | --------------- |
+| Plundarr | `plundarr` | `172.28.0.0/16` | Standard service ports |
+| Boudoirr | `boudoirr` | `172.29.0.0/16` | Selected service ports offset by `10000` |
+| Jellyfin | `jellyfin` | `172.30.0.0/16` | Jellyfin `8096` |
+| Plex | `plex` | `172.31.0.0/16` | Plex host networking |
+| Custom | `custom` | `172.27.0.0/16` | Selected service ports offset by `20000` |
+<!-- markdownlint-enable MD060 -->
+
+Container names also include the project name. The default Plundarr, default
+Boudoirr, standalone Jellyfin, and standalone Plex voyages can therefore run
+side by side on one host without sharing container names, subnets, or published
+ports. Existing values in `.env` remain preserved during regeneration, so
+review and change older project names, network values, or ports before placing
+an existing deployment beside another preset.
+
+Change the generated values whenever they overlap another Docker network, VPN,
+LAN route, or host service. Plex uses host networking, so only one Plex server
+can claim its standard host ports unless Plex itself is configured differently.
 
 ## Batten Down the Hatches 🖥️⚓
 
@@ -112,7 +135,7 @@ To deploy a project using Synology Container Manager:
 
 Refer to the [official Synology documentation](https://kb.synology.com/en-id/DSM/help/ContainerManager/docker_project?version=7) for further details.
 
-### Jellyfin and Plex Libraries 🎞️
+## Jellyfin and Plex Libraries 🎞️
 
 Jellyfin mounts `JELLYFIN_DATA_PATH` as writable `/data`, with separate
 persistent `/config` and `/cache` mounts. Add `/data/movies` and `/data/tv` as

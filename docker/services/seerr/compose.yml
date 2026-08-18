@@ -14,7 +14,7 @@ services:
     # Docker image and container information
     <<: *rootless-container                       # Pull in the rootless container information
     image: ghcr.io/seerr-team/seerr:${SEERR_TAG}  # Run using the specified tag
-    container_name: seerr-${SEERR_TAG}            # Append Docker image tag to container name
+    container_name: ${COMPOSE_PROJECT_NAME}-seerr  # Namespace the stable container name by project
     hostname: seerr                               # Set the container hostname
     init: true                                    # Use an init process to handle signals and zombie processes
 

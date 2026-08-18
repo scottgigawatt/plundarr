@@ -122,7 +122,7 @@ def _prepare_service(
     service_id: str,
     selected: set[str],
     include_native_plex: bool,
-    plex_libraries: tuple[str, ...],
+    media_libraries: tuple[str, ...],
 ) -> str:
     """Apply service-specific conditional edits to one extracted chart."""
     if service_id == "gluetun":
@@ -141,7 +141,7 @@ def _prepare_service(
         excluded_variables = {
             variable
             for library, variable in library_variables.items()
-            if library not in plex_libraries
+            if library not in media_libraries
         }
         block = "\n".join(
             line
@@ -221,7 +221,7 @@ def render_compose(catalog: Catalog, plan: StackPlan) -> str:
                 service.id,
                 selected,
                 include_native_plex,
-                plan.preset.plex_libraries,
+                plan.preset.media_libraries,
             )
         )
 
@@ -434,6 +434,43 @@ def render_environment(
             f"${{{variable}:-{preset_default}}}",
         )
     rendered = rendered.rstrip() + "\n"
+    if plan.preset.host_port_offset:
+        # Offset only variables that publish a host port in the resolved chart.
+        # Internal service ports and host-network services remain unchanged.
+        compose = render_compose(catalog, plan)
+        published_variables = set(
+            re.findall(
+                r"^\s*-\s+\$\{([A-Z][A-Z0-9_]*PORT)\}:",
+                compose,
+                flags=re.MULTILINE,
+            )
+        )
+        remapped_ports: dict[str, str] = {}
+        for variable in published_variables:
+            assignment = re.compile(
+                rf'^{re.escape(variable)}="\$\{{{re.escape(variable)}:-(\d+)\}}"$',
+                flags=re.MULTILINE,
+            )
+            match = assignment.search(rendered)
+            if not match:
+                continue
+            original_port = match.group(1)
+            offset_port = str(int(original_port) + plan.preset.host_port_offset)
+            if int(offset_port) > 65535:
+                raise RenderError(
+                    f"Preset '{plan.preset.id}' offsets {variable} beyond port 65535."
+                )
+            rendered = assignment.sub(
+                f'{variable}="${{{variable}:-{offset_port}}}"',
+                rendered,
+                count=1,
+            )
+            remapped_ports[original_port] = offset_port
+        for original_port, offset_port in remapped_ports.items():
+            rendered = rendered.replace(
+                f"host.or.ip:{original_port}",
+                f"host.or.ip:{offset_port}",
+            )
     existing = _existing_values(existing_path) if existing_path else {}
     if generate_secrets:
         rendered = _generate_first_run_secrets(rendered, existing)

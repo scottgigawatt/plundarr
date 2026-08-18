@@ -14,7 +14,7 @@ services:
     # Docker image and container information
     <<: *default-container                               # Pull in the default container information
     image: ghcr.io/gethomepage/homepage:${HOMEPAGE_TAG}  # Run using the specified tag
-    container_name: homepage-${HOMEPAGE_TAG}             # Append Docker image tag to container name
+    container_name: ${COMPOSE_PROJECT_NAME}-homepage     # Namespace the stable container name by project
     hostname: homepage                                   # Set the container hostname
 
     # Define the container environment
@@ -26,6 +26,7 @@ services:
       HOMEPAGE_ALLOWED_HOSTS: ${HOMEPAGE_ALLOWED_HOSTS}
       HOMEPAGE_VAR_TITLE: ${HOMEPAGE_VAR_TITLE}
       HOMEPAGE_VAR_SEARCH_PROVIDER: ${HOMEPAGE_VAR_SEARCH_PROVIDER}
+      HOMEPAGE_VAR_CONTAINER_PREFIX: ${COMPOSE_PROJECT_NAME}
 
       # Homepage weather widget
       HOMEPAGE_VAR_WEATHER_CITY: ${HOMEPAGE_VAR_WEATHER_CITY}

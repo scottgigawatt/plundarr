@@ -35,12 +35,14 @@ preset directly:
 make ship PRESET=jellyfin
 make ship PRESET=plex
 make ship PRESET=boudoirr ADD_SERVICES=jellyfin
+make ship ADD_SERVICES=sonarr-anime
 ```
 
 Plundarr and Boudoirr use qBittorrent as their only default downloader.
 SABnzbd, NZBGet, and Watchtower remain optional selections through
-`make configure` or `ADD_SERVICES`. Review `.env`, then start the generated
-stack with `make up`.
+`make configure` or `ADD_SERVICES`. Plundarr includes one Sonarr instance;
+`sonarr-anime` adds the optional second instance. Review `.env`, then start the
+generated stack with `make up`.
 
 ## Image Details
 

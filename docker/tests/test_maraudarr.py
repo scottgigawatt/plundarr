@@ -10,8 +10,11 @@
 
 from __future__ import annotations
 
+import re
 import tempfile
 import unittest
+from ipaddress import ip_network
+from itertools import combinations
 from pathlib import Path
 from subprocess import CompletedProcess
 from unittest.mock import Mock, patch
@@ -63,6 +66,7 @@ class MaraudarrTests(unittest.TestCase):
                 "homepage",
             ),
         )
+        self.assertNotIn("sonarr-anime", plan.service_ids)
 
     def test_boudoirr_preset_reuses_the_shared_service_catalog(self) -> None:
         """Build Boudoirr from shared services without Plundarr-only edges."""
@@ -131,6 +135,12 @@ class MaraudarrTests(unittest.TestCase):
 
         self.assertEqual(self.catalog.resolve("jellyfin").service_ids, ("jellyfin",))
         self.assertEqual(self.catalog.resolve("plex").service_ids, ("plex",))
+        self.assertEqual(
+            self.catalog.preset("jellyfin").media_libraries, ("movies", "tv")
+        )
+        self.assertEqual(
+            self.catalog.preset("boudoirr").media_libraries, ("movies", "scenes")
+        )
 
     def test_dependencies_are_added_before_the_requested_service(self) -> None:
         """Auto-add required services before their selected dependent."""
@@ -275,6 +285,107 @@ class MaraudarrTests(unittest.TestCase):
                         f'WHISPARR_DATA_PATH="${{WHISPARR_DATA_PATH:-{media_root}}}"',
                         environment,
                     )
+
+    def test_fresh_presets_can_share_one_docker_host(self) -> None:
+        """Keep project names, networks, containers, and host ports distinct."""
+
+        preset_ids = ("plundarr", "boudoirr", "jellyfin", "plex", "custom")
+        plans = {
+            preset_id: self.catalog.resolve(
+                preset_id,
+                selected={"homepage"} if preset_id == "custom" else None,
+            )
+            for preset_id in preset_ids
+        }
+        project_names = [plan.preset.project_name for plan in plans.values()]
+        networks = [
+            ip_network(plan.preset.network_subnet) for plan in plans.values()
+        ]
+
+        self.assertEqual(len(project_names), len(set(project_names)))
+        for first, second in combinations(networks, 2):
+            self.assertFalse(first.overlaps(second), f"{first} overlaps {second}")
+
+        container_names: dict[str, set[str]] = {}
+        published_ports: dict[str, set[int]] = {}
+        for preset_id, plan in plans.items():
+            compose = render_compose(self.catalog, plan)
+            environment = render_environment(
+                self.catalog,
+                plan,
+                None,
+                generate_secrets=False,
+            )
+            container_names[preset_id] = {
+                name.replace("${COMPOSE_PROJECT_NAME}", plan.preset.project_name)
+                for name in re.findall(
+                    r"^\s*container_name:\s+([^\s#]+)", compose, re.MULTILINE
+                )
+            }
+            port_variables = set(
+                re.findall(
+                    r"^\s*-\s+\$\{([A-Z][A-Z0-9_]*PORT)\}:",
+                    compose,
+                    re.MULTILINE,
+                )
+            )
+            published_ports[preset_id] = {
+                int(match.group(1))
+                for variable in port_variables
+                if (
+                    match := re.search(
+                        rf'^{re.escape(variable)}="\$\{{{re.escape(variable)}:-(\d+)\}}"$',
+                        environment,
+                        re.MULTILINE,
+                    )
+                )
+            }
+
+        for first, second in combinations(preset_ids, 2):
+            self.assertTrue(
+                container_names[first].isdisjoint(container_names[second])
+            )
+            self.assertTrue(
+                published_ports[first].isdisjoint(published_ports[second])
+            )
+
+        self.assertIn(18191, published_ports["boudoirr"])
+        self.assertIn(19696, published_ports["boudoirr"])
+        self.assertIn(18080, published_ports["boudoirr"])
+        self.assertIn(21011, published_ports["boudoirr"])
+
+        boudoirr_homepage = render_environment(
+            self.catalog,
+            self.catalog.resolve("boudoirr", add={"homepage"}),
+            None,
+            generate_secrets=False,
+        )
+        self.assertIn(
+            'HOMEPAGE_VAR_QBITTORRENT_HREF="${HOMEPAGE_VAR_QBITTORRENT_HREF:-http://host.or.ip:18080}"',
+            boudoirr_homepage,
+        )
+
+    def test_existing_boudoirr_port_values_survive_a_rebuild(self) -> None:
+        """Preserve operator-selected ports instead of applying a fresh offset."""
+
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            env_path = Path(temporary_directory) / ".env"
+            existing_port = (
+                'QBITTORRENT_WEBUI_PORT="${QBITTORRENT_WEBUI_PORT:-28080}"'
+            )
+            env_path.write_text(existing_port + "\n")
+            environment = render_environment(
+                self.catalog,
+                self.catalog.resolve("boudoirr"),
+                env_path,
+                generate_secrets=False,
+            )
+
+        self.assertIn(existing_port, environment)
+        self.assertNotIn(
+            'QBITTORRENT_WEBUI_PORT="${QBITTORRENT_WEBUI_PORT:-18080}"',
+            environment,
+        )
 
     def test_existing_environment_values_survive_a_rebuild(self) -> None:
         """Preserve user-managed environment values across regeneration."""
@@ -457,8 +568,10 @@ class MaraudarrTests(unittest.TestCase):
         downloads_group = homepage[homepage.index("- Downloads:") :]
         self.assertIn("- Jellyfin:", media_group)
         self.assertIn("- Sonarr Anime:", media_group)
+        self.assertIn("{{HOMEPAGE_VAR_CONTAINER_PREFIX}}-sonarr-anime", media_group)
         self.assertIn("- qBittorrent:", downloads_group)
         self.assertIn("- NZBGet:", downloads_group)
+        self.assertIn("{{HOMEPAGE_VAR_CONTAINER_PREFIX}}-qbittorrent", downloads_group)
         self.assertNotIn("- Jellyfin:", downloads_group)
 
     def test_custom_homepage_omits_unselected_cards_and_variables(self) -> None:

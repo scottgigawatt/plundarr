@@ -40,7 +40,8 @@ not decide dependency order or edit source templates.
 
 `Catalog` reads the TOML catalog and validates every referenced Compose,
 environment, dependency, recommendation, preset service, project identity,
-network default, media root, and Plex library profile. `Catalog.resolve` then:
+network default, media root, media library profile, and host-port offset.
+`Catalog.resolve` then:
 
 1. Starts with a preset or explicit custom selection.
 2. Applies removals and additions.
@@ -64,9 +65,10 @@ generated deployment retains those comments and unresolved `${VARIABLES}`.
 
 `text.py` locates service declarations, framed environment sections, shared
 anchors, and footer blocks. `render.py` combines selected fragments and applies
-conditional additions such as Gluetun ports, Homepage cards, preset-aware Plex
-libraries, and fresh environment defaults. Jellyfin remains deliberately
-invariant: every preset mounts one writable media root at `/data`.
+conditional additions such as Gluetun ports, Homepage cards, preset-aware media
+libraries, collision-free project port defaults, and fresh environment values.
+Jellyfin remains deliberately invariant: every preset mounts one writable media
+root at `/data`.
 
 !!! important
 
