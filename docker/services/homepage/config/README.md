@@ -1,20 +1,37 @@
-# 🧭 Homepage Configuration
+# ⚓️ Ahoy, Matey! Welcome to the Homepage Config Directory! 🏴‍☠️
 
-Homepage stores its dashboard settings here. Maraudarr builds `services.yaml`
-from `services.base.yaml`, the selected files in `fragments/`, and
-`services.footer.yaml` whenever it generates a stack.
+This be the sacred spot for configurin' yer **Homepage** service, the treasure map to all yer piratey apps and plunderin' adventures!
 
-Edit the source fragments when changing generated service cards; direct changes
-to `services.yaml` may be replaced by the next generation.
+## 🗺️ What Be This?
 
-## Links and Widgets
+The `homepage` service be yer trusty startin' point, guidin' ye to all yer other services and keepin' the ship's logs in order. Customize it to suit yer needs and always know where yer goin' on the high seas!
 
-- `HOMEPAGE_VAR_*_HREF` is the address opened by a dashboard card. For a simple
-  LAN, use the NAS address and published port, such as
-  `http://192.168.1.210:7878`.
-- `HOMEPAGE_VAR_*_URL` is the address Homepage uses inside Docker to reach a
-  service API. Keep the generated internal service address unless your network
-  requires something different.
+[Homepage's documentation](https://gethomepage.dev/latest/) has more information.
 
-See the [Homepage documentation](https://gethomepage.dev/latest/) for dashboard
-customization.
+## 🏴‍☠️ How to Set Sail
+
+When ye run the Docker container, this here directory will be mounted as the configuration folder. Tweak it to yer heart's content to make yer navigation smooth and shipshape!
+
+Homepage service cards are charted from `services.base.yaml`, selected service fragments in `fragments/`, and `services.footer.yaml` when ye run `make ship`. The generated `services.yaml` is the file Homepage reads at runtime.
+
+If ye edit generated cards, update the Maraudarr source fragment under `docker/services/homepage/config/fragments/`; otherwise the next voyage may replace yer change.
+
+## 🧭 LAN Links and Widget URLs
+
+Homepage uses two kinds of URL variables:
+
+- `HOMEPAGE_VAR_*_HREF` controls where a dashboard card sends yer browser.
+- `HOMEPAGE_VAR_*_URL` controls where a Homepage widget talks to the service API.
+
+For a simple LAN with no reverse proxy, set the `HREF` values to full IP-and-port links, like `http://192.168.1.210:7878`. Keep widget `URL` values pointed at the service endpoint Homepage can reach from inside Docker.
+
+Fer more details, consult the ship's log in the main repository: [docker-compose.yml](../../docker-compose.yml).
+
+## 📜 Useful Links
+
+- **Homepage Docs**: [Read the latest documentation](https://gethomepage.dev/latest/)
+- **GitHub Repository**: [Explore the code](https://github.com/gethomepage/homepage)
+
+---
+
+Happy sailin', ye scurvy dog! Keep yer Homepage shipshape and ready fer plunderin'!

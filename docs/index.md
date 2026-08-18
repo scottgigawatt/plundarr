@@ -9,12 +9,7 @@ Welcome aboard the developer documentation for **Plundarr** and its generator,
 catalog into one comment-rich Docker Compose deployment without trampling
 existing user configuration.
 
-!!! tip "Deploying the stack?"
-
-    Start with the [root quick start](https://github.com/scottgigawatt/plundarr#readme)
-    or the [Synology setup guide](SETUP.md). The pages below are for contributors.
-
-## Choose a Route 🧭
+## Choose Yer Route 🧭
 
 | Destination                                                   | Best for                                                  |
 | :------------------------------------------------------------ | :-------------------------------------------------------- |

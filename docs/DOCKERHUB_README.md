@@ -16,7 +16,7 @@ The repository Makefile supplies the hardened Docker invocation:
 ```bash
 git clone https://github.com/scottgigawatt/plundarr.git
 cd plundarr
-make configure
+make ship
 ```
 
 Generated cargo lands in the repository root:
@@ -28,7 +28,8 @@ example.env
 config/
 ```
 
-Use `make ship` for the default Plundarr preset, or choose a preset directly:
+Run `make configure` for the interactive preset and service picker, or choose a
+preset directly:
 
 ```bash
 make ship PRESET=jellyfin
@@ -37,12 +38,9 @@ make ship PRESET=boudoirr ADD_SERVICES=jellyfin
 ```
 
 Plundarr and Boudoirr use qBittorrent as their only default downloader.
-SABnzbd, NZBGet, and Watchtower remain optional selections; add them through
-`make configure` or `ADD_SERVICES`.
-
-Review the generated `.env`, then start the stack with `make up`. The complete
-beginner and Synology instructions live in the
-[Plundarr README](https://github.com/scottgigawatt/plundarr#readme).
+SABnzbd, NZBGet, and Watchtower remain optional selections through
+`make configure` or `ADD_SERVICES`. Review `.env`, then start the generated
+stack with `make up`.
 
 ## Image Details
 

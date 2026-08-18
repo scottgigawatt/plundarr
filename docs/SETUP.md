@@ -1,30 +1,16 @@
-# Synology Setup ⚓
+# Plundarr Docker Setup Guide ⚓🐳🏴‍☠️
 
-This guide deploys one generated Plundarr project with Synology Container
-Manager on DSM 7.2 or later.
+Avast ye! This here be the guide for riggin' up yer Docker Compose fleet with PIA WireGuard and port-forwarding support. It covers the treacherous waters of Synology DiskStations with DSM 7.2 or later, but landlubbers usin' Linux and macOS can sail by these charts too! 🏴‍☠️
 
-## Before You Start
+## Choose Yer Voyage 🧭
 
-Prepare:
-
-- Container Manager, Git, and Make.
-- A project directory such as `/volume1/docker/plundarr`.
-- Host directories for downloads, media, and service configuration.
-- PIA credentials when the selected preset includes Privateerr and Gluetun.
-
-The optional
-[Synology helper scripts](https://github.com/scottgigawatt/plundarr/tree/main/scripts#readme)
-can prepare TUN, Docker socket, and inotify settings when your NAS needs them.
-
-## 1. Generate the Project 🗺️
-
-From the cloned repository, run the interactive generator:
+Run the interactive generator from the cloned repository:
 
 ```bash
 make configure
 ```
 
-Or generate a known preset directly:
+Or generate a known voyage directly:
 
 ```bash
 make ship
@@ -33,81 +19,111 @@ make ship PRESET=jellyfin
 make ship PRESET=plex
 ```
 
-Maraudarr writes `docker-compose.yml`, `.env`, `example.env`, and only the
-selected service directories under `config/`.
-
-Plundarr and Boudoirr select only qBittorrent as a downloader by default.
-SABnzbd, NZBGet, and Watchtower are optional choices in `make configure`.
-Equivalent repeatable commands include:
+Plundarr and Boudoirr use qBittorrent as their only default downloader.
+SABnzbd, NZBGet, and Watchtower remain optional choices. Use
+`ADD_SERVICES` and `REMOVE_SERVICES` for repeatable changes:
 
 ```bash
 # Usenet only
-make ship PRESET=boudoirr REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=sabnzbd
+make ship REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=sabnzbd
 
 # Torrents and Usenet, with optional update checks
 make ship PRESET=boudoirr ADD_SERVICES=sabnzbd,watchtower
 ```
 
-## 2. Review `.env` 🔐
+Maraudarr writes `docker-compose.yml`, `example.env`, `.env`, and the selected
+service directories under `config/`. Review `.env` before launch, especially
+user IDs, host paths, timezone, network values, and PIA credentials when the
+voyage includes Privateerr and Gluetun.
 
-Check these values before launch:
+## Chartin' the Docker Network Waters 🌍🧭
 
-| Setting                              | What to Confirm                                 |
-| ------------------------------------ | ----------------------------------------------- |
-| `PIA_USER`, `PIA_PASS`               | Real PIA credentials when VPN services are used |
-| `DEFAULT_PUID`, `DEFAULT_PGID`       | IDs that can access every mounted host path     |
-| `HOST_*_PATH`                        | Download and automation or Plex library paths   |
-| `WHISPARR_DATA_PATH`                 | High-level Boudoirr media directory             |
-| `JELLYFIN_DATA_PATH`                 | High-level Jellyfin media directory             |
-| `TZ`, `*_WEBUI_PORT`                 | Timezone and available host ports               |
-| `COMPOSE_NETWORK_*`                  | A private subnet that does not overlap your LAN |
+> [!IMPORTANT]
+> ⚓️ Set yer IPAM settings right in `.env` before settin' sail, or ye'll find yerself adrift in a sea of network woes!
 
-Keep `.env` beside `docker-compose.yml` and never commit it. Maraudarr creates
-supported first-run secrets automatically and preserves existing values when
-the project is regenerated.
+Docker IPAM (IP Address Management) lets ye carve out yer own slice of the subnet seas, makin' yer fleet easier to command and troubleshoot 🛠️.
 
-## 3. Create the Container Manager Project 📦
+Update these settings in yer generated `.env` file:
 
-1. Open **Container Manager** → **Project** → **Create**.
-2. Use the generated `COMPOSE_PROJECT_NAME` as the project name.
-3. Select the cloned repository as the project path.
-4. Select `docker-compose.yml` as the Compose file.
-5. Review the chart and start the project.
+```bash
+#
+# Broad waters fer the subnet (Subnet range: 172.28.0.1 - 172.28.255.254)
+# Chart mask: 255.255.0.0
+#
+COMPOSE_NETWORK_SUBNET="${COMPOSE_NETWORK_SUBNET:-172.28.0.0/16}"
 
-Container Manager reads `.env` from the same directory automatically.
+#
+# Where the crew drops anchor (IP range fer containers: 172.28.5.1 - 172.28.5.254)
+# Chart mask: 255.255.255.0
+#
+COMPOSE_NETWORK_IP_RANGE="${COMPOSE_NETWORK_IP_RANGE:-172.28.5.0/24}"
 
-## Jellyfin Libraries 🪼
+#
+# Gateway to the open seas (Network gateway IP address)
+#
+COMPOSE_NETWORK_GATEWAY="${COMPOSE_NETWORK_GATEWAY:-172.28.5.254}"
+```
 
-Jellyfin always receives `JELLYFIN_DATA_PATH` as writable `/data`:
+For detailed documentation, refer to the [Docker Compose IPAM documentation](https://docs.docker.com/compose/compose-file/06-networks/#ipam).
 
-- Standalone Jellyfin or Plundarr: add `/data/movies` and `/data/tv`.
-- Boudoirr: add `/data/movies` and `/data/scenes`.
-
-For Boudoirr with Jellyfin, set `WHISPARR_DATA_PATH` and
-`JELLYFIN_DATA_PATH` to the same high-level host directory. Add `/data/scenes`
-as Whisparr's root folder.
-
-Configuration, cache, and logs remain under `config/jellyfin/`; logs are
-already persisted through `/config/log` and need no separate mount.
-
-## Network and Firewall 🌍
-
-Fresh presets use separate `/16` networks:
-
-| Preset   | Default Subnet  |
-| -------- | --------------- |
-| Plundarr | `172.28.0.0/16` |
-| Boudoirr | `172.29.0.0/16` |
-| Jellyfin | `172.30.0.0/16` |
-| Plex     | `172.31.0.0/16` |
-
-Change the generated `COMPOSE_NETWORK_*` values if a subnet overlaps another
+Fresh Plundarr, Boudoirr, Jellyfin, and Plex presets use `172.28.0.0/16`,
+`172.29.0.0/16`, `172.30.0.0/16`, and `172.31.0.0/16`, respectively. Use the
+matching generated values in `.env`, and change them when they overlap another
 Docker network, VPN, or LAN route.
 
-If the DSM firewall blocks container traffic, add an **Allow** rule for the
-selected subnet under **Control Panel** → **Security** → **Firewall**. A `/16`
-network uses subnet mask `255.255.0.0`.
+## Batten Down the Hatches 🖥️⚓
 
-See Synology's official
-[Container Manager project documentation](https://kb.synology.com/en-id/DSM/help/ContainerManager/docker_project?version=7)
-for DSM interface details.
+Fer them sailin' with Synology DiskStations, here be the riggin' details ye need!
+
+### Guardin' the Ship 🔥🛡️
+
+> [!WARNING]
+> 🏴‍☠️ Misfirin' yer firewall could leave yer crew stranded! Double-check them source IPs and subnet details before ye weigh anchor.
+
+If your Synology DiskStation firewall is enabled, allow traffic for the custom Docker network:
+
+1. 🛠️ Open **Control Panel** → **Security** (under Connectivity).
+2. 🛡️ Go to the **Firewall** tab → Click **Edit Rules**.
+3. ➕ Click **Create** to add a rule:
+   - 🎯 **Ports**: Select `All`
+   - 🌐 **Source IP**: Select `Specific IP`
+   - 🧩 Click `Select` → Choose `Subnet`
+   - 📝 Enter `172.28.0.0` for **IP Address** and `255.255.0.0` for **Subnet mask/Prefix length**
+   - ✅ **Action**: Select `Allow`
+4. 💾 Click **OK** to apply.
+
+This allows containers to communicate internally within the defined Docker network while Gluetun hauls selected download-client traffic and port-forwarding through the proper PIA tunnel.
+
+### Launchin' Yer Fleet 📦🚀
+
+> [!NOTE]
+> 📜 If yer on DSM 7.2 or later, Synology's Container Manager Project be the swiftest way to get yer fleet underway. Make sure yer vessel's firmware be up-to-date!
+
+To deploy a project using Synology Container Manager:
+
+1. 🔑 Log in to the Synology DSM web interface.
+2. 🗺️ Run `make configure` from the cloned repository to chart `docker-compose.yml`, `.env`, and the selected `config/` directories.
+3. 📦 Open **Container Manager** and navigate to the **Project** tab 📂.
+4. 🆕 Click **Create** and configure:
+   - 🏷️ **Project Name**: (e.g., `plundarr`)
+   - 📂 **Project Path**: Path to the cloned repository.
+   - 📜 **Compose File**: `docker-compose.yml`
+5. 🚀 Review and confirm the settings to deploy the project.
+
+Refer to the [official Synology documentation](https://kb.synology.com/en-id/DSM/help/ContainerManager/docker_project?version=7) for further details.
+
+### Jellyfin and Plex Libraries 🎞️
+
+Jellyfin mounts `JELLYFIN_DATA_PATH` as writable `/data`, with separate
+persistent `/config` and `/cache` mounts. Add `/data/movies` and `/data/tv` as
+libraries for standalone Jellyfin or Plundarr. For Boudoirr, add
+`/data/movies` and `/data/scenes`, then point `WHISPARR_DATA_PATH` and
+`JELLYFIN_DATA_PATH` at the same high-level host directory. Logs persist under
+`/config/log` without a separate log mount.
+
+Plex uses separate read-only library mounts: movies, TV, and anime for
+Plundarr; movies and scenes for Boudoirr; movies and TV standalone.
+
+---
+
+These secrets should have ye sailin' smooth seas 🚢 — may yer containers stay hearty 🏴‍☠️ and yer logs whisper like the calm before a storm 🌊. Fair winds and followin' seas, matey! 🐳🏴‍☠️

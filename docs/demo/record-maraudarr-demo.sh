@@ -12,7 +12,7 @@
 #   - Verifies every command required to record and optimize the animation.
 #   - Clones the current repository into a temporary working directory.
 #   - Isolates Compose networking, storage paths, credentials, and host ports.
-#   - Generates the selected Plundarr stack and pre-pulls its container images.
+#   - Generates Boudoirr with Jellyfin and pre-pulls its container images.
 #   - Records the interactive Maraudarr and Docker Compose workflow with VHS.
 #   - Optimizes the generated GIF for the repository's added-file size limit.
 #   - Stops the demonstration stack and removes all temporary files on exit.
@@ -81,6 +81,7 @@ mkdir -p \
     "$DEMO_DATA/downloads/usenet" \
     "$DEMO_DATA/media/anime-tv" \
     "$DEMO_DATA/media/movies" \
+    "$DEMO_DATA/media/scenes" \
     "$DEMO_DATA/media/tv"
 
 #
@@ -124,6 +125,9 @@ export HOST_USENET_DOWNLOADS_PATH="$DEMO_DATA/downloads/usenet"
 export HOST_MOVIES_PATH="$DEMO_DATA/media/movies"
 export HOST_TV_PATH="$DEMO_DATA/media/tv"
 export HOST_ANIME_TV_PATH="$DEMO_DATA/media/anime-tv"
+export HOST_SCENES_PATH="$DEMO_DATA/media/scenes"
+export WHISPARR_DATA_PATH="$DEMO_DATA/media"
+export JELLYFIN_DATA_PATH="$DEMO_DATA/media"
 export DUPLICATI_BACKUPS_PATH="$DEMO_DATA/backups"
 export HOMEPAGE_DATA_ROOT_PATH="$DEMO_DATA/media"
 
@@ -142,13 +146,14 @@ export SPEEDTEST_TRACKER_WEBUI_PORT="19080"
 export DUPLICATI_WEBUI_PORT="18200"
 export HOMEPAGE_WEBUI_PORT="13000"
 export JELLYFIN_WEBUI_PORT="18096"
+export WHISPARR_WEBUI_PORT="16969"
 
 #
 # Generate the demonstration stack and pre-pull images outside the recording.
 #
 (
     cd "$DEMO_CHECKOUT"
-    make ship ADD_SERVICES=jellyfin \
+    make ship PRESET=boudoirr ADD_SERVICES=jellyfin \
         >/dev/null
     docker compose --env-file .env -f docker-compose.yml pull --quiet
 )

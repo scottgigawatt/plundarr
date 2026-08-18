@@ -1,56 +1,109 @@
-# Testing Plundarr 🧪🏴‍☠️
+# Plundarr Test Hold 🧪🏴‍☠️
 
-Generator checks are safe and credential-free. Runtime VPN checks can start
-real containers and use the PIA credentials in `.env`.
+Welcome to the test hold, where Plundarr checks that Privateerr and Gluetun left the PIA WireGuard and port-forwarding voyage in a usable state.
 
-## Generator Checks
+## What Gets Tested 🦜
 
-Run this after changing presets, service charts, config seeds, or Maraudarr:
+The VPN test script does not use a throwaway test image. It validates the actual Privateerr, Gluetun, and qBittorrent Compose containers:
+
+- Privateerr generated PIA WireGuard `wg0.conf`.
+- Privateerr generated PIA port-forwarding metadata in `privateerr.env`.
+- Privateerr and Gluetun containers are running and healthy.
+- Gluetun is reachable through its unauthenticated health endpoint from inside the Gluetun container.
+- PIA port-forwarding produced a usable forwarded port when required.
+- qBittorrent listens on Gluetun's forwarded port when qBittorrent validation is enabled.
+
+## Test Voyages 🧭
+
+### Maraudarr Generator Checks
+
+Use the complete Maraudarr test target while changing image resolution,
+presets, service charts, or generated config seeds:
 
 ```bash
 make test-maraudarr
 ```
 
-It runs the Python unit suite, image-resolution tests, representative stack
-generation, and real `docker compose config` validation without starting the
-generated application containers.
+These checks simulate local-image discovery, a successful GHCR pull, a local
+fallback build, and a complete retrieval failure without contacting a registry.
+They also run the Python unit suite and generate representative Compose charts.
 
-## Runtime Checks
+### Running Stack Check
 
-| Command           | What It Tests                                          |
-| ----------------- | ------------------------------------------------------ |
-| `make test-vpn`   | Privateerr output, Gluetun health, and port forwarding |
-| `make test-e2e`   | VPN services plus rendered download clients            |
-| `make test-stack` | Every service in the generated stack                   |
-| `make test-down`  | Stops test containers and restores example VPN files   |
-
-`make test-e2e` discovers qBittorrent, SABnzbd, and NZBGet from the generated
-Compose file. Plundarr and Boudoirr default to qBittorrent only; generate the
-desired downloader mode first:
+Use this when the full Plundarr stack is already running:
 
 ```bash
-# Usenet only
-make ship REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=sabnzbd
+make test-vpn
+```
 
-# Torrents and Usenet
-make ship ADD_SERVICES=sabnzbd
+This checks the existing Privateerr and Gluetun containers, then verifies generated files and port forwarding.
 
+### Privateerr + Gluetun + Download E2E
+
+Use this when ye want `Make` to launch only the VPN pair plus download clients, validate it, then clean up:
+
+```bash
 make test-e2e
 ```
 
-Successful `test-stack` runs leave the stack running. Failed runs print Compose
-status and recent logs before restoring the example VPN files.
+This target:
+
+1. Restores example config.
+2. Starts only `privateerr`, `gluetun`, and selected download services with Docker Compose.
+3. Waits for those services to report healthy.
+4. Runs `test/plundarr-vpn-test.sh`.
+5. Brings the Compose stack down.
+6. Restores example config again.
+
+Generate the downloader mode before the test voyage. Plundarr and Boudoirr use
+qBittorrent by default; switch to SABnzbd-only with:
+
+```bash
+make ship REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=sabnzbd
+make test-e2e
+```
+
+Chart the same E2E voyage with NZBGet instead:
+
+```bash
+make ship REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=nzbget
+make test-e2e
+```
+
+Keep qBittorrent and add either Usenet client when ye want both downloader
+types tested together, for example `make ship ADD_SERVICES=sabnzbd`.
+
+### Full Stack Test
+
+Use this when ye want Make to launch every service, wait for health, and validate the full port-forwarding chain:
+
+```bash
+make test-stack
+```
+
+This target:
+
+1. Restores example config.
+2. Starts every Compose service.
+3. Waits for healthcheck-enabled containers to report healthy.
+4. Verifies Privateerr output, Gluetun health, Gluetun forwarded port, and qBittorrent port sync.
+5. Leaves the stack running on success.
+6. Prints Compose status and recent logs on failure.
+7. Restores example config after validation.
 
 > [!WARNING]
-> Never commit `.env`, live PIA credentials, generated `wg0.conf`,
-> `privateerr.env`, forwarded ports, application databases, or runtime logs.
+> 🧨 VPN tests can involve real PIA credentials in `.env`. 🧨
+>
+> Do not commit live credentials, generated WireGuard VPN configs, forwarded ports, or logs from yer secret treasure chest. 🪎
 
-## Example and Cleanup Files
+## Example Files 📜
 
-Safe reset fixtures live under [`examples/`](examples/):
+The [examples](examples/) directory stores example files used to reset the repo after a live run:
 
-- [`example-wg0.conf`](examples/example-wg0.conf)
-- [`example-privateerr.env`](examples/example-privateerr.env)
+- [examples/example-wg0.conf](examples/example-wg0.conf)
+- [examples/example-privateerr.env](examples/example-privateerr.env)
+
+These files match the Privateerr examples exactly. Cleanup targets copy them back into `config/gluetun/wireguard/` so live secrets do not accidentally sneak into Git.
 
 Useful cleanup commands:
 
@@ -60,6 +113,5 @@ make reset-config
 make nuke
 ```
 
-> [!CAUTION]
-> `make nuke` removes generated files, containers, volumes, and images. Review
-> the target before using it on a deployment with data you need to keep.
+> [!TIP]
+> 🏴‍☠️ Run cleanup before committing after any real VPN voyage. _Future ye will thank past ye!_

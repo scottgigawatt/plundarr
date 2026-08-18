@@ -8,7 +8,7 @@
 #
 # The recording:
 #   - Opens Maraudarr's interactive configurator through Make.
-#   - Selects the Plundarr voyage with qBittorrent, Cleanuparr, and Jellyfin.
+#   - Selects Boudoirr's qBittorrent defaults and adds Jellyfin.
 #   - Generates the complete Compose chart, environment, and configuration.
 #   - Applies the credential-free runtime override outside the visible capture.
 #   - Starts the selected Compose fleet and displays its container status.
@@ -60,25 +60,32 @@ Enter
 Sleep 3s
 
 #
-# Choose the default Plundarr voyage.
+# Choose the Boudoirr voyage.
 #
+Down
 Enter
 Sleep 2s
 
 #
-# Keep qBittorrent, skip extra automation services, and add Jellyfin.
+# Keep qBittorrent, then skip unrelated automation and experience services.
 #
 Enter
 Sleep 700ms
 Enter
 Sleep 700ms
+Enter
+Sleep 700ms
+
+#
+# Add Jellyfin as Boudoirr's media server.
+#
 Down
 Space
 Enter
 Sleep 700ms
 
 #
-# Keep Cleanuparr and skip the optional notification service.
+# Keep Cleanuparr, skip other operations, and skip monitoring services.
 #
 Enter
 Sleep 700ms
@@ -86,7 +93,7 @@ Enter
 Sleep 2s
 
 #
-# Confirm the resolved Plundarr service manifest and generate its files.
+# Confirm the resolved Boudoirr service manifest and generate its files.
 #
 Enter
 Sleep 5s

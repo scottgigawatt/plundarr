@@ -1,9 +1,31 @@
-# ☠️ Privateerr Configuration
+# 🏴‍☠️ Privateerr Configuration ☠️
 
-Privateerr uses the PIA credentials in the root `.env` file to generate Gluetun's
-WireGuard configuration and port-forwarding metadata. Its own logs and state are
-stored here; generated VPN files are stored under `config/gluetun/wireguard`.
+Greetings, swashbucklers! This be the config directory for **Privateerr**, the service that generates Private Internet Access WireGuard config and port-forwarding metadata for Gluetun in Plundarr.
+
+## Purpose 🦜⚓️
+
+> [!NOTE]
+> 🏴‍☠️ Plundarr pulls the published Privateerr image from GHCR. The PIA manual connection scripts live upstream in Privateerr, not in this repo.
+
+Privateerr generates [`../gluetun/wireguard/wg0.conf`](../gluetun/wireguard/wg0.conf) and [`../gluetun/wireguard/privateerr.env`](../gluetun/wireguard/privateerr.env). Gluetun consumes both files when the stack starts so PIA WireGuard and port forwarding can sail together.
 
 > [!IMPORTANT]
-> The root `.env` and generated WireGuard files contain sensitive VPN details.
-> Keep them private and include them in secure backups.
+> ⚓️ The generated `wg0.conf` and `privateerr.env` can contain live VPN and port-forwarding details. Guard them like yer finest loot.
+
+## Instructions 🗺️
+
+> [!WARNING]
+> ☠️ Mess up the steps below an’ ye might find yerself driftin’ without VPN cover.
+
+To use this directory:
+
+1. Copy [`../../example.env`](../../example.env) to `.env` and set yer PIA values.
+2. Run `make up`.
+3. Wait for Privateerr to update [`../gluetun/wireguard/wg0.conf`](../gluetun/wireguard/wg0.conf) and [`../gluetun/wireguard/privateerr.env`](../gluetun/wireguard/privateerr.env).
+
+The files in this directory are for Privateerr logs and service state. The WireGuard treasure map and port-forwarding metadata land under `config/gluetun/wireguard`.
+
+> [!CAUTION]
+> 🏴‍☠️⚠️ Forgettin’ to check the generated config file could leave yer ship exposed to unwanted eyes!
+
+Smooth sailin' and safe voyages, me hearties! 🌊🏴‍☠️
