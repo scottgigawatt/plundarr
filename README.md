@@ -88,8 +88,8 @@ make up
 
 | Preset        | Best For                                             |
 | ------------- | ---------------------------------------------------- |
-| `plundarr`    | Movies and TV automation; no bundled media server    |
-| `boudoirr`    | Whisparr automation; no media server by default      |
+| `plundarr`    | Movies and TV automation with qBittorrent            |
+| `boudoirr`    | Whisparr automation with qBittorrent                 |
 | `jellyfin`    | Standalone Jellyfin with movies and TV               |
 | `plex`        | Standalone Plex with movies and TV                   |
 | `custom`      | Starting empty and selecting every service yourself  |
@@ -102,11 +102,26 @@ make ship PRESET=jellyfin
 make ship PRESET=boudoirr ADD_SERVICES=jellyfin
 make ship PRESET=boudoirr ADD_SERVICES=plex
 make ship REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=sabnzbd
+make ship PRESET=boudoirr ADD_SERVICES=sabnzbd,watchtower
 ```
 
 Run `make presets` or `make services` to see every available choice. Preset
 core services cannot be removed; Maraudarr explains any required dependencies
 it adds automatically.
+
+## Choose Downloaders and Updates 📥
+
+Plundarr and Boudoirr start with qBittorrent as their only downloader. SABnzbd,
+NZBGet, and Watchtower are optional and remain unchecked in `make configure`.
+
+- **Usenet only:** uncheck qBittorrent and Cleanuparr, then select SABnzbd or
+  NZBGet.
+- **Torrents and Usenet:** keep qBittorrent checked and select a Usenet client.
+- **Automatic update checks:** select Watchtower only when you want it.
+
+For non-interactive generation, use the same `ADD_SERVICES` and
+`REMOVE_SERVICES` options shown above. Replace `sabnzbd` with `nzbget` when that
+is your preferred Usenet client.
 
 ## Storage Without Surprises 📦
 

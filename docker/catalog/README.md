@@ -12,6 +12,11 @@ root, and the library mounts used when Plex is selected. Jellyfin always mounts
 that high-level root at `/data`; its library names remain application settings,
 not alternate Compose shapes.
 
+Preset `core` services cannot be removed. Preset `defaults` are only preselected
+in the interactive picker and may be unchecked. Plundarr and Boudoirr use this
+boundary to default to qBittorrent while leaving SABnzbd, NZBGet, and Watchtower
+as independent opt-in services.
+
 > [!IMPORTANT]
 > Keep service IDs aligned with their directory names. Maraudarr derives
 > `services/<id>/compose.yml`, `environment.env`, and `config/` from that ID.

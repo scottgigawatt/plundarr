@@ -36,6 +36,18 @@ make ship PRESET=plex
 Maraudarr writes `docker-compose.yml`, `.env`, `example.env`, and only the
 selected service directories under `config/`.
 
+Plundarr and Boudoirr select only qBittorrent as a downloader by default.
+SABnzbd, NZBGet, and Watchtower are optional choices in `make configure`.
+Equivalent repeatable commands include:
+
+```bash
+# Usenet only
+make ship PRESET=boudoirr REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=sabnzbd
+
+# Torrents and Usenet, with optional update checks
+make ship PRESET=boudoirr ADD_SERVICES=sabnzbd,watchtower
+```
+
 ## 2. Review `.env` 🔐
 
 Check these values before launch:

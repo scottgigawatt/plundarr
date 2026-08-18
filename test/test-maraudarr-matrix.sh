@@ -109,9 +109,19 @@ run_case standalone-jellyfin --preset jellyfin
 run_case standalone-plex --preset plex
 
 #
-# Complete Boudoirr preset.
+# Default Boudoirr voyage with qBittorrent only.
 #
 run_case boudoirr --preset boudoirr
+
+# Boudoirr supports Usenet-only and combined downloader choices.
+#
+run_case boudoirr-usenet \
+    --preset boudoirr \
+    --remove qbittorrent,cleanuparr \
+    --add sabnzbd
+run_case boudoirr-addons \
+    --preset boudoirr \
+    --add sabnzbd,watchtower
 
 #
 # Boudoirr can choose either media server without gaining one by default.

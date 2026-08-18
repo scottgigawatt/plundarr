@@ -25,10 +25,16 @@ generated application containers.
 | `make test-down`  | Stops test containers and restores example VPN files   |
 
 `make test-e2e` discovers qBittorrent, SABnzbd, and NZBGet from the generated
-Compose file. Generate the desired downloader first:
+Compose file. Plundarr and Boudoirr default to qBittorrent only; generate the
+desired downloader mode first:
 
 ```bash
+# Usenet only
 make ship REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=sabnzbd
+
+# Torrents and Usenet
+make ship ADD_SERVICES=sabnzbd
+
 make test-e2e
 ```
 

@@ -36,6 +36,10 @@ make ship PRESET=plex
 make ship PRESET=boudoirr ADD_SERVICES=jellyfin
 ```
 
+Plundarr and Boudoirr use qBittorrent as their only default downloader.
+SABnzbd, NZBGet, and Watchtower remain optional selections; add them through
+`make configure` or `ADD_SERVICES`.
+
 Review the generated `.env`, then start the stack with `make up`. The complete
 beginner and Synology instructions live in the
 [Plundarr README](https://github.com/scottgigawatt/plundarr#readme).

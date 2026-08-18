@@ -49,6 +49,10 @@ network default, media root, and Plex library profile. `Catalog.resolve` then:
 5. Recursively adds required dependencies.
 6. Sorts services by catalog order and stable service ID.
 
+Core services are restored in step 3 and cannot be removed. Default services
+are only the preset's initial checkbox state, so users can replace qBittorrent
+with a Usenet client or select both without a separate add-on mechanism.
+
 The result is an immutable `StackPlan`. Renderers consume that plan rather than
 repeating selection logic.
 

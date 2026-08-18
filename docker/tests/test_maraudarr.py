@@ -78,16 +78,53 @@ class MaraudarrTests(unittest.TestCase):
                 "flaresolverr",
                 "prowlarr",
                 "qbittorrent",
-                "sabnzbd",
                 "whisparr",
                 "cleanuparr",
-                "watchtower",
             ),
         )
         self.assertNotIn("depends_on:", extract_service(compose, "cleanuparr"))
         self.assertNotIn("depends_on:", extract_service(compose, "whisparr"))
         self.assertNotIn("  jellyfin:", compose)
         self.assertNotIn("  plex:", compose)
+
+    def test_automation_presets_support_optional_downloader_modes(self) -> None:
+        """Keep torrent-only, Usenet-only, and combined modes selectable."""
+
+        for preset_id in ("plundarr", "boudoirr"):
+            with self.subTest(preset=preset_id, mode="torrent"):
+                default = set(self.catalog.resolve(preset_id).service_ids)
+                self.assertIn("qbittorrent", default)
+                self.assertNotIn("sabnzbd", default)
+                self.assertNotIn("nzbget", default)
+
+            with self.subTest(preset=preset_id, mode="usenet"):
+                usenet = set(
+                    self.catalog.resolve(
+                        preset_id,
+                        add={"sabnzbd"},
+                        remove={"qbittorrent", "cleanuparr"},
+                    ).service_ids
+                )
+                self.assertIn("sabnzbd", usenet)
+                self.assertNotIn("qbittorrent", usenet)
+
+            with self.subTest(preset=preset_id, mode="combined"):
+                combined = set(
+                    self.catalog.resolve(preset_id, add={"sabnzbd"}).service_ids
+                )
+                self.assertIn("qbittorrent", combined)
+                self.assertIn("sabnzbd", combined)
+
+    def test_watchtower_is_opt_in_for_automation_presets(self) -> None:
+        """Leave Watchtower unchecked until a user explicitly selects it."""
+
+        for preset_id in ("plundarr", "boudoirr"):
+            with self.subTest(preset=preset_id):
+                default = self.catalog.resolve(preset_id)
+                selected = self.catalog.resolve(preset_id, add={"watchtower"})
+
+                self.assertNotIn("watchtower", default.service_ids)
+                self.assertIn("watchtower", selected.service_ids)
 
     def test_standalone_media_server_presets_select_one_core_service(self) -> None:
         """Keep the standalone Jellyfin and Plex presets deliberately focused."""

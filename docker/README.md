@@ -48,10 +48,13 @@ For repeatable builds, pass the preset and service changes directly:
 make ship PRESET=boudoirr ADD_SERVICES=jellyfin
 make ship PRESET=jellyfin
 make ship PRESET=plex
+make ship PRESET=boudoirr ADD_SERVICES=sabnzbd,watchtower
 ```
 
 `ADD_SERVICES` and `REMOVE_SERVICES` accept comma-separated service IDs. Make
 uses a matching local image, then GHCR, then a local build from this checkout.
+Plundarr and Boudoirr preselect qBittorrent only; both Usenet clients and
+Watchtower remain ordinary opt-in service choices.
 
 ## What Be in This Image? 📦
 

@@ -21,9 +21,10 @@ make test-maraudarr
 ```
 
 This includes unit tests, packaged-image fallback checks, all product presets,
-Boudoirr's optional media-server combinations, and representative service
-additions and removals. Every generated Compose/environment pair is inspected
-by Docker Compose without starting application containers.
+Boudoirr's optional media-server combinations, torrent-only, Usenet-only, and
+combined downloader modes, plus opt-in Watchtower. Every generated
+Compose/environment pair is inspected by Docker Compose without starting
+application containers.
 
 ## Image Builds
 
