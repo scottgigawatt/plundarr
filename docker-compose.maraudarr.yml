@@ -46,6 +46,6 @@ services:
     tmpfs:
       - /tmp:rw,noexec,nosuid,size=64m  # Temporary generation workspace
 
-    # Mount this repository as Maraudarr's output directory
+    # Mount this repository as Maraudarr's output root
     volumes:
-      - .:/output:rw  # Write Plundarr files into the repository root
+      - .:/output:rw  # Write generated preset projects beneath repository dist/

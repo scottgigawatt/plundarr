@@ -117,13 +117,13 @@ HOMEPAGE_SERVICE    ?= homepage
 #
 PRIVATEERR_EXAMPLE_WG_CONFIG   ?= test/examples/example-wg0.conf
 PRIVATEERR_EXAMPLE_METADATA    ?= test/examples/example-privateerr.env
-PRIVATEERR_GENERATED_WG_CONFIG ?= config/gluetun/wireguard/wg0.conf
-PRIVATEERR_GENERATED_METADATA  ?= config/gluetun/wireguard/privateerr.env
-PLUNDARR_GENERATED_PATHS       ?= config/privateerr/logs \
-	config/gluetun/forwarded_port \
-	config/gluetun/ip \
-	config/gluetun/piaportforward.json \
-	config/gluetun/servers \
+PRIVATEERR_GENERATED_WG_CONFIG ?= $(CONFIG_PATH)/gluetun/wireguard/wg0.conf
+PRIVATEERR_GENERATED_METADATA  ?= $(CONFIG_PATH)/gluetun/wireguard/privateerr.env
+PLUNDARR_GENERATED_PATHS       ?= $(CONFIG_PATH)/privateerr/logs \
+	$(CONFIG_PATH)/gluetun/forwarded_port \
+	$(CONFIG_PATH)/gluetun/ip \
+	$(CONFIG_PATH)/gluetun/piaportforward.json \
+	$(CONFIG_PATH)/gluetun/servers \
 	test/logs
 
 #
@@ -132,9 +132,11 @@ PLUNDARR_GENERATED_PATHS       ?= config/privateerr/logs \
 PRESET                    ?= plundarr
 ADD_SERVICES              ?=
 REMOVE_SERVICES           ?=
-RENDERED_COMPOSE_FILE     ?= docker-compose.yml
+DEPLOYMENT_ROOT           ?= dist
+DEPLOYMENT_PATH           ?= $(DEPLOYMENT_ROOT)/$(PRESET)
+RENDERED_COMPOSE_FILE     ?= $(DEPLOYMENT_PATH)/docker-compose.yml
 COMPOSE_FILE              ?= $(RENDERED_COMPOSE_FILE)
-ENV_FILE                  ?= .env
+ENV_FILE                  ?= $(DEPLOYMENT_PATH)/.env
 COMPOSE_ENV_FILE          ?= $(ENV_FILE)
 COMPOSE_DOWN_TIMEOUT      ?= 30
 COMPOSE_DOWN_OPTIONS      ?= --timeout $(COMPOSE_DOWN_TIMEOUT) --remove-orphans
@@ -148,12 +150,13 @@ MARAUDARR_IMAGE           ?= ghcr.io/scottgigawatt/maraudarr:latest
 MARAUDARR_COMPOSE_FILE    ?= docker-compose.maraudarr.yml
 MARAUDARR_ENV_FILE        ?= example.maraudarr.env
 MARAUDARR_OUTPUT          ?= /output
+MARAUDARR_OUTPUT_ROOT     ?= $(MARAUDARR_OUTPUT)/$(DEPLOYMENT_ROOT)
 MARAUDARR_BUILD_OPTIONS   ?= --pull --no-cache
 MARAUDARR_BUILD_PLATFORMS ?= linux/amd64,linux/arm64,linux/arm/v7
 MARAUDARR_MULTIARCH_IMAGE ?= maraudarr:multiarch-local
 MARAUDARR_TEST_OUTPUT     ?= /tmp/maraudarr-matrix
-CONFIG_PATH               ?= config
-CONFIG_BACKUP_PATH        ?= backups
+CONFIG_PATH               ?= $(DEPLOYMENT_PATH)/config
+CONFIG_BACKUP_PATH        ?= $(DEPLOYMENT_PATH)/backups
 PYTHON_BIN                ?= python3
 
 #
@@ -360,11 +363,11 @@ $(BACKUP_CONFIG):
 	fi
 	@mkdir -p "$(CONFIG_BACKUP_PATH)"
 	@timestamp=$$(date +%Y%m%d-%H%M%S); \
-	archive="$(CONFIG_BACKUP_PATH)/plundarr-config-$${timestamp}.tar.gz"; \
+	archive="$(CONFIG_BACKUP_PATH)/$(PRESET)-config-$${timestamp}.tar.gz"; \
 	suffix=0; \
 	while [ -e "$$archive" ]; do \
 		suffix=$$((suffix + 1)); \
-		archive="$(CONFIG_BACKUP_PATH)/plundarr-config-$${timestamp}-$${suffix}.tar.gz"; \
+		archive="$(CONFIG_BACKUP_PATH)/$(PRESET)-config-$${timestamp}-$${suffix}.tar.gz"; \
 	done; \
 	tar -czf "$$archive" "$(CONFIG_PATH)"; \
 	echo "\nConfig cargo archived at $$archive. 📦"
@@ -390,6 +393,8 @@ $(TEST_VPN): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 	@echo "\nInspectin' the VPN tunnel and port-forwarding loot. 🔎"
 	PLUNDARR_COMPOSE_FILE=$(COMPOSE_FILE) \
 	PLUNDARR_ENV_FILE=$(COMPOSE_ENV_FILE) \
+	PLUNDARR_CONFIG_PATH=$(CONFIG_PATH)/gluetun/wireguard \
+	PLUNDARR_GLUETUN_PATH=$(CONFIG_PATH)/gluetun \
 	PLUNDARR_PRIVATEERR_SERVICE=$(PRIVATEERR_SERVICE) \
 	PLUNDARR_GLUETUN_SERVICE=$(GLUETUN_SERVICE) \
 	PLUNDARR_DOWNLOAD_SERVICES="$(E2E_DOWNLOAD_SERVICES)" \
@@ -413,6 +418,8 @@ $(TEST_E2E): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED) $(RESET_CONFIG)
 	if [ "$$status" -eq 0 ]; then \
 		PLUNDARR_COMPOSE_FILE=$(COMPOSE_FILE) \
 		PLUNDARR_ENV_FILE=$(COMPOSE_ENV_FILE) \
+		PLUNDARR_CONFIG_PATH=$(CONFIG_PATH)/gluetun/wireguard \
+		PLUNDARR_GLUETUN_PATH=$(CONFIG_PATH)/gluetun \
 		PLUNDARR_PRIVATEERR_SERVICE=$(PRIVATEERR_SERVICE) \
 		PLUNDARR_GLUETUN_SERVICE=$(GLUETUN_SERVICE) \
 		PLUNDARR_DOWNLOAD_SERVICES="$(E2E_DOWNLOAD_SERVICES)" \
@@ -446,6 +453,8 @@ $(TEST_STACK): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED) $(RESET_CONFIG)
 	if [ "$$status" -eq 0 ]; then \
 		PLUNDARR_COMPOSE_FILE=$(COMPOSE_FILE) \
 		PLUNDARR_ENV_FILE=$(COMPOSE_ENV_FILE) \
+		PLUNDARR_CONFIG_PATH=$(CONFIG_PATH)/gluetun/wireguard \
+		PLUNDARR_GLUETUN_PATH=$(CONFIG_PATH)/gluetun \
 		PLUNDARR_PRIVATEERR_SERVICE=$(PRIVATEERR_SERVICE) \
 		PLUNDARR_GLUETUN_SERVICE=$(GLUETUN_SERVICE) \
 		PLUNDARR_DOWNLOAD_SERVICES="$(E2E_DOWNLOAD_SERVICES)" \
@@ -547,7 +556,7 @@ $(SHIP): $(ENSURE_MARAUDARR_IMAGE)
 		--preset "$(PRESET)" \
 		--remove "$(REMOVE_SERVICES)" \
 		--add "$(ADD_SERVICES)" \
-		--output "$(MARAUDARR_OUTPUT)"
+		--output-root "$(MARAUDARR_OUTPUT_ROOT)"
 
 #
 # $(CONFIGURE): Opens Maraudarr's interactive preset and service configurator.
@@ -556,7 +565,7 @@ $(SHIP): $(ENSURE_MARAUDARR_IMAGE)
 #   $(ENSURE_MARAUDARR_IMAGE) - Prepare a local Maraudarr image.
 #
 $(CONFIGURE): $(ENSURE_MARAUDARR_IMAGE)
-	$(MARAUDARR_RUN_INTERACTIVE) configure --output "$(MARAUDARR_OUTPUT)"
+	$(MARAUDARR_RUN_INTERACTIVE) configure --output-root "$(MARAUDARR_OUTPUT_ROOT)"
 
 #
 # $(BUILD_MARAUDARR): Builds Maraudarr locally using its dedicated Compose chart.

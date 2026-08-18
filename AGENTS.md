@@ -17,8 +17,8 @@ and initial configuration directories.
 
 Keep the names distinct:
 
-- **Plundarr** is the generated stack in `docker-compose.yml`, `.env`, and
-  `config/`.
+- **Plundarr** is the generated stack in `dist/<preset>/docker-compose.yml`,
+  `.env`, and `config/`.
 - **Maraudarr** is the short-lived generator image and Python application under
   `docker/`.
 
@@ -28,10 +28,8 @@ Keep the names distinct:
   for changes in this directory.
 - `docker-compose.maraudarr.yml`: Local Maraudarr image build and run chart.
 - `example.maraudarr.env`: Maraudarr image build defaults.
-- `docker-compose.yml`: Generated default Plundarr stack checked into the repo.
-- `example.env`: Complete example settings for the default Plundarr stack.
-- `.env`: Local generated Plundarr settings. Never commit real credentials.
-- `config/`: Generated Plundarr service directories and runtime state.
+- `dist/`: Ignored generated Plundarr preset projects, each with Compose,
+  environment, and runtime state.
 - `test/`: Plundarr runtime validation and Maraudarr generation matrix.
 - `docs/`: Supporting setup, contribution, security, and community documents.
 - `.github/`: Workflows, Renovate configuration, templates, and ownership.
@@ -74,13 +72,13 @@ Every target should have the established framed comment and dependency notes.
 
 ## Generated Files And Secrets
 
-Maraudarr writes into the repository root. Do not resolve `${VARIABLES}` inside
-the generated Compose file. The generated `.env` remains the only file users
-need to edit after generation.
+Maraudarr writes each normal deployment into `dist/<preset>/`. Do not resolve
+`${VARIABLES}` inside the generated Compose file. The generated `.env` remains
+the only file users need to edit after generation.
 
 Never commit real credentials, API keys, generated application databases, or
 VPN state. Config seed files belong under `docker/services/*/config/`; generated
-runtime state belongs under root `config/` and remains ignored.
+runtime state belongs under `dist/<preset>/config/` and remains ignored.
 
 Do not remove or overwrite existing application state while regenerating a
 stack. The explicit `make clean-config` target owns destructive config cleanup.
@@ -123,5 +121,5 @@ pre-commit run --all-files
 Validate generated output with:
 
 ```sh
-docker compose --env-file .env -f docker-compose.yml config --quiet
+docker compose --env-file dist/plundarr/.env -f dist/plundarr/docker-compose.yml config --quiet
 ```

@@ -46,10 +46,10 @@
 # Plundarr 🏴‍☠️
 
 Ahoy, mateys! Plundarr charts a complete Docker Compose media fleet from the
-services ye actually want, then packs the whole voyage into one commented
-`docker-compose.yml` and one matching `.env` file. Docker Compose and Synology
-Container Manager both get one final chart, while routine configuration stays
-where it belongs: in `.env`. ⚓️
+services ye actually want, then packs each voyage into one commented
+`docker-compose.yml` and matching `.env` file beneath `dist/<preset>/`. Docker
+Compose and Synology Container Manager both get one final chart, while routine
+configuration stays where it belongs: in that voyage's `.env`. ⚓️
 
 ## Captain's Log 📜
 
@@ -59,7 +59,7 @@ Plundarr has two clearly separate parts:
 | Component | What It Does | Where It Lives |
 | --------- | ------------ | -------------- |
 | **Maraudarr** | Short-lived generator that chooses services, resolves dependencies, validates the result, and exits | Published as [`ghcr.io/scottgigawatt/maraudarr`](https://github.com/scottgigawatt/plundarr/pkgs/container/maraudarr) and [`scottgigawatt/maraudarr`](https://hub.docker.com/r/scottgigawatt/maraudarr) |
-| **Plundarr** | The generated media stack that stays on yer host and runs the selected services | `docker-compose.yml`, `.env`, and `config/` in this repository |
+| **Plundarr** | The generated media stack that stays on yer host and runs the selected services | `dist/<preset>/docker-compose.yml`, `.env`, and `config/` |
 <!-- markdownlint-enable MD060 -->
 
 `make ship` and `make configure` run the published Maraudarr image when it is
@@ -80,7 +80,7 @@ configuration, and raise the Compose fleet:
 <!-- markdownlint-enable MD033 -->
 
 The animation follows the real `make configure`, `make up`, and `make ps`
-workflow. Curious captains can inspect or replay the
+workflow for `dist/plundarr/`. Curious captains can inspect or replay the
 [recording source](./docs/demo/record-maraudarr-demo.sh).
 
 > [!NOTE]
@@ -132,7 +132,7 @@ required foundation services and shows the resolved fleet before writing it.
 The default Plundarr voyage uses qBittorrent and needs no setup questions.
 `make ship` uses Maraudarr locally when available, pulls it when missing, and
 builds it from this checkout when no published image is available. It then
-generates the complete Plundarr stack in this repository:
+generates the complete Plundarr project in `dist/plundarr/`:
 
 ```bash
 # Hoist the Jolly Roger, clone the repo, and chart the default stack
@@ -141,18 +141,20 @@ generates the complete Plundarr stack in this repository:
 ❯ make ship
 ```
 
-Maraudarr writes the complete Plundarr project where ye already expect it:
+Maraudarr gives each preset its own complete deployment directory:
 
 ```text
-docker-compose.yml
-example.env
-.env
-config/
+dist/
+└── plundarr/
+    ├── docker-compose.yml
+    ├── example.env
+    ├── .env
+    └── config/
 ```
 
 > [!IMPORTANT]
-> 🔐 Open `.env` before launch. Most defaults can stay aboard, but real PIA
-> credentials and host storage paths must match yer own harbor.
+> 🔐 Open `dist/plundarr/.env` before launch. Most defaults can stay aboard,
+> but real PIA credentials and host storage paths must match yer own harbor.
 
 ### Focus on These Settings ⚙️
 
@@ -173,7 +175,8 @@ Maraudarr writes only settings used by the selected services:
 
 > [!TIP]
 > 🗺️ Fresh paths match the selected preset. Service configuration stays under
-> this repository's `config/` directory unless ye change its path in `.env`.
+> that preset's `dist/<preset>/config/` directory unless ye change its path in
+> `.env`.
 
 When the chart looks shipshape, launch the complete fleet in one shot:
 
@@ -238,10 +241,12 @@ Preset core services cannot be removed. Default services can be unchecked in
 
 ### Synology Notes 📦
 
-Synology Container Manager gets the same one-file deployment chart:
+Synology Container Manager gets the same one-file deployment chart for each
+preset:
 
-1. Keep `.env` beside `docker-compose.yml`.
-2. Create a Container Manager project from `docker-compose.yml`.
+1. Keep `dist/<preset>/.env` beside `dist/<preset>/docker-compose.yml`.
+2. Create one Container Manager project from that preset directory's
+   `docker-compose.yml`.
 3. Review the generated chart, then launch the project.
 
 Read the Synology setup scroll before the first voyage:
@@ -282,8 +287,8 @@ make test-stack
 | 🔎 `make config`              | Prints Docker Compose's validated model                 |
 | 🚀 `make up`                  | Starts the complete generated stack                     |
 | ⚓ `make down`                | Stops and removes the generated stack                   |
-| 💾 `make backup-config`       | Archives `config/` with a collision-safe timestamp      |
-| ☠️ `make clean-config`        | Deletes the complete generated config directory         |
+| 💾 `make backup-config`       | Archives the selected preset's `config/` safely         |
+| ☠️ `make clean-config`        | Deletes the selected preset's generated config tree     |
 | 🐍 `make test-maraudarr-unit` | Runs Maraudarr's Python unit tests                      |
 | 🧪 `make test-maraudarr`      | Tests presets and generated Compose combinations        |
 | ⚒️ `make build-maraudarr`     | Builds the Maraudarr image locally from this repository |

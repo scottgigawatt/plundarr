@@ -89,10 +89,10 @@ Sleep 5s
 # Merge the credential-free runtime override outside the visible recording.
 #
 Hide
-Type `docker compose --env-file .env -f docker-compose.yml -f docker-compose.demo.yml config > docker-compose.runtime.yml`
+Type `docker compose --env-file dist/plundarr/.env -f dist/plundarr/docker-compose.yml -f docker-compose.demo.yml config > dist/plundarr/docker-compose.runtime.yml`
 Enter
 Sleep 2s
-Type "mv docker-compose.runtime.yml docker-compose.yml"
+Type "mv dist/plundarr/docker-compose.runtime.yml dist/plundarr/docker-compose.yml"
 Enter
 Type "clear"
 Enter

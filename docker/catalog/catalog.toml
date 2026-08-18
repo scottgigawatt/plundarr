@@ -278,7 +278,7 @@ network_ip_range = "172.30.5.0/24"
 network_gateway = "172.30.5.254"
 media_root = "/volume1/jellyfin"
 media_libraries = ["movies", "tv"]
-host_port_offset = 0
+host_port_offset = 20000
 compose_summary = [
     "docker-compose.yml: Docker Compose configuration for running a standalone",
     "                    Jellyfin media server on Plundarr's shared foundation.",
@@ -324,7 +324,7 @@ network_ip_range = "172.27.5.0/24"
 network_gateway = "172.27.5.254"
 media_root = "/volume1/plex"
 media_libraries = ["movies", "tv"]
-host_port_offset = 20000
+host_port_offset = 30000
 compose_summary = [
     "docker-compose.yml: Docker Compose configuration generated from Maraudarr's",
     "                    selectable media service catalog.",

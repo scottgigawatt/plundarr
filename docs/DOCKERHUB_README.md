@@ -19,13 +19,14 @@ cd plundarr
 make ship
 ```
 
-Generated cargo lands in the repository root:
+Generated cargo lands in its preset directory:
 
 ```text
-docker-compose.yml
-example.env
-.env
-config/
+dist/plundarr/
+├── docker-compose.yml
+├── example.env
+├── .env
+└── config/
 ```
 
 Run `make configure` for the interactive preset and service picker, or choose a
@@ -41,8 +42,8 @@ make ship ADD_SERVICES=sonarr-anime
 Plundarr and Boudoirr use qBittorrent as their only default downloader.
 SABnzbd, NZBGet, and Watchtower remain optional selections through
 `make configure` or `ADD_SERVICES`. Plundarr includes one Sonarr instance;
-`sonarr-anime` adds the optional second instance. Review `.env`, then start the
-generated stack with `make up`.
+`sonarr-anime` adds the optional second instance. Review
+`dist/<preset>/.env`, then start the generated stack with `make up PRESET=<preset>`.
 
 ## Image Details
 

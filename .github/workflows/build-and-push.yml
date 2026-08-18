@@ -21,9 +21,7 @@ on:
       - "v*.*.*"
     paths:
       - "docker/**"
-      - "docker-compose.yml"
       - "docker-compose.maraudarr.yml"
-      - "example.env"
       - "example.maraudarr.env"
       - "test/test-maraudarr-matrix.sh"
       - "Makefile"
@@ -87,10 +85,10 @@ jobs:
             --mount "type=bind,src=${RUNNER_TEMP}/plundarr-output,dst=/output" \
             ghcr.io/${{ github.repository_owner }}/maraudarr:scan \
             --plain build --preset plundarr --add apprise,jellyfin
-          test -s "${RUNNER_TEMP}/plundarr-output/config/homepage/services.yaml"
+          test -s "${RUNNER_TEMP}/plundarr-output/dist/plundarr/config/homepage/services.yaml"
           docker compose \
-            --env-file "${RUNNER_TEMP}/plundarr-output/.env" \
-            -f "${RUNNER_TEMP}/plundarr-output/docker-compose.yml" \
+            --env-file "${RUNNER_TEMP}/plundarr-output/dist/plundarr/.env" \
+            -f "${RUNNER_TEMP}/plundarr-output/dist/plundarr/docker-compose.yml" \
             config \
             --quiet
 

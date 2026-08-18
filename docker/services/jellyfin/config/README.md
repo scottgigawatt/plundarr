@@ -2,7 +2,8 @@
 
 Jellyfin stores its database, metadata, plugins, and application logs beneath
 `config/`; its disposable transcode and image cache lives beneath `cache/`.
-Both directories are created here and remain configurable in root `.env`.
+Both directories are created here and remain configurable in the generated
+preset's `.env` file.
 
 The official image writes application logs beneath `/config/log`, so the
 persistent `/config` mount already keeps them without a separate log volume.

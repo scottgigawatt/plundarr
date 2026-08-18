@@ -39,12 +39,12 @@ DEMO_DATA="$DEMO_ROOT/data"
 MARAUDARR_IMAGE="maraudarr:readme-demo-$$"
 
 #
-# Stop the temporary Compose project and remove the disposable checkout.
+# Stop the temporary generated project and remove the disposable checkout.
 #
 cleanup() {
-    if [ -f "$DEMO_CHECKOUT/docker-compose.yml" ] && [ -f "$DEMO_CHECKOUT/.env" ]; then
+    if [ -f "$DEMO_CHECKOUT/dist/plundarr/docker-compose.yml" ] && [ -f "$DEMO_CHECKOUT/dist/plundarr/.env" ]; then
         (
-            cd "$DEMO_CHECKOUT"
+            cd "$DEMO_CHECKOUT/dist/plundarr"
             docker compose --env-file .env -f docker-compose.yml down \
                 --timeout 15 --remove-orphans
         ) >/dev/null 2>&1 || true
@@ -136,21 +136,21 @@ export DUPLICATI_BACKUPS_PATH="$DEMO_DATA/backups"
 export HOMEPAGE_DATA_ROOT_PATH="$DEMO_DATA/media"
 
 #
-# Remap published service ports away from the normal Plundarr defaults.
+# Remap published service ports away from normal Plundarr deployment ports.
 #
-export FLARESOLVERR_PORT="18191"
-export PROWLARR_WEBUI_PORT="19696"
-export QBITTORRENT_TCP_PORT="16881"
-export QBITTORRENT_UDP_PORT="16881"
-export QBITTORRENT_WEBUI_PORT="18080"
-export RADARR_WEBUI_PORT="17878"
-export SONARR_WEBUI_PORT="18989"
-export BAZARR_WEBUI_PORT="16767"
-export SEERR_WEBUI_PORT="15055"
-export CLEANUPARR_WEBUI_PORT="11012"
-export SPEEDTEST_TRACKER_WEBUI_PORT="19080"
-export DUPLICATI_WEBUI_PORT="18200"
-export HOMEPAGE_WEBUI_PORT="13000"
+export FLARESOLVERR_PORT="48191"
+export PROWLARR_WEBUI_PORT="49696"
+export QBITTORRENT_TCP_PORT="46881"
+export QBITTORRENT_UDP_PORT="46881"
+export QBITTORRENT_WEBUI_PORT="48080"
+export RADARR_WEBUI_PORT="47878"
+export SONARR_WEBUI_PORT="48989"
+export BAZARR_WEBUI_PORT="46767"
+export SEERR_WEBUI_PORT="45055"
+export CLEANUPARR_WEBUI_PORT="41011"
+export SPEEDTEST_TRACKER_WEBUI_PORT="39080"
+export DUPLICATI_WEBUI_PORT="48200"
+export HOMEPAGE_WEBUI_PORT="33000"
 
 #
 # Build Maraudarr, generate the stack, and pre-pull images outside the recording.
@@ -159,7 +159,10 @@ export HOMEPAGE_WEBUI_PORT="13000"
     cd "$DEMO_CHECKOUT"
     make build-maraudarr >/dev/null
     make ship >/dev/null
-    docker compose --env-file .env -f docker-compose.yml pull --quiet
+    docker compose \
+        --env-file dist/plundarr/.env \
+        -f dist/plundarr/docker-compose.yml \
+        pull --quiet
 )
 
 #

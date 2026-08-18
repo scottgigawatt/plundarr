@@ -29,7 +29,7 @@ required by the image must live here.
 - `services/<name>/compose.yml`: Exactly one selectable service definition.
 - `services/<name>/environment.env`: Settings owned by that service.
 - `services/<name>/config/`: Files copied into generated `config/<name>/`.
-- `config/`: Files copied into the root of generated `config/`.
+- `config/`: Files copied into the root of a generated preset's `config/`.
 
 ## Catalog Rules
 
@@ -40,11 +40,14 @@ dependencies, source paths, and descriptions explicit and documented in
 
 ## Rendering Rules
 
-Maraudarr preserves source comments and `${VARIABLES}`. It writes:
+Maraudarr preserves source comments and `${VARIABLES}`. Normal generation writes:
 
-- `/output/docker-compose.yml`
-- `/output/.env`
-- `/output/config/`
+- `/output/dist/<preset>/docker-compose.yml`
+- `/output/dist/<preset>/.env`
+- `/output/dist/<preset>/config/`
+
+The explicit `--output` option remains available for an exact automation
+directory such as a test fixture.
 
 Writes to Compose and environment output must remain atomic. Config generation
 may add missing seed files and refresh project-owned README files, but must not

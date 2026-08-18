@@ -36,10 +36,11 @@ Default Plundarr includes one Sonarr instance for television. The separate
 Sonarr Anime instance appears only when selected through `make configure` or
 `ADD_SERVICES=sonarr-anime`.
 
-Maraudarr writes `docker-compose.yml`, `example.env`, `.env`, and the selected
-service directories under `config/`. Review `.env` before launch, especially
-user IDs, host paths, timezone, network values, and PIA credentials when the
-voyage includes Privateerr and Gluetun.
+Maraudarr writes each voyage to `dist/<preset>/docker-compose.yml`,
+`dist/<preset>/example.env`, `dist/<preset>/.env`, and the selected service
+directories under `dist/<preset>/config/`. Review that preset's `.env` before
+launch, especially user IDs, host paths, timezone, network values, and PIA
+credentials when the voyage includes Privateerr and Gluetun.
 
 ## Chartin' the Docker Network Waters 🌍🧭
 
@@ -78,18 +79,19 @@ Fresh presets receive distinct project and network defaults:
 | ------ | ------- | ------ | --------------- |
 | Plundarr | `plundarr` | `172.28.0.0/16` | Standard service ports |
 | Boudoirr | `boudoirr` | `172.29.0.0/16` | Selected service ports offset by `10000` |
-| Jellyfin | `jellyfin` | `172.30.0.0/16` | Jellyfin `8096` |
+| Jellyfin | `jellyfin` | `172.30.0.0/16` | Jellyfin `28096` (`8096` + `20000`) |
 | Plex | `plex` | `172.31.0.0/16` | Plex host networking |
-| Custom | `custom` | `172.27.0.0/16` | Selected service ports offset by `20000` |
+| Custom | `custom` | `172.27.0.0/16` | Selected service ports offset by `30000` |
 <!-- markdownlint-enable MD060 -->
 
 Container names include the project, service, and image tag, such as
 `plundarr-bazarr-latest`. The default Plundarr, default Boudoirr, standalone
 Jellyfin, and standalone Plex voyages can therefore run side by side without
-sharing container names, subnets, or published ports. Existing values in `.env`
-remain preserved during regeneration, so review and change older project names,
-network values, or ports before placing an existing deployment beside another
-preset.
+sharing container names, subnets, or published ports. The host-port bands retain
+the familiar tail of common ports: qBittorrent is `8080` for Plundarr and
+`18080` for Boudoirr. Existing values in a preset's `.env` remain preserved
+during regeneration, so review and change older project names, network values,
+or ports before placing an existing deployment beside another preset.
 
 Change the generated values whenever they overlap another Docker network, VPN,
 LAN route, or host service. Plex uses host networking, so only one Plex server
@@ -126,11 +128,12 @@ This allows containers to communicate internally within the defined Docker netwo
 To deploy a project using Synology Container Manager:
 
 1. 🔑 Log in to the Synology DSM web interface.
-2. 🗺️ Run `make configure` from the cloned repository to chart `docker-compose.yml`, `.env`, and the selected `config/` directories.
+2. 🗺️ Run `make configure` from the cloned repository to chart the selected
+   `dist/<preset>/docker-compose.yml`, `.env`, and `config/` directories.
 3. 📦 Open **Container Manager** and navigate to the **Project** tab 📂.
 4. 🆕 Click **Create** and configure:
    - 🏷️ **Project Name**: (e.g., `plundarr`)
-   - 📂 **Project Path**: Path to the cloned repository.
+   - 📂 **Project Path**: Path to the selected `dist/<preset>` directory.
    - 📜 **Compose File**: `docker-compose.yml`
 5. 🚀 Review and confirm the settings to deploy the project.
 

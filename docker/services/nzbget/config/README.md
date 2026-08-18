@@ -84,6 +84,6 @@ NZBGet's completed cargo appears to them under `/downloads/usenet/complete`.
 Because every service sees the same host path through the same internal path,
 remote path mappings are unnecessary.
 
-Fer more details, set yer spyglass on the generated `docker-compose.yml` and
-`.env` files in the repository root. May yer Usenet cargo arrive repaired,
-unpacked, and ready for the library hold! ⚓
+Fer more details, set yer spyglass on the generated
+`dist/<preset>/docker-compose.yml` and `.env` files. May yer Usenet cargo
+arrive repaired, unpacked, and ready for the library hold! ⚓

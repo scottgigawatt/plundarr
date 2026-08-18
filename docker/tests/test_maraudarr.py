@@ -349,10 +349,16 @@ class MaraudarrTests(unittest.TestCase):
                 published_ports[first].isdisjoint(published_ports[second])
             )
 
+        self.assertIn(8191, published_ports["plundarr"])
+        self.assertIn(9696, published_ports["plundarr"])
+        self.assertIn(8080, published_ports["plundarr"])
+        self.assertIn(11011, published_ports["plundarr"])
         self.assertIn(18191, published_ports["boudoirr"])
         self.assertIn(19696, published_ports["boudoirr"])
         self.assertIn(18080, published_ports["boudoirr"])
         self.assertIn(21011, published_ports["boudoirr"])
+        self.assertIn(28096, published_ports["jellyfin"])
+        self.assertIn(33000, published_ports["custom"])
 
         boudoirr_homepage = render_environment(
             self.catalog,

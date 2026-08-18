@@ -103,7 +103,9 @@ The [examples](examples/) directory stores example files used to reset the repo 
 - [examples/example-wg0.conf](examples/example-wg0.conf)
 - [examples/example-privateerr.env](examples/example-privateerr.env)
 
-These files match the Privateerr examples exactly. Cleanup targets copy them back into `config/gluetun/wireguard/` so live secrets do not accidentally sneak into Git.
+These files match the Privateerr examples exactly. Cleanup targets copy them
+back into `dist/<preset>/config/gluetun/wireguard/` so live secrets do not
+accidentally sneak into Git.
 
 Useful cleanup commands:
 

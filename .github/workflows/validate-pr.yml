@@ -50,12 +50,9 @@ jobs:
               uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c  # v4.2.0
 
             #
-            # Validate both the checked-in default chart and Maraudarr's unit,
-            # image-fallback, and representative Compose generation tests.
+            # Validate Maraudarr's unit, image-fallback, and representative
+            # Compose generation tests.
             #
-            - name: "Interrogate the Default Plundarr Chart 💣"
-              run: docker compose --env-file example.env config --quiet
-
             - name: "Test Maraudarr's Charts 🧰"
               run: make test-maraudarr
 
@@ -85,10 +82,10 @@ jobs:
                     --mount "type=bind,src=${RUNNER_TEMP}/plundarr-output,dst=/output" \
                     maraudarr:pr \
                     --plain build --preset boudoirr
-                  test -s "${RUNNER_TEMP}/plundarr-output/config/README.md"
+                  test -s "${RUNNER_TEMP}/plundarr-output/dist/boudoirr/config/README.md"
                   docker compose \
-                    --env-file "${RUNNER_TEMP}/plundarr-output/.env" \
-                    -f "${RUNNER_TEMP}/plundarr-output/docker-compose.yml" \
+                    --env-file "${RUNNER_TEMP}/plundarr-output/dist/boudoirr/.env" \
+                    -f "${RUNNER_TEMP}/plundarr-output/dist/boudoirr/docker-compose.yml" \
                     config \
                     --quiet
 

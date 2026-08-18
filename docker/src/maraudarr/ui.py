@@ -319,7 +319,7 @@ class UI:
             }
         ):
             steps.append("Check download, media, and config paths in .env.")
-        steps.append("Start the stack with make up.")
+        steps.append(f"Start the stack with make up PRESET={plan.preset.id}.")
 
         if self.console:
             table = Table.grid(padding=(0, 2))

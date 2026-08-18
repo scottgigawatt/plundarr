@@ -20,10 +20,11 @@ loads a preset, resolves required services, preserves the handwritten Compose
 comments, and writes a deployable Plundarr project into the mounted repository:
 
 ```text
-docker-compose.yml
-example.env
-.env
-config/
+dist/<preset>/
+├── docker-compose.yml
+├── example.env
+├── .env
+└── config/
 ```
 
 > [!IMPORTANT]
@@ -114,9 +115,9 @@ The published image and Make targets use a deliberately narrow runtime:
 | 🗃️ State preservation    | Existing application config files are never deleted during regeneration   |
 
 Maraudarr validates every generated pair with its bundled standalone
-`docker-compose config --quiet` command before replacing root output. The
-explicit `make clean-config` target is the only normal path that removes the
-complete config hold.
+`docker-compose config --quiet` command before replacing a preset's output.
+The explicit `make clean-config PRESET=<preset>` target is the only normal path
+that removes a complete config hold.
 
 ## Registry Charts 🗂️
 

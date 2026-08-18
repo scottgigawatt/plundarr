@@ -33,8 +33,10 @@ flowchart TB
 ## 1. Parse Intent
 
 `maraudarr.cli` accepts an interactive `configure` voyage or a deterministic
-`build` command. The CLI normalizes service additions and removals, but it does
-not decide dependency order or edit source templates.
+`build` command. The CLI normalizes service additions and removals, then writes
+normal user-facing output to `dist/<preset>/`; `--output` remains available for
+an exact automation directory. It does not decide dependency order or edit
+source templates.
 
 ## 2. Load and Resolve the Catalog
 
@@ -86,7 +88,7 @@ cannot drift accidentally.
 ## 5. Stage, Validate, and Publish Output
 
 Compose and environment files are written to a temporary directory inside the
-requested output directory. Maraudarr asks Docker Compose to validate that
+requested preset directory. Maraudarr asks Docker Compose to validate that
 staged pair, then atomically replaces the public files only after validation
 succeeds. A missing Docker executable is tolerated for dependency-free source
 testing; an installed Docker Compose that rejects the chart is a hard failure.

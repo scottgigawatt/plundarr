@@ -50,6 +50,40 @@ run_case() {
     test -f "${case_output}/config/README.md"
 }
 
+# Generate several presets beneath one distribution root. This is the normal
+# user-facing mode: every preset owns an isolated Compose, environment, and
+# configuration directory while sharing the same checkout.
+run_distribution_case() {
+    preset=$1
+    shift
+    preset_output="${TEST_ROOT}/dist/${preset}"
+
+    PYTHONDONTWRITEBYTECODE=1 \
+        PYTHONPATH="${REPOSITORY_ROOT}/docker/src" \
+        MARAUDARR_CATALOG_ROOT="${REPOSITORY_ROOT}/docker" \
+        "${PYTHON_BIN}" -m maraudarr \
+        --plain \
+        build \
+        --output-root "${TEST_ROOT}/dist" \
+        --preset "${preset}" \
+        "$@"
+
+    docker compose \
+        --env-file "${preset_output}/.env" \
+        -f "${preset_output}/docker-compose.yml" \
+        config \
+        --quiet
+    test -f "${preset_output}/example.env"
+    test -f "${preset_output}/config/README.md"
+}
+
+rm -rf "${TEST_ROOT}/dist"
+run_distribution_case plundarr
+run_distribution_case boudoirr
+run_distribution_case jellyfin
+run_distribution_case plex
+run_distribution_case custom --add homepage
+
 #
 # Default Plundarr voyage with qBittorrent.
 #
