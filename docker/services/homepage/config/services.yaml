@@ -19,7 +19,7 @@
         icon: radarr.svg
         href: {{HOMEPAGE_VAR_RADARR_HREF}}
         description: Movies management
-        container: {{HOMEPAGE_VAR_CONTAINER_PREFIX}}-radarr
+        container: {{HOMEPAGE_VAR_RADARR_CONTAINER}}
         widget:
           type: radarr
           fields: ["wanted", "queued"]
@@ -30,7 +30,7 @@
         icon: sonarr.svg
         href: {{HOMEPAGE_VAR_SONARR_HREF}}
         description: Series management
-        container: {{HOMEPAGE_VAR_CONTAINER_PREFIX}}-sonarr
+        container: {{HOMEPAGE_VAR_SONARR_CONTAINER}}
         widget:
           type: sonarr
           fields: ["wanted", "queued"]
@@ -41,7 +41,7 @@
         icon: bazarr.svg
         href: {{HOMEPAGE_VAR_BAZARR_HREF}}
         description: Subtitles management
-        container: {{HOMEPAGE_VAR_CONTAINER_PREFIX}}-bazarr
+        container: {{HOMEPAGE_VAR_BAZARR_CONTAINER}}
         widget:
           type: bazarr
           url: {{HOMEPAGE_VAR_BAZARR_URL}}
@@ -51,7 +51,7 @@
         icon: seerr.svg
         href: {{HOMEPAGE_VAR_SEERR_HREF}}
         description: Requests management
-        container: {{HOMEPAGE_VAR_CONTAINER_PREFIX}}-seerr
+        container: {{HOMEPAGE_VAR_SEERR_CONTAINER}}
         widget:
           type: seerr
           url: {{HOMEPAGE_VAR_SEERR_URL}}
@@ -98,7 +98,7 @@
         icon: prowlarr.svg
         href: {{HOMEPAGE_VAR_PROWLARR_HREF}}
         description: Indexers management
-        container: {{HOMEPAGE_VAR_CONTAINER_PREFIX}}-prowlarr
+        container: {{HOMEPAGE_VAR_PROWLARR_CONTAINER}}
         widget:
           type: prowlarr
           url: {{HOMEPAGE_VAR_PROWLARR_URL}}
@@ -108,7 +108,7 @@
         icon: qbittorrent.svg
         href: {{HOMEPAGE_VAR_QBITTORRENT_HREF}}
         description: Torrents management
-        container: {{HOMEPAGE_VAR_CONTAINER_PREFIX}}-qbittorrent
+        container: {{HOMEPAGE_VAR_QBITTORRENT_CONTAINER}}
         widget:
           type: qbittorrent
           url: {{HOMEPAGE_VAR_QBITTORRENT_URL}}
@@ -119,7 +119,7 @@
         icon: mdi-rabbit
         href: {{HOMEPAGE_VAR_SPEEDTEST_HREF}}
         description: Internet speed monitoring
-        container: {{HOMEPAGE_VAR_CONTAINER_PREFIX}}-speedtest-tracker
+        container: {{HOMEPAGE_VAR_SPEEDTEST_CONTAINER}}
         widget:
           type: speedtest
           url: {{HOMEPAGE_VAR_SPEEDTEST_URL}}

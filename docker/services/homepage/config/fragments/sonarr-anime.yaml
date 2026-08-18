@@ -3,7 +3,7 @@
         icon: sonarr.svg
         href: {{HOMEPAGE_VAR_SONARR_ANIME_HREF}}
         description: Anime series management
-        container: {{HOMEPAGE_VAR_CONTAINER_PREFIX}}-sonarr-anime
+        container: {{HOMEPAGE_VAR_SONARR_ANIME_CONTAINER}}
         widget:
           type: sonarr
           fields: ["wanted", "queued"]

@@ -12,10 +12,10 @@ services:
   #
   duplicati:
     # Docker image and container information
-    <<: *arr-stack-container                               # Pull in arr-stack container config
-    image: lscr.io/linuxserver/duplicati:${DUPLICATI_TAG}  # Run using the specified tag
-    container_name: ${COMPOSE_PROJECT_NAME}-duplicati      # Namespace the stable container name by project
-    hostname: duplicati                                    # Set the container hostname
+    <<: *arr-stack-container                                            # Pull in arr-stack container config
+    image: lscr.io/linuxserver/duplicati:${DUPLICATI_TAG}               # Run using the specified tag
+    container_name: ${COMPOSE_PROJECT_NAME}-duplicati-${DUPLICATI_TAG}  # Namespace the container name by project and tag
+    hostname: duplicati                                                 # Set the container hostname
 
     # Define the container environment
     environment:

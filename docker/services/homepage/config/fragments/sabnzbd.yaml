@@ -3,7 +3,7 @@
         icon: sabnzbd.svg
         href: {{HOMEPAGE_VAR_SABNZBD_HREF}}
         description: Usenet downloads management
-        container: {{HOMEPAGE_VAR_CONTAINER_PREFIX}}-sabnzbd
+        container: {{HOMEPAGE_VAR_SABNZBD_CONTAINER}}
         widget:
           type: sabnzbd
           url: {{HOMEPAGE_VAR_SABNZBD_URL}}

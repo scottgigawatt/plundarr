@@ -12,10 +12,10 @@ services:
   #
   jellyfin:
     # Docker image and container information
-    <<: *rootless-container                   # Pull in rootless container config
-    image: jellyfin/jellyfin:${JELLYFIN_TAG}  # Run the official Jellyfin image
-    container_name: ${COMPOSE_PROJECT_NAME}-jellyfin  # Namespace the stable container name by project
-    hostname: jellyfin                        # Set the container hostname
+    <<: *rootless-container                                           # Pull in rootless container config
+    image: jellyfin/jellyfin:${JELLYFIN_TAG}                          # Run the official Jellyfin image
+    container_name: ${COMPOSE_PROJECT_NAME}-jellyfin-${JELLYFIN_TAG}  # Namespace the container name by project and tag
+    hostname: jellyfin                                                # Set the container hostname
 
     # Define the container environment
     environment:

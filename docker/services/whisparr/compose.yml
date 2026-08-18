@@ -12,10 +12,10 @@ services:
   #
   whisparr:
     # Docker image and container information
-    <<: *arr-stack-container                       # Pull in arr-stack container config
-    image: ghcr.io/hotio/whisparr:${WHISPARR_TAG}  # Run using the specified tag
-    container_name: ${COMPOSE_PROJECT_NAME}-whisparr  # Namespace the stable container name by project
-    hostname: whisparr                             # Set the container hostname
+    <<: *arr-stack-container                                          # Pull in arr-stack container config
+    image: ghcr.io/hotio/whisparr:${WHISPARR_TAG}                     # Run using the specified tag
+    container_name: ${COMPOSE_PROJECT_NAME}-whisparr-${WHISPARR_TAG}  # Namespace the container name by project and tag
+    hostname: whisparr                                                # Set the container hostname
 
     # Define the host and container ports
     ports:

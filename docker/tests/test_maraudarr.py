@@ -568,10 +568,10 @@ class MaraudarrTests(unittest.TestCase):
         downloads_group = homepage[homepage.index("- Downloads:") :]
         self.assertIn("- Jellyfin:", media_group)
         self.assertIn("- Sonarr Anime:", media_group)
-        self.assertIn("{{HOMEPAGE_VAR_CONTAINER_PREFIX}}-sonarr-anime", media_group)
+        self.assertIn("{{HOMEPAGE_VAR_SONARR_ANIME_CONTAINER}}", media_group)
         self.assertIn("- qBittorrent:", downloads_group)
         self.assertIn("- NZBGet:", downloads_group)
-        self.assertIn("{{HOMEPAGE_VAR_CONTAINER_PREFIX}}-qbittorrent", downloads_group)
+        self.assertIn("{{HOMEPAGE_VAR_QBITTORRENT_CONTAINER}}", downloads_group)
         self.assertNotIn("- Jellyfin:", downloads_group)
 
     def test_custom_homepage_omits_unselected_cards_and_variables(self) -> None:
@@ -602,6 +602,55 @@ class MaraudarrTests(unittest.TestCase):
     #
     # Catalog source and generated style enforcement.
     #
+    def test_container_names_include_project_service_and_image_tag(self) -> None:
+        """Keep every explicit container name unique across projects and tags."""
+
+        compose = render_compose(
+            self.catalog,
+            self.catalog.resolve("custom", selected=set(self.catalog.services)),
+        )
+
+        for service in self.catalog.services.values():
+            block = extract_service(compose, service.service)
+            tag_match = re.search(
+                r"^\s*image:.*\$\{([A-Z][A-Z0-9_]*_TAG)\}",
+                block,
+                re.MULTILINE,
+            )
+            with self.subTest(service=service.id):
+                self.assertIsNotNone(tag_match)
+                tag_variable = tag_match.group(1)
+                self.assertIn(
+                    f"container_name: ${{COMPOSE_PROJECT_NAME}}-{service.id}-${{{tag_variable}}}",
+                    block,
+                )
+
+    def test_service_identity_comments_are_aligned(self) -> None:
+        """Align comments in every service image and container identity block."""
+
+        identity_keys = (
+            "<<:",
+            "image:",
+            "container_name:",
+            "hostname:",
+            "network_mode:",
+        )
+        for service in self.catalog.services.values():
+            source = self.catalog.source_path(service.compose).read_text()
+            block = source.split("# Docker image and container information", 1)[1]
+            block = block.split("\n\n", 1)[0]
+            comment_columns = {
+                line.index("#")
+                for line in block.splitlines()
+                if line.strip().startswith(identity_keys) and "#" in line
+            }
+            with self.subTest(service=service.id):
+                self.assertEqual(
+                    len(comment_columns),
+                    1,
+                    f"Service '{service.id}' identity comments are not aligned.",
+                )
+
     def test_inline_comments_have_two_spaces_before_the_hash(self) -> None:
         """Require two spaces before every generated inline comment."""
 

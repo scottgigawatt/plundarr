@@ -176,6 +176,7 @@ def _prepare_service(
                 "      HOMEPAGE_VAR_SONARR_ANIME_HREF: ${HOMEPAGE_VAR_SONARR_ANIME_HREF}                           # Homepage Sonarr Anime click target\n"
                 "      HOMEPAGE_VAR_SONARR_ANIME_URL: ${HOMEPAGE_VAR_SONARR_ANIME_URL}:${SONARR_ANIME_WEBUI_PORT}  # Homepage Sonarr Anime widget URL\n"
                 "      HOMEPAGE_VAR_SONARR_ANIME_KEY: ${HOMEPAGE_VAR_SONARR_ANIME_KEY}                             # Homepage Sonarr Anime API key\n"
+                "      HOMEPAGE_VAR_SONARR_ANIME_CONTAINER: ${COMPOSE_PROJECT_NAME}-sonarr-anime-${SONARR_ANIME_TAG}  # Homepage Sonarr Anime container\n"
             )
             block = block.replace(anchor, insertion + anchor, 1)
         if "jellyfin" in selected:

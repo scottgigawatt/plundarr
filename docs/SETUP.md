@@ -83,12 +83,13 @@ Fresh presets receive distinct project and network defaults:
 | Custom | `custom` | `172.27.0.0/16` | Selected service ports offset by `20000` |
 <!-- markdownlint-enable MD060 -->
 
-Container names also include the project name. The default Plundarr, default
-Boudoirr, standalone Jellyfin, and standalone Plex voyages can therefore run
-side by side on one host without sharing container names, subnets, or published
-ports. Existing values in `.env` remain preserved during regeneration, so
-review and change older project names, network values, or ports before placing
-an existing deployment beside another preset.
+Container names include the project, service, and image tag, such as
+`plundarr-bazarr-latest`. The default Plundarr, default Boudoirr, standalone
+Jellyfin, and standalone Plex voyages can therefore run side by side without
+sharing container names, subnets, or published ports. Existing values in `.env`
+remain preserved during regeneration, so review and change older project names,
+network values, or ports before placing an existing deployment beside another
+preset.
 
 Change the generated values whenever they overlap another Docker network, VPN,
 LAN route, or host service. Plex uses host networking, so only one Plex server
