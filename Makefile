@@ -267,7 +267,7 @@ MARAUDARR_RUN_OPTIONS ?= \
 # Non-interactive, styled-list, and interactive Maraudarr image commands.
 #
 MARAUDARR_RUN = docker run $(MARAUDARR_RUN_OPTIONS) $(MARAUDARR_IMAGE)
-MARAUDARR_RUN_STYLED = docker run $(if $(COLOR_ENABLED),--tty) $(MARAUDARR_RUN_OPTIONS) $(MARAUDARR_IMAGE)
+MARAUDARR_RUN_STYLED = docker run --tty $(MARAUDARR_RUN_OPTIONS) $(MARAUDARR_IMAGE)
 MARAUDARR_RUN_INTERACTIVE = docker run --interactive --tty $(MARAUDARR_RUN_OPTIONS) $(MARAUDARR_IMAGE)
 MARAUDARR_BUILD = $(MARAUDARR_COMPOSE) build $(MARAUDARR_BUILD_OPTIONS) maraudarr
 
@@ -279,48 +279,80 @@ define localhost_url
 endef
 
 #
-# Terminal presentation settings. Color is enabled only for interactive
-# terminals and honors the standard NO_COLOR opt-out.
+# Terminal presentation settings. Recipe-time checks enable color only for
+# interactive terminals and honor the standard NO_COLOR opt-out.
 #
 # See https://no-color.org/ for the opt-out convention.
-COLOR_ENABLED := $(shell if [ -t 1 ] && [ -z "$$NO_COLOR" ]; then printf 1; fi)
-COLOR_RESET   := $(if $(COLOR_ENABLED),\033[0m)
-COLOR_TITLE   := $(if $(COLOR_ENABLED),\033[1;36m)
-COLOR_COMMAND := $(if $(COLOR_ENABLED),\033[1;33m)
-COLOR_INFO    := $(if $(COLOR_ENABLED),\033[0;36m)
-COLOR_SUCCESS := $(if $(COLOR_ENABLED),\033[0;32m)
-COLOR_WARNING := $(if $(COLOR_ENABLED),\033[1;33m)
-COLOR_ERROR   := $(if $(COLOR_ENABLED),\033[1;31m)
-COLOR_MUTED   := $(if $(COLOR_ENABLED),\033[0;37m)
+COLOR_RESET   := \033[0m
+COLOR_TITLE   := \033[1;36m
+COLOR_COMMAND := \033[1;33m
+COLOR_INFO    := \033[0;36m
+COLOR_SUCCESS := \033[0;32m
+COLOR_WARNING := \033[1;33m
+COLOR_ERROR   := \033[1;31m
+COLOR_MUTED   := \033[0;37m
+
+#
+# Shell fragments used by user-facing Make output. Test stdout here instead of
+# inside $(shell ...): GNU Make captures expansion output before a recipe sees
+# the caller's terminal.
+#
+define print_line_inline
+if [ -t 1 ] && [ -z "$$NO_COLOR" ]; then \
+	printf '\n%b%s%b\n' "$(1)" "$(2)" "$(COLOR_RESET)"; \
+else \
+	printf '\n%s\n' "$(2)"; \
+fi
+endef
+
+define print_detail_inline
+if [ -t 1 ] && [ -z "$$NO_COLOR" ]; then \
+	printf '  %b%s%b\n' "$(1)" "$(2)" "$(COLOR_RESET)"; \
+else \
+	printf '  %s\n' "$(2)"; \
+fi
+endef
 
 #
 # User-facing Make output helpers.
 #
 define announce
-	@printf '\n%b%s%b\n' "$(COLOR_INFO)" "$(1)" "$(COLOR_RESET)"
+	@$(call print_line_inline,$(COLOR_INFO),$(1))
 endef
 
 define announce_success
-	@printf '\n%b%s%b\n' "$(COLOR_SUCCESS)" "$(1)" "$(COLOR_RESET)"
+	@$(call print_line_inline,$(COLOR_SUCCESS),$(1))
 endef
 
 define announce_warning
-	@printf '\n%b%s%b\n' "$(COLOR_WARNING)" "$(1)" "$(COLOR_RESET)"
+	@$(call print_line_inline,$(COLOR_WARNING),$(1))
 endef
 
 define announce_error
-	@printf '\n%b%s%b\n' "$(COLOR_ERROR)" "$(1)" "$(COLOR_RESET)"
+	@$(call print_line_inline,$(COLOR_ERROR),$(1))
+endef
+
+define announce_title
+	@$(call print_line_inline,$(COLOR_TITLE),$(1))
+endef
+
+define announce_detail
+	@$(call print_detail_inline,$(COLOR_MUTED),$(1))
 endef
 
 #
 # Help message formatting.
 #
 define help_line
-	@printf '  %b%-24s%b %s\n' "$(COLOR_COMMAND)" "$(1)" "$(COLOR_RESET)" "$(2)"
+	@if [ -t 1 ] && [ -z "$$NO_COLOR" ]; then \
+		printf '  %b%-24s%b %s\n' "$(COLOR_COMMAND)" "$(1)" "$(COLOR_RESET)" "$(2)"; \
+	else \
+		printf '  %-24s %s\n' "$(1)" "$(2)"; \
+	fi
 endef
 
 define help_heading
-	@printf '\n%b%s%b\n' "$(COLOR_TITLE)" "$(1)" "$(COLOR_RESET)"
+	@$(call print_line_inline,$(COLOR_TITLE),$(1))
 endef
 
 #
@@ -358,8 +390,8 @@ $(BUILD_DEPENDS):
 		$(if $(shell which $(exe) 2> /dev/null),,$(error "No $(exe) in PATH")))
 	@# Verify Docker Compose availability.
 	@$(DOCKER_COMPOSE) version >/dev/null 2>&1 || { \
-		printf '\n%b%s%b\n' "$(COLOR_ERROR)" "Docker Compose be missin'." "$(COLOR_RESET)"; \
-		printf '  %b%s%b\n' "$(COLOR_MUTED)" "Install docker compose or docker-compose. 🧭" "$(COLOR_RESET)"; \
+		$(call print_line_inline,$(COLOR_ERROR),Docker Compose be missin'.); \
+		$(call print_detail_inline,$(COLOR_MUTED),Install docker compose or docker-compose. 🧭); \
 		exit 1; \
 	}
 
@@ -368,8 +400,8 @@ $(BUILD_DEPENDS):
 #
 $(CHECK_ENV):
 	@if [ ! -f "$(ENV_FILE)" ]; then \
-		printf '\n%b%s%b\n' "$(COLOR_ERROR)" "No $(ENV_FILE) found. The ship needs a chart before it sails. 🗺️" "$(COLOR_RESET)"; \
-		printf '  %b%s%b\n' "$(COLOR_MUTED)" "Run: make $(SHIP)" "$(COLOR_RESET)"; \
+		$(call print_line_inline,$(COLOR_ERROR),No $(ENV_FILE) found. The ship needs a chart before it sails. 🗺️); \
+		$(call print_detail_inline,$(COLOR_MUTED),Run: make $(SHIP)); \
 		exit 1; \
 	fi
 
@@ -378,8 +410,8 @@ $(CHECK_ENV):
 #
 $(CHECK_RENDERED):
 	@if [ ! -f "$(COMPOSE_FILE)" ]; then \
-		printf '\n%b%s%b\n' "$(COLOR_ERROR)" "No $(COMPOSE_FILE) found. The fleet needs one final chart. 🗺️" "$(COLOR_RESET)"; \
-		printf '  %b%s%b\n' "$(COLOR_MUTED)" "Run: make $(SHIP)" "$(COLOR_RESET)"; \
+		$(call print_line_inline,$(COLOR_ERROR),No $(COMPOSE_FILE) found. The fleet needs one final chart. 🗺️); \
+		$(call print_detail_inline,$(COLOR_MUTED),Run: make $(SHIP)); \
 		exit 1; \
 	fi
 
@@ -410,7 +442,7 @@ $(RESET_CONFIG):
 #
 $(BACKUP_CONFIG):
 	@if [ ! -d "$(CONFIG_PATH)" ]; then \
-		printf '\n%b%s%b\n' "$(COLOR_ERROR)" "No $(CONFIG_PATH) directory found to archive." "$(COLOR_RESET)"; \
+		$(call print_line_inline,$(COLOR_ERROR),No $(CONFIG_PATH) directory found to archive.); \
 		exit 1; \
 	fi
 	@mkdir -p "$(CONFIG_BACKUP_PATH)"
@@ -422,7 +454,7 @@ $(BACKUP_CONFIG):
 		archive="$(CONFIG_BACKUP_PATH)/$(PRESET)-config-$${timestamp}-$${suffix}.tar.gz"; \
 	done; \
 	tar -czf "$$archive" "$(CONFIG_PATH)"; \
-	printf '\n%b%s%b\n' "$(COLOR_SUCCESS)" "Config cargo archived at $$archive. 📦" "$(COLOR_RESET)"
+	$(call print_line_inline,$(COLOR_SUCCESS),Config cargo archived at $$archive. 📦)
 
 #
 # $(CLEAN_CONFIG): Deletes the complete generated config directory. This target
@@ -431,7 +463,7 @@ $(BACKUP_CONFIG):
 $(CLEAN_CONFIG):
 	$(call announce_warning,Removing the complete Plundarr config hold. ☠️)
 	rm -rf "$(CONFIG_PATH)"
-	@printf '  %b%s%b\n' "$(COLOR_MUTED)" "Run make $(SHIP) to regenerate selected service folders and seed files. 🗺️" "$(COLOR_RESET)"
+	$(call announce_detail,Run make $(SHIP) to regenerate selected service folders and seed files. 🗺️)
 
 #
 # $(CLEAN_ARTIFACTS): Removes only disposable developer artifacts. It never
@@ -445,7 +477,7 @@ $(CLEAN_ARTIFACTS):
 		-type d -name '__pycache__' -prune -exec rm -rf {} +
 	find . -path './.git' -prune -o -path './dist' -prune -o \
 		-type f \( -name '*.pyc' -o -name '*.pyo' -o -name '.DS_Store' \) -delete
-	@printf '  %b%s%b\n' "$(COLOR_MUTED)" "Deployment charts, .env files, config, backups, containers, volumes, and images remain untouched. ⚓" "$(COLOR_RESET)"
+	$(call announce_detail,Deployment charts, .env files, config, backups, containers, volumes, and images remain untouched. ⚓)
 
 #
 # $(TEST_VPN): Validates a running stack's Privateerr and Gluetun VPN runtime state.
@@ -582,21 +614,21 @@ $(UP): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 #
 $(ENSURE_MARAUDARR_IMAGE): $(BUILD_DEPENDS)
 	@if docker image inspect "$(MARAUDARR_IMAGE)" >/dev/null 2>&1; then \
-		printf '\n%b%s%b\n' "$(COLOR_SUCCESS)" "⚓ Found Maraudarr aboard locally: $(MARAUDARR_IMAGE)" "$(COLOR_RESET)"; \
+		$(call print_line_inline,$(COLOR_SUCCESS),⚓ Found Maraudarr aboard locally: $(MARAUDARR_IMAGE)); \
 	else \
-		printf '\n%b%s%b\n' "$(COLOR_INFO)" "🌊 No local Maraudarr image found. Checking GHCR..." "$(COLOR_RESET)"; \
+		$(call print_line_inline,$(COLOR_INFO),🌊 No local Maraudarr image found. Checking GHCR...); \
 		if docker pull "$(MARAUDARR_IMAGE)" >/dev/null 2>&1; then \
-			printf '\n%b%s%b\n' "$(COLOR_SUCCESS)" "✅ Published Maraudarr image is ready." "$(COLOR_RESET)"; \
+			$(call print_line_inline,$(COLOR_SUCCESS),✅ Published Maraudarr image is ready.); \
 		else \
-			printf '\n%b%s%b\n' "$(COLOR_WARNING)" "🛠️ Published image unavailable. Building from this checkout..." "$(COLOR_RESET)"; \
+			$(call print_line_inline,$(COLOR_WARNING),🛠️ Published image unavailable. Building from this checkout...); \
 			$(MARAUDARR_BUILD) || { \
-				printf '\n%b%s%b\n' "$(COLOR_ERROR)" "☠️ Maraudarr could not be pulled or built." "$(COLOR_RESET)"; \
+				$(call print_line_inline,$(COLOR_ERROR),☠️ Maraudarr could not be pulled or built.); \
 				exit 1; \
 			}; \
 		fi; \
 	fi
 	@docker image inspect "$(MARAUDARR_IMAGE)" >/dev/null 2>&1 || { \
-		printf '\n%b%s%b\n' "$(COLOR_ERROR)" "☠️ Maraudarr image is still missing: $(MARAUDARR_IMAGE)" "$(COLOR_RESET)"; \
+		$(call print_line_inline,$(COLOR_ERROR),☠️ Maraudarr image is still missing: $(MARAUDARR_IMAGE)); \
 		exit 1; \
 	}
 
@@ -694,8 +726,8 @@ $(TEST_MARAUDARR): $(BUILD_DEPENDS) $(TEST_MARAUDARR_UNIT)
 $(DOCS_VENV)/bin/python:
 	$(call announce,📚 Creating the isolated developer documentation toolchain...)
 	@$(PYTHON_BIN) -m venv "$(DOCS_VENV)" || { \
-		printf '\n%b%s%b\n' "$(COLOR_ERROR)" "Python venv support is required to build documentation." "$(COLOR_RESET)"; \
-		printf '  %b%s%b\n' "$(COLOR_MUTED)" "Install Python with venv support, then run make $(DOCS)." "$(COLOR_RESET)"; \
+		$(call print_line_inline,$(COLOR_ERROR),Python venv support is required to build documentation.); \
+		$(call print_detail_inline,$(COLOR_MUTED),Install Python with venv support, then run make $(DOCS).); \
 		exit 1; \
 	}
 
@@ -742,7 +774,11 @@ $(DOCS_SERVE): $(DOCS_DEPENDENCIES)
 #
 $(PRESETS): $(ENSURE_MARAUDARR_IMAGE)
 	$(call announce,🗺️ Maraudarr preset voyages)
-	@$(MARAUDARR_RUN_STYLED) presets
+	@if [ -t 1 ] && [ -z "$$NO_COLOR" ]; then \
+		$(MARAUDARR_RUN_STYLED) presets; \
+	else \
+		$(MARAUDARR_RUN) --plain presets; \
+	fi
 
 #
 # $(AVAILABLE_SERVICES): Lists every selectable Plundarr service.
@@ -752,7 +788,11 @@ $(PRESETS): $(ENSURE_MARAUDARR_IMAGE)
 #
 $(AVAILABLE_SERVICES): $(ENSURE_MARAUDARR_IMAGE)
 	$(call announce,🧰 Maraudarr service cargo)
-	@$(MARAUDARR_RUN_STYLED) services
+	@if [ -t 1 ] && [ -z "$$NO_COLOR" ]; then \
+		$(MARAUDARR_RUN_STYLED) services; \
+	else \
+		$(MARAUDARR_RUN) --plain services; \
+	fi
 
 #
 # $(CONFIG): Renders the actual data model to be applied on the Docker Engine.
@@ -885,8 +925,8 @@ $(OPEN): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 # $(HELP): Print help information.
 #
 $(HELP):
-	@printf '\n%b%s%b\n' "$(COLOR_TITLE)" "🏴‍☠️ Plundarr command chart" "$(COLOR_RESET)"
-	@printf '  %b%s%b\n' "$(COLOR_MUTED)" "Usage: make <target> [PRESET=<preset>] [ADD_SERVICES=id,...] [REMOVE_SERVICES=id,...]" "$(COLOR_RESET)"
+	$(call announce_title,🏴‍☠️ Plundarr command chart)
+	$(call announce_detail,Usage: make <target> [PRESET=<preset>] [ADD_SERVICES=id,...] [REMOVE_SERVICES=id,...])
 	$(call help_heading,🧭 Generate and discover)
 	$(call help_line,$(SHIP),Generate a preset deployment (default: plundarr).)
 	$(call help_line,$(CONFIGURE),Open the interactive preset and service selector.)
@@ -923,7 +963,7 @@ $(HELP):
 	$(call help_line,$(RESET_CONFIG),Restore example VPN config files for tests.)
 	$(call help_line,$(CLEAN_CONFIG),DANGER: delete the selected preset config tree.)
 	$(call help_line,$(NUKE),DANGER: remove selected-stack containers volumes and images.)
-	@printf '\n%b%s%b\n' "$(COLOR_WARNING)" "⚠️  Destructive targets never run automatically. Back up config before using them." "$(COLOR_RESET)"
+	$(call announce_warning,⚠️  Destructive targets never run automatically. Back up config before using them.)
 
 #
 # $(CLEAN): Alias for test-down.
