@@ -138,7 +138,7 @@ class UI:
                 )
                 cargo = ", ".join(service.title for service in ordered_services)
                 table.add_row(
-                    f"{PRESET_ICONS.get(preset.id, '⚓')} {preset.title}",
+                    preset.title,
                     preset.description,
                     cargo or "Choose your own",
                 )
@@ -201,7 +201,7 @@ class UI:
             previous_category = ""
             for index, service in enumerate(services):
                 category = (
-                    f"{CATEGORY_ICONS.get(service.category, '🧩')} {service.category}"
+                    service.category
                     if service.category != previous_category
                     else ""
                 )

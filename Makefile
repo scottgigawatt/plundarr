@@ -100,6 +100,11 @@ TARGETS= \
 	$(STOP)
 
 #
+# Punctuation expanded after Make parses $(call ...) arguments.
+#
+COMMA=,
+
+#
 # Docker Compose service names.
 #
 PRIVATEERR_SERVICE  ?= privateerr
@@ -477,7 +482,7 @@ $(CLEAN_ARTIFACTS):
 		-type d -name '__pycache__' -prune -exec rm -rf {} +
 	find . -path './.git' -prune -o -path './dist' -prune -o \
 		-type f \( -name '*.pyc' -o -name '*.pyo' -o -name '.DS_Store' \) -delete
-	$(call announce_detail,Deployment charts, .env files, config, backups, containers, volumes, and images remain untouched. ⚓)
+	$(call announce_detail,Deployment charts$(COMMA) .env files$(COMMA) config$(COMMA) backups$(COMMA) containers$(COMMA) volumes$(COMMA) and images remain untouched. ⚓)
 
 #
 # $(TEST_VPN): Validates a running stack's Privateerr and Gluetun VPN runtime state.
@@ -509,7 +514,7 @@ $(TEST_VPN): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 #   $(RESET_CONFIG) - Restore example config files.
 #
 $(TEST_E2E): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED) $(RESET_CONFIG)
-	$(call announce,Launching Privateerr, Gluetun, and selected download mates for one clean test voyage. 🌊)
+	$(call announce,Launching Privateerr$(COMMA) Gluetun$(COMMA) and selected download mates for one clean test voyage. 🌊)
 	@status=0; \
 	$(PLUNDARR_COMPOSE) \
 		up $(COMPOSE_E2E_OPTIONS) $(E2E_SERVICES) || status=$$?; \
@@ -926,7 +931,7 @@ $(OPEN): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 #
 $(HELP):
 	$(call announce_title,🏴‍☠️ Plundarr command chart)
-	$(call announce_detail,Usage: make <target> [PRESET=<preset>] [ADD_SERVICES=id,...] [REMOVE_SERVICES=id,...])
+	$(call announce_detail,Usage: make <target> [PRESET=<preset>] [ADD_SERVICES=id$(COMMA)...] [REMOVE_SERVICES=id$(COMMA)...])
 	$(call help_heading,🧭 Generate and discover)
 	$(call help_line,$(SHIP),Generate a preset deployment (default: plundarr).)
 	$(call help_line,$(CONFIGURE),Open the interactive preset and service selector.)

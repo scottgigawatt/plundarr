@@ -3,10 +3,10 @@
 #
 # Licensed under the Apache License, Version 2.0.
 #
-# test_ui.py: Verify Maraudarr's dependency-free preset and service listings.
+# test_ui.py: Verify Maraudarr's preset and service terminal listings.
 #
 
-"""Exercise readable no-color terminal listings for Maraudarr choices."""
+"""Exercise readable plain and styled terminal listings for Maraudarr choices."""
 
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ from contextlib import redirect_stdout
 from pathlib import Path
 
 from maraudarr.catalog import Catalog
-from maraudarr.ui import UI
+from maraudarr.ui import RICH_AVAILABLE, UI
 
 
 class MaraudarrUiTests(unittest.TestCase):
@@ -57,6 +57,35 @@ class MaraudarrUiTests(unittest.TestCase):
         self.assertIn("🛡️ VPN foundation", listing)
         self.assertIn("⬇️ Download clients", listing)
         self.assertIn("qBittorrent", listing)
+
+    @unittest.skipUnless(RICH_AVAILABLE, "Rich is not installed")
+    def test_styled_tables_keep_emoji_outside_grid_cells(self) -> None:
+        """Avoid terminal-dependent emoji widths inside bordered table columns."""
+
+        from rich.console import Console
+
+        output = io.StringIO()
+        ui = UI()
+        ui.console = Console(
+            color_system=None,
+            file=output,
+            force_terminal=False,
+            width=120,
+        )
+
+        ui.show_presets(
+            list(self.catalog.presets.values()),
+            self.catalog.services,
+        )
+        ui.show_service_choices(
+            sorted(self.catalog.services.values(), key=lambda item: item.order)
+        )
+
+        listing = output.getvalue()
+        self.assertIn("Plundarr", listing)
+        self.assertIn("VPN foundation", listing)
+        self.assertNotIn("🏴‍☠️ Plundarr", listing)
+        self.assertNotIn("🛡️ VPN foundation", listing)
 
 
 if __name__ == "__main__":
