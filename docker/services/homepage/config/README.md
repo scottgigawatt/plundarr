@@ -25,7 +25,8 @@ Homepage uses two kinds of URL variables:
 
 For a simple LAN with no reverse proxy, set the `HREF` values to full IP-and-port links, like `http://192.168.1.210:7878`. Keep widget `URL` values pointed at the service endpoint Homepage can reach from inside Docker.
 
-Fer more details, consult the ship's log in the main repository: [docker-compose.yml](../../docker-compose.yml).
+Fer more details, consult yer generated `dist/<preset>/docker-compose.yml` and
+the matching `.env` file.
 
 ## 📜 Useful Links
 

@@ -55,12 +55,10 @@ configuration stays where it belongs: in that voyage's `.env`. ⚓️
 
 Plundarr has two clearly separate parts:
 
-<!-- markdownlint-disable MD060 -->
-| Component | What It Does | Where It Lives |
-| --------- | ------------ | -------------- |
+| Component     | What It Does                                                                                        | Where It Lives                                                                                                                                                                                         |
+| ------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **Maraudarr** | Short-lived generator that chooses services, resolves dependencies, validates the result, and exits | Published as [`ghcr.io/scottgigawatt/maraudarr`](https://github.com/scottgigawatt/plundarr/pkgs/container/maraudarr) and [`scottgigawatt/maraudarr`](https://hub.docker.com/r/scottgigawatt/maraudarr) |
-| **Plundarr** | The generated media stack that stays on yer host and runs the selected services | `dist/<preset>/docker-compose.yml`, `.env`, and `config/` |
-<!-- markdownlint-enable MD060 -->
+| **Plundarr**  | The generated media stack that stays on yer host and runs the selected services                     | `dist/<preset>/docker-compose.yml`, `.env`, and `config/`                                                                                                                                              |
 
 `make ship` and `make configure` run the published Maraudarr image when it is
 available, or build it from this checkout as a fallback. Maraudarr keeps the
@@ -93,15 +91,13 @@ workflow for `dist/plundarr/`. Curious captains can inspect or replay the
 Choose a preset in `make configure`, or pass it to `make ship`. These are the
 exact services included before ye add or remove anything:
 
-<!-- markdownlint-disable MD060 -->
-| Preset | Best For | Included Out of the Box |
-| ------ | -------- | ----------------------- |
-| 🏴‍☠️ `plundarr` | Movies and TV automation | [Privateerr](https://github.com/scottgigawatt/privateerr), [Gluetun](https://github.com/qdm12/gluetun), [FlareSolverr](https://github.com/FlareSolverr/FlareSolverr), [Prowlarr](https://github.com/Prowlarr/Prowlarr), [qBittorrent](https://github.com/qbittorrent/qBittorrent), [Radarr](https://github.com/Radarr/Radarr), [Sonarr](https://github.com/Sonarr/Sonarr), [Bazarr](https://github.com/morpheus65535/bazarr), [Seerr](https://github.com/seerr-team/seerr), [Cleanuparr](https://github.com/Cleanuparr/Cleanuparr), [Speedtest Tracker](https://docs.speedtest-tracker.dev/), [Duplicati](https://www.duplicati.com), and [Homepage](https://gethomepage.dev/latest/) |
-| 🔞 `boudoirr` | Whisparr automation | [Privateerr](https://github.com/scottgigawatt/privateerr), [Gluetun](https://github.com/qdm12/gluetun), [FlareSolverr](https://github.com/FlareSolverr/FlareSolverr), [Prowlarr](https://github.com/Prowlarr/Prowlarr), [qBittorrent](https://github.com/qbittorrent/qBittorrent), [Whisparr](https://github.com/Whisparr/Whisparr), and [Cleanuparr](https://github.com/Cleanuparr/Cleanuparr) |
-| 🎞️ `jellyfin` | Standalone movies and TV playback | [Jellyfin](https://jellyfin.org/docs/) |
-| 🎬 `plex` | Standalone movies and TV playback | [Plex Media Server](https://support.plex.tv/articles/categories/plex-media-server/) |
-| 🧩 `custom` | A stack assembled service by service | Nothing; every service is selected explicitly |
-<!-- markdownlint-enable MD060 -->
+| Preset           | Best For                             | Included Out of the Box                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| ---------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 🏴‍☠️ `plundarr`    | Movies and TV automation             | [Privateerr](https://github.com/scottgigawatt/privateerr), [Gluetun](https://github.com/qdm12/gluetun), [FlareSolverr](https://github.com/FlareSolverr/FlareSolverr), [Prowlarr](https://github.com/Prowlarr/Prowlarr), [qBittorrent](https://github.com/qbittorrent/qBittorrent), [Radarr](https://github.com/Radarr/Radarr), [Sonarr](https://github.com/Sonarr/Sonarr), [Bazarr](https://github.com/morpheus65535/bazarr), [Seerr](https://github.com/seerr-team/seerr), [Cleanuparr](https://github.com/Cleanuparr/Cleanuparr), [Speedtest Tracker](https://docs.speedtest-tracker.dev/), [Duplicati](https://www.duplicati.com), and [Homepage](https://gethomepage.dev/latest/) |
+| 🔞 `boudoirr`    | Whisparr automation                  | [Privateerr](https://github.com/scottgigawatt/privateerr), [Gluetun](https://github.com/qdm12/gluetun), [FlareSolverr](https://github.com/FlareSolverr/FlareSolverr), [Prowlarr](https://github.com/Prowlarr/Prowlarr), [qBittorrent](https://github.com/qbittorrent/qBittorrent), [Whisparr](https://github.com/Whisparr/Whisparr), and [Cleanuparr](https://github.com/Cleanuparr/Cleanuparr)                                                                                                                                                                                                                                                                                       |
+| 🎞️ `jellyfin`    | Standalone movies and TV playback    | [Jellyfin](https://jellyfin.org/docs/)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| 🎬 `plex`        | Standalone movies and TV playback    | [Plex Media Server](https://support.plex.tv/articles/categories/plex-media-server/)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| 🧩 `custom`      | A stack assembled service by service | Nothing; every service is selected explicitly                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 
 Plundarr and Boudoirr use qBittorrent as their only default downloader. On
 those presets, SABnzbd, NZBGet, Jellyfin, Plex, and Watchtower are never
@@ -112,15 +108,13 @@ silently added.
 Every catalog service can be added to a compatible preset. Maraudarr adds any
 required foundation services and shows the resolved fleet before writing it.
 
-<!-- markdownlint-disable MD060 -->
-| Cargo Hold | Selectable Services |
-| ---------- | ------------------- |
-| VPN foundation | [Privateerr](https://github.com/scottgigawatt/privateerr) and [Gluetun](https://github.com/qdm12/gluetun) |
-| Download clients | [qBittorrent](https://github.com/qbittorrent/qBittorrent), [SABnzbd](https://sabnzbd.org/wiki/), and [NZBGet](https://nzbget.com/documentation/) |
-| Automation | [FlareSolverr](https://github.com/FlareSolverr/FlareSolverr), [Prowlarr](https://wiki.servarr.com/prowlarr), [Radarr](https://wiki.servarr.com/radarr), [Sonarr](https://wiki.servarr.com/sonarr), [Sonarr Anime](https://wiki.servarr.com/sonarr), [Whisparr](https://wiki.servarr.com/whisparr), [Bazarr](https://wiki.bazarr.media/), and [Seerr](https://docs.seerr.dev/) |
-| Media servers | [Jellyfin](https://jellyfin.org/docs/) and [Plex Media Server](https://support.plex.tv/articles/categories/plex-media-server/) |
-| Operations | [Cleanuparr](https://cleanuparr.github.io/Cleanuparr/), [Speedtest Tracker](https://docs.speedtest-tracker.dev/), [Apprise](https://github.com/caronc/apprise-api), [Duplicati](https://docs.duplicati.com/), [Homepage](https://gethomepage.dev/latest/), and [Watchtower](https://containrrr.dev/watchtower/) |
-<!-- markdownlint-enable MD060 -->
+| Cargo Hold       | Selectable Services                                                                                                                                                                                                                                                                                                                                                           |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| VPN foundation   | [Privateerr](https://github.com/scottgigawatt/privateerr) and [Gluetun](https://github.com/qdm12/gluetun)                                                                                                                                                                                                                                                                     |
+| Download clients | [qBittorrent](https://github.com/qbittorrent/qBittorrent), [SABnzbd](https://sabnzbd.org/wiki/), and [NZBGet](https://nzbget.com/documentation/)                                                                                                                                                                                                                              |
+| Automation       | [FlareSolverr](https://github.com/FlareSolverr/FlareSolverr), [Prowlarr](https://wiki.servarr.com/prowlarr), [Radarr](https://wiki.servarr.com/radarr), [Sonarr](https://wiki.servarr.com/sonarr), [Sonarr Anime](https://wiki.servarr.com/sonarr), [Whisparr](https://wiki.servarr.com/whisparr), [Bazarr](https://wiki.bazarr.media/), and [Seerr](https://docs.seerr.dev/) |
+| Media servers    | [Jellyfin](https://jellyfin.org/docs/) and [Plex Media Server](https://support.plex.tv/articles/categories/plex-media-server/)                                                                                                                                                                                                                                                |
+| Operations       | [Cleanuparr](https://cleanuparr.github.io/Cleanuparr/), [Speedtest Tracker](https://docs.speedtest-tracker.dev/), [Apprise](https://github.com/caronc/apprise-api), [Duplicati](https://docs.duplicati.com/), [Homepage](https://gethomepage.dev/latest/), and [Watchtower](https://containrrr.dev/watchtower/)                                                               |
 
 > [!NOTE]
 > 📚 Readarr has been scuttled from this fleet; use
@@ -160,18 +154,16 @@ dist/
 
 Maraudarr writes only settings used by the selected services:
 
-<!-- markdownlint-disable MD060 -->
-| Setting | Why Ye Care |
-| ------- | ----------- |
-| 🔐 `PIA_USER` / `PIA_PASS` | Required when Privateerr and Gluetun are selected |
-| 👤 `DEFAULT_PUID` / `DEFAULT_PGID` | Must be able to read and write the mounted files |
-| 📦 `HOST_DOWNLOADS_PATH` | Shared download root for automation services |
+| Setting                                                                         | Why Ye Care                                                   |
+| ------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| 🔐 `PIA_USER` / `PIA_PASS`                                                      | Required when Privateerr and Gluetun are selected             |
+| 👤 `DEFAULT_PUID` / `DEFAULT_PGID`                                              | Must be able to read and write the mounted files              |
+| 📦 `HOST_DOWNLOADS_PATH`                                                        | Shared download root for automation services                  |
 | 🎥 `HOST_MOVIES_PATH`, `HOST_TV_PATH`, `HOST_ANIME_TV_PATH`, `HOST_SCENES_PATH` | Automation and Plex library paths used by the selected preset |
-| 🔞 `WHISPARR_DATA_PATH` | High-level media root mounted into Whisparr at `/data` |
-| 🎞️ `JELLYFIN_DATA_PATH` | High-level media root mounted into Jellyfin at `/data` |
-| 🕰️ `TZ` | Timezone used by the containers |
-| 🚪 `*_WEBUI_PORT` | Change only when a host port is already occupied |
-<!-- markdownlint-enable MD060 -->
+| 🔞 `WHISPARR_DATA_PATH`                                                         | High-level media root mounted into Whisparr at `/data`        |
+| 🎞️ `JELLYFIN_DATA_PATH`                                                         | High-level media root mounted into Jellyfin at `/data`        |
+| 🕰️ `TZ`                                                                         | Timezone used by the containers                               |
+| 🚪 `*_WEBUI_PORT`                                                               | Change only when a host port is already occupied              |
 
 > [!TIP]
 > 🗺️ Fresh paths match the selected preset. Service configuration stays under
@@ -198,18 +190,16 @@ lightly pirate, and clear about what will be written.
 
 Useful commands for captains who already know the route:
 
-<!-- markdownlint-disable MD060 -->
-| Command | What It Does |
-| ------- | ------------ |
-| 🗺️ `make presets` | Shows each preset and its exact default cargo |
-| 📦 `make services` | Lists every service Maraudarr can add |
-| 🎞️ `make ship PRESET=jellyfin` | Generates standalone Jellyfin |
-| 🎬 `make ship PRESET=plex` | Generates standalone Plex |
-| 🔞 `make ship PRESET=boudoirr ADD_SERVICES=jellyfin` | Adds Jellyfin to Boudoirr |
-| 🍜 `make ship ADD_SERVICES=sonarr-anime` | Adds the optional second Sonarr instance |
+| Command                                                                    | What It Does                                        |
+| -------------------------------------------------------------------------- | --------------------------------------------------- |
+| 🗺️ `make presets`                                                          | Shows each preset and its exact default cargo       |
+| 📦 `make services`                                                         | Lists every service Maraudarr can add               |
+| 🎞️ `make ship PRESET=jellyfin`                                             | Generates standalone Jellyfin                       |
+| 🎬 `make ship PRESET=plex`                                                 | Generates standalone Plex                           |
+| 🔞 `make ship PRESET=boudoirr ADD_SERVICES=jellyfin`                       | Adds Jellyfin to Boudoirr                           |
+| 🍜 `make ship ADD_SERVICES=sonarr-anime`                                   | Adds the optional second Sonarr instance            |
 | 📰 `make ship REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=sabnzbd` | Switches the default Plundarr preset to Usenet only |
-| 🔭 `make ship PRESET=boudoirr ADD_SERVICES=sabnzbd,watchtower` | Adds Usenet and update checks to Boudoirr |
-<!-- markdownlint-enable MD060 -->
+| 🔭 `make ship PRESET=boudoirr ADD_SERVICES=sabnzbd,watchtower`             | Adds Usenet and update checks to Boudoirr           |
 
 `ADD_SERVICES` and `REMOVE_SERVICES` accept comma-separated service IDs. For
 example, switch Plundarr from torrents to NZBGet-only Usenet:
@@ -266,9 +256,9 @@ make test-stack
 ```
 
 > [!WARNING]
-> ⚠️☠️ VPN tests use real PIA credentials from `.env` and may launch real
-> containers. Read the [full testing chart](./test/README.md) before firing
-> those cannons.
+> ⚠️☠️ VPN tests use real PIA credentials from the selected preset's `.env` and
+> may launch real containers. Read the [full testing chart](./test/README.md)
+> before firing those cannons.
 
 ## Navigatin' Troubled Waters ☠️🌊
 

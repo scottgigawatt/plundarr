@@ -74,15 +74,13 @@ For detailed documentation, refer to the [Docker Compose IPAM documentation](htt
 
 Fresh presets receive distinct project and network defaults:
 
-<!-- markdownlint-disable MD060 -->
-| Preset | Project | Subnet | Published Ports |
-| ------ | ------- | ------ | --------------- |
-| Plundarr | `plundarr` | `172.28.0.0/16` | Standard service ports |
+| Preset   | Project    | Subnet          | Published Ports                          |
+| -------- | ---------- | --------------- | ---------------------------------------- |
+| Plundarr | `plundarr` | `172.28.0.0/16` | Standard service ports                   |
 | Boudoirr | `boudoirr` | `172.29.0.0/16` | Selected service ports offset by `10000` |
-| Jellyfin | `jellyfin` | `172.30.0.0/16` | Jellyfin `28096` (`8096` + `20000`) |
-| Plex | `plex` | `172.31.0.0/16` | Plex host networking |
-| Custom | `custom` | `172.27.0.0/16` | Selected service ports offset by `30000` |
-<!-- markdownlint-enable MD060 -->
+| Jellyfin | `jellyfin` | `172.30.0.0/16` | Jellyfin `28096` (`8096` + `20000`)      |
+| Plex     | `plex`     | `172.31.0.0/16` | Plex host networking                     |
+| Custom   | `custom`   | `172.27.0.0/16` | Selected service ports offset by `30000` |
 
 Container names include the project, service, and image tag, such as
 `plundarr-bazarr-latest`. The default Plundarr, default Boudoirr, standalone

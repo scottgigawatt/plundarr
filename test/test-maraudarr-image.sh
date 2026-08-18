@@ -46,7 +46,7 @@ fail() {
 }
 
 #
-# Assert that one literal command fragment is present or absent.
+# Assert that one literal command fragment is present.
 #
 assert_contains() {
     expected=$1
@@ -56,6 +56,9 @@ assert_contains() {
         || fail "Expected Docker command was not called: ${expected}" "${log_path}"
 }
 
+#
+# Assert that one literal command fragment is absent.
+#
 assert_absent() {
     unexpected=$1
     log_path=$2

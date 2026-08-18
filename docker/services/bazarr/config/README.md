@@ -6,6 +6,7 @@ Ahoy, matey! This be the treasure chest holdin' the configuration files fer the 
 
 Bazarr be yer trusty subtitle mate, fetchin' and managing subtitles for all yer movies and TV shows, makin' sure ye never miss a word.
 
-Fer more details, set yer spyglass on the [docker-compose.yml](../../docker-compose.yml) file in the root of the repository.
+Fer more details, inspect yer generated `dist/<preset>/docker-compose.yml` and
+`.env` files.
 
 Arrr, may yer subtitles be as clear as the stars in the night sky! 🌟🏴‍☠️

@@ -50,9 +50,11 @@ run_case() {
     test -f "${case_output}/config/README.md"
 }
 
+#
 # Generate several presets beneath one distribution root. This is the normal
 # user-facing mode: every preset owns an isolated Compose, environment, and
 # configuration directory while sharing the same checkout.
+#
 run_distribution_case() {
     preset=$1
     shift
@@ -147,6 +149,7 @@ run_case standalone-plex --preset plex
 #
 run_case boudoirr --preset boudoirr
 
+#
 # Boudoirr supports Usenet-only and combined downloader choices.
 #
 run_case boudoirr-usenet \

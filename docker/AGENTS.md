@@ -49,6 +49,9 @@ Maraudarr preserves source comments and `${VARIABLES}`. Normal generation writes
 The explicit `--output` option remains available for an exact automation
 directory such as a test fixture.
 
+Normal user-facing commands use `--output-root` so a resolved preset owns its
+own Compose file, `.env`, and `config/` tree under `dist/<preset>/`.
+
 Writes to Compose and environment output must remain atomic. Config generation
 may add missing seed files and refresh project-owned README files, but must not
 delete databases or replace user-owned application configuration.

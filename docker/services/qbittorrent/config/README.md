@@ -48,6 +48,7 @@ When the port-forwarding script runs, it sets qBittorrent to:
 - Disable random ports.
 - Disable UPnP port mapping.
 
-Fer more details, set yer spyglass on the [docker-compose.yml](../../docker-compose.yml) file in the root of the repository.
+Fer more details, inspect yer generated `dist/<preset>/docker-compose.yml` and
+`.env` files.
 
 May yer sails be full and yer seas calm as ye plunder the digital depths! ⚔️🌊

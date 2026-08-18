@@ -26,6 +26,7 @@ SABnzbd category folder/path: movies
 
 For Usenet, point SABnzbd completed jobs at `/downloads/usenet` and temporary jobs at `/downloads/usenet/incomplete`; the `radarr` category then lands movie jobs in `/downloads/usenet/movies`.
 
-Fer more details, set yer spyglass on the [docker-compose.yml](../../docker-compose.yml) file in the root of the repository.
+Fer more details, inspect yer generated `dist/<preset>/docker-compose.yml` and
+`.env` files.
 
 May yer movie collection be as vast as the seven seas, with hidden treasures awaitin' at every turn! 🌊⚔️

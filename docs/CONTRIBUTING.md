@@ -34,7 +34,7 @@ cd plundarr
 make ship
 ```
 
-Edit `.env` with yer own values. Keep that file private.
+Edit `dist/plundarr/.env` with yer own values. Keep that file private.
 
 Useful commands:
 
@@ -43,16 +43,18 @@ make check-env
 make config
 make env
 make test-maraudarr
-make up
+make up PRESET=plundarr
 make test-vpn
 make test-e2e
 make test-stack
-make reset-config
+make reset-config PRESET=plundarr
 pre-commit run --all-files
 ```
 
 > [!IMPORTANT]
-> 🧪 VPN and port-forwarding testing uses real PIA credentials from `.env`. That voyage should happen locally, not with secrets flung into public waters.
+> 🧪 VPN and port-forwarding testing uses real PIA credentials from the selected
+> preset's `.env`. That voyage should happen locally, not with secrets flung
+> into public waters.
 
 ## Style Rules 📜
 
@@ -60,7 +62,8 @@ pre-commit run --all-files
 - Code comments should use plain English.
 - Shell scripts written for host use should use `#!/bin/sh` where possible.
 - Shell scripts should use four spaces for indentation.
-- Docker Compose values should come from `.env` instead of inline fallback soup.
+- Docker Compose values should come from the selected preset's `.env` instead
+  of inline fallback soup.
 - Keep service config directories aligned with service names.
 - Let Privateerr own the upstream PIA manual connection scripts.
 
