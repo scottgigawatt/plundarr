@@ -23,8 +23,9 @@ BUILD_MARAUDARR=build-maraudarr
 BUILD_MULTIARCH=build-multiarch
 DOCS=docs
 DOCS_SERVE=docs-serve
+DOCS_DEPENDENCIES=docs-dependencies
 ENSURE_MARAUDARR_IMAGE=ensure-maraudarr-image
-UPDATE_MARAUDARR=update-maraudarr
+PULL_MARAUDARR=pull-maraudarr
 RESET_CONFIG=reset-config
 BACKUP_CONFIG=backup-config
 CLEAN_CONFIG=clean-config
@@ -67,8 +68,9 @@ TARGETS= \
 	$(BUILD_MULTIARCH) \
 	$(DOCS) \
 	$(DOCS_SERVE) \
+	$(DOCS_DEPENDENCIES) \
 	$(ENSURE_MARAUDARR_IMAGE) \
-	$(UPDATE_MARAUDARR) \
+	$(PULL_MARAUDARR) \
 	$(RESET_CONFIG) \
 	$(BACKUP_CONFIG) \
 	$(CLEAN_CONFIG) \
@@ -175,7 +177,11 @@ endif
 MKDOCS             ?= mkdocs
 DOCS_SITE_PATH     ?= site
 DOCS_SERVE_ADDRESS ?= 127.0.0.1:8000
-DEVELOPER_ARTIFACTS ?= site .ruff_cache .pytest_cache test/logs
+DOCS_VENV           ?= .venv-docs
+DOCS_PYTHON         ?= $(DOCS_VENV)/bin/python
+DOCS_MKDOCS         ?= $(DOCS_VENV)/bin/$(MKDOCS)
+DOCS_REQUIREMENTS   ?= requirements-docs.txt
+DEVELOPER_ARTIFACTS ?= $(DOCS_VENV) site .ruff_cache .pytest_cache test/logs
 
 #
 # Rendered service selection used by runtime tests.
@@ -258,9 +264,10 @@ MARAUDARR_RUN_OPTIONS ?= \
 	--volume "$(CURDIR):$(MARAUDARR_OUTPUT):rw"
 
 #
-# Non-interactive and interactive Maraudarr image commands.
+# Non-interactive, styled-list, and interactive Maraudarr image commands.
 #
 MARAUDARR_RUN = docker run $(MARAUDARR_RUN_OPTIONS) $(MARAUDARR_IMAGE)
+MARAUDARR_RUN_STYLED = docker run $(if $(COLOR_ENABLED),--tty) $(MARAUDARR_RUN_OPTIONS) $(MARAUDARR_IMAGE)
 MARAUDARR_RUN_INTERACTIVE = docker run --interactive --tty $(MARAUDARR_RUN_OPTIONS) $(MARAUDARR_IMAGE)
 MARAUDARR_BUILD = $(MARAUDARR_COMPOSE) build $(MARAUDARR_BUILD_OPTIONS) maraudarr
 
@@ -272,10 +279,48 @@ define localhost_url
 endef
 
 #
+# Terminal presentation settings. Color is enabled only for interactive
+# terminals and honors the standard NO_COLOR opt-out.
+#
+# See https://no-color.org/ for the opt-out convention.
+COLOR_ENABLED := $(shell if [ -t 1 ] && [ -z "$$NO_COLOR" ]; then printf 1; fi)
+COLOR_RESET   := $(if $(COLOR_ENABLED),\033[0m)
+COLOR_TITLE   := $(if $(COLOR_ENABLED),\033[1;36m)
+COLOR_COMMAND := $(if $(COLOR_ENABLED),\033[1;33m)
+COLOR_INFO    := $(if $(COLOR_ENABLED),\033[0;36m)
+COLOR_SUCCESS := $(if $(COLOR_ENABLED),\033[0;32m)
+COLOR_WARNING := $(if $(COLOR_ENABLED),\033[1;33m)
+COLOR_ERROR   := $(if $(COLOR_ENABLED),\033[1;31m)
+COLOR_MUTED   := $(if $(COLOR_ENABLED),\033[0;37m)
+
+#
+# User-facing Make output helpers.
+#
+define announce
+	@printf '\n%b%s%b\n' "$(COLOR_INFO)" "$(1)" "$(COLOR_RESET)"
+endef
+
+define announce_success
+	@printf '\n%b%s%b\n' "$(COLOR_SUCCESS)" "$(1)" "$(COLOR_RESET)"
+endef
+
+define announce_warning
+	@printf '\n%b%s%b\n' "$(COLOR_WARNING)" "$(1)" "$(COLOR_RESET)"
+endef
+
+define announce_error
+	@printf '\n%b%s%b\n' "$(COLOR_ERROR)" "$(1)" "$(COLOR_RESET)"
+endef
+
+#
 # Help message formatting.
 #
 define help_line
-	@printf "  %-24s %s\n" "$(1)" "$(2)"
+	@printf '  %b%-24s%b %s\n' "$(COLOR_COMMAND)" "$(1)" "$(COLOR_RESET)" "$(2)"
+endef
+
+define help_heading
+	@printf '\n%b%s%b\n' "$(COLOR_TITLE)" "$(1)" "$(COLOR_RESET)"
 endef
 
 #
@@ -313,8 +358,8 @@ $(BUILD_DEPENDS):
 		$(if $(shell which $(exe) 2> /dev/null),,$(error "No $(exe) in PATH")))
 	@# Verify Docker Compose availability.
 	@$(DOCKER_COMPOSE) version >/dev/null 2>&1 || { \
-		echo "Docker Compose be missin'."; \
-		echo "Install docker compose or docker-compose. 🧭"; \
+		printf '\n%b%s%b\n' "$(COLOR_ERROR)" "Docker Compose be missin'." "$(COLOR_RESET)"; \
+		printf '  %b%s%b\n' "$(COLOR_MUTED)" "Install docker compose or docker-compose. 🧭" "$(COLOR_RESET)"; \
 		exit 1; \
 	}
 
@@ -323,8 +368,8 @@ $(BUILD_DEPENDS):
 #
 $(CHECK_ENV):
 	@if [ ! -f "$(ENV_FILE)" ]; then \
-		echo "\nNo $(ENV_FILE) found. The ship needs a chart before it sails. 🗺️"; \
-		echo "Run: make $(SHIP)"; \
+		printf '\n%b%s%b\n' "$(COLOR_ERROR)" "No $(ENV_FILE) found. The ship needs a chart before it sails. 🗺️" "$(COLOR_RESET)"; \
+		printf '  %b%s%b\n' "$(COLOR_MUTED)" "Run: make $(SHIP)" "$(COLOR_RESET)"; \
 		exit 1; \
 	fi
 
@@ -333,8 +378,8 @@ $(CHECK_ENV):
 #
 $(CHECK_RENDERED):
 	@if [ ! -f "$(COMPOSE_FILE)" ]; then \
-		echo "\nNo $(COMPOSE_FILE) found. The fleet needs one final chart. 🗺️"; \
-		echo "Run: make $(SHIP)"; \
+		printf '\n%b%s%b\n' "$(COLOR_ERROR)" "No $(COMPOSE_FILE) found. The fleet needs one final chart. 🗺️" "$(COLOR_RESET)"; \
+		printf '  %b%s%b\n' "$(COLOR_MUTED)" "Run: make $(SHIP)" "$(COLOR_RESET)"; \
 		exit 1; \
 	fi
 
@@ -347,14 +392,14 @@ $(CHECK_RENDERED):
 #   $(CHECK_RENDERED) - Ensure the rendered Compose file exists.
 #
 $(DOWN): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
-	@echo "\nDroppin' anchor for the Plundarr fleet. ⚓"
+	$(call announce,Droppin' anchor for the Plundarr fleet. ⚓)
 	$(PLUNDARR_COMPOSE) down $(COMPOSE_DOWN_OPTIONS)
 
 #
 # $(RESET_CONFIG): Restores checked-in example config files after live tests.
 #
 $(RESET_CONFIG):
-	@echo "\nRestorin' example maps for safe check-in. 🧭"
+	$(call announce,Restorin' example maps for safe check-in. 🧭)
 	mkdir -p $$(dirname $(PRIVATEERR_GENERATED_WG_CONFIG))
 	cp $(PRIVATEERR_EXAMPLE_WG_CONFIG) $(PRIVATEERR_GENERATED_WG_CONFIG)
 	cp $(PRIVATEERR_EXAMPLE_METADATA) $(PRIVATEERR_GENERATED_METADATA)
@@ -365,7 +410,7 @@ $(RESET_CONFIG):
 #
 $(BACKUP_CONFIG):
 	@if [ ! -d "$(CONFIG_PATH)" ]; then \
-		echo "No $(CONFIG_PATH) directory found to archive."; \
+		printf '\n%b%s%b\n' "$(COLOR_ERROR)" "No $(CONFIG_PATH) directory found to archive." "$(COLOR_RESET)"; \
 		exit 1; \
 	fi
 	@mkdir -p "$(CONFIG_BACKUP_PATH)"
@@ -377,16 +422,16 @@ $(BACKUP_CONFIG):
 		archive="$(CONFIG_BACKUP_PATH)/$(PRESET)-config-$${timestamp}-$${suffix}.tar.gz"; \
 	done; \
 	tar -czf "$$archive" "$(CONFIG_PATH)"; \
-	echo "\nConfig cargo archived at $$archive. 📦"
+	printf '\n%b%s%b\n' "$(COLOR_SUCCESS)" "Config cargo archived at $$archive. 📦" "$(COLOR_RESET)"
 
 #
 # $(CLEAN_CONFIG): Deletes the complete generated config directory. This target
 #                  is intentionally explicit because application state is lost.
 #
 $(CLEAN_CONFIG):
-	@echo "\nRemoving the complete Plundarr config hold. ☠️"
+	$(call announce_warning,Removing the complete Plundarr config hold. ☠️)
 	rm -rf "$(CONFIG_PATH)"
-	@echo "Run make $(SHIP) to regenerate selected service folders and seed files. 🗺️"
+	@printf '  %b%s%b\n' "$(COLOR_MUTED)" "Run make $(SHIP) to regenerate selected service folders and seed files. 🗺️" "$(COLOR_RESET)"
 
 #
 # $(CLEAN_ARTIFACTS): Removes only disposable developer artifacts. It never
@@ -394,13 +439,13 @@ $(CLEAN_CONFIG):
 #                     environment files, Docker resources, or backups.
 #
 $(CLEAN_ARTIFACTS):
-	@echo "\nScrubbin' disposable developer artifacts only. 🧽"
+	$(call announce,Scrubbin' disposable developer artifacts only. 🧽)
 	rm -rf $(DEVELOPER_ARTIFACTS)
 	find . -path './.git' -prune -o -path './dist' -prune -o \
 		-type d -name '__pycache__' -prune -exec rm -rf {} +
 	find . -path './.git' -prune -o -path './dist' -prune -o \
 		-type f \( -name '*.pyc' -o -name '*.pyo' -o -name '.DS_Store' \) -delete
-	@echo "Deployment charts, .env files, config, backups, containers, volumes, and images remain untouched. ⚓"
+	@printf '  %b%s%b\n' "$(COLOR_MUTED)" "Deployment charts, .env files, config, backups, containers, volumes, and images remain untouched. ⚓" "$(COLOR_RESET)"
 
 #
 # $(TEST_VPN): Validates a running stack's Privateerr and Gluetun VPN runtime state.
@@ -411,7 +456,7 @@ $(CLEAN_ARTIFACTS):
 #   $(CHECK_RENDERED) - Ensure the rendered Compose file exists.
 #
 $(TEST_VPN): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
-	@echo "\nInspectin' the VPN tunnel and port-forwarding loot. 🔎"
+	$(call announce,Inspectin' the VPN tunnel and port-forwarding loot. 🔎)
 	PLUNDARR_COMPOSE_FILE=$(COMPOSE_FILE) \
 	PLUNDARR_ENV_FILE=$(COMPOSE_ENV_FILE) \
 	PLUNDARR_CONFIG_PATH=$(CONFIG_PATH)/gluetun/wireguard \
@@ -432,7 +477,7 @@ $(TEST_VPN): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 #   $(RESET_CONFIG) - Restore example config files.
 #
 $(TEST_E2E): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED) $(RESET_CONFIG)
-	@echo "\nLaunching Privateerr, Gluetun, and selected download mates for one clean test voyage. 🌊"
+	$(call announce,Launching Privateerr, Gluetun, and selected download mates for one clean test voyage. 🌊)
 	@status=0; \
 	$(PLUNDARR_COMPOSE) \
 		up $(COMPOSE_E2E_OPTIONS) $(E2E_SERVICES) || status=$$?; \
@@ -462,7 +507,7 @@ $(TEST_E2E): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED) $(RESET_CONFIG)
 #   $(RESET_CONFIG) - Restore example config files.
 #
 $(TEST_STACK): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED) $(RESET_CONFIG)
-	@echo "\nLaunching the whole Plundarr fleet for a full-stack test voyage. 🏴‍☠️"
+	$(call announce,Launching the whole Plundarr fleet for a full-stack test voyage. 🏴‍☠️)
 	@status=0; \
 	$(PLUNDARR_COMPOSE) up $(COMPOSE_UP_OPTIONS) || status=$$?; \
 	if [ "$$status" -eq 0 ]; then \
@@ -508,10 +553,10 @@ $(TEST_DOWN): $(DOWN) $(RESET_CONFIG)
 #   $(CHECK_RENDERED) - Ensure the rendered Compose file exists.
 #
 $(NUKE): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
-	@echo "\nFirin' the clean broadside. Repo-safe files stay aboard. 💣"
+	$(call announce_warning,Firin' the clean broadside. Repo-safe files stay aboard. 💣)
 	$(PLUNDARR_COMPOSE) down $(COMPOSE_CLEAN_OPTIONS) --rmi all
 
-	@echo "Scrubbin' generated logs and Gluetun state. 🧽"
+	$(call announce,Scrubbin' generated logs and Gluetun state. 🧽)
 	rm -rf $(PLUNDARR_GENERATED_PATHS)
 
 	@$(MAKE) --no-print-directory $(RESET_CONFIG)
@@ -525,7 +570,7 @@ $(NUKE): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 #   $(CHECK_RENDERED) - Ensure the rendered Compose file exists.
 #
 $(UP): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
-	@echo "\nRaisin' the whole Plundarr fleet. 🏴‍☠️"
+	$(call announce,Raisin' the whole Plundarr fleet. 🏴‍☠️)
 	$(PLUNDARR_COMPOSE) up $(COMPOSE_UP_OPTIONS)
 
 #
@@ -537,32 +582,32 @@ $(UP): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 #
 $(ENSURE_MARAUDARR_IMAGE): $(BUILD_DEPENDS)
 	@if docker image inspect "$(MARAUDARR_IMAGE)" >/dev/null 2>&1; then \
-		echo "⚓ Found Maraudarr aboard locally: $(MARAUDARR_IMAGE)"; \
+		printf '\n%b%s%b\n' "$(COLOR_SUCCESS)" "⚓ Found Maraudarr aboard locally: $(MARAUDARR_IMAGE)" "$(COLOR_RESET)"; \
 	else \
-		echo "🌊 No local Maraudarr image found. Checking GHCR..."; \
+		printf '\n%b%s%b\n' "$(COLOR_INFO)" "🌊 No local Maraudarr image found. Checking GHCR..." "$(COLOR_RESET)"; \
 		if docker pull "$(MARAUDARR_IMAGE)" >/dev/null 2>&1; then \
-			echo "✅ Published Maraudarr image is ready."; \
+			printf '\n%b%s%b\n' "$(COLOR_SUCCESS)" "✅ Published Maraudarr image is ready." "$(COLOR_RESET)"; \
 		else \
-			echo "🛠️ Published image unavailable. Building from this checkout..."; \
+			printf '\n%b%s%b\n' "$(COLOR_WARNING)" "🛠️ Published image unavailable. Building from this checkout..." "$(COLOR_RESET)"; \
 			$(MARAUDARR_BUILD) || { \
-				echo "☠️ Maraudarr could not be pulled or built."; \
+				printf '\n%b%s%b\n' "$(COLOR_ERROR)" "☠️ Maraudarr could not be pulled or built." "$(COLOR_RESET)"; \
 				exit 1; \
 			}; \
 		fi; \
 	fi
 	@docker image inspect "$(MARAUDARR_IMAGE)" >/dev/null 2>&1 || { \
-		echo "☠️ Maraudarr image is still missing: $(MARAUDARR_IMAGE)"; \
+		printf '\n%b%s%b\n' "$(COLOR_ERROR)" "☠️ Maraudarr image is still missing: $(MARAUDARR_IMAGE)" "$(COLOR_RESET)"; \
 		exit 1; \
 	}
 
 #
-# $(UPDATE_MARAUDARR): Refreshes the published Maraudarr image from GHCR.
+# $(PULL_MARAUDARR): Pulls the latest published Maraudarr image from GHCR.
 #
 # Dependencies:
 #   $(BUILD_DEPENDS) - Ensure build dependencies are installed.
 #
-$(UPDATE_MARAUDARR): $(BUILD_DEPENDS)
-	@echo "🌊 Fetching the newest published Maraudarr image..."
+$(PULL_MARAUDARR): $(BUILD_DEPENDS)
+	$(call announce,🌊 Pulling the latest published Maraudarr image...)
 	docker pull "$(MARAUDARR_IMAGE)"
 
 #
@@ -572,8 +617,8 @@ $(UPDATE_MARAUDARR): $(BUILD_DEPENDS)
 #   $(ENSURE_MARAUDARR_IMAGE) - Prepare a local Maraudarr image.
 #
 $(SHIP): $(ENSURE_MARAUDARR_IMAGE)
-
-	$(MARAUDARR_RUN) build \
+	$(call announce,🧭 Maraudarr is charting the $(PRESET) deployment...)
+	@$(MARAUDARR_RUN) build \
 		--preset "$(PRESET)" \
 		--remove "$(REMOVE_SERVICES)" \
 		--add "$(ADD_SERVICES)" \
@@ -586,7 +631,8 @@ $(SHIP): $(ENSURE_MARAUDARR_IMAGE)
 #   $(ENSURE_MARAUDARR_IMAGE) - Prepare a local Maraudarr image.
 #
 $(CONFIGURE): $(ENSURE_MARAUDARR_IMAGE)
-	$(MARAUDARR_RUN_INTERACTIVE) configure --output-root "$(MARAUDARR_OUTPUT_ROOT)"
+	$(call announce,🧭 Openin' Maraudarr's interactive voyage planner...)
+	@$(MARAUDARR_RUN_INTERACTIVE) configure --output-root "$(MARAUDARR_OUTPUT_ROOT)"
 
 #
 # $(BUILD_MARAUDARR): Builds Maraudarr locally using its dedicated Compose chart.
@@ -642,30 +688,51 @@ $(TEST_MARAUDARR): $(BUILD_DEPENDS) $(TEST_MARAUDARR_UNIT)
 		test/test-maraudarr-matrix.sh
 
 #
+# $(DOCS_VENV)/bin/python: Creates an isolated Python environment for developer
+#                           documentation tooling.
+#
+$(DOCS_VENV)/bin/python:
+	$(call announce,📚 Creating the isolated developer documentation toolchain...)
+	@$(PYTHON_BIN) -m venv "$(DOCS_VENV)" || { \
+		printf '\n%b%s%b\n' "$(COLOR_ERROR)" "Python venv support is required to build documentation." "$(COLOR_RESET)"; \
+		printf '  %b%s%b\n' "$(COLOR_MUTED)" "Install Python with venv support, then run make $(DOCS)." "$(COLOR_RESET)"; \
+		exit 1; \
+	}
+
+#
+# $(DOCS_VENV)/.requirements-installed: Installs the pinned developer
+#                                         documentation toolchain when its
+#                                         requirements change.
+#
+$(DOCS_VENV)/.requirements-installed: $(DOCS_REQUIREMENTS) | $(DOCS_VENV)/bin/python
+	$(call announce,📦 Installing pinned developer documentation tools...)
+	@$(DOCS_PYTHON) -m pip install --disable-pip-version-check --requirement "$(DOCS_REQUIREMENTS)"
+	@touch "$(DOCS_VENV)/.requirements-installed"
+
+#
+# $(DOCS_DEPENDENCIES): Ensures the pinned documentation toolchain is ready.
+#
+$(DOCS_DEPENDENCIES): $(DOCS_VENV)/.requirements-installed
+
+#
 # $(DOCS): Builds the strict Plundarr developer documentation site.
 #
 # Dependencies:
-#   requirements-docs.txt - Install the pinned MkDocs toolchain first.
+#   $(DOCS_DEPENDENCIES) - Prepare the isolated MkDocs toolchain.
 #
-$(DOCS):
-	@command -v $(MKDOCS) >/dev/null 2>&1 || { \
-		echo "MkDocs be missin'. Install requirements-docs.txt first. 📚"; \
-		exit 1; \
-	}
-	$(MKDOCS) build --strict --site-dir "$(DOCS_SITE_PATH)"
+$(DOCS): $(DOCS_DEPENDENCIES)
+	$(call announce,📚 Building the strict developer documentation site...)
+	$(DOCS_MKDOCS) build --strict --site-dir "$(DOCS_SITE_PATH)"
 
 #
 # $(DOCS_SERVE): Starts the local developer documentation preview server.
 #
 # Dependencies:
-#   requirements-docs.txt - Install the pinned MkDocs toolchain first.
+#   $(DOCS_DEPENDENCIES) - Prepare the isolated MkDocs toolchain.
 #
-$(DOCS_SERVE):
-	@command -v $(MKDOCS) >/dev/null 2>&1 || { \
-		echo "MkDocs be missin'. Install requirements-docs.txt first. 📚"; \
-		exit 1; \
-	}
-	$(MKDOCS) serve --dev-addr "$(DOCS_SERVE_ADDRESS)"
+$(DOCS_SERVE): $(DOCS_DEPENDENCIES)
+	$(call announce,📚 Serving developer documentation at http://$(DOCS_SERVE_ADDRESS)...)
+	$(DOCS_MKDOCS) serve --dev-addr "$(DOCS_SERVE_ADDRESS)"
 
 #
 # $(PRESETS): Lists presets and their exact default services.
@@ -674,7 +741,8 @@ $(DOCS_SERVE):
 #   $(ENSURE_MARAUDARR_IMAGE) - Prepare a local Maraudarr image.
 #
 $(PRESETS): $(ENSURE_MARAUDARR_IMAGE)
-	$(MARAUDARR_RUN) --plain presets
+	$(call announce,🗺️ Maraudarr preset voyages)
+	@$(MARAUDARR_RUN_STYLED) presets
 
 #
 # $(AVAILABLE_SERVICES): Lists every selectable Plundarr service.
@@ -683,7 +751,8 @@ $(PRESETS): $(ENSURE_MARAUDARR_IMAGE)
 #   $(ENSURE_MARAUDARR_IMAGE) - Prepare a local Maraudarr image.
 #
 $(AVAILABLE_SERVICES): $(ENSURE_MARAUDARR_IMAGE)
-	$(MARAUDARR_RUN) --plain services
+	$(call announce,🧰 Maraudarr service cargo)
+	@$(MARAUDARR_RUN_STYLED) services
 
 #
 # $(CONFIG): Renders the actual data model to be applied on the Docker Engine.
@@ -758,7 +827,7 @@ $(PRINT_ENV): $(CHECK_ENV)
 #   $(CHECK_RENDERED) - Ensure the rendered Compose file exists.
 #
 $(LOGS): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
-	@echo "\nReadin' logs for the fleet. 🔎"
+	$(call announce,Readin' logs for the fleet. 🔎)
 	$(PLUNDARR_COMPOSE) logs $(COMPOSE_LOGS_OPTIONS)
 
 #
@@ -803,7 +872,7 @@ $(TEST_LOGS): $(LOGS)
 #   $(CHECK_RENDERED) - Ensure the rendered Compose file exists.
 #
 $(OPEN): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
-	@echo "\nOpening compose services in default browser"
+	$(call announce,Opening selected Compose services in the default browser. 🌐)
 	open \
 		$(foreach port,$(GLUETUN_WEB_PORTS), \
 			$(call localhost_url,$(GLUETUN_SERVICE),$(port))) \
@@ -816,30 +885,26 @@ $(OPEN): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 # $(HELP): Print help information.
 #
 $(HELP):
-	@echo "Plundarr command chart"
-	@echo "Usage: make <target> [PRESET=<preset>] [ADD_SERVICES=id,...] [REMOVE_SERVICES=id,...]"
-	@echo ""
-	@echo "🧭 Generate and discover"
+	@printf '\n%b%s%b\n' "$(COLOR_TITLE)" "🏴‍☠️ Plundarr command chart" "$(COLOR_RESET)"
+	@printf '  %b%s%b\n' "$(COLOR_MUTED)" "Usage: make <target> [PRESET=<preset>] [ADD_SERVICES=id,...] [REMOVE_SERVICES=id,...]" "$(COLOR_RESET)"
+	$(call help_heading,🧭 Generate and discover)
 	$(call help_line,$(SHIP),Generate a preset deployment (default: plundarr).)
 	$(call help_line,$(CONFIGURE),Open the interactive preset and service selector.)
 	$(call help_line,$(PRESETS),List presets and their default services.)
 	$(call help_line,$(AVAILABLE_SERVICES),List every selectable service.)
-	@echo ""
-	@echo "🚀 Run the selected deployment"
+	$(call help_heading,🚀 Run the selected deployment)
 	$(call help_line,$(UP),Start or recreate the selected stack.)
 	$(call help_line,$(DOWN),Stop and remove selected-stack containers and networks.)
 	$(call help_line,$(PS),Show a compact container status table.)
 	$(call help_line,$(LOGS),Follow selected-stack logs.)
 	$(call help_line,$(OPEN),Open selected-stack web interfaces on macOS.)
-	@echo ""
-	@echo "🔎 Inspect generated output"
+	$(call help_heading,🔎 Inspect generated output)
 	$(call help_line,$(CONFIG),Print Docker Compose's rendered configuration.)
 	$(call help_line,$(COMPOSE_SERVICES),List rendered Compose services.)
 	$(call help_line,$(ENV),Print rendered environment values.)
 	$(call help_line,$(PRINT_CONFIG),Print raw Compose configuration without comments.)
 	$(call help_line,$(PRINT_ENV),Print raw environment settings without comments.)
-	@echo ""
-	@echo "🧪 Test and build"
+	$(call help_heading,🧪 Test and build)
 	$(call help_line,$(TEST_MARAUDARR_UNIT),Run Maraudarr Python unit tests.)
 	$(call help_line,$(TEST_MARAUDARR),Run image fallback and Compose matrix tests.)
 	$(call help_line,$(TEST_VPN),Check a running VPN tunnel.)
@@ -849,17 +914,16 @@ $(HELP):
 	$(call help_line,$(BUILD_MULTIARCH),Check every published image architecture.)
 	$(call help_line,$(DOCS),Build the strict developer documentation site.)
 	$(call help_line,$(DOCS_SERVE),Preview developer documentation locally.)
-	@echo ""
-	@echo "🧹 Maintenance"
-	$(call help_line,$(UPDATE_MARAUDARR),Refresh the published Maraudarr image.)
+	$(call help_line,$(DOCS_DEPENDENCIES),Install or refresh pinned documentation tools.)
+	$(call help_heading,🧹 Maintenance)
+	$(call help_line,$(PULL_MARAUDARR),Pull the latest published Maraudarr image.)
 	$(call help_line,$(BACKUP_CONFIG),Archive the selected preset config safely.)
 	$(call help_line,$(CLEAN_ARTIFACTS),Remove only disposable developer artifacts.)
 	$(call help_line,$(CLEAN),Stop the stack and restore example test config.)
 	$(call help_line,$(RESET_CONFIG),Restore example VPN config files for tests.)
 	$(call help_line,$(CLEAN_CONFIG),DANGER: delete the selected preset config tree.)
 	$(call help_line,$(NUKE),DANGER: remove selected-stack containers volumes and images.)
-	@echo ""
-	@echo "The destructive targets never run automatically. Back up config before using them."
+	@printf '\n%b%s%b\n' "$(COLOR_WARNING)" "⚠️  Destructive targets never run automatically. Back up config before using them." "$(COLOR_RESET)"
 
 #
 # $(CLEAN): Alias for test-down.

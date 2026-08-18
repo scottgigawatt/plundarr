@@ -47,6 +47,26 @@ if RICH_AVAILABLE:
     )
 
 
+PRESET_ICONS = {
+    "plundarr": "🏴‍☠️",
+    "boudoirr": "🔞",
+    "jellyfin": "🎞️",
+    "plex": "📺",
+    "custom": "🧩",
+}
+
+CATEGORY_ICONS = {
+    "VPN foundation": "🛡️",
+    "Indexing": "🗺️",
+    "Download clients": "⬇️",
+    "Media automation": "⚙️",
+    "Media experience": "🍿",
+    "Media servers": "📺",
+    "Operations": "🧹",
+    "Monitoring and notifications": "📡",
+}
+
+
 class UserCancelled(RuntimeError):
     """Represent an intentional cancellation rather than a generator failure."""
 
@@ -108,26 +128,35 @@ class UI:
                 box=box.ROUNDED,
                 header_style="bold",
             )
-            table.add_column("Preset", style="#f2c14e", no_wrap=True)
-            table.add_column("Purpose")
-            table.add_column("Default cargo")
+            table.add_column("Voyage", style="#f2c14e", no_wrap=True)
+            table.add_column("Built for")
+            table.add_column("Included by default")
             for preset in presets:
                 ordered_services = sorted(
                     (service_lookup[item] for item in preset.services),
                     key=lambda service: service.order,
                 )
                 cargo = ", ".join(service.title for service in ordered_services)
-                table.add_row(preset.title, preset.description, cargo or "Choose your own")
+                table.add_row(
+                    f"{PRESET_ICONS.get(preset.id, '⚓')} {preset.title}",
+                    preset.description,
+                    cargo or "Choose your own",
+                )
             self.console.print(table)
             return
 
+        print("🗺️ Preset voyages")
         for preset in presets:
             ordered_services = sorted(
                 (service_lookup[item] for item in preset.services),
                 key=lambda service: service.order,
             )
             cargo = ", ".join(service.title for service in ordered_services)
-            print(f"{preset.id}: {preset.description}\n  Services: {cargo or 'Choose your own'}")
+            print(
+                f"\n{PRESET_ICONS.get(preset.id, '⚓')} {preset.title}\n"
+                f"  {preset.description}\n"
+                f"  Included by default: {cargo or 'Choose your own'}"
+            )
 
     def choose_preset(self, presets: list[Preset]) -> str:
         """Prompt for one preset in an interactive terminal.
@@ -169,14 +198,35 @@ class UI:
             table.add_column("Category", style="#f2c14e", no_wrap=True)
             table.add_column("Service", style="bold", no_wrap=True)
             table.add_column("What it adds")
-            for service in services:
-                table.add_row(service.category, service.title, service.description)
+            previous_category = ""
+            for index, service in enumerate(services):
+                category = (
+                    f"{CATEGORY_ICONS.get(service.category, '🧩')} {service.category}"
+                    if service.category != previous_category
+                    else ""
+                )
+                next_category = (
+                    services[index + 1].category
+                    if index + 1 < len(services)
+                    else None
+                )
+                table.add_row(
+                    category,
+                    service.title,
+                    service.description,
+                    end_section=service.category != next_category,
+                )
+                previous_category = service.category
             self.console.print(table)
             return
 
-        print("Available services:")
+        print("🧰 Service cargo")
+        category = ""
         for service in services:
-            print(f"  {service.id:<18} {service.description}")
+            if service.category != category:
+                category = service.category
+                print(f"\n{CATEGORY_ICONS.get(category, '🧩')} {category}")
+            print(f"  {service.title:<18} {service.description}")
 
     def choose_services(
         self,

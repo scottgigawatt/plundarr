@@ -33,8 +33,8 @@ dist/<preset>/
 
 ## Take the Quick Passage 🧭
 
-Run these commands from the repository root. Make prints the complete Docker
-command before Maraudarr leaves port.
+Run these commands from the repository root. Make keeps the Docker wiring out
+of sight and prints only the useful status and Maraudarr output.
 
 | Command                    | What It Does                                                |
 | -------------------------- | ----------------------------------------------------------- |
@@ -42,7 +42,7 @@ command before Maraudarr leaves port.
 | `make configure`           | Opens the interactive preset and service picker             |
 | `make presets`             | Lists every preset and its exact defaults                   |
 | `make services`            | Lists every selectable service                              |
-| `make update-maraudarr`    | Refreshes the published Maraudarr image from GHCR           |
+| `make pull-maraudarr`      | Pulls the latest published Maraudarr image from GHCR        |
 | `make build-maraudarr`     | Builds the Maraudarr image locally from this directory      |
 | `make test-maraudarr-unit` | Runs Maraudarr's Python unit tests                          |
 | `make test-maraudarr`      | Runs unit tests and the real Compose matrix                 |
@@ -55,7 +55,7 @@ available. No pull-skip variable be needed.
 Refresh or rebuild Maraudarr explicitly when ye want a different image:
 
 ```sh
-make update-maraudarr
+make pull-maraudarr
 make build-maraudarr
 ```
 

@@ -18,5 +18,8 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 
+# Isolated, reproducible MkDocs toolchain created by make docs.
+.venv-docs/
+
 # Generated MkDocs developer site.
 site/
