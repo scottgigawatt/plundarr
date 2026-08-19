@@ -26,8 +26,11 @@ For Usenet, point SABnzbd completed jobs at `/downloads/usenet` and temporary jo
 
 Render the service into yer final chart:
 
-```bash
-make ship OPTIONAL_SERVICES=qbittorrent,cleanuparr,sonarr-anime
-```
+> [!TIP]
+>
+> ```sh
+> make ship ADD_SERVICES=sonarr-anime
+> ```
 
-For more details, set yer sights on the [docker-compose.yml](../../docker-compose.yml) parchment in the root of the repository.
+For more details, set yer sights on the generated
+`dist/<preset>/docker-compose.yml` and `.env` files.

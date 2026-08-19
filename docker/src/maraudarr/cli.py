@@ -27,6 +27,19 @@ def _comma_set(value: str | None) -> set[str]:
     return {item.strip() for item in (value or "").split(",") if item.strip()}
 
 
+def _add_output_arguments(parser: argparse.ArgumentParser) -> None:
+    """Add exact-output and preset-directory output options to one command."""
+    output_group = parser.add_mutually_exclusive_group()
+    output_group.add_argument(
+        "--output",
+        help="Exact directory that receives one generated Plundarr project.",
+    )
+    output_group.add_argument(
+        "--output-root",
+        help="Parent directory that receives one project directory per preset.",
+    )
+
+
 def _parser() -> argparse.ArgumentParser:
     """Create the parser shared by interactive and deterministic commands."""
     parser = argparse.ArgumentParser(
@@ -64,21 +77,13 @@ def _parser() -> argparse.ArgumentParser:
         default="",
         help="Comma-separated optional services to remove.",
     )
-    build_parser.add_argument(
-        "--output",
-        default=os.environ.get("MARAUDARR_OUTPUT", "/output"),
-        help="Repository directory that receives generated Plundarr files.",
-    )
+    _add_output_arguments(build_parser)
 
     configure_parser = subparsers.add_parser(
         "configure",
         help="Choose a preset and services interactively.",
     )
-    configure_parser.add_argument(
-        "--output",
-        default=os.environ.get("MARAUDARR_OUTPUT", "/output"),
-        help="Repository directory that receives generated Plundarr files.",
-    )
+    _add_output_arguments(configure_parser)
 
     subparsers.add_parser("presets", help="Show every preset and its services.")
     subparsers.add_parser("services", help="Show every selectable service.")
@@ -97,6 +102,17 @@ def _write(catalog: Catalog, plan: StackPlan, output: Path, ui: UI) -> int:
     ui.progress("🔎 Docker Compose inspection passed.")
     ui.success(plan, str(compose_path), str(env_path), str(config_path))
     return 0
+
+
+def _output_path(arguments: argparse.Namespace, plan: StackPlan) -> Path:
+    """Resolve an exact output directory or the preset directory below a root."""
+    if arguments.output:
+        return Path(arguments.output).resolve()
+
+    output_root = arguments.output_root or os.environ.get(
+        "MARAUDARR_OUTPUT_ROOT", "/output/dist"
+    )
+    return (Path(output_root).resolve() / plan.preset.id).resolve()
 
 
 def _interactive_plan(catalog: Catalog, ui: UI) -> StackPlan:
@@ -162,11 +178,11 @@ def main(arguments: list[str] | None = None) -> int:
                 add=_comma_set(arguments_namespace.add),
                 remove=_comma_set(arguments_namespace.remove),
             )
-            output_path = Path(arguments_namespace.output).resolve()
+            output_path = _output_path(arguments_namespace, plan)
             return _write(catalog, plan, output_path, ui)
 
         plan = _interactive_plan(catalog, ui)
-        output_path = Path(arguments_namespace.output).resolve()
+        output_path = _output_path(arguments_namespace, plan)
         return _write(catalog, plan, output_path, ui)
     except UserCancelled as error:
         ui.cancelled(str(error))

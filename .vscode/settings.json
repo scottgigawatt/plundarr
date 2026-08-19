@@ -1,29 +1,52 @@
 {
+    //
+    // Copyright 2025-2026 Scott Gigawatt
+    //
+    // Licensed under the Apache License, Version 2.0.
+    //
+    // settings.json: Keep the Plundarr workspace aligned with repository
+    //                formatting, spelling, schema, and validation rules.
+    //
+
+    //
+    // Accept project names, dependencies, and intentional pirate vocabulary.
+    //
     "cSpell.words": [
         "addgroup",
         "adduser",
         "APIKEY",
+        "aquasecurity",
         "argjson",
         "Arrr",
         "Atheris",
         "autoclean",
         "AUTOCONNECT",
+        "automatin",
+        "autorefs",
         "autoremove",
+        "Avenir",
+        "avoidin",
         "awaitin",
+        "backrefs",
         "Bazarr",
         "blocklist",
+        "blockquotes",
         "Boudoirr",
         "buildin",
         "buildx",
+        "bypassin",
         "caronc",
         "CDPATH",
         "centurylinklabs",
+        "certifi",
         "changeme",
         "Chartin",
+        "cksum",
         "cleanuparr",
         "clingin",
         "Cloudant",
         "clusterfuzzlite",
+        "colorama",
         "Commandin",
         "configurator",
         "configurin",
@@ -32,7 +55,9 @@
         "Contributin",
         "creatin",
         "creds",
+        "crossrefs",
         "datetime",
+        "dateutil",
         "debconf",
         "deliverin",
         "Dockerfiles",
@@ -40,6 +65,7 @@
         "docstrings",
         "doin's",
         "DOWNLOADCLEANER",
+        "driftin",
         "Droppin",
         "Duplicati",
         "elif",
@@ -48,9 +74,12 @@
         "entware",
         "feedin",
         "Firin",
+        "fiving",
         "flaresolverr",
         "flmorg",
         "followin",
+        "fontawesome",
+        "Forgettin",
         "functionin",
         "generatin",
         "geolocated",
@@ -60,11 +89,13 @@
         "gitleaks",
         "Gluetun",
         "goin",
+        "griffelib",
         "gsub",
         "Guardin",
         "guidin",
         "handlin",
         "hardlinks",
+        "headerlink",
         "healthcheck",
         "healthchecks",
         "helpin",
@@ -72,6 +103,10 @@
         "hoistin",
         "holdin",
         "hotio",
+        "huntin",
+        "idna",
+        "includin",
+        "inlinehilite",
         "inotify",
         "insmod",
         "Inspectin",
@@ -79,11 +114,14 @@
         "IPINFO",
         "JELLYFIN",
         "KEEPALIVE",
+        "keepends",
         "keepin",
+        "lanczos",
         "Launchin",
         "leakin",
         "libexec",
         "linebreak",
+        "linenums",
         "linkify",
         "localtime",
         "LOGLEVEL",
@@ -91,30 +129,41 @@
         "maintainin",
         "makin",
         "Maraudarr",
+        "markupsafe",
         "mdurl",
+        "mergedeep",
         "Misfirin",
         "Missin",
         "mkdocs",
+        "mkdocstrings",
         "mknod",
+        "mktemp",
         "Moby",
         "multiarch",
         "Navigatin",
         "ndeloof",
         "networkin",
+        "networkless",
         "noexec",
         "noninteractive",
         "nosuid",
         "NOTIFIARR",
         "nzbget",
         "Ookla's",
+        "opencontainers",
+        "Openin",
         "openmeteo",
         "opkg",
         "oughta",
+        "pathspec",
         "PGID",
         "pgsql",
         "piaportforward",
         "piratey",
+        "pkgs",
+        "platformdirs",
         "plundarr",
+        "Plundarrpedia",
         "plunderin",
         "printin",
         "Privateerr",
@@ -125,13 +174,17 @@
         "PUID",
         "pycache",
         "pygments",
+        "pymdown",
+        "pymdownx",
         "Pypi",
         "pyproject",
         "pytest",
         "PYTHONDONTWRITEBYTECODE",
         "PYTHONPATH",
         "PYTHONUNBUFFERED",
+        "pyyaml",
         "QBITTORRENT",
+        "qmark",
         "qmcgaw",
         "QUEUECLEANER",
         "quicklaunch",
@@ -147,6 +200,7 @@
         "RUNSEQUENTIALLY",
         "SABnzbd",
         "sailin",
+        "SARIF",
         "scottgigawatt",
         "Scrubbin",
         "SEARCHTYPE",
@@ -163,14 +217,26 @@
         "Sonoma",
         "Speedtest",
         "squawkin",
+        "SSF's",
         "startin",
         "stumblin",
+        "subfolders",
+        "superfences",
+        "synogroup",
         "Tautulli",
+        "testin",
         "tiktok",
+        "timesheets",
         "tmpfs",
+        "todate",
         "torrentin",
+        "trivyignores",
         "tryin",
         "understandin",
+        "unhashed",
+        "upnp",
+        "urandom",
+        "urllib",
         "Usin",
         "venv",
         "wakin",
@@ -179,9 +245,114 @@
         "WEBSERVICE",
         "WEBUI",
         "whisparr",
+        "worktree",
         "wranglin",
         "yarrr",
-        "yerself"
+        "yerself",
+        "zipx"
     ],
+    //
+    // Keep Makefile Tools from inventing a configure step for this project.
+    //
     "makefile.configureOnOpen": false,
+
+    //
+    // Associate special repository files with their correct language modes.
+    //
+    "files.associations": {
+        ".secrets.baseline": "jsonc",
+        "**/CODEOWNERS": "plaintext",
+        "Dockerfile*": "dockerfile"
+    },
+    //
+    // Mirror EditorConfig indentation while disabling VS Code auto-detection.
+    //
+    "[dockerfile]": {
+        "editor.detectIndentation": false,
+        "editor.tabSize": 4,
+        "editor.insertSpaces": true
+    },
+    "[css][javascript]": {
+        "editor.detectIndentation": false,
+        "editor.tabSize": 2,
+        "editor.insertSpaces": true
+    },
+    "[yaml]": {
+        "editor.detectIndentation": false,
+        "editor.tabSize": 2,
+        "editor.insertSpaces": true
+    },
+    "[github-actions-workflow]": {
+        "editor.detectIndentation": false,
+        "editor.tabSize": 2,
+        "editor.insertSpaces": true
+    },
+    "[json][jsonc]": {
+        "editor.detectIndentation": false,
+        "editor.tabSize": 4,
+        "editor.insertSpaces": true
+    },
+    "[makefile]": {
+        "editor.detectIndentation": false,
+        "editor.tabSize": 4,
+        "editor.insertSpaces": false
+    },
+    "[markdown]": {
+        "editor.detectIndentation": false,
+        "editor.tabSize": 2,
+        "editor.insertSpaces": true
+    },
+    "[python]": {
+        "editor.detectIndentation": false,
+        "editor.tabSize": 4,
+        "editor.insertSpaces": true
+    },
+    "[shellscript]": {
+        "editor.detectIndentation": false,
+        "editor.tabSize": 4,
+        "editor.insertSpaces": true
+    },
+    "[toml]": {
+        "editor.defaultFormatter": "tamasfe.even-better-toml",
+        "editor.detectIndentation": false,
+        "editor.tabSize": 2,
+        "editor.insertSpaces": true
+    },
+
+    //
+    // Keep TOML formatting at two spaces and validate Python package metadata
+    // against SchemaStore through Even Better TOML.
+    //
+    "evenBetterToml.formatter.indentString": "  ",
+    "evenBetterToml.schema.associations": {
+        "(^|/)docker/pyproject\\.toml$": "https://json.schemastore.org/pyproject.json"
+    },
+
+    //
+    // Enable shell diagnostics for every project-owned helper.
+    //
+    "shellcheck.enable": true,
+
+    //
+    // Teach the YAML extension about MkDocs' Python tag and repository schemas.
+    //
+    "yaml.customTags": [
+        "tag:yaml.org,2002:python/name:pymdownx.superfences.fence_code_format"
+    ],
+    "yaml.format.enable": true,
+    "yaml.schemaStore.enable": true,
+    "yaml.schemas": {
+        "https://json.schemastore.org/github-workflow.json": [
+            "**/.github/workflows/*.yml",
+            "**/.github/workflows/*.yaml"
+        ],
+        "https://raw.githubusercontent.com/compose-spec/compose-spec/main/schema/compose-spec.json": [
+            "**/docker-compose*.yml",
+            "**/docker-compose*.yaml",
+            "docker/templates/compose.yml"
+        ],
+        "https://json.schemastore.org/pre-commit-config.json": ".pre-commit-config.yaml"
+    },
+    "yaml.validate": true,
+    "yaml.yamlVersion": "1.2"
 }

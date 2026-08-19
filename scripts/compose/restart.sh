@@ -5,26 +5,27 @@
 #
 # Licensed under the Apache License, Version 2.0.
 #
-# compose-restart.sh: This script is intended to run directly on a host with
-#                     Docker Compose to stop and restart a Compose project in
-#                     a predictable way.
+# restart.sh: Run directly on a Docker host to stop and restart a Compose
+#             project in a predictable way.
 #
 # The script:
-#   - Accepts a single argument: the path to a Docker Compose project directory.
-#   - Waits up to 60 seconds for the Docker CLI to become available (on boot).
-#   - Navigates to the specified project directory and extracts a project name.
-#   - Detects whether to use 'docker compose' (v2) or 'docker-compose' (v1).
-#   - Shuts down all containers and removes volumes using 'down -v'.
-#   - Rebuilds and starts the stack using 'up -d'.
-#   - Logs status messages throughout for visibility and debugging.
+#   - Accepts one Compose-project directory.
+#   - Waits up to 60 seconds for the Docker daemon during host boot.
+#   - Detects Docker Compose v2 or v1.
+#   - Restarts the stack without deleting named volumes or application state.
 #
-# Usage: sh compose-restart.sh /path/to/project
+# Usage: sh scripts/compose/restart.sh /path/to/project
 #
+
+#
+# Exit on errors and unset variables.
+#
+set -eu
 
 #
 # Check if a directory path was provided as an argument.
 #
-if [ -z "$1" ]; then
+if [ "$#" -ne 1 ]; then
     echo "Usage: $0 /path/to/compose/project"
     exit 1
 fi
@@ -55,7 +56,7 @@ done
 #
 # Change to the specified project directory, or exit with error if not found.
 #
-cd "$PROJECT_DIR" || {
+CDPATH='' cd -- "$PROJECT_DIR" || {
     echo "ERROR: Could not find project directory at $PROJECT_DIR"
     exit 1
 }
@@ -78,10 +79,10 @@ else
 fi
 
 #
-# Tear down the running stack, including named volumes.
+# Tear down the running stack while preserving named volumes and application state.
 #
-echo "Stopping and removing current containers and volumes for '$PROJECT_NAME'..."
-$COMPOSE_CMD down -v
+echo "Stopping current containers for '$PROJECT_NAME' while preserving volumes..."
+$COMPOSE_CMD down --remove-orphans
 
 #
 # Rebuild and start the stack in detached mode.

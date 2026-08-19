@@ -28,31 +28,38 @@ Questionable cargo includes:
 
 ## Local Setup 🛠️
 
-```bash
-git clone git@github.com:scottgigawatt/plundarr.git
-cd plundarr
-make ship
-```
+> [!TIP]
+>
+> ```sh
+> git clone git@github.com:scottgigawatt/plundarr.git
+> cd plundarr
+> make ship
+> ```
 
-Edit `.env` with yer own values. Keep that file private.
+Edit `dist/plundarr/.env` with yer own values. Keep that file private.
 
 Useful commands:
 
-```bash
-make check-env
-make config
-make env
-make test-maraudarr
-make up
-make test-vpn
-make test-e2e
-make test-stack
-make reset-config
-pre-commit run --all-files
-```
+> [!TIP]
+>
+> ```sh
+> make help
+> make test
+> make docs
+> make build
+> make test-image
+> make build-platforms
+> pre-commit run --all-files
+> ```
+
+Generated-stack checks such as `make config`, `make env`, `make up`,
+`make test-vpn`, `make test-e2e`, and `make test-stack` accept
+`PRESET=<preset>` when the change is preset-specific.
 
 > [!IMPORTANT]
-> 🧪 VPN and port-forwarding testing uses real PIA credentials from `.env`. That voyage should happen locally, not with secrets flung into public waters.
+> 🧪 VPN and port-forwarding testing uses real PIA credentials from the selected
+> preset's `.env`. That voyage should happen locally, not with secrets flung
+> into public waters.
 
 ## Style Rules 📜
 
@@ -60,7 +67,14 @@ pre-commit run --all-files
 - Code comments should use plain English.
 - Shell scripts written for host use should use `#!/bin/sh` where possible.
 - Shell scripts should use four spaces for indentation.
-- Docker Compose values should come from `.env` instead of inline fallback soup.
+- Shell functions document their purpose, parameters, and return behavior.
+- Copyable Markdown commands use `sh` fences without a shell prompt.
+- Helpful teaching examples wrap copyable commands in a `[!TIP]` callout.
+  Required sequences use `[!IMPORTANT]`, while risky commands use `[!CAUTION]`.
+  Keep explanatory comments outside the code fence.
+- YAML and TOML use two-space indentation; Python, shell, and JSON use four.
+- Docker Compose values should come from the selected preset's `.env` instead
+  of inline fallback soup.
 - Keep service config directories aligned with service names.
 - Let Privateerr own the upstream PIA manual connection scripts.
 

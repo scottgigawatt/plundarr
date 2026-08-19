@@ -29,7 +29,7 @@ required by the image must live here.
 - `services/<name>/compose.yml`: Exactly one selectable service definition.
 - `services/<name>/environment.env`: Settings owned by that service.
 - `services/<name>/config/`: Files copied into generated `config/<name>/`.
-- `config/`: Files copied into the root of generated `config/`.
+- `config/`: Files copied into the root of a generated preset's `config/`.
 
 ## Catalog Rules
 
@@ -38,13 +38,27 @@ Do not create separate "extra" or "addon" aggregate files. Keep service order,
 dependencies, source paths, and descriptions explicit and documented in
 `catalog/catalog.toml`.
 
+Keep the category comments and add a concise comment immediately above every
+service and preset table so catalog readers can understand both the group and
+the entry's role without reading the renderer.
+
+All TOML in this build context uses two-space indentation for multi-line arrays.
+Comment every table and any dependency or metadata choice whose purpose is not
+obvious from its key.
+
 ## Rendering Rules
 
-Maraudarr preserves source comments and `${VARIABLES}`. It writes:
+Maraudarr preserves source comments and `${VARIABLES}`. Normal generation writes:
 
-- `/output/docker-compose.yml`
-- `/output/.env`
-- `/output/config/`
+- `/output/dist/<preset>/docker-compose.yml`
+- `/output/dist/<preset>/.env`
+- `/output/dist/<preset>/config/`
+
+The explicit `--output` option remains available for an exact automation
+directory such as a test fixture.
+
+Normal user-facing commands use `--output-root` so a resolved preset owns its
+own Compose file, `.env`, and `config/` tree under `dist/<preset>/`.
 
 Writes to Compose and environment output must remain atomic. Config generation
 may add missing seed files and refresh project-owned README files, but must not
@@ -69,3 +83,7 @@ OCI release metadata must remain configurable through build arguments.
 
 The entrypoint must use `exec` so Maraudarr receives signals directly. The image
 is a short-lived tool and should not define a long-running healthcheck.
+
+Label every Dockerfile stage in order and comment each instruction group so the
+artifact, security boundary, and reason for the stage remain clear during
+review.

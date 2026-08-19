@@ -1,0 +1,1 @@
+--8<-- "scripts/README.md"

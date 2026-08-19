@@ -48,6 +48,8 @@ fi
 #
 if ! lsmod | grep -q "^tun\s"; then
     echo "tun module is not loaded. Loading it now."
+
+    # Attempt to load the tun module.
     if insmod /lib/modules/tun.ko; then
         echo "tun module loaded successfully."
     else

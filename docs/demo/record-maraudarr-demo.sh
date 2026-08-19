@@ -10,9 +10,10 @@
 #
 # The script:
 #   - Verifies every command required to record and optimize the animation.
-#   - Clones the current repository into a temporary working directory.
+#   - Clones the current repository and applies tracked worktree edits.
 #   - Isolates Compose networking, storage paths, credentials, and host ports.
-#   - Generates the selected Plundarr stack and pre-pulls its container images.
+#   - Builds a disposable Maraudarr image from the current checkout.
+#   - Generates the default Plundarr preset and pre-pulls its container images.
 #   - Records the interactive Maraudarr and Docker Compose workflow with VHS.
 #   - Optimizes the generated GIF for the repository's added-file size limit.
 #   - Stops the demonstration stack and removes all temporary files on exit.
@@ -35,19 +36,27 @@ ASSET_PATH="$REPOSITORY_ROOT/docs/assets/maraudarr-demo.gif"
 DEMO_ROOT=$(mktemp -d "${TMPDIR:-/tmp}/plundarr-readme-demo.XXXXXX")
 DEMO_CHECKOUT="$DEMO_ROOT/plundarr"
 DEMO_DATA="$DEMO_ROOT/data"
+MARAUDARR_IMAGE="maraudarr:readme-demo-$$"
 
 #
-# Stop the temporary Compose project and remove the disposable checkout.
+# cleanup: Stop the temporary project and remove its disposable checkout.
+#
+# Parameters: None.
+#
+# Returns: Always returns 0 so cleanup cannot hide the original result.
 #
 cleanup() {
-    if [ -f "$DEMO_CHECKOUT/docker-compose.yml" ] && [ -f "$DEMO_CHECKOUT/.env" ]; then
+    # Stop the demonstration stack if it is still running.
+    if [ -f "$DEMO_CHECKOUT/dist/plundarr/docker-compose.yml" ] && [ -f "$DEMO_CHECKOUT/dist/plundarr/.env" ]; then
         (
-            cd "$DEMO_CHECKOUT"
+            cd "$DEMO_CHECKOUT/dist/plundarr"
             docker compose --env-file .env -f docker-compose.yml down \
                 --timeout 15 --remove-orphans
         ) >/dev/null 2>&1 || true
     fi
 
+    # Remove the disposable Maraudarr image and checkout.
+    docker image rm --force "$MARAUDARR_IMAGE" >/dev/null 2>&1 || true
     rm -rf -- "$DEMO_ROOT"
 }
 
@@ -70,6 +79,10 @@ done
 # Create the disposable checkout and copy its demo-only Compose override.
 #
 git clone --quiet --local "$REPOSITORY_ROOT" "$DEMO_CHECKOUT"
+if ! git -C "$REPOSITORY_ROOT" diff --quiet HEAD; then
+    git -C "$REPOSITORY_ROOT" diff --binary HEAD |
+        git -C "$DEMO_CHECKOUT" apply
+fi
 cp "$SCRIPT_PATH/docker-compose.demo.yml" "$DEMO_CHECKOUT/docker-compose.demo.yml"
 
 #
@@ -87,10 +100,11 @@ mkdir -p \
 # Isolate the demonstration project and Docker network from local deployments.
 #
 export PLUNDARR_DEMO_DIR="$DEMO_CHECKOUT"
+export MARAUDARR_IMAGE
 export COMPOSE_PROJECT_NAME="plundarr-readme-demo"
-export COMPOSE_NETWORK_SUBNET="172.31.0.0/16"
-export COMPOSE_NETWORK_IP_RANGE="172.31.5.0/24"
-export COMPOSE_NETWORK_GATEWAY="172.31.5.254"
+export COMPOSE_NETWORK_SUBNET="172.26.0.0/16"
+export COMPOSE_NETWORK_IP_RANGE="172.26.5.0/24"
+export COMPOSE_NETWORK_GATEWAY="172.26.5.254"
 export COMPOSE_UP_OPTIONS="--force-recreate --pull never --detach --remove-orphans"
 
 #
@@ -128,29 +142,33 @@ export DUPLICATI_BACKUPS_PATH="$DEMO_DATA/backups"
 export HOMEPAGE_DATA_ROOT_PATH="$DEMO_DATA/media"
 
 #
-# Remap published service ports away from the normal Plundarr defaults.
+# Remap published service ports away from normal Plundarr deployment ports.
 #
-export FLARESOLVERR_PORT="18191"
-export PROWLARR_WEBUI_PORT="19696"
-export QBITTORRENT_WEBUI_PORT="18080"
-export RADARR_WEBUI_PORT="17878"
-export SONARR_WEBUI_PORT="18989"
-export BAZARR_WEBUI_PORT="16767"
-export SEERR_WEBUI_PORT="15055"
-export CLEANUPARR_WEBUI_PORT="11012"
-export SPEEDTEST_TRACKER_WEBUI_PORT="19080"
-export DUPLICATI_WEBUI_PORT="18200"
-export HOMEPAGE_WEBUI_PORT="13000"
-export JELLYFIN_WEBUI_PORT="18096"
+export FLARESOLVERR_PORT="48191"
+export PROWLARR_WEBUI_PORT="49696"
+export QBITTORRENT_TCP_PORT="46881"
+export QBITTORRENT_UDP_PORT="46881"
+export QBITTORRENT_WEBUI_PORT="48080"
+export RADARR_WEBUI_PORT="47878"
+export SONARR_WEBUI_PORT="48989"
+export BAZARR_WEBUI_PORT="46767"
+export SEERR_WEBUI_PORT="45055"
+export CLEANUPARR_WEBUI_PORT="41011"
+export SPEEDTEST_TRACKER_WEBUI_PORT="39080"
+export DUPLICATI_WEBUI_PORT="48200"
+export HOMEPAGE_WEBUI_PORT="33000"
 
 #
-# Generate the demonstration stack and pre-pull images outside the recording.
+# Build Maraudarr, generate the stack, and pre-pull images outside the recording.
 #
 (
     cd "$DEMO_CHECKOUT"
-    make ship OPTIONAL_SERVICES=qbittorrent,cleanuparr,jellyfin \
-        >/dev/null
-    docker compose --env-file .env -f docker-compose.yml pull --quiet
+    make build >/dev/null
+    make ship >/dev/null
+    docker compose \
+        --env-file dist/plundarr/.env \
+        -f dist/plundarr/docker-compose.yml \
+        pull --quiet
 )
 
 #
@@ -161,11 +179,23 @@ cd "$REPOSITORY_ROOT"
 vhs "$TAPE_PATH"
 
 #
-# Optimize the animation while preserving readable terminal text and timing.
+# Optimize the recorded animation for the repository's added-file size limit.
 #
 OPTIMIZED_ASSET=$(mktemp "$DEMO_ROOT/maraudarr-demo.XXXXXX.gif")
-gifsicle --optimize=3 --lossy=150 --colors 48 \
-    --resize-width 800 --resize-method lanczos3 \
+gifsicle \
+    --optimize=3 \
+    --lossy=150 \
+    --colors 48 \
+    --resize-width 800 \
+    --resize-method lanczos3 \
     --output "$OPTIMIZED_ASSET" "$ASSET_PATH"
+
+#
+# Move the optimized animation into the repository documentation assets.
+#
 mv "$OPTIMIZED_ASSET" "$ASSET_PATH"
+
+#
+# Set the optimized animation to be readable by all users.
+#
 chmod 0644 "$ASSET_PATH"

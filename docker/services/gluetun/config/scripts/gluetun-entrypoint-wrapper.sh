@@ -35,7 +35,11 @@ gluetun_script_name="gluetun-entrypoint-wrapper.sh"
 elapsed_seconds=0
 
 #
-# Prefix wrapper log lines so they are distinct from Gluetun output.
+# log: Prefix wrapper log lines so they are distinct from Gluetun output.
+#
+# Parameters: $* - Message fragments to write as one status line.
+#
+# Returns: 0 after writing the line.
 #
 log() {
     printf '[%s] %s\n' "${gluetun_script_name}" "$*"

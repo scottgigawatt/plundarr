@@ -20,10 +20,11 @@ loads a preset, resolves required services, preserves the handwritten Compose
 comments, and writes a deployable Plundarr project into the mounted repository:
 
 ```text
-docker-compose.yml
-example.env
-.env
-config/
+dist/<preset>/
+├── docker-compose.yml
+├── example.env
+├── .env
+└── config/
 ```
 
 > [!IMPORTANT]
@@ -32,8 +33,8 @@ config/
 
 ## Take the Quick Passage 🧭
 
-Run these commands from the repository root. Make prints the complete Docker
-command before Maraudarr leaves port.
+Run these commands from the repository root. Make keeps the Docker wiring out
+of sight and prints only the useful status and Maraudarr output.
 
 | Command                    | What It Does                                                |
 | -------------------------- | ----------------------------------------------------------- |
@@ -41,11 +42,11 @@ command before Maraudarr leaves port.
 | `make configure`           | Opens the interactive preset and service picker             |
 | `make presets`             | Lists every preset and its exact defaults                   |
 | `make services`            | Lists every selectable service                              |
-| `make update-maraudarr`    | Refreshes the published Maraudarr image from GHCR           |
-| `make build-maraudarr`     | Builds the Maraudarr image locally from this directory      |
-| `make test-maraudarr-unit` | Runs Maraudarr's Python unit tests                          |
-| `make test-maraudarr`      | Runs unit tests and the real Compose matrix                 |
-| `make build-multiarch`     | Verifies all published CPU architectures                    |
+| `make pull-image`          | Pulls the latest published Maraudarr image from GHCR        |
+| `make build`               | Builds the Maraudarr image locally from this directory      |
+| `make test-unit`           | Runs Maraudarr's Python unit tests                          |
+| `make test`                | Runs unit tests and the real Compose matrix                 |
+| `make build-platforms`     | Verifies all published CPU architectures                    |
 
 Maraudarr uses a matching local image first. When none exists, Make tries GHCR
 and automatically builds from this checkout if the published image is not yet
@@ -53,16 +54,40 @@ available. No pull-skip variable be needed.
 
 Refresh or rebuild Maraudarr explicitly when ye want a different image:
 
-```bash
-make update-maraudarr
-make build-maraudarr
-```
+> [!TIP]
+>
+> ```sh
+> make pull-image
+> make build
+> ```
 
 Add optional cargo without opening the interactive prompts:
 
-```bash
-make ship OPTIONAL_SERVICES=qbittorrent,cleanuparr,apprise,jellyfin
-```
+> [!TIP]
+>
+> ```sh
+> make ship PRESET=boudoirr ADD_SERVICES=jellyfin
+> make ship PRESET=jellyfin
+> make ship PRESET=plex
+> make ship ADD_SERVICES=sonarr-anime
+> ```
+
+`ADD_SERVICES` and `REMOVE_SERVICES` accept comma-separated service IDs.
+Plundarr and Boudoirr preselect qBittorrent as their only downloader; SABnzbd,
+NZBGet, and Watchtower remain ordinary opt-in choices:
+
+The first command selects Usenet only. The second keeps torrents, adds Usenet,
+and opts into update checks:
+
+> [!TIP]
+>
+> ```sh
+> make ship REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=sabnzbd
+> make ship PRESET=boudoirr ADD_SERVICES=sabnzbd,watchtower
+> ```
+
+The default Plundarr voyage includes one Sonarr instance. `sonarr-anime` is an
+opt-in second instance with its own configuration and library path.
 
 ## What Be in This Image? 📦
 
@@ -87,7 +112,7 @@ The published image and Make targets use a deliberately narrow runtime:
 
 | Guardrail                | Behavior                                                                  |
 | ------------------------ | ------------------------------------------------------------------------- |
-| 👤 Unprivileged identity | Image UID and GID are configurable; Make uses the invoking host user      |
+| 👤 Unprivileged identity | Image UID, GID, and group name are configurable; Make uses the invoking host user |
 | 🔒 Read-only image       | Only the mounted repository and `/tmp` are writable                       |
 | 🌐 No network            | Generation runs with `--network none`                                     |
 | ✂️ No capabilities       | Every optional Linux capability is dropped                                |
@@ -96,9 +121,9 @@ The published image and Make targets use a deliberately narrow runtime:
 | 🗃️ State preservation    | Existing application config files are never deleted during regeneration   |
 
 Maraudarr validates every generated pair with its bundled standalone
-`docker-compose config --quiet` command before replacing root output. The
-explicit `make clean-config` target is the only normal path that removes the
-complete config hold.
+`docker-compose config --quiet` command before replacing a preset's output.
+The explicit `make delete-config PRESET=<preset>` target is the only normal path
+that removes a complete config hold.
 
 ## Registry Charts 🗂️
 
@@ -128,17 +153,22 @@ critical image vulnerabilities.
 
 Run host-side tests while editing Python or service charts:
 
-```bash
-make test-maraudarr-unit
-```
+> [!TIP]
+>
+> ```sh
+> make test-unit
+> ```
 
 Then fire the complete checks:
 
-```bash
-make test-maraudarr
-make build-maraudarr
-pre-commit run --all-files
-```
+> [!IMPORTANT]
+>
+> ```sh
+> make test
+> make build
+> make build-platforms
+> pre-commit run --all-files
+> ```
 
 > [!TIP]
 > New services belong under `services/<name>/`. Do not revive aggregate

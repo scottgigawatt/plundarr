@@ -1,22 +1,49 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# .gitignore: Exclude local secrets, generated deployments, caches, test
+#             output, and documentation artifacts from version control.
+#
+
+#
+# Local workstation metadata and secret-bearing files.
+#
 .DS_Store
 .secrets
 .env
 servers.json
 
-# Generated Plundarr service configuration and runtime state.
-/config/
+#
+# Generated Plundarr deployment projects, configuration, and runtime state.
+#
+/dist/
 
-# Timestamped config archives created by make backup-config.
+#
+# Timestamped configuration archives created by make backup.
+#
 backups/
 
+#
 # Local test output.
+#
 test/logs/
 
+#
 # Python development caches.
+#
 __pycache__/
 *.py[cod]
 .pytest_cache/
 .ruff_cache/
 
+#
+# Isolated, reproducible MkDocs toolchain created by make docs.
+#
+.venv-docs/
+
+#
 # Generated MkDocs developer site.
+#
 site/

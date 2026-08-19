@@ -12,11 +12,11 @@ services:
   #
   apprise:
     # Docker image and container information
-    <<: *rootless-container                 # Pull in the rootless container information
-    image: caronc/apprise:${APPRISE_TAG}    # Run using the specified tag
-    container_name: apprise-${APPRISE_TAG}  # Append Docker image tag to container name
-    hostname: apprise                       # Set the container hostname
-    read_only: true                         # Keep the API container filesystem immutable
+    <<: *rootless-container                                         # Pull in the rootless container information
+    image: caronc/apprise:${APPRISE_TAG}                            # Run using the specified tag
+    container_name: ${COMPOSE_PROJECT_NAME}-apprise-${APPRISE_TAG}  # Namespace the container name by project and tag
+    hostname: apprise                                               # Set the container hostname
+    read_only: true                                                 # Keep the API container filesystem immutable
 
     # Drop privileges that are not needed by the notification API
     cap_drop:

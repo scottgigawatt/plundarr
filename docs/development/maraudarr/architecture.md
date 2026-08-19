@@ -33,14 +33,17 @@ flowchart TB
 ## 1. Parse Intent
 
 `maraudarr.cli` accepts an interactive `configure` voyage or a deterministic
-`build` command. The CLI normalizes service additions and removals, but it does
-not decide dependency order or edit source templates.
+`build` command. The CLI normalizes service additions and removals, then writes
+normal user-facing output to `dist/<preset>/`; `--output` remains available for
+an exact automation directory. It does not decide dependency order or edit
+source templates.
 
 ## 2. Load and Resolve the Catalog
 
 `Catalog` reads the TOML catalog and validates every referenced Compose,
-environment, dependency, recommendation, and preset service. `Catalog.resolve`
-then:
+environment, dependency, recommendation, preset service, project identity,
+network default, media root, media library profile, and host-port offset.
+`Catalog.resolve` then:
 
 1. Starts with a preset or explicit custom selection.
 2. Applies removals and additions.
@@ -48,6 +51,10 @@ then:
 4. Rejects unknown or empty selections.
 5. Recursively adds required dependencies.
 6. Sorts services by catalog order and stable service ID.
+
+Core services are restored in step 3 and cannot be removed. Default services
+are only the preset's initial checkbox state, so users can replace qBittorrent
+with a Usenet client or select both without a separate add-on mechanism.
 
 The result is an immutable `StackPlan`. Renderers consume that plan rather than
 repeating selection logic.
@@ -60,7 +67,10 @@ generated deployment retains those comments and unresolved `${VARIABLES}`.
 
 `text.py` locates service declarations, framed environment sections, shared
 anchors, and footer blocks. `render.py` combines selected fragments and applies
-conditional additions such as Gluetun ports and Homepage cards.
+conditional additions such as Gluetun ports, Homepage cards, preset-aware media
+libraries, collision-free project port defaults, and fresh environment values.
+Jellyfin remains deliberately invariant: every preset mounts one writable media
+root at `/data`.
 
 !!! important
 
@@ -78,7 +88,7 @@ cannot drift accidentally.
 ## 5. Stage, Validate, and Publish Output
 
 Compose and environment files are written to a temporary directory inside the
-requested output directory. Maraudarr asks Docker Compose to validate that
+requested preset directory. Maraudarr asks Docker Compose to validate that
 staged pair, then atomically replaces the public files only after validation
 succeeds. A missing Docker executable is tolerated for dependency-free source
 testing; an installed Docker Compose that rejects the chart is a hard failure.
@@ -86,7 +96,7 @@ testing; an installed Docker Compose that rejects the chart is a hard failure.
 Config seeding follows a different safety rule: missing seeds are copied,
 project-owned README files may be refreshed, and existing application files are
 never replaced. Destructive cleanup belongs exclusively to the explicit
-`make clean-config` target.
+`make delete-config` target.
 
 ## Failure Boundaries
 

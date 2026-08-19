@@ -12,10 +12,10 @@ services:
   #
   nzbget:
     # Docker image and container information
-    <<: *arr-stack-container                         # Pull in arr-stack container config
-    image: lscr.io/linuxserver/nzbget:${NZBGET_TAG}  # Run using the specified tag
-    container_name: nzbget-${NZBGET_TAG}             # Append Docker image tag to container name
-    network_mode: service:gluetun                    # Route network traffic through gluetun
+    <<: *arr-stack-container                                      # Pull in arr-stack container config
+    image: lscr.io/linuxserver/nzbget:${NZBGET_TAG}               # Run using the specified tag
+    container_name: ${COMPOSE_PROJECT_NAME}-nzbget-${NZBGET_TAG}  # Namespace the container name by project and tag
+    network_mode: service:gluetun                                 # Route network traffic through gluetun
 
     # Define the container environment
     environment:

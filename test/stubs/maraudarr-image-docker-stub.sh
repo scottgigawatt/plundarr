@@ -53,6 +53,9 @@ if [ "$#" -ge 1 ] && [ "$1" = "pull" ]; then
     exit 1
 fi
 
+#
+# Look for a build command and simulate success or failure.
+#
 for argument in "$@"; do
     if [ "${argument}" = "build" ]; then
         if [ "${MARAUDARR_DOCKER_STUB_BUILD}" = "success" ]; then
@@ -63,5 +66,9 @@ for argument in "$@"; do
     fi
 done
 
+#
+# Exit with an error for any other command, since the stub only supports
+# a limited set of Docker commands.
+#
 printf 'Unexpected Docker stub command: %s\n' "$*" >&2
 exit 1

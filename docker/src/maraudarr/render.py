@@ -122,6 +122,7 @@ def _prepare_service(
     service_id: str,
     selected: set[str],
     include_native_plex: bool,
+    media_libraries: tuple[str, ...],
 ) -> str:
     """Apply service-specific conditional edits to one extracted chart."""
     if service_id == "gluetun":
@@ -130,6 +131,23 @@ def _prepare_service(
     # remove template dependencies that were intentionally left unselected.
     if service_id in {"cleanuparr", "whisparr"}:
         block = strip_yaml_key(block, "depends_on")
+    if service_id == "plex":
+        library_variables = {
+            "anime": "${HOST_ANIME_TV_PATH}",
+            "movies": "${HOST_MOVIES_PATH}",
+            "scenes": "${HOST_SCENES_PATH}",
+            "tv": "${HOST_TV_PATH}",
+        }
+        excluded_variables = {
+            variable
+            for library, variable in library_variables.items()
+            if library not in media_libraries
+        }
+        block = "\n".join(
+            line
+            for line in block.splitlines()
+            if not any(variable in line for variable in excluded_variables)
+        )
     if service_id == "homepage":
         homepage_groups = {
             "Homepage Plex click target and widget": include_native_plex,
@@ -158,6 +176,7 @@ def _prepare_service(
                 "      HOMEPAGE_VAR_SONARR_ANIME_HREF: ${HOMEPAGE_VAR_SONARR_ANIME_HREF}                           # Homepage Sonarr Anime click target\n"
                 "      HOMEPAGE_VAR_SONARR_ANIME_URL: ${HOMEPAGE_VAR_SONARR_ANIME_URL}:${SONARR_ANIME_WEBUI_PORT}  # Homepage Sonarr Anime widget URL\n"
                 "      HOMEPAGE_VAR_SONARR_ANIME_KEY: ${HOMEPAGE_VAR_SONARR_ANIME_KEY}                             # Homepage Sonarr Anime API key\n"
+                "      HOMEPAGE_VAR_SONARR_ANIME_CONTAINER: ${COMPOSE_PROJECT_NAME}-sonarr-anime-${SONARR_ANIME_TAG}  # Homepage Sonarr Anime container\n"
             )
             block = block.replace(anchor, insertion + anchor, 1)
         if "jellyfin" in selected:
@@ -198,7 +217,13 @@ def render_compose(catalog: Catalog, plan: StackPlan) -> str:
         source = catalog.source_path(service.compose).read_text()
         block = extract_service(source, service.service)
         service_blocks.append(
-            _prepare_service(block, service.id, selected, include_native_plex)
+            _prepare_service(
+                block,
+                service.id,
+                selected,
+                include_native_plex,
+                plan.preset.media_libraries,
+            )
         )
 
     return (
@@ -380,15 +405,73 @@ def render_environment(
     rendered = "\n\n".join(
         section.rstrip("\n") for section in rendered_sections
     )
-    # Project identity follows the selected product preset and intentionally
-    # remains generator-owned during preservation.
-    project_name = "boudoirr" if plan.preset.id == "boudoirr" else "plundarr"
-    rendered = rendered.replace(
-        'COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-plundarr}"',
-        f'COMPOSE_PROJECT_NAME="${{COMPOSE_PROJECT_NAME:-{project_name}}}"',
-        1,
-    )
+    # Fresh environments inherit identity, network, and media defaults from
+    # the selected preset. Existing user-managed values remain preserved below.
+    media_root = plan.preset.media_root.rstrip("/")
+    preset_defaults = {
+        "COMPOSE_PROJECT_NAME": ("plundarr", plan.preset.project_name),
+        "COMPOSE_NETWORK_SUBNET": ("172.28.0.0/16", plan.preset.network_subnet),
+        "COMPOSE_NETWORK_IP_RANGE": (
+            "172.28.5.0/24",
+            plan.preset.network_ip_range,
+        ),
+        "COMPOSE_NETWORK_GATEWAY": (
+            "172.28.5.254",
+            plan.preset.network_gateway,
+        ),
+        "HOST_MOVIES_PATH": ("/volume1/plex/movies", f"{media_root}/movies"),
+        "HOST_TV_PATH": ("/volume1/plex/tv", f"{media_root}/tv"),
+        "HOST_ANIME_TV_PATH": (
+            "/volume1/plex/anime-tv",
+            f"{media_root}/anime-tv",
+        ),
+        "HOST_SCENES_PATH": ("/volume1/plex/scenes", f"{media_root}/scenes"),
+        "JELLYFIN_DATA_PATH": ("/volume1/jellyfin", media_root),
+        "WHISPARR_DATA_PATH": ("/volume1/media/adult", media_root),
+    }
+    for variable, (source_default, preset_default) in preset_defaults.items():
+        rendered = rendered.replace(
+            f"${{{variable}:-{source_default}}}",
+            f"${{{variable}:-{preset_default}}}",
+        )
     rendered = rendered.rstrip() + "\n"
+    if plan.preset.host_port_offset:
+        # Offset only variables that publish a host port in the resolved chart.
+        # Internal service ports and host-network services remain unchanged.
+        compose = render_compose(catalog, plan)
+        published_variables = set(
+            re.findall(
+                r"^\s*-\s+\$\{([A-Z][A-Z0-9_]*PORT)\}:",
+                compose,
+                flags=re.MULTILINE,
+            )
+        )
+        remapped_ports: dict[str, str] = {}
+        for variable in published_variables:
+            assignment = re.compile(
+                rf'^{re.escape(variable)}="\$\{{{re.escape(variable)}:-(\d+)\}}"(?P<comment>\s+#.*)?$',
+                flags=re.MULTILINE,
+            )
+            match = assignment.search(rendered)
+            if not match:
+                continue
+            original_port = match.group(1)
+            offset_port = str(int(original_port) + plan.preset.host_port_offset)
+            if int(offset_port) > 65535:
+                raise RenderError(
+                    f"Preset '{plan.preset.id}' offsets {variable} beyond port 65535."
+                )
+            rendered = assignment.sub(
+                f'{variable}="${{{variable}:-{offset_port}}}"{match.group("comment") or ""}',
+                rendered,
+                count=1,
+            )
+            remapped_ports[original_port] = offset_port
+        for original_port, offset_port in remapped_ports.items():
+            rendered = rendered.replace(
+                f"host.or.ip:{original_port}",
+                f"host.or.ip:{offset_port}",
+            )
     existing = _existing_values(existing_path) if existing_path else {}
     if generate_secrets:
         rendered = _generate_first_run_secrets(rendered, existing)

@@ -26,6 +26,7 @@ services:
         MARAUDARR_BIN_HOME: ${MARAUDARR_BIN_HOME}  # Application install directory
         MARAUDARR_UID: ${MARAUDARR_UID}            # Default unprivileged runtime user ID
         MARAUDARR_GID: ${MARAUDARR_GID}            # Default unprivileged runtime group ID
+        MARAUDARR_GROUP: ${MARAUDARR_GROUP}        # Default unprivileged runtime group name
         IMAGE_CREATED: ${IMAGE_CREATED}            # OCI image creation timestamp
         IMAGE_REVISION: ${IMAGE_REVISION}          # OCI source revision
         IMAGE_VERSION: ${MARAUDARR_TAG}            # OCI image version
@@ -36,9 +37,11 @@ services:
     stdin_open: true                               # Support interactive service selection
     tty: true                                      # Render the interactive terminal correctly
 
-    # Drop every optional capability and prevent privilege escalation
+    # Drop every optional capability from the container
     cap_drop:
       - ALL  # Maraudarr only reads templates and writes generated files
+
+    # Security options for the container
     security_opt:
       - no-new-privileges:true  # Prevent processes from gaining privileges
 
@@ -46,6 +49,6 @@ services:
     tmpfs:
       - /tmp:rw,noexec,nosuid,size=64m  # Temporary generation workspace
 
-    # Mount this repository as Maraudarr's output directory
+    # Mount this repository as Maraudarr's output root
     volumes:
-      - .:/output:rw  # Write Plundarr files into the repository root
+      - .:/output:rw  # Write generated preset projects beneath repository dist/

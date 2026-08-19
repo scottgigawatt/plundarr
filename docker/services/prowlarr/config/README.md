@@ -6,6 +6,7 @@ Welcome aboard, mateys! This here directory holds the configuration files for th
 
 Prowlarr be yer indexer manager, helpin' ye find and organize the best treasures (indexers) across the seven seas.
 
-For more details on how this fits into the full Plundarr setup, see the main [docker-compose.yml](../../docker-compose.yml) file.
+For more details on how this fits into the full Plundarr setup, inspect yer
+generated `dist/<preset>/docker-compose.yml` and `.env` files.
 
 May yer indexer hunts be bountiful and yer seas calm! 🏴‍☠️

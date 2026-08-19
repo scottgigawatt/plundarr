@@ -17,11 +17,12 @@ Privateerr generates [`../gluetun/wireguard/wg0.conf`](../gluetun/wireguard/wg0.
 > [!WARNING]
 > ☠️ Mess up the steps below an’ ye might find yerself driftin’ without VPN cover.
 
-To use this directory:
+To use this directory in a default Plundarr voyage:
 
-1. Copy [`../../example.env`](../../example.env) to `.env` and set yer PIA values.
-2. Run `make up`.
-3. Wait for Privateerr to update [`../gluetun/wireguard/wg0.conf`](../gluetun/wireguard/wg0.conf) and [`../gluetun/wireguard/privateerr.env`](../gluetun/wireguard/privateerr.env).
+1. Run `make ship PRESET=plundarr`.
+2. Set yer PIA values in `dist/plundarr/.env`.
+3. Run `make up PRESET=plundarr`.
+4. Wait for Privateerr to update [`../gluetun/wireguard/wg0.conf`](../gluetun/wireguard/wg0.conf) and [`../gluetun/wireguard/privateerr.env`](../gluetun/wireguard/privateerr.env).
 
 The files in this directory are for Privateerr logs and service state. The WireGuard treasure map and port-forwarding metadata land under `config/gluetun/wireguard`.
 

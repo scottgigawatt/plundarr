@@ -40,12 +40,17 @@ That makes completed jobs land in `/downloads/usenet/movies` and `/downloads/use
 
 qBittorrent uses internal port `8080` inside Gluetun's network namespace. SABnzbd uses internal port `8085`, so both download clients can share Gluetun cleanly.
 
-Use `SABNZBD_WEBUI_PORT` in `.env` to choose the host-side port. Plundarr defaults the host port to `8081` and maps it to SABnzbd's fixed internal `8085`. Leave the internal port alone unless ye also update the Compose healthcheck and Gluetun port mapping.
+Use `SABNZBD_WEBUI_PORT` in the generated preset's `.env` to choose the
+host-side port. Plundarr defaults the host port to `8081` and maps it to
+SABnzbd's fixed internal `8085`. Leave the internal port alone unless ye also
+update the Compose healthcheck and Gluetun port mapping.
 
 ## Homepage Widget 🗺️
 
-After SABnzbd starts, copy its API key into `HOMEPAGE_VAR_SABNZBD_KEY` in `.env` if ye want Homepage to show the widget status.
+After SABnzbd starts, copy its API key into `HOMEPAGE_VAR_SABNZBD_KEY` in the
+generated preset's `.env` if ye want Homepage to show the widget status.
 
-Fer more details, set yer spyglass on the [docker-compose.yml](../../docker-compose.yml) file in the root of the repository.
+Fer more details, inspect yer generated `dist/<preset>/docker-compose.yml` and
+`.env` files.
 
 May yer Usenet cargo arrive repaired, extracted, and ready for the library hold! ⚓

@@ -13,6 +13,7 @@ When PIA assigns or removes a forwarded port, Gluetun calls [`scripts/qbittorren
 > [!TIP]
 > PIA port forwarding needs `SERVER_NAMES` when Gluetun runs with `VPN_SERVICE_PROVIDER=custom`, `VPN_TYPE=wireguard`, and `VPN_PORT_FORWARDING=on`.
 
-Fer more information, cast yer eye on the [docker-compose.yml](../../docker-compose.yml) file in the root of the repository.
+Fer more information, cast yer eye on the generated
+`dist/<preset>/docker-compose.yml` and `.env` files.
 
 Smooth sailin' with secure VPN connections, mateys! 🌊🏴‍☠️

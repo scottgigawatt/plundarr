@@ -17,21 +17,34 @@ set -eu
 #
 # Test paths and the disposable image reference passed through Make.
 #
-REPOSITORY_ROOT=$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd)
+REPOSITORY_ROOT=$(CDPATH='' cd -- "$(dirname -- "$0")/../.." && pwd)
 TEST_ROOT=${MARAUDARR_IMAGE_TEST_ROOT:-/tmp/maraudarr-image-test}
-DOCKER_STUB="${REPOSITORY_ROOT}/test/maraudarr-image-docker-stub.sh"
+DOCKER_STUB="${REPOSITORY_ROOT}/test/stubs/maraudarr-image-docker-stub.sh"
 TEST_IMAGE="ghcr.io/scottgigawatt/maraudarr:test"
 
 #
-# Remove test state on exit, including after a failed assertion.
+# cleanup: Remove test state on exit, including after a failed assertion.
+#
+# Parameters: None.
+#
+# Returns: Always returns 0 so cleanup cannot hide the original result.
 #
 cleanup() {
     rm -rf "${TEST_ROOT}"
 }
+
+#
+# Set up cleanup on exit, hangup, interrupt, or termination.
+#
 trap cleanup EXIT HUP INT TERM
 
 #
-# Report one assertion failure with the recorded Docker command sequence.
+# fail: Report one assertion failure with recorded Docker commands.
+#
+# Parameters: $1 - Failure message.
+#             $2 - Docker command log path.
+#
+# Returns: Does not return; exits with status 1.
 #
 fail() {
     message=$1
@@ -46,27 +59,50 @@ fail() {
 }
 
 #
-# Assert that one literal command fragment is present or absent.
+# assert_contains: Assert a literal command fragment is present.
+#
+# Parameters: $1 - Expected fragment.
+#             $2 - Docker command log path.
+#
+# Returns: 0 when present; otherwise exits through fail.
 #
 assert_contains() {
     expected=$1
     log_path=$2
 
+    # Check for the expected fragment in the log, ignoring errors.
     grep -F -- "${expected}" "${log_path}" >/dev/null 2>&1 \
         || fail "Expected Docker command was not called: ${expected}" "${log_path}"
 }
 
+#
+# assert_absent: Assert a literal command fragment is absent.
+#
+# Parameters: $1 - Unexpected fragment.
+#             $2 - Docker command log path.
+#
+# Returns: 0 when absent; otherwise exits through fail.
+#
 assert_absent() {
     unexpected=$1
     log_path=$2
 
+    # Check for the unexpected fragment in the log, ignoring errors.
     if grep -F -- "${unexpected}" "${log_path}" >/dev/null 2>&1; then
         fail "Unexpected Docker command was called: ${unexpected}" "${log_path}"
     fi
 }
 
 #
-# Run one isolated resolver scenario through the real Make target.
+# run_case: Run one isolated Maraudarr image-resolution scenario.
+#
+# Parameters: $1 - Case name.
+#             $2 - Local image state.
+#             $3 - Pull result.
+#             $4 - Build result.
+#             $5 - Expected result.
+#
+# Returns: 0 when the observed result matches the expected result.
 #
 run_case() {
     case_name=$1

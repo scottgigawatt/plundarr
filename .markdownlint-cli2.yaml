@@ -51,7 +51,7 @@ config:
     siblings_only: true
 
   #
-  # Keep table source padded to its rendered width, including emoji glyphs.
+  # GitHub and MkDocs render tables independently of source padding. Allow
+  # concise source tables, especially where long URLs and prose are clearer.
   #
-  table-column-style:
-    style: aligned
+  table-column-style: false

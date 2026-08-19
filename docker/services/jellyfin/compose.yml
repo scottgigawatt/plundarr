@@ -12,10 +12,10 @@ services:
   #
   jellyfin:
     # Docker image and container information
-    <<: *rootless-container                   # Pull in rootless container config
-    image: jellyfin/jellyfin:${JELLYFIN_TAG}  # Run the official Jellyfin image
-    container_name: jellyfin-${JELLYFIN_TAG}  # Append Docker image tag to container name
-    hostname: jellyfin                        # Set the container hostname
+    <<: *rootless-container                                           # Pull in rootless container config
+    image: jellyfin/jellyfin:${JELLYFIN_TAG}                          # Run the official Jellyfin image
+    container_name: ${COMPOSE_PROJECT_NAME}-jellyfin-${JELLYFIN_TAG}  # Namespace the container name by project and tag
+    hostname: jellyfin                                                # Set the container hostname
 
     # Define the container environment
     environment:
@@ -29,9 +29,7 @@ services:
     volumes:
       - ${JELLYFIN_CONFIG_PATH}:/config:rw  # Persistent Jellyfin configuration
       - ${JELLYFIN_CACHE_PATH}:/cache:rw    # Transcoding and image cache
-      - ${HOST_MOVIES_PATH}:/movies:ro      # Movie library
-      - ${HOST_TV_PATH}:/tv:ro              # Television library
-      - ${HOST_ANIME_TV_PATH}:/anime:ro     # Anime television library
+      - ${JELLYFIN_DATA_PATH}:/data:rw      # Media root containing library directories
 
     # Define container healthcheck to verify Jellyfin connectivity
     healthcheck:

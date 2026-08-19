@@ -17,8 +17,8 @@ and initial configuration directories.
 
 Keep the names distinct:
 
-- **Plundarr** is the generated stack in `docker-compose.yml`, `.env`, and
-  `config/`.
+- **Plundarr** is the generated stack in `dist/<preset>/docker-compose.yml`,
+  `.env`, and `config/`.
 - **Maraudarr** is the short-lived generator image and Python application under
   `docker/`.
 
@@ -28,11 +28,14 @@ Keep the names distinct:
   for changes in this directory.
 - `docker-compose.maraudarr.yml`: Local Maraudarr image build and run chart.
 - `example.maraudarr.env`: Maraudarr image build defaults.
-- `docker-compose.yml`: Generated default Plundarr stack checked into the repo.
-- `example.env`: Complete example settings for the default Plundarr stack.
-- `.env`: Local generated Plundarr settings. Never commit real credentials.
-- `config/`: Generated Plundarr service directories and runtime state.
-- `test/`: Plundarr runtime validation and Maraudarr generation matrix.
+- `dist/`: Ignored generated Plundarr preset projects, each with Compose,
+  environment, and runtime state.
+- `scripts/compose/`: Host-side generated-project helpers used by Make.
+- `scripts/linux/` and `scripts/synology/`: Documented host maintenance tools.
+- `test/generator/`: Maraudarr image and preset-matrix validation.
+- `test/helpers/`: Offline Make and workflow helper tests.
+- `test/runtime/`: Live generated-stack and VPN validation.
+- `test/stubs/`: Deterministic command stubs used by shell tests.
 - `docs/`: Supporting setup, contribution, security, and community documents.
 - `.github/`: Workflows, Renovate configuration, templates, and ownership.
 
@@ -51,6 +54,15 @@ Use GitHub callouts where they improve scanning:
 - `[!WARNING]`
 - `[!CAUTION]`
 
+MkDocs converts this native GitHub syntax through `pymdownx.quotes`; do not
+maintain a second `!!!` admonition form for the published site.
+
+Put helpful copyable command examples inside `[!TIP]` callouts when the
+surrounding section is teaching a command sequence. Use `[!IMPORTANT]` for
+required command sequences and `[!CAUTION]` when commands carry meaningful
+risk. Keep explanations outside the code fence and do not add prompt characters
+or prose comments inside those examples.
+
 ## Code Comment Style
 
 Code comments use concise plain English rather than pirate language. Project-
@@ -60,7 +72,13 @@ summary block.
 
 Inline Compose comments use two spaces before `#`. Align the `#` characters for
 logically grouped lines. Use four-space indentation in project-owned shell and
-Python code.
+Python code, two-space indentation in YAML and TOML, and four-space indentation
+in JSON and JSON-with-comments files. Every TOML table needs a concise purpose
+comment; keep multi-line arrays indented two spaces.
+
+VS Code workspace JSON files use JSON with Comments so settings and extension
+choices can carry the same copyright, license, filename summary, and section
+comments as other project configuration.
 
 ## Shell And Make Rules
 
@@ -71,19 +89,77 @@ Bash.
 Keep Makefile variables centralized near the top. User-facing targets may use
 light pirate humor, but errors must identify the problem and corrective action.
 Every target should have the established framed comment and dependency notes.
+Keep `requirements-docs.txt` exact and SHA-256 hash-verified, and require pip's
+hash-checking mode whenever Make installs the documentation toolchain.
 
 ## Generated Files And Secrets
 
-Maraudarr writes into the repository root. Do not resolve `${VARIABLES}` inside
-the generated Compose file. The generated `.env` remains the only file users
-need to edit after generation.
+Maraudarr writes each normal deployment into `dist/<preset>/`. Do not resolve
+`${VARIABLES}` inside the generated Compose file. The generated `.env` remains
+the only file users need to edit after generation.
+
+`--output` is reserved for isolated tests and explicit automation paths. Normal
+user-facing Make targets use `--output-root` and must keep preset Compose,
+environment, and config state together under `dist/<preset>/`.
 
 Never commit real credentials, API keys, generated application databases, or
 VPN state. Config seed files belong under `docker/services/*/config/`; generated
-runtime state belongs under root `config/` and remains ignored.
+runtime state belongs under `dist/<preset>/config/` and remains ignored.
 
 Do not remove or overwrite existing application state while regenerating a
-stack. The explicit `make clean-config` target owns destructive config cleanup.
+stack. The explicit `make delete-config` target owns destructive config cleanup.
+`make nuke` intentionally removes the selected stack's Docker resources. Both
+targets must remain clearly marked as destructive in `make help` and public
+documentation; `make clean` must never touch deployments, `.env`
+files, configuration, backups, containers, volumes, or images.
+
+## Shell, Documentation, And Automation Style
+
+Every project-owned shell script begins with its interpreter, copyright block,
+filename summary, purpose, and usage. Document each shell function immediately
+above its declaration with its purpose, parameters, and return behavior. Put
+one parameter on each comment line, align continuation descriptions beneath the
+first parameter, use `Parameters: None.` when appropriate, and use one space
+after `Returns:`. Follow this exact shape:
+
+```sh
+#
+# function_name: Describe the function's purpose.
+#
+# Parameters: $1 - Describe the first parameter.
+#             $2 - Describe the second parameter.
+#
+# Returns: Describe the return value or exit behavior.
+#
+```
+
+Use POSIX function syntax in `sh` scripts and Bash syntax only when Bash is
+needed.
+
+Keep host helpers grouped under `scripts/compose/`, `scripts/linux/`, or
+`scripts/synology/`. Keep shell tests grouped under `test/generator/`,
+`test/helpers/`, `test/runtime/`, or `test/stubs/`; update Make, workflows,
+documentation, and usage headers whenever a script moves.
+
+Markdown command snippets are copyable: use `sh` fences without prompt
+characters. Reserve `bash` for Bash-only syntax and `console` for real terminal
+transcripts. Generated environment fragments should give short, aligned
+end-of-line guidance for values novice operators need to change.
+
+All project-owned YAML, including GitHub Actions workflows, uses two-space
+indentation. Keep comments for non-obvious security, lifecycle, and integration
+decisions. Reusable workflow shell logic belongs in documented `.github`
+helpers instead of duplicated `run` blocks.
+
+Treat `.editorconfig` as the portable source of truth for indentation, line
+endings, final newlines, and trailing whitespace. Workspace settings may repeat
+language indentation to disable VS Code auto-detection and may add schemas or
+extension-specific validation that EditorConfig cannot express. Keep those
+overlapping values identical.
+
+Comment every Dockerfile build stage and each non-obvious instruction group.
+Stage comments must explain both the artifact produced and why the stage is
+separate.
 
 ## Docker And Compose Rules
 
@@ -114,14 +190,16 @@ changes:
 
 ```sh
 make help
-make test-maraudarr
-make build-maraudarr
-make build-multiarch
+make test-workflows
+make test
+make build
+make test-image
+make build-platforms
 pre-commit run --all-files
 ```
 
 Validate generated output with:
 
 ```sh
-docker compose --env-file .env -f docker-compose.yml config --quiet
+docker compose --env-file dist/plundarr/.env -f dist/plundarr/docker-compose.yml config --quiet
 ```

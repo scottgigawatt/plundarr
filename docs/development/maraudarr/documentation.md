@@ -51,6 +51,26 @@ Good private-helper documentation explains matters such as:
 
 Avoid comments that merely translate the following expression into English.
 
+## Markdown Alerts
+
+Write alerts once using GitHub's supported blockquote syntax:
+
+> [!TIP]
+>
+> ```text
+> > [!IMPORTANT]
+> > Explain the required action here.
+> ```
+
+GitHub renders that syntax natively. MkDocs enables `pymdownx.quotes` with
+callout processing, which converts the same source into Material admonitions.
+The project stylesheet supplies Material treatments for GitHub's `important`
+and `caution` types. Do not duplicate alerts with MkDocs-only `!!!` syntax.
+
+> [!CAUTION]
+> GitHub recognizes only `NOTE`, `TIP`, `IMPORTANT`, `WARNING`, and `CAUTION`.
+> Other labels fall back to an ordinary blockquote instead of an alert.
+
 ## Generated Reference Boundary
 
 The MkDocs configuration renders names that do not begin with `_`. This keeps

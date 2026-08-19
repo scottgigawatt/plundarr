@@ -11,8 +11,10 @@
 from __future__ import annotations
 
 import os
-import tomllib
+from ipaddress import IPv4Address, IPv4Network, ip_address, ip_network
 from pathlib import Path
+
+import tomllib
 
 from maraudarr.models import Preset, Service, StackPlan
 
@@ -104,6 +106,13 @@ class Catalog:
             title=str(values["title"]),
             description=str(values["description"]),
             compose_summary=tuple(str(item) for item in values["compose_summary"]),
+            project_name=str(values["project_name"]),
+            network_subnet=str(values["network_subnet"]),
+            network_ip_range=str(values["network_ip_range"]),
+            network_gateway=str(values["network_gateway"]),
+            media_root=str(values["media_root"]),
+            media_libraries=tuple(str(item) for item in values["media_libraries"]),
+            host_port_offset=int(values.get("host_port_offset", 0)),
             core=tuple(str(item) for item in values.get("core", [])),
             defaults=tuple(str(item) for item in values.get("defaults", [])),
         )
@@ -123,6 +132,8 @@ class Catalog:
                         f"'{dependency}'."
                     )
 
+        preset_networks: dict[str, IPv4Network] = {}
+        project_names: dict[str, str] = {}
         for preset in self.presets.values():
             unknown_services = set(preset.services) - self.services.keys()
             if unknown_services:
@@ -130,6 +141,61 @@ class Catalog:
                 raise CatalogError(
                     f"Preset '{preset.id}' references unknown services: {names}."
                 )
+            unknown_libraries = set(preset.media_libraries) - {
+                "anime",
+                "movies",
+                "scenes",
+                "tv",
+            }
+            if unknown_libraries:
+                names = ", ".join(sorted(unknown_libraries))
+                raise CatalogError(
+                    f"Preset '{preset.id}' references unknown media libraries: "
+                    f"{names}."
+                )
+            if preset.host_port_offset < 0:
+                raise CatalogError(
+                    f"Preset '{preset.id}' has a negative host port offset."
+                )
+
+            try:
+                subnet = ip_network(preset.network_subnet)
+                ip_range = ip_network(preset.network_ip_range)
+                gateway = ip_address(preset.network_gateway)
+            except ValueError as error:
+                raise CatalogError(
+                    f"Preset '{preset.id}' has invalid IPv4 network settings: {error}."
+                ) from error
+            if not isinstance(subnet, IPv4Network) or not isinstance(
+                gateway, IPv4Address
+            ):
+                raise CatalogError(
+                    f"Preset '{preset.id}' must use IPv4 network settings."
+                )
+            if not isinstance(ip_range, IPv4Network) or not ip_range.subnet_of(
+                subnet
+            ):
+                raise CatalogError(
+                    f"Preset '{preset.id}' IP range must be inside its subnet."
+                )
+            if gateway not in ip_range:
+                raise CatalogError(
+                    f"Preset '{preset.id}' gateway must be inside its IP range."
+                )
+            for other_id, other_network in preset_networks.items():
+                if subnet.overlaps(other_network):
+                    raise CatalogError(
+                        f"Preset '{preset.id}' network overlaps preset '{other_id}'."
+                    )
+            preset_networks[preset.id] = subnet
+
+            other_preset = project_names.get(preset.project_name)
+            if other_preset:
+                raise CatalogError(
+                    f"Preset '{preset.id}' reuses the Compose project name from "
+                    f"preset '{other_preset}'."
+                )
+            project_names[preset.project_name] = preset.id
 
     def preset(self, preset_id: str) -> Preset:
         """Return a named preset.

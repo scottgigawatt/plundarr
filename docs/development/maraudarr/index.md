@@ -16,9 +16,10 @@ Maraudarr owns:
 - Loading services and presets from `docker/catalog/catalog.toml`.
 - Resolving required services into deterministic output order.
 - Extracting service definitions without discarding handwritten comments.
-- Rendering the complete `docker-compose.yml`, `.env`, and `example.env`.
+- Rendering each `dist/<preset>/docker-compose.yml`, `.env`, and `example.env`.
 - Generating first-run application secrets without replacing existing values.
-- Seeding selected `config/` directories without overwriting application state.
+- Seeding selected `dist/<preset>/config/` directories without overwriting
+  application state.
 - Validating the generated Compose and environment pair when Docker is present.
 - Presenting interactive Rich output and dependency-free plain output.
 

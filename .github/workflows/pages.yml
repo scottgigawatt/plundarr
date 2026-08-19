@@ -9,81 +9,146 @@
 name: "Publish the Developer Charts 📚🏴‍☠️"
 
 #
-# Publish only documentation-relevant changes merged to main, or when a
-# maintainer explicitly requests a fresh deployment.
+# Publish only documentation-relevant changes merged to main or release tags
+# created from main. Pull requests continue to build documentation exclusively
+# through validate-pr.yml and never receive Pages deployment permissions.
 #
 on:
-    push:
-        branches:
-            - main
-        paths:
-            - ".github/workflows/pages.yml"
-            - "docker/src/maraudarr/**"
-            - "docs/**"
-            - "mkdocs.yml"
-            - "requirements-docs.txt"
-    workflow_dispatch:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*"
+    paths:
+      - ".github/scripts/notify-docs-discord.sh"
+      - ".github/workflows/pages.yml"
+      - "docker/src/maraudarr/**"
+      - "docs/**"
+      - "Makefile"
+      - "mkdocs.yml"
+      - "requirements-docs.txt"
+      - "scripts/README.md"
+      - "test/README.md"
 
 permissions:
-    contents: read
+  contents: read
 
 concurrency:
-    group: github-pages
-    cancel-in-progress: false
+  group: github-pages
+  cancel-in-progress: false
 
 jobs:
-    #
-    # Build one immutable static artifact before entering the deployment
-    # environment with Pages write permissions.
-    #
-    build:
-        name: "Draw the Developer Charts 🗺️"
-        runs-on: ubuntu-latest
-        permissions:
-            contents: read
+  #
+  # Build one immutable static artifact before entering the deployment
+  # environment with Pages write permissions.
+  #
+  build:
+    name: "Draw the Developer Charts 🗺️"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
-        steps:
-            - name: "Grab the Source Charts 📖"
-              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
-              with:
-                  persist-credentials: false
+    steps:
+      - name: "Grab the Source Charts 📖"
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          #
+          # Release-tag publication must inspect the complete main history.
+          #
+          fetch-depth: 0
+          persist-credentials: false
 
-            - name: "Ready the Python Quill 🪶"
-              uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7
-              with:
-                  python-version: "3.14"
-                  cache: pip
-                  cache-dependency-path: requirements-docs.txt
+      #
+      # A matching tag name alone is insufficient: only release commits that
+      # already belong to main may publish the project documentation.
+      #
+      - name: "Confirm the Release Tag Sailed from Main 🔖"
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          if ! git merge-base --is-ancestor "${GITHUB_SHA}^{commit}" origin/main; then
+              echo "::error::Release tags must point to a commit on main before publishing Pages."
+              exit 1
+          fi
 
-            - name: "Load the Documentation Tools 🧰"
-              run: pip install --requirement requirements-docs.txt
+      - name: "Ready the Python Quill 🪶"
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: requirements-docs.txt
 
-            - name: "Configure the Pages Harbor ⚓"
-              uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d  # v6
+      #
+      # Install only exact, hash-verified documentation dependencies.
+      #
+      - name: "Load the Documentation Tools 🧰"
+        run: make docs-install
 
-            - name: "Render Every Developer Chart 🔎"
-              run: mkdocs build --strict
+      - name: "Configure the Pages Harbor ⚓"
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d  # v6
 
-            - name: "Crate the Static Site 📦"
-              uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9  # v5
-              with:
-                  path: site
+      - name: "Render Every Developer Chart 🔎"
+        run: make docs
 
-    #
-    # Deploy only the artifact created by the read-only build job.
-    #
-    deploy:
-        name: "Raise the Developer Pages Flag 🚩"
-        needs: build
-        runs-on: ubuntu-latest
-        permissions:
-            pages: write
-            id-token: write
-        environment:
-            name: github-pages
-            url: ${{ steps.deployment.outputs.page_url }}
+      - name: "Crate the Static Site 📦"
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9  # v5
+        with:
+          path: site
 
-        steps:
-            - name: "Publish the Developer Charts 🚀"
-              id: deployment
-              uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128  # v5
+  #
+  # Deploy only the artifact created by the read-only build job.
+  #
+  deploy:
+    name: "Raise the Developer Pages Flag 🚩"
+    needs: build
+    runs-on: ubuntu-latest
+    outputs:
+      page-url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: "Publish the Developer Charts 🚀"
+        id: deployment
+        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128  # v5
+
+  #
+  # Announce either outcome from a separate read-only job so build failures and
+  # skipped deployments still reach the optional primary Discord destination.
+  #
+  notify:
+    name: "Report from the Chart Room 🦜"
+    if: always()
+    needs:
+      - build
+      - deploy
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: "Grab the Notification Helper 🧰"
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: "Notify Discord: documentation verdict 📚"
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          DOCS_BUILD_STATUS: ${{ needs.build.result }}
+          DOCS_DEPLOY_STATUS: ${{ needs.deploy.result }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          SITE_URL: ${{ needs.deploy.outputs.page-url }}
+          REPOSITORY: ${{ github.repository }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          sh .github/scripts/notify-docs-discord.sh \
+              --build-status  "${DOCS_BUILD_STATUS}" \
+              --deploy-status "${DOCS_DEPLOY_STATUS}" \
+              --run-url       "${RUN_URL}" \
+              --site-url      "${SITE_URL}" \
+              --repository    "${REPOSITORY}" \
+              --ref-name      "${REF_NAME}"

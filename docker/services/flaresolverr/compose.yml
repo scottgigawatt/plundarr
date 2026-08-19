@@ -12,10 +12,10 @@ services:
   #
   flaresolverr:
     # Docker image and container information
-    <<: *default-container                                        # Pull in default container config
-    image: ghcr.io/flaresolverr/flaresolverr:${FLARESOLVERR_TAG}  # Run using the specified tag
-    container_name: flaresolverr-${FLARESOLVERR_TAG}              # Append Docker image tag to container name
-    hostname: flaresolverr                                        # Set the container hostname
+    <<: *default-container                                                    # Pull in default container config
+    image: ghcr.io/flaresolverr/flaresolverr:${FLARESOLVERR_TAG}              # Run using the specified tag
+    container_name: ${COMPOSE_PROJECT_NAME}-flaresolverr-${FLARESOLVERR_TAG}  # Namespace the container name by project and tag
+    hostname: flaresolverr                                                    # Set the container hostname
 
     # Define the host and container ports
     ports:

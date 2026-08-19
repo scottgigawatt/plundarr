@@ -3,7 +3,7 @@
         icon: mdi-rabbit
         href: {{HOMEPAGE_VAR_SPEEDTEST_HREF}}
         description: Internet speed monitoring
-        container: speedtest-tracker-latest
+        container: {{HOMEPAGE_VAR_SPEEDTEST_CONTAINER}}
         widget:
           type: speedtest
           url: {{HOMEPAGE_VAR_SPEEDTEST_URL}}

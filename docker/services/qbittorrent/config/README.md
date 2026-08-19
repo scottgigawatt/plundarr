@@ -48,6 +48,23 @@ When the port-forwarding script runs, it sets qBittorrent to:
 - Disable random ports.
 - Disable UPnP port mapping.
 
-Fer more details, set yer spyglass on the [docker-compose.yml](../../docker-compose.yml) file in the root of the repository.
+Fer more details, inspect yer generated `dist/<preset>/docker-compose.yml` and
+`.env` files.
+
+## Seed Configuration Map 🗺️
+
+The seeded `qBittorrent.conf` stays data-only. qBittorrent stores settings with
+Qt's INI-backed configuration format and may rewrite the file, so this README
+keeps the explanations durable instead of relying on inline comments that could
+disappear after the first application save.
+
+| Section         | Settings                                                       | Why Plundarr seeds them                                                                     |
+| --------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `[AutoRun]`     | `enabled`, `program`                                           | Disables arbitrary program execution after torrent events.                                  |
+| `[BitTorrent]`  | save path, temporary path, listen port, queueing, share action | Keeps completed and incomplete torrents under `/downloads/torrents`.                        |
+| `[LegalNotice]` | `Accepted`                                                     | Records the initial notice acknowledgement so the service can start unattended.             |
+| `[Meta]`        | `MigrationVersion`                                             | Lets qBittorrent apply its own compatible settings migrations.                              |
+| `[Network]`     | cookies, proxy profiles, port forwarding                       | Leaves VPN routing to Gluetun and prevents application-level port forwarding.               |
+| `[Preferences]` | Web UI access, download paths, UPnP, port range                | Permits localhost-only automation while the Gluetun hook updates the listening port safely. |
 
 May yer sails be full and yer seas calm as ye plunder the digital depths! ⚔️🌊

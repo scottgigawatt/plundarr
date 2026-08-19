@@ -190,6 +190,41 @@ body::before {
   box-shadow: 0 0.45rem 1.35rem var(--plundarr-shadow);
 }
 
+/* Map GitHub-only alert types onto Material colors and bundled icons. */
+.md-typeset .admonition.important,
+.md-typeset details.important {
+  border-color: rgb(130 80 223);
+}
+
+.md-typeset .important > .admonition-title,
+.md-typeset .important > summary {
+  background-color: rgb(130 80 223 / 10%);
+}
+
+.md-typeset .important > .admonition-title::before,
+.md-typeset .important > summary::before {
+  background-color: rgb(130 80 223);
+  -webkit-mask-image: var(--md-admonition-icon--info);
+  mask-image: var(--md-admonition-icon--info);
+}
+
+.md-typeset .admonition.caution,
+.md-typeset details.caution {
+  border-color: rgb(207 34 46);
+}
+
+.md-typeset .caution > .admonition-title,
+.md-typeset .caution > summary {
+  background-color: rgb(207 34 46 / 10%);
+}
+
+.md-typeset .caution > .admonition-title::before,
+.md-typeset .caution > summary::before {
+  background-color: rgb(207 34 46);
+  -webkit-mask-image: var(--md-admonition-icon--danger);
+  mask-image: var(--md-admonition-icon--danger);
+}
+
 .md-typeset table:not([class]) {
   background: var(--plundarr-surface);
   border: 1px solid var(--plundarr-border);

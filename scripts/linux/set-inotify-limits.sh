@@ -30,6 +30,9 @@
 #   - Writes a persistent sysctl drop-in if supported.
 #
 
+#
+# Print a message indicating the script has started.
+#
 echo "Starting script to raise inotify limits for Plex."
 
 #
@@ -82,7 +85,12 @@ if [ -z "$SYSCTL_BIN" ]; then
 fi
 
 #
-# Function to set and verify sysctl values.
+# set_and_verify: Set one sysctl value and verify the kernel accepted it.
+#
+# Parameters: $1 - sysctl key.
+#             $2 - Expected value.
+#
+# Returns: 0 when the current value matches; exits nonzero on failure.
 #
 set_and_verify() {
     KEY="$1"
@@ -101,6 +109,7 @@ set_and_verify() {
         exit 1
     fi
 
+    # Print a success message.
     echo "$KEY successfully set to $CURRENT."
 }
 
@@ -115,10 +124,12 @@ set_and_verify "fs.inotify.max_queued_events" "$QUEUED_EVENTS"
 # Persist configuration if sysctl.d exists.
 #
 if [ -d /etc/sysctl.d ]; then
+    # Write a sysctl drop-in configuration file to persist the inotify limits across reboots.
     CONF_FILE="/etc/sysctl.d/99-plundarr-inotify.conf"
 
     echo "Writing persistent configuration to $CONF_FILE."
 
+    # Use a here-document to write the configuration file.
     cat > "$CONF_FILE" <<EOF
 # Managed by plundarr: inotify limits for Plex
 fs.inotify.max_user_watches=$WATCHES
@@ -126,9 +137,11 @@ fs.inotify.max_user_instances=$INSTANCES
 fs.inotify.max_queued_events=$QUEUED_EVENTS
 EOF
 
+    # Set the file permissions to be readable by root only.
     chmod 0644 "$CONF_FILE"
     echo "Persistent configuration written."
 else
+    # /etc/sysctl.d does not exist; skip persistent configuration.
     echo "/etc/sysctl.d not found. Skipping persistent configuration."
 fi
 
@@ -140,4 +153,7 @@ echo "Final inotify values:"
 "$SYSCTL_BIN" fs.inotify.max_user_instances 2>/dev/null
 "$SYSCTL_BIN" fs.inotify.max_queued_events 2>/dev/null
 
+#
+# Print a completion message.
+#
 echo "Script execution completed."

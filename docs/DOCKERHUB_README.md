@@ -13,23 +13,41 @@ environment file, and the selected service config directories.
 
 The repository Makefile supplies the hardened Docker invocation:
 
-```bash
-git clone https://github.com/scottgigawatt/plundarr.git
-cd plundarr
-make ship
-```
+> [!TIP]
+>
+> ```sh
+> git clone https://github.com/scottgigawatt/plundarr.git
+> cd plundarr
+> make ship
+> ```
 
-Generated cargo lands in the repository root:
+Generated cargo lands in its preset directory:
 
 ```text
-docker-compose.yml
-example.env
-.env
-config/
+dist/plundarr/
+├── docker-compose.yml
+├── example.env
+├── .env
+└── config/
 ```
 
-Run `make configure` for the interactive preset and service picker, or
-`make services` to inspect every available service.
+Run `make configure` for the interactive preset and service picker, or choose a
+preset directly:
+
+> [!TIP]
+>
+> ```sh
+> make ship PRESET=jellyfin
+> make ship PRESET=plex
+> make ship PRESET=boudoirr ADD_SERVICES=jellyfin
+> make ship ADD_SERVICES=sonarr-anime
+> ```
+
+Plundarr and Boudoirr use qBittorrent as their only default downloader.
+SABnzbd, NZBGet, and Watchtower remain optional selections through
+`make configure` or `ADD_SERVICES`. Plundarr includes one Sonarr instance;
+`sonarr-anime` adds the optional second instance. Review
+`dist/<preset>/.env`, then start the generated stack with `make up PRESET=<preset>`.
 
 ## Image Details
 

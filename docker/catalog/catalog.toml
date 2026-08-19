@@ -23,10 +23,14 @@
 #   services/<service-id>/environment.env
 #   services/<service-id>/config/
 #
+# Preset tables also define the generated project name, network defaults,
+# high-level media root, expected libraries, and optional host-port offset.
+#
 
 #
 # VPN foundation services.
 #
+# Privateerr produces the PIA WireGuard material consumed by Gluetun.
 [services.privateerr]
 title = "Privateerr"
 description = "Generates the PIA WireGuard configuration and Gluetun metadata."
@@ -34,6 +38,7 @@ category = "VPN foundation"
 url = "https://github.com/scottgigawatt/privateerr"
 order = 100
 
+# Gluetun provides the protected network namespace for selected download clients.
 [services.gluetun]
 title = "Gluetun"
 description = "Runs the VPN tunnel and protects selected download clients."
@@ -45,6 +50,7 @@ requires = ["privateerr"]
 #
 # Indexing and download services.
 #
+# FlareSolverr is an optional Prowlarr dependency for supported anti-bot sites.
 [services.flaresolverr]
 title = "FlareSolverr"
 description = "Helps Prowlarr handle supported anti-bot challenges."
@@ -52,6 +58,7 @@ category = "Indexing"
 url = "https://github.com/FlareSolverr/FlareSolverr"
 order = 200
 
+# Prowlarr centralizes indexers for every selected automation service.
 [services.prowlarr]
 title = "Prowlarr"
 description = "Manages indexers shared by the media automation services."
@@ -60,6 +67,7 @@ url = "https://github.com/Prowlarr/Prowlarr"
 order = 210
 requires = ["flaresolverr"]
 
+# qBittorrent is the default torrent downloader for Plundarr and Boudoirr.
 [services.qbittorrent]
 title = "qBittorrent"
 description = "Downloads torrents through the Gluetun VPN tunnel."
@@ -68,6 +76,7 @@ url = "https://github.com/qbittorrent/qBittorrent"
 order = 220
 requires = ["gluetun"]
 
+# SABnzbd is an explicit Usenet downloader choice.
 [services.sabnzbd]
 title = "SABnzbd"
 description = "Downloads Usenet cargo through the Gluetun VPN tunnel."
@@ -76,6 +85,7 @@ url = "https://sabnzbd.org"
 order = 230
 requires = ["gluetun"]
 
+# NZBGet is the alternative explicit Usenet downloader choice.
 [services.nzbget]
 title = "NZBGet"
 description = "Downloads Usenet cargo efficiently through the Gluetun VPN tunnel."
@@ -87,6 +97,7 @@ requires = ["gluetun"]
 #
 # Media automation services.
 #
+# Radarr manages movie discovery, downloads, and library organization.
 [services.radarr]
 title = "Radarr"
 description = "Finds, tracks, and organizes movies."
@@ -95,6 +106,7 @@ url = "https://github.com/Radarr/Radarr"
 order = 300
 requires = ["prowlarr"]
 
+# Sonarr manages television discovery, downloads, and library organization.
 [services.sonarr]
 title = "Sonarr"
 description = "Finds, tracks, and organizes television shows."
@@ -103,6 +115,7 @@ url = "https://github.com/Sonarr/Sonarr"
 order = 310
 requires = ["prowlarr"]
 
+# Sonarr Anime is a second, optional Sonarr instance with its own configuration.
 [services.sonarr-anime]
 title = "Sonarr Anime"
 description = "Runs a second Sonarr instance dedicated to anime television."
@@ -111,6 +124,7 @@ url = "https://github.com/Sonarr/Sonarr"
 order = 320
 requires = ["prowlarr"]
 
+# Whisparr manages Boudoirr's adult-media workflow.
 [services.whisparr]
 title = "Whisparr"
 description = "Finds, tracks, and organizes an adult media library."
@@ -120,6 +134,7 @@ order = 330
 requires = ["prowlarr"]
 recommended = ["qbittorrent"]
 
+# Bazarr adds subtitle automation to the Radarr and Sonarr libraries.
 [services.bazarr]
 title = "Bazarr"
 description = "Fetches subtitles for movie and television libraries."
@@ -131,6 +146,7 @@ requires = ["radarr", "sonarr"]
 #
 # Media request, playback, and dashboard services.
 #
+# Seerr provides a request interface without requiring a particular media server.
 [services.seerr]
 title = "Seerr"
 description = "Accepts and manages media requests."
@@ -138,6 +154,7 @@ category = "Media experience"
 url = "https://github.com/seerr-team/seerr"
 order = 400
 
+# Plex is an explicitly selected media server with separate read-only libraries.
 [services.plex]
 title = "Plex"
 description = "Streams selected media libraries with Plex Media Server."
@@ -145,6 +162,7 @@ category = "Media servers"
 url = "https://www.plex.tv/media-server-downloads/"
 order = 410
 
+# Jellyfin is an explicitly selected media server with one writable /data root.
 [services.jellyfin]
 title = "Jellyfin"
 description = "Streams selected media libraries with an open media server."
@@ -152,6 +170,7 @@ category = "Media servers"
 url = "https://jellyfin.org"
 order = 420
 
+# Homepage is the optional dashboard for the generated fleet.
 [services.homepage]
 title = "Homepage"
 description = "Provides a dashboard for the generated service fleet."
@@ -162,6 +181,7 @@ order = 800
 #
 # Cleanup, monitoring, notification, backup, and update services.
 #
+# Cleanuparr is the default cleanup companion for qBittorrent-based presets.
 [services.cleanuparr]
 title = "Cleanuparr"
 description = "Removes blocked or unwanted downloads from configured clients."
@@ -170,6 +190,7 @@ url = "https://github.com/Cleanuparr/Cleanuparr"
 order = 500
 recommended = ["qbittorrent"]
 
+# Speedtest Tracker records network performance for the selected deployment.
 [services.speedtest-tracker]
 title = "Speedtest Tracker"
 description = "Measures and records internet performance over time."
@@ -177,6 +198,7 @@ category = "Monitoring and notifications"
 url = "https://docs.speedtest-tracker.dev"
 order = 600
 
+# Apprise is the optional notification endpoint used by supported services.
 [services.apprise]
 title = "Apprise"
 description = "Delivers Speedtest Tracker and other notifications."
@@ -185,6 +207,7 @@ url = "https://github.com/caronc/apprise-api"
 order = 610
 recommended = ["speedtest-tracker"]
 
+# Duplicati backs up selected configuration and host data.
 [services.duplicati]
 title = "Duplicati"
 description = "Backs up Plundarr configuration and other selected data."
@@ -192,6 +215,7 @@ category = "Operations"
 url = "https://www.duplicati.com"
 order = 700
 
+# Watchtower is an opt-in image update checker, never a preset default.
 [services.watchtower]
 title = "Watchtower"
 description = "Checks selected containers for image updates."
@@ -202,65 +226,137 @@ order = 900
 #
 # Plundarr is the default general-purpose media automation voyage.
 #
+# This preset combines automation, requests, monitoring, backup, and qBittorrent.
 [presets.plundarr]
 title = "Plundarr"
 description = "Movies, television, subtitles, requests, monitoring, and a VPN-protected torrent client."
+project_name = "plundarr"
+network_subnet = "172.28.0.0/16"
+network_ip_range = "172.28.5.0/24"
+network_gateway = "172.28.5.254"
+media_root = "/volume1/plex"
+media_libraries = ["movies", "tv", "anime"]
+host_port_offset = 0
 compose_summary = [
-    "docker-compose.yml: Docker Compose configuration for running Plundarr's",
-    "                    media service stack with Privateerr-generated PIA",
-    "                    WireGuard config, PIA port forwarding, Gluetun VPN",
-    "                    routing, and the 'arr' applications.",
-    "",
-    "This configuration sets up default properties for all containers, integrates",
-    "PIA with native WireGuard connections and port forwarding, and provides",
-    "environment-specific settings for a seamless VPN setup.",
+  "docker-compose.yml: Docker Compose configuration for running Plundarr's",
+  "                    media service stack with Privateerr-generated PIA",
+  "                    WireGuard config, PIA port forwarding, Gluetun VPN",
+  "                    routing, and the 'arr' applications.",
+  "",
+  "This configuration sets up default properties for all containers, integrates",
+  "PIA with native WireGuard connections and port forwarding, and provides",
+  "environment-specific settings for a seamless VPN setup.",
 ]
 core = [
-    "privateerr",
-    "gluetun",
-    "flaresolverr",
-    "prowlarr",
-    "radarr",
-    "sonarr",
-    "bazarr",
-    "seerr",
-    "speedtest-tracker",
-    "duplicati",
-    "homepage",
+  "privateerr",
+  "gluetun",
+  "flaresolverr",
+  "prowlarr",
+  "radarr",
+  "sonarr",
+  "bazarr",
+  "seerr",
+  "speedtest-tracker",
+  "duplicati",
+  "homepage",
 ]
 defaults = ["qbittorrent", "cleanuparr"]
 
 #
 # Boudoirr reuses the same catalog for an adult-media-focused stack.
 #
+# This preset uses Whisparr with movies and scenes beneath one media root.
 [presets.boudoirr]
 title = "Boudoirr"
-description = "Whisparr-focused automation with both VPN-protected download clients and controlled updates."
+description = "Whisparr-focused automation with one VPN-protected torrent client by default."
+project_name = "boudoirr"
+network_subnet = "172.29.0.0/16"
+network_ip_range = "172.29.5.0/24"
+network_gateway = "172.29.5.254"
+media_root = "/volume1/jellyfin"
+media_libraries = ["movies", "scenes"]
+host_port_offset = 10000
 compose_summary = [
-    "docker-compose.yml: Docker Compose configuration for running Boudoirr's",
-    "                    adult-media service stack with Privateerr-generated PIA",
-    "                    WireGuard config, PIA port forwarding, Gluetun VPN",
-    "                    routing, and the supporting applications.",
-    "",
-    "This configuration sets up default properties for all containers, integrates",
-    "PIA with native WireGuard connections and port forwarding, and provides",
-    "environment-specific settings for a seamless VPN setup.",
+  "docker-compose.yml: Docker Compose configuration for running Boudoirr's",
+  "                    adult-media service stack with Privateerr-generated PIA",
+  "                    WireGuard config, PIA port forwarding, Gluetun VPN",
+  "                    routing, and the supporting applications.",
+  "",
+  "This configuration sets up default properties for all containers, integrates",
+  "PIA with native WireGuard connections and port forwarding, and provides",
+  "environment-specific settings for a seamless VPN setup.",
 ]
 core = ["privateerr", "gluetun", "flaresolverr", "prowlarr", "whisparr"]
-defaults = ["qbittorrent", "sabnzbd", "cleanuparr", "watchtower"]
+defaults = ["qbittorrent", "cleanuparr"]
+
+#
+# Jellyfin keeps the standalone deployment deliberately small.
+#
+# This preset renders only Jellyfin with movies and television libraries.
+[presets.jellyfin]
+title = "Jellyfin"
+description = "A standalone Jellyfin server with movies and television beneath one media root."
+project_name = "jellyfin"
+network_subnet = "172.30.0.0/16"
+network_ip_range = "172.30.5.0/24"
+network_gateway = "172.30.5.254"
+media_root = "/volume1/jellyfin"
+media_libraries = ["movies", "tv"]
+host_port_offset = 20000
+compose_summary = [
+  "docker-compose.yml: Docker Compose configuration for running a standalone",
+  "                    Jellyfin media server on Plundarr's shared foundation.",
+  "",
+  "Jellyfin receives one writable /data mount containing the media libraries",
+  "and separate persistent configuration and cache directories.",
+]
+core = ["jellyfin"]
+defaults = []
+
+#
+# Plex mirrors the focused standalone Jellyfin preset.
+#
+# This preset renders only Plex with movies and television libraries.
+[presets.plex]
+title = "Plex"
+description = "A standalone Plex server with movie and television libraries."
+project_name = "plex"
+network_subnet = "172.31.0.0/16"
+network_ip_range = "172.31.5.0/24"
+network_gateway = "172.31.5.254"
+media_root = "/volume1/plex"
+media_libraries = ["movies", "tv"]
+host_port_offset = 0
+compose_summary = [
+  "docker-compose.yml: Docker Compose configuration for running a standalone",
+  "                    Plex Media Server on Plundarr's shared foundation.",
+  "",
+  "Plex receives focused movie and television library mounts plus persistent",
+  "configuration and transcode directories.",
+]
+core = ["plex"]
+defaults = []
 
 #
 # Custom starts empty so every service choice is explicit.
 #
+# This preset has no services until the operator chooses them.
 [presets.custom]
 title = "Custom"
 description = "Begin with an empty cargo hold and select every service yourself."
+project_name = "custom"
+network_subnet = "172.27.0.0/16"
+network_ip_range = "172.27.5.0/24"
+network_gateway = "172.27.5.254"
+media_root = "/volume1/plex"
+media_libraries = ["movies", "tv"]
+host_port_offset = 30000
 compose_summary = [
-    "docker-compose.yml: Docker Compose configuration generated from Maraudarr's",
-    "                    selectable media service catalog.",
-    "",
-    "This configuration contains the services selected for this custom stack and",
-    "uses environment variables for settings that may change after deployment.",
+  "docker-compose.yml: Docker Compose configuration generated from Maraudarr's",
+  "                    selectable media service catalog.",
+  "",
+  "This configuration contains the services selected for this custom stack and",
+  "uses environment variables for settings that may change after deployment.",
 ]
 core = []
 defaults = []

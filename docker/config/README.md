@@ -1,9 +1,14 @@
 # ⚓️ Config Booty
 
-Ahoy, ye scurvy devils! Welcome to the **`config`** directory of the grand vessel _Plundarr_. This here be the treasure chest holdin' all the config maps for every fine piece of software in our Docker stack, includin' PIA WireGuard and port-forwarding scrolls. Clone this repo, chart yer own configs, and set sail with ease — _no scallywag left behind_! 🏴‍☠️
+Ahoy, ye scurvy devils! This README is copied into every generated
+`dist/<preset>/config/` directory. That hold keeps configuration maps for the
+services selected in that voyage, including PIA WireGuard and port-forwarding
+scrolls. 🏴‍☠️
 
 > [!IMPORTANT]
-> Every tool has its own subfolder in `config/`, ready to drop anchor with persistent volumes. Ye need only fill in the blanks, and hoist the docker-compose sails!
+> Every selected tool has its own subfolder in `config/`, ready to drop anchor
+> with persistent volumes. The root repository `config/` directory is not used
+> by normal generated deployments.
 
 ## 🗺️ Tools in the Plundarr Fleet
 
@@ -35,15 +40,18 @@ Ahoy, ye scurvy devils! Welcome to the **`config`** directory of the grand vesse
 
 ## Reset the Hold 🧽
 
-To archive the config hold before a reset, run:
+To archive the selected config hold before a reset, run:
 
-```bash
-make backup-config
-```
+> [!TIP]
+>
+> ```sh
+> make backup PRESET=<preset>
+> ```
 
-To deliberately remove the complete generated config tree, run `make clean-config`.
-The next `make ship` voyage recreates only the directories and seed files needed
-by the selected services.
+To deliberately remove that generated config tree, run
+`make delete-config PRESET=<preset>`. The next `make ship PRESET=<preset>`
+voyage recreates only the directories and seed files needed by its selected
+services.
 
 > [!CAUTION]
 > Don't commit any sensitive keys, secrets, or VPN credentials to this here public code — or the sharks'll be on ye in no time.

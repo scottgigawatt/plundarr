@@ -53,6 +53,13 @@ class Preset:
         title: Human-readable preset name displayed by Maraudarr.
         description: Short explanation of the preset's intended voyage.
         compose_summary: Comment lines inserted into the generated chart header.
+        project_name: Compose project namespace used by fresh environments.
+        network_subnet: Default private network allocated to the preset.
+        network_ip_range: Default container allocation range within the subnet.
+        network_gateway: Default gateway address within the subnet.
+        media_root: Host directory containing the preset's media libraries.
+        media_libraries: Library directories expected by the preset.
+        host_port_offset: Offset applied to published ports for fresh stacks.
         core: Service IDs that cannot be removed from this preset.
         defaults: Optional service IDs selected when the preset starts.
     """
@@ -61,6 +68,13 @@ class Preset:
     title: str
     description: str
     compose_summary: tuple[str, ...]
+    project_name: str
+    network_subnet: str
+    network_ip_range: str
+    network_gateway: str
+    media_root: str
+    media_libraries: tuple[str, ...]
+    host_port_offset: int
     core: tuple[str, ...]
     defaults: tuple[str, ...]
 

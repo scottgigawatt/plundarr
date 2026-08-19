@@ -3,7 +3,7 @@
         icon: qbittorrent.svg
         href: {{HOMEPAGE_VAR_QBITTORRENT_HREF}}
         description: Torrents management
-        container: qbittorrent-latest
+        container: {{HOMEPAGE_VAR_QBITTORRENT_CONTAINER}}
         widget:
           type: qbittorrent
           url: {{HOMEPAGE_VAR_QBITTORRENT_URL}}

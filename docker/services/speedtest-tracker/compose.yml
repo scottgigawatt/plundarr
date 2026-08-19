@@ -12,10 +12,10 @@ services:
   #
   speedtest-tracker:
     # Docker image and container information
-    <<: *default-container                                                 # Pull in the default container information
-    image: lscr.io/linuxserver/speedtest-tracker:${SPEEDTEST_TRACKER_TAG}  # Run using the specified tag
-    container_name: speedtest-tracker-${SPEEDTEST_TRACKER_TAG}             # Append Docker image tag to container name
-    hostname: speedtest-tracker                                            # Set the container hostname
+    <<: *default-container                                                              # Pull in the default container information
+    image: lscr.io/linuxserver/speedtest-tracker:${SPEEDTEST_TRACKER_TAG}               # Run using the specified tag
+    container_name: ${COMPOSE_PROJECT_NAME}-speedtest-tracker-${SPEEDTEST_TRACKER_TAG}  # Namespace the container name by project and tag
+    hostname: speedtest-tracker                                                         # Set the container hostname
 
     # Define the container environment
     environment:

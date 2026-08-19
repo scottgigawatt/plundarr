@@ -26,6 +26,7 @@ SABnzbd category folder/path: tv
 
 For Usenet, point SABnzbd completed jobs at `/downloads/usenet` and temporary jobs at `/downloads/usenet/incomplete`; the `sonarr` category then lands episode jobs in `/downloads/usenet/tv`.
 
-For more details, set yer sights on the [docker-compose.yml](../../docker-compose.yml) parchment in the root of the repository.
+For more details, set yer sights on the generated
+`dist/<preset>/docker-compose.yml` and `.env` files.
 
 May yer TV show library be as vast as the seven seas, with adventures awaitin' at every watch! 📺⚔️

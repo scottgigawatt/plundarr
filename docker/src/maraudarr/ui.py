@@ -47,6 +47,26 @@ if RICH_AVAILABLE:
     )
 
 
+PRESET_ICONS = {
+    "plundarr": "🏴‍☠️",
+    "boudoirr": "🔞",
+    "jellyfin": "🎞️",
+    "plex": "📺",
+    "custom": "🧩",
+}
+
+CATEGORY_ICONS = {
+    "VPN foundation": "🛡️",
+    "Indexing": "🗺️",
+    "Download clients": "⬇️",
+    "Media automation": "⚙️",
+    "Media experience": "🍿",
+    "Media servers": "📺",
+    "Operations": "🧹",
+    "Monitoring and notifications": "📡",
+}
+
+
 class UserCancelled(RuntimeError):
     """Represent an intentional cancellation rather than a generator failure."""
 
@@ -108,26 +128,35 @@ class UI:
                 box=box.ROUNDED,
                 header_style="bold",
             )
-            table.add_column("Preset", style="#f2c14e", no_wrap=True)
-            table.add_column("Purpose")
-            table.add_column("Default cargo")
+            table.add_column("Voyage", style="#f2c14e", no_wrap=True)
+            table.add_column("Built for")
+            table.add_column("Included by default")
             for preset in presets:
                 ordered_services = sorted(
                     (service_lookup[item] for item in preset.services),
                     key=lambda service: service.order,
                 )
                 cargo = ", ".join(service.title for service in ordered_services)
-                table.add_row(preset.title, preset.description, cargo or "Choose your own")
+                table.add_row(
+                    preset.title,
+                    preset.description,
+                    cargo or "Choose your own",
+                )
             self.console.print(table)
             return
 
+        print("🗺️ Preset voyages")
         for preset in presets:
             ordered_services = sorted(
                 (service_lookup[item] for item in preset.services),
                 key=lambda service: service.order,
             )
             cargo = ", ".join(service.title for service in ordered_services)
-            print(f"{preset.id}: {preset.description}\n  Services: {cargo or 'Choose your own'}")
+            print(
+                f"\n{PRESET_ICONS.get(preset.id, '⚓')} {preset.title}\n"
+                f"  {preset.description}\n"
+                f"  Included by default: {cargo or 'Choose your own'}"
+            )
 
     def choose_preset(self, presets: list[Preset]) -> str:
         """Prompt for one preset in an interactive terminal.
@@ -169,14 +198,35 @@ class UI:
             table.add_column("Category", style="#f2c14e", no_wrap=True)
             table.add_column("Service", style="bold", no_wrap=True)
             table.add_column("What it adds")
-            for service in services:
-                table.add_row(service.category, service.title, service.description)
+            previous_category = ""
+            for index, service in enumerate(services):
+                category = (
+                    service.category
+                    if service.category != previous_category
+                    else ""
+                )
+                next_category = (
+                    services[index + 1].category
+                    if index + 1 < len(services)
+                    else None
+                )
+                table.add_row(
+                    category,
+                    service.title,
+                    service.description,
+                    end_section=service.category != next_category,
+                )
+                previous_category = service.category
             self.console.print(table)
             return
 
-        print("Available services:")
+        print("🧰 Service cargo")
+        category = ""
         for service in services:
-            print(f"  {service.id:<18} {service.description}")
+            if service.category != category:
+                category = service.category
+                print(f"\n{CATEGORY_ICONS.get(category, '🧩')} {category}")
+            print(f"  {service.title:<18} {service.description}")
 
     def choose_services(
         self,
@@ -265,7 +315,7 @@ class UI:
         if self.plain or not sys.stdin.isatty():
             return True
         answer = questionary.confirm(
-            "⚒️  Build this Plundarr stack?",
+            "⚒️  Build this stack?",
             default=True,
             style=PIRATE_STYLE,
         ).ask()
@@ -319,7 +369,7 @@ class UI:
             }
         ):
             steps.append("Check download, media, and config paths in .env.")
-        steps.append("Start the stack with make up.")
+        steps.append(f"Start the stack with make up PRESET={plan.preset.id}.")
 
         if self.console:
             table = Table.grid(padding=(0, 2))
@@ -330,14 +380,21 @@ class UI:
             table.add_row("Config cargo", config_path)
             table.add_row("Services", str(len(plan.services)))
             self.console.print(
-                Panel(table, title="✅ Plundarr Ready to Sail", border_style="#52b788")
+                Panel(
+                    table,
+                    title=f"✅ {plan.preset.title} Ready to Sail",
+                    border_style="#52b788",
+                )
             )
             self.console.print("\n[bold]Before launch:[/]")
             for number, step in enumerate(steps, start=1):
                 self.console.print(f"  {number}. {step}")
             return
 
-        print(f"Plundarr ready: {compose_path}, {env_path}, and {config_path}")
+        print(
+            f"{plan.preset.title} ready: "
+            f"{compose_path}, {env_path}, and {config_path}"
+        )
         for number, step in enumerate(steps, start=1):
             print(f"{number}. {step}")
 

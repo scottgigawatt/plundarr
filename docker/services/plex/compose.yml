@@ -12,11 +12,11 @@ services:
   #
   plex:
     # Docker image and container information
-    <<: *arr-stack-container                     # Pull in arr-stack container config
-    image: lscr.io/linuxserver/plex:${PLEX_TAG}  # Run using the specified tag
-    container_name: plex-${PLEX_TAG}             # Append Docker image tag to container name
-    hostname: plex                               # Set the container hostname
-    network_mode: host                           # Allow local discovery and direct media connections
+    <<: *arr-stack-container                                  # Pull in arr-stack container config
+    image: lscr.io/linuxserver/plex:${PLEX_TAG}               # Run using the specified tag
+    container_name: ${COMPOSE_PROJECT_NAME}-plex-${PLEX_TAG}  # Namespace the container name by project and tag
+    hostname: plex                                            # Set the container hostname
+    network_mode: host                                        # Allow local discovery and direct media connections
 
     # Define Plex-specific environment values
     environment:
@@ -31,6 +31,7 @@ services:
       - ${HOST_MOVIES_PATH}:/movies:ro        # Movie library
       - ${HOST_TV_PATH}:/tv:ro                # Television library
       - ${HOST_ANIME_TV_PATH}:/anime:ro       # Anime television library
+      - ${HOST_SCENES_PATH}:/scenes:ro        # Scene library
 
     # Define container healthcheck to verify Plex connectivity
     healthcheck:

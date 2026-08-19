@@ -46,266 +46,305 @@
 # Plundarr 🏴‍☠️
 
 Ahoy, mateys! Plundarr charts a complete Docker Compose media fleet from the
-services ye actually want, then packs the whole voyage into one commented
-`docker-compose.yml` and one matching `.env` file. Docker Compose and Synology
-Container Manager both get one final chart, while routine configuration stays
-where it belongs: in `.env`. ⚓️
+services ye actually want, then packs each voyage into one commented
+`docker-compose.yml` and matching `.env` file beneath `dist/<preset>/`. Docker
+Compose and Synology Container Manager both get one final chart, while routine
+configuration stays where it belongs: in that voyage's `.env`. ⚓️
 
 ## Captain's Log 📜
 
-**Maraudarr** be the shipwright of this operation. It is a short-lived,
-published Docker image that chooses a ready-made voyage or loads the hold
-service by service. Maraudarr keeps the handwritten comments, resolves required
-shipmates, writes Plundarr into the repository root, and asks Docker Compose to
-inspect the riggin' before anything leaves port.
+Plundarr has two clearly separate parts:
+
+- 🧭 **Maraudarr — the generator.** Chooses services, resolves dependencies,
+  validates the generated stack, and exits. Its multi-architecture image is
+  published to:
+
+  - 📦 [GitHub Container Registry](https://github.com/scottgigawatt/plundarr/pkgs/container/maraudarr)
+  - 🐳 [Docker Hub](https://hub.docker.com/r/scottgigawatt/maraudarr)
+
+- 🏴‍☠️ **Plundarr — the generated stack.** Stays on yer host and runs the
+  selected services. Each voyage contains:
+
+  - 🧾 `dist/<preset>/docker-compose.yml`
+  - ⚙️ `dist/<preset>/.env`
+  - 📂 `dist/<preset>/config/`
+
+> [!NOTE]
+>
+> - `<preset>` is `plundarr`, `boudoirr`, `jellyfin`, `plex`, or `custom`.
+> - Add-ons change the services aboard without changing the directory name.
+> - For example, `make ship ADD_SERVICES=plex` would deploy to `dist/plundarr/`.
+
+`make ship` and `make configure` run the published Maraudarr image when it is
+available, or build it from this checkout as a fallback. Maraudarr keeps the
+handwritten Compose comments, preserves existing settings and application
+state, and asks Docker Compose to inspect the riggin' before anything leaves
+port. It does not remain running with the generated fleet.
 
 ## Maraudarr in Motion 🎬
 
-Watch Maraudarr chart a Plundarr voyage, load Jellyfin aboard, generate the
-complete configuration, and raise the Compose fleet:
+Watch Maraudarr chart the default Plundarr voyage, generate one complete
+configuration, and raise the Compose fleet:
 
 <!-- markdownlint-disable MD033 -->
-<p align="center">
-  <img src="./docs/assets/maraudarr-demo.gif" width="800" alt="Maraudarr generates and starts a Plundarr Docker Compose stack" />
-</p>
+<img src="./docs/assets/maraudarr-demo.gif" width="1000" alt="Maraudarr generates and starts a Plundarr Docker Compose stack" />
 <!-- markdownlint-enable MD033 -->
 
-The animation follows the real `make configure`, `make up`, and `make ps`
-workflow. Curious captains can inspect or replay the
-[recording source](./docs/demo/record-maraudarr-demo.sh).
+The animation shows the `make configure`, `make up`, and `make ps` workflows for `dist/plundarr/`.
 
 > [!NOTE]
-> The disposable recording uses inert VPN bootstrap stand-ins, so it needs no
-> PIA credentials and opens no tunnel. A normal `make up` launches Privateerr
-> and Gluetun from the generated chart.
+>
+> 🗡️ Curious captains can inspect or replay the 🎥 [recording source](./docs/demo/record-maraudarr-demo.sh).
 
 ## Treasure Map 🗺️
 
-| Shipmate          | What It Be                                            | Yo Ho Ho and More Info                                                |
-| ----------------- | ----------------------------------------------------- | --------------------------------------------------------------------- |
-| Privateerr        | 🏴‍☠️ Creates PIA WireGuard config and port metadata.    | [More info](https://github.com/scottgigawatt/privateerr)              |
-| Gluetun           | 🌊 Runs the VPN tunnel and PIA port forwarding.       | [More info](https://github.com/qdm12/gluetun)                         |
-| FlareSolverr      | 🔥 Helps Prowlarr through supported anti-bot storms.  | [More info](https://github.com/FlareSolverr/FlareSolverr)             |
-| Prowlarr          | 🐾 Manages indexers for the automation fleet.         | [More info](https://github.com/Prowlarr/Prowlarr)                     |
-| qBittorrent       | 🌊 Downloads torrents through Gluetun.                | [More info](https://github.com/qbittorrent/qBittorrent)               |
-| SABnzbd           | 📰 Downloads Usenet cargo through Gluetun.            | [More info](https://sabnzbd.org)                                      |
-| NZBGet            | ⚡ Runs a lean Usenet downloader through Gluetun.     | [More info](https://nzbget.com)                                       |
-| Radarr            | 🎥 Finds, tracks, and organizes movies.               | [More info](https://github.com/Radarr/Radarr)                         |
-| Sonarr            | 📺 Finds, tracks, and organizes TV shows.             | [More info](https://github.com/Sonarr/Sonarr)                         |
-| Sonarr Anime      | 🍜 Runs a second Sonarr for anime TV cargo.           | [More info](https://github.com/Sonarr/Sonarr)                         |
-| Whisparr          | 🔞 Manages an adult media library.                    | [More info](https://github.com/Whisparr/Whisparr)                     |
-| Bazarr            | 🦜 Fetches subtitles for movies and TV shows.         | [More info](https://github.com/morpheus65535/bazarr)                  |
-| Seerr             | ⚓️ Handles media requests for yer crew.               | [More info](https://github.com/seerr-team/seerr)                      |
-| Plex              | 🎬 Streams selected libraries with Plex Media Server. | [More info](https://www.plex.tv/media-server-downloads/)              |
-| Jellyfin          | 🎞️ Streams movies, television, and anime.             | [More info](https://jellyfin.org)                                     |
-| Cleanuparr        | 🧹 Removes blocked or unwanted downloads.             | [More info](https://github.com/Cleanuparr/Cleanuparr)                 |
-| Speedtest Tracker | ⚡️ Tracks internet speed over time.                   | [More info](https://docs.speedtest-tracker.dev/)                      |
-| Apprise           | 📯 Delivers notifications without another public UI.  | [More info](https://github.com/caronc/apprise-api)                    |
-| Duplicati         | 💣 Backs up yer precious booty.                       | [More info](https://www.duplicati.com)                                |
-| Homepage          | 🏠 Provides a dashboard for the whole fleet.          | [More info](https://gethomepage.dev)                                  |
-| Watchtower        | 🔭 Checks selected containers for image updates.      | [More info](https://github.com/containrrr/watchtower)                 |
-| **~~Readarr~~**   | ❌ Scuttled; use Calibre Web Automated instead.       | [Set Sail ⚓](https://github.com/scottgigawatt/calibre-web-automated) |
+Choose a preset in `make configure`, or pass it to `make ship`. These are the
+exact services included before ye add or remove anything:
+
+| Preset                | Best For                             | Included Out of the Box                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| --------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 🏴‍☠️&nbsp;`plundarr`    | Movies and TV automation             | [Privateerr](https://github.com/scottgigawatt/privateerr), [Gluetun](https://github.com/qdm12/gluetun), [FlareSolverr](https://github.com/FlareSolverr/FlareSolverr), [Prowlarr](https://github.com/Prowlarr/Prowlarr), [qBittorrent](https://github.com/qbittorrent/qBittorrent), [Radarr](https://github.com/Radarr/Radarr), [Sonarr](https://github.com/Sonarr/Sonarr), [Bazarr](https://github.com/morpheus65535/bazarr), [Seerr](https://github.com/seerr-team/seerr), [Cleanuparr](https://github.com/Cleanuparr/Cleanuparr), [Speedtest Tracker](https://docs.speedtest-tracker.dev/), [Duplicati](https://www.duplicati.com), and [Homepage](https://gethomepage.dev/latest/) |
+| 🔞&nbsp;`boudoirr`    | Whisparr automation                  | [Privateerr](https://github.com/scottgigawatt/privateerr), [Gluetun](https://github.com/qdm12/gluetun), [FlareSolverr](https://github.com/FlareSolverr/FlareSolverr), [Prowlarr](https://github.com/Prowlarr/Prowlarr), [qBittorrent](https://github.com/qbittorrent/qBittorrent), [Whisparr](https://github.com/Whisparr/Whisparr), and [Cleanuparr](https://github.com/Cleanuparr/Cleanuparr)                                                                                                                                                                                                                                                                                       |
+| 🎞️&nbsp;`jellyfin`    | Standalone movies and TV playback    | [Jellyfin](https://jellyfin.org/docs/)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| 🎬&nbsp;`plex`        | Standalone movies and TV playback    | [Plex Media Server](https://support.plex.tv/articles/categories/plex-media-server/)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| 🧩&nbsp;`custom`      | A stack assembled service by service | Nothing; every service is selected explicitly                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+
+Plundarr and Boudoirr use qBittorrent as their only default downloader. On
+those presets, SABnzbd, NZBGet, Jellyfin, Plex, and Watchtower are not present
+by default, but may be added using `make ship ADD_SERVICES=sabnzbd,jellyfin`.
+
+### Cargo Ye Can Add 🧩
+
+Every catalog service can be added to a compatible preset. Maraudarr adds any
+required foundation services and shows the resolved fleet before writing it.
+
+| Cargo Hold                    | Selectable Services                                                                                                                                                                                                                                                                                                                                                           |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 🛡️&nbsp;VPN&nbsp;foundation   | [Privateerr](https://github.com/scottgigawatt/privateerr) and [Gluetun](https://github.com/qdm12/gluetun)                                                                                                                                                                                                                                                                     |
+| ⬇️&nbsp;Download&nbsp;clients | [qBittorrent](https://github.com/qbittorrent/qBittorrent), [SABnzbd](https://sabnzbd.org/wiki/), and [NZBGet](https://nzbget.com/documentation/)                                                                                                                                                                                                                              |
+| ⚙️&nbsp;Automation            | [FlareSolverr](https://github.com/FlareSolverr/FlareSolverr), [Prowlarr](https://wiki.servarr.com/prowlarr), [Radarr](https://wiki.servarr.com/radarr), [Sonarr](https://wiki.servarr.com/sonarr), [Sonarr Anime](https://wiki.servarr.com/sonarr), [Whisparr](https://wiki.servarr.com/whisparr), [Bazarr](https://wiki.bazarr.media/), and [Seerr](https://docs.seerr.dev/) |
+| 🎞️&nbsp;Media&nbsp;servers    | [Jellyfin](https://jellyfin.org/docs/) and [Plex Media Server](https://support.plex.tv/articles/categories/plex-media-server/)                                                                                                                                                                                                                                                |
+| 🧰&nbsp;Operations            | [Cleanuparr](https://cleanuparr.github.io/Cleanuparr/), [Speedtest Tracker](https://docs.speedtest-tracker.dev/), [Apprise](https://github.com/caronc/apprise-api), [Duplicati](https://docs.duplicati.com/), [Homepage](https://gethomepage.dev/latest/), and [Watchtower](https://containrrr.dev/watchtower/)                                                               |
+
+> [!NOTE]
+>
+> 📚 Readarr has been scuttled from this fleet; use
+> [Calibre Web Automated](https://github.com/scottgigawatt/calibre-web-automated)
+> for book cargo.
 
 ## Hoist the Sails ⚓️
 
 The default Plundarr voyage uses qBittorrent and needs no setup questions.
 `make ship` uses Maraudarr locally when available, pulls it when missing, and
 builds it from this checkout when no published image is available. It then
-generates the complete Plundarr stack in this repository:
+generates the complete Plundarr project in `dist/plundarr/`:
 
-```bash
-# Hoist the Jolly Roger, clone the repo, and chart the default stack
-❯ git clone https://github.com/scottgigawatt/plundarr.git
-❯ cd plundarr
-❯ make ship
-```
+> [!TIP]
+>
+> ```sh
+> git clone https://github.com/scottgigawatt/plundarr.git
+> cd plundarr
+> make ship
+> ```
 
-Maraudarr writes the complete Plundarr project where ye already expect it:
+Maraudarr gives each preset its own complete deployment directory:
 
 ```text
-docker-compose.yml
-example.env
-.env
-config/
+dist/
+└── plundarr/
+    ├── docker-compose.yml
+    ├── example.env
+    ├── .env
+    └── config/
 ```
 
 > [!IMPORTANT]
-> 🔐 Open `.env` before launch. Most defaults can stay aboard, but real PIA
-> credentials and host storage paths must match yer own harbor.
+>
+> 🔐 Open `dist/plundarr/.env` before launch. Most defaults can stay aboard,
+> but real PIA credentials and host storage paths must match yer own harbor.
 
 ### Focus on These Settings ⚙️
 
-| Setting                            | Why Ye Care                                          |
-| ---------------------------------- | ---------------------------------------------------- |
-| 🔐 `PIA_USER` / `PIA_PASS`         | Required for PIA WireGuard and port forwarding       |
-| 👤 `DEFAULT_PUID` / `DEFAULT_PGID` | Must be able to read and write the mounted files     |
-| 📦 `HOST_DOWNLOADS_PATH`           | Shared download root for the automation fleet        |
-| 🎥 `HOST_MOVIES_PATH`              | Final movie library                                  |
-| 📺 `HOST_TV_PATH`                  | Final television library                             |
-| 🍜 `HOST_ANIME_TV_PATH`            | Anime library when Sonarr Anime or Jellyfin needs it |
-| 🕰️ `TZ`                            | Timezone used by the containers                      |
-| 🚪 `*_WEBUI_PORT`                  | Change only when a host port already be occupied     |
+Maraudarr writes only settings used by the selected services:
+
+| Setting                              | Why Ye Care                                                                     |
+| ------------------------------------ | ------------------------------------------------------------------------------- |
+| 🔐&nbsp;`PIA_USER`                   | Privateerr username; `make up` rejects empty or generated example values        |
+| 🔐&nbsp;`PIA_PASS`                   | Privateerr password; `make up` rejects empty or generated example values        |
+| 👤&nbsp;`DEFAULT_PUID`               | User ID that must be able to read and write the mounted files                   |
+| 👤&nbsp;`DEFAULT_PGID`               | Group ID that must be able to read and write the mounted files                  |
+| 📦&nbsp;`HOST_DOWNLOADS_PATH`        | Shared download root for automation services                                    |
+| 🎥&nbsp;`HOST_MOVIES_PATH`           | Movies path used by automation services and Plex                                |
+| 📺&nbsp;`HOST_TV_PATH`               | TV path used by automation services and Plex                                    |
+| 🐉&nbsp;`HOST_ANIME_TV_PATH`         | Anime TV path used when Sonarr Anime is selected                                |
+| 🔞&nbsp;`HOST_SCENES_PATH`           | Scenes path used by Boudoirr automation and Plex                                |
+| 🔞&nbsp;`WHISPARR_DATA_PATH`         | High-level media root mounted into Whisparr at `/data`                          |
+| 🎞️&nbsp;`JELLYFIN_DATA_PATH`         | High-level media root mounted into Jellyfin at `/data`                          |
+| 🕰️&nbsp;`TZ`                         | Timezone used by the containers                                                 |
+| 🚪&nbsp;`*_WEBUI_PORT`               | Change only when a host port is already occupied                                |
 
 > [!TIP]
-> 🗺️ The defaults expect downloads under `/volume1/downloads`, movies under
-> `/volume1/plex/movies`, television under `/volume1/plex/tv`, and service
-> configuration under this repository's `config/` directory.
+>
+> 🗺️ Fresh paths match the selected preset. Service configuration stays under
+> that preset's `dist/<preset>/config/` directory unless ye change its path in
+> `.env`.
 
 When the chart looks shipshape, launch the complete fleet in one shot:
 
-```bash
+```sh
 make up
 ```
 
-## Chart Yer Own Voyage 🧭
+### Chart Yer Own Voyage 🧭
 
 Open Maraudarr's full interactive voyage through Make:
 
-```bash
-make configure
+> [!TIP]
+>
+> ```sh
+> make configure
+> ```
+
+Choose a preset from the 🗺️ Treasure Map above, inspect its default cargo, add or remove services, and approve the final manifest. The prompts stay friendly, lightly pirate, and clear about what will be written. 🏴‍☠️
+
+#### 🗺️ Inspect Presets and Services
+
+```sh
+make presets
+make services
 ```
 
-Choose a preset, inspect its cargo, add or remove services, and approve the
-final manifest. The prompts stay friendly, lightly pirate, and very clear about
-what will be written.
+#### 🎞️ Generate a Standalone Media Server
 
-| Voyage        | Default Cargo                                                                                                                                   |
-| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| 🏴‍☠️ `plundarr` | Privateerr, Gluetun, FlareSolverr, Prowlarr, qBittorrent, Radarr, Sonarr, Bazarr, Seerr, Cleanuparr, Speedtest Tracker, Duplicati, and Homepage |
-| 🔞 `boudoirr` | Privateerr, Gluetun, FlareSolverr, Prowlarr, qBittorrent, SABnzbd, Whisparr, Cleanuparr, and Watchtower                                         |
-| 🧩 `custom`   | An empty hold; choose every service yerself                                                                                                     |
-
-Useful commands for captains who already know the route:
-
-| Command                                                                                    | What It Does                            |
-| ------------------------------------------------------------------------------------------ | --------------------------------------- |
-| 🗺️ `make presets`                                                                          | Shows each preset and its default cargo |
-| 📦 `make services`                                                                         | Lists every service Maraudarr can add   |
-| ⚓ `make ship OPTIONAL_SERVICES=qbittorrent,cleanuparr,apprise,jellyfin`                   | Adds Apprise and Jellyfin               |
-| 🎬 `make ship OPTIONAL_SERVICES=qbittorrent,cleanuparr,plex`                               | Adds containerized Plex                 |
-| 📰 `make ship OPTIONAL_SERVICES=nzbget`                                                    | Charts an NZBGet Usenet voyage          |
-| 🔞 `make ship PRESET=boudoirr OPTIONAL_SERVICES=qbittorrent,sabnzbd,cleanuparr,watchtower` | Charts the Boudoirr voyage              |
-
-Switch the default Plundarr voyage from torrents to Usenet:
-
-```bash
-make ship PRESET=plundarr OPTIONAL_SERVICES=sabnzbd
+```sh
+make ship PRESET=jellyfin
+make ship PRESET=plex
 ```
 
-Or choose NZBGet as the Usenet runner:
+#### 🧩 Add Common Extras
 
-```bash
-make ship PRESET=plundarr OPTIONAL_SERVICES=nzbget
+```sh
+make ship PRESET=boudoirr ADD_SERVICES=jellyfin
+make ship ADD_SERVICES=sonarr-anime
+make ship ADD_SERVICES=sabnzbd
 ```
 
-Both Usenet clients can sail together when ye want separate queues:
+#### 📰 Use Usenet Instead of Torrents
 
-```bash
-make ship PRESET=plundarr OPTIONAL_SERVICES=sabnzbd,nzbget
+```sh
+make ship REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=nzbget
 ```
+
+#### 🔭 Add Watchtower Container Update Checks
+
+```sh
+make ship PRESET=boudoirr ADD_SERVICES=sabnzbd,watchtower
+```
+
+- `ADD_SERVICES` and `REMOVE_SERVICES` accept comma-separated service IDs.
+- Preset core services cannot be removed.
+- Default services can be removed using `make configure` or `REMOVE_SERVICES`.
+- Adding SABnzbd without removing qBittorrent keeps both downloader types.
 
 > [!NOTE]
+>
 > 🧰 Rebuilds preserve existing values by variable name. Fresh voyages receive
 > strong Speedtest Tracker, Duplicati, and NZBGet secrets, while values for
 > temporarily unselected services wait safely in a marked footer until that
 > cargo returns.
-
-> [!NOTE]
+>
 > 🌊 Only selected download clients share Gluetun's network namespace. Prowlarr,
 > Radarr, Sonarr, Bazarr, and the rest of the automation fleet use the normal
-> project network.
+> project network. See [Docker Project Setup](https://scottgigawatt.github.io/plundarr/SETUP/) for preset
+> networks, side-by-side deployments, and Jellyfin or Plex library paths.
 
 ### Synology Notes 📦
 
-Synology Container Manager gets the same one-file deployment chart:
+Synology Container Manager gets the same one-file deployment chart for each
+preset:
 
-1. Keep `.env` beside `docker-compose.yml`.
-2. Create a Container Manager project from `docker-compose.yml`.
+1. Keep `dist/<preset>/.env` beside `dist/<preset>/docker-compose.yml`.
+2. Create one Container Manager project from that preset directory's
+   `docker-compose.yml`.
 3. Review the generated chart, then launch the project.
 
 Read the Synology setup scroll before the first voyage:
 
-- 🖥️ [Docker Project Setup](./docs/SETUP.md)
-- 🦜 [Synology Helper Scripts](scripts/README.md)
+- 🖥️ [Docker Project Setup](https://scottgigawatt.github.io/plundarr/SETUP/)
+- 🦜 [Synology Helper Scripts](https://scottgigawatt.github.io/plundarr/project-guides/scripts/)
 
 ## Spyglass Check 🔎
 
 Useful test voyages:
 
-```bash
-make test-maraudarr
+```sh
+make test
 make test-vpn
 make test-e2e
 make test-stack
 ```
 
+The targets cover the generator and automation-helper suite, a running VPN
+check, a focused VPN end-to-end test, and a complete service-stack test.
+
 > [!WARNING]
-> ⚠️☠️ VPN tests use real PIA credentials from `.env` and may launch real
-> containers. Read the [full testing chart](./test/README.md) before firing
-> those cannons.
+>
+> ⚠️☠️ VPN tests use real PIA credentials from the selected preset's `.env` and
+> may launch real containers. Read the [full testing chart](https://scottgigawatt.github.io/plundarr/project-guides/testing/)
+> before firing those cannons.
+
+### 🧹 Clear Developer Artifacts
+
+> [!TIP]
+>
+> ```sh
+> make clean
+> ```
+
+This removes only generated documentation, Python caches, and test logs.
+Deployment charts, `.env` files, config, backups, containers, volumes, and
+images stay put.
 
 ## Navigatin' Troubled Waters ☠️🌊
 
 > [!TIP]
-> 🧭 Prefer a trusty first mate? The `Makefile` wraps the common Maraudarr and
-> Docker Compose commands while still printin' the complete command it runs.
+>
+> 🧭 `make help` is the complete grouped command chart. It marks the two
+> intentionally destructive targets, `delete-config` and `nuke`, as danger
+> commands; use `backup` before either one.
 
-| Command                       | What It Does                                            |
-| ----------------------------- | ------------------------------------------------------- |
-| 🗺️ `make ship`                | Prepares Maraudarr and generates the Plundarr stack     |
-| 🧭 `make configure`           | Opens Maraudarr's interactive configurator              |
-| 📜 `make presets`             | Lists presets and their exact default services          |
-| 📦 `make services`            | Lists every service Maraudarr can select                |
-| 🌊 `make update-maraudarr`    | Refreshes the published Maraudarr image                 |
-| 🧾 `make compose-services`    | Lists services in the generated Plundarr chart          |
-| 🔎 `make config`              | Prints Docker Compose's validated model                 |
-| 🚀 `make up`                  | Starts the complete generated stack                     |
-| ⚓ `make down`                | Stops and removes the generated stack                   |
-| 💾 `make backup-config`       | Archives `config/` with a collision-safe timestamp      |
-| ☠️ `make clean-config`        | Deletes the complete generated config directory         |
-| 🐍 `make test-maraudarr-unit` | Runs Maraudarr's Python unit tests                      |
-| 🧪 `make test-maraudarr`      | Tests presets and generated Compose combinations        |
-| ⚒️ `make build-maraudarr`     | Builds the Maraudarr image locally from this repository |
-| 📚 `make docs`                | Builds the strict developer documentation site          |
-| 🔭 `make docs-serve`          | Previews developer documentation on localhost           |
+## More Treasure Maps & Crew Codes 🗺️
 
-Need the whole command chart? Run `make help`.
-
-## More Treasure Maps 🗺️
-
-| Scroll                                                               | When Ye Need It                                  |
-| -------------------------------------------------------------------- | ------------------------------------------------ |
-| 📚 [Developer Chart Room](https://scottgigawatt.github.io/plundarr/) | Architecture and generated Python reference      |
-| ⚒️ [Inside Maraudarr](docker/README.md)                              | Image commands, security, tags, and architecture |
-| 🖥️ [Synology Setup](docs/SETUP.md)                                   | Container Manager and host-path preparation      |
-| 🧪 [Testing Hold](test/README.md)                                    | VPN, end-to-end, and stack validation            |
-| 🛠️ [Contributin' Code Booty](docs/CONTRIBUTING.md)                   | Repository standards and pull requests           |
-| 🤝 [The Pirate Code](docs/CODE_OF_CONDUCT.md)                        | Expectations for every member of the crew        |
-| 🛡️ [Security Parley](docs/SECURITY.md)                               | Private vulnerability reporting                  |
+| Scroll                                                                                        | When Ye Need It                                 |
+| --------------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| 📚&nbsp;[Developer Chart Room](https://scottgigawatt.github.io/plundarr/)                     | Maraudarr architecture and Python reference     |
+| ⚒️&nbsp;[Maraudarr Overview](https://scottgigawatt.github.io/plundarr/development/maraudarr/) | Generator behavior, service charts, and testing |
+| 🖥️&nbsp;[Synology Setup](https://scottgigawatt.github.io/plundarr/SETUP/)                     | Container Manager and host-path preparation     |
+| 🛠️&nbsp;[Contributing](https://scottgigawatt.github.io/plundarr/CONTRIBUTING/)                | Repository standards and pull requests          |
+| 🤝&nbsp;[Code of Conduct](https://scottgigawatt.github.io/plundarr/CODE_OF_CONDUCT/)          | Expectations for every member of the crew       |
+| 🛡️&nbsp;[Security](https://scottgigawatt.github.io/plundarr/SECURITY/)                        | Private vulnerability reporting                 |
+| 🧪&nbsp;[Testing Hold](https://scottgigawatt.github.io/plundarr/project-guides/testing/)       | VPN, end-to-end, and stack validation           |
+| 🦜&nbsp;[Synology Helper Scripts](https://scottgigawatt.github.io/plundarr/project-guides/scripts/) | Host-specific helper usage                      |
 
 ## Ship's Log 🏝️
 
-Plundarr has sailed on Synology DSM and macOS, but the generated Compose chart
-ought to run in any harbor with a compatible Docker Engine. The Maraudarr
-image publishes for `linux/amd64`, `linux/arm64`, and `linux/arm/v7`; individual
-third-party service images may support fewer architectures.
+| Compatibility                         | Status           | Details                                                                                                                                                                                           |
+| ------------------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 🗄️&nbsp;Synology&nbsp;DiskStation     | ✅&nbsp;Tested    | DSM 7.4 with Container Manager projects                                                                                                                                                           |
+| 🍎&nbsp;macOS                         | ✅&nbsp;Tested    | macOS Tahoe 26 with Docker Desktop and Docker Compose                                                                                                                                             |
+| 🐧&nbsp;Other&nbsp;Docker&nbsp;hosts  | 🧭&nbsp;Expected  | Expected to work with a compatible Docker Engine and Docker Compose                                                                                                                               |
+| 🏗️&nbsp;Maraudarr&nbsp;architectures  | ✅&nbsp;Published | `linux/amd64`, `linux/arm64`, and `linux/arm/v7`                                                                                                                                                  |
+| 📦&nbsp;Container&nbsp;registries     | ✅&nbsp;Mirrored  | 📦&nbsp;[GitHub&nbsp;Container&nbsp;Registry](https://github.com/scottgigawatt/plundarr/pkgs/container/maraudarr) and 🐳&nbsp;[Docker&nbsp;Hub](https://hub.docker.com/r/scottgigawatt/maraudarr) |
+
+> [!WARNING]
+>
+> ⚔️ Third-party service images may support fewer architectures than Maraudarr.
 
 ## Articles of Agreement ⚖️
 
-This project be licensed under the [Apache License 2.0](LICENSE).
-
-Privateerr uses the unmodified upstream
-[PIA manual-connections](https://github.com/pia-foss/manual-connections)
-scripts under their upstream MIT license. Plundarr consumes the published
-Privateerr image and does not vendor those scripts.
-
-### 🧭 Crew Charts & Codes
-
-| 📜 Shipboard Scroll                                 | ⚓ What It Helps Ye Do                                                  |
-| --------------------------------------------------- | ----------------------------------------------------------------------- |
-| 🛠️ [Patch the Hull](docs/CONTRIBUTING.md)           | Bring fixes and bright ideas aboard without springing leaks below deck. |
-| 🤝 [The Crewmate Compact](docs/CODE_OF_CONDUCT.md)  | Keep the deck welcoming, useful, and free of plank-walking nonsense.    |
-| 🔐 [Whisper to the Quartermaster](docs/SECURITY.md) | Report dangerous leaks privately before the sharks catch their scent.   |
+- This project be licensed under the [Apache License 2.0](LICENSE).
+- Privateerr uses the unmodified upstream [PIA manual-connections](https://github.com/pia-foss/manual-connections) scripts under their upstream [MIT license](https://github.com/pia-foss/manual-connections/blob/master/LICENSE).
+- Plundarr consumes the published Privateerr image and does not vendor the upstream PIA manual-connections scripts that Privateerr uses.
 
 ---
 

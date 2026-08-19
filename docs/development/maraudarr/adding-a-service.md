@@ -8,26 +8,31 @@ fragments through aggregate files.
 
 Create this structure:
 
-```text
-docker/services/example/
-├── README.md
-├── compose.yml
-├── environment.env
-└── config/
-    └── README.md
-```
+> [!TIP]
+>
+> ```text
+> docker/services/example/
+> ├── README.md
+> ├── compose.yml
+> ├── environment.env
+> └── config/
+>     └── README.md
+> ```
 
 Then add one explicit table to `docker/catalog/catalog.toml`:
 
-```toml
-[services.example]
-title = "Example"
-description = "Explains what the service contributes to the stack."
-category = "Category"
-url = "https://example.com"
-order = 999
-requires = ["required-service"]
-```
+> [!TIP]
+>
+> ```toml
+> # Describe the service's role immediately above its catalog table.
+> [services.example]
+> title = "Example"
+> description = "Explains what the service contributes to the stack."
+> category = "Category"
+> url = "https://example.com"
+> order = 999
+> requires = ["required-service"]
+> ```
 
 ## Compose Contract
 
@@ -75,14 +80,16 @@ passes `docker compose config --quiet`.
 
 Before publishing, run:
 
-```bash
-make test-maraudarr
-make build-maraudarr
-make build-multiarch
-make docs
-pre-commit run --all-files
-git diff --check
-```
+> [!IMPORTANT]
+>
+> ```sh
+> make test
+> make build
+> make build-platforms
+> make docs
+> pre-commit run --all-files
+> git diff --check
+> ```
 
 Live E2E validation that requires private credentials is a separate deployment
 check. Report an unavailable external dependency honestly rather than treating

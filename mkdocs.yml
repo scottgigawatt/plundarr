@@ -7,7 +7,9 @@
 #             API reference configuration.
 #
 
+#
 # Use the Material schema for editor validation and completion.
+#
 # yaml-language-server: $schema=https://squidfunk.github.io/mkdocs-material/schema.json
 
 #
@@ -48,6 +50,8 @@ nav:
   - Project Guides:
       - Guide Map: project-guides/index.md
       - Synology Setup: SETUP.md
+      - Testing Hold: project-guides/testing.md
+      - Script Hold: project-guides/scripts.md
       - Contributing: CONTRIBUTING.md
       - Security: SECURITY.md
       - Code of Conduct: CODE_OF_CONDUCT.md
@@ -61,18 +65,24 @@ theme:
   name: material
   language: en
 
+  #
   # Keep typography local and privacy-friendly by using system font stacks.
+  #
   font: false
 
+  #
   # Use bundled icons so the header needs no additional image downloads.
+  #
   icon:
     logo: material/ship-wheel
     repo: fontawesome/brands/github
     edit: material/pencil
     view: material/eye
 
+  #
   # Follow the operating-system preference on first visit and retain the
   # accessible manual toggle. Custom colors are defined in extra.css.
+  #
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
@@ -89,7 +99,9 @@ theme:
         icon: material/white-balance-sunny
         name: Raise the sun
 
+  #
   # Enable only features that improve source discovery and long-form reading.
+  #
   features:
     - content.action.edit
     - content.action.view
@@ -159,21 +171,37 @@ markdown_extensions:
   - md_in_html
   - tables
 
+  #
   # Add linked heading anchors with a project-specific table-of-contents label.
+  #
   - toc:
       permalink: true
       title: On this chart
   - pymdownx.details
 
+  #
   # Preserve line anchors and language classes for readable source examples.
+  #
   - pymdownx.highlight:
       anchor_linenums: true
       line_spans: __span
       pygments_lang_class: true
   - pymdownx.inlinehilite
-  - pymdownx.snippets
 
+  #
+  # Interpret GitHub's native blockquote alerts as Material admonitions so one
+  # Markdown form renders correctly in both the repository and published site.
+  #
+  - pymdownx.quotes:
+      callouts: true
+  - pymdownx.snippets:
+      base_path:
+        - .
+      check_paths: true
+
+  #
   # Render nested fences normally while routing Mermaid blocks to its renderer.
+  #
   - pymdownx.superfences:
       custom_fences:
         - name: mermaid
