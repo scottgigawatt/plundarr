@@ -57,6 +57,24 @@ if printf '%s\n' 'PIA_USER=' 'PIA_PASS=not-a-real-secret' \
 fi
 
 #
+# Confirm the diagnostic identifies the problem and corrective action.
+#
+grep -F "Privateerr cannot sail without valid PIA credentials." \
+    "${test_output}/missing.out" >/dev/null
+grep -F "PIA_USER is missing or still uses the generated example value." \
+    "${test_output}/missing.out" >/dev/null
+grep -F "Set PIA_USER in the selected preset's .env file, then run make up again." \
+    "${test_output}/missing.out" >/dev/null
+
+#
+# Keep redirected diagnostic output free from terminal escape sequences.
+#
+if LC_ALL=C grep "$(printf '\033')" "${test_output}/missing.out" >/dev/null; then
+    echo "Credential helper emitted terminal colors into redirected output." >&2
+    exit 1
+fi
+
+#
 # Reject missing and generated example values.
 #
 if printf '%s\n' 'PIA_USER=p7654321' 'PIA_PASS=abc123' \
@@ -64,6 +82,9 @@ if printf '%s\n' 'PIA_USER=p7654321' 'PIA_PASS=abc123' \
     echo "Credential helper accepted the generated PIA password." >&2
     exit 1
 fi
+
+grep -F "PIA_PASS is missing or still uses the generated example value." \
+    "${test_output}/placeholder.out" >/dev/null
 
 #
 # Confirm the status helper delegates project selection to Docker Compose.

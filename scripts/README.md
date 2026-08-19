@@ -8,7 +8,7 @@ header before running it with elevated privileges.
 
 | Hold       | Script                                                                 | Purpose                                                            |
 | ---------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------ |
-| 🐳 Compose | [`compose/check-pia-credentials.sh`](compose/check-pia-credentials.sh) | Reject missing or example PIA credentials before Privateerr starts |
+| 🐳 Compose | [`compose/check-pia-credentials.sh`](compose/check-pia-credentials.sh) | Report missing or example PIA credentials before Privateerr starts |
 | 🐳 Compose | [`compose/ps.sh`](compose/ps.sh)                                       | Print a compact status table for one generated project             |
 | 🐳 Compose | [`compose/restart.sh`](compose/restart.sh)                             | Wait for Docker, stop a project safely, and start it again         |
 | 🐧 Linux   | [`linux/set-inotify-limits.sh`](linux/set-inotify-limits.sh)           | Raise inotify limits for large Plex libraries                      |
@@ -27,7 +27,9 @@ header before running it with elevated privileges.
 
 Reads resolved Compose environment values from standard input and fails when a
 Privateerr deployment would start without real `PIA_USER` and `PIA_PASS`
-values. `make up`, `make test-e2e`, and `make test-stack` call it automatically.
+values. Invalid credentials produce a color-aware diagnostic with a corrective
+action; redirected output remains plain text and `NO_COLOR` disables terminal
+color. `make up`, `make test-e2e`, and `make test-stack` call it automatically.
 
 ### `compose/ps.sh`
 

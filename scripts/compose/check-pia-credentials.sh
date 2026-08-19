@@ -17,11 +17,68 @@
 set -eu
 
 #
+# Terminal presentation settings. Color is enabled only when stderr is an
+# interactive terminal and the standard NO_COLOR opt-out is not set.
+#
+color_reset='\033[0m'
+color_error='\033[1;31m'
+color_warning='\033[1;33m'
+color_muted='\033[0;37m'
+
+#
 # Validate that the resolved PIA credentials are not empty or still use the
 # documented example values.
 #
 pia_user=""
 pia_pass=""
+
+#
+# print_error: Print the credential-check heading to stderr.
+#
+# Parameters: $1 - Error heading.
+#
+# Returns: Nothing.
+#
+print_error() {
+    if [ -t 2 ] && [ -z "${NO_COLOR:-}" ]; then
+        printf '\n%b%s%b\n' "${color_error}" "$1" "${color_reset}" >&2
+    else
+        printf '\n%s\n' "$1" >&2
+    fi
+}
+
+#
+# print_detail: Print an indented credential-check detail to stderr.
+#
+# Parameters: $1 - Detail color.
+#             $2 - Detail message.
+#
+# Returns: Nothing.
+#
+print_detail() {
+    if [ -t 2 ] && [ -z "${NO_COLOR:-}" ]; then
+        printf '  %b%s%b\n' "$1" "$2" "${color_reset}" >&2
+    else
+        printf '  %s\n' "$2" >&2
+    fi
+}
+
+#
+# report_invalid_credential: Explain an invalid credential and how to fix it.
+#
+# Parameters: $1 - Environment variable name.
+#
+# Returns: Nothing.
+#
+report_invalid_credential() {
+    print_error "☠️  Privateerr cannot sail without valid PIA credentials."
+    print_detail \
+        "${color_warning}" \
+        "$1 is missing or still uses the generated example value."
+    print_detail \
+        "${color_muted}" \
+        "Set $1 in the selected preset's .env file, then run make up again."
+}
 
 #
 # credential_is_invalid: Identify an empty or generated example credential.
@@ -54,8 +111,7 @@ done
 # Reject missing values and the documented examples generated for new stacks.
 #
 if credential_is_invalid "${pia_user}" "p1234567"; then
-    echo "PIA_USER is missing or still uses the generated example value." >&2
-    echo "Set PIA_USER in the selected preset's .env file before starting Privateerr." >&2
+    report_invalid_credential "PIA_USER"
     exit 1
 fi
 
@@ -63,7 +119,6 @@ fi
 # Reject missing values and the documented examples generated for new stacks.
 #
 if credential_is_invalid "${pia_pass}" "abc123"; then
-    echo "PIA_PASS is missing or still uses the generated example value." >&2
-    echo "Set PIA_PASS in the selected preset's .env file before starting Privateerr." >&2
+    report_invalid_credential "PIA_PASS"
     exit 1
 fi
