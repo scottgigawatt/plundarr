@@ -56,11 +56,12 @@ contacts Discord or either container registry.
 > make build-platforms
 > ```
 
-The first command builds the production image shape. The smoke voyage runs that
-image with Maraudarr's read-only, networkless runtime controls, generates one
-deployment in a disposable directory, and validates it with Docker Compose.
-The final command verifies every published CPU architecture: `linux/amd64`,
-`linux/arm64`, and `linux/arm/v7`.
+The first command builds the production image shape. The image test runs the
+terminal UI tests with the image's exact dependencies, including Rich
+presentation, then applies Maraudarr's read-only, networkless runtime controls,
+generates one deployment in a disposable directory, and validates it with
+Docker Compose. The final command verifies every published CPU architecture:
+`linux/amd64`, `linux/arm64`, and `linux/arm/v7`.
 
 ## Documentation
 

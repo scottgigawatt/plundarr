@@ -80,19 +80,6 @@
               params:
                 unmonitored: true
 
-    - Tautulli:
-        icon: tautulli.svg
-        href: {{HOMEPAGE_VAR_TAUTULLI_HREF}}
-        description: Plex monitoring
-        container: tautulli-latest
-        widget:
-          type: tautulli
-          url: {{HOMEPAGE_VAR_TAUTULLI_URL}}
-          key: {{HOMEPAGE_VAR_TAUTULLI_KEY}}
-          enableUser: true
-          showEpisodeNumber: true
-          expandOneStreamToTwoRows: false
-
 - Downloads:
     - Prowlarr:
         icon: prowlarr.svg

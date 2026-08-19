@@ -6,7 +6,7 @@ Welcome to the test hold, where Plundarr checks that Privateerr and Gluetun left
 
 | Hold         | Script                                                                         | Purpose                                                             |
 | ------------ | ------------------------------------------------------------------------------ | ------------------------------------------------------------------- |
-| 🧭 Generator | [`generator/maraudarr-image-smoke.sh`](generator/maraudarr-image-smoke.sh)     | Exercise a hardened Maraudarr container in disposable output        |
+| 🧭 Generator | [`generator/maraudarr-image-smoke.sh`](generator/maraudarr-image-smoke.sh)     | Test image UI and validate one disposable deployment                |
 | 🧭 Generator | [`generator/test-maraudarr-image.sh`](generator/test-maraudarr-image.sh)       | Verify local, pulled, built, and unavailable image resolution paths |
 | 🧭 Generator | [`generator/test-maraudarr-matrix.sh`](generator/test-maraudarr-matrix.sh)     | Generate and validate representative preset and add-on combinations |
 | 🧰 Helpers   | [`helpers/test-make-helpers.sh`](helpers/test-make-helpers.sh)                 | Test PIA preflight and compact Compose status helpers               |
@@ -51,8 +51,9 @@ They also run the Python unit suite, exercise the offline Discord and registry
 helpers, verify the compact Compose status and secret-safe PIA preflight
 helpers, and generate representative Compose charts.
 
-After building an image, exercise its hardened container contract and validate
-one disposable generated deployment with:
+After building an image, run its terminal UI tests with exact runtime
+dependencies, then exercise its hardened contract and validate one disposable
+deployment:
 
 > [!EXAMPLE]
 >
@@ -60,7 +61,9 @@ one disposable generated deployment with:
 > make test-image
 > ```
 
-CI can select another representative voyage with `MARAUDARR_TEST_PRESET`,
+This makes the Rich terminal regression checks mandatory for the built image,
+even when Rich is unavailable to host-side tests. CI can select another voyage
+with `MARAUDARR_TEST_PRESET`,
 `MARAUDARR_TEST_ADD`, `MARAUDARR_TEST_REMOVE`, and
 `MARAUDARR_TEST_FILE` without duplicating a raw `docker run` block.
 

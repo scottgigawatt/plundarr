@@ -5,15 +5,15 @@
 #
 # Licensed under the Apache License, Version 2.0.
 #
-# maraudarr-image-smoke.sh: Generate and validate one deployment with the exact
-#                           hardened Maraudarr runtime contract used in CI.
+# maraudarr-image-smoke.sh: Test the Maraudarr terminal UI, then generate and
+#                           validate one deployment with CI's runtime controls.
 #
 # Usage: test/generator/maraudarr-image-smoke.sh --image <image> --preset <preset> \
 #        --required-file <path> [options]
 #
 
 #
-# Directory for smoke-test output.
+# Runtime command, repository, selection, and disposable output settings.
 #
 add_services=""
 deployment_root="dist"
@@ -23,6 +23,7 @@ output_mount="/output"
 output_root="/output/dist"
 preset=""
 remove_services=""
+repository_root=$(CDPATH='' cd -- "$(dirname -- "$0")/../.." && pwd)
 required_file=""
 smoke_output=""
 
@@ -83,6 +84,25 @@ require_option_argument() {
         printf '%s requires a value.\n' "$1" >&2
         exit 2
     fi
+}
+
+#
+# run_hardened_image: Run the selected image with Maraudarr's runtime controls.
+#
+# Parameters: $@ - Docker options, image, and command arguments.
+#
+# Returns: The Docker command's exit status.
+#
+run_hardened_image() {
+    "${docker_bin}" run \
+        --rm \
+        --read-only \
+        --network none \
+        --cap-drop ALL \
+        --security-opt no-new-privileges:true \
+        --tmpfs /tmp:rw,noexec,nosuid,size=64m \
+        --user "$(id -u):$(id -g)" \
+        "$@"
 }
 
 #
@@ -171,16 +191,22 @@ smoke_output=$(mktemp -d)
 trap cleanup 0 1 2 15
 
 #
-# Run the container with the specified options.
+# Run the terminal UI tests inside the exact image so optional runtime
+# dependencies, including Rich, exercise their host-skipped presentation checks.
 #
-"${docker_bin}" run \
-    --rm \
-    --read-only \
-    --network none \
-    --cap-drop ALL \
-    --security-opt no-new-privileges:true \
-    --tmpfs /tmp:rw,noexec,nosuid,size=64m \
-    --user "$(id -u):$(id -g)" \
+run_hardened_image \
+    --volume "${repository_root}/docker:/source:ro" \
+    --entrypoint python3 \
+    "${image}" \
+    -m unittest discover \
+    -s /source/tests \
+    -p test_ui.py \
+    -v
+
+#
+# Generate the requested deployment through the same hardened image contract.
+#
+run_hardened_image \
     --volume "${smoke_output}:${output_mount}:rw" \
     "${image}" \
     --plain build \

@@ -113,15 +113,20 @@ grep -F "plundarr-prowlarr-latest" "${test_output}/ps.out" >/dev/null
 grep -F "plundarr-gluetun-latest" "${test_output}/ps.out" >/dev/null
 
 #
-# Stack crowded port lists while retaining compact two-binding rows.
+# Collapse duplicate wildcard bindings and stack each distinct published port.
 #
 test "$(grep -c 'plundarr-gluetun-latest' "${test_output}/ps.out")" -eq 1
-grep -E '^[[:space:]]+\[::\]:6881->6881/tcp$' \
+grep -E '^[[:space:]]+8080->8080/tcp$' \
     "${test_output}/ps.out" >/dev/null
-grep -E '^[[:space:]]+0\.0\.0\.0:8080->8080/tcp$' \
+grep -E '^[[:space:]]+6881->6881/udp$' \
     "${test_output}/ps.out" >/dev/null
-grep -F "0.0.0.0:9696->9696/tcp, [::]:9696->9696/tcp" \
+grep -F "6881->6881/tcp" "${test_output}/ps.out" >/dev/null
+grep -F "9696->9696/tcp" \
     "${test_output}/ps.out" >/dev/null
+if grep -F '[::]' "${test_output}/ps.out" >/dev/null; then
+    echo "Compose status helper retained a duplicate IPv6 wildcard binding." >&2
+    exit 1
+fi
 
 #
 # Report success.

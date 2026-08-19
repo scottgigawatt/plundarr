@@ -747,14 +747,14 @@ $(BUILD_PLATFORMS): $(BUILD_DEPENDS)
 	$(MARAUDARR_PLATFORM_BUILD)
 
 #
-# $(TEST_IMAGE): Runs one hardened image-generation and Compose-validation
-#                voyage in a disposable output directory.
+# $(TEST_IMAGE): Runs runtime-dependent UI tests inside one hardened image, then
+#                generates and validates a disposable Compose deployment.
 #
 # Dependencies:
 #   $(ENSURE_MARAUDARR_IMAGE) - Prepare the exact image requested by the caller.
 #
 $(TEST_IMAGE): $(ENSURE_MARAUDARR_IMAGE)
-	$(call announce,Smoke-testin' Maraudarr in a sealed temporary barrel. 🛢️)
+	$(call announce,Testin' Maraudarr in a sealed temporary barrel. 🛢️)
 	@$(MARAUDARR_SMOKE_CMD) \
 		--docker-bin "$(DOCKER_BIN)" \
 		--image "$(MARAUDARR_IMAGE)" \
@@ -1018,7 +1018,7 @@ $(HELP):
 	$(call help_line,$(TEST_VPN),Check a running VPN tunnel.)
 	$(call help_line,$(TEST_E2E),Run the focused VPN end-to-end test.)
 	$(call help_line,$(TEST_STACK),Run the complete stack test.)
-	$(call help_line,$(TEST_IMAGE),Smoke-test one hardened Maraudarr image.)
+	$(call help_line,$(TEST_IMAGE),Test one hardened Maraudarr image and its terminal UI.)
 	$(call help_line,$(BUILD),Build Maraudarr from this checkout.)
 	$(call help_line,$(BUILD_PLATFORMS),Check every published image architecture.)
 	$(call help_line,$(DOCS),Build the strict developer documentation site.)

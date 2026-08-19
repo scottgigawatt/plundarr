@@ -6,7 +6,7 @@
 # Licensed under the Apache License, Version 2.0.
 #
 # registry-mirror.sh: Mirror published Maraudarr tags from GHCR to Docker Hub
-#                     and verify that both registries expose the same digest.
+#                     and verify that both registries expose matching digests.
 #
 # Usage: GHCR_TOKEN=<token> DOCKERHUB_TOKEN=<token> registry-mirror.sh \
 #        <--mirror|--verify> --ghcr-image <image> --dockerhub-image <image> \
@@ -130,38 +130,38 @@ mirror_tags() {
 }
 
 #
-# verify_mirrors: Compare the first published tag across both registries.
+# verify_mirrors: Compare every published tag across both registries.
 #
 # Parameters: None.
 #
-# Returns: 0 when the digests match; otherwise returns nonzero.
+# Returns: 0 when every pair of digests matches; otherwise returns nonzero.
 #
 verify_mirrors() {
-    # Select the first published tag for comparison.
-    primary_tag=$(printf '%s\n' "${published_tags}" | sed -n '/./{p;q;}')
-    require_value --published-tags "${primary_tag}"
-    dockerhub_tag=$(dockerhub_tag_for "${primary_tag}")
+    printf '%s\n' "${published_tags}" \
+        | while IFS= read -r ghcr_tag; do
+            [ -n "${ghcr_tag}" ] || continue
+            dockerhub_tag=$(dockerhub_tag_for "${ghcr_tag}")
 
-    # Inspect the GHCR tag to get its digest.
-    ghcr_digest=$("${skopeo_bin}" inspect \
-        --creds "${ghcr_username}:${GHCR_TOKEN}" \
-        --format '{{.Digest}}' \
-        "docker://${primary_tag}")
+            # Inspect both registry tags to get their digests.
+            ghcr_digest=$("${skopeo_bin}" inspect \
+                --creds "${ghcr_username}:${GHCR_TOKEN}" \
+                --format '{{.Digest}}' \
+                "docker://${ghcr_tag}")
+            dockerhub_digest=$("${skopeo_bin}" inspect \
+                --creds "${dockerhub_username}:${DOCKERHUB_TOKEN}" \
+                --format '{{.Digest}}' \
+                "docker://${dockerhub_tag}")
 
-    # Inspect the Docker Hub tag to get its digest.
-    dockerhub_digest=$("${skopeo_bin}" inspect \
-        --creds "${dockerhub_username}:${DOCKERHUB_TOKEN}" \
-        --format '{{.Digest}}' \
-        "docker://${dockerhub_tag}")
+            # Report the exact tag pair when registry content differs.
+            if [ "${ghcr_digest}" != "${dockerhub_digest}" ]; then
+                printf 'Registry digest mismatch for %s: GHCR=%s DockerHub=%s\n' \
+                    "${ghcr_tag}" "${ghcr_digest}" "${dockerhub_digest}" >&2
+                return 1
+            fi
 
-    # Compare the two digests and report a mismatch if they differ.
-    if [ "${ghcr_digest}" != "${dockerhub_digest}" ]; then
-        printf 'Registry digest mismatch: GHCR=%s DockerHub=%s\n' \
-            "${ghcr_digest}" "${dockerhub_digest}" >&2
-        return 1
-    fi
-
-    printf 'Registry manifests match at %s.\n' "${ghcr_digest}"
+            printf 'Registry manifests match for %s at %s.\n' \
+                "${ghcr_tag}" "${ghcr_digest}"
+        done
 }
 
 #

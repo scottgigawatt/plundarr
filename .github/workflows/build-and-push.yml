@@ -78,12 +78,10 @@ jobs:
           MARAUDARR_IMAGE=ghcr.io/${{ github.repository_owner }}/maraudarr:scan
           MARAUDARR_BUILD_OPTIONS=--pull
 
-        #
-        # Run the hardened smoke voyage with a plundarr preset and a few selectable services.
-        # The smoke test is deliberately not exhaustive, but it does exercise the Maraudarr
-        # generator, the hardened runtime, and the selected services to ensure they all work
-        # together in a basic configuration.
-        #
+      #
+      # Run the hardened smoke voyage with a Plundarr preset and a few selectable
+      # services. This exercises the generator and the hardened image together.
+      #
       - name: "Run the Hardened Smoke Voyage ⚓"
         run: >-
           make test-image

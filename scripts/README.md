@@ -34,10 +34,9 @@ color. `make up`, `make test-e2e`, and `make test-stack` call it automatically.
 ### `compose/ps.sh`
 
 Resolves the selected Compose project and prints only its containers in a
-terminal-friendly status table. `make ps PRESET=<preset>` is the normal entry
-point. Containers with more than two published bindings, such as Gluetun, stack
-their ports on aligned continuation lines so the table does not spill across a
-wide terminal.
+terminal-friendly status table. Equivalent IPv4 and IPv6 wildcard bindings are
+collapsed, and each distinct published port receives an aligned continuation
+line. `make ps PRESET=<preset>` is the normal entry point.
 
 ### `compose/restart.sh`
 

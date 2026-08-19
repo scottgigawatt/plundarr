@@ -56,7 +56,7 @@ require_option_argument() {
 }
 
 #
-# format_status_table: Align Compose status rows and stack crowded port lists.
+# format_status_table: Align status rows and stack concise published port lists.
 #
 # Parameters: None. Reads tab-separated Compose status rows from standard input.
 #
@@ -68,7 +68,7 @@ format_status_table() {
             name_width = length("NAME")
             service_width = length("SERVICE")
             status_width = length("STATUS")
-            stack_threshold = 2
+            stack_threshold = 1
         }
 
         {
@@ -76,7 +76,21 @@ format_status_table() {
             names[row_count] = $1
             services[row_count] = $2
             statuses[row_count] = $3
-            port_lists[row_count] = $4
+            raw_port_count = split($4, raw_ports, /,[[:space:]]*/)
+            port_lists[row_count] = ""
+            for (raw_port = 1; raw_port <= raw_port_count; raw_port++) {
+                normalized_port = raw_ports[raw_port]
+                sub(/^0\.0\.0\.0:/, "", normalized_port)
+                sub(/^\[::\]:/, "", normalized_port)
+                port_key = row_count SUBSEP normalized_port
+                if (normalized_port == "" || seen_ports[port_key]++) {
+                    continue
+                }
+                if (port_lists[row_count] != "") {
+                    port_lists[row_count] = port_lists[row_count] ", "
+                }
+                port_lists[row_count] = port_lists[row_count] normalized_port
+            }
 
             if (length($1) > name_width) {
                 name_width = length($1)

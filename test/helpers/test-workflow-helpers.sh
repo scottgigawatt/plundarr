@@ -17,7 +17,7 @@
 set -eu
 
 #
-# Default test settings. MARAUDARR_TEST_OUTPUT can move generated charts to a
+# Resolve the repository root and isolate every generated test artifact.
 #
 REPOSITORY_ROOT=$(CDPATH='' cd -- "$(dirname -- "$0")/../.." && pwd)
 TEST_ROOT=$(mktemp -d)
@@ -164,6 +164,9 @@ run_registry_helper -v
 #
 grep -F -- 'copy --all --preserve-digests' "${SKOPEO_LOG}" >/dev/null
 grep -F -- 'docker://docker.io/test/maraudarr:sha-test' "${SKOPEO_LOG}" >/dev/null
-grep -F -- 'inspect --creds' "${SKOPEO_LOG}" >/dev/null
+grep -F -- 'inspect --creds test-user:test-token --format {{.Digest}} docker://ghcr.io/test/maraudarr:edge' "${SKOPEO_LOG}" >/dev/null
+grep -F -- 'inspect --creds test-user:test-token --format {{.Digest}} docker://docker.io/test/maraudarr:edge' "${SKOPEO_LOG}" >/dev/null
+grep -F -- 'inspect --creds test-user:test-token --format {{.Digest}} docker://ghcr.io/test/maraudarr:sha-test' "${SKOPEO_LOG}" >/dev/null
+grep -F -- 'inspect --creds test-user:test-token --format {{.Digest}} docker://docker.io/test/maraudarr:sha-test' "${SKOPEO_LOG}" >/dev/null
 
 echo "Workflow helper tests passed."

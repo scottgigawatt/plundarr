@@ -18,7 +18,7 @@
 - [ ] `make config PRESET=<preset>` if generated Compose changed
 - [ ] `make env PRESET=<preset>` if the generated `.env` shape changed
 - [ ] `make build` if the Maraudarr image or build context changed
-- [ ] `make test-image` if the Maraudarr container contract changed
+- [ ] `make test-image` if runtime dependencies or the container contract changed
 - [ ] `make build-platforms` if image dependencies or build stages changed
 - [ ] `make test-vpn` if validating an already-running Privateerr/Gluetun pair
 - [ ] `make test-e2e` if VPN, Privateerr, Gluetun, or downloader behavior changed
