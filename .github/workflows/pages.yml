@@ -75,6 +75,9 @@ jobs:
           cache: pip
           cache-dependency-path: requirements-docs.txt
 
+      #
+      # Install only exact, hash-verified documentation dependencies.
+      #
       - name: "Load the Documentation Tools 🧰"
         run: make docs-install
 

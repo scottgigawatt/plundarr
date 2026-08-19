@@ -117,7 +117,7 @@
             "matchManagers": ["docker-compose", "dockerfile", "custom.regex"]
         },
         {
-            "description": "Keep Maraudarr Python dependencies pinned exactly",
+            "description": "Keep Python dependencies exact and hash-verified",
             "matchManagers": ["pep621", "pip_requirements"],
             "rangeStrategy": "pin"
         }

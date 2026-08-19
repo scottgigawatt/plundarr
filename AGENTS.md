@@ -89,6 +89,8 @@ Bash.
 Keep Makefile variables centralized near the top. User-facing targets may use
 light pirate humor, but errors must identify the problem and corrective action.
 Every target should have the established framed comment and dependency notes.
+Keep `requirements-docs.txt` exact and SHA-256 hash-verified, and require pip's
+hash-checking mode whenever Make installs the documentation toolchain.
 
 ## Generated Files And Secrets
 

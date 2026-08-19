@@ -812,16 +812,17 @@ $(DOCS_PYTHON_TARGET):
 	}
 
 #
-# $(DOCS_INSTALL_STAMP): Installs the pinned developer documentation toolchain
-#                        when its requirements change.
+# $(DOCS_INSTALL_STAMP): Installs the hash-verified developer documentation
+#                        toolchain when its requirements change.
 #
 # Dependencies:
-#   $(DOCS_REQUIREMENTS) - Declare the pinned documentation packages.
+#   $(DOCS_REQUIREMENTS) - Declare exact, hash-verified documentation packages.
 #   $(DOCS_PYTHON_TARGET) - Provide the isolated Python environment.
 #
 $(DOCS_INSTALL_STAMP): $(DOCS_REQUIREMENTS) | $(DOCS_PYTHON_TARGET)
-	$(call announce,📦 Installing pinned developer documentation tools...)
-	@$(DOCS_PYTHON) -m pip install --disable-pip-version-check --requirement "$(DOCS_REQUIREMENTS)"
+	$(call announce,📦 Installing hash-verified developer documentation tools...)
+	@$(DOCS_PYTHON) -m pip install --disable-pip-version-check --require-hashes \
+		--requirement "$(DOCS_REQUIREMENTS)"
 	@touch "$(DOCS_INSTALL_STAMP)"
 
 #

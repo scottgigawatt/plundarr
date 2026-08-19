@@ -9,8 +9,8 @@
 name: "Inspect the Crow's Nest 🦜"
 
 #
-# Re-evaluate repository policy changes, security workflow changes, the weekly
-# schedule, and explicit maintainer requests against the current default branch.
+# Re-evaluate repository policy, workflow, and build-dependency changes plus the
+# weekly schedule and explicit maintainer requests against the default branch.
 #
 on:
   branch_protection_rule:
@@ -19,8 +19,11 @@ on:
       - main
     paths:
       - ".github/workflows/**"
-      - ".github/renovate.json"
-      - "renovate.json"
+      - ".github/renovate.json5"
+      - "Makefile"
+      - "docker/Dockerfile"
+      - "docker/requirements.txt"
+      - "requirements-docs.txt"
   schedule:
     - cron: "29 8 * * 1"
   workflow_dispatch:
