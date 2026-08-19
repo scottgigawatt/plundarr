@@ -8,7 +8,7 @@ fragments through aggregate files.
 
 Create this structure:
 
-> [!EXAMPLE]
+> [!TIP]
 >
 > ```text
 > docker/services/example/
@@ -21,7 +21,7 @@ Create this structure:
 
 Then add one explicit table to `docker/catalog/catalog.toml`:
 
-> [!EXAMPLE]
+> [!TIP]
 >
 > ```toml
 > # Describe the service's role immediately above its catalog table.
@@ -80,7 +80,7 @@ passes `docker compose config --quiet`.
 
 Before publishing, run:
 
-> [!EXAMPLE]
+> [!IMPORTANT]
 >
 > ```sh
 > make test

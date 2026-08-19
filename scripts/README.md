@@ -43,7 +43,7 @@ line. `make ps PRESET=<preset>` is the normal entry point.
 Waits for Docker, stops a Compose project while preserving named volumes, and
 starts the project again in detached mode.
 
-> [!EXAMPLE]
+> [!TIP]
 >
 > ```sh
 > sh /volume1/docker/plundarr/scripts/compose/restart.sh /volume1/docker/plundarr/dist/plundarr
@@ -56,7 +56,7 @@ starts the project again in detached mode.
 Raises Linux inotify limits so Plex can monitor large media libraries without
 running out of watches.
 
-> [!EXAMPLE]
+> [!TIP]
 >
 > ```sh
 > sh /volume1/docker/plundarr/scripts/linux/set-inotify-limits.sh
@@ -68,7 +68,7 @@ running out of watches.
 
 Ensures `/dev/net/tun` exists for Gluetun and other VPN containers.
 
-> [!EXAMPLE]
+> [!TIP]
 >
 > ```sh
 > sh /volume1/docker/plundarr/scripts/synology/tun.sh
@@ -79,7 +79,7 @@ Ensures `/dev/net/tun` exists for Gluetun and other VPN containers.
 Mounts and starts Entware at boot, adds its profile to `/etc/profile`, and
 updates the package list.
 
-> [!EXAMPLE]
+> [!TIP]
 >
 > ```sh
 > sh /volume1/docker/plundarr/scripts/synology/entware.sh
@@ -94,7 +94,7 @@ control of the NAS through Docker.
 Create a `docker` group in **DSM → Control Panel → User & Group → Group**, add
 only trusted Docker users, and run the boot task as `root`:
 
-> [!EXAMPLE]
+> [!TIP]
 >
 > ```sh
 > sh /volume1/docker/plundarr/scripts/synology/docker-socket.sh

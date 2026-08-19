@@ -42,7 +42,7 @@ scrolls. 🏴‍☠️
 
 To archive the selected config hold before a reset, run:
 
-> [!EXAMPLE]
+> [!TIP]
 >
 > ```sh
 > make backup PRESET=<preset>

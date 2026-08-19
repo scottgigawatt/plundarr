@@ -54,7 +54,7 @@ available. No pull-skip variable be needed.
 
 Refresh or rebuild Maraudarr explicitly when ye want a different image:
 
-> [!EXAMPLE]
+> [!TIP]
 >
 > ```sh
 > make pull-image
@@ -63,7 +63,7 @@ Refresh or rebuild Maraudarr explicitly when ye want a different image:
 
 Add optional cargo without opening the interactive prompts:
 
-> [!EXAMPLE]
+> [!TIP]
 >
 > ```sh
 > make ship PRESET=boudoirr ADD_SERVICES=jellyfin
@@ -79,7 +79,7 @@ NZBGet, and Watchtower remain ordinary opt-in choices:
 The first command selects Usenet only. The second keeps torrents, adds Usenet,
 and opts into update checks:
 
-> [!EXAMPLE]
+> [!TIP]
 >
 > ```sh
 > make ship REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=sabnzbd
@@ -153,7 +153,7 @@ critical image vulnerabilities.
 
 Run host-side tests while editing Python or service charts:
 
-> [!EXAMPLE]
+> [!TIP]
 >
 > ```sh
 > make test-unit
@@ -161,7 +161,7 @@ Run host-side tests while editing Python or service charts:
 
 Then fire the complete checks:
 
-> [!EXAMPLE]
+> [!IMPORTANT]
 >
 > ```sh
 > make test

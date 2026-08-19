@@ -9,7 +9,7 @@ the same chart. 🏴‍☠️
 
 Run the interactive generator from the cloned repository:
 
-> [!EXAMPLE]
+> [!TIP]
 >
 > ```sh
 > make configure
@@ -17,7 +17,7 @@ Run the interactive generator from the cloned repository:
 
 Or generate a known voyage directly:
 
-> [!EXAMPLE]
+> [!TIP]
 >
 > ```sh
 > make ship
@@ -34,7 +34,7 @@ SABnzbd, NZBGet, and Watchtower remain optional choices. Use
 For Usenet only, remove the default torrent client and its cleanup companion.
 To keep torrents and add Usenet plus update checks, leave the defaults intact:
 
-> [!EXAMPLE]
+> [!TIP]
 >
 > ```sh
 > make ship REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=sabnzbd

@@ -130,7 +130,7 @@ The default Plundarr voyage uses qBittorrent and needs no setup questions.
 builds it from this checkout when no published image is available. It then
 generates the complete Plundarr project in `dist/plundarr/`:
 
-> [!EXAMPLE]
+> [!TIP]
 >
 > ```sh
 > git clone https://github.com/scottgigawatt/plundarr.git
@@ -175,7 +175,7 @@ Maraudarr writes only settings used by the selected services:
 
 When the chart looks shipshape, launch the complete fleet in one shot:
 
-> [!EXAMPLE]
+> [!TIP]
 >
 > ```sh
 > make up
@@ -185,7 +185,7 @@ When the chart looks shipshape, launch the complete fleet in one shot:
 
 Open Maraudarr's full interactive voyage through Make:
 
-> [!EXAMPLE]
+> [!TIP]
 >
 > ```sh
 > make configure
@@ -195,7 +195,7 @@ Choose a preset from the 🗺️ Treasure Map above, inspect its default cargo, 
 
 #### 🗺️ Inspect Presets and Services
 
-> [!EXAMPLE]
+> [!TIP]
 >
 > ```sh
 > make presets
@@ -204,7 +204,7 @@ Choose a preset from the 🗺️ Treasure Map above, inspect its default cargo, 
 
 #### 🎞️ Generate a Standalone Media Server
 
-> [!EXAMPLE]
+> [!TIP]
 >
 > ```sh
 > make ship PRESET=jellyfin
@@ -213,7 +213,7 @@ Choose a preset from the 🗺️ Treasure Map above, inspect its default cargo, 
 
 #### 🧩 Add Common Extras
 
-> [!EXAMPLE]
+> [!TIP]
 >
 > ```sh
 > make ship PRESET=boudoirr ADD_SERVICES=jellyfin
@@ -223,7 +223,7 @@ Choose a preset from the 🗺️ Treasure Map above, inspect its default cargo, 
 
 #### 📰 Use Usenet Instead of Torrents
 
-> [!EXAMPLE]
+> [!TIP]
 >
 > ```sh
 > make ship REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=nzbget
@@ -231,7 +231,7 @@ Choose a preset from the 🗺️ Treasure Map above, inspect its default cargo, 
 
 #### 🔭 Add Update Checks
 
-> [!EXAMPLE]
+> [!TIP]
 >
 > ```sh
 > make ship PRESET=boudoirr ADD_SERVICES=sabnzbd,watchtower
@@ -272,7 +272,7 @@ Read the Synology setup scroll before the first voyage:
 
 Useful test voyages:
 
-> [!EXAMPLE]
+> [!TIP]
 >
 > ```sh
 > make test
@@ -288,7 +288,7 @@ Useful test voyages:
 
 ### 🧹 Clear Developer Artifacts
 
-> [!EXAMPLE]
+> [!TIP]
 >
 > ```sh
 > make clean

@@ -5,7 +5,7 @@ for generator, image, workflow, or documentation changes.
 
 ## Unit Tests
 
-> [!EXAMPLE]
+> [!TIP]
 >
 > ```sh
 > make test-unit
@@ -18,7 +18,7 @@ not hide source behavior.
 
 ## Generation Matrix
 
-> [!EXAMPLE]
+> [!TIP]
 >
 > ```sh
 > make test
@@ -35,7 +35,7 @@ project/service/tag container names, and published ports collision-free.
 
 ## Workflow Helpers
 
-> [!EXAMPLE]
+> [!TIP]
 >
 > ```sh
 > make test-workflows
@@ -48,7 +48,7 @@ contacts Discord or either container registry.
 
 ## Image Builds
 
-> [!EXAMPLE]
+> [!TIP]
 >
 > ```sh
 > make build
@@ -67,7 +67,7 @@ Docker Compose. The final command verifies every published CPU architecture:
 
 Build the warning-free site or start a local preview:
 
-> [!EXAMPLE]
+> [!TIP]
 >
 > ```sh
 > make docs
@@ -83,7 +83,7 @@ the same strict build and publishes a fresh artifact from `main`.
 
 Finish with:
 
-> [!EXAMPLE]
+> [!IMPORTANT]
 >
 > ```sh
 > pre-commit run --all-files

@@ -28,7 +28,7 @@ Questionable cargo includes:
 
 ## Local Setup 🛠️
 
-> [!EXAMPLE]
+> [!TIP]
 >
 > ```sh
 > git clone git@github.com:scottgigawatt/plundarr.git
@@ -40,7 +40,7 @@ Edit `dist/plundarr/.env` with yer own values. Keep that file private.
 
 Useful commands:
 
-> [!EXAMPLE]
+> [!TIP]
 >
 > ```sh
 > make help
@@ -69,8 +69,9 @@ Generated-stack checks such as `make config`, `make env`, `make up`,
 - Shell scripts should use four spaces for indentation.
 - Shell functions document their purpose, parameters, and return behavior.
 - Copyable Markdown commands use `sh` fences without a shell prompt.
-- Teaching examples wrap copyable commands in an `[!EXAMPLE]` callout and keep
-  explanatory comments outside the code fence.
+- Helpful teaching examples wrap copyable commands in a `[!TIP]` callout.
+  Required sequences use `[!IMPORTANT]`, while risky commands use `[!CAUTION]`.
+  Keep explanatory comments outside the code fence.
 - YAML and TOML use two-space indentation; Python, shell, and JSON use four.
 - Docker Compose values should come from the selected preset's `.env` instead
   of inline fallback soup.

@@ -53,11 +53,12 @@ Use GitHub callouts where they improve scanning:
 - `[!IMPORTANT]`
 - `[!WARNING]`
 - `[!CAUTION]`
-- `[!EXAMPLE]`
 
-Put copyable command examples inside `[!EXAMPLE]` callouts when the surrounding
-section is teaching a command sequence. Keep explanations outside the code
-fence and do not add prompt characters or prose comments inside those examples.
+Put helpful copyable command examples inside `[!TIP]` callouts when the
+surrounding section is teaching a command sequence. Use `[!IMPORTANT]` for
+required command sequences and `[!CAUTION]` when commands carry meaningful
+risk. Keep explanations outside the code fence and do not add prompt characters
+or prose comments inside those examples.
 
 ## Code Comment Style
 
