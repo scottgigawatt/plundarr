@@ -16,13 +16,22 @@
 #
 set -eu
 
+#
+# Ensure that the PLUNDARR_TEST_LOG environment variable is set.
+#
 : "${PLUNDARR_TEST_LOG:?PLUNDARR_TEST_LOG is required}"
 
+#
+# Report Docker Compose availability without contacting a daemon.
+#
 if [ "$#" -ge 2 ] && [ "$1" = "compose" ] && [ "$2" = "version" ]; then
     echo "Docker Compose test stub"
     exit 0
 fi
 
+#
+# Record the invocation and return a stable Compose status table.
+#
 printf '%s\n' "$*" >"${PLUNDARR_TEST_LOG}"
 printf '%s\n' \
     "NAMES                         SERVICE      STATUS          PORTS" \

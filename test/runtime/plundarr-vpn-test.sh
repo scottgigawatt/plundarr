@@ -173,18 +173,22 @@ wait_for_healthy_container() {
     service_name="$2"
     elapsed_seconds=0
 
+    # Wait for the container to become healthy, up to PLUNDARR_WAIT_SECONDS.
     while true; do
         health_status="$(docker inspect -f '{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' "${container_id}")"
 
+        # If the container is healthy, return success.
         if [[ "${health_status}" == "healthy" ]]; then
             return 0
         fi
 
+        # If the timeout has been reached, log an error and exit.
         if [[ "${elapsed_seconds}" -ge "${PLUNDARR_WAIT_SECONDS}" ]]; then
             log "${service_name} health is ${health_status}, expected healthy."
             exit 1
         fi
 
+        # Log the current health status and wait before checking again.
         log "Waiting for ${service_name} health: ${health_status}."
         sleep 2
         elapsed_seconds=$((elapsed_seconds + 2))
@@ -203,6 +207,8 @@ json_value() {
     json_payload="$1"
     json_key="$2"
 
+    # Extract the requested value with the minimal tools available in the
+    # runtime container.
     printf '%s\n' "${json_payload}" \
         | grep -o "\"${json_key}\"[[:space:]]*:[[:space:]]*\"[^\"]*\"\\|\"${json_key}\"[[:space:]]*:[[:space:]]*true\\|\"${json_key}\"[[:space:]]*:[[:space:]]*false\\|\"${json_key}\"[[:space:]]*:[[:space:]]*[0-9][0-9]*" \
         | head -n 1 \

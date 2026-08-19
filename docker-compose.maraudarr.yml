@@ -26,6 +26,7 @@ services:
         MARAUDARR_BIN_HOME: ${MARAUDARR_BIN_HOME}  # Application install directory
         MARAUDARR_UID: ${MARAUDARR_UID}            # Default unprivileged runtime user ID
         MARAUDARR_GID: ${MARAUDARR_GID}            # Default unprivileged runtime group ID
+        MARAUDARR_GROUP: ${MARAUDARR_GROUP}        # Default unprivileged runtime group name
         IMAGE_CREATED: ${IMAGE_CREATED}            # OCI image creation timestamp
         IMAGE_REVISION: ${IMAGE_REVISION}          # OCI source revision
         IMAGE_VERSION: ${MARAUDARR_TAG}            # OCI image version

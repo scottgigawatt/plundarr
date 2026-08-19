@@ -97,6 +97,7 @@ ARG ALPINE_TAG=3.24@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6e
 ARG MARAUDARR_BIN_HOME=/maraudarr
 ARG MARAUDARR_UID=1000
 ARG MARAUDARR_GID=1000
+ARG MARAUDARR_GROUP=maraudarr
 ARG IMAGE_CREATED=unknown
 ARG IMAGE_REVISION=unknown
 ARG IMAGE_VERSION=latest
@@ -160,8 +161,8 @@ COPY maraudarr-entrypoint.sh ${MARAUDARR_BIN_HOME}/maraudarr-entrypoint.sh
 # Create the configurable unprivileged runtime account and secure the
 # project-owned entrypoint.
 #
-RUN addgroup -S -g "${MARAUDARR_GID}" maraudarr && \
-    adduser -S -D -H -u "${MARAUDARR_UID}" -G maraudarr maraudarr && \
+RUN addgroup -S -g "${MARAUDARR_GID}" "${MARAUDARR_GROUP}" && \
+    adduser -S -D -H -u "${MARAUDARR_UID}" -G "${MARAUDARR_GROUP}" maraudarr && \
     chmod +x "${MARAUDARR_BIN_HOME}/maraudarr-entrypoint.sh"
 
 #

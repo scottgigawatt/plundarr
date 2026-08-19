@@ -112,7 +112,7 @@ The published image and Make targets use a deliberately narrow runtime:
 
 | Guardrail                | Behavior                                                                  |
 | ------------------------ | ------------------------------------------------------------------------- |
-| 👤 Unprivileged identity | Image UID and GID are configurable; Make uses the invoking host user      |
+| 👤 Unprivileged identity | Image UID, GID, and group name are configurable; Make uses the invoking host user |
 | 🔒 Read-only image       | Only the mounted repository and `/tmp` are writable                       |
 | 🌐 No network            | Generation runs with `--network none`                                     |
 | ✂️ No capabilities       | Every optional Linux capability is dropped                                |
