@@ -103,9 +103,10 @@ characters. Reserve `bash` for Bash-only syntax and `console` for real terminal
 transcripts. Generated environment fragments should give short, aligned
 end-of-line guidance for values novice operators need to change.
 
-Workflow YAML uses four-space indentation. Keep comments for non-obvious
-security, lifecycle, and integration decisions. Reusable workflow shell logic
-belongs in documented `.github` helpers instead of duplicated `run` blocks.
+All project-owned YAML, including GitHub Actions workflows, uses two-space
+indentation. Keep comments for non-obvious security, lifecycle, and integration
+decisions. Reusable workflow shell logic belongs in documented `.github`
+helpers instead of duplicated `run` blocks.
 
 ## Docker And Compose Rules
 

@@ -55,7 +55,7 @@ repos:
         pass_filenames: false
 
   #
-  # Enforce strict YAML style outside generated service template directories.
+  # Enforce strict two-space YAML outside generated service template directories.
   #
   - repo: https://github.com/adrienverge/yamllint
     rev: v1.38.0
@@ -64,7 +64,7 @@ repos:
         args:
           - "--strict"
           - "-d"
-          - "{extends: default, rules: {document-start: disable, line-length: disable, truthy: disable}}"
+          - "{extends: default, rules: {document-start: disable, indentation: {spaces: 2, indent-sequences: true}, line-length: disable, truthy: disable}}"
         exclude: ^docker/services/(?:homepage/config/|[^/]+/compose\.yml$)
 
   #

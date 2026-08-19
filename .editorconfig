@@ -19,9 +19,6 @@ indent_style = space
 [*.{md,yml,yaml}]
 indent_size = 2
 
-[.github/workflows/*.{yml,yaml}]
-indent_size = 4
-
 [*.{json,json5,py,sh,toml}]
 indent_size = 4
 

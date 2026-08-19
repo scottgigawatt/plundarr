@@ -76,23 +76,23 @@ payload="$(jq -n \
     --arg actor_label "${actor_label}" \
     --argjson color "${color}" \
     '{
-      username: $username,
-      embeds: [{
-        title: $title,
-        description: $description,
-        url: $url,
-        color: $color,
-        fields: [
-          {name: $repository_label, value: $repository, inline: true},
-          {name: "🌿 Ref", value: $ref, inline: true},
-          {name: $actor_label, value: $actor, inline: true},
-          {name: "🧱 Platforms", value: $platforms, inline: false},
-          {name: "📦 GHCR", value: $ghcr, inline: false},
-          {name: "🐳 Docker Hub", value: $dockerhub, inline: false}
-        ],
-        footer: {text: $footer},
-        timestamp: now | todate
-      }]
+        username: $username,
+        embeds: [{
+            title: $title,
+            description: $description,
+            url: $url,
+            color: $color,
+            fields: [
+                {name: $repository_label, value: $repository, inline: true},
+                {name: "🌿 Ref", value: $ref, inline: true},
+                {name: $actor_label, value: $actor, inline: true},
+                {name: "🧱 Platforms", value: $platforms, inline: false},
+                {name: "📦 GHCR", value: $ghcr, inline: false},
+                {name: "🐳 Docker Hub", value: $dockerhub, inline: false}
+            ],
+            footer: {text: $footer},
+            timestamp: now | todate
+        }]
     }')"
 
 #

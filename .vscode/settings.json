@@ -122,6 +122,7 @@
         "NOTIFIARR",
         "nzbget",
         "Ookla's",
+        "opencontainers",
         "openmeteo",
         "opkg",
         "oughta",
@@ -210,4 +211,33 @@
         "zipx"
     ],
     "makefile.configureOnOpen": false,
+    "[yaml]": {
+        "editor.detectIndentation": false,
+        "editor.tabSize": 2,
+        "editor.insertSpaces": true
+    },
+    "[github-actions-workflow]": {
+        "editor.detectIndentation": false,
+        "editor.tabSize": 2,
+        "editor.insertSpaces": true
+    },
+    "yaml.customTags": [
+        "tag:yaml.org,2002:python/name:pymdownx.superfences.fence_code_format"
+    ],
+    "yaml.format.enable": true,
+    "yaml.schemaStore.enable": true,
+    "yaml.schemas": {
+        "https://json.schemastore.org/github-workflow.json": [
+            "**/.github/workflows/*.yml",
+            "**/.github/workflows/*.yaml"
+        ],
+        "https://squidfunk.github.io/mkdocs-material/schema.json": "mkdocs.yml",
+        "https://raw.githubusercontent.com/compose-spec/compose-spec/main/schema/compose-spec.json": [
+            "**/docker-compose*.yml",
+            "**/docker-compose*.yaml",
+            "docker/templates/compose.yml"
+        ],
+        "https://json.schemastore.org/pre-commit-config.json": ".pre-commit-config.yaml"
+    },
+    "yaml.validate": true
 }

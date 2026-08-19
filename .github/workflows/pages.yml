@@ -13,77 +13,77 @@ name: "Publish the Developer Charts 📚🏴‍☠️"
 # maintainer explicitly requests a fresh deployment.
 #
 on:
-    push:
-        branches:
-            - main
-        paths:
-            - ".github/workflows/pages.yml"
-            - "docker/src/maraudarr/**"
-            - "docs/**"
-            - "mkdocs.yml"
-            - "requirements-docs.txt"
-    workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/pages.yml"
+      - "docker/src/maraudarr/**"
+      - "docs/**"
+      - "mkdocs.yml"
+      - "requirements-docs.txt"
+  workflow_dispatch:
 
 permissions:
-    contents: read
+  contents: read
 
 concurrency:
-    group: github-pages
-    cancel-in-progress: false
+  group: github-pages
+  cancel-in-progress: false
 
 jobs:
-    #
-    # Build one immutable static artifact before entering the deployment
-    # environment with Pages write permissions.
-    #
-    build:
-        name: "Draw the Developer Charts 🗺️"
-        runs-on: ubuntu-latest
-        permissions:
-            contents: read
+  #
+  # Build one immutable static artifact before entering the deployment
+  # environment with Pages write permissions.
+  #
+  build:
+    name: "Draw the Developer Charts 🗺️"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
-        steps:
-            - name: "Grab the Source Charts 📖"
-              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
-              with:
-                  persist-credentials: false
+    steps:
+      - name: "Grab the Source Charts 📖"
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
 
-            - name: "Ready the Python Quill 🪶"
-              uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7
-              with:
-                  python-version: "3.14"
-                  cache: pip
-                  cache-dependency-path: requirements-docs.txt
+      - name: "Ready the Python Quill 🪶"
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: requirements-docs.txt
 
-            - name: "Load the Documentation Tools 🧰"
-              run: pip install --requirement requirements-docs.txt
+      - name: "Load the Documentation Tools 🧰"
+        run: pip install --requirement requirements-docs.txt
 
-            - name: "Configure the Pages Harbor ⚓"
-              uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d  # v6
+      - name: "Configure the Pages Harbor ⚓"
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d  # v6
 
-            - name: "Render Every Developer Chart 🔎"
-              run: mkdocs build --strict
+      - name: "Render Every Developer Chart 🔎"
+        run: mkdocs build --strict
 
-            - name: "Crate the Static Site 📦"
-              uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9  # v5
-              with:
-                  path: site
+      - name: "Crate the Static Site 📦"
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9  # v5
+        with:
+          path: site
 
-    #
-    # Deploy only the artifact created by the read-only build job.
-    #
-    deploy:
-        name: "Raise the Developer Pages Flag 🚩"
-        needs: build
-        runs-on: ubuntu-latest
-        permissions:
-            pages: write
-            id-token: write
-        environment:
-            name: github-pages
-            url: ${{ steps.deployment.outputs.page_url }}
+  #
+  # Deploy only the artifact created by the read-only build job.
+  #
+  deploy:
+    name: "Raise the Developer Pages Flag 🚩"
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
 
-        steps:
-            - name: "Publish the Developer Charts 🚀"
-              id: deployment
-              uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128  # v5
+    steps:
+      - name: "Publish the Developer Charts 🚀"
+        id: deployment
+        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128  # v5

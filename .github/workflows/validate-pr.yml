@@ -13,132 +13,132 @@ name: "Inspect the Boarding Pass 🧪🏴‍☠️"
 # broad path rule makes this the repository's dependable merge gate.
 #
 on:
-    pull_request:
-        branches:
-            - main
-        paths:
-            - "**"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "**"
 
 permissions:
-    contents: read
+  contents: read
 
 jobs:
-    #
-    # Exercise source generation, runtime hardening, multi-architecture builds,
-    # vulnerability policy, and repository linting in one read-only job.
-    #
-    validate-pr:
-        name: "Validate the Plundarr and Maraudarr Charts 🧭"
-        runs-on: ubuntu-latest
-        permissions:
-            contents: read
+  #
+  # Exercise source generation, runtime hardening, multi-architecture builds,
+  # vulnerability policy, and repository linting in one read-only job.
+  #
+  validate-pr:
+    name: "Validate the Plundarr and Maraudarr Charts 🧭"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
-        steps:
-            #
-            # Check out without persistent credentials and prepare emulation plus
-            # Buildx before any architecture-sensitive validation begins.
-            #
-            - name: "Grab the Treasure Map 🗺️"
-              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
-              with:
-                  persist-credentials: false
+    steps:
+      #
+      # Check out without persistent credentials and prepare emulation plus
+      # Buildx before any architecture-sensitive validation begins.
+      #
+      - name: "Grab the Treasure Map 🗺️"
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
 
-            - name: "Summon Cross-Arch Cannons 🧨"
-              uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8  # v4
+      - name: "Summon Cross-Arch Cannons 🧨"
+        uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8  # v4
 
-            - name: "Sharpen the Build Axe 🪓"
-              uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c  # v4.2.0
+      - name: "Sharpen the Build Axe 🪓"
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c  # v4.2.0
 
-            #
-            # Validate Maraudarr's unit, image-fallback, and representative
-            # Compose generation tests.
-            #
-            - name: "Test Maraudarr's Charts 🧰"
-              run: make test-maraudarr
+      #
+      # Validate Maraudarr's unit, image-fallback, and representative
+      # Compose generation tests.
+      #
+      - name: "Test Maraudarr's Charts 🧰"
+        run: make test-maraudarr
 
-            #
-            # Build the publishable image shape, then run it with the same
-            # read-only, networkless, unprivileged contract promised to users.
-            #
-            - name: "Build the Published Maraudarr Shape 📦"
-              run: |
-                  docker build \
-                    --pull \
-                    --tag maraudarr:pr \
-                    --file docker/Dockerfile \
-                    docker
+      #
+      # Build the publishable image shape, then run it with the same
+      # read-only, networkless, unprivileged contract promised to users.
+      #
+      - name: "Build the Published Maraudarr Shape 📦"
+        run: |
+          docker build \
+            --pull \
+            --tag maraudarr:pr \
+            --file docker/Dockerfile \
+            docker
 
-            - name: "Smoke-Test Containerized Maraudarr ⚓"
-              run: |
-                  mkdir -p "${RUNNER_TEMP}/plundarr-output"
-                  docker run \
-                    --rm \
-                    --read-only \
-                    --network none \
-                    --cap-drop ALL \
-                    --security-opt no-new-privileges:true \
-                    --tmpfs /tmp:rw,noexec,nosuid,size=64m \
-                    --user "$(id -u):$(id -g)" \
-                    --mount "type=bind,src=${RUNNER_TEMP}/plundarr-output,dst=/output" \
-                    maraudarr:pr \
-                    --plain build --preset boudoirr
-                  test -s "${RUNNER_TEMP}/plundarr-output/dist/boudoirr/config/README.md"
-                  docker compose \
-                    --env-file "${RUNNER_TEMP}/plundarr-output/dist/boudoirr/.env" \
-                    -f "${RUNNER_TEMP}/plundarr-output/dist/boudoirr/docker-compose.yml" \
-                    config \
-                    --quiet
+      - name: "Smoke-Test Containerized Maraudarr ⚓"
+        run: |
+          mkdir -p "${RUNNER_TEMP}/plundarr-output"
+          docker run \
+            --rm \
+            --read-only \
+            --network none \
+            --cap-drop ALL \
+            --security-opt no-new-privileges:true \
+            --tmpfs /tmp:rw,noexec,nosuid,size=64m \
+            --user "$(id -u):$(id -g)" \
+            --mount "type=bind,src=${RUNNER_TEMP}/plundarr-output,dst=/output" \
+            maraudarr:pr \
+            --plain build --preset boudoirr
+          test -s "${RUNNER_TEMP}/plundarr-output/dist/boudoirr/config/README.md"
+          docker compose \
+            --env-file "${RUNNER_TEMP}/plundarr-output/dist/boudoirr/.env" \
+            -f "${RUNNER_TEMP}/plundarr-output/dist/boudoirr/docker-compose.yml" \
+            config \
+            --quiet
 
-            #
-            # Prove every supported target architecture builds before enforcing
-            # the repository's HIGH and CRITICAL vulnerability threshold.
-            #
-            - name: "Test the Three-Deck Hull Plan 🛠️"
-              run: make build-multiarch
+      #
+      # Prove every supported target architecture builds before enforcing
+      # the repository's HIGH and CRITICAL vulnerability threshold.
+      #
+      - name: "Test the Three-Deck Hull Plan 🛠️"
+        run: make build-multiarch
 
-            - name: "Scan Maraudarr for Bilge Rot 🔍"
-              uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25  # v0.36.0
-              with:
-                  image-ref: maraudarr:pr
-                  format: table
-                  vuln-type: os,library
-                  severity: CRITICAL,HIGH
-                  ignore-unfixed: true
-                  trivyignores: .trivyignore.yaml
-                  exit-code: 1
+      - name: "Scan Maraudarr for Bilge Rot 🔍"
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25  # v0.36.0
+        with:
+          image-ref: maraudarr:pr
+          format: table
+          vuln-type: os,library
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          trivyignores: .trivyignore.yaml
+          exit-code: 1
 
-            #
-            # Finish with all repository formatting, secret, workflow, YAML, and
-            # shell checks so generated artifacts cannot hide basic quality drift.
-            #
-            - name: "Fire the Pre-Commit Cannons 💥"
-              uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd  # v3.0.1
+      #
+      # Finish with all repository formatting, secret, workflow, YAML, and
+      # shell checks so generated artifacts cannot hide basic quality drift.
+      #
+      - name: "Fire the Pre-Commit Cannons 💥"
+        uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd  # v3.0.1
 
-    #
-    # Build the source-derived Python reference separately so documentation
-    # dependencies never enter the published Maraudarr runtime image.
-    #
-    validate-docs:
-        name: "Validate the Developer Charts 📚"
-        runs-on: ubuntu-latest
-        permissions:
-            contents: read
+  #
+  # Build the source-derived Python reference separately so documentation
+  # dependencies never enter the published Maraudarr runtime image.
+  #
+  validate-docs:
+    name: "Validate the Developer Charts 📚"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
-        steps:
-            - name: "Grab the Source Charts 📖"
-              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
-              with:
-                  persist-credentials: false
+    steps:
+      - name: "Grab the Source Charts 📖"
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
 
-            - name: "Ready the Python Quill 🪶"
-              uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7
-              with:
-                  python-version: "3.14"
-                  cache: pip
-                  cache-dependency-path: requirements-docs.txt
+      - name: "Ready the Python Quill 🪶"
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: requirements-docs.txt
 
-            - name: "Load the Documentation Tools 🧰"
-              run: pip install --requirement requirements-docs.txt
+      - name: "Load the Documentation Tools 🧰"
+        run: pip install --requirement requirements-docs.txt
 
-            - name: "Render Every Developer Chart 🔎"
-              run: mkdocs build --strict
+      - name: "Render Every Developer Chart 🔎"
+        run: mkdocs build --strict
