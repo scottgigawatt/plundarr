@@ -1,4 +1,16 @@
 {
+    //
+    // Copyright 2025-2026 Scott Gigawatt
+    //
+    // Licensed under the Apache License, Version 2.0.
+    //
+    // settings.json: Keep the Plundarr workspace aligned with repository
+    //                formatting, spelling, schema, and validation rules.
+    //
+
+    //
+    // Accept project names, dependencies, and intentional pirate vocabulary.
+    //
     "cSpell.words": [
         "addgroup",
         "adduser",
@@ -11,6 +23,8 @@
         "AUTOCONNECT",
         "automatin",
         "autoremove",
+        "Avenir",
+        "avoidin",
         "awaitin",
         "Bazarr",
         "blocklist",
@@ -75,6 +89,7 @@
         "guidin",
         "handlin",
         "hardlinks",
+        "headerlink",
         "healthcheck",
         "healthchecks",
         "helpin",
@@ -92,6 +107,7 @@
         "IPINFO",
         "JELLYFIN",
         "KEEPALIVE",
+        "keepends",
         "keepin",
         "lanczos",
         "Launchin",
@@ -155,6 +171,7 @@
         "PYTHONPATH",
         "PYTHONUNBUFFERED",
         "QBITTORRENT",
+        "qmark",
         "qmcgaw",
         "QUEUECLEANER",
         "quicklaunch",
@@ -219,12 +236,22 @@
         "yerself",
         "zipx"
     ],
+    //
+    // Keep Makefile Tools from inventing a configure step for this project.
+    //
     "makefile.configureOnOpen": false,
+
+    //
+    // Associate special repository files with their correct language modes.
+    //
     "files.associations": {
         ".secrets.baseline": "jsonc",
         "**/CODEOWNERS": "plaintext",
         "Dockerfile*": "dockerfile"
     },
+    //
+    // Mirror EditorConfig indentation while disabling VS Code auto-detection.
+    //
     "[dockerfile]": {
         "editor.detectIndentation": false,
         "editor.tabSize": 4,
@@ -271,11 +298,29 @@
         "editor.insertSpaces": true
     },
     "[toml]": {
+        "editor.defaultFormatter": "tamasfe.even-better-toml",
         "editor.detectIndentation": false,
-        "editor.tabSize": 4,
+        "editor.tabSize": 2,
         "editor.insertSpaces": true
     },
+
+    //
+    // Keep TOML formatting at two spaces and validate Python package metadata
+    // against SchemaStore through Even Better TOML.
+    //
+    "evenBetterToml.formatter.indentString": "  ",
+    "evenBetterToml.schema.associations": {
+        "(^|/)docker/pyproject\\.toml$": "https://json.schemastore.org/pyproject.json"
+    },
+
+    //
+    // Enable shell diagnostics for every project-owned helper.
+    //
     "shellcheck.enable": true,
+
+    //
+    // Teach the YAML extension about MkDocs' Python tag and repository schemas.
+    //
     "yaml.customTags": [
         "tag:yaml.org,2002:python/name:pymdownx.superfences.fence_code_format"
     ],

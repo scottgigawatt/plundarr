@@ -17,9 +17,9 @@ set -eu
 #
 # Test paths and the disposable image reference passed through Make.
 #
-REPOSITORY_ROOT=$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd)
+REPOSITORY_ROOT=$(CDPATH='' cd -- "$(dirname -- "$0")/../.." && pwd)
 TEST_ROOT=${MARAUDARR_IMAGE_TEST_ROOT:-/tmp/maraudarr-image-test}
-DOCKER_STUB="${REPOSITORY_ROOT}/test/maraudarr-image-docker-stub.sh"
+DOCKER_STUB="${REPOSITORY_ROOT}/test/stubs/maraudarr-image-docker-stub.sh"
 TEST_IMAGE="ghcr.io/scottgigawatt/maraudarr:test"
 
 #

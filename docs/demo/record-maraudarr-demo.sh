@@ -46,6 +46,7 @@ MARAUDARR_IMAGE="maraudarr:readme-demo-$$"
 # Returns: Always returns 0 so cleanup cannot hide the original result.
 #
 cleanup() {
+    # Stop the demonstration stack if it is still running.
     if [ -f "$DEMO_CHECKOUT/dist/plundarr/docker-compose.yml" ] && [ -f "$DEMO_CHECKOUT/dist/plundarr/.env" ]; then
         (
             cd "$DEMO_CHECKOUT/dist/plundarr"
@@ -54,6 +55,7 @@ cleanup() {
         ) >/dev/null 2>&1 || true
     fi
 
+    # Remove the disposable Maraudarr image and checkout.
     docker image rm --force "$MARAUDARR_IMAGE" >/dev/null 2>&1 || true
     rm -rf -- "$DEMO_ROOT"
 }
@@ -177,11 +179,23 @@ cd "$REPOSITORY_ROOT"
 vhs "$TAPE_PATH"
 
 #
-# Optimize the animation while preserving readable terminal text and timing.
+# Optimize the recorded animation for the repository's added-file size limit.
 #
 OPTIMIZED_ASSET=$(mktemp "$DEMO_ROOT/maraudarr-demo.XXXXXX.gif")
-gifsicle --optimize=3 --lossy=150 --colors 48 \
-    --resize-width 800 --resize-method lanczos3 \
+gifsicle \
+    --optimize=3 \
+    --lossy=150 \
+    --colors 48 \
+    --resize-width 800 \
+    --resize-method lanczos3 \
     --output "$OPTIMIZED_ASSET" "$ASSET_PATH"
+
+#
+# Move the optimized animation into the repository documentation assets.
+#
 mv "$OPTIMIZED_ASSET" "$ASSET_PATH"
+
+#
+# Set the optimized animation to be readable by all users.
+#
 chmod 0644 "$ASSET_PATH"

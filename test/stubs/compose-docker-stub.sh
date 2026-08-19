@@ -8,7 +8,7 @@
 # compose-docker-stub.sh: Stand in for the Docker CLI during Compose helper
 #                         tests without contacting a Docker daemon.
 #
-# Usage: PLUNDARR_TEST_LOG=<path> test/compose-docker-stub.sh compose <args>
+# Usage: PLUNDARR_TEST_LOG=<path> test/stubs/compose-docker-stub.sh compose <args>
 #
 
 #

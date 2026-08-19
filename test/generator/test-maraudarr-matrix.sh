@@ -19,7 +19,7 @@ set -eu
 # different temporary harbor when the default path is unavailable.
 #
 PYTHON_BIN=${PYTHON_BIN:-python3}
-REPOSITORY_ROOT=$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd)
+REPOSITORY_ROOT=$(CDPATH='' cd -- "$(dirname -- "$0")/../.." && pwd)
 TEST_ROOT=${MARAUDARR_TEST_OUTPUT:-/tmp/maraudarr-matrix}
 
 #

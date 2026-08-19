@@ -31,13 +31,13 @@ requires-python = "==3.14.7"
 license = "Apache-2.0"
 # Record the project maintainer in standard PEP 621 metadata.
 authors = [
-    { name = "Scott Gigawatt" },
+  { name = "Scott Gigawatt" },
 ]
 dependencies = [
-    # Interactive terminal prompts used by the configurator.
-    "questionary==2.1.1",
-    # Styled terminal output used by the command-line interface.
-    "rich==15.0.0",
+  # Interactive terminal prompts used by the configurator.
+  "questionary==2.1.1",
+  # Styled terminal output used by the command-line interface.
+  "rich==15.0.0",
 ]
 
 #

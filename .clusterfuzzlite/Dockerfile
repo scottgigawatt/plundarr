@@ -7,8 +7,9 @@
 #
 
 #
-# Use the official Python builder expected by ClusterFuzzLite. The digest keeps
-# the fuzzing toolchain deterministic while Renovate tracks future updates.
+# Stage 1 of 1: Build Maraudarr's Python fuzz targets with the official
+# ClusterFuzzLite builder. The digest keeps the toolchain deterministic while
+# Renovate tracks future updates.
 #
 FROM gcr.io/oss-fuzz-base/base-builder-python:v1@sha256:6b2b3a7e4a2da50de47f94925cffbe34747e1aae4f33d7f07ba6c681dd648b23
 

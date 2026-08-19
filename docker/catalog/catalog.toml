@@ -238,27 +238,27 @@ media_root = "/volume1/plex"
 media_libraries = ["movies", "tv", "anime"]
 host_port_offset = 0
 compose_summary = [
-    "docker-compose.yml: Docker Compose configuration for running Plundarr's",
-    "                    media service stack with Privateerr-generated PIA",
-    "                    WireGuard config, PIA port forwarding, Gluetun VPN",
-    "                    routing, and the 'arr' applications.",
-    "",
-    "This configuration sets up default properties for all containers, integrates",
-    "PIA with native WireGuard connections and port forwarding, and provides",
-    "environment-specific settings for a seamless VPN setup.",
+  "docker-compose.yml: Docker Compose configuration for running Plundarr's",
+  "                    media service stack with Privateerr-generated PIA",
+  "                    WireGuard config, PIA port forwarding, Gluetun VPN",
+  "                    routing, and the 'arr' applications.",
+  "",
+  "This configuration sets up default properties for all containers, integrates",
+  "PIA with native WireGuard connections and port forwarding, and provides",
+  "environment-specific settings for a seamless VPN setup.",
 ]
 core = [
-    "privateerr",
-    "gluetun",
-    "flaresolverr",
-    "prowlarr",
-    "radarr",
-    "sonarr",
-    "bazarr",
-    "seerr",
-    "speedtest-tracker",
-    "duplicati",
-    "homepage",
+  "privateerr",
+  "gluetun",
+  "flaresolverr",
+  "prowlarr",
+  "radarr",
+  "sonarr",
+  "bazarr",
+  "seerr",
+  "speedtest-tracker",
+  "duplicati",
+  "homepage",
 ]
 defaults = ["qbittorrent", "cleanuparr"]
 
@@ -277,14 +277,14 @@ media_root = "/volume1/jellyfin"
 media_libraries = ["movies", "scenes"]
 host_port_offset = 10000
 compose_summary = [
-    "docker-compose.yml: Docker Compose configuration for running Boudoirr's",
-    "                    adult-media service stack with Privateerr-generated PIA",
-    "                    WireGuard config, PIA port forwarding, Gluetun VPN",
-    "                    routing, and the supporting applications.",
-    "",
-    "This configuration sets up default properties for all containers, integrates",
-    "PIA with native WireGuard connections and port forwarding, and provides",
-    "environment-specific settings for a seamless VPN setup.",
+  "docker-compose.yml: Docker Compose configuration for running Boudoirr's",
+  "                    adult-media service stack with Privateerr-generated PIA",
+  "                    WireGuard config, PIA port forwarding, Gluetun VPN",
+  "                    routing, and the supporting applications.",
+  "",
+  "This configuration sets up default properties for all containers, integrates",
+  "PIA with native WireGuard connections and port forwarding, and provides",
+  "environment-specific settings for a seamless VPN setup.",
 ]
 core = ["privateerr", "gluetun", "flaresolverr", "prowlarr", "whisparr"]
 defaults = ["qbittorrent", "cleanuparr"]
@@ -304,11 +304,11 @@ media_root = "/volume1/jellyfin"
 media_libraries = ["movies", "tv"]
 host_port_offset = 20000
 compose_summary = [
-    "docker-compose.yml: Docker Compose configuration for running a standalone",
-    "                    Jellyfin media server on Plundarr's shared foundation.",
-    "",
-    "Jellyfin receives one writable /data mount containing the media libraries",
-    "and separate persistent configuration and cache directories.",
+  "docker-compose.yml: Docker Compose configuration for running a standalone",
+  "                    Jellyfin media server on Plundarr's shared foundation.",
+  "",
+  "Jellyfin receives one writable /data mount containing the media libraries",
+  "and separate persistent configuration and cache directories.",
 ]
 core = ["jellyfin"]
 defaults = []
@@ -328,11 +328,11 @@ media_root = "/volume1/plex"
 media_libraries = ["movies", "tv"]
 host_port_offset = 0
 compose_summary = [
-    "docker-compose.yml: Docker Compose configuration for running a standalone",
-    "                    Plex Media Server on Plundarr's shared foundation.",
-    "",
-    "Plex receives focused movie and television library mounts plus persistent",
-    "configuration and transcode directories.",
+  "docker-compose.yml: Docker Compose configuration for running a standalone",
+  "                    Plex Media Server on Plundarr's shared foundation.",
+  "",
+  "Plex receives focused movie and television library mounts plus persistent",
+  "configuration and transcode directories.",
 ]
 core = ["plex"]
 defaults = []
@@ -352,11 +352,11 @@ media_root = "/volume1/plex"
 media_libraries = ["movies", "tv"]
 host_port_offset = 30000
 compose_summary = [
-    "docker-compose.yml: Docker Compose configuration generated from Maraudarr's",
-    "                    selectable media service catalog.",
-    "",
-    "This configuration contains the services selected for this custom stack and",
-    "uses environment variables for settings that may change after deployment.",
+  "docker-compose.yml: Docker Compose configuration generated from Maraudarr's",
+  "                    selectable media service catalog.",
+  "",
+  "This configuration contains the services selected for this custom stack and",
+  "uses environment variables for settings that may change after deployment.",
 ]
 core = []
 defaults = []

@@ -42,6 +42,10 @@ Keep the category comments and add a concise comment immediately above every
 service and preset table so catalog readers can understand both the group and
 the entry's role without reading the renderer.
 
+All TOML in this build context uses two-space indentation for multi-line arrays.
+Comment every table and any dependency or metadata choice whose purpose is not
+obvious from its key.
+
 ## Rendering Rules
 
 Maraudarr preserves source comments and `${VARIABLES}`. Normal generation writes:
@@ -79,3 +83,7 @@ OCI release metadata must remain configurable through build arguments.
 
 The entrypoint must use `exec` so Maraudarr receives signals directly. The image
 is a short-lived tool and should not define a long-running healthcheck.
+
+Label every Dockerfile stage in order and comment each instruction group so the
+artifact, security boundary, and reason for the stage remain clear during
+review.

@@ -5,9 +5,9 @@
 #
 # Licensed under the Apache License, Version 2.0.
 #
-# compose-ps.sh: Display one Compose project's containers in a compact table.
+# ps.sh: Display one Compose project's containers in a compact table.
 #
-# Usage: scripts/compose-ps.sh --env-file <path> --compose-file <path> [options]
+# Usage: scripts/compose/ps.sh --env-file <path> --compose-file <path> [options]
 #
 
 compose_file=""

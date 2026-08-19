@@ -8,7 +8,7 @@
 # check-pia-credentials.sh: Validate resolved PIA credentials without sourcing
 #                           an environment file or printing secret values.
 #
-# Usage: docker compose config --environment | scripts/check-pia-credentials.sh
+# Usage: docker compose config --environment | scripts/compose/check-pia-credentials.sh
 #
 
 #

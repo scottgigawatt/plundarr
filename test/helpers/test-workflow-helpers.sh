@@ -8,7 +8,7 @@
 # test-workflow-helpers.sh: Validate Discord payload generation and registry
 #                           mirroring without messages or registry writes.
 #
-# Usage: test/test-workflow-helpers.sh
+# Usage: test/helpers/test-workflow-helpers.sh
 #
 
 #
@@ -19,7 +19,7 @@ set -eu
 #
 # Default test settings. MARAUDARR_TEST_OUTPUT can move generated charts to a
 #
-REPOSITORY_ROOT=$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd)
+REPOSITORY_ROOT=$(CDPATH='' cd -- "$(dirname -- "$0")/../.." && pwd)
 TEST_ROOT=$(mktemp -d)
 SKOPEO_LOG="${TEST_ROOT}/skopeo.log"
 
@@ -128,7 +128,7 @@ assert_json_value "${TEST_ROOT}/docs-failure.json" \
 #
 mkdir -p "${TEST_ROOT}/bin"
 sed "s|@SKOPEO_LOG@|${SKOPEO_LOG}|g" \
-    "${REPOSITORY_ROOT}/test/workflow-skopeo-stub.sh" \
+    "${REPOSITORY_ROOT}/test/stubs/workflow-skopeo-stub.sh" \
     > "${TEST_ROOT}/bin/skopeo"
 chmod +x "${TEST_ROOT}/bin/skopeo"
 

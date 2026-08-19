@@ -54,31 +54,37 @@ available. No pull-skip variable be needed.
 
 Refresh or rebuild Maraudarr explicitly when ye want a different image:
 
-```sh
-make pull-image
-make build
-```
+> [!EXAMPLE]
+>
+> ```sh
+> make pull-image
+> make build
+> ```
 
 Add optional cargo without opening the interactive prompts:
 
-```sh
-make ship PRESET=boudoirr ADD_SERVICES=jellyfin
-make ship PRESET=jellyfin
-make ship PRESET=plex
-make ship ADD_SERVICES=sonarr-anime
-```
+> [!EXAMPLE]
+>
+> ```sh
+> make ship PRESET=boudoirr ADD_SERVICES=jellyfin
+> make ship PRESET=jellyfin
+> make ship PRESET=plex
+> make ship ADD_SERVICES=sonarr-anime
+> ```
 
 `ADD_SERVICES` and `REMOVE_SERVICES` accept comma-separated service IDs.
 Plundarr and Boudoirr preselect qBittorrent as their only downloader; SABnzbd,
 NZBGet, and Watchtower remain ordinary opt-in choices:
 
-```sh
-# Usenet only
-make ship REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=sabnzbd
+The first command selects Usenet only. The second keeps torrents, adds Usenet,
+and opts into update checks:
 
-# Torrents and Usenet, with optional update checks
-make ship PRESET=boudoirr ADD_SERVICES=sabnzbd,watchtower
-```
+> [!EXAMPLE]
+>
+> ```sh
+> make ship REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=sabnzbd
+> make ship PRESET=boudoirr ADD_SERVICES=sabnzbd,watchtower
+> ```
 
 The default Plundarr voyage includes one Sonarr instance. `sonarr-anime` is an
 opt-in second instance with its own configuration and library path.
@@ -147,18 +153,22 @@ critical image vulnerabilities.
 
 Run host-side tests while editing Python or service charts:
 
-```sh
-make test-unit
-```
+> [!EXAMPLE]
+>
+> ```sh
+> make test-unit
+> ```
 
 Then fire the complete checks:
 
-```sh
-make test
-make build
-make build-platforms
-pre-commit run --all-files
-```
+> [!EXAMPLE]
+>
+> ```sh
+> make test
+> make build
+> make build-platforms
+> pre-commit run --all-files
+> ```
 
 > [!TIP]
 > New services belong under `services/<name>/`. Do not revive aggregate

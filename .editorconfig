@@ -9,6 +9,10 @@
 
 root = true
 
+#
+# Repository-wide text encoding, line endings, whitespace, and space-based
+# indentation defaults.
+#
 [*]
 charset = utf-8
 end_of_line = lf
@@ -16,20 +20,38 @@ insert_final_newline = true
 trim_trailing_whitespace = true
 indent_style = space
 
+#
+# Documentation and YAML use two-space indentation for compact nested content.
+#
 [*.{md,yml,yaml}]
 indent_size = 2
 
+#
+# Web assets use the conventional two-space project style.
+#
 [*.{css,js}]
 indent_size = 2
 
-[*.{json,json5,py,sh,toml}]
-indent_size = 4
-
-[.gitleaks.toml]
+#
+# TOML arrays and nested values use two-space indentation.
+#
+[*.toml]
 indent_size = 2
 
+#
+# JSON, Python, and shell source use four-space indentation.
+#
+[*.{json,json5,py,sh}]
+indent_size = 4
+
+#
+# Dockerfile continuations use four-space indentation.
+#
 [Dockerfile]
 indent_size = 4
 
+#
+# Make recipes require literal tabs.
+#
 [Makefile]
 indent_style = tab

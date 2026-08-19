@@ -236,14 +236,14 @@ DIRECT_WEB_PORTS  ?= \
 #
 # Testing commands.
 #
-PLUNDARR_VPN_TEST_CMD     ?= test/plundarr-vpn-test.sh
-PLUNDARR_STACK_WAIT_CMD   ?= test/plundarr-stack-wait.sh
-MARAUDARR_IMAGE_TEST_CMD  ?= test/test-maraudarr-image.sh
-WORKFLOW_HELPERS_TEST_CMD ?= test/test-workflow-helpers.sh
-MAKE_HELPERS_TEST_CMD     ?= test/test-make-helpers.sh
-MARAUDARR_SMOKE_CMD       ?= test/maraudarr-image-smoke.sh
-PLUNDARR_PS_CMD           ?= scripts/compose-ps.sh
-PIA_CREDENTIAL_CHECK_CMD  ?= scripts/check-pia-credentials.sh
+PLUNDARR_VPN_TEST_CMD     ?= test/runtime/plundarr-vpn-test.sh
+PLUNDARR_STACK_WAIT_CMD   ?= test/runtime/plundarr-stack-wait.sh
+MARAUDARR_IMAGE_TEST_CMD  ?= test/generator/test-maraudarr-image.sh
+WORKFLOW_HELPERS_TEST_CMD ?= test/helpers/test-workflow-helpers.sh
+MAKE_HELPERS_TEST_CMD     ?= test/helpers/test-make-helpers.sh
+MARAUDARR_SMOKE_CMD       ?= test/generator/maraudarr-image-smoke.sh
+PLUNDARR_PS_CMD           ?= scripts/compose/ps.sh
+PIA_CREDENTIAL_CHECK_CMD  ?= scripts/compose/check-pia-credentials.sh
 
 #
 # Docker commands used directly instead of through Compose.
@@ -795,7 +795,7 @@ $(TEST): $(BUILD_DEPENDS) $(TEST_UNIT) $(TEST_WORKFLOWS)
 	$(MAKE_HELPERS_TEST_CMD)
 	MARAUDARR_TEST_OUTPUT="$(MARAUDARR_TEST_OUTPUT)" \
 	PYTHON_BIN="$(PYTHON_BIN)" \
-		test/test-maraudarr-matrix.sh
+		test/generator/test-maraudarr-matrix.sh
 
 #
 # $(DOCS_PYTHON_TARGET): Creates an isolated Python environment for developer

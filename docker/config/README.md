@@ -42,9 +42,11 @@ scrolls. 🏴‍☠️
 
 To archive the selected config hold before a reset, run:
 
-```sh
-make backup PRESET=<preset>
-```
+> [!EXAMPLE]
+>
+> ```sh
+> make backup PRESET=<preset>
+> ```
 
 To deliberately remove that generated config tree, run
 `make delete-config PRESET=<preset>`. The next `make ship PRESET=<preset>`

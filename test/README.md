@@ -2,6 +2,25 @@
 
 Welcome to the test hold, where Plundarr checks that Privateerr and Gluetun left the PIA WireGuard and port-forwarding voyage in a usable state.
 
+## Test Script Chart 🗺️
+
+| Hold | Script | Purpose |
+| ---- | ------ | ------- |
+| 🧭 Generator | [`generator/maraudarr-image-smoke.sh`](generator/maraudarr-image-smoke.sh) | Exercise a hardened Maraudarr container in disposable output |
+| 🧭 Generator | [`generator/test-maraudarr-image.sh`](generator/test-maraudarr-image.sh) | Verify local, pulled, built, and unavailable image resolution paths |
+| 🧭 Generator | [`generator/test-maraudarr-matrix.sh`](generator/test-maraudarr-matrix.sh) | Generate and validate representative preset and add-on combinations |
+| 🧰 Helpers | [`helpers/test-make-helpers.sh`](helpers/test-make-helpers.sh) | Test PIA preflight and compact Compose status helpers |
+| 🧰 Helpers | [`helpers/test-workflow-helpers.sh`](helpers/test-workflow-helpers.sh) | Test Discord payload and registry helper behavior offline |
+| 🌊 Runtime | [`runtime/plundarr-stack-wait.sh`](runtime/plundarr-stack-wait.sh) | Wait for a generated stack to become healthy |
+| 🌊 Runtime | [`runtime/plundarr-vpn-test.sh`](runtime/plundarr-vpn-test.sh) | Validate Privateerr, Gluetun, and selected downloader state |
+| 🎭 Stubs | [`stubs/compose-docker-stub.sh`](stubs/compose-docker-stub.sh) | Supply deterministic Docker output to Compose helper tests |
+| 🎭 Stubs | [`stubs/maraudarr-image-docker-stub.sh`](stubs/maraudarr-image-docker-stub.sh) | Simulate Maraudarr image discovery and retrieval outcomes |
+| 🎭 Stubs | [`stubs/workflow-skopeo-stub.sh`](stubs/workflow-skopeo-stub.sh) | Simulate registry inspection without network access |
+
+The subfolders separate generator contracts, reusable helper tests, live-stack
+runtime checks, and deterministic command stubs. Make targets remain the public
+interface; invoke individual scripts only while diagnosing a focused failure.
+
 ## What Gets Tested 🦜
 
 The VPN test script does not use a throwaway test image. It validates the actual Privateerr, Gluetun, and qBittorrent Compose containers:
@@ -20,9 +39,11 @@ The VPN test script does not use a throwaway test image. It validates the actual
 Use the complete Maraudarr test target while changing image resolution,
 presets, service charts, or generated config seeds:
 
-```sh
-make test
-```
+> [!EXAMPLE]
+>
+> ```sh
+> make test
+> ```
 
 These checks simulate local-image discovery, a successful GHCR pull, a local
 fallback build, and a complete retrieval failure without contacting a registry.
@@ -33,9 +54,11 @@ helpers, and generate representative Compose charts.
 After building an image, exercise its hardened container contract and validate
 one disposable generated deployment with:
 
-```sh
-make test-image
-```
+> [!EXAMPLE]
+>
+> ```sh
+> make test-image
+> ```
 
 CI can select another representative voyage with `MARAUDARR_TEST_PRESET`,
 `MARAUDARR_TEST_ADD`, `MARAUDARR_TEST_REMOVE`, and
@@ -45,9 +68,11 @@ CI can select another representative voyage with `MARAUDARR_TEST_PRESET`,
 
 Use this when the full Plundarr stack is already running:
 
-```sh
-make test-vpn
-```
+> [!EXAMPLE]
+>
+> ```sh
+> make test-vpn
+> ```
 
 This checks the existing Privateerr and Gluetun containers, then verifies generated files and port forwarding.
 
@@ -55,33 +80,39 @@ This checks the existing Privateerr and Gluetun containers, then verifies genera
 
 Use this when ye want `Make` to launch only the VPN pair plus download clients, validate it, then clean up:
 
-```sh
-make test-e2e
-```
+> [!EXAMPLE]
+>
+> ```sh
+> make test-e2e
+> ```
 
 This target:
 
 1. Restores example config.
 2. Starts only `privateerr`, `gluetun`, and selected download services with Docker Compose.
 3. Waits for those services to report healthy.
-4. Runs `test/plundarr-vpn-test.sh`.
+4. Runs `test/runtime/plundarr-vpn-test.sh`.
 5. Brings the Compose stack down.
 6. Restores example config again.
 
 Generate the downloader mode before the test voyage. Plundarr and Boudoirr use
 qBittorrent by default; switch to SABnzbd-only with:
 
-```sh
-make ship REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=sabnzbd
-make test-e2e
-```
+> [!EXAMPLE]
+>
+> ```sh
+> make ship REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=sabnzbd
+> make test-e2e
+> ```
 
 Chart the same E2E voyage with NZBGet instead:
 
-```sh
-make ship REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=nzbget
-make test-e2e
-```
+> [!EXAMPLE]
+>
+> ```sh
+> make ship REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=nzbget
+> make test-e2e
+> ```
 
 Keep qBittorrent and add either Usenet client when ye want both downloader
 types tested together, for example `make ship ADD_SERVICES=sabnzbd`.
@@ -90,9 +121,11 @@ types tested together, for example `make ship ADD_SERVICES=sabnzbd`.
 
 Use this when ye want Make to launch every service, wait for health, and validate the full port-forwarding chain:
 
-```sh
-make test-stack
-```
+> [!EXAMPLE]
+>
+> ```sh
+> make test-stack
+> ```
 
 This target:
 
@@ -122,16 +155,17 @@ accidentally sneak into Git.
 
 Useful cleanup commands:
 
-```sh
-#
-# Restore test fixtures or deliberately remove Docker resources after a test.
-# delete-config deletes the selected application-state directory.
-#
-make clean-test
-make restore-test-config
-make nuke
-make clean
-```
+> [!EXAMPLE]
+>
+> ```sh
+> make clean-test
+> make restore-test-config
+> make nuke
+> make clean
+> ```
+
+`make delete-config` is deliberately absent from that routine cleanup example:
+it destroys the selected deployment's application state.
 
 > [!TIP]
 > 🏴‍☠️ Run cleanup before committing after any real VPN voyage. _Future ye will thank past ye!_

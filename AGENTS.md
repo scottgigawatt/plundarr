@@ -30,7 +30,12 @@ Keep the names distinct:
 - `example.maraudarr.env`: Maraudarr image build defaults.
 - `dist/`: Ignored generated Plundarr preset projects, each with Compose,
   environment, and runtime state.
-- `test/`: Plundarr runtime validation and Maraudarr generation matrix.
+- `scripts/compose/`: Host-side generated-project helpers used by Make.
+- `scripts/linux/` and `scripts/synology/`: Documented host maintenance tools.
+- `test/generator/`: Maraudarr image and preset-matrix validation.
+- `test/helpers/`: Offline Make and workflow helper tests.
+- `test/runtime/`: Live generated-stack and VPN validation.
+- `test/stubs/`: Deterministic command stubs used by shell tests.
 - `docs/`: Supporting setup, contribution, security, and community documents.
 - `.github/`: Workflows, Renovate configuration, templates, and ownership.
 
@@ -48,6 +53,11 @@ Use GitHub callouts where they improve scanning:
 - `[!IMPORTANT]`
 - `[!WARNING]`
 - `[!CAUTION]`
+- `[!EXAMPLE]`
+
+Put copyable command examples inside `[!EXAMPLE]` callouts when the surrounding
+section is teaching a command sequence. Keep explanations outside the code
+fence and do not add prompt characters or prose comments inside those examples.
 
 ## Code Comment Style
 
@@ -58,7 +68,13 @@ summary block.
 
 Inline Compose comments use two spaces before `#`. Align the `#` characters for
 logically grouped lines. Use four-space indentation in project-owned shell and
-Python code.
+Python code, two-space indentation in YAML and TOML, and four-space indentation
+in JSON and JSON-with-comments files. Every TOML table needs a concise purpose
+comment; keep multi-line arrays indented two spaces.
+
+VS Code workspace JSON files use JSON with Comments so settings and extension
+choices can carry the same copyright, license, filename summary, and section
+comments as other project configuration.
 
 ## Shell And Make Rules
 
@@ -114,6 +130,11 @@ after `Returns:`. Follow this exact shape:
 Use POSIX function syntax in `sh` scripts and Bash syntax only when Bash is
 needed.
 
+Keep host helpers grouped under `scripts/compose/`, `scripts/linux/`, or
+`scripts/synology/`. Keep shell tests grouped under `test/generator/`,
+`test/helpers/`, `test/runtime/`, or `test/stubs/`; update Make, workflows,
+documentation, and usage headers whenever a script moves.
+
 Markdown command snippets are copyable: use `sh` fences without prompt
 characters. Reserve `bash` for Bash-only syntax and `console` for real terminal
 transcripts. Generated environment fragments should give short, aligned
@@ -129,6 +150,10 @@ endings, final newlines, and trailing whitespace. Workspace settings may repeat
 language indentation to disable VS Code auto-detection and may add schemas or
 extension-specific validation that EditorConfig cannot express. Keep those
 overlapping values identical.
+
+Comment every Dockerfile build stage and each non-obvious instruction group.
+Stage comments must explain both the artifact produced and why the stage is
+separate.
 
 ## Docker And Compose Rules
 

@@ -8,7 +8,7 @@
 # test-make-helpers.sh: Validate secret-safe credential and Compose status
 #                       helpers without mutating a deployment.
 #
-# Usage: test/test-make-helpers.sh
+# Usage: test/helpers/test-make-helpers.sh
 #
 
 test_output=""
@@ -38,20 +38,20 @@ trap cleanup 0 1 2 15
 # Accept resolved credentials without echoing either value.
 #
 credential_output=$(printf '%s\n' 'PIA_USER=p7654321' 'PIA_PASS=not-a-real-secret' \
-    | scripts/check-pia-credentials.sh)
+    | scripts/compose/check-pia-credentials.sh)
 test -z "${credential_output}"
 
 #
 # Reject missing and generated example values.
 #
 if printf '%s\n' 'PIA_USER=' 'PIA_PASS=not-a-real-secret' \
-    | scripts/check-pia-credentials.sh >"${test_output}/missing.out" 2>&1; then
+    | scripts/compose/check-pia-credentials.sh >"${test_output}/missing.out" 2>&1; then
     echo "Credential helper accepted a missing PIA username." >&2
     exit 1
 fi
 
 if printf '%s\n' 'PIA_USER=p7654321' 'PIA_PASS=abc123' \
-    | scripts/check-pia-credentials.sh >"${test_output}/placeholder.out" 2>&1; then
+    | scripts/compose/check-pia-credentials.sh >"${test_output}/placeholder.out" 2>&1; then
     echo "Credential helper accepted the generated PIA password." >&2
     exit 1
 fi
@@ -62,8 +62,8 @@ fi
 : >"${test_output}/compose.yml"
 : >"${test_output}/stack.env"
 PLUNDARR_TEST_LOG="${test_output}/docker.log" \
-    scripts/compose-ps.sh \
-        --docker-bin "$(pwd)/test/compose-docker-stub.sh" \
+    scripts/compose/ps.sh \
+        --docker-bin "$(pwd)/test/stubs/compose-docker-stub.sh" \
         --env-file "${test_output}/stack.env" \
         --compose-file "${test_output}/compose.yml" \
         >"${test_output}/ps.out"

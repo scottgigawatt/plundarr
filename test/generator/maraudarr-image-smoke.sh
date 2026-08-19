@@ -8,7 +8,7 @@
 # maraudarr-image-smoke.sh: Generate and validate one deployment with the exact
 #                           hardened Maraudarr runtime contract used in CI.
 #
-# Usage: test/maraudarr-image-smoke.sh --image <image> --preset <preset> \
+# Usage: test/generator/maraudarr-image-smoke.sh --image <image> --preset <preset> \
 #        --required-file <path> [options]
 #
 

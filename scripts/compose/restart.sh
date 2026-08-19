@@ -5,9 +5,8 @@
 #
 # Licensed under the Apache License, Version 2.0.
 #
-# compose-restart.sh: This script is intended to run directly on a host with
-#                     Docker Compose to stop and restart a Compose project in
-#                     a predictable way.
+# restart.sh: Run directly on a Docker host to stop and restart a Compose
+#             project in a predictable way.
 #
 # The script:
 #   - Accepts one Compose-project directory.
@@ -15,7 +14,7 @@
 #   - Detects Docker Compose v2 or v1.
 #   - Restarts the stack without deleting named volumes or application state.
 #
-# Usage: sh scripts/compose-restart.sh /path/to/project
+# Usage: sh scripts/compose/restart.sh /path/to/project
 #
 
 #

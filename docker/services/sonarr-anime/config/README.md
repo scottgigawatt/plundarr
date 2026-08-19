@@ -26,9 +26,11 @@ For Usenet, point SABnzbd completed jobs at `/downloads/usenet` and temporary jo
 
 Render the service into yer final chart:
 
-```sh
-make ship ADD_SERVICES=sonarr-anime
-```
+> [!EXAMPLE]
+>
+> ```sh
+> make ship ADD_SERVICES=sonarr-anime
+> ```
 
 For more details, set yer sights on the generated
 `dist/<preset>/docker-compose.yml` and `.env` files.
