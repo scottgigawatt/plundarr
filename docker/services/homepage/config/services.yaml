@@ -4,6 +4,17 @@
 #
 
 - Media:
+    - Plex:
+        id: 100
+        icon: plex.svg
+        href: {{HOMEPAGE_VAR_PLEX_HREF}}
+        description: Plex Media Server
+        widget:
+          type: plex
+          fields: ["streams", "movies", "tv"]
+          url: {{HOMEPAGE_VAR_PLEX_URL}}
+          key: {{HOMEPAGE_VAR_PLEX_TOKEN}}
+
     - Radarr:
         icon: radarr.svg
         href: {{HOMEPAGE_VAR_RADARR_HREF}}
@@ -68,6 +79,19 @@
               color: teal
               params:
                 unmonitored: true
+
+    - Tautulli:
+        icon: tautulli.svg
+        href: {{HOMEPAGE_VAR_TAUTULLI_HREF}}
+        description: Plex monitoring
+        container: tautulli-latest
+        widget:
+          type: tautulli
+          url: {{HOMEPAGE_VAR_TAUTULLI_URL}}
+          key: {{HOMEPAGE_VAR_TAUTULLI_KEY}}
+          enableUser: true
+          showEpisodeNumber: true
+          expandOneStreamToTwoRows: false
 
 - Downloads:
     - Prowlarr:

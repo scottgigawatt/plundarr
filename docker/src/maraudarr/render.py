@@ -121,7 +121,7 @@ def _prepare_service(
     block: str,
     service_id: str,
     selected: set[str],
-    include_plex_homepage: bool,
+    include_native_plex: bool,
     media_libraries: tuple[str, ...],
 ) -> str:
     """Apply service-specific conditional edits to one extracted chart."""
@@ -150,7 +150,8 @@ def _prepare_service(
         )
     if service_id == "homepage":
         homepage_groups = {
-            "Homepage Plex click target and widget": include_plex_homepage,
+            "Homepage Plex click target and widget": include_native_plex,
+            "Homepage Tautulli click target and widget": include_native_plex,
             "Homepage Radarr click target and widget": "radarr" in selected,
             "Homepage Sonarr click target and widget": "sonarr" in selected,
             "Homepage Bazarr click target and widget": "bazarr" in selected,
@@ -210,7 +211,7 @@ def render_compose(catalog: Catalog, plan: StackPlan) -> str:
     """
     base_source = catalog.source_path("templates/compose.yml").read_text()
     selected = set(plan.service_ids)
-    include_plex_homepage = "plex" in selected
+    include_native_plex = plan.preset.id == "plundarr" or "plex" in selected
     service_blocks = []
     for service in plan.services:
         source = catalog.source_path(service.compose).read_text()
@@ -220,7 +221,7 @@ def render_compose(catalog: Catalog, plan: StackPlan) -> str:
                 block,
                 service.id,
                 selected,
-                include_plex_homepage,
+                include_native_plex,
                 plan.preset.media_libraries,
             )
         )
@@ -237,11 +238,12 @@ def render_compose(catalog: Catalog, plan: StackPlan) -> str:
 def _filter_homepage_env(
     section: str,
     selected: set[str],
-    include_plex_homepage: bool,
+    include_native_plex: bool,
 ) -> str:
     """Remove Homepage environment groups for unavailable integrations."""
     groups = {
-        "Homepage Plex click-target and widget variables": include_plex_homepage,
+        "Homepage Plex click-target and widget variables": include_native_plex,
+        "Homepage Tautulli click-target and widget variables": include_native_plex,
         "Homepage Radarr click-target and widget variables": "radarr" in selected,
         "Homepage Sonarr click-target and widget variables": "sonarr" in selected,
         "Homepage Sonarr Anime click-target and widget variables": (
@@ -388,7 +390,7 @@ def render_environment(
     """
     base_source = catalog.source_path("templates/environment.env").read_text()
     selected = set(plan.service_ids)
-    include_plex_homepage = "plex" in selected
+    include_plex_homepage = plan.preset.id == "plundarr" or "plex" in selected
     rendered_sections = [base_source]
     for service in plan.services:
         section = catalog.source_path(service.environment).read_text()
@@ -527,7 +529,7 @@ def render_homepage_services(catalog: Catalog, plan: StackPlan) -> str:
     source = (homepage_root / "services.base.yaml").read_text()
     source += (homepage_root / "services.footer.yaml").read_text()
     selected = set(plan.service_ids)
-    include_plex_homepage = "plex" in selected
+    include_plex_homepage = plan.preset.id == "plundarr" or "plex" in selected
     preamble = source[: source.find("- Media:")].rstrip()
 
     media_cards = []
@@ -552,6 +554,8 @@ def render_homepage_services(catalog: Catalog, plan: StackPlan) -> str:
     data_cards = []
     if selected.intersection({"radarr", "sonarr"}):
         data_cards.append(_filter_calendar(_homepage_card(source, "Calendar"), selected))
+    if include_plex_homepage:
+        data_cards.append(_homepage_card(source, "Tautulli"))
 
     download_cards = []
     if "prowlarr" in selected:

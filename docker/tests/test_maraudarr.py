@@ -576,42 +576,6 @@ class MaraudarrTests(unittest.TestCase):
     #
     # Homepage card and variable selection behavior.
     #
-    def test_default_plundarr_omits_unselected_media_server_integrations(self) -> None:
-        """Exclude Plex and Tautulli when neither integration is selected."""
-
-        plan = self.catalog.resolve("plundarr")
-        compose = render_compose(self.catalog, plan)
-        homepage = render_homepage_services(self.catalog, plan)
-        with tempfile.TemporaryDirectory() as temporary_directory:
-            environment = render_environment(
-                self.catalog,
-                plan,
-                Path(temporary_directory) / ".env",
-            )
-
-        for rendered in (compose, environment, homepage):
-            self.assertNotIn("HOMEPAGE_VAR_PLEX", rendered)
-            self.assertNotIn("Tautulli", rendered)
-            self.assertNotIn("TAUTULLI", rendered)
-
-    def test_selected_plex_adds_only_its_homepage_integration(self) -> None:
-        """Add the Plex card and variables without an unavailable Tautulli card."""
-
-        plan = self.catalog.resolve("plundarr", add={"plex"})
-        compose = render_compose(self.catalog, plan)
-        homepage = render_homepage_services(self.catalog, plan)
-        with tempfile.TemporaryDirectory() as temporary_directory:
-            environment = render_environment(
-                self.catalog,
-                plan,
-                Path(temporary_directory) / ".env",
-            )
-
-        for rendered in (compose, environment, homepage):
-            self.assertIn("HOMEPAGE_VAR_PLEX", rendered)
-            self.assertNotIn("Tautulli", rendered)
-            self.assertNotIn("TAUTULLI", rendered)
-
     def test_homepage_fragments_join_the_correct_service_groups(self) -> None:
         """Place selected Homepage cards in their intended service groups."""
 
