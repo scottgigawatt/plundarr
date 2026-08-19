@@ -78,7 +78,7 @@ mkdir -p "$(dirname "${PLUNDARR_LOG_PATH}")"
 #
 # Parameters: $* - Message fragments to write as one status line.
 #
-# Returns:     tee's exit status.
+# Returns: tee's exit status.
 #
 log() {
     printf '[%s] %s\n' "${plundarr_test_script_name}" "$*" \
@@ -91,7 +91,7 @@ log() {
 # Parameters: $1 - File path.
 #             $2 - Human-readable file label.
 #
-# Returns:     0 when the file exists; exits nonzero otherwise.
+# Returns: 0 when the file exists; exits nonzero otherwise.
 #
 require_file() {
     file_path="$1"
@@ -108,7 +108,7 @@ require_file() {
 #
 # Parameters: $1 - Compose service name.
 #
-# Returns:     0 and the newest container ID when found.
+# Returns: 0 and the newest container ID when found.
 #
 container_id_for_service() {
     service_name="$1"
@@ -123,7 +123,7 @@ container_id_for_service() {
 # Parameters: $1 - Container ID.
 #             $2 - Compose service name.
 #
-# Returns:     0 when running; exits nonzero otherwise.
+# Returns: 0 when running; exits nonzero otherwise.
 #
 require_running_container() {
     container_id="$1"
@@ -146,7 +146,7 @@ require_running_container() {
 # Parameters: $1 - Container ID.
 #             $2 - Compose service name.
 #
-# Returns:     0 when healthy; exits nonzero otherwise.
+# Returns: 0 when healthy; exits nonzero otherwise.
 #
 require_healthy_container() {
     container_id="$1"
@@ -166,7 +166,7 @@ require_healthy_container() {
 # Parameters: $1 - Container ID.
 #             $2 - Compose service name.
 #
-# Returns:     0 when healthy; exits nonzero after the configured timeout.
+# Returns: 0 when healthy; exits nonzero after the configured timeout.
 #
 wait_for_healthy_container() {
     container_id="$1"
@@ -197,7 +197,7 @@ wait_for_healthy_container() {
 # Parameters: $1 - JSON payload.
 #             $2 - JSON key.
 #
-# Returns:     0 and the scalar value when found.
+# Returns: 0 and the scalar value when found.
 #
 json_value() {
     json_payload="$1"

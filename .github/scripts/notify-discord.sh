@@ -46,7 +46,7 @@ set -eu
 #
 # Parameters: None.
 #
-# Returns:     Prints usage text.
+# Returns: Prints usage text.
 #
 usage() {
     printf '%s\n' \
@@ -86,7 +86,7 @@ usage() {
 # Parameters: $1 - Option name.
 #             $2 - Number of remaining command-line arguments.
 #
-# Returns:     0 when a value follows; otherwise exits with status 2.
+# Returns: 0 when a value follows; otherwise exits with status 2.
 #
 require_option_argument() {
     if [ "$2" -lt 2 ]; then
@@ -95,6 +95,9 @@ require_option_argument() {
     fi
 }
 
+#
+# Parse command-line flags and arguments.
+#
 while [ "$#" -gt 0 ]; do
     case "$1" in
         -e | --event)
@@ -198,8 +201,8 @@ done
 #
 # Parameters: None.
 #
-# Returns:     Prints deterministic test input, operating-system randomness,
-#              or a portable timestamp checksum fallback.
+# Returns: Prints deterministic test input, operating-system randomness,
+#          or a portable timestamp checksum fallback.
 #
 random_value() {
     if [ -n "${discord_random_value}" ]; then
@@ -231,7 +234,7 @@ random_value() {
 #
 # Parameters: $@ - One or more complete message strings.
 #
-# Returns:     Prints exactly one selected message.
+# Returns: Prints exactly one selected message.
 #
 choose_message() {
     if [ "$#" -eq 0 ]; then
@@ -254,7 +257,7 @@ choose_message() {
 # Parameters: $1 - Input name.
 #             $2 - Input value.
 #
-# Returns:     0 when present; otherwise returns 1.
+# Returns: 0 when present; otherwise returns 1.
 #
 require_value() {
     if [ -z "$2" ]; then
@@ -272,6 +275,9 @@ if [ -z "${DISCORD_WEBHOOK_URL}" ] && [ "${discord_dry_run}" != "true" ]; then
     exit 0
 fi
 
+#
+# Validate required inputs for both event types.
+#
 require_value --event "${discord_event}"
 require_value --template "${discord_template}"
 require_value --run-url "${run_url}"

@@ -43,9 +43,15 @@ jobs:
         with:
           persist-credentials: false
 
+      #
+      # Set up QEMU for cross-architecture builds and tests.
+      #
       - name: "Summon Cross-Arch Cannons 🧨"
         uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8  # v4
 
+      #
+      # Set up Buildx for cross-architecture builds and tests.
+      #
       - name: "Sharpen the Build Axe 🪓"
         uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c  # v4.2.0
 
@@ -66,6 +72,12 @@ jobs:
           MARAUDARR_IMAGE=maraudarr:pr
           MARAUDARR_BUILD_OPTIONS=--pull
 
+      #
+      # Run the hardened smoke voyage with a plundarr preset and a few selectable services.
+      # The smoke test is deliberately not exhaustive, but it does exercise the Maraudarr
+      # generator, the hardened runtime, and the selected services to ensure they all work
+      # together in a basic configuration.
+      #
       - name: "Smoke-Test Containerized Maraudarr ⚓"
         run: >-
           make smoke-maraudarr
@@ -79,6 +91,9 @@ jobs:
       - name: "Test the Three-Deck Hull Plan 🛠️"
         run: make build-multiarch
 
+      #
+      # Scan for vulnerabilities in the built image.
+      #
       - name: "Scan Maraudarr for Bilge Rot 🔍"
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25  # v0.36.0
         with:
@@ -108,11 +123,18 @@ jobs:
       contents: read
 
     steps:
+      #
+      # Check out without persistent credentials and prepare the Python
+      # environment before documentation-sensitive validation begins.
+      #
       - name: "Grab the Source Charts 📖"
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           persist-credentials: false
 
+      #
+      # Set up Python for documentation validation.
+      #
       - name: "Ready the Python Quill 🪶"
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7
         with:
@@ -120,8 +142,15 @@ jobs:
           cache: pip
           cache-dependency-path: requirements-docs.txt
 
+      #
+      # Install the documentation dependencies.
+      #
       - name: "Load the Documentation Tools 🧰"
         run: pip install --requirement requirements-docs.txt
 
+      #
+      # Render the documentation to ensure all source charts and references are
+      # valid.
+      #
       - name: "Render Every Developer Chart 🔎"
         run: mkdocs build --strict

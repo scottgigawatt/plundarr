@@ -38,7 +38,7 @@ set -eu
 #
 # Parameters: None.
 #
-# Returns:     Prints usage text.
+# Returns: Prints usage text.
 #
 usage() {
     printf '%s\n' \
@@ -64,7 +64,7 @@ usage() {
 # Parameters: $1 - Option name.
 #             $2 - Number of remaining command-line arguments.
 #
-# Returns:     0 when a value follows; otherwise exits with status 2.
+# Returns: 0 when a value follows; otherwise exits with status 2.
 #
 require_option_argument() {
     if [ "$2" -lt 2 ]; then
@@ -79,7 +79,7 @@ require_option_argument() {
 # Parameters: $1 - Input name.
 #             $2 - Input value.
 #
-# Returns:     0 when present; otherwise returns 1.
+# Returns: 0 when present; otherwise returns 1.
 #
 require_value() {
     if [ -z "$2" ]; then
@@ -93,7 +93,7 @@ require_value() {
 #
 # Parameters: $1 - Fully qualified GHCR tag.
 #
-# Returns:     Prints the equivalent Docker Hub tag.
+# Returns: Prints the equivalent Docker Hub tag.
 #
 dockerhub_tag_for() {
     case "$1" in
@@ -112,7 +112,7 @@ dockerhub_tag_for() {
 #
 # Parameters: None.
 #
-# Returns:     0 when every copy succeeds; otherwise returns nonzero.
+# Returns: 0 when every copy succeeds; otherwise returns nonzero.
 #
 mirror_tags() {
     printf '%s\n' "${published_tags}" \
@@ -134,22 +134,27 @@ mirror_tags() {
 #
 # Parameters: None.
 #
-# Returns:     0 when the digests match; otherwise returns nonzero.
+# Returns: 0 when the digests match; otherwise returns nonzero.
 #
 verify_mirrors() {
+    # Select the first published tag for comparison.
     primary_tag=$(printf '%s\n' "${published_tags}" | sed -n '/./{p;q;}')
     require_value --published-tags "${primary_tag}"
     dockerhub_tag=$(dockerhub_tag_for "${primary_tag}")
 
+    # Inspect the GHCR tag to get its digest.
     ghcr_digest=$("${skopeo_bin}" inspect \
         --creds "${ghcr_username}:${GHCR_TOKEN}" \
         --format '{{.Digest}}' \
         "docker://${primary_tag}")
+
+    # Inspect the Docker Hub tag to get its digest.
     dockerhub_digest=$("${skopeo_bin}" inspect \
         --creds "${dockerhub_username}:${DOCKERHUB_TOKEN}" \
         --format '{{.Digest}}' \
         "docker://${dockerhub_tag}")
 
+    # Compare the two digests and report a mismatch if they differ.
     if [ "${ghcr_digest}" != "${dockerhub_digest}" ]; then
         printf 'Registry digest mismatch: GHCR=%s DockerHub=%s\n' \
             "${ghcr_digest}" "${dockerhub_digest}" >&2
@@ -159,6 +164,9 @@ verify_mirrors() {
     printf 'Registry manifests match at %s.\n' "${ghcr_digest}"
 }
 
+#
+# Parse command-line flags and arguments.
+#
 while [ "$#" -gt 0 ]; do
     case "$1" in
         -m | --mirror)
@@ -211,6 +219,9 @@ while [ "$#" -gt 0 ]; do
     esac
 done
 
+#
+# Validate that all required inputs are present.
+#
 require_value --operation "${operation}"
 require_value --ghcr-image "${ghcr_image}"
 require_value --dockerhub-image "${dockerhub_image}"
@@ -220,6 +231,9 @@ require_value --dockerhub-username "${dockerhub_username}"
 require_value DOCKERHUB_TOKEN "${DOCKERHUB_TOKEN}"
 require_value --published-tags "${published_tags}"
 
+#
+# Dispatch the requested operation.
+#
 case "${operation}" in
     mirror)
         mirror_tags

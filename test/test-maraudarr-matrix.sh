@@ -28,13 +28,14 @@ TEST_ROOT=${MARAUDARR_TEST_OUTPUT:-/tmp/maraudarr-matrix}
 # Parameters: $1 - Case name.
 #             $@ - Remaining arguments are Maraudarr build options.
 #
-# Returns:     0 when generation and Docker Compose validation succeed.
+# Returns: 0 when generation and Docker Compose validation succeed.
 #
 run_case() {
     case_name=$1
     shift
     case_output="${TEST_ROOT}/${case_name}"
 
+    # Remove any previous test output and generate a fresh voyage.
     rm -rf "${case_output}"
     PYTHONDONTWRITEBYTECODE=1 \
         PYTHONPATH="${REPOSITORY_ROOT}/docker/src" \
@@ -45,12 +46,14 @@ run_case() {
         --output "${case_output}" \
         "$@"
 
+    # Validate the generated Compose chart and its environment file.
     docker compose \
         --env-file "${case_output}/.env" \
         -f "${case_output}/docker-compose.yml" \
         config \
         --quiet
 
+    # Validate the generated example.env and config/README.md files.
     test -f "${case_output}/config/README.md"
 }
 
@@ -60,13 +63,14 @@ run_case() {
 # Parameters: $1 - Preset name.
 #             $@ - Remaining arguments are Maraudarr build options.
 #
-# Returns:     0 when generation and Docker Compose validation succeed.
+# Returns: 0 when generation and Docker Compose validation succeed.
 #
 run_distribution_case() {
     preset=$1
     shift
     preset_output="${TEST_ROOT}/dist/${preset}"
 
+    # Remove any previous test output and generate a fresh voyage.
     PYTHONDONTWRITEBYTECODE=1 \
         PYTHONPATH="${REPOSITORY_ROOT}/docker/src" \
         MARAUDARR_CATALOG_ROOT="${REPOSITORY_ROOT}/docker" \
@@ -77,16 +81,26 @@ run_distribution_case() {
         --preset "${preset}" \
         "$@"
 
+    # Validate the generated Compose chart and its environment file.
     docker compose \
         --env-file "${preset_output}/.env" \
         -f "${preset_output}/docker-compose.yml" \
         config \
         --quiet
+
+    # Validate the generated example.env and config/README.md files.
     test -f "${preset_output}/example.env"
     test -f "${preset_output}/config/README.md"
 }
 
+#
+# Remove any previous test output and create a fresh temporary harbor.
+#
 rm -rf "${TEST_ROOT}/dist"
+
+#
+# Run every preset beneath the Maraudarr distribution root.
+#
 run_distribution_case plundarr
 run_distribution_case boudoirr
 run_distribution_case jellyfin

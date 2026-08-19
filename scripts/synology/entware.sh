@@ -6,13 +6,14 @@
 # Licensed under the Apache License, Version 2.0.
 #
 # entware.sh: This script is intended to run directly on Synology NAS to
-#             ensure Entware is mounted, started, and refreshed on boot.
+#             ensure that the Entware profile is included in the global profile
+#             and that Entware is mounted, started, and refreshed on boot.
 #
 # The script:
 #   - Creates the /opt directory if it does not exist and mounts Entware to /opt.
 #   - Starts the Entware services using the init script.
 #   - Checks if the Entware profile is already included in the global profile. If not, it adds the necessary entry.
-#   - Updates the Entware package list.
+#   - Updates the Entware package list and upgrades installed packages to ensure the system is up-to-date.
 #
 
 #
@@ -37,6 +38,7 @@ EOF
 fi
 
 #
-# Update the Entware package list.
+# Update Entware package list and upgrade installed packages.
 #
 /opt/bin/opkg update
+/opt/bin/opkg upgrade

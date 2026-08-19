@@ -25,6 +25,9 @@
 #
 set -eu
 
+#
+# Print a message indicating the script has started.
+#
 echo "Starting script to configure Docker socket permissions."
 
 #
@@ -57,24 +60,31 @@ fi
 # Wait for Container Manager to create the Docker daemon socket during boot.
 #
 while [ ! -S "$DOCKER_SOCKET" ]; do
+    # Check if the maximum wait time has been exceeded.
     if [ "$WAIT_TIME" -ge "$MAX_WAIT" ]; then
         echo "ERROR: Docker socket did not appear at $DOCKER_SOCKET after $MAX_WAIT seconds."
         exit 1
     fi
 
+    # Print a waiting message and increment the wait time.
     echo "Docker socket is not ready. Waiting..."
     sleep "$WAIT_INTERVAL"
     WAIT_TIME=$((WAIT_TIME + WAIT_INTERVAL))
 done
 
 #
-# Grant the docker group read/write access without exposing the socket to
-# untrusted users.
+# Set the socket ownership to root:docker to allow group access.
 #
 echo "Setting $DOCKER_SOCKET ownership to root:$DOCKER_GROUP."
 chown "root:$DOCKER_GROUP" "$DOCKER_SOCKET"
 
+#
+# Set the socket permissions to allow group read/write access.
+#
 echo "Setting $DOCKER_SOCKET permissions to 0660."
 chmod 0660 "$DOCKER_SOCKET"
 
+#
+# Print a success message.
+#
 echo "Docker socket permissions configured successfully."

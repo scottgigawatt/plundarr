@@ -60,6 +60,10 @@ jobs:
         with:
           persist-credentials: false
 
+      #
+      # Run the Maraudarr generator against the checked-in presets and service
+      # definitions to ensure they all produce valid stacks.
+      #
       - name: "Test the Stack Charts 🔎"
         run: make test-maraudarr
 
@@ -73,6 +77,12 @@ jobs:
           MARAUDARR_IMAGE=ghcr.io/${{ github.repository_owner }}/maraudarr:scan
           MARAUDARR_BUILD_OPTIONS=--pull
 
+        #
+        # Run the hardened smoke voyage with a plundarr preset and a few selectable services.
+        # The smoke test is deliberately not exhaustive, but it does exercise the Maraudarr
+        # generator, the hardened runtime, and the selected services to ensure they all work
+        # together in a basic configuration.
+        #
       - name: "Run the Hardened Smoke Voyage ⚓"
         run: >-
           make smoke-maraudarr
@@ -142,15 +152,15 @@ jobs:
           IMAGE_PLATFORMS: ${{ env.IMAGE_PLATFORMS }}
         run: |
           sh .github/scripts/notify-discord.sh \
-              --event start \
-              --template shipyard \
-              --run-url "${RUN_URL}" \
-              --repository "${REPOSITORY}" \
-              --ref-name "${REF_NAME}" \
-              --workflow-name "${WORKFLOW_NAME}" \
-              --actor "${ACTOR}" \
-              --platforms "${IMAGE_PLATFORMS}" \
-              --ghcr-image "${GHCR_IMAGE}" \
+              --event           start \
+              --template        shipyard \
+              --run-url         "${RUN_URL}" \
+              --repository      "${REPOSITORY}" \
+              --ref-name        "${REF_NAME}" \
+              --workflow-name   "${WORKFLOW_NAME}" \
+              --actor           "${ACTOR}" \
+              --platforms       "${IMAGE_PLATFORMS}" \
+              --ghcr-image      "${GHCR_IMAGE}" \
               --dockerhub-image "${DOCKERHUB_IMAGE}"
 
       - name: "Notify Hades Discord: kraken awakened 🦑"
@@ -166,15 +176,15 @@ jobs:
           IMAGE_PLATFORMS: ${{ env.IMAGE_PLATFORMS }}
         run: |
           sh .github/scripts/notify-discord.sh \
-              --event start \
-              --template kraken \
-              --run-url "${RUN_URL}" \
-              --repository "${REPOSITORY}" \
-              --ref-name "${REF_NAME}" \
-              --workflow-name "${WORKFLOW_NAME}" \
-              --actor "${ACTOR}" \
-              --platforms "${IMAGE_PLATFORMS}" \
-              --ghcr-image "${GHCR_IMAGE}" \
+              --event           start \
+              --template        kraken \
+              --run-url         "${RUN_URL}" \
+              --repository      "${REPOSITORY}" \
+              --ref-name        "${REF_NAME}" \
+              --workflow-name   "${WORKFLOW_NAME}" \
+              --actor           "${ACTOR}" \
+              --platforms       "${IMAGE_PLATFORMS}" \
+              --ghcr-image      "${GHCR_IMAGE}" \
               --dockerhub-image "${DOCKERHUB_IMAGE}"
 
       - name: "Summon Cross-Arch Cannons 🧨"
@@ -265,11 +275,11 @@ jobs:
         run: |
           sh .github/scripts/registry-mirror.sh \
               --mirror \
-              --ghcr-image "${GHCR_IMAGE}" \
-              --dockerhub-image "${DOCKERHUB_IMAGE}" \
-              --ghcr-username "${GHCR_USERNAME}" \
+              --ghcr-image         "${GHCR_IMAGE}" \
+              --dockerhub-image    "${DOCKERHUB_IMAGE}" \
+              --ghcr-username      "${GHCR_USERNAME}" \
               --dockerhub-username "${DOCKERHUB_USERNAME}" \
-              --published-tags "${PUBLISHED_TAGS}"
+              --published-tags     "${PUBLISHED_TAGS}"
 
       - name: "Verify the Registry Mirrors 🔎"
         env:
@@ -281,11 +291,11 @@ jobs:
         run: |
           sh .github/scripts/registry-mirror.sh \
               --verify \
-              --ghcr-image "${GHCR_IMAGE}" \
-              --dockerhub-image "${DOCKERHUB_IMAGE}" \
-              --ghcr-username "${GHCR_USERNAME}" \
+              --ghcr-image         "${GHCR_IMAGE}" \
+              --dockerhub-image    "${DOCKERHUB_IMAGE}" \
+              --ghcr-username      "${GHCR_USERNAME}" \
               --dockerhub-username "${DOCKERHUB_USERNAME}" \
-              --published-tags "${PUBLISHED_TAGS}"
+              --published-tags     "${PUBLISHED_TAGS}"
 
       #
       # Keep the Docker Hub landing page synchronized with the checked-in public
@@ -319,16 +329,16 @@ jobs:
           PUBLISHED_DIGEST: ${{ steps.publish.outputs.digest }}
         run: |
           sh .github/scripts/notify-discord.sh \
-              --event verdict \
-              --template shipyard \
-              --run-url "${RUN_URL}" \
-              --repository "${REPOSITORY}" \
-              --ref-name "${REF_NAME}" \
-              --job-status "${JOB_STATUS}" \
-              --ghcr-image "${GHCR_IMAGE}" \
+              --event            verdict \
+              --template         shipyard \
+              --run-url          "${RUN_URL}" \
+              --repository       "${REPOSITORY}" \
+              --ref-name         "${REF_NAME}" \
+              --job-status       "${JOB_STATUS}" \
+              --ghcr-image       "${GHCR_IMAGE}" \
               --ghcr-package-url "${GHCR_PACKAGE_URL}" \
-              --dockerhub-url "${DOCKERHUB_URL}" \
-              --published-tags "${PUBLISHED_TAGS}" \
+              --dockerhub-url    "${DOCKERHUB_URL}" \
+              --published-tags   "${PUBLISHED_TAGS}" \
               --published-digest "${PUBLISHED_DIGEST}"
 
       - name: "Notify Hades Discord: kraken verdict 🦑"
@@ -346,14 +356,14 @@ jobs:
           PUBLISHED_DIGEST: ${{ steps.publish.outputs.digest }}
         run: |
           sh .github/scripts/notify-discord.sh \
-              --event verdict \
-              --template kraken \
-              --run-url "${RUN_URL}" \
-              --repository "${REPOSITORY}" \
-              --ref-name "${REF_NAME}" \
-              --job-status "${JOB_STATUS}" \
-              --ghcr-image "${GHCR_IMAGE}" \
+              --event            verdict \
+              --template         kraken \
+              --run-url          "${RUN_URL}" \
+              --repository       "${REPOSITORY}" \
+              --ref-name         "${REF_NAME}" \
+              --job-status       "${JOB_STATUS}" \
+              --ghcr-image       "${GHCR_IMAGE}" \
               --ghcr-package-url "${GHCR_PACKAGE_URL}" \
-              --dockerhub-url "${DOCKERHUB_URL}" \
-              --published-tags "${PUBLISHED_TAGS}" \
+              --dockerhub-url    "${DOCKERHUB_URL}" \
+              --published-tags   "${PUBLISHED_TAGS}" \
               --published-digest "${PUBLISHED_DIGEST}"

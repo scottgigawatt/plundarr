@@ -187,9 +187,9 @@ endif
 #
 # Developer documentation settings.
 #
-MKDOCS             ?= mkdocs
-DOCS_SITE_PATH     ?= site
-DOCS_SERVE_ADDRESS ?= 127.0.0.1:8000
+MKDOCS              ?= mkdocs
+DOCS_SITE_PATH      ?= site
+DOCS_SERVE_ADDRESS  ?= 127.0.0.1:8000
 DOCS_VENV           ?= .venv-docs
 DOCS_PYTHON         ?= $(DOCS_VENV)/bin/python
 DOCS_MKDOCS         ?= $(DOCS_VENV)/bin/$(MKDOCS)
@@ -230,9 +230,9 @@ DIRECT_WEB_PORTS  ?= \
 #
 # Testing commands.
 #
-PLUNDARR_VPN_TEST_CMD    ?= test/plundarr-vpn-test.sh
-PLUNDARR_STACK_WAIT_CMD  ?= test/plundarr-stack-wait.sh
-MARAUDARR_IMAGE_TEST_CMD ?= test/test-maraudarr-image.sh
+PLUNDARR_VPN_TEST_CMD     ?= test/plundarr-vpn-test.sh
+PLUNDARR_STACK_WAIT_CMD   ?= test/plundarr-stack-wait.sh
+MARAUDARR_IMAGE_TEST_CMD  ?= test/test-maraudarr-image.sh
 WORKFLOW_HELPERS_TEST_CMD ?= test/test-workflow-helpers.sh
 
 #
@@ -250,7 +250,8 @@ DOCKER_COMPOSE := $(shell \
 #
 # Always bind Compose interpolation to the generated environment file.
 #
-PLUNDARR_COMPOSE = $(DOCKER_COMPOSE) \
+PLUNDARR_COMPOSE = \
+	$(DOCKER_COMPOSE) \
 	--env-file $(COMPOSE_ENV_FILE) \
 	-f $(COMPOSE_FILE)
 
@@ -258,7 +259,8 @@ PLUNDARR_COMPOSE = $(DOCKER_COMPOSE) \
 # Docker Compose command used to build Maraudarr from its self-contained image
 # context. This file and environment pair never replace generated Plundarr files.
 #
-MARAUDARR_COMPOSE = MARAUDARR_IMAGE="$(MARAUDARR_IMAGE)" \
+MARAUDARR_COMPOSE = \
+	MARAUDARR_IMAGE="$(MARAUDARR_IMAGE)" \
 	$(DOCKER_COMPOSE) \
 	--env-file $(MARAUDARR_ENV_FILE) \
 	-f $(MARAUDARR_COMPOSE_FILE)
@@ -304,6 +306,7 @@ endef
 # interactive terminals and honor the standard NO_COLOR opt-out.
 #
 # See https://no-color.org/ for the opt-out convention.
+#
 COLOR_RESET   := \033[0m
 COLOR_TITLE   := \033[1;36m
 COLOR_COMMAND := \033[1;33m
@@ -781,7 +784,7 @@ $(TEST_MARAUDARR): $(BUILD_DEPENDS) $(TEST_MARAUDARR_UNIT) $(TEST_WORKFLOW_HELPE
 
 #
 # $(DOCS_VENV)/bin/python: Creates an isolated Python environment for developer
-#                           documentation tooling.
+#                          documentation tooling.
 #
 $(DOCS_VENV)/bin/python:
 	$(call announce,📚 Creating the isolated developer documentation toolchain...)
@@ -792,9 +795,8 @@ $(DOCS_VENV)/bin/python:
 	}
 
 #
-# $(DOCS_VENV)/.requirements-installed: Installs the pinned developer
-#                                         documentation toolchain when its
-#                                         requirements change.
+# $(DOCS_VENV)/.requirements-installed: Installs the pinned developer documentation
+#                                       toolchain when its requirements change.
 #
 $(DOCS_VENV)/.requirements-installed: $(DOCS_REQUIREMENTS) | $(DOCS_VENV)/bin/python
 	$(call announce,📦 Installing pinned developer documentation tools...)
@@ -992,13 +994,13 @@ $(HELP):
 	$(call help_line,$(CONFIGURE),Open the interactive preset and service selector.)
 	$(call help_line,$(PRESETS),List presets and their default services.)
 	$(call help_line,$(AVAILABLE_SERVICES),List every selectable service.)
-	$(call help_heading,🚀 Run the selected deployment)
+	$(call help_heading,🚀 Run the stack)
 	$(call help_line,$(UP),Start or recreate the selected stack.)
 	$(call help_line,$(DOWN),Stop and remove selected-stack containers and networks.)
 	$(call help_line,$(PS),Show a compact container status table.)
 	$(call help_line,$(LOGS),Follow selected-stack logs.)
 	$(call help_line,$(OPEN),Open selected-stack web interfaces on macOS.)
-	$(call help_heading,🔎 Inspect generated output)
+	$(call help_heading,🔎 Inspect the output)
 	$(call help_line,$(CONFIG),Print Docker Compose's rendered configuration.)
 	$(call help_line,$(COMPOSE_SERVICES),List rendered Compose services.)
 	$(call help_line,$(ENV),Print rendered environment values.)
@@ -1023,8 +1025,8 @@ $(HELP):
 	$(call help_line,$(CLEAN_ARTIFACTS),Remove only disposable developer artifacts.)
 	$(call help_line,$(CLEAN),Stop the stack and restore example test config.)
 	$(call help_line,$(RESET_CONFIG),Restore example VPN config files for tests.)
-	$(call help_line,$(CLEAN_CONFIG),‼️DANGER‼️ delete the selected preset config tree.)
-	$(call help_line,$(NUKE),‼️DANGER‼️ remove selected-stack containers volumes and images.)
+	$(call help_line,$(CLEAN_CONFIG),‼️ DANGER ‼️ delete the selected preset config tree.)
+	$(call help_line,$(NUKE),‼️ DANGER ️‼️ remove selected-stack containers volumes and images.)
 	$(call announce_warning,⚠️  Destructive targets never run automatically. Back up config before using them.)
 
 #

@@ -27,11 +27,15 @@ TEST_IMAGE="ghcr.io/scottgigawatt/maraudarr:test"
 #
 # Parameters: None.
 #
-# Returns:     Always returns 0 so cleanup cannot hide the original result.
+# Returns: Always returns 0 so cleanup cannot hide the original result.
 #
 cleanup() {
     rm -rf "${TEST_ROOT}"
 }
+
+#
+# Set up cleanup on exit, hangup, interrupt, or termination.
+#
 trap cleanup EXIT HUP INT TERM
 
 #
@@ -40,7 +44,7 @@ trap cleanup EXIT HUP INT TERM
 # Parameters: $1 - Failure message.
 #             $2 - Docker command log path.
 #
-# Returns:     Does not return; exits with status 1.
+# Returns: Does not return; exits with status 1.
 #
 fail() {
     message=$1
@@ -60,12 +64,13 @@ fail() {
 # Parameters: $1 - Expected fragment.
 #             $2 - Docker command log path.
 #
-# Returns:     0 when present; otherwise exits through fail.
+# Returns: 0 when present; otherwise exits through fail.
 #
 assert_contains() {
     expected=$1
     log_path=$2
 
+    # Check for the expected fragment in the log, ignoring errors.
     grep -F -- "${expected}" "${log_path}" >/dev/null 2>&1 \
         || fail "Expected Docker command was not called: ${expected}" "${log_path}"
 }
@@ -76,12 +81,13 @@ assert_contains() {
 # Parameters: $1 - Unexpected fragment.
 #             $2 - Docker command log path.
 #
-# Returns:     0 when absent; otherwise exits through fail.
+# Returns: 0 when absent; otherwise exits through fail.
 #
 assert_absent() {
     unexpected=$1
     log_path=$2
 
+    # Check for the unexpected fragment in the log, ignoring errors.
     if grep -F -- "${unexpected}" "${log_path}" >/dev/null 2>&1; then
         fail "Unexpected Docker command was called: ${unexpected}" "${log_path}"
     fi
@@ -96,7 +102,7 @@ assert_absent() {
 #             $4 - Build result.
 #             $5 - Expected result.
 #
-# Returns:     0 when the observed result matches the expected result.
+# Returns: 0 when the observed result matches the expected result.
 #
 run_case() {
     case_name=$1

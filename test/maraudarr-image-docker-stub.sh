@@ -66,5 +66,9 @@ for argument in "$@"; do
     fi
 done
 
+#
+# Exit with an error for any other command, since the stub only supports
+# a limited set of Docker commands.
+#
 printf 'Unexpected Docker stub command: %s\n' "$*" >&2
 exit 1

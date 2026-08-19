@@ -16,15 +16,24 @@
 #
 set -eu
 
+#
+# Record all Skopeo calls to the test log for later validation.
+#
 printf '%s\n' "$*" >> "@SKOPEO_LOG@"
 
+#
+# Return a stable digest for the test Maraudarr image when Skopeo copies or inspects it.
+#
 case "${1:-}" in
+    # Return a stable digest for the test Maraudarr image when Skopeo copies it.
     copy)
         exit 0
         ;;
+    # Return a stable digest for the test Maraudarr image when Skopeo inspects it.
     inspect)
         printf '%s\n' 'sha256:0123456789abcdef'
         ;;
+    # Handle unexpected Skopeo commands gracefully.
     *)
         printf 'Unexpected Skopeo command: %s\n' "$*" >&2
         exit 1

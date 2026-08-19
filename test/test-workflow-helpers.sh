@@ -16,6 +16,9 @@
 #
 set -eu
 
+#
+# Default test settings. MARAUDARR_TEST_OUTPUT can move generated charts to a
+#
 REPOSITORY_ROOT=$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd)
 TEST_ROOT=$(mktemp -d)
 SKOPEO_LOG="${TEST_ROOT}/skopeo.log"
@@ -25,11 +28,15 @@ SKOPEO_LOG="${TEST_ROOT}/skopeo.log"
 #
 # Parameters: None.
 #
-# Returns:     Always returns 0 so cleanup cannot hide the original result.
+# Returns: Always returns 0 so cleanup cannot hide the original result.
 #
 cleanup() {
     rm -rf "${TEST_ROOT}"
 }
+
+#
+# Set up cleanup on exit, hangup, interrupt, or termination.
+#
 trap cleanup EXIT HUP INT TERM
 
 #
@@ -38,7 +45,7 @@ trap cleanup EXIT HUP INT TERM
 # Parameters: $1 - JSON document path.
 #             $2 - jq assertion expression.
 #
-# Returns:     0 when the expression succeeds; otherwise returns nonzero.
+# Returns: 0 when the expression succeeds; otherwise returns nonzero.
 #
 assert_json_value() {
     jq -e "$2" "$1" >/dev/null
@@ -130,7 +137,7 @@ chmod +x "${TEST_ROOT}/bin/skopeo"
 #
 # Parameters: $@ - Registry-helper flags.
 #
-# Returns:     The registry helper's exit status.
+# Returns: The registry helper's exit status.
 #
 run_registry_helper() {
     GHCR_TOKEN=test-token \
@@ -146,9 +153,15 @@ ghcr.io/test/maraudarr:sha-test" \
         "$@"
 }
 
+#
+# Run the registry helper to mirror and verify the test Maraudarr image without writing to any registry.
+#
 run_registry_helper --mirror
 run_registry_helper -v
 
+#
+# Validate that the Skopeo recorder logged the expected copy and digest operations.
+#
 grep -F -- 'copy --all --preserve-digests' "${SKOPEO_LOG}" >/dev/null
 grep -F -- 'docker://docker.io/test/maraudarr:sha-test' "${SKOPEO_LOG}" >/dev/null
 grep -F -- 'inspect --creds' "${SKOPEO_LOG}" >/dev/null
