@@ -77,8 +77,18 @@ PLUNDARR_TEST_LOG="${test_output}/docker.log" \
         --compose-file "${test_output}/compose.yml" \
         >"${test_output}/ps.out"
 
+#
+# Confirm the status helper invokes Docker Compose with the expected arguments.
+#
 grep -F -- "compose --env-file ${test_output}/stack.env -f ${test_output}/compose.yml ps --format" \
     "${test_output}/docker.log" >/dev/null
+
+#
+# Confirm the status helper returns the expected Compose output.
+#
 grep -F "plundarr-prowlarr-latest" "${test_output}/ps.out" >/dev/null
 
+#
+# Report success.
+#
 echo "Make helper tests passed."

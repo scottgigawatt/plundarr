@@ -10,6 +10,9 @@
 # Usage: scripts/compose/ps.sh --env-file <path> --compose-file <path> [options]
 #
 
+#
+# Variables for the Compose project and its environment.
+#
 compose_file=""
 docker_bin="docker"
 env_file=""
@@ -85,13 +88,16 @@ while [ "$#" -gt 0 ]; do
 done
 
 #
-# Validate required paths before asking Compose to inspect the project.
+# Validate that the required paths were provided.
 #
 if [ ! -f "${env_file}" ]; then
     printf 'Environment file not found: %s\n' "${env_file}" >&2
     exit 1
 fi
 
+#
+# Validate required paths before asking Compose to inspect the project.
+#
 if [ ! -f "${compose_file}" ]; then
     printf 'Compose file not found: %s\n' "${compose_file}" >&2
     exit 1

@@ -12,6 +12,9 @@
 #        --required-file <path> [options]
 #
 
+#
+# Directory for smoke-test output.
+#
 add_services=""
 deployment_root="dist"
 docker_bin="docker"
@@ -36,6 +39,7 @@ set -eu
 # Returns: Nothing.
 #
 cleanup() {
+    # Remove the isolated smoke-test output directory.
     if [ -n "${smoke_output}" ] && [ -d "${smoke_output}" ]; then
         rm -rf "${smoke_output}"
     fi
@@ -49,6 +53,7 @@ cleanup() {
 # Returns: Prints usage text.
 #
 usage() {
+    # Print the supported command-line options.
     printf '%s\n' \
         "Usage: $0 --image <image> --preset <preset> --required-file <path> [options]" \
         "" \
@@ -143,13 +148,16 @@ while [ "$#" -gt 0 ]; do
 done
 
 #
-# Validate the required inputs and keep the container output under its mount.
+# Validate that the required options are present.
 #
 if [ -z "${image}" ] || [ -z "${preset}" ] || [ -z "${required_file}" ]; then
     echo "--image, --preset, and --required-file are required." >&2
     exit 2
 fi
 
+#
+# Validate that the output root is under the output mount.
+#
 expected_output_root="${output_mount}/${deployment_root}"
 if [ "${output_root}" != "${expected_output_root}" ]; then
     echo "--output-root must equal --output-mount/--deployment-root." >&2
@@ -162,6 +170,9 @@ fi
 smoke_output=$(mktemp -d)
 trap cleanup 0 1 2 15
 
+#
+# Run the container with the specified options.
+#
 "${docker_bin}" run \
     --rm \
     --read-only \
@@ -178,6 +189,9 @@ trap cleanup 0 1 2 15
     --add "${add_services}" \
     --output-root "${output_root}"
 
+#
+# Validate that the expected files were generated.
+#
 smoke_deployment="${smoke_output}/${deployment_root}/${preset}"
 test -s "${smoke_deployment}/docker-compose.yml"
 test -s "${smoke_deployment}/.env"

@@ -16,6 +16,10 @@
 #
 set -eu
 
+#
+# Validate that the resolved PIA credentials are not empty or still use the
+# documented example values.
+#
 pia_user=""
 pia_pass=""
 
@@ -55,6 +59,9 @@ if credential_is_invalid "${pia_user}" "p1234567"; then
     exit 1
 fi
 
+#
+# Reject missing values and the documented examples generated for new stacks.
+#
 if credential_is_invalid "${pia_pass}" "abc123"; then
     echo "PIA_PASS is missing or still uses the generated example value." >&2
     echo "Set PIA_PASS in the selected preset's .env file before starting Privateerr." >&2
