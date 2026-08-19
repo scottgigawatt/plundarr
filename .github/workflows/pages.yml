@@ -9,13 +9,16 @@
 name: "Publish the Developer Charts 📚🏴‍☠️"
 
 #
-# Publish only documentation-relevant changes merged to main, or when a
-# maintainer explicitly requests a fresh deployment.
+# Publish only documentation-relevant changes merged to main or release tags
+# created from main. Pull requests continue to build documentation exclusively
+# through validate-pr.yml and never receive Pages deployment permissions.
 #
 on:
   push:
     branches:
       - main
+    tags:
+      - "v*"
     paths:
       - ".github/scripts/notify-docs-discord.sh"
       - ".github/workflows/pages.yml"
@@ -24,7 +27,6 @@ on:
       - "Makefile"
       - "mkdocs.yml"
       - "requirements-docs.txt"
-  workflow_dispatch:
 
 permissions:
   contents: read
@@ -48,7 +50,19 @@ jobs:
       - name: "Grab the Source Charts 📖"
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
+          # Release-tag publication must inspect the complete main history.
+          fetch-depth: 0
           persist-credentials: false
+
+      # A matching tag name alone is insufficient: only release commits that
+      # already belong to main may publish the project documentation.
+      - name: "Confirm the Release Tag Sailed from Main 🔖"
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          if ! git merge-base --is-ancestor "${GITHUB_SHA}^{commit}" origin/main; then
+              echo "::error::Release tags must point to a commit on main before publishing Pages."
+              exit 1
+          fi
 
       - name: "Ready the Python Quill 🪶"
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7

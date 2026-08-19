@@ -54,6 +54,9 @@ Use GitHub callouts where they improve scanning:
 - `[!WARNING]`
 - `[!CAUTION]`
 
+MkDocs converts this native GitHub syntax through `pymdownx.quotes`; do not
+maintain a second `!!!` admonition form for the published site.
+
 Put helpful copyable command examples inside `[!TIP]` callouts when the
 surrounding section is teaching a command sequence. Use `[!IMPORTANT]` for
 required command sequences and `[!CAUTION]` when commands carry meaningful

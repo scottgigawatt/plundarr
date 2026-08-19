@@ -175,6 +175,11 @@ markdown_extensions:
       line_spans: __span
       pygments_lang_class: true
   - pymdownx.inlinehilite
+
+  # Interpret GitHub's native blockquote alerts as Material admonitions so one
+  # Markdown form renders correctly in both the repository and published site.
+  - pymdownx.quotes:
+      callouts: true
   - pymdownx.snippets
 
   # Render nested fences normally while routing Mermaid blocks to its renderer.
