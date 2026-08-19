@@ -325,8 +325,8 @@ images stay put.
 
 ## Ship's Log 🏝️
 
-| Compatibility               | Status      | Details                                                                                                                                                                  |
-| --------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Compatibility               |   Status    | Details                                                                                                                                                                  |
+| :-------------------------- | :---------: | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 🗄️&nbsp;Synology DiskStation    | ✅&nbsp;Tested    | DSM 7.4.1-90080 with Container Manager projects                                                                                                                               |
 | 🍎&nbsp;macOS                    | ✅&nbsp;Tested    | macOS Tahoe 26 with Docker Desktop and Docker Compose                                                                                                                         |
 | 🐧&nbsp;Other Docker hosts       | 🧭&nbsp;Expected | A compatible Docker Engine and Compose implementation should run the generated chart                                                                                          |
