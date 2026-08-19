@@ -57,9 +57,9 @@ print_error() {
 #
 print_detail() {
     if [ -t 2 ] && [ -z "${NO_COLOR:-}" ]; then
-        printf '  %b%s%b\n' "$1" "$2" "${color_reset}" >&2
+        printf '    %b%s%b\n' "$1" "$2" "${color_reset}" >&2
     else
-        printf '  %s\n' "$2" >&2
+        printf '    %s\n' "$2" >&2
     fi
 }
 
@@ -72,12 +72,17 @@ print_detail() {
 #
 report_invalid_credential() {
     print_error "☠️  Privateerr cannot sail without valid PIA credentials."
+    printf '\n' >&2
     print_detail \
         "${color_warning}" \
-        "$1 is missing or still uses the generated example value."
+        "Credential  $1"
+    print_detail \
+        "${color_warning}" \
+        "Problem     Missing or still using the generated example value."
     print_detail \
         "${color_muted}" \
-        "Set $1 in the selected preset's .env file, then run make up again."
+        "Fix         Set $1 in the selected preset's .env file, then run make up again."
+    printf '\n' >&2
 }
 
 #

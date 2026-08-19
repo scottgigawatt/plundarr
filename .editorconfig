@@ -7,6 +7,10 @@
 #                formatted across supported editors.
 #
 
+#
+# Indicates that this is the top-most EditorConfig file and that all
+# other EditorConfig files in subdirectories should be ignored.
+#
 root = true
 
 #

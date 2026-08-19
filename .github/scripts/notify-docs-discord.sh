@@ -143,6 +143,7 @@ done
 #          or a portable timestamp checksum fallback.
 #
 random_value() {
+    # Use the supplied random value if present, but validate it first.
     if [ -n "${discord_random_value}" ]; then
         case "${discord_random_value}" in
             *[!0-9]*)
@@ -154,6 +155,7 @@ random_value() {
         return 0
     fi
 
+    # Use /dev/urandom if available, but fall back to a portable checksum.
     if [ -r /dev/urandom ] && command -v od >/dev/null 2>&1; then
         value=$(od -An -N4 -tu4 /dev/urandom | awk 'NF {print $1; exit}')
         if [ -n "${value}" ]; then
@@ -162,6 +164,7 @@ random_value() {
         fi
     fi
 
+    # Fallback to a portable timestamp checksum if no other source is available.
     printf '%s' "$(date +%s)-$$-${build_status}-${deploy_status}" \
         | cksum \
         | awk '{print $1}'
@@ -175,11 +178,13 @@ random_value() {
 # Returns: Prints exactly one selected message.
 #
 choose_message() {
+    # Validate that at least one message is supplied.
     if [ "$#" -eq 0 ]; then
         echo "choose_message requires at least one message." >&2
         return 1
     fi
 
+    # Use a random value to select one of the supplied messages.
     value=$(random_value)
     choice=$((value % $# + 1))
     while [ "${choice}" -gt 1 ]; do
@@ -198,6 +203,7 @@ choose_message() {
 # Returns: 0 when present; otherwise returns 1.
 #
 require_value() {
+    # Validate that a required input is present.
     if [ -z "$2" ]; then
         printf '%s is required.\n' "$1" >&2
         return 1

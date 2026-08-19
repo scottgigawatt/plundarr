@@ -61,9 +61,11 @@ fi
 #
 grep -F "Privateerr cannot sail without valid PIA credentials." \
     "${test_output}/missing.out" >/dev/null
-grep -F "PIA_USER is missing or still uses the generated example value." \
+grep -F "Credential  PIA_USER" \
     "${test_output}/missing.out" >/dev/null
-grep -F "Set PIA_USER in the selected preset's .env file, then run make up again." \
+grep -F "Problem     Missing or still using the generated example value." \
+    "${test_output}/missing.out" >/dev/null
+grep -F "Fix         Set PIA_USER in the selected preset's .env file, then run make up again." \
     "${test_output}/missing.out" >/dev/null
 
 #
@@ -83,7 +85,7 @@ if printf '%s\n' 'PIA_USER=p7654321' 'PIA_PASS=abc123' \
     exit 1
 fi
 
-grep -F "PIA_PASS is missing or still uses the generated example value." \
+grep -F "Credential  PIA_PASS" \
     "${test_output}/placeholder.out" >/dev/null
 
 #
@@ -108,6 +110,18 @@ grep -F -- "compose --env-file ${test_output}/stack.env -f ${test_output}/compos
 # Confirm the status helper returns the expected Compose output.
 #
 grep -F "plundarr-prowlarr-latest" "${test_output}/ps.out" >/dev/null
+grep -F "plundarr-gluetun-latest" "${test_output}/ps.out" >/dev/null
+
+#
+# Stack crowded port lists while retaining compact two-binding rows.
+#
+test "$(grep -c 'plundarr-gluetun-latest' "${test_output}/ps.out")" -eq 1
+grep -E '^[[:space:]]+\[::\]:6881->6881/tcp$' \
+    "${test_output}/ps.out" >/dev/null
+grep -E '^[[:space:]]+0\.0\.0\.0:8080->8080/tcp$' \
+    "${test_output}/ps.out" >/dev/null
+grep -F "0.0.0.0:9696->9696/tcp, [::]:9696->9696/tcp" \
+    "${test_output}/ps.out" >/dev/null
 
 #
 # Report success.

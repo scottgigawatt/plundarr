@@ -30,9 +30,15 @@ if [ "$#" -ge 2 ] && [ "$1" = "compose" ] && [ "$2" = "version" ]; then
 fi
 
 #
-# Record the invocation and return a stable Compose status table.
+# Record the invocation and return stable tab-separated Compose status rows.
 #
 printf '%s\n' "$*" >"${PLUNDARR_TEST_LOG}"
-printf '%s\n' \
-    "NAMES                         SERVICE      STATUS          PORTS" \
-    "plundarr-prowlarr-latest      prowlarr     Up 1 minute     0.0.0.0:9696->9696/tcp"
+printf '%s\t%s\t%s\t%s\n' \
+    "plundarr-gluetun-latest" \
+    "gluetun" \
+    "Up 1 minute (healthy)" \
+    "0.0.0.0:6881->6881/tcp, [::]:6881->6881/tcp, 0.0.0.0:8080->8080/tcp, [::]:8080->8080/tcp" \
+    "plundarr-prowlarr-latest" \
+    "prowlarr" \
+    "Up 1 minute (healthy)" \
+    "0.0.0.0:9696->9696/tcp, [::]:9696->9696/tcp"

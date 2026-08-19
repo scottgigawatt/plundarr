@@ -56,6 +56,64 @@ require_option_argument() {
 }
 
 #
+# format_status_table: Align Compose status rows and stack crowded port lists.
+#
+# Parameters: None. Reads tab-separated Compose status rows from standard input.
+#
+# Returns: Prints a compact status table.
+#
+format_status_table() {
+    awk -F '\t' '
+        BEGIN {
+            name_width = length("NAME")
+            service_width = length("SERVICE")
+            status_width = length("STATUS")
+            stack_threshold = 2
+        }
+
+        {
+            row_count++
+            names[row_count] = $1
+            services[row_count] = $2
+            statuses[row_count] = $3
+            port_lists[row_count] = $4
+
+            if (length($1) > name_width) {
+                name_width = length($1)
+            }
+            if (length($2) > service_width) {
+                service_width = length($2)
+            }
+            if (length($3) > status_width) {
+                status_width = length($3)
+            }
+        }
+
+        END {
+            row_format = "%-" name_width "s  %-" service_width "s  %-" status_width "s  %s\n"
+            printf row_format, "NAME", "SERVICE", "STATUS", "PORTS"
+
+            for (row = 1; row <= row_count; row++) {
+                port_count = split(port_lists[row], ports, /,[[:space:]]*/)
+                if (port_lists[row] == "") {
+                    port_count = 0
+                }
+
+                if (port_count <= stack_threshold) {
+                    printf row_format, names[row], services[row], statuses[row], port_lists[row]
+                    continue
+                }
+
+                printf row_format, names[row], services[row], statuses[row], ports[1]
+                for (port = 2; port <= port_count; port++) {
+                    printf row_format, "", "", "", ports[port]
+                }
+            }
+        }
+    '
+}
+
+#
 # Parse command-line flags and arguments.
 #
 while [ "$#" -gt 0 ]; do
@@ -108,11 +166,12 @@ fi
 # Compose owns project-name resolution, so nested .env defaults remain correct.
 #
 if "${docker_bin}" compose version >/dev/null 2>&1; then
-    "${docker_bin}" compose \
+    compose_status=$("${docker_bin}" compose \
         --env-file "${env_file}" \
         -f "${compose_file}" \
         ps \
-        --format 'table {{.Name}}\t{{.Service}}\t{{.Status}}\t{{.Ports}}'
+        --format '{{.Name}}\t{{.Service}}\t{{.Status}}\t{{.Ports}}')
+    printf '%s' "${compose_status}" | format_status_table
 elif command -v docker-compose >/dev/null 2>&1; then
     docker-compose \
         --env-file "${env_file}" \
