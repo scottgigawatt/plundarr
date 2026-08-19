@@ -6,15 +6,15 @@ header before running it with elevated privileges.
 
 ## Script Chart 🧭
 
-| Hold | Script | Purpose |
-| ---- | ------ | ------- |
+| Hold       | Script                                                                 | Purpose                                                            |
+| ---------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------ |
 | 🐳 Compose | [`compose/check-pia-credentials.sh`](compose/check-pia-credentials.sh) | Reject missing or example PIA credentials before Privateerr starts |
-| 🐳 Compose | [`compose/ps.sh`](compose/ps.sh) | Print a compact status table for one generated project |
-| 🐳 Compose | [`compose/restart.sh`](compose/restart.sh) | Wait for Docker, stop a project safely, and start it again |
-| 🐧 Linux | [`linux/set-inotify-limits.sh`](linux/set-inotify-limits.sh) | Raise inotify limits for large Plex libraries |
-| ⚓ Synology | [`synology/docker-socket.sh`](synology/docker-socket.sh) | Restore trusted `docker` group access to the Docker socket |
-| ⚓ Synology | [`synology/entware.sh`](synology/entware.sh) | Mount and start Entware during boot |
-| ⚓ Synology | [`synology/tun.sh`](synology/tun.sh) | Ensure `/dev/net/tun` exists for VPN containers |
+| 🐳 Compose | [`compose/ps.sh`](compose/ps.sh)                                       | Print a compact status table for one generated project             |
+| 🐳 Compose | [`compose/restart.sh`](compose/restart.sh)                             | Wait for Docker, stop a project safely, and start it again         |
+| 🐧 Linux   | [`linux/set-inotify-limits.sh`](linux/set-inotify-limits.sh)           | Raise inotify limits for large Plex libraries                      |
+| ⚓ Synology | [`synology/docker-socket.sh`](synology/docker-socket.sh)               | Restore trusted `docker` group access to the Docker socket         |
+| ⚓ Synology | [`synology/entware.sh`](synology/entware.sh)                           | Mount and start Entware during boot                                |
+| ⚓ Synology | [`synology/tun.sh`](synology/tun.sh)                                   | Ensure `/dev/net/tun` exists for VPN containers                    |
 
 > [!IMPORTANT]
 > Scripts under `scripts/synology/` run directly on a Synology NAS. They are
