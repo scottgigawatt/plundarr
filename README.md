@@ -70,9 +70,10 @@ Plundarr has two clearly separate parts:
   - 📂 `dist/<preset>/config/`
 
 > [!NOTE]
-> `<preset>` is `plundarr`, `boudoirr`, `jellyfin`, `plex`, or `custom`.
-> Add-ons change the services aboard without changing the selected
-> `dist/<preset>/` directory name.
+>
+> - `<preset>` is `plundarr`, `boudoirr`, `jellyfin`, `plex`, or `custom`.
+> - Add-ons change the services aboard without changing the directory name.
+> - For example, `make ship ADD_SERVICES=plex` would deploy to `dist/plundarr/`.
 
 `make ship` and `make configure` run the published Maraudarr image when it is
 available, or build it from this checkout as a fallback. Maraudarr keeps the
@@ -86,51 +87,47 @@ Watch Maraudarr chart the default Plundarr voyage, generate one complete
 configuration, and raise the Compose fleet:
 
 <!-- markdownlint-disable MD033 -->
-<p align="center">
-  <img src="./docs/assets/maraudarr-demo.gif" width="800" alt="Maraudarr generates and starts a Plundarr Docker Compose stack" />
-</p>
+<img src="./docs/assets/maraudarr-demo.gif" width="1000" alt="Maraudarr generates and starts a Plundarr Docker Compose stack" />
 <!-- markdownlint-enable MD033 -->
 
-The animation follows the real `make configure`, `make up`, and `make ps`
-workflow for `dist/plundarr/`. Curious captains can inspect or replay the
-[recording source](./docs/demo/record-maraudarr-demo.sh).
+The animation shows the `make configure`, `make up`, and `make ps` workflows for `dist/plundarr/`.
 
 > [!NOTE]
-> The disposable recording uses inert VPN bootstrap stand-ins, so it needs no
-> PIA credentials and opens no tunnel. A normal `make up` launches Privateerr
-> and Gluetun from the generated chart.
+>
+> 🗡️ Curious captains can inspect or replay the 🎥 [recording source](./docs/demo/record-maraudarr-demo.sh).
 
 ## Treasure Map 🗺️
 
 Choose a preset in `make configure`, or pass it to `make ship`. These are the
 exact services included before ye add or remove anything:
 
-| Preset           | Best For                             | Included Out of the Box                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| ---------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 🏴‍☠️&nbsp;`plundarr` | Movies and TV automation             | [Privateerr](https://github.com/scottgigawatt/privateerr), [Gluetun](https://github.com/qdm12/gluetun), [FlareSolverr](https://github.com/FlareSolverr/FlareSolverr), [Prowlarr](https://github.com/Prowlarr/Prowlarr), [qBittorrent](https://github.com/qbittorrent/qBittorrent), [Radarr](https://github.com/Radarr/Radarr), [Sonarr](https://github.com/Sonarr/Sonarr), [Bazarr](https://github.com/morpheus65535/bazarr), [Seerr](https://github.com/seerr-team/seerr), [Cleanuparr](https://github.com/Cleanuparr/Cleanuparr), [Speedtest Tracker](https://docs.speedtest-tracker.dev/), [Duplicati](https://www.duplicati.com), and [Homepage](https://gethomepage.dev/latest/) |
+| Preset                | Best For                             | Included Out of the Box                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| --------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 🏴‍☠️&nbsp;`plundarr`    | Movies and TV automation             | [Privateerr](https://github.com/scottgigawatt/privateerr), [Gluetun](https://github.com/qdm12/gluetun), [FlareSolverr](https://github.com/FlareSolverr/FlareSolverr), [Prowlarr](https://github.com/Prowlarr/Prowlarr), [qBittorrent](https://github.com/qbittorrent/qBittorrent), [Radarr](https://github.com/Radarr/Radarr), [Sonarr](https://github.com/Sonarr/Sonarr), [Bazarr](https://github.com/morpheus65535/bazarr), [Seerr](https://github.com/seerr-team/seerr), [Cleanuparr](https://github.com/Cleanuparr/Cleanuparr), [Speedtest Tracker](https://docs.speedtest-tracker.dev/), [Duplicati](https://www.duplicati.com), and [Homepage](https://gethomepage.dev/latest/) |
 | 🔞&nbsp;`boudoirr`    | Whisparr automation                  | [Privateerr](https://github.com/scottgigawatt/privateerr), [Gluetun](https://github.com/qdm12/gluetun), [FlareSolverr](https://github.com/FlareSolverr/FlareSolverr), [Prowlarr](https://github.com/Prowlarr/Prowlarr), [qBittorrent](https://github.com/qbittorrent/qBittorrent), [Whisparr](https://github.com/Whisparr/Whisparr), and [Cleanuparr](https://github.com/Cleanuparr/Cleanuparr)                                                                                                                                                                                                                                                                                       |
 | 🎞️&nbsp;`jellyfin`    | Standalone movies and TV playback    | [Jellyfin](https://jellyfin.org/docs/)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | 🎬&nbsp;`plex`        | Standalone movies and TV playback    | [Plex Media Server](https://support.plex.tv/articles/categories/plex-media-server/)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | 🧩&nbsp;`custom`      | A stack assembled service by service | Nothing; every service is selected explicitly                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 
 Plundarr and Boudoirr use qBittorrent as their only default downloader. On
-those presets, SABnzbd, NZBGet, Jellyfin, Plex, and Watchtower are never
-silently added.
+those presets, SABnzbd, NZBGet, Jellyfin, Plex, and Watchtower are are not present
+by default but may be added using `ADD_SERVICES`; e.g., `make ship ADD_SERVICES=sabnzbd,jellyfin`.
 
 ### Cargo Ye Can Add 🧩
 
 Every catalog service can be added to a compatible preset. Maraudarr adds any
 required foundation services and shows the resolved fleet before writing it.
 
-| Cargo Hold       | Selectable Services                                                                                                                                                                                                                                                                                                                                                           |
-| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Cargo Hold                    | Selectable Services                                                                                                                                                                                                                                                                                                                                                           |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 🛡️&nbsp;VPN&nbsp;foundation   | [Privateerr](https://github.com/scottgigawatt/privateerr) and [Gluetun](https://github.com/qdm12/gluetun)                                                                                                                                                                                                                                                                     |
 | ⬇️&nbsp;Download&nbsp;clients | [qBittorrent](https://github.com/qbittorrent/qBittorrent), [SABnzbd](https://sabnzbd.org/wiki/), and [NZBGet](https://nzbget.com/documentation/)                                                                                                                                                                                                                              |
-| ⚙️&nbsp;Automation             | [FlareSolverr](https://github.com/FlareSolverr/FlareSolverr), [Prowlarr](https://wiki.servarr.com/prowlarr), [Radarr](https://wiki.servarr.com/radarr), [Sonarr](https://wiki.servarr.com/sonarr), [Sonarr Anime](https://wiki.servarr.com/sonarr), [Whisparr](https://wiki.servarr.com/whisparr), [Bazarr](https://wiki.bazarr.media/), and [Seerr](https://docs.seerr.dev/) |
+| ⚙️&nbsp;Automation            | [FlareSolverr](https://github.com/FlareSolverr/FlareSolverr), [Prowlarr](https://wiki.servarr.com/prowlarr), [Radarr](https://wiki.servarr.com/radarr), [Sonarr](https://wiki.servarr.com/sonarr), [Sonarr Anime](https://wiki.servarr.com/sonarr), [Whisparr](https://wiki.servarr.com/whisparr), [Bazarr](https://wiki.bazarr.media/), and [Seerr](https://docs.seerr.dev/) |
 | 🎞️&nbsp;Media&nbsp;servers    | [Jellyfin](https://jellyfin.org/docs/) and [Plex Media Server](https://support.plex.tv/articles/categories/plex-media-server/)                                                                                                                                                                                                                                                |
-| 🧰&nbsp;Operations             | [Cleanuparr](https://cleanuparr.github.io/Cleanuparr/), [Speedtest Tracker](https://docs.speedtest-tracker.dev/), [Apprise](https://github.com/caronc/apprise-api), [Duplicati](https://docs.duplicati.com/), [Homepage](https://gethomepage.dev/latest/), and [Watchtower](https://containrrr.dev/watchtower/)                                                               |
+| 🧰&nbsp;Operations            | [Cleanuparr](https://cleanuparr.github.io/Cleanuparr/), [Speedtest Tracker](https://docs.speedtest-tracker.dev/), [Apprise](https://github.com/caronc/apprise-api), [Duplicati](https://docs.duplicati.com/), [Homepage](https://gethomepage.dev/latest/), and [Watchtower](https://containrrr.dev/watchtower/)                                                               |
 
 > [!NOTE]
+>
 > 📚 Readarr has been scuttled from this fleet; use
 > [Calibre Web Automated](https://github.com/scottgigawatt/calibre-web-automated)
 > for book cargo.
@@ -162,6 +159,7 @@ dist/
 ```
 
 > [!IMPORTANT]
+>
 > 🔐 Open `dist/plundarr/.env` before launch. Most defaults can stay aboard,
 > but real PIA credentials and host storage paths must match yer own harbor.
 
@@ -186,6 +184,7 @@ Maraudarr writes only settings used by the selected services:
 | 🚪&nbsp;`*_WEBUI_PORT`               | Change only when a host port is already occupied                                |
 
 > [!TIP]
+>
 > 🗺️ Fresh paths match the selected preset. Service configuration stays under
 > that preset's `dist/<preset>/config/` directory unless ye change its path in
 > `.env`.
@@ -246,7 +245,7 @@ Choose a preset from the 🗺️ Treasure Map above, inspect its default cargo, 
 > make ship REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=nzbget
 > ```
 
-#### 🔭 Add Update Checks
+#### 🔭 Add Watchtower Container Update Checks
 
 > [!TIP]
 >
@@ -260,6 +259,7 @@ core services cannot be removed. Default services can be unchecked in
 qBittorrent keeps both downloader types.
 
 > [!NOTE]
+>
 > 🧰 Rebuilds preserve existing values by variable name. Fresh voyages receive
 > strong Speedtest Tracker, Duplicati, and NZBGet secrets, while values for
 > temporarily unselected services wait safely in a marked footer until that
@@ -299,6 +299,7 @@ Useful test voyages:
 > ```
 
 > [!WARNING]
+>
 > ⚠️☠️ VPN tests use real PIA credentials from the selected preset's `.env` and
 > may launch real containers. Read the [full testing chart](./test/README.md)
 > before firing those cannons.
@@ -318,31 +319,32 @@ images stay put.
 ## Navigatin' Troubled Waters ☠️🌊
 
 > [!TIP]
+>
 > 🧭 `make help` is the complete grouped command chart. It marks the two
 > intentionally destructive targets, `delete-config` and `nuke`, as danger
 > commands; use `backup` before either one.
 
 ## More Treasure Maps & Crew Codes 🗺️
 
-| Scroll                                                                                   | When Ye Need It                                 |
-| ---------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| Scroll                                                                                        | When Ye Need It                                 |
+| --------------------------------------------------------------------------------------------- | ----------------------------------------------- |
 | 📚&nbsp;[Developer Chart Room](https://scottgigawatt.github.io/plundarr/)                     | Maraudarr architecture and Python reference     |
 | ⚒️&nbsp;[Maraudarr Overview](https://scottgigawatt.github.io/plundarr/development/maraudarr/) | Generator behavior, service charts, and testing |
-| 🖥️&nbsp;[Synology Setup](https://scottgigawatt.github.io/plundarr/SETUP/)                    | Container Manager and host-path preparation     |
-| 🛠️&nbsp;[Contributing](https://scottgigawatt.github.io/plundarr/CONTRIBUTING/)               | Repository standards and pull requests          |
+| 🖥️&nbsp;[Synology Setup](https://scottgigawatt.github.io/plundarr/SETUP/)                     | Container Manager and host-path preparation     |
+| 🛠️&nbsp;[Contributing](https://scottgigawatt.github.io/plundarr/CONTRIBUTING/)                | Repository standards and pull requests          |
 | 🤝&nbsp;[Code of Conduct](https://scottgigawatt.github.io/plundarr/CODE_OF_CONDUCT/)          | Expectations for every member of the crew       |
-| 🛡️&nbsp;[Security](https://scottgigawatt.github.io/plundarr/SECURITY/)                       | Private vulnerability reporting                 |
+| 🛡️&nbsp;[Security](https://scottgigawatt.github.io/plundarr/SECURITY/)                        | Private vulnerability reporting                 |
 | 🧪&nbsp;[Testing Hold](test/README.md)                                                        | VPN, end-to-end, and stack validation           |
 | 🦜&nbsp;[Synology Helper Scripts](scripts/README.md)                                          | Host-specific helper usage                      |
 
 ## Ship's Log 🏝️
 
-| Compatibility               |   Status    | Details                                                                                                                                                                  |
-| :-------------------------- | :---------: | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 🗄️&nbsp;Synology&nbsp;DiskStation    | ✅&nbsp;Tested    | DSM 7.4.1-90080 with Container Manager projects                                                                                                                               |
-| 🍎&nbsp;macOS                    | ✅&nbsp;Tested    | macOS Tahoe 26 with Docker Desktop and Docker Compose                                                                                                                         |
-| 🐧&nbsp;Other&nbsp;Docker&nbsp;hosts       | 🧭&nbsp;Expected | A compatible Docker Engine and Compose implementation should run the generated chart                                                                                          |
-| 🏗️&nbsp;Maraudarr&nbsp;architectures | ✅&nbsp;Published | `linux/amd64`, `linux/arm64`, and `linux/arm/v7`                                                                                                                              |
+| Compatibility                         | Status           | Details                                                                                                                                                                                           |
+| ------------------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 🗄️&nbsp;Synology&nbsp;DiskStation     | ✅&nbsp;Tested    | DSM 7.4.1-90080 with Container Manager projects                                                                                                                                                   |
+| 🍎&nbsp;macOS                         | ✅&nbsp;Tested    | macOS Tahoe 26 with Docker Desktop and Docker Compose                                                                                                                                             |
+| 🐧&nbsp;Other&nbsp;Docker&nbsp;hosts  | 🧭&nbsp;Expected  | A compatible Docker Engine and Compose implementation should run the generated chart                                                                                                              |
+| 🏗️&nbsp;Maraudarr&nbsp;architectures  | ✅&nbsp;Published | `linux/amd64`, `linux/arm64`, and `linux/arm/v7`                                                                                                                                                  |
 | 📦&nbsp;Container&nbsp;registries     | ✅&nbsp;Mirrored  | [📦&nbsp;GitHub&nbsp;Container&nbsp;Registry](https://github.com/scottgigawatt/plundarr/pkgs/container/maraudarr) and [🐳&nbsp;Docker&nbsp;Hub](https://hub.docker.com/r/scottgigawatt/maraudarr) |
 
 Third-party service images may support fewer architectures than Maraudarr.
