@@ -56,11 +56,15 @@ configuration stays where it belongs: in that voyage's `.env`. ⚓️
 Plundarr has two clearly separate parts:
 
 <!-- markdownlint-disable MD033 -->
-| Component     | What It Does and Produces                                                                                                                                                                                                                                                                                                                                                                |
-| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Maraudarr** | Short-lived Compose generator that chooses services, resolves dependencies, validates the result, and exits. Maraudarr is a multi-architecture image published to:<br>📦&nbsp;[GitHub Container Registry](https://github.com/scottgigawatt/plundarr/pkgs/container/maraudarr)<br>🐳&nbsp;[Docker Hub](https://hub.docker.com/r/scottgigawatt/maraudarr) |
-| **Plundarr**  | Generated media stack that stays on yer host and runs the selected services. Each voyage contains:<br>🧾&nbsp;`dist/<preset>/docker-compose.yml`<br>⚙️&nbsp;`dist/<preset>/.env`<br>📂&nbsp;`dist/<preset>/config/` |
+| Component                     | What It Does                                                                                        | Output                                                                                                                                                                                                                     |
+| :---------------------------- | :-------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 🧭&nbsp;**Maraudarr**         | Short-lived generator that chooses services, resolves dependencies, validates the result, and exits | **Published image**<br>📦&nbsp;[GitHub Container Registry](https://github.com/scottgigawatt/plundarr/pkgs/container/maraudarr)<br>🐳&nbsp;[Docker Hub](https://hub.docker.com/r/scottgigawatt/maraudarr) |
+| 🏴‍☠️&nbsp;**Plundarr**         | Generated media stack that stays on yer host and runs the selected services                         | **Generated project**<br>🧾&nbsp;`dist/<preset>/docker-compose.yml`<br>⚙️&nbsp;`dist/<preset>/.env`<br>📂&nbsp;`dist/<preset>/config/`                         |
 <!-- markdownlint-enable MD033 -->
+
+`<preset>` is the selected voyage: `plundarr`, `boudoirr`, `jellyfin`,
+`plex`, or `custom`. Add-ons change the services aboard without changing that
+preset's `dist/<preset>/` directory name.
 
 `make ship` and `make configure` run the published Maraudarr image when it is
 available, or build it from this checkout as a fallback. Maraudarr keeps the

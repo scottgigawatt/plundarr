@@ -54,6 +54,9 @@ RUN=run
 START=start
 STOP=stop
 
+#
+# List of all available targets
+#
 TARGETS= \
 	$(ALL) \
 	$(DOWN) \
@@ -213,7 +216,7 @@ CLEAN_ARTIFACT_FIND_MATCH := -type d -name '__pycache__' -o -type f \( -name '*.
 #
 # Rendered service selection used by runtime tests.
 #
-SELECTED_COMPOSE_SERVICES = $(strip $(shell $(PLUNDARR_COMPOSE) config --services 2>/dev/null))
+SELECTED_COMPOSE_SERVICES  = $(strip $(shell $(PLUNDARR_COMPOSE) config --services 2>/dev/null))
 VPN_QBITTORRENT_SERVICE   ?= $(filter $(QBITTORRENT_SERVICE),$(SELECTED_COMPOSE_SERVICES))
 E2E_DOWNLOAD_SERVICES     ?= $(filter $(QBITTORRENT_SERVICE) $(SABNZBD_SERVICE) $(NZBGET_SERVICE),$(SELECTED_COMPOSE_SERVICES))
 GLUETUN_DOWNLOADER_PORTS  ?= $(if $(filter $(QBITTORRENT_SERVICE),$(SELECTED_COMPOSE_SERVICES)),8080,) \
