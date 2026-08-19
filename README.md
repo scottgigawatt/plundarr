@@ -55,42 +55,24 @@ configuration stays where it belongs: in that voyage's `.env`. ⚓️
 
 Plundarr has two clearly separate parts:
 
-<!-- markdownlint-disable MD033 -->
-<table>
-  <thead>
-    <tr>
-      <th scope="col" width="15%">Component</th>
-      <th scope="col" width="45%">What It Does</th>
-      <th scope="col" width="40%">Output</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>🧭&nbsp;<strong>Maraudarr</strong></td>
-      <td>Short-lived generator that chooses services, resolves dependencies, validates the result, and exits</td>
-      <td>
-        <strong>Published&nbsp;image</strong><br>
-        📦&nbsp;<a href="https://github.com/scottgigawatt/plundarr/pkgs/container/maraudarr">GitHub&nbsp;Container&nbsp;Registry</a><br>
-        🐳&nbsp;<a href="https://hub.docker.com/r/scottgigawatt/maraudarr">Docker&nbsp;Hub</a>
-      </td>
-    </tr>
-    <tr>
-      <td>🏴‍☠️&nbsp;<strong>Plundarr</strong></td>
-      <td>Generated media stack that stays on yer host and runs the selected services</td>
-      <td>
-        <strong>Generated&nbsp;project</strong><br>
-        🧾&nbsp;<code>dist/&lt;preset&gt;/docker-compose.yml</code><br>
-        ⚙️&nbsp;<code>dist/&lt;preset&gt;/.env</code><br>
-        📂&nbsp;<code>dist/&lt;preset&gt;/config/</code>
-      </td>
-    </tr>
-  </tbody>
-</table>
-<!-- markdownlint-enable MD033 -->
+- 🧭 **Maraudarr — the generator.** Chooses services, resolves dependencies,
+  validates the generated stack, and exits. Its multi-architecture image is
+  published to:
 
-`<preset>` is the selected voyage: `plundarr`, `boudoirr`, `jellyfin`,
-`plex`, or `custom`. Add-ons change the services aboard without changing that
-preset's `dist/<preset>/` directory name.
+  - 📦 [GitHub Container Registry](https://github.com/scottgigawatt/plundarr/pkgs/container/maraudarr)
+  - 🐳 [Docker Hub](https://hub.docker.com/r/scottgigawatt/maraudarr)
+
+- 🏴‍☠️ **Plundarr — the generated stack.** Stays on yer host and runs the
+  selected services. Each voyage contains:
+
+  - 🧾 `dist/<preset>/docker-compose.yml`
+  - ⚙️ `dist/<preset>/.env`
+  - 📂 `dist/<preset>/config/`
+
+> [!NOTE]
+> `<preset>` is `plundarr`, `boudoirr`, `jellyfin`, `plex`, or `custom`.
+> Add-ons change the services aboard without changing the selected
+> `dist/<preset>/` directory name.
 
 `make ship` and `make configure` run the published Maraudarr image when it is
 available, or build it from this checkout as a fallback. Maraudarr keeps the
