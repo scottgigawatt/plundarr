@@ -50,12 +50,16 @@ jobs:
       - name: "Grab the Source Charts 📖"
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
+          #
           # Release-tag publication must inspect the complete main history.
+          #
           fetch-depth: 0
           persist-credentials: false
 
+      #
       # A matching tag name alone is insufficient: only release commits that
       # already belong to main may publish the project documentation.
+      #
       - name: "Confirm the Release Tag Sailed from Main 🔖"
         if: startsWith(github.ref, 'refs/tags/')
         run: |
