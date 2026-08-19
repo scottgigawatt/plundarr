@@ -84,7 +84,8 @@ fi
 #
 # set_and_verify: Set one sysctl value and verify the kernel accepted it.
 #
-# Parameters: $1 - sysctl key. $2 - Expected value.
+# Parameters: $1 - sysctl key.
+#             $2 - Expected value.
 #
 # Returns:     0 when the current value matches; exits nonzero on failure.
 #

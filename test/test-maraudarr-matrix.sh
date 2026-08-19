@@ -25,7 +25,8 @@ TEST_ROOT=${MARAUDARR_TEST_OUTPUT:-/tmp/maraudarr-matrix}
 #
 # run_case: Generate one voyage and validate its final deployment pair.
 #
-# Parameters: $1 - Case name. Remaining arguments are Maraudarr build options.
+# Parameters: $1 - Case name.
+#             $@ - Remaining arguments are Maraudarr build options.
 #
 # Returns:     0 when generation and Docker Compose validation succeed.
 #
@@ -56,7 +57,8 @@ run_case() {
 #
 # run_distribution_case: Generate one normal preset beneath a distribution root.
 #
-# Parameters: $1 - Preset name. Remaining arguments are Maraudarr build options.
+# Parameters: $1 - Preset name.
+#             $@ - Remaining arguments are Maraudarr build options.
 #
 # Returns:     0 when generation and Docker Compose validation succeed.
 #

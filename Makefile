@@ -21,6 +21,7 @@ CHECK_RENDERED=check-rendered
 BUILD=build
 BUILD_MARAUDARR=build-maraudarr
 BUILD_MULTIARCH=build-multiarch
+SMOKE_MARAUDARR=smoke-maraudarr
 DOCS=docs
 DOCS_SERVE=docs-serve
 DOCS_DEPENDENCIES=docs-dependencies
@@ -39,6 +40,7 @@ SHIP=ship
 CONFIGURE=configure
 TEST_MARAUDARR_UNIT=test-maraudarr-unit
 TEST_MARAUDARR=test-maraudarr
+TEST_WORKFLOW_HELPERS=test-workflow-helpers
 PRESETS=presets
 AVAILABLE_SERVICES=services
 CONFIG=config
@@ -66,6 +68,7 @@ TARGETS= \
 	$(BUILD) \
 	$(BUILD_MARAUDARR) \
 	$(BUILD_MULTIARCH) \
+	$(SMOKE_MARAUDARR) \
 	$(DOCS) \
 	$(DOCS_SERVE) \
 	$(DOCS_DEPENDENCIES) \
@@ -84,6 +87,7 @@ TARGETS= \
 	$(CONFIGURE) \
 	$(TEST_MARAUDARR_UNIT) \
 	$(TEST_MARAUDARR) \
+	$(TEST_WORKFLOW_HELPERS) \
 	$(PRESETS) \
 	$(AVAILABLE_SERVICES) \
 	$(CONFIG) \
@@ -164,6 +168,10 @@ MARAUDARR_BUILD_OPTIONS   ?= --pull --no-cache
 MARAUDARR_BUILD_PLATFORMS ?= linux/amd64,linux/arm64,linux/arm/v7
 MARAUDARR_MULTIARCH_IMAGE ?= maraudarr:multiarch-local
 MARAUDARR_TEST_OUTPUT     ?= /tmp/maraudarr-matrix
+MARAUDARR_SMOKE_PRESET    ?= plundarr
+MARAUDARR_SMOKE_ADD       ?=
+MARAUDARR_SMOKE_REMOVE    ?=
+MARAUDARR_SMOKE_FILE      ?= config/README.md
 CONFIG_PATH               ?= $(DEPLOYMENT_PATH)/config
 CONFIG_BACKUP_PATH        ?= $(DEPLOYMENT_PATH)/backups
 PYTHON_BIN                ?= python3
@@ -225,6 +233,7 @@ DIRECT_WEB_PORTS  ?= \
 PLUNDARR_VPN_TEST_CMD    ?= test/plundarr-vpn-test.sh
 PLUNDARR_STACK_WAIT_CMD  ?= test/plundarr-stack-wait.sh
 MARAUDARR_IMAGE_TEST_CMD ?= test/test-maraudarr-image.sh
+WORKFLOW_HELPERS_TEST_CMD ?= test/test-workflow-helpers.sh
 
 #
 # Docker Compose command compatible with 'docker compose' (v2) and 'docker-compose' (v1).
@@ -258,14 +267,21 @@ MARAUDARR_COMPOSE = MARAUDARR_IMAGE="$(MARAUDARR_IMAGE)" \
 # Hardened Docker options shared by every published Maraudarr image command.
 # The host identity keeps generated files editable by the invoking user.
 #
-MARAUDARR_RUN_OPTIONS ?= \
+MARAUDARR_BASE_RUN_OPTIONS ?= \
 	--rm \
 	--read-only \
 	--network none \
 	--cap-drop ALL \
 	--security-opt no-new-privileges:true \
 	--tmpfs /tmp:rw,noexec,nosuid,size=64m \
-	--user "$$(id -u):$$(id -g)" \
+	--user "$$(id -u):$$(id -g)"
+
+#
+# Normal generation writes into this checkout. The smoke target adds its own
+# disposable output mount so it cannot alter a real generated deployment.
+#
+MARAUDARR_RUN_OPTIONS ?= \
+	$(MARAUDARR_BASE_RUN_OPTIONS) \
 	--volume "$(CURDIR):$(MARAUDARR_OUTPUT):rw"
 
 #
@@ -703,6 +719,38 @@ $(BUILD_MULTIARCH): $(BUILD_DEPENDS)
 		docker
 
 #
+# $(SMOKE_MARAUDARR): Runs one hardened image-generation and Compose-validation
+#                     voyage in a disposable output directory.
+#
+# Dependencies:
+#   $(ENSURE_MARAUDARR_IMAGE) - Prepare the exact image requested by the caller.
+#
+$(SMOKE_MARAUDARR): $(ENSURE_MARAUDARR_IMAGE)
+	$(call announce,Smoke-testin' Maraudarr in a sealed temporary barrel. 🛢️)
+	@set -eu; \
+	smoke_output=$$(mktemp -d); \
+	trap 'rm -rf "$$smoke_output"' 0 1 2 15; \
+	docker run \
+		$(MARAUDARR_BASE_RUN_OPTIONS) \
+		--volume "$$smoke_output:$(MARAUDARR_OUTPUT):rw" \
+		"$(MARAUDARR_IMAGE)" \
+		--plain build \
+		--preset "$(MARAUDARR_SMOKE_PRESET)" \
+		--remove "$(MARAUDARR_SMOKE_REMOVE)" \
+		--add "$(MARAUDARR_SMOKE_ADD)" \
+		--output-root "$(MARAUDARR_OUTPUT_ROOT)"; \
+	smoke_deployment="$$smoke_output/$(DEPLOYMENT_ROOT)/$(MARAUDARR_SMOKE_PRESET)"; \
+	test -s "$$smoke_deployment/docker-compose.yml"; \
+	test -s "$$smoke_deployment/.env"; \
+	test -s "$$smoke_deployment/$(MARAUDARR_SMOKE_FILE)"; \
+	$(DOCKER_COMPOSE) \
+		--env-file "$$smoke_deployment/.env" \
+		-f "$$smoke_deployment/docker-compose.yml" \
+		config \
+		--quiet
+	$(call announce_success,Maraudarr's disposable smoke voyage came back clean. ✅)
+
+#
 # $(TEST_MARAUDARR_UNIT): Runs Maraudarr's Python unit tests.
 #
 $(TEST_MARAUDARR_UNIT):
@@ -712,13 +760,20 @@ $(TEST_MARAUDARR_UNIT):
 		$(PYTHON_BIN) -m unittest discover -s docker/tests -v
 
 #
-# $(TEST_MARAUDARR): Runs unit tests and the representative Compose matrix.
+# $(TEST_WORKFLOW_HELPERS): Tests workflow payload and registry helpers locally.
+#
+$(TEST_WORKFLOW_HELPERS):
+	$(WORKFLOW_HELPERS_TEST_CMD)
+
+#
+# $(TEST_MARAUDARR): Runs unit tests, workflow helpers, and the Compose matrix.
 #
 # Dependencies:
 #   $(BUILD_DEPENDS) - Ensure Docker and Docker Compose are installed.
 #   $(TEST_MARAUDARR_UNIT) - Run Maraudarr's Python unit tests.
+#   $(TEST_WORKFLOW_HELPERS) - Test workflow helpers without external writes.
 #
-$(TEST_MARAUDARR): $(BUILD_DEPENDS) $(TEST_MARAUDARR_UNIT)
+$(TEST_MARAUDARR): $(BUILD_DEPENDS) $(TEST_MARAUDARR_UNIT) $(TEST_WORKFLOW_HELPERS)
 	$(MARAUDARR_IMAGE_TEST_CMD)
 	MARAUDARR_TEST_OUTPUT="$(MARAUDARR_TEST_OUTPUT)" \
 	PYTHON_BIN="$(PYTHON_BIN)" \
@@ -951,12 +1006,14 @@ $(HELP):
 	$(call help_line,$(PRINT_ENV),Print raw environment settings without comments.)
 	$(call help_heading,🧪 Test and build)
 	$(call help_line,$(TEST_MARAUDARR_UNIT),Run Maraudarr Python unit tests.)
-	$(call help_line,$(TEST_MARAUDARR),Run image fallback and Compose matrix tests.)
+	$(call help_line,$(TEST_MARAUDARR),Run all generator and workflow-helper tests.)
+	$(call help_line,$(TEST_WORKFLOW_HELPERS),Test Discord and registry workflow helpers.)
 	$(call help_line,$(TEST_VPN),Check a running VPN tunnel.)
 	$(call help_line,$(TEST_E2E),Run the focused VPN end-to-end test.)
 	$(call help_line,$(TEST_STACK),Run the complete stack test.)
 	$(call help_line,$(BUILD_MARAUDARR),Build Maraudarr from this checkout.)
 	$(call help_line,$(BUILD_MULTIARCH),Check every published image architecture.)
+	$(call help_line,$(SMOKE_MARAUDARR),Smoke-test one hardened Maraudarr image.)
 	$(call help_line,$(DOCS),Build the strict developer documentation site.)
 	$(call help_line,$(DOCS_SERVE),Preview developer documentation locally.)
 	$(call help_line,$(DOCS_DEPENDENCIES),Install or refresh pinned documentation tools.)
@@ -966,8 +1023,8 @@ $(HELP):
 	$(call help_line,$(CLEAN_ARTIFACTS),Remove only disposable developer artifacts.)
 	$(call help_line,$(CLEAN),Stop the stack and restore example test config.)
 	$(call help_line,$(RESET_CONFIG),Restore example VPN config files for tests.)
-	$(call help_line,$(CLEAN_CONFIG),⚠️ DANGER: delete the selected preset config tree.)
-	$(call help_line,$(NUKE),⚠️ DANGER: remove selected-stack containers volumes and images.)
+	$(call help_line,$(CLEAN_CONFIG),‼️DANGER‼️ delete the selected preset config tree.)
+	$(call help_line,$(NUKE),‼️DANGER‼️ remove selected-stack containers volumes and images.)
 	$(call announce_warning,⚠️  Destructive targets never run automatically. Back up config before using them.)
 
 #

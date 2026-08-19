@@ -137,8 +137,10 @@ changes:
 
 ```sh
 make help
+make test-workflow-helpers
 make test-maraudarr
 make build-maraudarr
+make smoke-maraudarr
 make build-multiarch
 pre-commit run --all-files
 ```

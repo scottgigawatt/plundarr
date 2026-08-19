@@ -56,10 +56,10 @@ configuration stays where it belongs: in that voyage's `.env`. ⚓️
 Plundarr has two clearly separate parts:
 
 <!-- markdownlint-disable MD033 -->
-| Component     | What It Does                                                                                        | Output or image                                                                                                              |
-| ------------- | --------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| **Maraudarr** | Short-lived generator that chooses services, resolves dependencies, validates the result, and exits | 📦 [GitHub Container Registry](https://github.com/scottgigawatt/plundarr/pkgs/container/maraudarr)<br>🐳 [Docker Hub](https://hub.docker.com/r/scottgigawatt/maraudarr) |
-| **Plundarr**  | The generated media stack that stays on yer host and runs the selected services                     | 🧾 `dist/<preset>/docker-compose.yml`<br>⚙️ `dist/<preset>/.env`<br>📂 `dist/<preset>/config/` |
+| Component     | What It Does and Produces |
+| ------------- | ------------------------- |
+| **Maraudarr** | Short-lived generator that chooses services, resolves dependencies, validates the result, and exits.<br><br>Published to:<br>📦 [GitHub Container Registry](https://github.com/scottgigawatt/plundarr/pkgs/container/maraudarr)<br>🐳 [Docker Hub](https://hub.docker.com/r/scottgigawatt/maraudarr) |
+| **Plundarr**  | Generated media stack that stays on yer host and runs the selected services.<br><br>Produces:<br>🧾 `dist/<preset>/docker-compose.yml`<br>⚙️ `dist/<preset>/.env`<br>📂 `dist/<preset>/config/` |
 <!-- markdownlint-enable MD033 -->
 
 `make ship` and `make configure` run the published Maraudarr image when it is
@@ -316,16 +316,16 @@ make clean-artifacts
 
 ## More Treasure Maps & Crew Codes 🗺️
 
-| Scroll | When Ye Need It |
-| --- | --- |
-| 📚 [Developer Chart Room](https://scottgigawatt.github.io/plundarr/) | Maraudarr architecture and Python reference |
+| Scroll                                                                                   | When Ye Need It                                 |
+| ---------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| 📚 [Developer Chart Room](https://scottgigawatt.github.io/plundarr/)                     | Maraudarr architecture and Python reference     |
 | ⚒️ [Maraudarr Overview](https://scottgigawatt.github.io/plundarr/development/maraudarr/) | Generator behavior, service charts, and testing |
-| 🖥️ [Synology Setup](https://scottgigawatt.github.io/plundarr/SETUP/) | Container Manager and host-path preparation |
-| 🛠️ [Contributing](https://scottgigawatt.github.io/plundarr/CONTRIBUTING/) | Repository standards and pull requests |
-| 🤝 [Code of Conduct](https://scottgigawatt.github.io/plundarr/CODE_OF_CONDUCT/) | Expectations for every member of the crew |
-| 🛡️ [Security](https://scottgigawatt.github.io/plundarr/SECURITY/) | Private vulnerability reporting |
-| 🧪 [Testing Hold](test/README.md) | VPN, end-to-end, and stack validation |
-| 🦜 [Synology Helper Scripts](scripts/README.md) | Host-specific helper usage |
+| 🖥️ [Synology Setup](https://scottgigawatt.github.io/plundarr/SETUP/)                    | Container Manager and host-path preparation     |
+| 🛠️ [Contributing](https://scottgigawatt.github.io/plundarr/CONTRIBUTING/)               | Repository standards and pull requests          |
+| 🤝 [Code of Conduct](https://scottgigawatt.github.io/plundarr/CODE_OF_CONDUCT/)          | Expectations for every member of the crew       |
+| 🛡️ [Security](https://scottgigawatt.github.io/plundarr/SECURITY/)                       | Private vulnerability reporting                 |
+| 🧪 [Testing Hold](test/README.md)                                                        | VPN, end-to-end, and stack validation           |
+| 🦜 [Synology Helper Scripts](scripts/README.md)                                          | Host-specific helper usage                      |
 
 ## Ship's Log 🏝️
 

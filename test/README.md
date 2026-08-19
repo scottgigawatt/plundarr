@@ -26,7 +26,19 @@ make test-maraudarr
 
 These checks simulate local-image discovery, a successful GHCR pull, a local
 fallback build, and a complete retrieval failure without contacting a registry.
-They also run the Python unit suite and generate representative Compose charts.
+They also run the Python unit suite, exercise the offline Discord and registry
+helpers, and generate representative Compose charts.
+
+After building an image, exercise its hardened container contract and validate
+one disposable generated deployment with:
+
+```sh
+make smoke-maraudarr
+```
+
+CI can select another representative voyage with `MARAUDARR_SMOKE_PRESET`,
+`MARAUDARR_SMOKE_ADD`, `MARAUDARR_SMOKE_REMOVE`, and
+`MARAUDARR_SMOKE_FILE` without duplicating a raw `docker run` block.
 
 ### Running Stack Check
 

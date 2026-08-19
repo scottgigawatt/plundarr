@@ -61,33 +61,16 @@ jobs:
       # read-only, networkless, unprivileged contract promised to users.
       #
       - name: "Build the Published Maraudarr Shape 📦"
-        run: |
-          docker build \
-            --pull \
-            --tag maraudarr:pr \
-            --file docker/Dockerfile \
-            docker
+        run: >-
+          make build-maraudarr
+          MARAUDARR_IMAGE=maraudarr:pr
+          MARAUDARR_BUILD_OPTIONS=--pull
 
       - name: "Smoke-Test Containerized Maraudarr ⚓"
-        run: |
-          mkdir -p "${RUNNER_TEMP}/plundarr-output"
-          docker run \
-            --rm \
-            --read-only \
-            --network none \
-            --cap-drop ALL \
-            --security-opt no-new-privileges:true \
-            --tmpfs /tmp:rw,noexec,nosuid,size=64m \
-            --user "$(id -u):$(id -g)" \
-            --mount "type=bind,src=${RUNNER_TEMP}/plundarr-output,dst=/output" \
-            maraudarr:pr \
-            --plain build --preset boudoirr
-          test -s "${RUNNER_TEMP}/plundarr-output/dist/boudoirr/config/README.md"
-          docker compose \
-            --env-file "${RUNNER_TEMP}/plundarr-output/dist/boudoirr/.env" \
-            -f "${RUNNER_TEMP}/plundarr-output/dist/boudoirr/docker-compose.yml" \
-            config \
-            --quiet
+        run: >-
+          make smoke-maraudarr
+          MARAUDARR_IMAGE=maraudarr:pr
+          MARAUDARR_SMOKE_PRESET=boudoirr
 
       #
       # Prove every supported target architecture builds before enforcing

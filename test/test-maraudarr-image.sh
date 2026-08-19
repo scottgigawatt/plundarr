@@ -37,7 +37,8 @@ trap cleanup EXIT HUP INT TERM
 #
 # fail: Report one assertion failure with recorded Docker commands.
 #
-# Parameters: $1 - Failure message. $2 - Docker command log path.
+# Parameters: $1 - Failure message.
+#             $2 - Docker command log path.
 #
 # Returns:     Does not return; exits with status 1.
 #
@@ -56,7 +57,8 @@ fail() {
 #
 # assert_contains: Assert a literal command fragment is present.
 #
-# Parameters: $1 - Expected fragment. $2 - Docker command log path.
+# Parameters: $1 - Expected fragment.
+#             $2 - Docker command log path.
 #
 # Returns:     0 when present; otherwise exits through fail.
 #
@@ -71,7 +73,8 @@ assert_contains() {
 #
 # assert_absent: Assert a literal command fragment is absent.
 #
-# Parameters: $1 - Unexpected fragment. $2 - Docker command log path.
+# Parameters: $1 - Unexpected fragment.
+#             $2 - Docker command log path.
 #
 # Returns:     0 when absent; otherwise exits through fail.
 #
@@ -87,8 +90,11 @@ assert_absent() {
 #
 # run_case: Run one isolated Maraudarr image-resolution scenario.
 #
-# Parameters: $1 - Case name. $2 - Local image state. $3 - Pull result.
-#             $4 - Build result. $5 - Expected result.
+# Parameters: $1 - Case name.
+#             $2 - Local image state.
+#             $3 - Pull result.
+#             $4 - Build result.
+#             $5 - Expected result.
 #
 # Returns:     0 when the observed result matches the expected result.
 #

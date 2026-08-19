@@ -28,23 +28,32 @@ pair is inspected by Docker Compose without starting application containers.
 Unit coverage also keeps preset project names, Docker networks,
 project/service/tag container names, and published ports collision-free.
 
+## Workflow Helpers
+
+```sh
+make test-workflow-helpers
+```
+
+This offline suite validates randomized build and documentation Discord payloads,
+both short and long command-line flags, registry tag mirroring, and cross-registry
+digest comparison. It uses dry-run payloads and a local Skopeo stub, so it never
+contacts Discord or either container registry.
+
 ## Image Builds
 
 ```sh
 make build-maraudarr
+make smoke-maraudarr
 make build-multiarch
 ```
 
-The first command builds the production image shape. The second verifies every
-published CPU architecture: `linux/amd64`, `linux/arm64`, and `linux/arm/v7`.
+The first command builds the production image shape. The smoke voyage runs that
+image with Maraudarr's read-only, networkless runtime controls, generates one
+deployment in a disposable directory, and validates it with Docker Compose.
+The final command verifies every published CPU architecture: `linux/amd64`,
+`linux/arm64`, and `linux/arm/v7`.
 
 ## Documentation
-
-Install the isolated documentation toolchain once:
-
-```sh
-python3 -m pip install --requirement requirements-docs.txt
-```
 
 Build the warning-free site or start a local preview:
 
@@ -53,6 +62,8 @@ make docs
 make docs-serve
 ```
 
+Both targets create `.venv-docs/` and install the pinned tools from
+`requirements-docs.txt` when needed. No separate MkDocs setup step is required.
 The generated `site/` directory is disposable and ignored by Git. CI performs
 the same strict build and publishes a fresh artifact from `main`.
 

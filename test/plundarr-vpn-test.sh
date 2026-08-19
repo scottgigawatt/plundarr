@@ -88,7 +88,8 @@ log() {
 #
 # require_file: Ensure a file exists and is not empty.
 #
-# Parameters: $1 - File path. $2 - Human-readable file label.
+# Parameters: $1 - File path.
+#             $2 - Human-readable file label.
 #
 # Returns:     0 when the file exists; exits nonzero otherwise.
 #
@@ -119,7 +120,8 @@ container_id_for_service() {
 #
 # require_running_container: Check that a resolved container is running.
 #
-# Parameters: $1 - Container ID. $2 - Compose service name.
+# Parameters: $1 - Container ID.
+#             $2 - Compose service name.
 #
 # Returns:     0 when running; exits nonzero otherwise.
 #
@@ -141,7 +143,8 @@ require_running_container() {
 #
 # require_healthy_container: Check a container's Docker health status.
 #
-# Parameters: $1 - Container ID. $2 - Compose service name.
+# Parameters: $1 - Container ID.
+#             $2 - Compose service name.
 #
 # Returns:     0 when healthy; exits nonzero otherwise.
 #
@@ -160,7 +163,8 @@ require_healthy_container() {
 #
 # wait_for_healthy_container: Wait for one container to become healthy.
 #
-# Parameters: $1 - Container ID. $2 - Compose service name.
+# Parameters: $1 - Container ID.
+#             $2 - Compose service name.
 #
 # Returns:     0 when healthy; exits nonzero after the configured timeout.
 #
@@ -190,7 +194,8 @@ wait_for_healthy_container() {
 #
 # json_value: Extract a basic scalar value from qBittorrent preferences JSON.
 #
-# Parameters: $1 - JSON payload. $2 - JSON key.
+# Parameters: $1 - JSON payload.
+#             $2 - JSON key.
 #
 # Returns:     0 and the scalar value when found.
 #

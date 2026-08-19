@@ -47,7 +47,8 @@ log() {
 #
 # qbittorrent_api: Send a qBittorrent Web API request.
 #
-# Parameters: $1 - API path. $2 - Optional POST payload.
+# Parameters: $1 - API path.
+#             $2 - Optional POST payload.
 #
 # Returns:     wget's exit status and response body on standard output.
 #
@@ -87,7 +88,8 @@ wait_for_qbittorrent() {
 #
 # set_forwarded_port: Apply Gluetun's forwarded port to qBittorrent.
 #
-# Parameters: $1 - Forwarded TCP/UDP port. $2 - VPN interface name.
+# Parameters: $1 - Forwarded TCP/UDP port.
+#             $2 - VPN interface name.
 #
 # Returns:     0 after updating qBittorrent; exits nonzero for invalid input.
 #

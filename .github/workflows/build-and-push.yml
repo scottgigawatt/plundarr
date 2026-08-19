@@ -24,9 +24,13 @@ on:
       - "docker-compose.maraudarr.yml"
       - "example.maraudarr.env"
       - "test/test-maraudarr-matrix.sh"
+      - "test/test-workflow-helpers.sh"
+      - "test/workflow-skopeo-stub.sh"
       - "Makefile"
       - "LICENSE"
       - "docs/DOCKERHUB_README.md"
+      - ".github/scripts/notify-discord.sh"
+      - ".github/scripts/registry-mirror.sh"
       - ".github/workflows/build-and-push.yml"
   schedule:
     - cron: "17 7 * * 1"
@@ -64,33 +68,18 @@ jobs:
       # The later publishing job owns the multi-architecture registry build.
       #
       - name: "Build the Local Maraudarr Image ⚒️"
-        run: |
-          docker build \
-            --pull \
-            --tag ghcr.io/${{ github.repository_owner }}/maraudarr:scan \
-            --file docker/Dockerfile \
-            docker
+        run: >-
+          make build-maraudarr
+          MARAUDARR_IMAGE=ghcr.io/${{ github.repository_owner }}/maraudarr:scan
+          MARAUDARR_BUILD_OPTIONS=--pull
 
       - name: "Run the Hardened Smoke Voyage ⚓"
-        run: |
-          mkdir -p "${RUNNER_TEMP}/plundarr-output"
-          docker run \
-            --rm \
-            --read-only \
-            --network none \
-            --cap-drop ALL \
-            --security-opt no-new-privileges:true \
-            --tmpfs /tmp:rw,noexec,nosuid,size=16m \
-            --user "$(id -u):$(id -g)" \
-            --mount "type=bind,src=${RUNNER_TEMP}/plundarr-output,dst=/output" \
-            ghcr.io/${{ github.repository_owner }}/maraudarr:scan \
-            --plain build --preset plundarr --add apprise,jellyfin
-          test -s "${RUNNER_TEMP}/plundarr-output/dist/plundarr/config/homepage/services.yaml"
-          docker compose \
-            --env-file "${RUNNER_TEMP}/plundarr-output/dist/plundarr/.env" \
-            -f "${RUNNER_TEMP}/plundarr-output/dist/plundarr/docker-compose.yml" \
-            config \
-            --quiet
+        run: >-
+          make smoke-maraudarr
+          MARAUDARR_IMAGE=ghcr.io/${{ github.repository_owner }}/maraudarr:scan
+          MARAUDARR_SMOKE_PRESET=plundarr
+          MARAUDARR_SMOKE_ADD=apprise,jellyfin
+          MARAUDARR_SMOKE_FILE=config/homepage/services.yaml
 
       #
       # Keep HIGH and CRITICAL fixed vulnerabilities out of the published image.
@@ -143,7 +132,6 @@ jobs:
       - name: "Notify Discord: shipyard opened 📣"
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          DISCORD_TEMPLATE: shipyard
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           WORKFLOW_NAME: ${{ github.workflow }}
           REF_NAME: ${{ github.ref_name }}
@@ -152,12 +140,22 @@ jobs:
           GHCR_IMAGE: ${{ env.GHCR_IMAGE }}
           DOCKERHUB_IMAGE: ${{ env.DOCKERHUB_IMAGE }}
           IMAGE_PLATFORMS: ${{ env.IMAGE_PLATFORMS }}
-        run: sh .github/scripts/notify-discord.sh
+        run: |
+          sh .github/scripts/notify-discord.sh \
+              --event start \
+              --template shipyard \
+              --run-url "${RUN_URL}" \
+              --repository "${REPOSITORY}" \
+              --ref-name "${REF_NAME}" \
+              --workflow-name "${WORKFLOW_NAME}" \
+              --actor "${ACTOR}" \
+              --platforms "${IMAGE_PLATFORMS}" \
+              --ghcr-image "${GHCR_IMAGE}" \
+              --dockerhub-image "${DOCKERHUB_IMAGE}"
 
       - name: "Notify Hades Discord: kraken awakened 🦑"
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_HADES_HOOK_URL }}
-          DISCORD_TEMPLATE: kraken
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           WORKFLOW_NAME: ${{ github.workflow }}
           REF_NAME: ${{ github.ref_name }}
@@ -166,7 +164,18 @@ jobs:
           GHCR_IMAGE: ${{ env.GHCR_IMAGE }}
           DOCKERHUB_IMAGE: ${{ env.DOCKERHUB_IMAGE }}
           IMAGE_PLATFORMS: ${{ env.IMAGE_PLATFORMS }}
-        run: sh .github/scripts/notify-discord.sh
+        run: |
+          sh .github/scripts/notify-discord.sh \
+              --event start \
+              --template kraken \
+              --run-url "${RUN_URL}" \
+              --repository "${REPOSITORY}" \
+              --ref-name "${REF_NAME}" \
+              --workflow-name "${WORKFLOW_NAME}" \
+              --actor "${ACTOR}" \
+              --platforms "${IMAGE_PLATFORMS}" \
+              --ghcr-image "${GHCR_IMAGE}" \
+              --dockerhub-image "${DOCKERHUB_IMAGE}"
 
       - name: "Summon Cross-Arch Cannons 🧨"
         uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8  # v4
@@ -250,36 +259,33 @@ jobs:
         env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+          GHCR_USERNAME: ${{ github.actor }}
           GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PUBLISHED_TAGS: ${{ steps.metadata.outputs.tags }}
         run: |
-          while IFS= read -r ghcr_tag; do
-            [ -n "${ghcr_tag}" ] || continue
-            suffix="${ghcr_tag#"${GHCR_IMAGE}"}"
-            dockerhub_tag="${DOCKERHUB_IMAGE}${suffix}"
-            skopeo copy \
-              --all \
-              --preserve-digests \
-              --src-creds "${{ github.actor }}:${GHCR_TOKEN}" \
-              --dest-creds "${DOCKERHUB_USERNAME}:${DOCKERHUB_TOKEN}" \
-              "docker://${ghcr_tag}" \
-              "docker://${dockerhub_tag}"
-          done <<< "${PUBLISHED_TAGS}"
+          sh .github/scripts/registry-mirror.sh \
+              --mirror \
+              --ghcr-image "${GHCR_IMAGE}" \
+              --dockerhub-image "${DOCKERHUB_IMAGE}" \
+              --ghcr-username "${GHCR_USERNAME}" \
+              --dockerhub-username "${DOCKERHUB_USERNAME}" \
+              --published-tags "${PUBLISHED_TAGS}"
 
       - name: "Verify the Registry Mirrors 🔎"
         env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+          GHCR_USERNAME: ${{ github.actor }}
           GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PUBLISHED_TAGS: ${{ steps.metadata.outputs.tags }}
         run: |
-          primary_tag="$(printf '%s\n' "${PUBLISHED_TAGS}" | sed '/^$/d' | head -n 1)"
-          suffix="${primary_tag#"${GHCR_IMAGE}"}"
-          dockerhub_tag="${DOCKERHUB_IMAGE}${suffix}"
-          ghcr_digest="$(skopeo inspect --creds "${{ github.actor }}:${GHCR_TOKEN}" "docker://${primary_tag}" | jq -r .Digest)"
-          dockerhub_digest="$(skopeo inspect --creds "${DOCKERHUB_USERNAME}:${DOCKERHUB_TOKEN}" "docker://${dockerhub_tag}" | jq -r .Digest)"
-          test "${ghcr_digest}" = "${dockerhub_digest}"
-          echo "Registry manifests match at ${ghcr_digest}."
+          sh .github/scripts/registry-mirror.sh \
+              --verify \
+              --ghcr-image "${GHCR_IMAGE}" \
+              --dockerhub-image "${DOCKERHUB_IMAGE}" \
+              --ghcr-username "${GHCR_USERNAME}" \
+              --dockerhub-username "${DOCKERHUB_USERNAME}" \
+              --published-tags "${PUBLISHED_TAGS}"
 
       #
       # Keep the Docker Hub landing page synchronized with the checked-in public
@@ -312,70 +318,23 @@ jobs:
           PUBLISHED_TAGS: ${{ steps.metadata.outputs.tags }}
           PUBLISHED_DIGEST: ${{ steps.publish.outputs.digest }}
         run: |
-          if [ -z "${DISCORD_WEBHOOK_URL}" ]; then
-              echo "DISCORD_WEBHOOK_URL is not set; skipping Discord notification."
-              exit 0
-          fi
-
-          if [ "${JOB_STATUS}" = "success" ]; then
-              title="✅ Fleet launched"
-              description="Maraudarr reached both registries. The manifests agree, which is more than the crew can say."
-              color=3066993
-          else
-              title="💥 Build hit a reef"
-              description="Maraudarr ended ${JOB_STATUS}. The logs have been asked to explain themselves."
-              color=15158332
-          fi
-
-          formatted_tags="$(printf '%s\n' "${PUBLISHED_TAGS:-none}" \
-              | sed '/^$/d; s#^'"${GHCR_IMAGE}"':##; s/^/• /')"
-          [ -n "${formatted_tags}" ] || formatted_tags="none"
-          digest_short="$(printf '%s' "${PUBLISHED_DIGEST:-unavailable}" \
-              | sed -E 's/^(sha256:[0-9a-f]{12}).*/\1/')"
-
-          payload="$(jq -n \
-              --arg title "${title}" \
-              --arg description "${description}" \
-              --arg url "${RUN_URL}" \
-              --arg repository "${REPOSITORY}" \
-              --arg ref "${REF_NAME}" \
-              --arg tags "${formatted_tags}" \
-              --arg digest "${digest_short}" \
-              --arg ghcrUrl "${GHCR_PACKAGE_URL}" \
-              --arg dockerhubUrl "${DOCKERHUB_URL}" \
-              --argjson color "${color}" \
-              '{
-                username: "Maraudarr Deck Crew",
-                embeds: [{
-                  title: $title,
-                  description: $description,
-                  url: $url,
-                  color: $color,
-                  fields: [
-                    {name: "🗺️ Repository", value: $repository, inline: true},
-                    {name: "🌿 Ref", value: $ref, inline: true},
-                    {name: "🏷️ Tags", value: $tags, inline: false},
-                    {name: "🧾 Digest", value: $digest, inline: false},
-                    {name: "📦 GHCR", value: $ghcrUrl, inline: false},
-                    {name: "🐳 Docker Hub", value: $dockerhubUrl, inline: false}
-                  ],
-                  footer: {text: "Maraudarr Shipyard • receipts attached"},
-                  timestamp: now | todate
-                }]
-              }')"
-
-          curl \
-              --fail \
-              --silent \
-              --show-error \
-              --header "Content-Type: application/json" \
-              --data "${payload}" \
-              "${DISCORD_WEBHOOK_URL}"
+          sh .github/scripts/notify-discord.sh \
+              --event verdict \
+              --template shipyard \
+              --run-url "${RUN_URL}" \
+              --repository "${REPOSITORY}" \
+              --ref-name "${REF_NAME}" \
+              --job-status "${JOB_STATUS}" \
+              --ghcr-image "${GHCR_IMAGE}" \
+              --ghcr-package-url "${GHCR_PACKAGE_URL}" \
+              --dockerhub-url "${DOCKERHUB_URL}" \
+              --published-tags "${PUBLISHED_TAGS}" \
+              --published-digest "${PUBLISHED_DIGEST}"
 
       - name: "Notify Hades Discord: kraken verdict 🦑"
         if: always()
         env:
-          DISCORD_HADES_HOOK_URL: ${{ secrets.DISCORD_HADES_HOOK_URL }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_HADES_HOOK_URL }}
           JOB_STATUS: ${{ job.status }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           REPOSITORY: ${{ github.repository }}
@@ -386,62 +345,15 @@ jobs:
           PUBLISHED_TAGS: ${{ steps.metadata.outputs.tags }}
           PUBLISHED_DIGEST: ${{ steps.publish.outputs.digest }}
         run: |
-          if [ -z "${DISCORD_HADES_HOOK_URL}" ]; then
-              echo "DISCORD_HADES_HOOK_URL is not set; skipping Hades Discord notification."
-              exit 0
-          fi
-
-          if [ "${JOB_STATUS}" = "success" ]; then
-              title="🦑 Kraken stamped approved"
-              description="Images published on every architecture. The kraken requests credit for standing nearby."
-              color=3066993
-          else
-              title="🦑 Kraken misplaced the build"
-              description="Publication ended ${JOB_STATUS}. All tentacles point at the logs."
-              color=15158332
-          fi
-
-          formatted_tags="$(printf '%s\n' "${PUBLISHED_TAGS:-none}" \
-              | sed '/^$/d; s#^'"${GHCR_IMAGE}"':##; s/^/• /')"
-          [ -n "${formatted_tags}" ] || formatted_tags="none"
-          digest_short="$(printf '%s' "${PUBLISHED_DIGEST:-unavailable}" \
-              | sed -E 's/^(sha256:[0-9a-f]{12}).*/\1/')"
-
-          payload="$(jq -n \
-              --arg title "${title}" \
-              --arg description "${description}" \
-              --arg url "${RUN_URL}" \
-              --arg repository "${REPOSITORY}" \
-              --arg ref "${REF_NAME}" \
-              --arg tags "${formatted_tags}" \
-              --arg digest "${digest_short}" \
-              --arg ghcrUrl "${GHCR_PACKAGE_URL}" \
-              --arg dockerhubUrl "${DOCKERHUB_URL}" \
-              --argjson color "${color}" \
-              '{
-                username: "Kraken Build Bureau",
-                embeds: [{
-                  title: $title,
-                  description: $description,
-                  url: $url,
-                  color: $color,
-                  fields: [
-                    {name: "⚓ Repository", value: $repository, inline: true},
-                    {name: "🌿 Ref", value: $ref, inline: true},
-                    {name: "🏷️ Tags", value: $tags, inline: false},
-                    {name: "🧾 Digest", value: $digest, inline: false},
-                    {name: "📦 GHCR", value: $ghcrUrl, inline: false},
-                    {name: "🐳 Docker Hub", value: $dockerhubUrl, inline: false}
-                  ],
-                  footer: {text: "Kraken Build Bureau • eight arms, one incident report"},
-                  timestamp: now | todate
-                }]
-              }')"
-
-          curl \
-              --fail \
-              --silent \
-              --show-error \
-              --header "Content-Type: application/json" \
-              --data "${payload}" \
-              "${DISCORD_HADES_HOOK_URL}"
+          sh .github/scripts/notify-discord.sh \
+              --event verdict \
+              --template kraken \
+              --run-url "${RUN_URL}" \
+              --repository "${REPOSITORY}" \
+              --ref-name "${REF_NAME}" \
+              --job-status "${JOB_STATUS}" \
+              --ghcr-image "${GHCR_IMAGE}" \
+              --ghcr-package-url "${GHCR_PACKAGE_URL}" \
+              --dockerhub-url "${DOCKERHUB_URL}" \
+              --published-tags "${PUBLISHED_TAGS}" \
+              --published-digest "${PUBLISHED_DIGEST}"

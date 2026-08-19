@@ -17,6 +17,7 @@ on:
     branches:
       - main
     paths:
+      - ".github/scripts/notify-docs-discord.sh"
       - ".github/workflows/pages.yml"
       - "docker/src/maraudarr/**"
       - "docs/**"
@@ -76,6 +77,8 @@ jobs:
     name: "Raise the Developer Pages Flag 🚩"
     needs: build
     runs-on: ubuntu-latest
+    outputs:
+      page-url: ${{ steps.deployment.outputs.page_url }}
     permissions:
       pages: write
       id-token: write
@@ -87,3 +90,41 @@ jobs:
       - name: "Publish the Developer Charts 🚀"
         id: deployment
         uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128  # v5
+
+  #
+  # Announce either outcome from a separate read-only job so build failures and
+  # skipped deployments still reach the optional primary Discord destination.
+  #
+  notify:
+    name: "Report from the Chart Room 🦜"
+    if: always()
+    needs:
+      - build
+      - deploy
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: "Grab the Notification Helper 🧰"
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: "Notify Discord: documentation verdict 📚"
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          DOCS_BUILD_STATUS: ${{ needs.build.result }}
+          DOCS_DEPLOY_STATUS: ${{ needs.deploy.result }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          SITE_URL: ${{ needs.deploy.outputs.page-url }}
+          REPOSITORY: ${{ github.repository }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          sh .github/scripts/notify-docs-discord.sh \
+              --build-status "${DOCS_BUILD_STATUS}" \
+              --deploy-status "${DOCS_DEPLOY_STATUS}" \
+              --run-url "${RUN_URL}" \
+              --site-url "${SITE_URL}" \
+              --repository "${REPOSITORY}" \
+              --ref-name "${REF_NAME}"
