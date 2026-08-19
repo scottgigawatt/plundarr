@@ -43,7 +43,7 @@ MARAUDARR_IMAGE="maraudarr:readme-demo-$$"
 #
 # Parameters: None.
 #
-# Returns:     Always returns 0 so cleanup cannot hide the original result.
+# Returns: Always returns 0 so cleanup cannot hide the original result.
 #
 cleanup() {
     if [ -f "$DEMO_CHECKOUT/dist/plundarr/docker-compose.yml" ] && [ -f "$DEMO_CHECKOUT/dist/plundarr/.env" ]; then
@@ -161,7 +161,7 @@ export HOMEPAGE_WEBUI_PORT="33000"
 #
 (
     cd "$DEMO_CHECKOUT"
-    make build-maraudarr >/dev/null
+    make build >/dev/null
     make ship >/dev/null
     docker compose \
         --env-file dist/plundarr/.env \

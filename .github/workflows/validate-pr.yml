@@ -60,7 +60,7 @@ jobs:
       # Compose generation tests.
       #
       - name: "Test Maraudarr's Charts 🧰"
-        run: make test-maraudarr
+        run: make test
 
       #
       # Build the publishable image shape, then run it with the same
@@ -68,7 +68,7 @@ jobs:
       #
       - name: "Build the Published Maraudarr Shape 📦"
         run: >-
-          make build-maraudarr
+          make build
           MARAUDARR_IMAGE=maraudarr:pr
           MARAUDARR_BUILD_OPTIONS=--pull
 
@@ -80,16 +80,16 @@ jobs:
       #
       - name: "Smoke-Test Containerized Maraudarr ⚓"
         run: >-
-          make smoke-maraudarr
+          make test-image
           MARAUDARR_IMAGE=maraudarr:pr
-          MARAUDARR_SMOKE_PRESET=boudoirr
+          MARAUDARR_TEST_PRESET=boudoirr
 
       #
       # Prove every supported target architecture builds before enforcing
       # the repository's HIGH and CRITICAL vulnerability threshold.
       #
       - name: "Test the Three-Deck Hull Plan 🛠️"
-        run: make build-multiarch
+        run: make build-platforms
 
       #
       # Scan for vulnerabilities in the built image.
@@ -146,11 +146,11 @@ jobs:
       # Install the documentation dependencies.
       #
       - name: "Load the Documentation Tools 🧰"
-        run: pip install --requirement requirements-docs.txt
+        run: make docs-install
 
       #
       # Render the documentation to ensure all source charts and references are
       # valid.
       #
       - name: "Render Every Developer Chart 🔎"
-        run: mkdocs build --strict
+        run: make docs

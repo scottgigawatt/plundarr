@@ -11,5 +11,5 @@ Jellyfin receives the high-level media directory as writable `/data`; create
 libraries from the folders beneath it, such as `/data/movies` and `/data/tv` or
 `/data/movies` and `/data/scenes` for a Boudoirr voyage.
 
-Guard this cargo before running `make clean-config`; use `make backup-config`
+Guard this cargo before running `make delete-config`; use `make backup`
 when ye want a dated archive first.

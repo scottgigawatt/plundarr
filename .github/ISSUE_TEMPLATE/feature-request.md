@@ -21,7 +21,7 @@ make config
 make test-vpn
 make test-e2e
 make test-stack
-make reset-service-configs
+make restore-test-config
 ```
 
 **🗺️ Other routes you thought about**

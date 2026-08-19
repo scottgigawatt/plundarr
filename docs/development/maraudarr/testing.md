@@ -6,7 +6,7 @@ for generator, image, workflow, or documentation changes.
 ## Unit Tests
 
 ```sh
-make test-maraudarr-unit
+make test-unit
 ```
 
 The Python suite checks catalog resolution, comment preservation, environment
@@ -17,21 +17,22 @@ not hide source behavior.
 ## Generation Matrix
 
 ```sh
-make test-maraudarr
+make test
 ```
 
 This includes unit tests, packaged-image fallback checks, all product presets,
 Boudoirr's optional media-server combinations, torrent-only, Usenet-only, and
-combined downloader modes, plus opt-in Watchtower. The matrix also generates
-all five presets beneath one `dist/` root. Every generated Compose/environment
-pair is inspected by Docker Compose without starting application containers.
-Unit coverage also keeps preset project names, Docker networks,
+combined downloader modes, plus opt-in Watchtower. It also tests the compact
+Compose status and secret-safe PIA preflight helpers. The matrix generates all
+five presets beneath one `dist/` root. Every generated Compose/environment pair
+is inspected by Docker Compose without starting application containers. Unit
+coverage also keeps preset project names, Docker networks,
 project/service/tag container names, and published ports collision-free.
 
 ## Workflow Helpers
 
 ```sh
-make test-workflow-helpers
+make test-workflows
 ```
 
 This offline suite validates randomized build and documentation Discord payloads,
@@ -42,9 +43,9 @@ contacts Discord or either container registry.
 ## Image Builds
 
 ```sh
-make build-maraudarr
-make smoke-maraudarr
-make build-multiarch
+make build
+make test-image
+make build-platforms
 ```
 
 The first command builds the production image shape. The smoke voyage runs that

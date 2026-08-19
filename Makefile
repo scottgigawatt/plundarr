@@ -13,34 +13,32 @@
 ALL=all
 DOWN=down
 CLEAN=clean
-CLEAN_ARTIFACTS=clean-artifacts
 NUKE=nuke
 BUILD_DEPENDS=build-depends
 CHECK_ENV=check-env
 CHECK_RENDERED=check-rendered
+CHECK_PIA=check-pia
 BUILD=build
-BUILD_MARAUDARR=build-maraudarr
-BUILD_MULTIARCH=build-multiarch
-SMOKE_MARAUDARR=smoke-maraudarr
+BUILD_PLATFORMS=build-platforms
+TEST_IMAGE=test-image
 DOCS=docs
 DOCS_SERVE=docs-serve
-DOCS_DEPENDENCIES=docs-dependencies
+DOCS_INSTALL=docs-install
 ENSURE_MARAUDARR_IMAGE=ensure-maraudarr-image
-PULL_MARAUDARR=pull-maraudarr
-RESET_CONFIG=reset-config
-BACKUP_CONFIG=backup-config
-CLEAN_CONFIG=clean-config
+PULL_IMAGE=pull-image
+RESTORE_TEST_CONFIG=restore-test-config
+BACKUP=backup
+DELETE_CONFIG=delete-config
 TEST_VPN=test-vpn
 TEST_E2E=test-e2e
 TEST_STACK=test-stack
-TEST_DOWN=test-down
-TEST_LOGS=test-logs
+CLEAN_TEST=clean-test
 UP=up
 SHIP=ship
 CONFIGURE=configure
-TEST_MARAUDARR_UNIT=test-maraudarr-unit
-TEST_MARAUDARR=test-maraudarr
-TEST_WORKFLOW_HELPERS=test-workflow-helpers
+TEST_UNIT=test-unit
+TEST=test
+TEST_WORKFLOWS=test-workflows
 PRESETS=presets
 AVAILABLE_SERVICES=services
 CONFIG=config
@@ -60,34 +58,32 @@ TARGETS= \
 	$(ALL) \
 	$(DOWN) \
 	$(CLEAN) \
-	$(CLEAN_ARTIFACTS) \
 	$(NUKE) \
 	$(BUILD_DEPENDS) \
 	$(CHECK_ENV) \
 	$(CHECK_RENDERED) \
+	$(CHECK_PIA) \
 	$(BUILD) \
-	$(BUILD_MARAUDARR) \
-	$(BUILD_MULTIARCH) \
-	$(SMOKE_MARAUDARR) \
+	$(BUILD_PLATFORMS) \
+	$(TEST_IMAGE) \
 	$(DOCS) \
 	$(DOCS_SERVE) \
-	$(DOCS_DEPENDENCIES) \
+	$(DOCS_INSTALL) \
 	$(ENSURE_MARAUDARR_IMAGE) \
-	$(PULL_MARAUDARR) \
-	$(RESET_CONFIG) \
-	$(BACKUP_CONFIG) \
-	$(CLEAN_CONFIG) \
+	$(PULL_IMAGE) \
+	$(RESTORE_TEST_CONFIG) \
+	$(BACKUP) \
+	$(DELETE_CONFIG) \
 	$(TEST_VPN) \
 	$(TEST_E2E) \
 	$(TEST_STACK) \
-	$(TEST_DOWN) \
-	$(TEST_LOGS) \
+	$(CLEAN_TEST) \
 	$(UP) \
 	$(SHIP) \
 	$(CONFIGURE) \
-	$(TEST_MARAUDARR_UNIT) \
-	$(TEST_MARAUDARR) \
-	$(TEST_WORKFLOW_HELPERS) \
+	$(TEST_UNIT) \
+	$(TEST) \
+	$(TEST_WORKFLOWS) \
 	$(PRESETS) \
 	$(AVAILABLE_SERVICES) \
 	$(CONFIG) \
@@ -168,10 +164,10 @@ MARAUDARR_BUILD_OPTIONS   ?= --pull --no-cache
 MARAUDARR_BUILD_PLATFORMS ?= linux/amd64,linux/arm64,linux/arm/v7
 MARAUDARR_MULTIARCH_IMAGE ?= maraudarr:multiarch-local
 MARAUDARR_TEST_OUTPUT     ?= /tmp/maraudarr-matrix
-MARAUDARR_SMOKE_PRESET    ?= plundarr
-MARAUDARR_SMOKE_ADD       ?=
-MARAUDARR_SMOKE_REMOVE    ?=
-MARAUDARR_SMOKE_FILE      ?= config/README.md
+MARAUDARR_TEST_PRESET     ?= plundarr
+MARAUDARR_TEST_ADD        ?=
+MARAUDARR_TEST_REMOVE     ?=
+MARAUDARR_TEST_FILE       ?= config/README.md
 CONFIG_PATH               ?= $(DEPLOYMENT_PATH)/config
 CONFIG_BACKUP_PATH        ?= $(DEPLOYMENT_PATH)/backups
 PYTHON_BIN                ?= python3
@@ -191,10 +187,20 @@ MKDOCS              ?= mkdocs
 DOCS_SITE_PATH      ?= site
 DOCS_SERVE_ADDRESS  ?= 127.0.0.1:8000
 DOCS_VENV           ?= .venv-docs
-DOCS_PYTHON         ?= $(DOCS_VENV)/bin/python
+DOCS_PYTHON_TARGET  ?= $(DOCS_VENV)/bin/python
+DOCS_INSTALL_STAMP  ?= $(DOCS_VENV)/.requirements-installed
+DOCS_PYTHON         ?= $(DOCS_PYTHON_TARGET)
 DOCS_MKDOCS         ?= $(DOCS_VENV)/bin/$(MKDOCS)
 DOCS_REQUIREMENTS   ?= requirements-docs.txt
-DEVELOPER_ARTIFACTS ?= $(DOCS_VENV) site .ruff_cache .pytest_cache test/logs
+
+#
+# Disposable developer artifacts. Keep every cleanup target and expression in
+# one reviewable block so deployment state can never slip into this list.
+#
+CLEAN_ARTIFACT_PATHS      := $(DOCS_VENV) $(DOCS_SITE_PATH) .ruff_cache .pytest_cache test/logs
+CLEAN_ARTIFACT_FIND_ROOT  := .
+CLEAN_ARTIFACT_FIND_PRUNE := -path './.git' -o -path './dist'
+CLEAN_ARTIFACT_FIND_MATCH := -type d -name '__pycache__' -o -type f \( -name '*.pyc' -o -name '*.pyo' -o -name '.DS_Store' \)
 
 #
 # Rendered service selection used by runtime tests.
@@ -234,6 +240,16 @@ PLUNDARR_VPN_TEST_CMD     ?= test/plundarr-vpn-test.sh
 PLUNDARR_STACK_WAIT_CMD   ?= test/plundarr-stack-wait.sh
 MARAUDARR_IMAGE_TEST_CMD  ?= test/test-maraudarr-image.sh
 WORKFLOW_HELPERS_TEST_CMD ?= test/test-workflow-helpers.sh
+MAKE_HELPERS_TEST_CMD     ?= test/test-make-helpers.sh
+MARAUDARR_SMOKE_CMD       ?= test/maraudarr-image-smoke.sh
+PLUNDARR_PS_CMD           ?= scripts/compose-ps.sh
+PIA_CREDENTIAL_CHECK_CMD  ?= scripts/check-pia-credentials.sh
+
+#
+# Docker commands used directly instead of through Compose.
+#
+DOCKER_BIN    ?= docker
+DOCKER_BUILDX ?= $(DOCKER_BIN) buildx
 
 #
 # Docker Compose command compatible with 'docker compose' (v2) and 'docker-compose' (v1).
@@ -289,10 +305,16 @@ MARAUDARR_RUN_OPTIONS ?= \
 #
 # Non-interactive, styled-list, and interactive Maraudarr image commands.
 #
-MARAUDARR_RUN = docker run $(MARAUDARR_RUN_OPTIONS) $(MARAUDARR_IMAGE)
-MARAUDARR_RUN_STYLED = docker run --tty $(MARAUDARR_RUN_OPTIONS) $(MARAUDARR_IMAGE)
-MARAUDARR_RUN_INTERACTIVE = docker run --interactive --tty $(MARAUDARR_RUN_OPTIONS) $(MARAUDARR_IMAGE)
+MARAUDARR_RUN = $(DOCKER_BIN) run $(MARAUDARR_RUN_OPTIONS) $(MARAUDARR_IMAGE)
+MARAUDARR_RUN_STYLED = $(DOCKER_BIN) run --tty $(MARAUDARR_RUN_OPTIONS) $(MARAUDARR_IMAGE)
+MARAUDARR_RUN_INTERACTIVE = $(DOCKER_BIN) run --interactive --tty $(MARAUDARR_RUN_OPTIONS) $(MARAUDARR_IMAGE)
 MARAUDARR_BUILD = $(MARAUDARR_COMPOSE) build $(MARAUDARR_BUILD_OPTIONS) maraudarr
+MARAUDARR_PLATFORM_BUILD = $(DOCKER_BUILDX) build \
+	--pull \
+	--platform "$(MARAUDARR_BUILD_PLATFORMS)" \
+	--tag "$(MARAUDARR_MULTIARCH_IMAGE)" \
+	--file docker/Dockerfile \
+	docker
 
 #
 # Localhost URL helper function.
@@ -440,6 +462,20 @@ $(CHECK_RENDERED):
 	fi
 
 #
+# $(CHECK_PIA): Reject missing or placeholder PIA credentials before starting
+#               any deployment that includes Privateerr.
+#
+# Dependencies:
+#   $(BUILD_DEPENDS) - Ensure Docker and Docker Compose are installed.
+#   $(CHECK_ENV) - Ensure the environment file exists.
+#   $(CHECK_RENDERED) - Ensure the rendered Compose file exists.
+#
+$(CHECK_PIA): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
+	@if [ -n "$(filter $(PRIVATEERR_SERVICE),$(SELECTED_COMPOSE_SERVICES))" ]; then \
+		$(PLUNDARR_COMPOSE) config --environment | $(PIA_CREDENTIAL_CHECK_CMD); \
+	fi
+
+#
 # $(DOWN): Stops containers and removes containers and networks.
 #
 # Dependencies:
@@ -452,19 +488,19 @@ $(DOWN): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 	$(PLUNDARR_COMPOSE) down $(COMPOSE_DOWN_OPTIONS)
 
 #
-# $(RESET_CONFIG): Restores checked-in example config files after live tests.
+# $(RESTORE_TEST_CONFIG): Restores checked-in example config files after live tests.
 #
-$(RESET_CONFIG):
+$(RESTORE_TEST_CONFIG):
 	$(call announce,Restorin' example maps for safe check-in. 🧭)
 	mkdir -p $$(dirname $(PRIVATEERR_GENERATED_WG_CONFIG))
 	cp $(PRIVATEERR_EXAMPLE_WG_CONFIG) $(PRIVATEERR_GENERATED_WG_CONFIG)
 	cp $(PRIVATEERR_EXAMPLE_METADATA) $(PRIVATEERR_GENERATED_METADATA)
 
 #
-# $(BACKUP_CONFIG): Archives the complete config directory with a collision-safe
-#                   timestamped filename.
+# $(BACKUP): Archives the complete config directory with a collision-safe
+#            timestamped filename.
 #
-$(BACKUP_CONFIG):
+$(BACKUP):
 	@if [ ! -d "$(CONFIG_PATH)" ]; then \
 		$(call print_line_inline,$(COLOR_ERROR),No $(CONFIG_PATH) directory found to archive.); \
 		exit 1; \
@@ -481,26 +517,25 @@ $(BACKUP_CONFIG):
 	$(call print_line_inline,$(COLOR_SUCCESS),Config cargo archived at $$archive. 📦)
 
 #
-# $(CLEAN_CONFIG): Deletes the complete generated config directory. This target
-#                  is intentionally explicit because application state is lost.
+# $(DELETE_CONFIG): Deletes the complete generated config directory. This target
+#                   is intentionally explicit because application state is lost.
 #
-$(CLEAN_CONFIG):
+$(DELETE_CONFIG):
 	$(call announce_warning,Removing the complete Plundarr config hold. ☠️)
 	rm -rf "$(CONFIG_PATH)"
 	$(call announce_detail,Run make $(SHIP) to regenerate selected service folders and seed files. 🗺️)
 
 #
-# $(CLEAN_ARTIFACTS): Removes only disposable developer artifacts. It never
-#                     reads or deletes dist/, generated configuration,
-#                     environment files, Docker resources, or backups.
+# $(CLEAN): Removes only disposable developer artifacts. It never reads or
+#           deletes dist/, generated configuration, environment files, Docker
+#           resources, or backups.
 #
-$(CLEAN_ARTIFACTS):
+$(CLEAN):
 	$(call announce,Scrubbin' disposable developer artifacts only. 🧽)
-	rm -rf $(DEVELOPER_ARTIFACTS)
-	find . -path './.git' -prune -o -path './dist' -prune -o \
-		-type d -name '__pycache__' -prune -exec rm -rf {} +
-	find . -path './.git' -prune -o -path './dist' -prune -o \
-		-type f \( -name '*.pyc' -o -name '*.pyo' -o -name '.DS_Store' \) -delete
+	rm -rf $(CLEAN_ARTIFACT_PATHS)
+	find "$(CLEAN_ARTIFACT_FIND_ROOT)" \
+		\( $(CLEAN_ARTIFACT_FIND_PRUNE) \) -prune -o \
+		\( $(CLEAN_ARTIFACT_FIND_MATCH) \) -exec rm -rf {} +
 	$(call announce_detail,Deployment charts$(COMMA) .env files$(COMMA) config$(COMMA) backups$(COMMA) containers$(COMMA) volumes$(COMMA) and images remain untouched. ⚓)
 
 #
@@ -530,9 +565,10 @@ $(TEST_VPN): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 #   $(BUILD_DEPENDS) - Ensure build dependencies are installed.
 #   $(CHECK_ENV) - Ensure the environment file exists.
 #   $(CHECK_RENDERED) - Ensure the rendered Compose file exists.
-#   $(RESET_CONFIG) - Restore example config files.
+#   $(RESTORE_TEST_CONFIG) - Restore example config files.
+#   $(CHECK_PIA) - Validate resolved PIA credentials when Privateerr is selected.
 #
-$(TEST_E2E): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED) $(RESET_CONFIG)
+$(TEST_E2E): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED) $(RESTORE_TEST_CONFIG) $(CHECK_PIA)
 	$(call announce,Launching Privateerr$(COMMA) Gluetun$(COMMA) and selected download mates for one clean test voyage. 🌊)
 	@status=0; \
 	$(PLUNDARR_COMPOSE) \
@@ -550,7 +586,7 @@ $(TEST_E2E): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED) $(RESET_CONFIG)
 		$(PLUNDARR_VPN_TEST_CMD) || status=$$?; \
 	fi; \
 	$(PLUNDARR_COMPOSE) down $(COMPOSE_DOWN_OPTIONS); \
-	$(MAKE) --no-print-directory $(RESET_CONFIG); \
+	$(MAKE) --no-print-directory $(RESTORE_TEST_CONFIG); \
 	exit "$$status"
 
 #
@@ -560,9 +596,10 @@ $(TEST_E2E): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED) $(RESET_CONFIG)
 #   $(BUILD_DEPENDS) - Ensure build dependencies are installed.
 #   $(CHECK_ENV) - Ensure the environment file exists.
 #   $(CHECK_RENDERED) - Ensure the rendered Compose file exists.
-#   $(RESET_CONFIG) - Restore example config files.
+#   $(RESTORE_TEST_CONFIG) - Restore example config files.
+#   $(CHECK_PIA) - Validate resolved PIA credentials when Privateerr is selected.
 #
-$(TEST_STACK): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED) $(RESET_CONFIG)
+$(TEST_STACK): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED) $(RESTORE_TEST_CONFIG) $(CHECK_PIA)
 	$(call announce,Launching the whole Plundarr fleet for a full-stack test voyage. 🏴‍☠️)
 	@status=0; \
 	$(PLUNDARR_COMPOSE) up $(COMPOSE_UP_OPTIONS) || status=$$?; \
@@ -588,17 +625,17 @@ $(TEST_STACK): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED) $(RESET_CONFIG)
 		$(PLUNDARR_COMPOSE) ps; \
 		$(PLUNDARR_COMPOSE) logs --tail=120; \
 	fi; \
-	$(MAKE) --no-print-directory $(RESET_CONFIG); \
+	$(MAKE) --no-print-directory $(RESTORE_TEST_CONFIG); \
 	exit "$$status"
 
 #
-# $(TEST_DOWN): Stops and removes containers, then restores example config files.
+# $(CLEAN_TEST): Stops and removes containers, then restores example config files.
 #
 # Dependencies:
 #   $(DOWN) - Stop and remove the stack.
-#   $(RESET_CONFIG) - Restore example config files.
+#   $(RESTORE_TEST_CONFIG) - Restore example config files.
 #
-$(TEST_DOWN): $(DOWN) $(RESET_CONFIG)
+$(CLEAN_TEST): $(DOWN) $(RESTORE_TEST_CONFIG)
 
 #
 # $(NUKE): Removes containers, images, generated files, and resets example config.
@@ -615,7 +652,7 @@ $(NUKE): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 	$(call announce,Scrubbin' generated logs and Gluetun state. 🧽)
 	rm -rf $(PLUNDARR_GENERATED_PATHS)
 
-	@$(MAKE) --no-print-directory $(RESET_CONFIG)
+	@$(MAKE) --no-print-directory $(RESTORE_TEST_CONFIG)
 
 #
 # $(UP): (Re)creates and starts every service in the stack.
@@ -624,8 +661,9 @@ $(NUKE): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 #   $(BUILD_DEPENDS) - Ensure build dependencies are installed.
 #   $(CHECK_ENV) - Ensure the environment file exists.
 #   $(CHECK_RENDERED) - Ensure the rendered Compose file exists.
+#   $(CHECK_PIA) - Validate resolved PIA credentials when Privateerr is selected.
 #
-$(UP): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
+$(UP): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED) $(CHECK_PIA)
 	$(call announce,Raisin' the whole Plundarr fleet. 🏴‍☠️)
 	$(PLUNDARR_COMPOSE) up $(COMPOSE_UP_OPTIONS)
 
@@ -637,11 +675,11 @@ $(UP): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 #   $(BUILD_DEPENDS) - Ensure build dependencies are installed.
 #
 $(ENSURE_MARAUDARR_IMAGE): $(BUILD_DEPENDS)
-	@if docker image inspect "$(MARAUDARR_IMAGE)" >/dev/null 2>&1; then \
+	@if $(DOCKER_BIN) image inspect "$(MARAUDARR_IMAGE)" >/dev/null 2>&1; then \
 		$(call print_line_inline,$(COLOR_SUCCESS),⚓ Found Maraudarr aboard locally: $(MARAUDARR_IMAGE)); \
 	else \
 		$(call print_line_inline,$(COLOR_INFO),🌊 No local Maraudarr image found. Checking GHCR...); \
-		if docker pull "$(MARAUDARR_IMAGE)" >/dev/null 2>&1; then \
+		if $(DOCKER_BIN) pull "$(MARAUDARR_IMAGE)" >/dev/null 2>&1; then \
 			$(call print_line_inline,$(COLOR_SUCCESS),✅ Published Maraudarr image is ready.); \
 		else \
 			$(call print_line_inline,$(COLOR_WARNING),🛠️ Published image unavailable. Building from this checkout...); \
@@ -651,20 +689,20 @@ $(ENSURE_MARAUDARR_IMAGE): $(BUILD_DEPENDS)
 			}; \
 		fi; \
 	fi
-	@docker image inspect "$(MARAUDARR_IMAGE)" >/dev/null 2>&1 || { \
+	@$(DOCKER_BIN) image inspect "$(MARAUDARR_IMAGE)" >/dev/null 2>&1 || { \
 		$(call print_line_inline,$(COLOR_ERROR),☠️ Maraudarr image is still missing: $(MARAUDARR_IMAGE)); \
 		exit 1; \
 	}
 
 #
-# $(PULL_MARAUDARR): Pulls the latest published Maraudarr image from GHCR.
+# $(PULL_IMAGE): Pulls the latest published Maraudarr image from GHCR.
 #
 # Dependencies:
 #   $(BUILD_DEPENDS) - Ensure build dependencies are installed.
 #
-$(PULL_MARAUDARR): $(BUILD_DEPENDS)
+$(PULL_IMAGE): $(BUILD_DEPENDS)
 	$(call announce,🌊 Pulling the latest published Maraudarr image...)
-	docker pull "$(MARAUDARR_IMAGE)"
+	$(DOCKER_BIN) pull "$(MARAUDARR_IMAGE)"
 
 #
 # $(SHIP): Generates the comment-rich Compose and environment files.
@@ -691,102 +729,81 @@ $(CONFIGURE): $(ENSURE_MARAUDARR_IMAGE)
 	@$(MARAUDARR_RUN_INTERACTIVE) configure --output-root "$(MARAUDARR_OUTPUT_ROOT)"
 
 #
-# $(BUILD_MARAUDARR): Builds Maraudarr locally using its dedicated Compose chart.
+# $(BUILD): Builds Maraudarr locally using its dedicated Compose chart.
 #
 # Dependencies:
 #   $(BUILD_DEPENDS) - Ensure Docker and Docker Compose are installed.
 #
-$(BUILD_MARAUDARR): $(BUILD_DEPENDS)
+$(BUILD): $(BUILD_DEPENDS)
 	$(MARAUDARR_BUILD)
 
 #
-# $(BUILD): Alias for build-maraudarr to match the related Privateerr project.
-#
-# Dependencies:
-#   $(BUILD_MARAUDARR) - Build the local Maraudarr image.
-#
-$(BUILD): $(BUILD_MARAUDARR)
-
-#
-# $(BUILD_MULTIARCH): Verifies Maraudarr builds for every published architecture.
+# $(BUILD_PLATFORMS): Verifies Maraudarr builds for every published architecture.
 #
 # Dependencies:
 #   $(BUILD_DEPENDS) - Ensure Docker and Docker Compose are installed.
 #
-$(BUILD_MULTIARCH): $(BUILD_DEPENDS)
-	docker buildx build \
-		--pull \
-		--platform "$(MARAUDARR_BUILD_PLATFORMS)" \
-		--tag "$(MARAUDARR_MULTIARCH_IMAGE)" \
-		--file docker/Dockerfile \
-		docker
+$(BUILD_PLATFORMS): $(BUILD_DEPENDS)
+	$(MARAUDARR_PLATFORM_BUILD)
 
 #
-# $(SMOKE_MARAUDARR): Runs one hardened image-generation and Compose-validation
-#                     voyage in a disposable output directory.
+# $(TEST_IMAGE): Runs one hardened image-generation and Compose-validation
+#                voyage in a disposable output directory.
 #
 # Dependencies:
 #   $(ENSURE_MARAUDARR_IMAGE) - Prepare the exact image requested by the caller.
 #
-$(SMOKE_MARAUDARR): $(ENSURE_MARAUDARR_IMAGE)
+$(TEST_IMAGE): $(ENSURE_MARAUDARR_IMAGE)
 	$(call announce,Smoke-testin' Maraudarr in a sealed temporary barrel. 🛢️)
-	@set -eu; \
-	smoke_output=$$(mktemp -d); \
-	trap 'rm -rf "$$smoke_output"' 0 1 2 15; \
-	docker run \
-		$(MARAUDARR_BASE_RUN_OPTIONS) \
-		--volume "$$smoke_output:$(MARAUDARR_OUTPUT):rw" \
-		"$(MARAUDARR_IMAGE)" \
-		--plain build \
-		--preset "$(MARAUDARR_SMOKE_PRESET)" \
-		--remove "$(MARAUDARR_SMOKE_REMOVE)" \
-		--add "$(MARAUDARR_SMOKE_ADD)" \
-		--output-root "$(MARAUDARR_OUTPUT_ROOT)"; \
-	smoke_deployment="$$smoke_output/$(DEPLOYMENT_ROOT)/$(MARAUDARR_SMOKE_PRESET)"; \
-	test -s "$$smoke_deployment/docker-compose.yml"; \
-	test -s "$$smoke_deployment/.env"; \
-	test -s "$$smoke_deployment/$(MARAUDARR_SMOKE_FILE)"; \
-	$(DOCKER_COMPOSE) \
-		--env-file "$$smoke_deployment/.env" \
-		-f "$$smoke_deployment/docker-compose.yml" \
-		config \
-		--quiet
+	@$(MARAUDARR_SMOKE_CMD) \
+		--docker-bin "$(DOCKER_BIN)" \
+		--image "$(MARAUDARR_IMAGE)" \
+		--preset "$(MARAUDARR_TEST_PRESET)" \
+		--add-services "$(MARAUDARR_TEST_ADD)" \
+		--remove-services "$(MARAUDARR_TEST_REMOVE)" \
+		--required-file "$(MARAUDARR_TEST_FILE)" \
+		--output-mount "$(MARAUDARR_OUTPUT)" \
+		--output-root "$(MARAUDARR_OUTPUT_ROOT)" \
+		--deployment-root "$(DEPLOYMENT_ROOT)"
 	$(call announce_success,Maraudarr's disposable smoke voyage came back clean. ✅)
 
 #
-# $(TEST_MARAUDARR_UNIT): Runs Maraudarr's Python unit tests.
+# $(TEST_UNIT): Runs Maraudarr's Python unit tests.
 #
-$(TEST_MARAUDARR_UNIT):
+$(TEST_UNIT):
 	PYTHONDONTWRITEBYTECODE=1 \
 	PYTHONPATH=docker/src \
 	MARAUDARR_CATALOG_ROOT=docker \
 		$(PYTHON_BIN) -m unittest discover -s docker/tests -v
 
 #
-# $(TEST_WORKFLOW_HELPERS): Tests workflow payload and registry helpers locally.
+# $(TEST_WORKFLOWS): Tests workflow payload and registry helpers locally.
 #
-$(TEST_WORKFLOW_HELPERS):
+$(TEST_WORKFLOWS):
 	$(WORKFLOW_HELPERS_TEST_CMD)
 
 #
-# $(TEST_MARAUDARR): Runs unit tests, workflow helpers, and the Compose matrix.
+# $(TEST): Runs unit tests, automation helpers, and the Compose matrix.
 #
 # Dependencies:
 #   $(BUILD_DEPENDS) - Ensure Docker and Docker Compose are installed.
-#   $(TEST_MARAUDARR_UNIT) - Run Maraudarr's Python unit tests.
-#   $(TEST_WORKFLOW_HELPERS) - Test workflow helpers without external writes.
+#   $(TEST_UNIT) - Run Maraudarr's Python unit tests.
+#   $(TEST_WORKFLOWS) - Test workflow helpers without external writes.
 #
-$(TEST_MARAUDARR): $(BUILD_DEPENDS) $(TEST_MARAUDARR_UNIT) $(TEST_WORKFLOW_HELPERS)
+$(TEST): $(BUILD_DEPENDS) $(TEST_UNIT) $(TEST_WORKFLOWS)
 	$(MARAUDARR_IMAGE_TEST_CMD)
+	$(MAKE_HELPERS_TEST_CMD)
 	MARAUDARR_TEST_OUTPUT="$(MARAUDARR_TEST_OUTPUT)" \
 	PYTHON_BIN="$(PYTHON_BIN)" \
 		test/test-maraudarr-matrix.sh
 
 #
-# $(DOCS_VENV)/bin/python: Creates an isolated Python environment for developer
-#                          documentation tooling.
+# $(DOCS_PYTHON_TARGET): Creates an isolated Python environment for developer
+#                        documentation tooling.
 #
-$(DOCS_VENV)/bin/python:
+# Dependencies: None.
+#
+$(DOCS_PYTHON_TARGET):
 	$(call announce,📚 Creating the isolated developer documentation toolchain...)
 	@$(PYTHON_BIN) -m venv "$(DOCS_VENV)" || { \
 		$(call print_line_inline,$(COLOR_ERROR),Python venv support is required to build documentation.); \
@@ -795,26 +812,33 @@ $(DOCS_VENV)/bin/python:
 	}
 
 #
-# $(DOCS_VENV)/.requirements-installed: Installs the pinned developer documentation
-#                                       toolchain when its requirements change.
+# $(DOCS_INSTALL_STAMP): Installs the pinned developer documentation toolchain
+#                        when its requirements change.
 #
-$(DOCS_VENV)/.requirements-installed: $(DOCS_REQUIREMENTS) | $(DOCS_VENV)/bin/python
+# Dependencies:
+#   $(DOCS_REQUIREMENTS) - Declare the pinned documentation packages.
+#   $(DOCS_PYTHON_TARGET) - Provide the isolated Python environment.
+#
+$(DOCS_INSTALL_STAMP): $(DOCS_REQUIREMENTS) | $(DOCS_PYTHON_TARGET)
 	$(call announce,📦 Installing pinned developer documentation tools...)
 	@$(DOCS_PYTHON) -m pip install --disable-pip-version-check --requirement "$(DOCS_REQUIREMENTS)"
-	@touch "$(DOCS_VENV)/.requirements-installed"
+	@touch "$(DOCS_INSTALL_STAMP)"
 
 #
-# $(DOCS_DEPENDENCIES): Ensures the pinned documentation toolchain is ready.
+# $(DOCS_INSTALL): Ensures the pinned documentation toolchain is ready.
 #
-$(DOCS_DEPENDENCIES): $(DOCS_VENV)/.requirements-installed
+# Dependencies:
+#   $(DOCS_INSTALL_STAMP) - Install tools when the pinned requirements change.
+#
+$(DOCS_INSTALL): $(DOCS_INSTALL_STAMP)
 
 #
 # $(DOCS): Builds the strict Plundarr developer documentation site.
 #
 # Dependencies:
-#   $(DOCS_DEPENDENCIES) - Prepare the isolated MkDocs toolchain.
+#   $(DOCS_INSTALL) - Prepare the isolated MkDocs toolchain.
 #
-$(DOCS): $(DOCS_DEPENDENCIES)
+$(DOCS): $(DOCS_INSTALL)
 	$(call announce,📚 Building the strict developer documentation site...)
 	$(DOCS_MKDOCS) build --strict --site-dir "$(DOCS_SITE_PATH)"
 
@@ -822,9 +846,9 @@ $(DOCS): $(DOCS_DEPENDENCIES)
 # $(DOCS_SERVE): Starts the local developer documentation preview server.
 #
 # Dependencies:
-#   $(DOCS_DEPENDENCIES) - Prepare the isolated MkDocs toolchain.
+#   $(DOCS_INSTALL) - Prepare the isolated MkDocs toolchain.
 #
-$(DOCS_SERVE): $(DOCS_DEPENDENCIES)
+$(DOCS_SERVE): $(DOCS_INSTALL)
 	$(call announce,📚 Serving developer documentation at http://$(DOCS_SERVE_ADDRESS)...)
 	$(DOCS_MKDOCS) serve --dev-addr "$(DOCS_SERVE_ADDRESS)"
 
@@ -941,29 +965,10 @@ $(LOGS): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 #   $(CHECK_RENDERED) - Ensure the rendered Compose file exists.
 #
 $(PS): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
-	@project_name="$${COMPOSE_PROJECT_NAME:-}"; \
-	if [ -z "$$project_name" ]; then \
-		project_name=$$(awk -F '=' '\
-			/^COMPOSE_PROJECT_NAME=/ { \
-				value=$$2; \
-				sub(/^"\$\${COMPOSE_PROJECT_NAME:-/, "", value); \
-				sub(/}"$$/, "", value); \
-				sub(/^"/, "", value); \
-				print value; \
-				exit; \
-			}' "$(COMPOSE_ENV_FILE)"); \
-	fi; \
-	docker ps \
-		--filter "label=com.docker.compose.project=$$project_name" \
-		--format 'table {{.Names}}\t{{.Label "com.docker.compose.service"}}\t{{.Status}}\t{{.Ports}}'
-
-#
-# $(TEST_LOGS): View output from stack containers.
-#
-# Dependencies:
-#   $(LOGS) - Show logs for the service stack.
-#
-$(TEST_LOGS): $(LOGS)
+	@$(PLUNDARR_PS_CMD) \
+		--docker-bin "$(DOCKER_BIN)" \
+		--env-file "$(COMPOSE_ENV_FILE)" \
+		--compose-file "$(COMPOSE_FILE)"
 
 #
 # $(OPEN): Opens the compose services in the default web browser.
@@ -1007,35 +1012,27 @@ $(HELP):
 	$(call help_line,$(PRINT_CONFIG),Print raw Compose configuration without comments.)
 	$(call help_line,$(PRINT_ENV),Print raw environment settings without comments.)
 	$(call help_heading,🧪 Test and build)
-	$(call help_line,$(TEST_MARAUDARR_UNIT),Run Maraudarr Python unit tests.)
-	$(call help_line,$(TEST_MARAUDARR),Run all generator and workflow-helper tests.)
-	$(call help_line,$(TEST_WORKFLOW_HELPERS),Test Discord and registry workflow helpers.)
+	$(call help_line,$(TEST_UNIT),Run Maraudarr Python unit tests.)
+	$(call help_line,$(TEST),Run all generator and automation-helper tests.)
+	$(call help_line,$(TEST_WORKFLOWS),Test Discord and registry workflow helpers.)
 	$(call help_line,$(TEST_VPN),Check a running VPN tunnel.)
 	$(call help_line,$(TEST_E2E),Run the focused VPN end-to-end test.)
 	$(call help_line,$(TEST_STACK),Run the complete stack test.)
-	$(call help_line,$(BUILD_MARAUDARR),Build Maraudarr from this checkout.)
-	$(call help_line,$(BUILD_MULTIARCH),Check every published image architecture.)
-	$(call help_line,$(SMOKE_MARAUDARR),Smoke-test one hardened Maraudarr image.)
+	$(call help_line,$(TEST_IMAGE),Smoke-test one hardened Maraudarr image.)
+	$(call help_line,$(BUILD),Build Maraudarr from this checkout.)
+	$(call help_line,$(BUILD_PLATFORMS),Check every published image architecture.)
 	$(call help_line,$(DOCS),Build the strict developer documentation site.)
 	$(call help_line,$(DOCS_SERVE),Preview developer documentation locally.)
-	$(call help_line,$(DOCS_DEPENDENCIES),Install or refresh pinned documentation tools.)
+	$(call help_line,$(DOCS_INSTALL),Install or refresh pinned documentation tools.)
 	$(call help_heading,🧹 Maintenance)
-	$(call help_line,$(PULL_MARAUDARR),Pull the latest published Maraudarr image.)
-	$(call help_line,$(BACKUP_CONFIG),Archive the selected preset config safely.)
-	$(call help_line,$(CLEAN_ARTIFACTS),Remove only disposable developer artifacts.)
-	$(call help_line,$(CLEAN),Stop the stack and restore example test config.)
-	$(call help_line,$(RESET_CONFIG),Restore example VPN config files for tests.)
-	$(call help_line,$(CLEAN_CONFIG),‼️ DANGER ‼️ delete the selected preset config tree.)
-	$(call help_line,$(NUKE),‼️ DANGER ️‼️ remove selected-stack containers volumes and images.)
+	$(call help_line,$(PULL_IMAGE),Pull the latest published Maraudarr image.)
+	$(call help_line,$(BACKUP),Archive the selected preset config safely.)
+	$(call help_line,$(CLEAN),Remove only disposable developer artifacts.)
+	$(call help_line,$(CLEAN_TEST),Stop the stack and restore example test config.)
+	$(call help_line,$(RESTORE_TEST_CONFIG),Restore example VPN config files for tests.)
+	$(call help_line,$(DELETE_CONFIG),‼️DANGER‼️ delete the selected preset config tree.)
+	$(call help_line,$(NUKE),‼️DANGER‼️ remove selected-stack containers volumes and images.)
 	$(call announce_warning,⚠️  Destructive targets never run automatically. Back up config before using them.)
-
-#
-# $(CLEAN): Alias for test-down.
-#
-# Dependencies:
-#   $(TEST_DOWN) - Stop the stack and restore example config files.
-#
-$(CLEAN): $(TEST_DOWN)
 
 #
 # $(START): Alias for up.

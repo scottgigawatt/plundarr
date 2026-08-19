@@ -21,24 +21,25 @@ Use the complete Maraudarr test target while changing image resolution,
 presets, service charts, or generated config seeds:
 
 ```sh
-make test-maraudarr
+make test
 ```
 
 These checks simulate local-image discovery, a successful GHCR pull, a local
 fallback build, and a complete retrieval failure without contacting a registry.
 They also run the Python unit suite, exercise the offline Discord and registry
+helpers, verify the compact Compose status and secret-safe PIA preflight
 helpers, and generate representative Compose charts.
 
 After building an image, exercise its hardened container contract and validate
 one disposable generated deployment with:
 
 ```sh
-make smoke-maraudarr
+make test-image
 ```
 
-CI can select another representative voyage with `MARAUDARR_SMOKE_PRESET`,
-`MARAUDARR_SMOKE_ADD`, `MARAUDARR_SMOKE_REMOVE`, and
-`MARAUDARR_SMOKE_FILE` without duplicating a raw `docker run` block.
+CI can select another representative voyage with `MARAUDARR_TEST_PRESET`,
+`MARAUDARR_TEST_ADD`, `MARAUDARR_TEST_REMOVE`, and
+`MARAUDARR_TEST_FILE` without duplicating a raw `docker run` block.
 
 ### Running Stack Check
 
@@ -124,12 +125,12 @@ Useful cleanup commands:
 ```sh
 #
 # Restore test fixtures or deliberately remove Docker resources after a test.
-# clean-config deletes the selected application-state directory.
+# delete-config deletes the selected application-state directory.
 #
-make test-down
-make reset-config
+make clean-test
+make restore-test-config
 make nuke
-make clean-artifacts
+make clean
 ```
 
 > [!TIP]

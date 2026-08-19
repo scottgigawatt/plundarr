@@ -96,7 +96,7 @@ testing; an installed Docker Compose that rejects the chart is a hard failure.
 Config seeding follows a different safety rule: missing seeds are copied,
 project-owned README files may be refreshed, and existing application files are
 never replaced. Destructive cleanup belongs exclusively to the explicit
-`make clean-config` target.
+`make delete-config` target.
 
 ## Failure Boundaries
 

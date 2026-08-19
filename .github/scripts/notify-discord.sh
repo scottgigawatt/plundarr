@@ -37,6 +37,14 @@ run_url=""
 workflow_name=""
 
 #
+# Discord embed colors stored by visual role instead of opaque decimal values.
+#
+discord_color_failure_red=15158332
+discord_color_kraken_purple=10181046
+discord_color_shipyard_blue=3447003
+discord_color_success_green=3066993
+
+#
 # Fail on errors and unset variables.
 #
 set -eu
@@ -325,7 +333,7 @@ case "${discord_event}" in
                 "OSHA declined jurisdiction, the YAML retained counsel, and ${workflow_name} sailed anyway." \
                 "Please keep fingers clear of the build cache and emotional-support manifests.")
             footer="Maraudarr Shipyard • seaworthy is a spectrum"
-            color=3447003
+            color=${discord_color_shipyard_blue}
         else
             title="🦑 Kraken clocked in"
             description=$(choose_message \
@@ -336,7 +344,7 @@ case "${discord_event}" in
                 "The kraken insists the bubbles are part of the observability stack." \
                 "The kraken pressed every button at once. Against all engineering guidance, this begins the build.")
             footer="Kraken Build Bureau • tentacle-driven development"
-            color=10181046
+            color=${discord_color_kraken_purple}
         fi
         ;;
     verdict)
@@ -344,7 +352,7 @@ case "${discord_event}" in
         require_value --ghcr-image "${ghcr_image}"
 
         if [ "${job_status}" = "success" ]; then
-            color=3066993
+            color=${discord_color_success_green}
             if [ "${discord_template}" = "shipyard" ]; then
                 title="✅ Fleet launched"
                 description=$(choose_message \
@@ -367,7 +375,7 @@ case "${discord_event}" in
                 footer="Kraken Build Bureau • eight arms, one victory lap"
             fi
         else
-            color=15158332
+            color=${discord_color_failure_red}
             if [ "${discord_template}" = "shipyard" ]; then
                 title="💥 Build hit a reef"
                 description=$(choose_message \

@@ -21,6 +21,7 @@ on:
       - ".github/workflows/pages.yml"
       - "docker/src/maraudarr/**"
       - "docs/**"
+      - "Makefile"
       - "mkdocs.yml"
       - "requirements-docs.txt"
   workflow_dispatch:
@@ -57,13 +58,13 @@ jobs:
           cache-dependency-path: requirements-docs.txt
 
       - name: "Load the Documentation Tools 🧰"
-        run: pip install --requirement requirements-docs.txt
+        run: make docs-install
 
       - name: "Configure the Pages Harbor ⚓"
         uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d  # v6
 
       - name: "Render Every Developer Chart 🔎"
-        run: mkdocs build --strict
+        run: make docs
 
       - name: "Crate the Static Site 📦"
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9  # v5

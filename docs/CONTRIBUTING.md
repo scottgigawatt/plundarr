@@ -42,12 +42,12 @@ Useful commands:
 make check-env
 make config
 make env
-make test-maraudarr
+make test
 make up PRESET=plundarr
 make test-vpn
 make test-e2e
 make test-stack
-make reset-config PRESET=plundarr
+make restore-test-config PRESET=plundarr
 pre-commit run --all-files
 ```
 

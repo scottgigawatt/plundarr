@@ -39,7 +39,7 @@ elapsed_seconds=0
 #
 # Parameters: $* - Message fragments to write as one status line.
 #
-# Returns:     0 after writing the line.
+# Returns: 0 after writing the line.
 #
 log() {
     printf '[%s] %s\n' "${gluetun_script_name}" "$*"

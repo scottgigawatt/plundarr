@@ -38,7 +38,7 @@ script_name="qbittorrent-port-forwarding.sh"
 #
 # Parameters: $* - Message fragments to write as one status line.
 #
-# Returns:     0 after writing the line.
+# Returns: 0 after writing the line.
 #
 log() {
     printf '[%s] %s\n' "${script_name}" "$*"
@@ -50,7 +50,7 @@ log() {
 # Parameters: $1 - API path.
 #             $2 - Optional POST payload.
 #
-# Returns:     wget's exit status and response body on standard output.
+# Returns: wget's exit status and response body on standard output.
 #
 qbittorrent_api() {
     api_path="$1"
@@ -68,7 +68,7 @@ qbittorrent_api() {
 #
 # Parameters: None.
 #
-# Returns:     0 when reachable; exits nonzero after the configured timeout.
+# Returns: 0 when reachable; exits nonzero after the configured timeout.
 #
 wait_for_qbittorrent() {
     elapsed_seconds=0
@@ -91,7 +91,7 @@ wait_for_qbittorrent() {
 # Parameters: $1 - Forwarded TCP/UDP port.
 #             $2 - VPN interface name.
 #
-# Returns:     0 after updating qBittorrent; exits nonzero for invalid input.
+# Returns: 0 after updating qBittorrent; exits nonzero for invalid input.
 #
 set_forwarded_port() {
     forwarded_port="$1"
@@ -125,7 +125,7 @@ set_forwarded_port() {
 #
 # Parameters: None.
 #
-# Returns:     0 after applying the safe local-only defaults.
+# Returns: 0 after applying the safe local-only defaults.
 #
 reset_forwarded_port() {
     wait_for_qbittorrent

@@ -40,7 +40,9 @@ Maraudarr writes each voyage to `dist/<preset>/docker-compose.yml`,
 `dist/<preset>/example.env`, `dist/<preset>/.env`, and the selected service
 directories under `dist/<preset>/config/`. Review that preset's `.env` before
 launch, especially user IDs, host paths, timezone, network values, and PIA
-credentials when the voyage includes Privateerr and Gluetun.
+credentials when the voyage includes Privateerr and Gluetun. Startup stops with
+a corrective message when resolved `PIA_USER` or `PIA_PASS` values are missing
+or still use Maraudarr's generated examples.
 
 ## Chartin' the Docker Network Waters 🌍🧭
 

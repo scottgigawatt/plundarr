@@ -1,3 +1,4 @@
+# Ignore macOS Finder metadata files, local secrets, and environment variables.
 .DS_Store
 .secrets
 .env

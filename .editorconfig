@@ -19,13 +19,13 @@ indent_style = space
 [*.{md,yml,yaml}]
 indent_size = 2
 
+[*.{css,js}]
+indent_size = 2
+
 [*.{json,json5,py,sh,toml}]
 indent_size = 4
 
 [.gitleaks.toml]
-indent_size = 2
-
-[.secrets.baseline]
 indent_size = 2
 
 [Dockerfile]

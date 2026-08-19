@@ -220,6 +220,21 @@
         "zipx"
     ],
     "makefile.configureOnOpen": false,
+    "files.associations": {
+        ".secrets.baseline": "jsonc",
+        "**/CODEOWNERS": "plaintext",
+        "Dockerfile*": "dockerfile"
+    },
+    "[dockerfile]": {
+        "editor.detectIndentation": false,
+        "editor.tabSize": 4,
+        "editor.insertSpaces": true
+    },
+    "[css][javascript]": {
+        "editor.detectIndentation": false,
+        "editor.tabSize": 2,
+        "editor.insertSpaces": true
+    },
     "[yaml]": {
         "editor.detectIndentation": false,
         "editor.tabSize": 2,
@@ -230,6 +245,37 @@
         "editor.tabSize": 2,
         "editor.insertSpaces": true
     },
+    "[json][jsonc]": {
+        "editor.detectIndentation": false,
+        "editor.tabSize": 4,
+        "editor.insertSpaces": true
+    },
+    "[makefile]": {
+        "editor.detectIndentation": false,
+        "editor.tabSize": 4,
+        "editor.insertSpaces": false
+    },
+    "[markdown]": {
+        "editor.detectIndentation": false,
+        "editor.tabSize": 2,
+        "editor.insertSpaces": true
+    },
+    "[python]": {
+        "editor.detectIndentation": false,
+        "editor.tabSize": 4,
+        "editor.insertSpaces": true
+    },
+    "[shellscript]": {
+        "editor.detectIndentation": false,
+        "editor.tabSize": 4,
+        "editor.insertSpaces": true
+    },
+    "[toml]": {
+        "editor.detectIndentation": false,
+        "editor.tabSize": 4,
+        "editor.insertSpaces": true
+    },
+    "shellcheck.enable": true,
     "yaml.customTags": [
         "tag:yaml.org,2002:python/name:pymdownx.superfences.fence_code_format"
     ],
@@ -247,5 +293,6 @@
         ],
         "https://json.schemastore.org/pre-commit-config.json": ".pre-commit-config.yaml"
     },
-    "yaml.validate": true
+    "yaml.validate": true,
+    "yaml.yamlVersion": "1.2"
 }

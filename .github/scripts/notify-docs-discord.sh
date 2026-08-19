@@ -28,6 +28,12 @@ run_url=""
 site_url="unavailable"
 
 #
+# Discord embed colors stored by visual role instead of opaque decimal values.
+#
+discord_color_failure_red=15158332
+discord_color_success_green=3066993
+
+#
 # Fail on errors and unset variables.
 #
 set -eu
@@ -231,7 +237,7 @@ if [ "${build_status}" = "success" ] \
         "The docs escaped containment and are now teaching strangers how to operate Docker. Legally, this is outreach." \
         "Pages accepted the charts after a rigorous review by one lighthouse and a raccoon in a safety vest.")
     footer="Plundarr Chart Room • facts deployed under adult supervision"
-    color=3066993
+    color=${discord_color_success_green}
 else
     title="💥 The chart room has become conceptual"
     description=$(choose_message \
@@ -242,7 +248,7 @@ else
         "The chart room renovation uncovered load-bearing Markdown." \
         "A hyperlink achieved sentience, rejected its destination, and took the navigation menu with it.")
     footer="Plundarr Chart Room • the footnotes demand representation"
-    color=15158332
+    color=${discord_color_failure_red}
 fi
 
 #

@@ -42,11 +42,11 @@ of sight and prints only the useful status and Maraudarr output.
 | `make configure`           | Opens the interactive preset and service picker             |
 | `make presets`             | Lists every preset and its exact defaults                   |
 | `make services`            | Lists every selectable service                              |
-| `make pull-maraudarr`      | Pulls the latest published Maraudarr image from GHCR        |
-| `make build-maraudarr`     | Builds the Maraudarr image locally from this directory      |
-| `make test-maraudarr-unit` | Runs Maraudarr's Python unit tests                          |
-| `make test-maraudarr`      | Runs unit tests and the real Compose matrix                 |
-| `make build-multiarch`     | Verifies all published CPU architectures                    |
+| `make pull-image`          | Pulls the latest published Maraudarr image from GHCR        |
+| `make build`               | Builds the Maraudarr image locally from this directory      |
+| `make test-unit`           | Runs Maraudarr's Python unit tests                          |
+| `make test`                | Runs unit tests and the real Compose matrix                 |
+| `make build-platforms`     | Verifies all published CPU architectures                    |
 
 Maraudarr uses a matching local image first. When none exists, Make tries GHCR
 and automatically builds from this checkout if the published image is not yet
@@ -55,8 +55,8 @@ available. No pull-skip variable be needed.
 Refresh or rebuild Maraudarr explicitly when ye want a different image:
 
 ```sh
-make pull-maraudarr
-make build-maraudarr
+make pull-image
+make build
 ```
 
 Add optional cargo without opening the interactive prompts:
@@ -116,7 +116,7 @@ The published image and Make targets use a deliberately narrow runtime:
 
 Maraudarr validates every generated pair with its bundled standalone
 `docker-compose config --quiet` command before replacing a preset's output.
-The explicit `make clean-config PRESET=<preset>` target is the only normal path
+The explicit `make delete-config PRESET=<preset>` target is the only normal path
 that removes a complete config hold.
 
 ## Registry Charts 🗂️
@@ -148,15 +148,15 @@ critical image vulnerabilities.
 Run host-side tests while editing Python or service charts:
 
 ```sh
-make test-maraudarr-unit
+make test-unit
 ```
 
 Then fire the complete checks:
 
 ```sh
-make test-maraudarr
-make build-maraudarr
-make build-multiarch
+make test
+make build
+make build-platforms
 pre-commit run --all-files
 ```
 

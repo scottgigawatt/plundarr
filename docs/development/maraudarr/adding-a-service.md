@@ -76,9 +76,9 @@ passes `docker compose config --quiet`.
 Before publishing, run:
 
 ```sh
-make test-maraudarr
-make build-maraudarr
-make build-multiarch
+make test
+make build
+make build-platforms
 make docs
 pre-commit run --all-files
 git diff --check

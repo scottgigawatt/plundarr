@@ -12,7 +12,7 @@ rendering, config seeding, and the terminal interface.
 | `ui.py`      | Rich and plain terminal presentation                 |
 | `cli.py`     | Public command parsing and orchestration             |
 
-Run the package tests from the repository root with `make test-maraudarr`.
+Run the package tests from the repository root with `make test`.
 
 The [Maraudarr developer guide](../../../docs/development/maraudarr/index.md)
 explains the complete generation flow. Public Python interfaces are rendered

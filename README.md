@@ -158,7 +158,7 @@ Maraudarr writes only settings used by the selected services:
 
 | Setting                                                                         | Why Ye Care                                                   |
 | ------------------------------------------------------------------------------- | ------------------------------------------------------------- |
-| 🔐 `PIA_USER` / `PIA_PASS`                                                      | Required when Privateerr and Gluetun are selected             |
+| 🔐 `PIA_USER` / `PIA_PASS`                                                      | Required when Privateerr is selected; `make up` rejects empty or example values |
 | 👤 `DEFAULT_PUID` / `DEFAULT_PGID`                                              | Must be able to read and write the mounted files              |
 | 📦 `HOST_DOWNLOADS_PATH`                                                        | Shared download root for automation services                  |
 | 🎥 `HOST_MOVIES_PATH`, `HOST_TV_PATH`, `HOST_ANIME_TV_PATH`, `HOST_SCENES_PATH` | Automation and Plex library paths used by the selected preset |
@@ -286,7 +286,7 @@ Read the Synology setup scroll before the first voyage:
 Useful test voyages:
 
 ```sh
-make test-maraudarr
+make test
 make test-vpn
 make test-e2e
 make test-stack
@@ -304,15 +304,15 @@ make test-stack
 # Remove only generated documentation, Python caches, and test logs.
 # Deployment charts, .env files, config, backups, containers, volumes, and images stay put.
 #
-make clean-artifacts
+make clean
 ```
 
 ## Navigatin' Troubled Waters ☠️🌊
 
 > [!TIP]
 > 🧭 `make help` is the complete grouped command chart. It marks the two
-> intentionally destructive targets, `clean-config` and `nuke`, as danger
-> commands; use `backup-config` before either one.
+> intentionally destructive targets, `delete-config` and `nuke`, as danger
+> commands; use `backup` before either one.
 
 ## More Treasure Maps & Crew Codes 🗺️
 

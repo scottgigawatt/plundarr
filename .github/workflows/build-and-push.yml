@@ -24,6 +24,8 @@ on:
       - "docker-compose.maraudarr.yml"
       - "example.maraudarr.env"
       - "test/test-maraudarr-matrix.sh"
+      - "test/maraudarr-image-smoke.sh"
+      - "test/test-make-helpers.sh"
       - "test/test-workflow-helpers.sh"
       - "test/workflow-skopeo-stub.sh"
       - "Makefile"
@@ -65,7 +67,7 @@ jobs:
       # definitions to ensure they all produce valid stacks.
       #
       - name: "Test the Stack Charts 🔎"
-        run: make test-maraudarr
+        run: make test
 
       #
       # Build one local architecture for runtime and vulnerability inspection.
@@ -73,7 +75,7 @@ jobs:
       #
       - name: "Build the Local Maraudarr Image ⚒️"
         run: >-
-          make build-maraudarr
+          make build
           MARAUDARR_IMAGE=ghcr.io/${{ github.repository_owner }}/maraudarr:scan
           MARAUDARR_BUILD_OPTIONS=--pull
 
@@ -85,11 +87,11 @@ jobs:
         #
       - name: "Run the Hardened Smoke Voyage ⚓"
         run: >-
-          make smoke-maraudarr
+          make test-image
           MARAUDARR_IMAGE=ghcr.io/${{ github.repository_owner }}/maraudarr:scan
-          MARAUDARR_SMOKE_PRESET=plundarr
-          MARAUDARR_SMOKE_ADD=apprise,jellyfin
-          MARAUDARR_SMOKE_FILE=config/homepage/services.yaml
+          MARAUDARR_TEST_PRESET=plundarr
+          MARAUDARR_TEST_ADD=apprise,jellyfin
+          MARAUDARR_TEST_FILE=config/homepage/services.yaml
 
       #
       # Keep HIGH and CRITICAL fixed vulnerabilities out of the published image.
