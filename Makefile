@@ -183,25 +183,23 @@ endif
 #
 # Developer documentation settings.
 #
-MKDOCS              ?= mkdocs
+MKDOCS               ?= mkdocs
 PIP_MODULE           ?= pip
 PIP_INSTALL_COMMAND  ?= install
 PIP_NO_VERSION_CHECK ?= --disable-pip-version-check
 PIP_REQUIRE_HASHES   ?= --require-hashes
 PIP_REQUIREMENT_FILE ?= --requirement
-DOCS_SITE_PATH      ?= site
-DOCS_SERVE_ADDRESS  ?= 127.0.0.1:8000
-DOCS_VENV           ?= .venv-docs
-DOCS_PYTHON_TARGET  ?= $(DOCS_VENV)/bin/python
-DOCS_INSTALL_STAMP  ?= $(DOCS_VENV)/.requirements-installed
-DOCS_PYTHON         ?= $(DOCS_PYTHON_TARGET)
-DOCS_MKDOCS         ?= $(DOCS_VENV)/bin/$(MKDOCS)
-DOCS_REQUIREMENTS   ?= requirements-docs.txt
-DOCS_PIP            ?= $(DOCS_PYTHON) -m $(PIP_MODULE)
-DOCS_PIP_OPTIONS    ?= $(PIP_NO_VERSION_CHECK) \
-	$(PIP_REQUIRE_HASHES) \
-	$(PIP_REQUIREMENT_FILE) "$(DOCS_REQUIREMENTS)"
-DOCS_PIP_INSTALL    ?= $(DOCS_PIP) $(PIP_INSTALL_COMMAND) $(DOCS_PIP_OPTIONS)
+DOCS_SITE_PATH       ?= site
+DOCS_SERVE_ADDRESS   ?= 127.0.0.1:8000
+DOCS_VENV            ?= .venv-docs
+DOCS_PYTHON_TARGET   ?= $(DOCS_VENV)/bin/python
+DOCS_INSTALL_STAMP   ?= $(DOCS_VENV)/.requirements-installed
+DOCS_PYTHON          ?= $(DOCS_PYTHON_TARGET)
+DOCS_MKDOCS          ?= $(DOCS_VENV)/bin/$(MKDOCS)
+DOCS_REQUIREMENTS    ?= requirements-docs.txt
+DOCS_PIP             ?= $(DOCS_PYTHON) -m $(PIP_MODULE)
+DOCS_PIP_OPTIONS     ?= $(PIP_NO_VERSION_CHECK) $(PIP_REQUIRE_HASHES) $(PIP_REQUIREMENT_FILE) "$(DOCS_REQUIREMENTS)"
+DOCS_PIP_INSTALL     ?= $(DOCS_PIP) $(PIP_INSTALL_COMMAND) $(DOCS_PIP_OPTIONS)
 
 #
 # Disposable developer artifacts. Keep every cleanup target and expression in
