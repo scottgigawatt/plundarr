@@ -341,18 +341,20 @@ images stay put.
 
 | Compatibility                         | Status           | Details                                                                                                                                                                                           |
 | ------------------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 🗄️&nbsp;Synology&nbsp;DiskStation     | ✅&nbsp;Tested    | DSM 7.4.1-90080 with Container Manager projects                                                                                                                                                   |
+| 🗄️&nbsp;Synology&nbsp;DiskStation     | ✅&nbsp;Tested    | DSM 7.4 with Container Manager projects                                                                                                                                                           |
 | 🍎&nbsp;macOS                         | ✅&nbsp;Tested    | macOS Tahoe 26 with Docker Desktop and Docker Compose                                                                                                                                             |
-| 🐧&nbsp;Other&nbsp;Docker&nbsp;hosts  | 🧭&nbsp;Expected  | A compatible Docker Engine and Compose implementation should run the generated chart                                                                                                              |
+| 🐧&nbsp;Other&nbsp;Docker&nbsp;hosts  | 🧭&nbsp;Expected  | A compatible Docker Engine and Compose should run the generated chart                                                                                                              |
 | 🏗️&nbsp;Maraudarr&nbsp;architectures  | ✅&nbsp;Published | `linux/amd64`, `linux/arm64`, and `linux/arm/v7`                                                                                                                                                  |
-| 📦&nbsp;Container&nbsp;registries     | ✅&nbsp;Mirrored  | [📦&nbsp;GitHub&nbsp;Container&nbsp;Registry](https://github.com/scottgigawatt/plundarr/pkgs/container/maraudarr) and [🐳&nbsp;Docker&nbsp;Hub](https://hub.docker.com/r/scottgigawatt/maraudarr) |
+| 📦&nbsp;Container&nbsp;registries     | ✅&nbsp;Mirrored  | 📦&nbsp;[GitHub&nbsp;Container&nbsp;Registry](https://github.com/scottgigawatt/plundarr/pkgs/container/maraudarr) and 🐳&nbsp;[Docker&nbsp;Hub](https://hub.docker.com/r/scottgigawatt/maraudarr) |
 
-Third-party service images may support fewer architectures than Maraudarr.
+> [!WARNING]
+>
+> ⚔️ Third-party service images may support fewer architectures than Maraudarr.
 
 ## Articles of Agreement ⚖️
 
 - This project be licensed under the [Apache License 2.0](LICENSE).
-- Privateerr uses the unmodified upstream [PIA manual-connections](https://github.com/pia-foss/manual-connections) scripts under their upstream MIT license.
+- Privateerr uses the unmodified upstream [PIA manual-connections](https://github.com/pia-foss/manual-connections) scripts under their upstream [MIT license](https://github.com/pia-foss/manual-connections/blob/master/LICENSE).
 - Plundarr consumes the published Privateerr image and does not vendor the upstream PIA manual-connections scripts that Privateerr uses.
 
 ---
