@@ -334,8 +334,7 @@ Third-party service images may support fewer architectures than Maraudarr.
 
 - This project be licensed under the [Apache License 2.0](LICENSE).
 - Privateerr uses the unmodified upstream [PIA manual-connections](https://github.com/pia-foss/manual-connections) scripts under their upstream MIT license.
-- Plundarr consumes the published Privateerr image and does not vendor the
-  upstream PIA manual-connections scripts that Privateerr uses.
+- Plundarr consumes the published Privateerr image and does not vendor the upstream PIA manual-connections scripts that Privateerr uses.
 
 ---
 
