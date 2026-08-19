@@ -27,12 +27,16 @@
 set -euo pipefail
 
 #
-# Default script settings.
+# Default the Compose file when the caller does not provide one.
 #
 : "${PLUNDARR_COMPOSE_FILE:=docker-compose.yml}"
 if [[ -z "${PLUNDARR_ENV_FILE:-}" ]]; then
     PLUNDARR_ENV_FILE="$(dirname "${PLUNDARR_COMPOSE_FILE}")/.env"
 fi
+
+#
+# Default service names and paths.
+#
 : "${PLUNDARR_PRIVATEERR_SERVICE:=privateerr}"
 : "${PLUNDARR_GLUETUN_SERVICE:=gluetun}"
 : "${PLUNDARR_DOWNLOAD_SERVICES:=}"
@@ -81,6 +85,7 @@ mkdir -p "$(dirname "${PLUNDARR_LOG_PATH}")"
 # Returns: tee's exit status.
 #
 log() {
+    # Print the message with a timestamp and script name to both stdout and the log file.
     printf '[%s] %s\n' "${plundarr_test_script_name}" "$*" \
         | tee -a "${PLUNDARR_LOG_PATH}"
 }
@@ -97,6 +102,7 @@ require_file() {
     file_path="$1"
     file_label="$2"
 
+    # Check that the file exists and is not empty.
     if [[ ! -s "${file_path}" ]]; then
         log "Missing ${file_label}: ${file_path}"
         exit 1
@@ -113,6 +119,7 @@ require_file() {
 container_id_for_service() {
     service_name="$1"
 
+    # Use Docker Compose to get the container ID for the specified service.
     "${docker_compose[@]}" ps -q "${service_name}" \
         | tail -n 1
 }
@@ -129,11 +136,13 @@ require_running_container() {
     container_id="$1"
     service_name="$2"
 
+    # Check that the container ID is not empty and that the container is running.
     if [[ -z "${container_id}" ]]; then
         log "Missing container for ${service_name}."
         exit 1
     fi
 
+    # Check the container's running state using Docker inspect.
     if [[ "$(docker inspect -f '{{.State.Running}}' "${container_id}")" != "true" ]]; then
         log "${service_name} container is not running."
         exit 1
@@ -152,8 +161,10 @@ require_healthy_container() {
     container_id="$1"
     service_name="$2"
 
+    # Check the container's health status using Docker inspect.
     health_status="$(docker inspect -f '{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' "${container_id}")"
 
+    # If the health status is not "healthy", log an error and exit.
     if [[ "${health_status}" != "healthy" ]]; then
         log "${service_name} health is ${health_status}, expected healthy."
         exit 1
@@ -207,8 +218,7 @@ json_value() {
     json_payload="$1"
     json_key="$2"
 
-    # Extract the requested value with the minimal tools available in the
-    # runtime container.
+    # Use grep and cut to extract the value for the specified JSON key.
     printf '%s\n' "${json_payload}" \
         | grep -o "\"${json_key}\"[[:space:]]*:[[:space:]]*\"[^\"]*\"\\|\"${json_key}\"[[:space:]]*:[[:space:]]*true\\|\"${json_key}\"[[:space:]]*:[[:space:]]*false\\|\"${json_key}\"[[:space:]]*:[[:space:]]*[0-9][0-9]*" \
         | head -n 1 \
@@ -223,6 +233,9 @@ json_value() {
 privateerr_container_id="$(container_id_for_service "${PLUNDARR_PRIVATEERR_SERVICE}")"
 gluetun_container_id="$(container_id_for_service "${PLUNDARR_GLUETUN_SERVICE}")"
 
+#
+# Confirm Privateerr and Gluetun containers are running and healthy.
+#
 log "Inspecting Privateerr container."
 require_running_container "${privateerr_container_id}" "${PLUNDARR_PRIVATEERR_SERVICE}"
 if [[ "${PLUNDARR_WAIT_SECONDS}" -gt 0 ]]; then
@@ -231,6 +244,9 @@ else
     require_healthy_container "${privateerr_container_id}" "${PLUNDARR_PRIVATEERR_SERVICE}"
 fi
 
+#
+# Confirm Gluetun container is running and healthy.
+#
 log "Inspecting Gluetun container."
 require_running_container "${gluetun_container_id}" "${PLUNDARR_GLUETUN_SERVICE}"
 if [[ "${PLUNDARR_WAIT_SECONDS}" -gt 0 ]]; then
@@ -313,11 +329,13 @@ fi
 # Confirm qBittorrent picked up Gluetun's forwarded port when requested.
 #
 if [[ -n "${PLUNDARR_QBITTORRENT_SERVICE}" ]]; then
+    # Require the forwarded-port checks used by this validation block.
     if [[ "${PLUNDARR_REQUIRE_PORT_FORWARD}" != "true" ]]; then
         log "qBittorrent validation requires port forwarding."
         exit 1
     fi
 
+    # Check qBittorrent's port-forwarding preferences.
     log "Checking qBittorrent port-forwarding preferences."
     qbittorrent_preferences="$(
         docker exec \
@@ -326,32 +344,41 @@ if [[ -n "${PLUNDARR_QBITTORRENT_SERVICE}" ]]; then
             sh -ec 'wget -qO- "${PLUNDARR_QBITTORRENT_URL}/api/v2/app/preferences"'
     )"
 
+    # Extract the relevant preferences from the JSON payload.
     qbittorrent_listen_port="$(json_value "${qbittorrent_preferences}" "listen_port")"
     qbittorrent_random_port="$(json_value "${qbittorrent_preferences}" "random_port")"
     qbittorrent_upnp="$(json_value "${qbittorrent_preferences}" "upnp")"
     qbittorrent_network_interface="$(json_value "${qbittorrent_preferences}" "current_network_interface")"
 
+    # Validate that qBittorrent's listen_port matches the forwarded port.
     if [[ "${qbittorrent_listen_port}" != "${forwarded_port}" ]]; then
         log "qBittorrent listen_port is ${qbittorrent_listen_port}, expected ${forwarded_port}."
         exit 1
     fi
 
+    # Validate that qBittorrent's random_port and upnp settings are false.
     if [[ "${qbittorrent_random_port}" != "false" ]]; then
         log "qBittorrent random_port is ${qbittorrent_random_port}, expected false."
         exit 1
     fi
 
+    # Validate that qBittorrent's UPnP setting is false.
     if [[ "${qbittorrent_upnp}" != "false" ]]; then
         log "qBittorrent upnp is ${qbittorrent_upnp}, expected false."
         exit 1
     fi
 
+    # Validate that qBittorrent's current_network_interface is not empty or loopback.
     if [[ -z "${qbittorrent_network_interface}" ]] || [[ "${qbittorrent_network_interface}" == "lo" ]]; then
         log "qBittorrent current_network_interface is invalid: ${qbittorrent_network_interface}."
         exit 1
     fi
 
+    # Log the successful validation.
     log "qBittorrent listens on forwarded port ${qbittorrent_listen_port}."
 fi
 
+#
+# All checks passed. Log a success message.
+#
 log "All checks passed. The WireGuard map floats, the tunnel breathes, and the port be plundered."

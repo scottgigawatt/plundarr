@@ -11,6 +11,9 @@
 # Usage: test/helpers/test-make-helpers.sh
 #
 
+#
+# Directory for test output.
+#
 test_output=""
 
 #
@@ -31,6 +34,9 @@ cleanup() {
     fi
 }
 
+#
+# Create a temporary directory for test output and register cleanup on exit.
+#
 test_output=$(mktemp -d)
 trap cleanup 0 1 2 15
 
@@ -42,7 +48,7 @@ credential_output=$(printf '%s\n' 'PIA_USER=p7654321' 'PIA_PASS=not-a-real-secre
 test -z "${credential_output}"
 
 #
-# Reject missing and generated example values.
+# Reject missing values.
 #
 if printf '%s\n' 'PIA_USER=' 'PIA_PASS=not-a-real-secret' \
     | scripts/compose/check-pia-credentials.sh >"${test_output}/missing.out" 2>&1; then
@@ -50,6 +56,9 @@ if printf '%s\n' 'PIA_USER=' 'PIA_PASS=not-a-real-secret' \
     exit 1
 fi
 
+#
+# Reject missing and generated example values.
+#
 if printf '%s\n' 'PIA_USER=p7654321' 'PIA_PASS=abc123' \
     | scripts/compose/check-pia-credentials.sh >"${test_output}/placeholder.out" 2>&1; then
     echo "Credential helper accepted the generated PIA password." >&2

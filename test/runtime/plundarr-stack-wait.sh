@@ -59,6 +59,7 @@ docker_compose+=(--env-file "${PLUNDARR_ENV_FILE}" -f "${PLUNDARR_COMPOSE_FILE}"
 # Returns: 0 after writing the line.
 #
 log() {
+    # Print a consistent status line with the script name and message.
     printf '[%s] %s\n' "${script_name}" "$*"
 }
 
@@ -122,6 +123,7 @@ all_services_are_healthy() {
         fi
     done < <("${docker_compose[@]}" config --services)
 
+    # Return true only if all healthcheck-enabled services are healthy.
     [[ "${all_healthy}" == "true" ]]
 }
 
