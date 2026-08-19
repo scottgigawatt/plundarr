@@ -6,16 +6,16 @@ Welcome to the test hold, where Plundarr checks that Privateerr and Gluetun left
 
 | Hold         | Script                                                                         | Purpose                                                             |
 | ------------ | ------------------------------------------------------------------------------ | ------------------------------------------------------------------- |
-| 🧭 Generator | [`generator/maraudarr-image-smoke.sh`](generator/maraudarr-image-smoke.sh)     | Test image UI and validate one disposable deployment                |
-| 🧭 Generator | [`generator/test-maraudarr-image.sh`](generator/test-maraudarr-image.sh)       | Verify local, pulled, built, and unavailable image resolution paths |
-| 🧭 Generator | [`generator/test-maraudarr-matrix.sh`](generator/test-maraudarr-matrix.sh)     | Generate and validate representative preset and add-on combinations |
-| 🧰 Helpers   | [`helpers/test-make-helpers.sh`](helpers/test-make-helpers.sh)                 | Test PIA preflight and compact Compose status helpers               |
-| 🧰 Helpers   | [`helpers/test-workflow-helpers.sh`](helpers/test-workflow-helpers.sh)         | Test Discord payload and registry helper behavior offline           |
-| 🌊 Runtime   | [`runtime/plundarr-stack-wait.sh`](runtime/plundarr-stack-wait.sh)             | Wait for a generated stack to become healthy                        |
-| 🌊 Runtime   | [`runtime/plundarr-vpn-test.sh`](runtime/plundarr-vpn-test.sh)                 | Validate Privateerr, Gluetun, and selected downloader state         |
-| 🎭 Stubs     | [`stubs/compose-docker-stub.sh`](stubs/compose-docker-stub.sh)                 | Supply deterministic Docker output to Compose helper tests          |
-| 🎭 Stubs     | [`stubs/maraudarr-image-docker-stub.sh`](stubs/maraudarr-image-docker-stub.sh) | Simulate Maraudarr image discovery and retrieval outcomes           |
-| 🎭 Stubs     | [`stubs/workflow-skopeo-stub.sh`](stubs/workflow-skopeo-stub.sh)               | Simulate registry inspection without network access                 |
+| 🧭 Generator | [`generator/maraudarr-image-smoke.sh`](https://github.com/scottgigawatt/plundarr/blob/main/test/generator/maraudarr-image-smoke.sh)     | Test image UI and validate one disposable deployment                |
+| 🧭 Generator | [`generator/test-maraudarr-image.sh`](https://github.com/scottgigawatt/plundarr/blob/main/test/generator/test-maraudarr-image.sh)       | Verify local, pulled, built, and unavailable image resolution paths |
+| 🧭 Generator | [`generator/test-maraudarr-matrix.sh`](https://github.com/scottgigawatt/plundarr/blob/main/test/generator/test-maraudarr-matrix.sh)     | Generate and validate representative preset and add-on combinations |
+| 🧰 Helpers   | [`helpers/test-make-helpers.sh`](https://github.com/scottgigawatt/plundarr/blob/main/test/helpers/test-make-helpers.sh)                 | Test PIA preflight and compact Compose status helpers               |
+| 🧰 Helpers   | [`helpers/test-workflow-helpers.sh`](https://github.com/scottgigawatt/plundarr/blob/main/test/helpers/test-workflow-helpers.sh)         | Test Discord payload and registry helper behavior offline           |
+| 🌊 Runtime   | [`runtime/plundarr-stack-wait.sh`](https://github.com/scottgigawatt/plundarr/blob/main/test/runtime/plundarr-stack-wait.sh)             | Wait for a generated stack to become healthy                        |
+| 🌊 Runtime   | [`runtime/plundarr-vpn-test.sh`](https://github.com/scottgigawatt/plundarr/blob/main/test/runtime/plundarr-vpn-test.sh)                 | Validate Privateerr, Gluetun, and selected downloader state         |
+| 🎭 Stubs     | [`stubs/compose-docker-stub.sh`](https://github.com/scottgigawatt/plundarr/blob/main/test/stubs/compose-docker-stub.sh)                 | Supply deterministic Docker output to Compose helper tests          |
+| 🎭 Stubs     | [`stubs/maraudarr-image-docker-stub.sh`](https://github.com/scottgigawatt/plundarr/blob/main/test/stubs/maraudarr-image-docker-stub.sh) | Simulate Maraudarr image discovery and retrieval outcomes           |
+| 🎭 Stubs     | [`stubs/workflow-skopeo-stub.sh`](https://github.com/scottgigawatt/plundarr/blob/main/test/stubs/workflow-skopeo-stub.sh)               | Simulate registry inspection without network access                 |
 
 The subfolders separate generator contracts, reusable helper tests, live-stack
 runtime checks, and deterministic command stubs. Make targets remain the public
@@ -147,10 +147,10 @@ This target:
 
 ## Example Files 📜
 
-The [examples](examples/) directory stores example files used to reset the repo after a live run:
+The [examples](https://github.com/scottgigawatt/plundarr/tree/main/test/examples) directory stores example files used to reset the repo after a live run:
 
-- [examples/example-wg0.conf](examples/example-wg0.conf)
-- [examples/example-privateerr.env](examples/example-privateerr.env)
+- [examples/example-wg0.conf](https://github.com/scottgigawatt/plundarr/blob/main/test/examples/example-wg0.conf)
+- [examples/example-privateerr.env](https://github.com/scottgigawatt/plundarr/blob/main/test/examples/example-privateerr.env)
 
 These files match the Privateerr examples exactly. Cleanup targets copy them
 back into `dist/<preset>/config/gluetun/wireguard/` so live secrets do not

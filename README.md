@@ -110,8 +110,8 @@ exact services included before ye add or remove anything:
 | 🧩&nbsp;`custom`      | A stack assembled service by service | Nothing; every service is selected explicitly                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 
 Plundarr and Boudoirr use qBittorrent as their only default downloader. On
-those presets, SABnzbd, NZBGet, Jellyfin, Plex, and Watchtower are are not present
-by default but may be added using `ADD_SERVICES`; e.g., `make ship ADD_SERVICES=sabnzbd,jellyfin`.
+those presets, SABnzbd, NZBGet, Jellyfin, Plex, and Watchtower are not present
+by default, but may be added using `make ship ADD_SERVICES=sabnzbd,jellyfin`.
 
 ### Cargo Ye Can Add 🧩
 
@@ -191,11 +191,9 @@ Maraudarr writes only settings used by the selected services:
 
 When the chart looks shipshape, launch the complete fleet in one shot:
 
-> [!TIP]
->
-> ```sh
-> make up
-> ```
+```sh
+make up
+```
 
 ### Chart Yer Own Voyage 🧭
 
@@ -211,52 +209,42 @@ Choose a preset from the 🗺️ Treasure Map above, inspect its default cargo, 
 
 #### 🗺️ Inspect Presets and Services
 
-> [!TIP]
->
-> ```sh
-> make presets
-> make services
-> ```
+```sh
+make presets
+make services
+```
 
 #### 🎞️ Generate a Standalone Media Server
 
-> [!TIP]
->
-> ```sh
-> make ship PRESET=jellyfin
-> make ship PRESET=plex
-> ```
+```sh
+make ship PRESET=jellyfin
+make ship PRESET=plex
+```
 
 #### 🧩 Add Common Extras
 
-> [!TIP]
->
-> ```sh
-> make ship PRESET=boudoirr ADD_SERVICES=jellyfin
-> make ship ADD_SERVICES=sonarr-anime
-> make ship ADD_SERVICES=sabnzbd
-> ```
+```sh
+make ship PRESET=boudoirr ADD_SERVICES=jellyfin
+make ship ADD_SERVICES=sonarr-anime
+make ship ADD_SERVICES=sabnzbd
+```
 
 #### 📰 Use Usenet Instead of Torrents
 
-> [!TIP]
->
-> ```sh
-> make ship REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=nzbget
-> ```
+```sh
+make ship REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=nzbget
+```
 
 #### 🔭 Add Watchtower Container Update Checks
 
-> [!TIP]
->
-> ```sh
-> make ship PRESET=boudoirr ADD_SERVICES=sabnzbd,watchtower
-> ```
+```sh
+make ship PRESET=boudoirr ADD_SERVICES=sabnzbd,watchtower
+```
 
-`ADD_SERVICES` and `REMOVE_SERVICES` accept comma-separated service IDs. Preset
-core services cannot be removed. Default services can be unchecked in
-`make configure` or named in `REMOVE_SERVICES`; adding SABnzbd without removing
-qBittorrent keeps both downloader types.
+- `ADD_SERVICES` and `REMOVE_SERVICES` accept comma-separated service IDs.
+- Preset core services cannot be removed.
+- Default services can be removed using `make configure` or `REMOVE_SERVICES`.
+- Adding SABnzbd without removing qBittorrent keeps both downloader types.
 
 > [!NOTE]
 >
@@ -267,7 +255,7 @@ qBittorrent keeps both downloader types.
 >
 > 🌊 Only selected download clients share Gluetun's network namespace. Prowlarr,
 > Radarr, Sonarr, Bazarr, and the rest of the automation fleet use the normal
-> project network. See [Docker Project Setup](./docs/SETUP.md) for preset
+> project network. See [Docker Project Setup](https://scottgigawatt.github.io/plundarr/SETUP/) for preset
 > networks, side-by-side deployments, and Jellyfin or Plex library paths.
 
 ### Synology Notes 📦
@@ -282,26 +270,27 @@ preset:
 
 Read the Synology setup scroll before the first voyage:
 
-- 🖥️ [Docker Project Setup](./docs/SETUP.md)
-- 🦜 [Synology Helper Scripts](scripts/README.md)
+- 🖥️ [Docker Project Setup](https://scottgigawatt.github.io/plundarr/SETUP/)
+- 🦜 [Synology Helper Scripts](https://scottgigawatt.github.io/plundarr/project-guides/scripts/)
 
 ## Spyglass Check 🔎
 
 Useful test voyages:
 
-> [!TIP]
->
-> ```sh
-> make test
-> make test-vpn
-> make test-e2e
-> make test-stack
-> ```
+```sh
+make test
+make test-vpn
+make test-e2e
+make test-stack
+```
+
+The targets cover the generator and automation-helper suite, a running VPN
+check, a focused VPN end-to-end test, and a complete service-stack test.
 
 > [!WARNING]
 >
 > ⚠️☠️ VPN tests use real PIA credentials from the selected preset's `.env` and
-> may launch real containers. Read the [full testing chart](./test/README.md)
+> may launch real containers. Read the [full testing chart](https://scottgigawatt.github.io/plundarr/project-guides/testing/)
 > before firing those cannons.
 
 ### 🧹 Clear Developer Artifacts
@@ -334,8 +323,8 @@ images stay put.
 | 🛠️&nbsp;[Contributing](https://scottgigawatt.github.io/plundarr/CONTRIBUTING/)                | Repository standards and pull requests          |
 | 🤝&nbsp;[Code of Conduct](https://scottgigawatt.github.io/plundarr/CODE_OF_CONDUCT/)          | Expectations for every member of the crew       |
 | 🛡️&nbsp;[Security](https://scottgigawatt.github.io/plundarr/SECURITY/)                        | Private vulnerability reporting                 |
-| 🧪&nbsp;[Testing Hold](test/README.md)                                                        | VPN, end-to-end, and stack validation           |
-| 🦜&nbsp;[Synology Helper Scripts](scripts/README.md)                                          | Host-specific helper usage                      |
+| 🧪&nbsp;[Testing Hold](https://scottgigawatt.github.io/plundarr/project-guides/testing/)       | VPN, end-to-end, and stack validation           |
+| 🦜&nbsp;[Synology Helper Scripts](https://scottgigawatt.github.io/plundarr/project-guides/scripts/) | Host-specific helper usage                      |
 
 ## Ship's Log 🏝️
 
@@ -343,7 +332,7 @@ images stay put.
 | ------------------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 🗄️&nbsp;Synology&nbsp;DiskStation     | ✅&nbsp;Tested    | DSM 7.4 with Container Manager projects                                                                                                                                                           |
 | 🍎&nbsp;macOS                         | ✅&nbsp;Tested    | macOS Tahoe 26 with Docker Desktop and Docker Compose                                                                                                                                             |
-| 🐧&nbsp;Other&nbsp;Docker&nbsp;hosts  | 🧭&nbsp;Expected  | A compatible Docker Engine and Compose should run the generated chart                                                                                                              |
+| 🐧&nbsp;Other&nbsp;Docker&nbsp;hosts  | 🧭&nbsp;Expected  | Expected to work with a compatible Docker Engine and Docker Compose                                                                                                                               |
 | 🏗️&nbsp;Maraudarr&nbsp;architectures  | ✅&nbsp;Published | `linux/amd64`, `linux/arm64`, and `linux/arm/v7`                                                                                                                                                  |
 | 📦&nbsp;Container&nbsp;registries     | ✅&nbsp;Mirrored  | 📦&nbsp;[GitHub&nbsp;Container&nbsp;Registry](https://github.com/scottgigawatt/plundarr/pkgs/container/maraudarr) and 🐳&nbsp;[Docker&nbsp;Hub](https://hub.docker.com/r/scottgigawatt/maraudarr) |
 

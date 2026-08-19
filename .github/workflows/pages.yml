@@ -27,6 +27,8 @@ on:
       - "Makefile"
       - "mkdocs.yml"
       - "requirements-docs.txt"
+      - "scripts/README.md"
+      - "test/README.md"
 
 permissions:
   contents: read

@@ -8,13 +8,13 @@ header before running it with elevated privileges.
 
 | Hold       | Script                                                                 | Purpose                                                            |
 | ---------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------ |
-| 🐳 Compose | [`compose/check-pia-credentials.sh`](compose/check-pia-credentials.sh) | Report missing or example PIA credentials before Privateerr starts |
-| 🐳 Compose | [`compose/ps.sh`](compose/ps.sh)                                       | Print a compact status table for one generated project             |
-| 🐳 Compose | [`compose/restart.sh`](compose/restart.sh)                             | Wait for Docker, stop a project safely, and start it again         |
-| 🐧 Linux   | [`linux/set-inotify-limits.sh`](linux/set-inotify-limits.sh)           | Raise inotify limits for large Plex libraries                      |
-| ⚓ Synology | [`synology/docker-socket.sh`](synology/docker-socket.sh)               | Restore trusted `docker` group access to the Docker socket         |
-| ⚓ Synology | [`synology/entware.sh`](synology/entware.sh)                           | Mount and start Entware during boot                                |
-| ⚓ Synology | [`synology/tun.sh`](synology/tun.sh)                                   | Ensure `/dev/net/tun` exists for VPN containers                    |
+| 🐳 Compose | [`compose/check-pia-credentials.sh`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/compose/check-pia-credentials.sh) | Report missing or example PIA credentials before Privateerr starts |
+| 🐳 Compose | [`compose/ps.sh`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/compose/ps.sh)                                       | Print a compact status table for one generated project             |
+| 🐳 Compose | [`compose/restart.sh`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/compose/restart.sh)                             | Wait for Docker, stop a project safely, and start it again         |
+| 🐧 Linux   | [`linux/set-inotify-limits.sh`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/linux/set-inotify-limits.sh)           | Raise inotify limits for large Plex libraries                      |
+| ⚓ Synology | [`synology/docker-socket.sh`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/synology/docker-socket.sh)               | Restore trusted `docker` group access to the Docker socket         |
+| ⚓ Synology | [`synology/entware.sh`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/synology/entware.sh)                           | Mount and start Entware during boot                                |
+| ⚓ Synology | [`synology/tun.sh`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/synology/tun.sh)                                   | Ensure `/dev/net/tun` exists for VPN containers                    |
 
 > [!IMPORTANT]
 > Scripts under `scripts/synology/` run directly on a Synology NAS. They are
