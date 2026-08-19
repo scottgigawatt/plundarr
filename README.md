@@ -56,10 +56,36 @@ configuration stays where it belongs: in that voyage's `.env`. ⚓️
 Plundarr has two clearly separate parts:
 
 <!-- markdownlint-disable MD033 -->
-| Component                     | What It Does                                                                                        | Output                                                                                                                                                                                                                     |
-| :---------------------------- | :-------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 🧭&nbsp;**Maraudarr**         | Short-lived generator that chooses services, resolves dependencies, validates the result, and exits | **Published&nbsp;image**<br>📦&nbsp;[GitHub&nbsp;Container&nbsp;Registry](https://github.com/scottgigawatt/plundarr/pkgs/container/maraudarr)<br>🐳&nbsp;[Docker&nbsp;Hub](https://hub.docker.com/r/scottgigawatt/maraudarr) |
-| 🏴‍☠️&nbsp;**Plundarr**         | Generated media stack that stays on yer host and runs the selected services                         | **Generated&nbsp;project**<br>🧾&nbsp;`dist/<preset>/docker-compose.yml`<br>⚙️&nbsp;`dist/<preset>/.env`<br>📂&nbsp;`dist/<preset>/config/`                         |
+<table>
+  <thead>
+    <tr>
+      <th scope="col" width="15%">Component</th>
+      <th scope="col" width="45%">What It Does</th>
+      <th scope="col" width="40%">Output</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>🧭&nbsp;<strong>Maraudarr</strong></td>
+      <td>Short-lived generator that chooses services, resolves dependencies, validates the result, and exits</td>
+      <td>
+        <strong>Published&nbsp;image</strong><br>
+        📦&nbsp;<a href="https://github.com/scottgigawatt/plundarr/pkgs/container/maraudarr">GitHub&nbsp;Container&nbsp;Registry</a><br>
+        🐳&nbsp;<a href="https://hub.docker.com/r/scottgigawatt/maraudarr">Docker&nbsp;Hub</a>
+      </td>
+    </tr>
+    <tr>
+      <td>🏴‍☠️&nbsp;<strong>Plundarr</strong></td>
+      <td>Generated media stack that stays on yer host and runs the selected services</td>
+      <td>
+        <strong>Generated&nbsp;project</strong><br>
+        🧾&nbsp;<code>dist/&lt;preset&gt;/docker-compose.yml</code><br>
+        ⚙️&nbsp;<code>dist/&lt;preset&gt;/.env</code><br>
+        📂&nbsp;<code>dist/&lt;preset&gt;/config/</code>
+      </td>
+    </tr>
+  </tbody>
+</table>
 <!-- markdownlint-enable MD033 -->
 
 `<preset>` is the selected voyage: `plundarr`, `boudoirr`, `jellyfin`,
