@@ -320,13 +320,13 @@ images stay put.
 
 ## Ship's Log 🏝️
 
-| Compatibility               | Status      | Details                                                                                                                                                            |
-| --------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 🗄️ Synology DiskStation    | ✅ Tested    | DSM 7.4.1-90080 with Container Manager projects                                                                                                                    |
-| 🍎 macOS                    | ✅ Tested    | macOS Tahoe 26 with Docker Desktop and Docker Compose                                                                                                              |
-| 🐧 Other Docker hosts       | 🧭 Expected | A compatible Docker Engine and Compose implementation should run the generated chart                                                                               |
-| 🏗️ Maraudarr architectures | ✅ Published | `linux/amd64`, `linux/arm64`, and `linux/arm/v7`                                                                                                                   |
-| 📦 Container registries     | ✅ Mirrored  | [GitHub Container Registry](https://github.com/scottgigawatt/plundarr/pkgs/container/maraudarr) and [Docker Hub](https://hub.docker.com/r/scottgigawatt/maraudarr) |
+| Compatibility               | Status      | Details                                                                                                                                                                  |
+| --------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 🗄️ Synology DiskStation    | ✅ Tested    | DSM 7.4.1-90080 with Container Manager projects                                                                                                                          |
+| 🍎 macOS                    | ✅ Tested    | macOS Tahoe 26 with Docker Desktop and Docker Compose                                                                                                                    |
+| 🐧 Other Docker hosts       | 🧭 Expected | A compatible Docker Engine and Compose implementation should run the generated chart                                                                                     |
+| 🏗️ Maraudarr architectures | ✅ Published | `linux/amd64`, `linux/arm64`, and `linux/arm/v7`                                                                                                                         |
+| 📦 Container registries     | ✅ Mirrored  | [📦 GitHub Container Registry](https://github.com/scottgigawatt/plundarr/pkgs/container/maraudarr) and [🐳 Docker Hub](https://hub.docker.com/r/scottgigawatt/maraudarr) |
 
 Third-party service images may support fewer architectures than Maraudarr.
 
