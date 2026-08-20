@@ -8,6 +8,7 @@ the job and review its header before running it with elevated privileges.
 
 | Hold       | Script                                                                 | Purpose                                                            |
 | ---------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| 🧮 AWK     | [`awk/format-compose-status.awk`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/awk/format-compose-status.awk)             | Align Compose status rows and stack distinct published ports       |
 | 🧮 AWK     | [`awk/order-environment.awk`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/awk/order-environment.awk)                 | Order resolved values like the selected preset environment file    |
 | 🧮 AWK     | [`awk/strip-comments.awk`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/awk/strip-comments.awk)                       | Remove comments and blank lines from raw configuration output      |
 | 🐳 Compose | [`compose/backup.sh`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/compose/backup.sh)                                 | Archive one preset's config without replacing an existing backup   |
@@ -25,6 +26,13 @@ the job and review its header before running it with elevated privileges.
 > them on another DSM release or Linux host.
 
 ## AWK Programs 🧮
+
+### `awk/format-compose-status.awk`
+
+Formats tab-separated `docker compose ps` data into aligned terminal columns,
+collapses equivalent IPv4 and IPv6 wildcard bindings, and places each distinct
+published port on its own continuation row. `scripts/compose/ps.sh` resolves
+and invokes this program automatically.
 
 ### `awk/order-environment.awk`
 

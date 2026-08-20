@@ -31,9 +31,9 @@ indent_style = space
 indent_size = 2
 
 #
-# AWK programs and web assets use the conventional two-space project style.
+# AWK, jq, and web assets use the conventional two-space project style.
 #
-[*.{awk,css,js}]
+[*.{awk,css,jq,js}]
 indent_size = 2
 
 #

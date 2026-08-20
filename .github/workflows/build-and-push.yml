@@ -30,7 +30,8 @@ on:
       - "Makefile"
       - "LICENSE"
       - "docs/DOCKERHUB_README.md"
-      - ".github/scripts/notify-discord.sh"
+      - ".github/discord/**"
+      - ".github/scripts/discord-notifier.sh"
       - ".github/scripts/registry-mirror.sh"
       - ".github/scripts/validate-release-tag.sh"
       - ".github/workflows/build-and-push.yml"
@@ -151,7 +152,7 @@ jobs:
       # Announce the start independently to each configured Discord destination.
       # Missing optional webhooks deliberately skip without failing publication.
       #
-      - name: "Notify Discord: shipyard opened 📣"
+      - name: "Notify Primary Discord: build opened 📣"
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
@@ -163,9 +164,9 @@ jobs:
           DOCKERHUB_IMAGE: ${{ env.DOCKERHUB_IMAGE }}
           IMAGE_PLATFORMS: ${{ env.IMAGE_PLATFORMS }}
         run: |
-          sh .github/scripts/notify-discord.sh \
-              --event           start \
-              --template        shipyard \
+          sh .github/scripts/discord-notifier.sh \
+              --type            image-start \
+              --profile         image-primary \
               --run-url         "${RUN_URL}" \
               --repository      "${REPOSITORY}" \
               --ref-name        "${REF_NAME}" \
@@ -176,10 +177,10 @@ jobs:
               --dockerhub-image "${DOCKERHUB_IMAGE}"
 
       #
-      # Send the same opening state to the optional Hades destination with its
-      # dedicated notification template.
+      # Send the same opening state through the secondary destination profile
+      # so future presentation changes remain isolated from workflow logic.
       #
-      - name: "Notify Hades Discord: kraken awakened 🦑"
+      - name: "Notify Secondary Discord: build opened 📣"
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_HADES_HOOK_URL }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
@@ -191,9 +192,9 @@ jobs:
           DOCKERHUB_IMAGE: ${{ env.DOCKERHUB_IMAGE }}
           IMAGE_PLATFORMS: ${{ env.IMAGE_PLATFORMS }}
         run: |
-          sh .github/scripts/notify-discord.sh \
-              --event           start \
-              --template        kraken \
+          sh .github/scripts/discord-notifier.sh \
+              --type            image-start \
+              --profile         image-secondary \
               --run-url         "${RUN_URL}" \
               --repository      "${REPOSITORY}" \
               --ref-name        "${REF_NAME}" \
@@ -354,7 +355,7 @@ jobs:
       # Report the final job state to both optional Discord destinations. These
       # steps run on success or failure so a broken voyage never disappears.
       #
-      - name: "Notify Discord: build verdict 📣"
+      - name: "Notify Primary Discord: build verdict 📣"
         if: always()
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
@@ -368,9 +369,9 @@ jobs:
           PUBLISHED_TAGS: ${{ steps.metadata.outputs.tags }}
           PUBLISHED_DIGEST: ${{ steps.publish.outputs.digest }}
         run: |
-          sh .github/scripts/notify-discord.sh \
-              --event            verdict \
-              --template         shipyard \
+          sh .github/scripts/discord-notifier.sh \
+              --type             image-verdict \
+              --profile          image-primary \
               --run-url          "${RUN_URL}" \
               --repository       "${REPOSITORY}" \
               --ref-name         "${REF_NAME}" \
@@ -385,7 +386,7 @@ jobs:
       # Send the same final state to the optional Hades destination even when an
       # earlier publication step failed.
       #
-      - name: "Notify Hades Discord: kraken verdict 🦑"
+      - name: "Notify Secondary Discord: build verdict 📣"
         if: always()
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_HADES_HOOK_URL }}
@@ -399,9 +400,9 @@ jobs:
           PUBLISHED_TAGS: ${{ steps.metadata.outputs.tags }}
           PUBLISHED_DIGEST: ${{ steps.publish.outputs.digest }}
         run: |
-          sh .github/scripts/notify-discord.sh \
-              --event            verdict \
-              --template         kraken \
+          sh .github/scripts/discord-notifier.sh \
+              --type             image-verdict \
+              --profile          image-secondary \
               --run-url          "${RUN_URL}" \
               --repository       "${REPOSITORY}" \
               --ref-name         "${REF_NAME}" \
