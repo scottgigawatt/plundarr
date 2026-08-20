@@ -9,10 +9,10 @@
 #                      notifications to an optional Discord webhook.
 #
 # Usage: DISCORD_WEBHOOK_URL=<url> discord-notifier.sh \
-#        --type <image-start|image-verdict|docs-verdict> \
-#        --profile <image-primary|image-secondary|docs> \
-#        --run-url <url> --repository <owner/repository> \
-#        --ref-name <ref> [notification options]
+#            --type <image-start|image-verdict|docs-verdict> \
+#            --profile <image-primary|image-secondary|docs> \
+#            --run-url <url> --repository <owner/repository> \
+#            --ref-name <ref> [notification options]
 #
 
 #
@@ -386,18 +386,24 @@ selection=$(random_value)
 if ! notification=$(jq \
     --null-input \
     --compact-output \
-    --arg notification_type "${notification_type}" \
-    --arg profile "${discord_profile}" \
-    --arg outcome "${outcome}" \
-    --argjson selection "${selection}" \
-    --from-file "${themes_file}"); then
+    --arg     notification_type "${notification_type}" \
+    --arg     profile           "${discord_profile}" \
+    --arg     outcome           "${outcome}" \
+    --argjson selection         "${selection}" \
+    --from-file                 "${themes_file}"); then
     printf 'No Discord definition for %s/%s/%s.\n' \
         "${notification_type}" "${discord_profile}" "${outcome}" >&2
     exit 1
 fi
 
+#
+# Determine the external jq payload template for the selected notification type.
+#
 payload_path="${discord_directory}/payloads/${notification_type}.jq"
 
+#
+# Check that the selected payload template exists before attempting to render it.
+#
 if [ ! -f "${payload_path}" ]; then
     printf 'Discord payload template was not found: %s\n' "${payload_path}" >&2
     exit 1

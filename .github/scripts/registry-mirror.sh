@@ -9,9 +9,9 @@
 #                     and verify that both registries expose matching digests.
 #
 # Usage: GHCR_TOKEN=<token> DOCKERHUB_TOKEN=<token> registry-mirror.sh \
-#        <--mirror|--verify> --ghcr-image <image> --dockerhub-image <image> \
-#        --ghcr-username <name> --dockerhub-username <name> \
-#        --published-tags <tags>
+#            <--mirror|--verify> --ghcr-image <image> --dockerhub-image <image> \
+#            --ghcr-username <name> --dockerhub-username <name> \
+#            --published-tags <tags>
 #
 
 #
