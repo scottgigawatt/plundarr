@@ -183,10 +183,10 @@ expand_message() {
     jq \
         --null-input \
         --raw-output \
-        --arg message "$1" \
+        --arg message       "$1" \
         --arg workflow_name "${workflow_name}" \
-        --arg job_status "${job_status}" \
-        --arg build_status "${build_status}" \
+        --arg job_status    "${job_status}" \
+        --arg build_status  "${build_status}" \
         --arg deploy_status "${deploy_status}" \
         '
             def replace($token; $value): split($token) | join($value);
