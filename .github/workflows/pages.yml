@@ -49,6 +49,10 @@ jobs:
       contents: read
 
     steps:
+      #
+      # Fetch the complete read-only history so release tags can be verified
+      # against the main branch before publication.
+      #
       - name: "Grab the Source Charts 📖"
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
@@ -70,6 +74,9 @@ jobs:
               exit 1
           fi
 
+      #
+      # Install the pinned Python runtime and cache only the locked docs toolchain.
+      #
       - name: "Ready the Python Quill 🪶"
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7
         with:
@@ -83,12 +90,21 @@ jobs:
       - name: "Load the Documentation Tools 🧰"
         run: make docs-install
 
+      #
+      # Prepare GitHub Pages metadata before rendering and packaging the site.
+      #
       - name: "Configure the Pages Harbor ⚓"
         uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d  # v6
 
+      #
+      # Render the full strict documentation site from its checked-in sources.
+      #
       - name: "Render Every Developer Chart 🔎"
         run: make docs
 
+      #
+      # Package the rendered site as the immutable Pages deployment artifact.
+      #
       - name: "Crate the Static Site 📦"
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9  # v5
         with:
@@ -111,6 +127,9 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
+      #
+      # Deploy the previously built artifact and expose its final public URL.
+      #
       - name: "Publish the Developer Charts 🚀"
         id: deployment
         uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128  # v5
@@ -130,11 +149,17 @@ jobs:
       contents: read
 
     steps:
+      #
+      # Check out only the helper needed to report the independent job results.
+      #
       - name: "Grab the Notification Helper 🧰"
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           persist-credentials: false
 
+      #
+      # Report build and deployment outcomes to the optional Discord destination.
+      #
       - name: "Notify Discord: documentation verdict 📚"
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}

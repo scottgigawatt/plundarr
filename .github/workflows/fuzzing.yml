@@ -28,6 +28,10 @@ permissions:
   contents: read
 
 jobs:
+  #
+  # Build the instrumented parser harness and exercise it against changed code
+  # within a bounded pull-request runtime.
+  #
   fuzz-maraudarr:
     name: "Feed Strange Charts to Maraudarr 🗺️"
     runs-on: ubuntu-latest
