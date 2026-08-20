@@ -9,7 +9,7 @@ explicit long options and reserve environment variables for credentials.
 | Helper                    | Purpose                                                            |
 | ------------------------- | ------------------------------------------------------------------ |
 | `discord-notifier.sh`     | Validate inputs, render a selected jq payload, and notify Discord  |
-| `registry-mirror.sh`      | Copy published Maraudarr tags from GHCR to Docker Hub              |
+| `registry-mirror.sh`      | Copy published container tags from GHCR to Docker Hub              |
 | `validate-release-tag.sh` | Require annotated SemVer release tags whose commits belong to main |
 
 `discord-notifier.sh` reads the stable profiles, themed strings, presentation
@@ -20,9 +20,9 @@ manifest digests instead of trusting a successful transfer alone.
 ## Workflow Consumers 🧵
 
 `build-and-push.yml` uses all three helpers for guarded multi-registry image
-publication. `pages.yml` uses the generic notifier for documentation deployment
-results. The scripts remain repository-local so changes to their command-line
-contracts are reviewed with the workflows that call them.
+publication. The notifier also supports a documentation profile for workflows
+that publish a site. Keeping the helpers and structured assets byte-identical
+lets sibling repositories reuse them while reviewing each workflow locally.
 
 ## Offline Validation 🧪
 

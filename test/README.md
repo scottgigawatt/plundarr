@@ -58,6 +58,15 @@ registry helpers; enforce synchronized build pins and canonical image tags;
 verify the compact Compose status and secret-safe PIA preflight helpers; and
 generate representative Compose charts.
 
+Use the focused Make-helper target while changing AWK programs, config backup,
+the PIA credential preflight, or Compose status formatting:
+
+> [!TIP]
+>
+> ```sh
+> make test-make-helpers
+> ```
+
 After building an image, run its terminal UI tests with exact runtime
 dependencies, then exercise its hardened contract and validate one disposable
 deployment:

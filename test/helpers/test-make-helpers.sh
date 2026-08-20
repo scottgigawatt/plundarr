@@ -178,13 +178,13 @@ fi
 #
 # Confirm the diagnostic identifies the problem and corrective action.
 #
-grep -F "Privateerr cannot sail without valid PIA credentials." \
+grep -F "This deployment cannot start without valid PIA credentials." \
     "${test_output}/missing.out" >/dev/null
 grep -F "Credential  PIA_USER" \
     "${test_output}/missing.out" >/dev/null
-grep -F "Problem     Missing or still using the generated example value." \
+grep -F "Problem     Missing or still using a known example value." \
     "${test_output}/missing.out" >/dev/null
-grep -F "Fix         Set PIA_USER in the selected preset's .env file, then run make up again." \
+grep -F "Fix         Set PIA_USER in the active deployment's .env file, then rerun the requested Make target." \
     "${test_output}/missing.out" >/dev/null
 
 #
@@ -196,23 +196,26 @@ if LC_ALL=C grep "$(printf '\033')" "${test_output}/missing.out" >/dev/null; the
 fi
 
 #
-# Reject missing and generated example values.
+# Reject both known example password values.
 #
-if printf '%s\n' 'PIA_USER=p7654321' 'PIA_PASS=abc123' \
-    | scripts/compose/check-pia-credentials.sh >"${test_output}/placeholder.out" 2>&1; then
-    echo "Credential helper accepted the generated PIA password." >&2
-    exit 1
-fi
+for example_password in abc123 shiverMeTimbers123; do
+    if printf '%s\n' 'PIA_USER=p7654321' "PIA_PASS=${example_password}" \
+        | scripts/compose/check-pia-credentials.sh \
+            >"${test_output}/placeholder-${example_password}.out" 2>&1; then
+        echo "Credential helper accepted a known example PIA password." >&2
+        exit 1
+    fi
 
-grep -F "Credential  PIA_PASS" \
-    "${test_output}/placeholder.out" >/dev/null
+    grep -F "Credential  PIA_PASS" \
+        "${test_output}/placeholder-${example_password}.out" >/dev/null
+done
 
 #
 # Confirm the status helper delegates project selection to Docker Compose.
 #
 : >"${test_output}/compose.yml"
 : >"${test_output}/stack.env"
-PLUNDARR_TEST_LOG="${test_output}/docker.log" \
+COMPOSE_TEST_LOG="${test_output}/docker.log" \
     scripts/compose/ps.sh \
         --docker-bin "$(pwd)/test/stubs/compose-docker-stub.sh" \
         --env-file "${test_output}/stack.env" \
@@ -228,13 +231,14 @@ grep -F -- "compose --env-file ${test_output}/stack.env --file ${test_output}/co
 #
 # Confirm the status helper returns the expected Compose output.
 #
-grep -F "plundarr-prowlarr-latest" "${test_output}/ps.out" >/dev/null
-grep -F "plundarr-gluetun-latest" "${test_output}/ps.out" >/dev/null
+grep -F "test-idle-latest" "${test_output}/ps.out" >/dev/null
+grep -F "test-gluetun-latest" "${test_output}/ps.out" >/dev/null
+grep -F "test-service-latest" "${test_output}/ps.out" >/dev/null
 
 #
 # Collapse duplicate wildcard bindings and stack each distinct published port.
 #
-test "$(grep -c 'plundarr-gluetun-latest' "${test_output}/ps.out")" -eq 1
+test "$(grep -c 'test-gluetun-latest' "${test_output}/ps.out")" -eq 1
 grep -E '^[[:space:]]+8080->8080/tcp$' \
     "${test_output}/ps.out" >/dev/null
 grep -E '^[[:space:]]+6881->6881/udp$' \

@@ -38,6 +38,7 @@ SHIP=ship
 CONFIGURE=configure
 TEST_UNIT=test-unit
 TEST=test
+TEST_MAKE_HELPERS=test-make-helpers
 TEST_WORKFLOWS=test-workflows
 PRESETS=presets
 AVAILABLE_SERVICES=services
@@ -86,6 +87,7 @@ TARGETS= \
 	$(CONFIGURE) \
 	$(TEST_UNIT) \
 	$(TEST) \
+	$(TEST_MAKE_HELPERS) \
 	$(TEST_WORKFLOWS) \
 	$(PRESETS) \
 	$(AVAILABLE_SERVICES) \
@@ -799,6 +801,14 @@ $(TEST_UNIT):
 			--verbose
 
 #
+# $(TEST_MAKE_HELPERS): Tests reusable Make and Compose helpers locally.
+#
+# Dependencies: None.
+#
+$(TEST_MAKE_HELPERS):
+	$(MAKE_HELPERS_TEST_CMD)
+
+#
 # $(TEST_WORKFLOWS): Tests workflow helpers and shared publishing policies locally.
 #
 $(TEST_WORKFLOWS):
@@ -813,11 +823,11 @@ $(TEST_WORKFLOWS):
 # Dependencies:
 #   $(BUILD_DEPENDS) - Ensure Docker and Docker Compose are installed.
 #   $(TEST_UNIT) - Run Maraudarr's Python unit tests.
+#   $(TEST_MAKE_HELPERS) - Test reusable Make and Compose helpers.
 #   $(TEST_WORKFLOWS) - Test workflow helpers without external writes.
 #
-$(TEST): $(BUILD_DEPENDS) $(TEST_UNIT) $(TEST_WORKFLOWS)
+$(TEST): $(BUILD_DEPENDS) $(TEST_UNIT) $(TEST_MAKE_HELPERS) $(TEST_WORKFLOWS)
 	$(MARAUDARR_IMAGE_TEST_CMD)
-	$(MAKE_HELPERS_TEST_CMD)
 	MARAUDARR_TEST_OUTPUT="$(MARAUDARR_TEST_OUTPUT)" \
 	PYTHON_BIN="$(PYTHON_BIN)" \
 		test/generator/test-maraudarr-matrix.sh
@@ -1024,6 +1034,7 @@ $(HELP):
 	$(call help_line,$(PRINT_ENV),Print raw environment settings without comments.)
 	$(call help_heading,🧪 Test and build)
 	$(call help_line,$(TEST_UNIT),Run Maraudarr Python unit tests.)
+	$(call help_line,$(TEST_MAKE_HELPERS),Test reusable Make and Compose helpers.)
 	$(call help_line,$(TEST),Run all generator and automation-helper tests.)
 	$(call help_line,$(TEST_WORKFLOWS),Test workflow helpers and shared publishing policies.)
 	$(call help_line,$(TEST_VPN),Check a running VPN tunnel.)
