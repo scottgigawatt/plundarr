@@ -7,13 +7,13 @@
 #            copy behind stable destination profiles.
 #
 # Usage: jq -n --arg profile <profile> --arg notification_type <type> \
-#        --arg outcome <outcome> --argjson selection <integer> \
-#        -f .github/discord/themes.jq
+#            --arg outcome <outcome> --argjson selection <integer> \
+#            -f .github/discord/themes.jq
 #
 
 #
 # Keep workflow-facing profile names independent from the creative theme. A
-# future retheme changes only this file; workflows and helper arguments remain
+# future re-theme changes only this file; workflows and helper arguments remain
 # stable. Shared values apply to every notification owned by that profile.
 #
 {
