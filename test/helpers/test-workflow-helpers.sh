@@ -49,7 +49,7 @@ trap cleanup EXIT HUP INT TERM
 # Returns: 0 when the expression succeeds; otherwise returns nonzero.
 #
 assert_json_value() {
-    jq -e "$2" "$1" >/dev/null
+    jq --exit-status "$2" "$1" >/dev/null
 }
 
 #
@@ -76,7 +76,7 @@ git -C "${RELEASE_REPOSITORY}" config user.email test@example.invalid
 git -C "${RELEASE_REPOSITORY}" config user.name "Plundarr Tests"
 printf '%s\n' 'release fixture' > "${RELEASE_REPOSITORY}/release.txt"
 git -C "${RELEASE_REPOSITORY}" add release.txt
-git -C "${RELEASE_REPOSITORY}" commit --quiet -m "Add release fixture"
+git -C "${RELEASE_REPOSITORY}" commit --quiet --message "Add release fixture"
 main_sha=$(git -C "${RELEASE_REPOSITORY}" rev-parse HEAD)
 git -C "${RELEASE_REPOSITORY}" tag --annotate v1.2.3 \
     --message "Test release"
@@ -178,18 +178,18 @@ assert_json_value "${TEST_ROOT}/primary-start.json" \
         and (.embeds[0].description | contains("test-build"))'
 
 sh "${REPOSITORY_ROOT}/.github/scripts/discord-notifier.sh" \
-    -k image-start \
-    -p image-secondary \
-    -u https://example.invalid/run \
-    -r test/plundarr \
-    -f test-ref \
+    --type image-start \
+    --profile image-secondary \
+    --run-url https://example.invalid/run \
+    --repository test/plundarr \
+    --ref-name test-ref \
     --workflow-name test-build \
     --actor test-captain \
     --platforms linux/arm64 \
     --ghcr-image ghcr.io/test/maraudarr \
     --dockerhub-image docker.io/test/maraudarr \
-    -n 1 \
-    -x \
+    --random-value 1 \
+    --dry-run \
     > "${TEST_ROOT}/secondary-start.json"
 
 assert_json_value "${TEST_ROOT}/secondary-start.json" \
@@ -391,7 +391,7 @@ ghcr.io/test/maraudarr:sha-test" \
 # Run the registry helper to mirror and verify the test Maraudarr image without writing to any registry.
 #
 run_registry_helper --mirror
-run_registry_helper -v
+run_registry_helper --verify
 
 #
 # Validate that the Skopeo recorder logged the expected copy and digest operations.

@@ -15,6 +15,7 @@ the job and review its header before running it with elevated privileges.
 | 🐳 Compose | [`compose/check-pia-credentials.sh`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/compose/check-pia-credentials.sh) | Report missing or example PIA credentials before Privateerr starts |
 | 🐳 Compose | [`compose/ps.sh`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/compose/ps.sh)                                       | Print a compact status table for one generated project             |
 | 🐳 Compose | [`compose/restart.sh`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/compose/restart.sh)                             | Wait for Docker, stop a project safely, and start it again         |
+| 📚 Docs    | [`docs/prepare-python.sh`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/docs/prepare-python.sh)                     | Prepare the exact Python environment used to build documentation   |
 | 🐧 Linux   | [`linux/set-inotify-limits.sh`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/linux/set-inotify-limits.sh)           | Raise inotify limits for large Plex libraries                      |
 | ⚓ Synology | [`synology/docker-socket.sh`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/synology/docker-socket.sh)               | Restore trusted `docker` group access to the Docker socket         |
 | ⚓ Synology | [`synology/entware.sh`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/synology/entware.sh)                           | Mount and start Entware during boot                                |
@@ -80,6 +81,15 @@ starts the project again in detached mode.
 > ```sh
 > sh /volume1/docker/plundarr/scripts/compose/restart.sh /volume1/docker/plundarr/dist/plundarr
 > ```
+
+## Documentation Helpers 📚
+
+### `docs/prepare-python.sh`
+
+Validates the exact supported Python patch release, safely replaces an absent
+or incompatible documentation virtual environment, and writes the versioned
+stamp consumed by Make. `make docs` is the normal entry point and passes every
+path through explicit long options.
 
 ## Linux Helpers 🐧
 

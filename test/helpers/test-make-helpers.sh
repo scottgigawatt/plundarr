@@ -5,8 +5,8 @@
 #
 # Licensed under the Apache License, Version 2.0.
 #
-# test-make-helpers.sh: Validate Make's AWK, backup, credential, and Compose
-#                       status helpers without mutating a deployment.
+# test-make-helpers.sh: Validate Make's AWK, documentation, backup, credential,
+#                       and Compose status helpers without mutating a deployment.
 #
 # Usage: test/helpers/test-make-helpers.sh
 #
@@ -92,6 +92,20 @@ make --no-print-directory print-env \
     >"${test_output}/stripped-env.actual"
 cmp "${test_output}/stripped.expected" "${test_output}/stripped-config.actual"
 cmp "${test_output}/stripped.expected" "${test_output}/stripped-env.actual"
+
+#
+# Prepare a version-matched documentation Python environment.
+#
+docs_python=$(command -v python3)
+docs_python_version=$("${docs_python}" --version 2>&1 | sed 's/^Python[[:space:]]*//')
+scripts/docs/prepare-python.sh \
+    --python-bin "${docs_python}" \
+    --python-version "${docs_python_version}" \
+    --venv-path "${test_output}/docs-venv" \
+    --python-target "${test_output}/docs-venv/bin/python" \
+    --stamp-path "${test_output}/docs-venv/.python-${docs_python_version}"
+test -x "${test_output}/docs-venv/bin/python"
+test -f "${test_output}/docs-venv/.python-${docs_python_version}"
 
 #
 # Archive a complete config tree through Make without overwriting backups.
@@ -208,7 +222,7 @@ PLUNDARR_TEST_LOG="${test_output}/docker.log" \
 #
 # Confirm the status helper invokes Docker Compose with the expected arguments.
 #
-grep -F -- "compose --env-file ${test_output}/stack.env -f ${test_output}/compose.yml ps --format" \
+grep -F -- "compose --env-file ${test_output}/stack.env --file ${test_output}/compose.yml ps --format" \
     "${test_output}/docker.log" >/dev/null
 
 #

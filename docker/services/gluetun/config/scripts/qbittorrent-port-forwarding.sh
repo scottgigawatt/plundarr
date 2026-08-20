@@ -9,6 +9,8 @@
 #                                 port when Gluetun receives or drops a VPN
 #                                 forwarded port.
 #
+# Usage: qbittorrent-port-forwarding.sh up <port> <vpn-interface> | down
+#
 # The script:
 #   - Waits for qBittorrent's Web API to become reachable on localhost.
 #   - Sets the qBittorrent listening port to Gluetun's forwarded port.

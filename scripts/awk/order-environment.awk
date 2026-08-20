@@ -14,9 +14,11 @@
 # name, then continue with the selected preset environment file.
 #
 NR == FNR {
+  # Retain only syntactically valid environment assignments.
   if ($0 ~ /^[A-Za-z_][A-Za-z0-9_]*=/) {
     values[$1] = $0
   }
+
   next
 }
 

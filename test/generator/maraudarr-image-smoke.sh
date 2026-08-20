@@ -199,9 +199,9 @@ run_hardened_image \
     --entrypoint python3 \
     "${image}" \
     -m unittest discover \
-    -s /source/tests \
-    -p test_ui.py \
-    -v
+    --start-directory /source/tests \
+    --pattern test_ui.py \
+    --verbose
 
 #
 # Generate the requested deployment through the same hardened image contract.
@@ -229,13 +229,13 @@ test -s "${smoke_deployment}/${required_file}"
 if "${docker_bin}" compose version >/dev/null 2>&1; then
     "${docker_bin}" compose \
         --env-file "${smoke_deployment}/.env" \
-        -f "${smoke_deployment}/docker-compose.yml" \
+        --file "${smoke_deployment}/docker-compose.yml" \
         config \
         --quiet
 elif command -v docker-compose >/dev/null 2>&1; then
     docker-compose \
         --env-file "${smoke_deployment}/.env" \
-        -f "${smoke_deployment}/docker-compose.yml" \
+        --file "${smoke_deployment}/docker-compose.yml" \
         config \
         --quiet
 else

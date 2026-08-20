@@ -6,6 +6,8 @@
 #
 # build.sh: Expose Maraudarr source and compile its ClusterFuzzLite targets.
 #
+# Usage: .clusterfuzzlite/build.sh
+#
 
 set -eu
 

@@ -9,6 +9,8 @@
 #             ensure that the Entware profile is included in the global profile
 #             and that Entware is mounted, started, and refreshed on boot.
 #
+# Usage: scripts/synology/entware.sh
+#
 # The script:
 #   - Creates the /opt directory if it does not exist and mounts Entware to /opt.
 #   - Starts the Entware services using the init script.

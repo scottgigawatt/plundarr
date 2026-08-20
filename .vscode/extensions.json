@@ -10,18 +10,21 @@
 
     //
     // Keep recommendations focused on file types and checks owned by Plundarr.
-    // Even Better TOML supplies TOML validation and the workspace formatter.
+    // AWK Language Client validates portable programs, jq Syntax Highlighting
+    // colors reusable filters, and Even Better TOML validates and formats TOML.
     //
     "recommendations": [
         "davidanson.vscode-markdownlint",
         "EditorConfig.EditorConfig",
         "github.vscode-github-actions",
+        "jq-syntax-highlighting.jq-syntax-highlighting",
         "ms-azuretools.vscode-docker",
         "ms-python.python",
         "ms-vscode.makefile-tools",
         "redhat.vscode-yaml",
         "streetsidesoftware.code-spell-checker",
         "tamasfe.even-better-toml",
-        "timonwong.shellcheck"
+        "timonwong.shellcheck",
+        "TGV.awk-language-client"
     ]
 }

@@ -277,6 +277,11 @@
     //
     // Mirror EditorConfig indentation while disabling VS Code auto-detection.
     //
+    "[awk]": {
+        "editor.detectIndentation": false,
+        "editor.tabSize": 2,
+        "editor.insertSpaces": true
+    },
     "[dockerfile]": {
         "editor.detectIndentation": false,
         "editor.tabSize": 4,
@@ -302,6 +307,11 @@
     "[json][jsonc]": {
         "editor.detectIndentation": false,
         "editor.tabSize": 4,
+        "editor.insertSpaces": true
+    },
+    "[jq]": {
+        "editor.detectIndentation": false,
+        "editor.tabSize": 2,
         "editor.insertSpaces": true
     },
     "[makefile]": {
@@ -330,6 +340,12 @@
         "editor.tabSize": 2,
         "editor.insertSpaces": true
     },
+
+    //
+    // Validate project AWK programs against the portable POSIX language mode.
+    //
+    "awk.mode": "awk",
+    "awk.stylisticWarnings.missingSemicolon": false,
 
     //
     // Keep TOML formatting at two spaces and validate Python package metadata

@@ -126,7 +126,7 @@ if "${docker_bin}" compose version >/dev/null 2>&1; then
     # Use the modern Docker Compose v2 command to display the project status.
     compose_status=$("${docker_bin}" compose \
         --env-file "${env_file}" \
-        -f "${compose_file}" \
+        --file "${compose_file}" \
         ps \
         --format '{{.Name}}\t{{.Service}}\t{{.Status}}\t{{.Ports}}')
 
@@ -137,7 +137,7 @@ elif command -v docker-compose >/dev/null 2>&1; then
     # Use the legacy Docker Compose v1 command to display the project status.
     docker-compose \
         --env-file "${env_file}" \
-        -f "${compose_file}" \
+        --file "${compose_file}" \
         ps
 else
     echo "Neither 'docker compose' nor 'docker-compose' is available." >&2

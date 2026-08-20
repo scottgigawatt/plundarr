@@ -193,26 +193,27 @@ endif
 #
 # Developer documentation settings.
 #
-MKDOCS               ?= mkdocs
-PIP_MODULE           ?= pip
-PIP_INSTALL_COMMAND  ?= install
-PIP_NO_VERSION_CHECK ?= --disable-pip-version-check
-PIP_REQUIRE_HASHES   ?= --require-hashes
-PIP_REQUIREMENT_FILE ?= --requirement
-DOCS_SITE_PATH       ?= site
-DOCS_SERVE_ADDRESS   ?= 127.0.0.1:8000
-DOCS_VENV            ?= .venv-docs
-DOCS_PYTHON_BIN      ?= python3.14
-DOCS_PYTHON_VERSION  ?= 3.14.7
-DOCS_PYTHON_TARGET   ?= $(DOCS_VENV)/bin/python
-DOCS_PYTHON_STAMP    ?= $(DOCS_VENV)/.python-$(DOCS_PYTHON_VERSION)
-DOCS_INSTALL_STAMP   ?= $(DOCS_VENV)/.requirements-installed
-DOCS_PYTHON          ?= $(DOCS_PYTHON_TARGET)
-DOCS_MKDOCS          ?= $(DOCS_VENV)/bin/$(MKDOCS)
-DOCS_REQUIREMENTS    ?= requirements-docs.txt
-DOCS_PIP             ?= $(DOCS_PYTHON) -m $(PIP_MODULE)
-DOCS_PIP_OPTIONS     ?= $(PIP_NO_VERSION_CHECK) $(PIP_REQUIRE_HASHES) $(PIP_REQUIREMENT_FILE) "$(DOCS_REQUIREMENTS)"
-DOCS_PIP_INSTALL     ?= $(DOCS_PIP) $(PIP_INSTALL_COMMAND) $(DOCS_PIP_OPTIONS)
+MKDOCS                ?= mkdocs
+PIP_MODULE            ?= pip
+PIP_INSTALL_COMMAND   ?= install
+PIP_NO_VERSION_CHECK  ?= --disable-pip-version-check
+PIP_REQUIRE_HASHES    ?= --require-hashes
+PIP_REQUIREMENT_FILE  ?= --requirement
+DOCS_SITE_PATH        ?= site
+DOCS_SERVE_ADDRESS    ?= 127.0.0.1:8000
+DOCS_VENV             ?= .venv-docs
+DOCS_PYTHON_BIN       ?= python3.14
+DOCS_PYTHON_VERSION   ?= 3.14.7
+DOCS_PYTHON_TARGET    ?= $(DOCS_VENV)/bin/python
+DOCS_PYTHON_STAMP     ?= $(DOCS_VENV)/.python-$(DOCS_PYTHON_VERSION)
+DOCS_INSTALL_STAMP    ?= $(DOCS_VENV)/.requirements-installed
+DOCS_PYTHON           ?= $(DOCS_PYTHON_TARGET)
+DOCS_MKDOCS           ?= $(DOCS_VENV)/bin/$(MKDOCS)
+DOCS_REQUIREMENTS     ?= requirements-docs.txt
+DOCS_PIP              ?= $(DOCS_PYTHON) -m $(PIP_MODULE)
+DOCS_PIP_OPTIONS      ?= $(PIP_NO_VERSION_CHECK) $(PIP_REQUIRE_HASHES) $(PIP_REQUIREMENT_FILE) "$(DOCS_REQUIREMENTS)"
+DOCS_PIP_INSTALL      ?= $(DOCS_PIP) $(PIP_INSTALL_COMMAND) $(DOCS_PIP_OPTIONS)
+DOCS_PYTHON_SETUP_CMD ?= scripts/docs/prepare-python.sh
 
 #
 # Disposable developer artifacts. Keep every cleanup target and expression in
@@ -300,7 +301,7 @@ DOCKER_COMPOSE := $(shell \
 PLUNDARR_COMPOSE = \
 	$(DOCKER_COMPOSE) \
 		--env-file $(COMPOSE_ENV_FILE) \
-		-f         $(COMPOSE_FILE)
+		--file     $(COMPOSE_FILE)
 
 #
 # Docker Compose command used to build Maraudarr from its self-contained image
@@ -310,7 +311,7 @@ MARAUDARR_COMPOSE = \
 	MARAUDARR_IMAGE="$(MARAUDARR_IMAGE)" \
 	$(DOCKER_COMPOSE) \
 		--env-file $(MARAUDARR_ENV_FILE) \
-		-f         $(MARAUDARR_COMPOSE_FILE)
+		--file     $(MARAUDARR_COMPOSE_FILE)
 
 #
 # Hardened Docker options shared by every published Maraudarr image command.
@@ -793,7 +794,9 @@ $(TEST_UNIT):
 	PYTHONDONTWRITEBYTECODE=1 \
 	PYTHONPATH=docker/src \
 	MARAUDARR_CATALOG_ROOT=docker \
-		$(PYTHON_BIN) -m unittest discover -s docker/tests -v
+		$(PYTHON_BIN) -m unittest discover \
+			--start-directory docker/tests \
+			--verbose
 
 #
 # $(TEST_WORKFLOWS): Tests workflow helpers and shared publishing policies locally.
@@ -827,30 +830,12 @@ $(TEST): $(BUILD_DEPENDS) $(TEST_UNIT) $(TEST_WORKFLOWS)
 #
 $(DOCS_PYTHON_STAMP):
 	$(call announce,📚 Creating the isolated developer documentation toolchain...)
-	@command -v "$(DOCS_PYTHON_BIN)" >/dev/null 2>&1 || { \
-		$(call print_line_inline,$(COLOR_ERROR),Python $(DOCS_PYTHON_VERSION) is required to build documentation.); \
-		$(call print_detail_inline,$(COLOR_MUTED),Install $(DOCS_PYTHON_BIN) or override DOCS_PYTHON_BIN with the exact interpreter path.); \
-		exit 1; \
-	}
-	@python_version="$$("$(DOCS_PYTHON_BIN)" -c 'import platform; print(platform.python_version())')"; \
-	if [ "$$python_version" != "$(DOCS_PYTHON_VERSION)" ]; then \
-		$(call print_line_inline,$(COLOR_ERROR),Python $(DOCS_PYTHON_VERSION) is required; $(DOCS_PYTHON_BIN) reports $$python_version.); \
-		$(call print_detail_inline,$(COLOR_MUTED),Set DOCS_PYTHON_BIN to a Python $(DOCS_PYTHON_VERSION) executable.); \
-		exit 1; \
-	fi
-	@venv_version=""; \
-	if [ -x "$(DOCS_PYTHON_TARGET)" ]; then \
-		venv_version="$$("$(DOCS_PYTHON_TARGET)" -c 'import platform; print(platform.python_version())')"; \
-	fi; \
-	if [ "$$venv_version" != "$(DOCS_PYTHON_VERSION)" ]; then \
-		rm -rf "$(DOCS_VENV)"; \
-		"$(DOCS_PYTHON_BIN)" -m venv "$(DOCS_VENV)" || { \
-			$(call print_line_inline,$(COLOR_ERROR),Python venv support is required to build documentation.); \
-			$(call print_detail_inline,$(COLOR_MUTED),Install Python with venv support$(COMMA) then run make $(DOCS).); \
-			exit 1; \
-		}; \
-	fi
-	@touch "$(DOCS_PYTHON_STAMP)"
+	@$(DOCS_PYTHON_SETUP_CMD) \
+		--python-bin "$(DOCS_PYTHON_BIN)" \
+		--python-version "$(DOCS_PYTHON_VERSION)" \
+		--venv-path "$(DOCS_VENV)" \
+		--python-target "$(DOCS_PYTHON_TARGET)" \
+		--stamp-path "$(DOCS_PYTHON_STAMP)"
 
 #
 # $(DOCS_INSTALL_STAMP): Installs the hash-verified developer documentation

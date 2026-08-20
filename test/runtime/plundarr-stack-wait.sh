@@ -8,6 +8,8 @@
 # plundarr-stack-wait.sh: This script waits for all Docker Compose services
 #                         with healthchecks to report healthy.
 #
+# Usage: test/runtime/plundarr-stack-wait.sh
+#
 # The script:
 #   - Lists all services in the Docker Compose project.
 #   - Resolves each service to its current container.
@@ -49,7 +51,7 @@ fi
 #
 # Bind every Compose command to the generated deployment pair.
 #
-docker_compose+=(--env-file "${PLUNDARR_ENV_FILE}" -f "${PLUNDARR_COMPOSE_FILE}")
+docker_compose+=(--env-file "${PLUNDARR_ENV_FILE}" --file "${PLUNDARR_COMPOSE_FILE}")
 
 #
 # log: Print a consistent status line.
@@ -74,7 +76,7 @@ container_id_for_service() {
     service_name="$1"
 
     # Use the Compose command to find the newest container ID for the service.
-    "${docker_compose[@]}" ps -q "${service_name}" \
+    "${docker_compose[@]}" ps --quiet "${service_name}" \
         | tail -n 1
 }
 
@@ -100,8 +102,8 @@ all_services_are_healthy() {
         fi
 
         # Check the running and health status of the container.
-        running_status="$(docker inspect -f '{{.State.Running}}' "${container_id}")"
-        health_status="$(docker inspect -f '{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' "${container_id}")"
+        running_status="$(docker inspect --format '{{.State.Running}}' "${container_id}")"
+        health_status="$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' "${container_id}")"
 
         # Log the health status of each service and update the overall result.
         if [[ "${running_status}" != "true" ]]; then

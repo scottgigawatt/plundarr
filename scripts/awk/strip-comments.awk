@@ -16,6 +16,8 @@
 {
   sub(/#.*/, "")
   sub(/[[:space:]]+$/, "")
+
+  # Print only records that retain at least one field after normalization.
   if (NF) {
     print
   }
