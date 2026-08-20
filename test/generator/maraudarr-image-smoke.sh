@@ -9,7 +9,7 @@
 #                           validate one deployment with CI's runtime controls.
 #
 # Usage: test/generator/maraudarr-image-smoke.sh --image <image> --preset <preset> \
-#        --required-file <path> [options]
+#           --required-file <path> [options]
 #
 
 #
