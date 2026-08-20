@@ -4,18 +4,18 @@ Welcome to the test hold, where Plundarr checks that Privateerr and Gluetun left
 
 ## Test Script Chart 🗺️
 
-| Hold         | Script                                                                         | Purpose                                                             |
-| ------------ | ------------------------------------------------------------------------------ | ------------------------------------------------------------------- |
+| Hold         | Script                                                                                                                                  | Purpose                                                             |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
 | 🧭 Generator | [`generator/maraudarr-image-smoke.sh`](https://github.com/scottgigawatt/plundarr/blob/main/test/generator/maraudarr-image-smoke.sh)     | Test image UI and validate one disposable deployment                |
 | 🧭 Generator | [`generator/test-maraudarr-image.sh`](https://github.com/scottgigawatt/plundarr/blob/main/test/generator/test-maraudarr-image.sh)       | Verify local, pulled, built, and unavailable image resolution paths |
 | 🧭 Generator | [`generator/test-maraudarr-matrix.sh`](https://github.com/scottgigawatt/plundarr/blob/main/test/generator/test-maraudarr-matrix.sh)     | Generate and validate representative preset and add-on combinations |
 | 🧰 Helpers   | [`helpers/test-make-helpers.sh`](https://github.com/scottgigawatt/plundarr/blob/main/test/helpers/test-make-helpers.sh)                 | Test Make's AWK, backup, PIA preflight, and Compose status helpers  |
 | 🧰 Helpers   | [`helpers/test-policy-checks.sh`](https://github.com/scottgigawatt/plundarr/blob/main/test/helpers/test-policy-checks.sh)               | Test valid and invalid publishing-policy fixtures offline           |
 | 🧰 Helpers   | [`helpers/test-workflow-helpers.sh`](https://github.com/scottgigawatt/plundarr/blob/main/test/helpers/test-workflow-helpers.sh)         | Test release, Discord, and registry helper behavior offline         |
-| 🛡️ Policy   | [`policy/check-build-pin-policy.sh`](https://github.com/scottgigawatt/plundarr/blob/main/test/policy/check-build-pin-policy.sh)         | Keep digest-pinned build dependency tags synchronized               |
-| 🛡️ Policy   | [`policy/check-image-tag-policy.sh`](https://github.com/scottgigawatt/plundarr/blob/main/test/policy/check-image-tag-policy.sh)         | Enforce canonical image tags in every metadata-action block         |
-| 🧮 Policy   | [`policy/awk/check-image-tags.awk`](https://github.com/scottgigawatt/plundarr/blob/main/test/policy/awk/check-image-tags.awk)           | Parse and validate workflow image-tag metadata blocks               |
-| 🧮 Policy   | [`policy/awk/collect-build-pins.awk`](https://github.com/scottgigawatt/plundarr/blob/main/test/policy/awk/collect-build-pins.awk)       | Extract and validate digest-pinned build dependency values          |
+| 🛡️ Policy    | [`policy/check-build-pin-policy.sh`](https://github.com/scottgigawatt/plundarr/blob/main/test/policy/check-build-pin-policy.sh)         | Keep digest-pinned build dependency tags synchronized               |
+| 🛡️ Policy    | [`policy/check-image-tag-policy.sh`](https://github.com/scottgigawatt/plundarr/blob/main/test/policy/check-image-tag-policy.sh)         | Enforce canonical image tags in every metadata-action block         |
+| 🧮 Policy    | [`policy/awk/check-image-tags.awk`](https://github.com/scottgigawatt/plundarr/blob/main/test/policy/awk/check-image-tags.awk)           | Parse and validate workflow image-tag metadata blocks               |
+| 🧮 Policy    | [`policy/awk/collect-build-pins.awk`](https://github.com/scottgigawatt/plundarr/blob/main/test/policy/awk/collect-build-pins.awk)       | Extract and validate digest-pinned build dependency values          |
 | 🌊 Runtime   | [`runtime/plundarr-stack-wait.sh`](https://github.com/scottgigawatt/plundarr/blob/main/test/runtime/plundarr-stack-wait.sh)             | Wait for a generated stack to become healthy                        |
 | 🌊 Runtime   | [`runtime/plundarr-vpn-test.sh`](https://github.com/scottgigawatt/plundarr/blob/main/test/runtime/plundarr-vpn-test.sh)                 | Validate Privateerr, Gluetun, and selected downloader state         |
 | 🎭 Stubs     | [`stubs/compose-docker-stub.sh`](https://github.com/scottgigawatt/plundarr/blob/main/test/stubs/compose-docker-stub.sh)                 | Supply deterministic Docker output to Compose helper tests          |
