@@ -76,6 +76,10 @@ Build the warning-free site or start a local preview:
 
 Both targets create `.venv-docs/` and install the pinned tools from
 `requirements-docs.txt` when needed. No separate MkDocs setup step is required.
+The documentation toolchain requires Python 3.14.7 and selects `python3.14` by
+default. Set `DOCS_PYTHON_BIN` to the exact interpreter path when it uses a
+different executable name. A virtual environment created by another Python
+release is disposable and is recreated automatically before dependency install.
 The generated `site/` directory is disposable and ignored by Git. CI performs
 the same strict build and publishes a fresh artifact from `main`.
 

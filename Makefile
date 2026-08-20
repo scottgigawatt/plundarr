@@ -195,7 +195,10 @@ PIP_REQUIREMENT_FILE ?= --requirement
 DOCS_SITE_PATH       ?= site
 DOCS_SERVE_ADDRESS   ?= 127.0.0.1:8000
 DOCS_VENV            ?= .venv-docs
+DOCS_PYTHON_BIN      ?= python3.14
+DOCS_PYTHON_VERSION  ?= 3.14.7
 DOCS_PYTHON_TARGET   ?= $(DOCS_VENV)/bin/python
+DOCS_PYTHON_STAMP    ?= $(DOCS_VENV)/.python-$(DOCS_PYTHON_VERSION)
 DOCS_INSTALL_STAMP   ?= $(DOCS_VENV)/.requirements-installed
 DOCS_PYTHON          ?= $(DOCS_PYTHON_TARGET)
 DOCS_MKDOCS          ?= $(DOCS_VENV)/bin/$(MKDOCS)
@@ -816,18 +819,37 @@ $(TEST): $(BUILD_DEPENDS) $(TEST_UNIT) $(TEST_WORKFLOWS)
 		test/generator/test-maraudarr-matrix.sh
 
 #
-# $(DOCS_PYTHON_TARGET): Creates an isolated Python environment for developer
-#                        documentation tooling.
+# $(DOCS_PYTHON_STAMP): Creates an isolated documentation environment with the
+#                       exact supported Python release.
 #
 # Dependencies: None.
 #
-$(DOCS_PYTHON_TARGET):
+$(DOCS_PYTHON_STAMP):
 	$(call announce,📚 Creating the isolated developer documentation toolchain...)
-	@$(PYTHON_BIN) -m venv "$(DOCS_VENV)" || { \
-		$(call print_line_inline,$(COLOR_ERROR),Python venv support is required to build documentation.); \
-		$(call print_detail_inline,$(COLOR_MUTED),Install Python with venv support, then run make $(DOCS).); \
+	@command -v "$(DOCS_PYTHON_BIN)" >/dev/null 2>&1 || { \
+		$(call print_line_inline,$(COLOR_ERROR),Python $(DOCS_PYTHON_VERSION) is required to build documentation.); \
+		$(call print_detail_inline,$(COLOR_MUTED),Install $(DOCS_PYTHON_BIN) or override DOCS_PYTHON_BIN with the exact interpreter path.); \
 		exit 1; \
 	}
+	@python_version="$$("$(DOCS_PYTHON_BIN)" -c 'import platform; print(platform.python_version())')"; \
+	if [ "$$python_version" != "$(DOCS_PYTHON_VERSION)" ]; then \
+		$(call print_line_inline,$(COLOR_ERROR),Python $(DOCS_PYTHON_VERSION) is required; $(DOCS_PYTHON_BIN) reports $$python_version.); \
+		$(call print_detail_inline,$(COLOR_MUTED),Set DOCS_PYTHON_BIN to a Python $(DOCS_PYTHON_VERSION) executable.); \
+		exit 1; \
+	fi
+	@venv_version=""; \
+	if [ -x "$(DOCS_PYTHON_TARGET)" ]; then \
+		venv_version="$$("$(DOCS_PYTHON_TARGET)" -c 'import platform; print(platform.python_version())')"; \
+	fi; \
+	if [ "$$venv_version" != "$(DOCS_PYTHON_VERSION)" ]; then \
+		rm -rf "$(DOCS_VENV)"; \
+		"$(DOCS_PYTHON_BIN)" -m venv "$(DOCS_VENV)" || { \
+			$(call print_line_inline,$(COLOR_ERROR),Python venv support is required to build documentation.); \
+			$(call print_detail_inline,$(COLOR_MUTED),Install Python with venv support$(COMMA) then run make $(DOCS).); \
+			exit 1; \
+		}; \
+	fi
+	@touch "$(DOCS_PYTHON_STAMP)"
 
 #
 # $(DOCS_INSTALL_STAMP): Installs the hash-verified developer documentation
@@ -835,9 +857,9 @@ $(DOCS_PYTHON_TARGET):
 #
 # Dependencies:
 #   $(DOCS_REQUIREMENTS) - Declare exact, hash-verified documentation packages.
-#   $(DOCS_PYTHON_TARGET) - Provide the isolated Python environment.
+#   $(DOCS_PYTHON_STAMP) - Provide the version-matched Python environment.
 #
-$(DOCS_INSTALL_STAMP): $(DOCS_REQUIREMENTS) | $(DOCS_PYTHON_TARGET)
+$(DOCS_INSTALL_STAMP): $(DOCS_REQUIREMENTS) | $(DOCS_PYTHON_STAMP)
 	$(call announce,📦 Installing hash-verified developer documentation tools...)
 	@$(DOCS_PIP_INSTALL)
 	@touch "$(DOCS_INSTALL_STAMP)"
