@@ -299,8 +299,8 @@ DOCKER_COMPOSE := $(shell \
 #
 PLUNDARR_COMPOSE = \
 	$(DOCKER_COMPOSE) \
-	--env-file $(COMPOSE_ENV_FILE) \
-	-f $(COMPOSE_FILE)
+		--env-file $(COMPOSE_ENV_FILE) \
+		-f         $(COMPOSE_FILE)
 
 #
 # Docker Compose command used to build Maraudarr from its self-contained image
@@ -309,8 +309,8 @@ PLUNDARR_COMPOSE = \
 MARAUDARR_COMPOSE = \
 	MARAUDARR_IMAGE="$(MARAUDARR_IMAGE)" \
 	$(DOCKER_COMPOSE) \
-	--env-file $(MARAUDARR_ENV_FILE) \
-	-f $(MARAUDARR_COMPOSE_FILE)
+		--env-file $(MARAUDARR_ENV_FILE) \
+		-f         $(MARAUDARR_COMPOSE_FILE)
 
 #
 # Hardened Docker options shared by every published Maraudarr image command.
@@ -319,11 +319,11 @@ MARAUDARR_COMPOSE = \
 MARAUDARR_BASE_RUN_OPTIONS ?= \
 	--rm \
 	--read-only \
-	--network none \
-	--cap-drop ALL \
+	--network      none \
+	--cap-drop     ALL \
 	--security-opt no-new-privileges:true \
-	--tmpfs /tmp:rw,noexec,nosuid,size=64m \
-	--user "$$(id -u):$$(id -g)"
+	--tmpfs        /tmp:rw,noexec,nosuid,size=64m \
+	--user         "$$(id -u):$$(id -g)"
 
 #
 # Normal generation writes into this checkout. The smoke target adds its own
@@ -336,11 +336,11 @@ MARAUDARR_RUN_OPTIONS ?= \
 #
 # Non-interactive, styled-list, and interactive Maraudarr image commands.
 #
-MARAUDARR_RUN = $(DOCKER_BIN) run $(MARAUDARR_RUN_OPTIONS) $(MARAUDARR_IMAGE)
-MARAUDARR_RUN_STYLED = $(DOCKER_BIN) run --tty $(MARAUDARR_RUN_OPTIONS) $(MARAUDARR_IMAGE)
+MARAUDARR_RUN             = $(DOCKER_BIN) run $(MARAUDARR_RUN_OPTIONS) $(MARAUDARR_IMAGE)
+MARAUDARR_RUN_STYLED      = $(DOCKER_BIN) run --tty $(MARAUDARR_RUN_OPTIONS) $(MARAUDARR_IMAGE)
 MARAUDARR_RUN_INTERACTIVE = $(DOCKER_BIN) run --interactive --tty $(MARAUDARR_RUN_OPTIONS) $(MARAUDARR_IMAGE)
-MARAUDARR_BUILD = $(MARAUDARR_COMPOSE) build $(MARAUDARR_BUILD_OPTIONS) maraudarr
-MARAUDARR_PLATFORM_BUILD = $(DOCKER_BUILDX) build \
+MARAUDARR_BUILD           = $(MARAUDARR_COMPOSE) build $(MARAUDARR_BUILD_OPTIONS) maraudarr
+MARAUDARR_PLATFORM_BUILD  = $(DOCKER_BUILDX) build \
 	--pull \
 	--platform "$(MARAUDARR_BUILD_PLATFORMS)" \
 	--tag "$(MARAUDARR_MULTIARCH_IMAGE)" \
@@ -669,10 +669,8 @@ $(CLEAN_TEST): $(DOWN) $(RESTORE_TEST_CONFIG)
 $(NUKE): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 	$(call announce_warning,Firin' the clean broadside. Repo-safe files stay aboard. 💣)
 	$(PLUNDARR_COMPOSE) down $(COMPOSE_CLEAN_OPTIONS) --rmi all
-
 	$(call announce,Scrubbin' generated logs and Gluetun state. 🧽)
 	rm -rf $(PLUNDARR_GENERATED_PATHS)
-
 	@$(MAKE) --no-print-directory $(RESTORE_TEST_CONFIG)
 
 #
@@ -733,7 +731,6 @@ $(PULL_IMAGE): $(BUILD_DEPENDS)
 #
 $(SHIP): $(ENSURE_MARAUDARR_IMAGE)
 	$(call announce,🧭 Maraudarr is charting the $(PRESET) deployment...)
-
 	@$(MARAUDARR_RUN) \
 		build \
 		--preset      "$(PRESET)" \
@@ -749,7 +746,6 @@ $(SHIP): $(ENSURE_MARAUDARR_IMAGE)
 #
 $(CONFIGURE): $(ENSURE_MARAUDARR_IMAGE)
 	$(call announce,🧭 Openin' Maraudarr's interactive voyage planner...)
-
 	@$(MARAUDARR_RUN_INTERACTIVE) configure --output-root "$(MARAUDARR_OUTPUT_ROOT)"
 
 #
@@ -779,7 +775,6 @@ $(BUILD_PLATFORMS): $(BUILD_DEPENDS)
 #
 $(TEST_IMAGE): $(ENSURE_MARAUDARR_IMAGE)
 	$(call announce,Testin' Maraudarr in a sealed temporary barrel. 🛢️)
-
 	@$(MARAUDARR_SMOKE_CMD) \
 		--docker-bin      "$(DOCKER_BIN)" \
 		--image           "$(MARAUDARR_IMAGE)" \
@@ -790,7 +785,6 @@ $(TEST_IMAGE): $(ENSURE_MARAUDARR_IMAGE)
 		--output-mount    "$(MARAUDARR_OUTPUT)" \
 		--output-root     "$(MARAUDARR_OUTPUT_ROOT)" \
 		--deployment-root "$(DEPLOYMENT_ROOT)"
-
 	$(call announce_success,Maraudarr's disposable smoke voyage came back clean. ✅)
 
 #
