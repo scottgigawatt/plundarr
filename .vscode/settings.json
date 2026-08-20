@@ -251,6 +251,7 @@
         "yerself",
         "zipx"
     ],
+
     //
     // Keep Makefile Tools from inventing a configure step for this project.
     //
@@ -264,6 +265,7 @@
         "**/CODEOWNERS": "plaintext",
         "Dockerfile*": "dockerfile"
     },
+
     //
     // Mirror EditorConfig indentation while disabling VS Code auto-detection.
     //
@@ -280,12 +282,14 @@
     "[yaml]": {
         "editor.detectIndentation": false,
         "editor.tabSize": 2,
-        "editor.insertSpaces": true
+        "editor.insertSpaces": true,
+        "editor.formatOnSave": false
     },
     "[github-actions-workflow]": {
         "editor.detectIndentation": false,
         "editor.tabSize": 2,
-        "editor.insertSpaces": true
+        "editor.insertSpaces": true,
+        "editor.formatOnSave": false
     },
     "[json][jsonc]": {
         "editor.detectIndentation": false,
