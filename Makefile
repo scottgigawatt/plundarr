@@ -252,6 +252,9 @@ PLUNDARR_STACK_WAIT_CMD   ?= test/runtime/plundarr-stack-wait.sh
 MARAUDARR_IMAGE_TEST_CMD  ?= test/generator/test-maraudarr-image.sh
 WORKFLOW_HELPERS_TEST_CMD ?= test/helpers/test-workflow-helpers.sh
 MAKE_HELPERS_TEST_CMD     ?= test/helpers/test-make-helpers.sh
+POLICY_HELPERS_TEST_CMD   ?= test/helpers/test-policy-checks.sh
+BUILD_PIN_POLICY_TEST_CMD ?= test/policy/check-build-pin-policy.sh
+IMAGE_TAG_POLICY_TEST_CMD ?= test/policy/check-image-tag-policy.sh
 MARAUDARR_SMOKE_CMD       ?= test/generator/maraudarr-image-smoke.sh
 PLUNDARR_PS_CMD           ?= scripts/compose/ps.sh
 PIA_CREDENTIAL_CHECK_CMD  ?= scripts/compose/check-pia-credentials.sh
@@ -788,10 +791,14 @@ $(TEST_UNIT):
 		$(PYTHON_BIN) -m unittest discover -s docker/tests -v
 
 #
-# $(TEST_WORKFLOWS): Tests workflow payload and registry helpers locally.
+# $(TEST_WORKFLOWS): Tests workflow helpers and shared publishing policies
+#                    locally.
 #
 $(TEST_WORKFLOWS):
 	$(WORKFLOW_HELPERS_TEST_CMD)
+	$(BUILD_PIN_POLICY_TEST_CMD)
+	$(IMAGE_TAG_POLICY_TEST_CMD)
+	$(POLICY_HELPERS_TEST_CMD)
 
 #
 # $(TEST): Runs unit tests, automation helpers, and the Compose matrix.
@@ -1025,7 +1032,7 @@ $(HELP):
 	$(call help_heading,🧪 Test and build)
 	$(call help_line,$(TEST_UNIT),Run Maraudarr Python unit tests.)
 	$(call help_line,$(TEST),Run all generator and automation-helper tests.)
-	$(call help_line,$(TEST_WORKFLOWS),Test Discord and registry workflow helpers.)
+	$(call help_line,$(TEST_WORKFLOWS),Test workflow helpers and shared publishing policies.)
 	$(call help_line,$(TEST_VPN),Check a running VPN tunnel.)
 	$(call help_line,$(TEST_E2E),Run the focused VPN end-to-end test.)
 	$(call help_line,$(TEST_STACK),Run the complete stack test.)

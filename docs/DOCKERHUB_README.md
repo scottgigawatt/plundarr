@@ -55,8 +55,13 @@ SABnzbd, NZBGet, and Watchtower remain optional selections through
 - Platforms: `linux/amd64`, `linux/arm64`, and `linux/arm/v7`
 - Stable tag: `latest`
 - Main branch tag: `edge`
+- Stable release aliases: exact, minor, and major versions such as `1.2.3`, `1.2`, and `1`
+- Immutable revision tag: `sha-...`
 - Security: non-root, read-only, no-network generation with dropped capabilities
 - Supply chain: Trivy scanning, SBOM, provenance, and OCI metadata
+
+Major version zero omits the broad `0` alias. Prereleases publish only their
+exact version and immutable revision tag, never moving stable aliases.
 
 Full commands, tag policy, architecture, and maintenance notes live in the
 [Maraudarr README](https://github.com/scottgigawatt/plundarr/tree/main/docker#readme).

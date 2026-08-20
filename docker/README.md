@@ -141,6 +141,9 @@ docker.io/scottgigawatt/maraudarr
 | `edge`              | Latest successful build from `main`            |
 | `sha-...`           | Immutable source revision build                |
 
+Major version zero omits the broad `0` alias. Prereleases publish only their
+exact version and immutable `sha-...` tag; they never move stable aliases.
+
 Published platforms are `linux/amd64`, `linux/arm64`, and `linux/arm/v7`.
 Builds include OCI metadata, an SBOM, provenance, and a Trivy gate for high and
 critical image vulnerabilities.
