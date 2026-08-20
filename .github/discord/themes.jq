@@ -20,7 +20,7 @@
   "image-primary": {
     shared: {
       theme: "Rainbow Werkroom",
-      username: "Maraudarr Rainbow Werkroom",
+      username: "Rainbow Release Werkroom",
       repository_label: "👑 House"
     },
     notifications: {

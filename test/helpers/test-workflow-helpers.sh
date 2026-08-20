@@ -73,7 +73,7 @@ run_release_helper() {
 git init --quiet --bare "${TEST_ROOT}/origin.git"
 git init --quiet --initial-branch=main "${RELEASE_REPOSITORY}"
 git -C "${RELEASE_REPOSITORY}" config user.email test@example.invalid
-git -C "${RELEASE_REPOSITORY}" config user.name "Plundarr Tests"
+git -C "${RELEASE_REPOSITORY}" config user.name "Workflow Helper Tests"
 printf '%s\n' 'release fixture' > "${RELEASE_REPOSITORY}/release.txt"
 git -C "${RELEASE_REPOSITORY}" add release.txt
 git -C "${RELEASE_REPOSITORY}" commit --quiet --message "Add release fixture"
@@ -161,19 +161,19 @@ sh "${REPOSITORY_ROOT}/.github/scripts/discord-notifier.sh" \
     --type image-start \
     --profile image-primary \
     --run-url https://example.invalid/run \
-    --repository test/plundarr \
+    --repository test/repository \
     --ref-name test-ref \
     --workflow-name test-build \
     --actor test-captain \
     --platforms linux/amd64 \
-    --ghcr-image ghcr.io/test/maraudarr \
-    --dockerhub-image docker.io/test/maraudarr \
+    --ghcr-image ghcr.io/test/image \
+    --dockerhub-image docker.io/test/image \
     --random-value 0 \
     --dry-run \
     > "${TEST_ROOT}/primary-start.json"
 
 assert_json_value "${TEST_ROOT}/primary-start.json" \
-    '.username == "Maraudarr Rainbow Werkroom"
+    '.username == "Rainbow Release Werkroom"
         and .embeds[0].title == "🌈 Category is: multi-arch realness"
         and (.embeds[0].description | contains("test-build"))'
 
@@ -181,13 +181,13 @@ sh "${REPOSITORY_ROOT}/.github/scripts/discord-notifier.sh" \
     --type image-start \
     --profile image-secondary \
     --run-url https://example.invalid/run \
-    --repository test/plundarr \
+    --repository test/repository \
     --ref-name test-ref \
     --workflow-name test-build \
     --actor test-captain \
     --platforms linux/arm64 \
-    --ghcr-image ghcr.io/test/maraudarr \
-    --dockerhub-image docker.io/test/maraudarr \
+    --ghcr-image ghcr.io/test/image \
+    --dockerhub-image docker.io/test/image \
     --random-value 1 \
     --dry-run \
     > "${TEST_ROOT}/secondary-start.json"
@@ -207,13 +207,13 @@ sh "${REPOSITORY_ROOT}/.github/scripts/discord-notifier.sh" \
     --type image-start \
     --profile image-primary \
     --run-url https://example.invalid/run \
-    --repository test/plundarr \
+    --repository test/repository \
     --ref-name test-ref \
     --workflow-name "${injection_value}" \
     --actor test-captain \
     --platforms linux/amd64 \
-    --ghcr-image ghcr.io/test/maraudarr \
-    --dockerhub-image docker.io/test/maraudarr \
+    --ghcr-image ghcr.io/test/image \
+    --dockerhub-image docker.io/test/image \
     --random-value 0 \
     --dry-run \
     > "${TEST_ROOT}/literal-placeholder.json"
@@ -228,13 +228,13 @@ if sh "${REPOSITORY_ROOT}/.github/scripts/discord-notifier.sh" \
     --type image-start \
     --profile legacy \
     --run-url https://example.invalid/run \
-    --repository test/plundarr \
+    --repository test/repository \
     --ref-name test-ref \
     --workflow-name test-build \
     --actor test-captain \
     --platforms linux/amd64 \
-    --ghcr-image ghcr.io/test/maraudarr \
-    --dockerhub-image docker.io/test/maraudarr \
+    --ghcr-image ghcr.io/test/image \
+    --dockerhub-image docker.io/test/image \
     --random-value 0 \
     --dry-run \
     > "${TEST_ROOT}/unknown-profile.out" 2>&1; then
@@ -251,13 +251,13 @@ sh "${REPOSITORY_ROOT}/.github/scripts/discord-notifier.sh" \
     --type image-verdict \
     --profile image-primary \
     --run-url https://example.invalid/run \
-    --repository test/plundarr \
+    --repository test/repository \
     --ref-name test-ref \
     --job-status success \
-    --ghcr-image ghcr.io/test/maraudarr \
+    --ghcr-image ghcr.io/test/image \
     --ghcr-package-url https://example.invalid/ghcr \
     --dockerhub-url https://example.invalid/dockerhub \
-    --published-tags 'ghcr.io/test/maraudarr:latest' \
+    --published-tags 'ghcr.io/test/image:latest' \
     --published-digest sha256:0123456789abcdef \
     --random-value 0 \
     --dry-run \
@@ -273,10 +273,10 @@ sh "${REPOSITORY_ROOT}/.github/scripts/discord-notifier.sh" \
     --type image-verdict \
     --profile image-primary \
     --run-url https://example.invalid/run \
-    --repository test/plundarr \
+    --repository test/repository \
     --ref-name test-ref \
     --job-status failure \
-    --ghcr-image ghcr.io/test/maraudarr \
+    --ghcr-image ghcr.io/test/image \
     --random-value 2 \
     --dry-run \
     > "${TEST_ROOT}/primary-failure.json"
@@ -290,10 +290,10 @@ sh "${REPOSITORY_ROOT}/.github/scripts/discord-notifier.sh" \
     --type image-verdict \
     --profile image-secondary \
     --run-url https://example.invalid/run \
-    --repository test/plundarr \
+    --repository test/repository \
     --ref-name test-ref \
     --job-status success \
-    --ghcr-image ghcr.io/test/maraudarr \
+    --ghcr-image ghcr.io/test/image \
     --random-value 0 \
     --dry-run \
     > "${TEST_ROOT}/secondary-success.json"
@@ -306,10 +306,10 @@ sh "${REPOSITORY_ROOT}/.github/scripts/discord-notifier.sh" \
     --type image-verdict \
     --profile image-secondary \
     --run-url https://example.invalid/run \
-    --repository test/plundarr \
+    --repository test/repository \
     --ref-name test-ref \
     --job-status cancelled \
-    --ghcr-image ghcr.io/test/maraudarr \
+    --ghcr-image ghcr.io/test/image \
     --random-value 2 \
     --dry-run \
     > "${TEST_ROOT}/secondary-failure.json"
@@ -328,7 +328,7 @@ sh "${REPOSITORY_ROOT}/.github/scripts/discord-notifier.sh" \
     --deploy-status success \
     --run-url https://example.invalid/run \
     --site-url https://example.invalid/docs \
-    --repository test/plundarr \
+    --repository test/repository \
     --ref-name test-ref \
     --random-value 0 \
     --dry-run \
@@ -345,7 +345,7 @@ sh "${REPOSITORY_ROOT}/.github/scripts/discord-notifier.sh" \
     --build-status failure \
     --deploy-status skipped \
     --run-url https://example.invalid/run \
-    --repository test/plundarr \
+    --repository test/repository \
     --ref-name test-ref \
     --random-value 3 \
     --dry-run \
@@ -377,18 +377,18 @@ run_registry_helper() {
     GHCR_TOKEN=test-token \
     DOCKERHUB_TOKEN=test-token \
         sh "${REPOSITORY_ROOT}/.github/scripts/registry-mirror.sh" \
-        --ghcr-image ghcr.io/test/maraudarr \
-        --dockerhub-image docker.io/test/maraudarr \
+        --ghcr-image ghcr.io/test/image \
+        --dockerhub-image docker.io/test/image \
         --ghcr-username test-user \
         --dockerhub-username test-user \
-        --published-tags "ghcr.io/test/maraudarr:edge
-ghcr.io/test/maraudarr:sha-test" \
+        --published-tags "ghcr.io/test/image:edge
+ghcr.io/test/image:sha-test" \
         --skopeo-bin "${TEST_ROOT}/bin/skopeo" \
         "$@"
 }
 
 #
-# Run the registry helper to mirror and verify the test Maraudarr image without writing to any registry.
+# Run the registry helper to mirror and verify the test image without writing to any registry.
 #
 run_registry_helper --mirror
 run_registry_helper --verify
@@ -397,10 +397,10 @@ run_registry_helper --verify
 # Validate that the Skopeo recorder logged the expected copy and digest operations.
 #
 grep -F -- 'copy --all --preserve-digests' "${SKOPEO_LOG}" >/dev/null
-grep -F -- 'docker://docker.io/test/maraudarr:sha-test' "${SKOPEO_LOG}" >/dev/null
-grep -F -- 'inspect --creds test-user:test-token --format {{.Digest}} docker://ghcr.io/test/maraudarr:edge' "${SKOPEO_LOG}" >/dev/null
-grep -F -- 'inspect --creds test-user:test-token --format {{.Digest}} docker://docker.io/test/maraudarr:edge' "${SKOPEO_LOG}" >/dev/null
-grep -F -- 'inspect --creds test-user:test-token --format {{.Digest}} docker://ghcr.io/test/maraudarr:sha-test' "${SKOPEO_LOG}" >/dev/null
-grep -F -- 'inspect --creds test-user:test-token --format {{.Digest}} docker://docker.io/test/maraudarr:sha-test' "${SKOPEO_LOG}" >/dev/null
+grep -F -- 'docker://docker.io/test/image:sha-test' "${SKOPEO_LOG}" >/dev/null
+grep -F -- 'inspect --creds test-user:test-token --format {{.Digest}} docker://ghcr.io/test/image:edge' "${SKOPEO_LOG}" >/dev/null
+grep -F -- 'inspect --creds test-user:test-token --format {{.Digest}} docker://docker.io/test/image:edge' "${SKOPEO_LOG}" >/dev/null
+grep -F -- 'inspect --creds test-user:test-token --format {{.Digest}} docker://ghcr.io/test/image:sha-test' "${SKOPEO_LOG}" >/dev/null
+grep -F -- 'inspect --creds test-user:test-token --format {{.Digest}} docker://docker.io/test/image:sha-test' "${SKOPEO_LOG}" >/dev/null
 
 echo "Workflow helper tests passed."
