@@ -731,8 +731,7 @@ $(PULL_IMAGE): $(BUILD_DEPENDS)
 #
 $(SHIP): $(ENSURE_MARAUDARR_IMAGE)
 	$(call announce,🧭 Maraudarr is charting the $(PRESET) deployment...)
-	@$(MARAUDARR_RUN) \
-		build \
+	@$(MARAUDARR_RUN) build \
 		--preset      "$(PRESET)" \
 		--remove      "$(REMOVE_SERVICES)" \
 		--add         "$(ADD_SERVICES)" \
