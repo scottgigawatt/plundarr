@@ -23,10 +23,11 @@ description = "Generate polished, reusable Plundarr Docker Compose stacks."
 readme = "README.md"
 requires-python = "==3.14.7"
 license = "Apache-2.0"
-authors = [
-  { name = "Scott Gigawatt" },
-]
-# Keep terminal prompts and styled output reproducible across image builds.
+authors = [{ name = "Scott Gigawatt" }]
+
+#
+# Interactive command-line prompts for user input and rich terminal text.
+#
 dependencies = [
   "questionary==2.1.1",
   "rich==15.0.0",

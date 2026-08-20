@@ -72,6 +72,7 @@ usage() {
 # Returns: 0 when a value follows; otherwise exits with status 2.
 #
 require_option_argument() {
+    # Validate that a value was supplied for the required option.
     if [ "$2" -lt 2 ]; then
         printf '%s requires a value.\n' "$1" >&2
         exit 2
@@ -187,10 +188,14 @@ choose_message() {
     # Use a random value to select one of the supplied messages.
     value=$(random_value)
     choice=$((value % $# + 1))
+
+    # Shift through the supplied messages until the selected one is reached.
     while [ "${choice}" -gt 1 ]; do
         shift
         choice=$((choice - 1))
     done
+
+    # Print the selected message without evaluating its contents.
     printf '%s\n' "$1"
 }
 
@@ -222,11 +227,15 @@ fi
 #
 # Validate required workflow inputs and provide a useful error message.
 #
-require_value --build-status "${build_status}"
+require_value --build-status  "${build_status}"
 require_value --deploy-status "${deploy_status}"
-require_value --run-url "${run_url}"
-require_value --repository "${repository}"
-require_value --ref-name "${ref_name}"
+require_value --run-url       "${run_url}"
+require_value --repository    "${repository}"
+require_value --ref-name      "${ref_name}"
+
+#
+# Provide a default value for the optional site URL if it is not supplied.
+#
 [ -n "${site_url}" ] || site_url="unavailable"
 
 #
@@ -262,16 +271,16 @@ fi
 # executable shell content.
 #
 payload=$(jq -n \
-    --arg title "${title}" \
-    --arg description "${description}" \
-    --arg url "${run_url}" \
-    --arg repository "${repository}" \
-    --arg ref "${ref_name}" \
-    --arg build_status "${build_status}" \
+    --arg title         "${title}" \
+    --arg description   "${description}" \
+    --arg url           "${run_url}" \
+    --arg repository    "${repository}" \
+    --arg ref           "${ref_name}" \
+    --arg build_status  "${build_status}" \
     --arg deploy_status "${deploy_status}" \
-    --arg site_url "${site_url}" \
-    --arg footer "${footer}" \
-    --argjson color "${color}" \
+    --arg site_url      "${site_url}" \
+    --arg footer        "${footer}" \
+    --argjson color     "${color}" \
     '{
         username: "Plundarr Chart Room",
         embeds: [{
