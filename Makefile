@@ -776,16 +776,18 @@ $(BUILD_PLATFORMS): $(BUILD_DEPENDS)
 #
 $(TEST_IMAGE): $(ENSURE_MARAUDARR_IMAGE)
 	$(call announce,Testin' Maraudarr in a sealed temporary barrel. 🛢️)
+
 	@$(MARAUDARR_SMOKE_CMD) \
-		--docker-bin "$(DOCKER_BIN)" \
-		--image "$(MARAUDARR_IMAGE)" \
-		--preset "$(MARAUDARR_TEST_PRESET)" \
-		--add-services "$(MARAUDARR_TEST_ADD)" \
+		--docker-bin      "$(DOCKER_BIN)" \
+		--image           "$(MARAUDARR_IMAGE)" \
+		--preset          "$(MARAUDARR_TEST_PRESET)" \
+		--add-services    "$(MARAUDARR_TEST_ADD)" \
 		--remove-services "$(MARAUDARR_TEST_REMOVE)" \
-		--required-file "$(MARAUDARR_TEST_FILE)" \
-		--output-mount "$(MARAUDARR_OUTPUT)" \
-		--output-root "$(MARAUDARR_OUTPUT_ROOT)" \
+		--required-file   "$(MARAUDARR_TEST_FILE)" \
+		--output-mount    "$(MARAUDARR_OUTPUT)" \
+		--output-root     "$(MARAUDARR_OUTPUT_ROOT)" \
 		--deployment-root "$(DEPLOYMENT_ROOT)"
+
 	$(call announce_success,Maraudarr's disposable smoke voyage came back clean. ✅)
 
 #
@@ -798,8 +800,7 @@ $(TEST_UNIT):
 		$(PYTHON_BIN) -m unittest discover -s docker/tests -v
 
 #
-# $(TEST_WORKFLOWS): Tests workflow helpers and shared publishing policies
-#                    locally.
+# $(TEST_WORKFLOWS): Tests workflow helpers and shared publishing policies locally.
 #
 $(TEST_WORKFLOWS):
 	$(WORKFLOW_HELPERS_TEST_CMD)
