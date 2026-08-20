@@ -72,10 +72,9 @@ libraries, collision-free project port defaults, and fresh environment values.
 Jellyfin remains deliberately invariant: every preset mounts one writable media
 root at `/data`.
 
-!!! important
-
-    Replacing this layer with a generic YAML load-and-dump cycle would discard
-    comments and weaken the generated file as an operator-facing artifact.
+> [!IMPORTANT]
+> Replacing this layer with a generic YAML load-and-dump cycle would discard
+> comments and weaken the generated file as an operator-facing artifact.
 
 ## 4. Preserve Environment State
 

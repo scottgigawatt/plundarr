@@ -41,10 +41,17 @@ project/service/tag container names, and published ports collision-free.
 > make test-workflows
 > ```
 
-This offline suite validates randomized build and documentation Discord payloads,
-both short and long command-line flags, registry tag mirroring, and cross-registry
-digest comparison. It uses dry-run payloads and a local Skopeo stub, so it never
-contacts Discord or either container registry.
+This offline suite validates annotated release tags and main-branch ancestry,
+randomized build and documentation Discord payloads, both short and long
+command-line flags, registry tag mirroring, and cross-registry digest
+comparison. It uses fixture repositories, dry-run payloads, and a local Skopeo
+stub, so it never contacts Discord or either container registry.
+
+The same target enforces synchronized SHA-256 build pins across Dockerfiles,
+the root example environment, and the build workflow. Every Docker metadata
+block must also expose the canonical `latest`, `edge`, `sha-...`, exact SemVer,
+minor, and stable-major channels. Disposable negative fixtures prove the checks
+reject drift rather than merely accepting the current repository.
 
 ## Image Builds
 
@@ -95,6 +102,6 @@ Finish with:
 > ```
 
 These checks cover secret detection, file hygiene, TOML/YAML syntax, workflow
-linting, and shell correctness. Real VPN or downloader E2E tests require local
-credentials and should never expose `.env`, WireGuard state, or application
-databases in logs or commits.
+linting, shell correctness, synchronized build pins, and image-tag policy. Real
+VPN or downloader E2E tests require local credentials and should never expose
+`.env`, WireGuard state, or application databases in logs or commits.

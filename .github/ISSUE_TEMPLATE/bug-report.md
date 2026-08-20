@@ -29,7 +29,7 @@ Share safe logs, error messages, or screenshots if you have them.
 
 Useful commands:
 
-```bash
+```sh
 make check-env
 make config
 make test-vpn

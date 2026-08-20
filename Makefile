@@ -301,7 +301,7 @@ DOCKER_COMPOSE := $(shell \
 PLUNDARR_COMPOSE = \
 	$(DOCKER_COMPOSE) \
 		--env-file $(COMPOSE_ENV_FILE) \
-		--file     $(COMPOSE_FILE)
+		--file $(COMPOSE_FILE)
 
 #
 # Docker Compose command used to build Maraudarr from its self-contained image
@@ -311,7 +311,7 @@ MARAUDARR_COMPOSE = \
 	MARAUDARR_IMAGE="$(MARAUDARR_IMAGE)" \
 	$(DOCKER_COMPOSE) \
 		--env-file $(MARAUDARR_ENV_FILE) \
-		--file     $(MARAUDARR_COMPOSE_FILE)
+		--file $(MARAUDARR_COMPOSE_FILE)
 
 #
 # Hardened Docker options shared by every published Maraudarr image command.
@@ -320,11 +320,11 @@ MARAUDARR_COMPOSE = \
 MARAUDARR_BASE_RUN_OPTIONS ?= \
 	--rm \
 	--read-only \
-	--network      none \
-	--cap-drop     ALL \
+	--network none \
+	--cap-drop ALL \
 	--security-opt no-new-privileges:true \
-	--tmpfs        /tmp:rw,noexec,nosuid,size=64m \
-	--user         "$$(id -u):$$(id -g)"
+	--tmpfs /tmp:rw,noexec,nosuid,size=64m \
+	--user "$$(id -u):$$(id -g)"
 
 #
 # Normal generation writes into this checkout. The smoke target adds its own

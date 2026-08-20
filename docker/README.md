@@ -45,7 +45,8 @@ of sight and prints only the useful status and Maraudarr output.
 | `make pull-image`          | Pulls the latest published Maraudarr image from GHCR        |
 | `make build`               | Builds the Maraudarr image locally from this directory      |
 | `make test-unit`           | Runs Maraudarr's Python unit tests                          |
-| `make test`                | Runs unit tests and the real Compose matrix                 |
+| `make test-workflows`      | Checks workflow helpers and shared publishing policy        |
+| `make test`                | Runs unit, helper, policy, and real Compose matrix tests    |
 | `make build-platforms`     | Verifies all published CPU architectures                    |
 
 Maraudarr uses a matching local image first. When none exists, Make tries GHCR
@@ -143,6 +144,8 @@ docker.io/scottgigawatt/maraudarr
 
 Major version zero omits the broad `0` alias. Prereleases publish only their
 exact version and immutable `sha-...` tag; they never move stable aliases.
+Release publication additionally requires a `v`-prefixed annotated SemVer tag
+whose commit already belongs to `main`.
 
 Published platforms are `linux/amd64`, `linux/arm64`, and `linux/arm/v7`.
 Builds include OCI metadata, an SBOM, provenance, and a Trivy gate for high and

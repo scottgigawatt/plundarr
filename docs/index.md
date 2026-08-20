@@ -20,10 +20,9 @@ existing user configuration.
 | [Testing](development/maraudarr/testing.md)                   | Selecting the right validation voyage                     |
 | [Python reference](development/maraudarr/reference/index.md)  | Looking up public classes and functions from source       |
 
-!!! note
-
-    Plundarr is the generated deployment. Maraudarr is the short-lived Python
-    generator that selects, renders, validates, and writes that deployment.
+> [!NOTE]
+> Plundarr is the generated deployment. Maraudarr is the short-lived Python
+> generator that selects, renders, validates, and writes that deployment.
 
 ## Documentation Boundaries 📚
 

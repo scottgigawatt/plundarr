@@ -430,23 +430,23 @@ digest_short=$(printf '%s' "${published_digest:-unavailable}" \
 #
 payload=$(jq \
     --null-input \
-    --argjson notification "${notification}" \
-    --arg description "${description}" \
-    --arg url "${run_url}" \
-    --arg repository "${repository}" \
-    --arg ref "${ref_name}" \
-    --arg actor "${actor}" \
-    --arg platforms "${image_platforms}" \
-    --arg ghcr_image "${ghcr_image}" \
-    --arg dockerhub_image "${dockerhub_image}" \
-    --arg tags "${formatted_tags}" \
-    --arg digest "${digest_short}" \
-    --arg ghcr_url "${ghcr_package_url:-unavailable}" \
-    --arg dockerhub_url "${dockerhub_url:-unavailable}" \
-    --arg build_status "${build_status}" \
-    --arg deploy_status "${deploy_status}" \
-    --arg site_url "${site_url}" \
-    --from-file "${payload_path}")
+    --argjson notification     "${notification}" \
+    --arg     description      "${description}" \
+    --arg     url              "${run_url}" \
+    --arg     repository       "${repository}" \
+    --arg     ref              "${ref_name}" \
+    --arg     actor            "${actor}" \
+    --arg     platforms        "${image_platforms}" \
+    --arg     ghcr_image       "${ghcr_image}" \
+    --arg     dockerhub_image  "${dockerhub_image}" \
+    --arg     tags             "${formatted_tags}" \
+    --arg     digest           "${digest_short}" \
+    --arg     ghcr_url         "${ghcr_package_url:-unavailable}" \
+    --arg     dockerhub_url    "${dockerhub_url:-unavailable}" \
+    --arg     build_status     "${build_status}" \
+    --arg     deploy_status    "${deploy_status}" \
+    --arg     site_url         "${site_url}" \
+    --from-file                "${payload_path}")
 
 #
 # Dry runs expose only the public payload for deterministic local tests.

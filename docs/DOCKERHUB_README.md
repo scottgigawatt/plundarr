@@ -62,6 +62,8 @@ SABnzbd, NZBGet, and Watchtower remain optional selections through
 
 Major version zero omits the broad `0` alias. Prereleases publish only their
 exact version and immutable revision tag, never moving stable aliases.
+Release publication accepts only `v`-prefixed annotated SemVer tags whose
+commits already belong to `main`.
 
 Full commands, tag policy, architecture, and maintenance notes live in the
 [Maraudarr README](https://github.com/scottgigawatt/plundarr/tree/main/docker#readme).
