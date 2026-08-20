@@ -733,10 +733,12 @@ $(PULL_IMAGE): $(BUILD_DEPENDS)
 #
 $(SHIP): $(ENSURE_MARAUDARR_IMAGE)
 	$(call announce,🧭 Maraudarr is charting the $(PRESET) deployment...)
-	@$(MARAUDARR_RUN) build \
-		--preset "$(PRESET)" \
-		--remove "$(REMOVE_SERVICES)" \
-		--add "$(ADD_SERVICES)" \
+
+	@$(MARAUDARR_RUN) \
+		build \
+		--preset      "$(PRESET)" \
+		--remove      "$(REMOVE_SERVICES)" \
+		--add         "$(ADD_SERVICES)" \
 		--output-root "$(MARAUDARR_OUTPUT_ROOT)"
 
 #
@@ -747,6 +749,7 @@ $(SHIP): $(ENSURE_MARAUDARR_IMAGE)
 #
 $(CONFIGURE): $(ENSURE_MARAUDARR_IMAGE)
 	$(call announce,🧭 Openin' Maraudarr's interactive voyage planner...)
+
 	@$(MARAUDARR_RUN_INTERACTIVE) configure --output-root "$(MARAUDARR_OUTPUT_ROOT)"
 
 #
@@ -956,8 +959,8 @@ $(COMPOSE_SERVICES): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 #
 $(ENV): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 	@$(PLUNDARR_COMPOSE) config --environment | \
-	$(AWK_BIN) $(AWK_ASSIGNMENT_OPTIONS) $(AWK_FILE_OPTION) $(ORDER_ENVIRONMENT_AWK) \
-		- $(COMPOSE_ENV_FILE)
+	$(AWK_BIN) $(AWK_ASSIGNMENT_OPTIONS) $(AWK_FILE_OPTION) \
+	$(ORDER_ENVIRONMENT_AWK) - $(COMPOSE_ENV_FILE)
 
 #
 # $(PRINT_CONFIG): Prints the raw uncommented docker compose yaml configuration.
@@ -996,8 +999,8 @@ $(LOGS): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 #
 $(PS): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 	@$(PLUNDARR_PS_CMD) \
-		--docker-bin "$(DOCKER_BIN)" \
-		--env-file "$(COMPOSE_ENV_FILE)" \
+		--docker-bin   "$(DOCKER_BIN)" \
+		--env-file     "$(COMPOSE_ENV_FILE)" \
 		--compose-file "$(COMPOSE_FILE)"
 
 #
