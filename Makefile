@@ -176,6 +176,13 @@ CONFIG_BACKUP_PATH        ?= $(DEPLOYMENT_PATH)/backups
 PYTHON_BIN                ?= python3
 
 #
+# AWK command and reusable program options.
+#
+AWK_BIN                ?= awk
+AWK_FILE_OPTION        ?= -f
+AWK_ASSIGNMENT_OPTIONS ?= -F =
+
+#
 # Reject the retired service-selection interface instead of silently producing
 # a different stack than the caller requested.
 #
@@ -259,8 +266,15 @@ POLICY_HELPERS_TEST_CMD   ?= test/helpers/test-policy-checks.sh
 BUILD_PIN_POLICY_TEST_CMD ?= test/policy/check-build-pin-policy.sh
 IMAGE_TAG_POLICY_TEST_CMD ?= test/policy/check-image-tag-policy.sh
 MARAUDARR_SMOKE_CMD       ?= test/generator/maraudarr-image-smoke.sh
+
+#
+# Reusable Compose helpers and AWK programs.
+#
 PLUNDARR_PS_CMD           ?= scripts/compose/ps.sh
 PIA_CREDENTIAL_CHECK_CMD  ?= scripts/compose/check-pia-credentials.sh
+CONFIG_BACKUP_CMD         ?= scripts/compose/backup.sh
+ORDER_ENVIRONMENT_AWK     ?= scripts/awk/order-environment.awk
+STRIP_COMMENTS_AWK        ?= scripts/awk/strip-comments.awk
 
 #
 # Docker commands used directly instead of through Compose.
@@ -518,20 +532,10 @@ $(RESTORE_TEST_CONFIG):
 #            timestamped filename.
 #
 $(BACKUP):
-	@if [ ! -d "$(CONFIG_PATH)" ]; then \
-		$(call print_line_inline,$(COLOR_ERROR),No $(CONFIG_PATH) directory found to archive.); \
-		exit 1; \
-	fi
-	@mkdir -p "$(CONFIG_BACKUP_PATH)"
-	@timestamp=$$(date +%Y%m%d-%H%M%S); \
-	archive="$(CONFIG_BACKUP_PATH)/$(PRESET)-config-$${timestamp}.tar.gz"; \
-	suffix=0; \
-	while [ -e "$$archive" ]; do \
-		suffix=$$((suffix + 1)); \
-		archive="$(CONFIG_BACKUP_PATH)/$(PRESET)-config-$${timestamp}-$${suffix}.tar.gz"; \
-	done; \
-	tar -czf "$$archive" "$(CONFIG_PATH)"; \
-	$(call print_line_inline,$(COLOR_SUCCESS),Config cargo archived at $$archive. 📦)
+	@$(CONFIG_BACKUP_CMD) \
+		"$(CONFIG_PATH)" \
+		"$(CONFIG_BACKUP_PATH)" \
+		"$(PRESET)"
 
 #
 # $(DELETE_CONFIG): Deletes the complete generated config directory. This target
@@ -951,25 +955,14 @@ $(COMPOSE_SERVICES): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 #
 $(ENV): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 	@$(PLUNDARR_COMPOSE) config --environment | \
-	awk -F '=' ' \
-		NR == FNR { \
-			if ($$0 ~ /^[A-Za-z_][A-Za-z0-9_]*=/) values[$$1] = $$0; \
-			next; \
-		} \
-		$$0 ~ /^[A-Za-z_][A-Za-z0-9_]*=/ && $$1 in values { \
-			print values[$$1] \
-		} \
-	' - $(COMPOSE_ENV_FILE)
+	$(AWK_BIN) $(AWK_ASSIGNMENT_OPTIONS) $(AWK_FILE_OPTION) $(ORDER_ENVIRONMENT_AWK) \
+		- $(COMPOSE_ENV_FILE)
 
 #
 # $(PRINT_CONFIG): Prints the raw uncommented docker compose yaml configuration.
 #
 $(PRINT_CONFIG): $(CHECK_RENDERED)
-	@awk '{ \
-		sub(/#.*/, ""); \
-		sub(/[[:space:]]+$$/, ""); \
-		if (NF) print \
-	}' $(COMPOSE_FILE)
+	@$(AWK_BIN) $(AWK_FILE_OPTION) $(STRIP_COMMENTS_AWK) $(COMPOSE_FILE)
 
 #
 # $(PRINT_ENV): Prints the raw uncommented docker compose env configuration.
@@ -978,11 +971,7 @@ $(PRINT_CONFIG): $(CHECK_RENDERED)
 #   $(CHECK_ENV) - Ensure the environment file exists.
 #
 $(PRINT_ENV): $(CHECK_ENV)
-	@awk '{ \
-		sub(/#.*/, ""); \
-		sub(/[[:space:]]+$$/, ""); \
-		if (NF) print \
-	}' $(COMPOSE_ENV_FILE)
+	@$(AWK_BIN) $(AWK_FILE_OPTION) $(STRIP_COMMENTS_AWK) $(COMPOSE_ENV_FILE)
 
 #
 # $(LOGS): View output from stack containers.
