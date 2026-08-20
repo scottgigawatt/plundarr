@@ -7,11 +7,11 @@ evaluated as shell code.
 
 ## Wardrobe Chart 🧵
 
-| Path | Purpose |
-| --- | --- |
-| `themes.jq` | Stores every theme, presentation value, and randomized message behind stable destination profiles |
-| `payloads/*.jq` | Defines the Discord JSON embed shape for each notification type |
-| `../scripts/discord-notifier.sh` | Validates inputs, selects copy, renders JSON, and delivers or prints the payload |
+| Path                             | Purpose                                                                                           |
+| -------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `themes.jq`                      | Stores every theme, presentation value, and randomized message behind stable destination profiles |
+| `payloads/*.jq`                  | Defines the Discord JSON embed shape for each notification type                                   |
+| `../scripts/discord-notifier.sh` | Validates inputs, selects copy, renders JSON, and delivers or prints the payload                  |
 
 Workflows select the stable `image-primary`, `image-secondary`, or `docs`
 profile rather than a creative theme name. Today those profiles wear the
