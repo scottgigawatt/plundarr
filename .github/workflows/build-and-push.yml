@@ -32,6 +32,7 @@ on:
       - "docs/DOCKERHUB_README.md"
       - ".github/scripts/notify-discord.sh"
       - ".github/scripts/registry-mirror.sh"
+      - ".github/scripts/validate-release-tag.sh"
       - ".github/workflows/build-and-push.yml"
   schedule:
     - cron: "17 7 * * 1"
@@ -126,13 +127,25 @@ jobs:
 
     steps:
       #
-      # Check out without persistent credentials so the notification helper and
-      # release source are available before any registry action begins.
+      # Check out complete history without persistent credentials so release
+      # tags can be verified before any registry action begins.
       #
       - name: "Grab the Treasure Map 🗺️"
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
+          fetch-depth: 0
           persist-credentials: false
+
+      #
+      # Accept only annotated semantic-version tags whose commits already
+      # belong to main before any release image can be published.
+      #
+      - name: "Inspect the Release Chart 🧭"
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          .github/scripts/validate-release-tag.sh \
+            --release-tag "${{ github.ref_name }}" \
+            --release-sha "${{ github.sha }}"
 
       #
       # Announce the start independently to each configured Discord destination.
