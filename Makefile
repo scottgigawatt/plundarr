@@ -273,11 +273,11 @@ MARAUDARR_SMOKE_CMD       ?= test/generator/maraudarr-image-smoke.sh
 #
 # Reusable Compose helpers and AWK programs.
 #
-PLUNDARR_PS_CMD           ?= scripts/compose/ps.sh
-PIA_CREDENTIAL_CHECK_CMD  ?= scripts/compose/check-pia-credentials.sh
-CONFIG_BACKUP_CMD         ?= scripts/compose/backup.sh
-ORDER_ENVIRONMENT_AWK     ?= scripts/awk/order-environment.awk
-STRIP_COMMENTS_AWK        ?= scripts/awk/strip-comments.awk
+PLUNDARR_PS_CMD          ?= scripts/compose/ps.sh
+PIA_CREDENTIAL_CHECK_CMD ?= scripts/compose/check-pia-credentials.sh
+CONFIG_BACKUP_CMD        ?= scripts/compose/backup.sh
+ORDER_ENVIRONMENT_AWK    ?= scripts/awk/order-environment.awk
+STRIP_COMMENTS_AWK       ?= scripts/awk/strip-comments.awk
 
 #
 # Docker commands used directly instead of through Compose.
@@ -302,8 +302,8 @@ DOCKER_COMPOSE := $(shell \
 #
 PLUNDARR_COMPOSE = \
 	$(DOCKER_COMPOSE) \
-		--env-file $(COMPOSE_ENV_FILE) \
-		--file $(COMPOSE_FILE)
+	--env-file $(COMPOSE_ENV_FILE) \
+	--file $(COMPOSE_FILE)
 
 #
 # Docker Compose command used to build Maraudarr from its self-contained image
@@ -312,8 +312,8 @@ PLUNDARR_COMPOSE = \
 MARAUDARR_COMPOSE = \
 	MARAUDARR_IMAGE="$(MARAUDARR_IMAGE)" \
 	$(DOCKER_COMPOSE) \
-		--env-file $(MARAUDARR_ENV_FILE) \
-		--file $(MARAUDARR_COMPOSE_FILE)
+	--env-file $(MARAUDARR_ENV_FILE) \
+	--file $(MARAUDARR_COMPOSE_FILE)
 
 #
 # Hardened Docker options shared by every published Maraudarr image command.
@@ -735,9 +735,9 @@ $(PULL_IMAGE): $(BUILD_DEPENDS)
 $(SHIP): $(ENSURE_MARAUDARR_IMAGE)
 	$(call announce,🧭 Maraudarr is charting the $(PRESET) deployment...)
 	@$(MARAUDARR_RUN) build \
-		--preset      "$(PRESET)" \
-		--remove      "$(REMOVE_SERVICES)" \
-		--add         "$(ADD_SERVICES)" \
+		--preset "$(PRESET)" \
+		--remove "$(REMOVE_SERVICES)" \
+		--add "$(ADD_SERVICES)" \
 		--output-root "$(MARAUDARR_OUTPUT_ROOT)"
 
 #
@@ -778,14 +778,14 @@ $(BUILD_PLATFORMS): $(BUILD_DEPENDS)
 $(TEST_IMAGE): $(ENSURE_MARAUDARR_IMAGE)
 	$(call announce,Testin' Maraudarr in a sealed temporary barrel. 🛢️)
 	@$(MARAUDARR_SMOKE_CMD) \
-		--docker-bin      "$(DOCKER_BIN)" \
-		--image           "$(MARAUDARR_IMAGE)" \
-		--preset          "$(MARAUDARR_TEST_PRESET)" \
-		--add-services    "$(MARAUDARR_TEST_ADD)" \
+		--docker-bin "$(DOCKER_BIN)" \
+		--image "$(MARAUDARR_IMAGE)" \
+		--preset "$(MARAUDARR_TEST_PRESET)" \
+		--add-services "$(MARAUDARR_TEST_ADD)" \
 		--remove-services "$(MARAUDARR_TEST_REMOVE)" \
-		--required-file   "$(MARAUDARR_TEST_FILE)" \
-		--output-mount    "$(MARAUDARR_OUTPUT)" \
-		--output-root     "$(MARAUDARR_OUTPUT_ROOT)" \
+		--required-file "$(MARAUDARR_TEST_FILE)" \
+		--output-mount "$(MARAUDARR_OUTPUT)" \
+		--output-root "$(MARAUDARR_OUTPUT_ROOT)" \
 		--deployment-root "$(DEPLOYMENT_ROOT)"
 	$(call announce_success,Maraudarr's disposable smoke voyage came back clean. ✅)
 
@@ -987,8 +987,8 @@ $(LOGS): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 #
 $(PS): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 	@$(PLUNDARR_PS_CMD) \
-		--docker-bin   "$(DOCKER_BIN)" \
-		--env-file     "$(COMPOSE_ENV_FILE)" \
+		--docker-bin "$(DOCKER_BIN)" \
+		--env-file "$(COMPOSE_ENV_FILE)" \
 		--compose-file "$(COMPOSE_FILE)"
 
 #
