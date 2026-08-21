@@ -3,8 +3,8 @@
 #
 # Licensed under the Apache License, Version 2.0.
 #
-# .pre-commit-config.yaml: Repository lint, secret, workflow, shell, and YAML
-#                          validation hooks.
+# .pre-commit-config.yaml: Repository lint, secret, workflow, shell, policy,
+#                          and YAML validation hooks.
 #
 
 repos:
@@ -82,3 +82,20 @@ repos:
     rev: v0.11.0.1
     hooks:
       - id: shellcheck
+
+  #
+  # Enforce synchronized build pins and the shared image-tag channel policy.
+  #
+  - repo: local
+    hooks:
+      - id: check-build-pin-policy
+        name: check build pin policy
+        entry: test/policy/check-build-pin-policy.sh
+        language: script
+        pass_filenames: false
+
+      - id: check-image-tag-policy
+        name: check image tag policy
+        entry: test/policy/check-image-tag-policy.sh
+        language: script
+        pass_filenames: false

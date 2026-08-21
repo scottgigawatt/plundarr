@@ -30,8 +30,10 @@ on:
       - "Makefile"
       - "LICENSE"
       - "docs/DOCKERHUB_README.md"
-      - ".github/scripts/notify-discord.sh"
+      - ".github/discord/**"
+      - ".github/scripts/discord-notifier.sh"
       - ".github/scripts/registry-mirror.sh"
+      - ".github/scripts/validate-release-tag.sh"
       - ".github/workflows/build-and-push.yml"
   schedule:
     - cron: "17 7 * * 1"
@@ -126,19 +128,31 @@ jobs:
 
     steps:
       #
-      # Check out without persistent credentials so the notification helper and
-      # release source are available before any registry action begins.
+      # Check out complete history without persistent credentials so release
+      # tags can be verified before any registry action begins.
       #
       - name: "Grab the Treasure Map 🗺️"
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
+          fetch-depth: 0
           persist-credentials: false
+
+      #
+      # Accept only annotated semantic-version tags whose commits already
+      # belong to main before any release image can be published.
+      #
+      - name: "Inspect the Release Chart 🧭"
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          .github/scripts/validate-release-tag.sh \
+            --release-tag "${{ github.ref_name }}" \
+            --release-sha "${{ github.sha }}"
 
       #
       # Announce the start independently to each configured Discord destination.
       # Missing optional webhooks deliberately skip without failing publication.
       #
-      - name: "Notify Discord: shipyard opened 📣"
+      - name: "Notify Primary Discord: build opened 📣"
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
@@ -150,9 +164,9 @@ jobs:
           DOCKERHUB_IMAGE: ${{ env.DOCKERHUB_IMAGE }}
           IMAGE_PLATFORMS: ${{ env.IMAGE_PLATFORMS }}
         run: |
-          sh .github/scripts/notify-discord.sh \
-              --event           start \
-              --template        shipyard \
+          sh .github/scripts/discord-notifier.sh \
+              --type            image-start \
+              --profile         image-primary \
               --run-url         "${RUN_URL}" \
               --repository      "${REPOSITORY}" \
               --ref-name        "${REF_NAME}" \
@@ -163,10 +177,10 @@ jobs:
               --dockerhub-image "${DOCKERHUB_IMAGE}"
 
       #
-      # Send the same opening state to the optional Hades destination with its
-      # dedicated notification template.
+      # Send the same opening state through the secondary destination profile
+      # so future presentation changes remain isolated from workflow logic.
       #
-      - name: "Notify Hades Discord: kraken awakened 🦑"
+      - name: "Notify Secondary Discord: build opened 📣"
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_HADES_HOOK_URL }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
@@ -178,9 +192,9 @@ jobs:
           DOCKERHUB_IMAGE: ${{ env.DOCKERHUB_IMAGE }}
           IMAGE_PLATFORMS: ${{ env.IMAGE_PLATFORMS }}
         run: |
-          sh .github/scripts/notify-discord.sh \
-              --event           start \
-              --template        kraken \
+          sh .github/scripts/discord-notifier.sh \
+              --type            image-start \
+              --profile         image-secondary \
               --run-url         "${RUN_URL}" \
               --repository      "${REPOSITORY}" \
               --ref-name        "${REF_NAME}" \
@@ -214,21 +228,23 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       #
-      # Derive edge, commit, semantic-version, and latest tags from the ref. The
-      # timestamp step supplies reproducible OCI release metadata to the build.
+      # Derive the shared edge, commit, and semantic-version channels from the
+      # ref. Stable releases own latest plus minor and major aliases, while
+      # prereleases retain only their exact version.
       #
       - name: "Chart Stable and Edge Tags 🏷️"
         id: metadata
         uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302  # v6
         with:
           images: ${{ env.GHCR_IMAGE }}
+          flavor: |
+            latest=auto
           tags: |
-            type=raw,value=edge,enable=${{ github.ref == 'refs/heads/main' }}
+            type=edge,branch=main
             type=sha,prefix=sha-
             type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}},enable=${{ !contains(github.ref_name, '-') }}
-            type=semver,pattern={{major}},enable=${{ !contains(github.ref_name, '-') }}
-            type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/v') && !contains(github.ref_name, '-') }}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}},enable=${{ !startsWith(github.ref, 'refs/tags/v0.') }}
 
       #
       # Record one UTC creation timestamp for the image's OCI metadata.
@@ -339,7 +355,7 @@ jobs:
       # Report the final job state to both optional Discord destinations. These
       # steps run on success or failure so a broken voyage never disappears.
       #
-      - name: "Notify Discord: build verdict 📣"
+      - name: "Notify Primary Discord: build verdict 📣"
         if: always()
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
@@ -353,9 +369,9 @@ jobs:
           PUBLISHED_TAGS: ${{ steps.metadata.outputs.tags }}
           PUBLISHED_DIGEST: ${{ steps.publish.outputs.digest }}
         run: |
-          sh .github/scripts/notify-discord.sh \
-              --event            verdict \
-              --template         shipyard \
+          sh .github/scripts/discord-notifier.sh \
+              --type             image-verdict \
+              --profile          image-primary \
               --run-url          "${RUN_URL}" \
               --repository       "${REPOSITORY}" \
               --ref-name         "${REF_NAME}" \
@@ -370,7 +386,7 @@ jobs:
       # Send the same final state to the optional Hades destination even when an
       # earlier publication step failed.
       #
-      - name: "Notify Hades Discord: kraken verdict 🦑"
+      - name: "Notify Secondary Discord: build verdict 📣"
         if: always()
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_HADES_HOOK_URL }}
@@ -384,9 +400,9 @@ jobs:
           PUBLISHED_TAGS: ${{ steps.metadata.outputs.tags }}
           PUBLISHED_DIGEST: ${{ steps.publish.outputs.digest }}
         run: |
-          sh .github/scripts/notify-discord.sh \
-              --event            verdict \
-              --template         kraken \
+          sh .github/scripts/discord-notifier.sh \
+              --type             image-verdict \
+              --profile          image-secondary \
               --run-url          "${RUN_URL}" \
               --repository       "${REPOSITORY}" \
               --ref-name         "${REF_NAME}" \

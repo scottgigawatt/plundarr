@@ -8,6 +8,8 @@
 # maraudarr-entrypoint.sh: Launch Maraudarr as PID 1 and forward every command
 #                          argument supplied by Docker or Docker Compose.
 #
+# Usage: docker/maraudarr-entrypoint.sh [maraudarr arguments]
+#
 
 #
 # Fail on errors and unset variables.

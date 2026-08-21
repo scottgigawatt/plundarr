@@ -16,7 +16,7 @@ Describe the feature or change you want added to Plundarr.
 **🧪 How ye would prove it works**
 List any commands, checks, or workflows that should cover this change.
 
-```bash
+```sh
 make config
 make test-vpn
 make test-e2e

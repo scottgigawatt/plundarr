@@ -16,7 +16,7 @@ Describe the change or addition that would make the docs better.
 **🧪 Commands or examples involved**
 List any commands, files, or examples that should be checked.
 
-```bash
+```sh
 make help
 make env
 make config

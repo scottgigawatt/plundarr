@@ -7,36 +7,29 @@
 #
 
 #
-# Use setuptools to build the Maraudarr wheel installed in the image.
+# Build the Maraudarr wheel with the exact setuptools release used by the image.
 #
 [build-system]
 requires = ["setuptools==84.0.0"]
 build-backend = "setuptools.build_meta"
 
 #
-# Describe the Maraudarr application and its exact runtime dependencies.
+# Declare Maraudarr package metadata and exact runtime dependencies.
 #
 [project]
-# Keep the distribution name aligned with the public generator command.
 name = "maraudarr"
-# Version is intentionally explicit for reproducible image builds.
 version = "0.1.0"
-# Keep package metadata concise for registry and wheel consumers.
 description = "Generate polished, reusable Plundarr Docker Compose stacks."
-# Package documentation ships from the source-tree README.
 readme = "README.md"
-# The image and local tooling use this exact supported Python release.
 requires-python = "==3.14.7"
-# Maraudarr is distributed under the repository's Apache-2.0 license.
 license = "Apache-2.0"
-# Record the project maintainer in standard PEP 621 metadata.
-authors = [
-  { name = "Scott Gigawatt" },
-]
+authors = [{ name = "Scott Gigawatt" }]
+
+#
+# Interactive command-line prompts for user input and rich terminal text.
+#
 dependencies = [
-  # Interactive terminal prompts used by the configurator.
   "questionary==2.1.1",
-  # Styled terminal output used by the command-line interface.
   "rich==15.0.0",
 ]
 
@@ -47,12 +40,13 @@ dependencies = [
 maraudarr = "maraudarr.cli:main"
 
 #
-# Discover packages beneath the conventional src directory.
+# Map the package namespace to the conventional source-layout root.
 #
 [tool.setuptools]
-# Resolve packages from the conventional source-layout root.
 package-dir = { "" = "src" }
 
-# Discover only Maraudarr packages beneath the configured source root.
+#
+# Find Maraudarr packages beneath the configured source-layout root.
+#
 [tool.setuptools.packages.find]
 where = ["src"]

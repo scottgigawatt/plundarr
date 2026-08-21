@@ -8,6 +8,8 @@
 # tun.sh: This script is intended to run directly on Synology NAS to ensure
 #         the /dev/net/tun device exists for VPN applications like Gluetun.
 #
+# Usage: scripts/synology/tun.sh
+#
 # The script:
 #   - Verifies if /dev/net/tun exists and creates it if missing.
 #   - Creates the /dev/net directory if it doesn't exist.

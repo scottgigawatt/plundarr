@@ -45,6 +45,7 @@ Useful commands:
 > ```sh
 > make help
 > make test
+> make test-workflows
 > make docs
 > make build
 > make test-image
@@ -72,17 +73,34 @@ Generated-stack checks such as `make config`, `make env`, `make up`,
 - Helpful teaching examples wrap copyable commands in a `[!TIP]` callout.
   Required sequences use `[!IMPORTANT]`, while risky commands use `[!CAUTION]`.
   Keep explanatory comments outside the code fence.
-- YAML and TOML use two-space indentation; Python, shell, and JSON use four.
+- YAML, TOML, AWK, and jq use two-space indentation; Python, shell, JSON, and
+  JSON-with-comments use four.
 - Docker Compose values should come from the selected preset's `.env` instead
   of inline fallback soup.
 - Keep service config directories aligned with service names.
 - Let Privateerr own the upstream PIA manual connection scripts.
+
+### Editor Tooling 🧰
+
+`.editorconfig` is the portable source of truth for indentation, line endings,
+final newlines, and trailing whitespace. Install the recommendations from
+`.vscode/extensions.json` when using VS Code; each entry carries an aligned
+comment explaining whether it formats, validates, or only highlights a file
+type.
+
+Workspace format-on-save is deliberately disabled. Prettier is available only
+for explicit formatting of supported CSS, JavaScript, JSON, and Markdown files,
+using the checked-in `.prettierrc.json5`. It does not parse jq, and the
+repository excludes jq, YAML, TOML, and aligned workspace JSONC from Prettier so
+their specialized validators and formatters cannot undo project-owned spacing.
+In particular, keep two spaces before pinned-action comments in workflow YAML.
 
 ## Pull Requests 🪝
 
 Before opening a pull request:
 
 - Run relevant `make` targets.
+- Run `make test-workflows` for workflow, release, build-pin, or image-tag changes.
 - Run `make config`.
 - Run `pre-commit run --all-files` if hooks are installed.
 - Confirm no secrets, live VPN configs, or logs slipped into the hold.

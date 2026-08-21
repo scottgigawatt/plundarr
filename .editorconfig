@@ -31,6 +31,18 @@ indent_style = space
 indent_size = 2
 
 #
+# AWK programs use two-space indentation for readable rules and action blocks.
+#
+[*.awk]
+indent_size = 2
+
+#
+# jq filters use two-space indentation for readable pipelines and objects.
+#
+[*.jq]
+indent_size = 2
+
+#
 # Web assets use the conventional two-space project style.
 #
 [*.{css,js}]
@@ -51,7 +63,7 @@ indent_size = 4
 #
 # Dockerfile continuations use four-space indentation.
 #
-[Dockerfile,**/Dockerfile]
+[{Dockerfile,**/Dockerfile}]
 indent_size = 4
 
 #

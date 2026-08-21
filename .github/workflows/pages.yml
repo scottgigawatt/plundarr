@@ -20,7 +20,8 @@ on:
     tags:
       - "v*"
     paths:
-      - ".github/scripts/notify-docs-discord.sh"
+      - ".github/discord/**"
+      - ".github/scripts/discord-notifier.sh"
       - ".github/workflows/pages.yml"
       - "docker/src/maraudarr/**"
       - "docs/**"
@@ -80,7 +81,7 @@ jobs:
       - name: "Ready the Python Quill 🪶"
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7
         with:
-          python-version: "3.14"
+          python-version: "3.14.7"
           cache: pip
           cache-dependency-path: requirements-docs.txt
 
@@ -160,7 +161,7 @@ jobs:
       #
       # Report build and deployment outcomes to the optional Discord destination.
       #
-      - name: "Notify Discord: documentation verdict 📚"
+      - name: "Notify Discord: documentation verdict 📣"
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           DOCS_BUILD_STATUS: ${{ needs.build.result }}
@@ -170,7 +171,9 @@ jobs:
           REPOSITORY: ${{ github.repository }}
           REF_NAME: ${{ github.ref_name }}
         run: |
-          sh .github/scripts/notify-docs-discord.sh \
+          sh .github/scripts/discord-notifier.sh \
+              --type          docs-verdict \
+              --profile       docs \
               --build-status  "${DOCS_BUILD_STATUS}" \
               --deploy-status "${DOCS_DEPLOY_STATUS}" \
               --run-url       "${RUN_URL}" \

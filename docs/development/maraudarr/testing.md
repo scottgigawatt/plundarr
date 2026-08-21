@@ -41,10 +41,17 @@ project/service/tag container names, and published ports collision-free.
 > make test-workflows
 > ```
 
-This offline suite validates randomized build and documentation Discord payloads,
-both short and long command-line flags, registry tag mirroring, and cross-registry
-digest comparison. It uses dry-run payloads and a local Skopeo stub, so it never
-contacts Discord or either container registry.
+This offline suite validates annotated release tags and main-branch ancestry,
+randomized build and documentation Discord payloads, both short and long
+command-line flags, registry tag mirroring, and cross-registry digest
+comparison. It uses fixture repositories, dry-run payloads, and a local Skopeo
+stub, so it never contacts Discord or either container registry.
+
+The same target enforces synchronized SHA-256 build pins across Dockerfiles,
+the root example environment, and the build workflow. Every Docker metadata
+block must also expose the canonical `latest`, `edge`, `sha-...`, exact SemVer,
+minor, and stable-major channels. Disposable negative fixtures prove the checks
+reject drift rather than merely accepting the current repository.
 
 ## Image Builds
 
@@ -76,6 +83,10 @@ Build the warning-free site or start a local preview:
 
 Both targets create `.venv-docs/` and install the pinned tools from
 `requirements-docs.txt` when needed. No separate MkDocs setup step is required.
+The documentation toolchain requires Python 3.14.7 and selects `python3.14` by
+default. Set `DOCS_PYTHON_BIN` to the exact interpreter path when it uses a
+different executable name. A virtual environment created by another Python
+release is disposable and is recreated automatically before dependency install.
 The generated `site/` directory is disposable and ignored by Git. CI performs
 the same strict build and publishes a fresh artifact from `main`.
 
@@ -91,6 +102,6 @@ Finish with:
 > ```
 
 These checks cover secret detection, file hygiene, TOML/YAML syntax, workflow
-linting, and shell correctness. Real VPN or downloader E2E tests require local
-credentials and should never expose `.env`, WireGuard state, or application
-databases in logs or commits.
+linting, shell correctness, synchronized build pins, and image-tag policy. Real
+VPN or downloader E2E tests require local credentials and should never expose
+`.env`, WireGuard state, or application databases in logs or commits.

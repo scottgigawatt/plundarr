@@ -20,3 +20,25 @@ vulnerabilities:
     statement: >-
       Maraudarr invokes only offline Compose config without a Docker socket;
       the vulnerable Moby daemon authorization-plugin path is unreachable.
+
+  #
+  # Docker Compose carries the Go module-verification CVEs, but Maraudarr never
+  # downloads modules or contacts GOPROXY or GOSUMDB. Keep both exceptions
+  # scoped to the offline validation binary until an upstream release updates
+  # golang.org/x/mod.
+  #
+  - id: CVE-2026-56864
+    paths:
+      - usr/local/bin/docker-compose
+    expired_at: 2026-09-15
+    statement: >-
+      Maraudarr invokes only offline Compose config with networking disabled;
+      the vulnerable GOSUMDB module-download path is unreachable.
+
+  - id: CVE-2026-56865
+    paths:
+      - usr/local/bin/docker-compose
+    expired_at: 2026-09-15
+    statement: >-
+      Maraudarr invokes only offline Compose config with networking disabled;
+      the vulnerable GOPROXY module-download path is unreachable.

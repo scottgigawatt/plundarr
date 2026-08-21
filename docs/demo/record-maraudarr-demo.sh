@@ -50,7 +50,7 @@ cleanup() {
     if [ -f "$DEMO_CHECKOUT/dist/plundarr/docker-compose.yml" ] && [ -f "$DEMO_CHECKOUT/dist/plundarr/.env" ]; then
         (
             cd "$DEMO_CHECKOUT/dist/plundarr"
-            docker compose --env-file .env -f docker-compose.yml down \
+            docker compose --env-file .env --file docker-compose.yml down \
                 --timeout 15 --remove-orphans
         ) >/dev/null 2>&1 || true
     fi
@@ -167,7 +167,7 @@ export HOMEPAGE_WEBUI_PORT="33000"
     make ship >/dev/null
     docker compose \
         --env-file dist/plundarr/.env \
-        -f dist/plundarr/docker-compose.yml \
+        --file dist/plundarr/docker-compose.yml \
         pull --quiet
 )
 

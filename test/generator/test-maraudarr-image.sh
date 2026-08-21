@@ -8,6 +8,8 @@
 # test-maraudarr-image.sh: Validate Maraudarr's local, pull, and build image
 #                          resolution order without contacting a registry.
 #
+# Usage: test/generator/test-maraudarr-image.sh
+#
 
 #
 # Fail on errors and unset variables.

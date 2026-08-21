@@ -183,6 +183,13 @@ repository: `build-and-push.yml`, `codeql-actions.yml`, `scorecard.yml`, and
 `validate-pr.yml`. Keep GitHub Actions pinned by digest. Renovate owns dependency
 updates; do not add a second Dependabot configuration for the same dependencies.
 
+Use the same published image-tag contract as Privateerr:
+
+- Stable releases publish exact, minor, major, and `latest` aliases from one build.
+- Prereleases publish only their exact version and `sha-*` tag, never movable aliases.
+- Successful `main` builds publish `edge` and `sha-*` tags.
+- Major version zero publishes its exact and minor aliases but not a `0` alias.
+
 ## Validation Expectations
 
 Run the smallest applicable set, broadening it for generator, image, or workflow

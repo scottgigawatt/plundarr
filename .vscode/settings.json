@@ -98,6 +98,7 @@
         "headerlink",
         "healthcheck",
         "healthchecks",
+        "helpdesk",
         "helpin",
         "Hmac",
         "hoistin",
@@ -145,6 +146,7 @@
         "networkin",
         "networkless",
         "noexec",
+        "noncanonical",
         "noninteractive",
         "nosuid",
         "NOTIFIARR",
@@ -154,6 +156,7 @@
         "Openin",
         "openmeteo",
         "opkg",
+        "ossf",
         "oughta",
         "pathspec",
         "PGID",
@@ -195,7 +198,9 @@
         "resolvconf",
         "Restorin",
         "riggin",
+        "RLENGTH",
         "Roya",
+        "RSTART",
         "runnin",
         "RUNSEQUENTIALLY",
         "SABnzbd",
@@ -221,6 +226,8 @@
         "startin",
         "stumblin",
         "subfolders",
+        "SUBSEP",
+        "subtweets",
         "superfences",
         "synogroup",
         "Tautulli",
@@ -244,6 +251,7 @@
         "wcwidth",
         "WEBSERVICE",
         "WEBUI",
+        "werkroom",
         "whisparr",
         "worktree",
         "wranglin",
@@ -261,6 +269,7 @@
     // Associate special repository files with their correct language modes.
     //
     "files.associations": {
+        ".prettierrc.json5": "jsonc",
         ".secrets.baseline": "jsonc",
         "**/CODEOWNERS": "plaintext",
         "Dockerfile*": "dockerfile"
@@ -269,15 +278,29 @@
     //
     // Mirror EditorConfig indentation while disabling VS Code auto-detection.
     //
+    "[awk]": {
+        "editor.detectIndentation": false,
+        "editor.tabSize": 2,
+        "editor.insertSpaces": true
+    },
     "[dockerfile]": {
         "editor.detectIndentation": false,
         "editor.tabSize": 4,
         "editor.insertSpaces": true
     },
-    "[css][javascript]": {
+    "[css]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
         "editor.detectIndentation": false,
         "editor.tabSize": 2,
-        "editor.insertSpaces": true
+        "editor.insertSpaces": true,
+        "editor.formatOnSave": false
+    },
+    "[javascript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.detectIndentation": false,
+        "editor.tabSize": 2,
+        "editor.insertSpaces": true,
+        "editor.formatOnSave": false
     },
     "[yaml]": {
         "editor.detectIndentation": false,
@@ -291,10 +314,24 @@
         "editor.insertSpaces": true,
         "editor.formatOnSave": false
     },
-    "[json][jsonc]": {
+    "[json]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
         "editor.detectIndentation": false,
         "editor.tabSize": 4,
-        "editor.insertSpaces": true
+        "editor.insertSpaces": true,
+        "editor.formatOnSave": false
+    },
+    "[jsonc]": {
+        "editor.detectIndentation": false,
+        "editor.tabSize": 4,
+        "editor.insertSpaces": true,
+        "editor.formatOnSave": false
+    },
+    "[jq]": {
+        "editor.detectIndentation": false,
+        "editor.tabSize": 2,
+        "editor.insertSpaces": true,
+        "editor.formatOnSave": false
     },
     "[makefile]": {
         "editor.detectIndentation": false,
@@ -302,9 +339,11 @@
         "editor.insertSpaces": false
     },
     "[markdown]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
         "editor.detectIndentation": false,
         "editor.tabSize": 2,
-        "editor.insertSpaces": true
+        "editor.insertSpaces": true,
+        "editor.formatOnSave": false
     },
     "[python]": {
         "editor.detectIndentation": false,
@@ -322,6 +361,20 @@
         "editor.tabSize": 2,
         "editor.insertSpaces": true
     },
+
+    //
+    // Validate project AWK programs against the portable POSIX language mode.
+    //
+    "awk.mode": "awk",
+    "awk.stylisticWarnings.missingSemicolon": false,
+
+    //
+    // Use the checked-in Prettier configuration only for supported languages.
+    // Keep global module discovery disabled so formatting stays workspace-safe.
+    //
+    "prettier.requireConfig": true,
+    "prettier.resolveGlobalModules": false,
+    "prettier.useEditorConfig": true,
 
     //
     // Keep TOML formatting at two spaces and validate Python package metadata

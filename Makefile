@@ -38,6 +38,7 @@ SHIP=ship
 CONFIGURE=configure
 TEST_UNIT=test-unit
 TEST=test
+TEST_MAKE_HELPERS=test-make-helpers
 TEST_WORKFLOWS=test-workflows
 PRESETS=presets
 AVAILABLE_SERVICES=services
@@ -86,6 +87,7 @@ TARGETS= \
 	$(CONFIGURE) \
 	$(TEST_UNIT) \
 	$(TEST) \
+	$(TEST_MAKE_HELPERS) \
 	$(TEST_WORKFLOWS) \
 	$(PRESETS) \
 	$(AVAILABLE_SERVICES) \
@@ -176,6 +178,13 @@ CONFIG_BACKUP_PATH        ?= $(DEPLOYMENT_PATH)/backups
 PYTHON_BIN                ?= python3
 
 #
+# AWK command and reusable program options.
+#
+AWK_BIN                ?= awk
+AWK_FILE_OPTION        ?= -f
+AWK_ASSIGNMENT_OPTIONS ?= -F =
+
+#
 # Reject the retired service-selection interface instead of silently producing
 # a different stack than the caller requested.
 #
@@ -186,23 +195,27 @@ endif
 #
 # Developer documentation settings.
 #
-MKDOCS               ?= mkdocs
-PIP_MODULE           ?= pip
-PIP_INSTALL_COMMAND  ?= install
-PIP_NO_VERSION_CHECK ?= --disable-pip-version-check
-PIP_REQUIRE_HASHES   ?= --require-hashes
-PIP_REQUIREMENT_FILE ?= --requirement
-DOCS_SITE_PATH       ?= site
-DOCS_SERVE_ADDRESS   ?= 127.0.0.1:8000
-DOCS_VENV            ?= .venv-docs
-DOCS_PYTHON_TARGET   ?= $(DOCS_VENV)/bin/python
-DOCS_INSTALL_STAMP   ?= $(DOCS_VENV)/.requirements-installed
-DOCS_PYTHON          ?= $(DOCS_PYTHON_TARGET)
-DOCS_MKDOCS          ?= $(DOCS_VENV)/bin/$(MKDOCS)
-DOCS_REQUIREMENTS    ?= requirements-docs.txt
-DOCS_PIP             ?= $(DOCS_PYTHON) -m $(PIP_MODULE)
-DOCS_PIP_OPTIONS     ?= $(PIP_NO_VERSION_CHECK) $(PIP_REQUIRE_HASHES) $(PIP_REQUIREMENT_FILE) "$(DOCS_REQUIREMENTS)"
-DOCS_PIP_INSTALL     ?= $(DOCS_PIP) $(PIP_INSTALL_COMMAND) $(DOCS_PIP_OPTIONS)
+MKDOCS                ?= mkdocs
+PIP_MODULE            ?= pip
+PIP_INSTALL_COMMAND   ?= install
+PIP_NO_VERSION_CHECK  ?= --disable-pip-version-check
+PIP_REQUIRE_HASHES    ?= --require-hashes
+PIP_REQUIREMENT_FILE  ?= --requirement
+DOCS_SITE_PATH        ?= site
+DOCS_SERVE_ADDRESS    ?= 127.0.0.1:8000
+DOCS_VENV             ?= .venv-docs
+DOCS_PYTHON_BIN       ?= python3.14
+DOCS_PYTHON_VERSION   ?= 3.14.7
+DOCS_PYTHON_TARGET    ?= $(DOCS_VENV)/bin/python
+DOCS_PYTHON_STAMP     ?= $(DOCS_VENV)/.python-$(DOCS_PYTHON_VERSION)
+DOCS_INSTALL_STAMP    ?= $(DOCS_VENV)/.requirements-installed
+DOCS_PYTHON           ?= $(DOCS_PYTHON_TARGET)
+DOCS_MKDOCS           ?= $(DOCS_VENV)/bin/$(MKDOCS)
+DOCS_REQUIREMENTS     ?= requirements-docs.txt
+DOCS_PIP              ?= $(DOCS_PYTHON) -m $(PIP_MODULE)
+DOCS_PIP_OPTIONS      ?= $(PIP_NO_VERSION_CHECK) $(PIP_REQUIRE_HASHES) $(PIP_REQUIREMENT_FILE) "$(DOCS_REQUIREMENTS)"
+DOCS_PIP_INSTALL      ?= $(DOCS_PIP) $(PIP_INSTALL_COMMAND) $(DOCS_PIP_OPTIONS)
+DOCS_PYTHON_SETUP_CMD ?= scripts/docs/prepare-python.sh
 
 #
 # Disposable developer artifacts. Keep every cleanup target and expression in
@@ -252,9 +265,19 @@ PLUNDARR_STACK_WAIT_CMD   ?= test/runtime/plundarr-stack-wait.sh
 MARAUDARR_IMAGE_TEST_CMD  ?= test/generator/test-maraudarr-image.sh
 WORKFLOW_HELPERS_TEST_CMD ?= test/helpers/test-workflow-helpers.sh
 MAKE_HELPERS_TEST_CMD     ?= test/helpers/test-make-helpers.sh
+POLICY_HELPERS_TEST_CMD   ?= test/helpers/test-policy-checks.sh
+BUILD_PIN_POLICY_TEST_CMD ?= test/policy/check-build-pin-policy.sh
+IMAGE_TAG_POLICY_TEST_CMD ?= test/policy/check-image-tag-policy.sh
 MARAUDARR_SMOKE_CMD       ?= test/generator/maraudarr-image-smoke.sh
-PLUNDARR_PS_CMD           ?= scripts/compose/ps.sh
-PIA_CREDENTIAL_CHECK_CMD  ?= scripts/compose/check-pia-credentials.sh
+
+#
+# Reusable Compose helpers and AWK programs.
+#
+PLUNDARR_PS_CMD          ?= scripts/compose/ps.sh
+PIA_CREDENTIAL_CHECK_CMD ?= scripts/compose/check-pia-credentials.sh
+CONFIG_BACKUP_CMD        ?= scripts/compose/backup.sh
+ORDER_ENVIRONMENT_AWK    ?= scripts/awk/order-environment.awk
+STRIP_COMMENTS_AWK       ?= scripts/awk/strip-comments.awk
 
 #
 # Docker commands used directly instead of through Compose.
@@ -280,7 +303,7 @@ DOCKER_COMPOSE := $(shell \
 PLUNDARR_COMPOSE = \
 	$(DOCKER_COMPOSE) \
 	--env-file $(COMPOSE_ENV_FILE) \
-	-f $(COMPOSE_FILE)
+	--file $(COMPOSE_FILE)
 
 #
 # Docker Compose command used to build Maraudarr from its self-contained image
@@ -290,7 +313,7 @@ MARAUDARR_COMPOSE = \
 	MARAUDARR_IMAGE="$(MARAUDARR_IMAGE)" \
 	$(DOCKER_COMPOSE) \
 	--env-file $(MARAUDARR_ENV_FILE) \
-	-f $(MARAUDARR_COMPOSE_FILE)
+	--file $(MARAUDARR_COMPOSE_FILE)
 
 #
 # Hardened Docker options shared by every published Maraudarr image command.
@@ -316,11 +339,11 @@ MARAUDARR_RUN_OPTIONS ?= \
 #
 # Non-interactive, styled-list, and interactive Maraudarr image commands.
 #
-MARAUDARR_RUN = $(DOCKER_BIN) run $(MARAUDARR_RUN_OPTIONS) $(MARAUDARR_IMAGE)
-MARAUDARR_RUN_STYLED = $(DOCKER_BIN) run --tty $(MARAUDARR_RUN_OPTIONS) $(MARAUDARR_IMAGE)
+MARAUDARR_RUN             = $(DOCKER_BIN) run $(MARAUDARR_RUN_OPTIONS) $(MARAUDARR_IMAGE)
+MARAUDARR_RUN_STYLED      = $(DOCKER_BIN) run --tty $(MARAUDARR_RUN_OPTIONS) $(MARAUDARR_IMAGE)
 MARAUDARR_RUN_INTERACTIVE = $(DOCKER_BIN) run --interactive --tty $(MARAUDARR_RUN_OPTIONS) $(MARAUDARR_IMAGE)
-MARAUDARR_BUILD = $(MARAUDARR_COMPOSE) build $(MARAUDARR_BUILD_OPTIONS) maraudarr
-MARAUDARR_PLATFORM_BUILD = $(DOCKER_BUILDX) build \
+MARAUDARR_BUILD           = $(MARAUDARR_COMPOSE) build $(MARAUDARR_BUILD_OPTIONS) maraudarr
+MARAUDARR_PLATFORM_BUILD  = $(DOCKER_BUILDX) build \
 	--pull \
 	--platform "$(MARAUDARR_BUILD_PLATFORMS)" \
 	--tag "$(MARAUDARR_MULTIARCH_IMAGE)" \
@@ -512,20 +535,10 @@ $(RESTORE_TEST_CONFIG):
 #            timestamped filename.
 #
 $(BACKUP):
-	@if [ ! -d "$(CONFIG_PATH)" ]; then \
-		$(call print_line_inline,$(COLOR_ERROR),No $(CONFIG_PATH) directory found to archive.); \
-		exit 1; \
-	fi
-	@mkdir -p "$(CONFIG_BACKUP_PATH)"
-	@timestamp=$$(date +%Y%m%d-%H%M%S); \
-	archive="$(CONFIG_BACKUP_PATH)/$(PRESET)-config-$${timestamp}.tar.gz"; \
-	suffix=0; \
-	while [ -e "$$archive" ]; do \
-		suffix=$$((suffix + 1)); \
-		archive="$(CONFIG_BACKUP_PATH)/$(PRESET)-config-$${timestamp}-$${suffix}.tar.gz"; \
-	done; \
-	tar -czf "$$archive" "$(CONFIG_PATH)"; \
-	$(call print_line_inline,$(COLOR_SUCCESS),Config cargo archived at $$archive. 📦)
+	@$(CONFIG_BACKUP_CMD) \
+		"$(CONFIG_PATH)" \
+		"$(CONFIG_BACKUP_PATH)" \
+		"$(PRESET)"
 
 #
 # $(DELETE_CONFIG): Deletes the complete generated config directory. This target
@@ -659,10 +672,8 @@ $(CLEAN_TEST): $(DOWN) $(RESTORE_TEST_CONFIG)
 $(NUKE): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 	$(call announce_warning,Firin' the clean broadside. Repo-safe files stay aboard. 💣)
 	$(PLUNDARR_COMPOSE) down $(COMPOSE_CLEAN_OPTIONS) --rmi all
-
 	$(call announce,Scrubbin' generated logs and Gluetun state. 🧽)
 	rm -rf $(PLUNDARR_GENERATED_PATHS)
-
 	@$(MAKE) --no-print-directory $(RESTORE_TEST_CONFIG)
 
 #
@@ -785,13 +796,26 @@ $(TEST_UNIT):
 	PYTHONDONTWRITEBYTECODE=1 \
 	PYTHONPATH=docker/src \
 	MARAUDARR_CATALOG_ROOT=docker \
-		$(PYTHON_BIN) -m unittest discover -s docker/tests -v
+		$(PYTHON_BIN) -m unittest discover \
+			--start-directory docker/tests \
+			--verbose
 
 #
-# $(TEST_WORKFLOWS): Tests workflow payload and registry helpers locally.
+# $(TEST_MAKE_HELPERS): Tests reusable Make and Compose helpers locally.
+#
+# Dependencies: None.
+#
+$(TEST_MAKE_HELPERS):
+	$(MAKE_HELPERS_TEST_CMD)
+
+#
+# $(TEST_WORKFLOWS): Tests workflow helpers and shared publishing policies locally.
 #
 $(TEST_WORKFLOWS):
 	$(WORKFLOW_HELPERS_TEST_CMD)
+	$(BUILD_PIN_POLICY_TEST_CMD)
+	$(IMAGE_TAG_POLICY_TEST_CMD)
+	$(POLICY_HELPERS_TEST_CMD)
 
 #
 # $(TEST): Runs unit tests, automation helpers, and the Compose matrix.
@@ -799,28 +823,29 @@ $(TEST_WORKFLOWS):
 # Dependencies:
 #   $(BUILD_DEPENDS) - Ensure Docker and Docker Compose are installed.
 #   $(TEST_UNIT) - Run Maraudarr's Python unit tests.
+#   $(TEST_MAKE_HELPERS) - Test reusable Make and Compose helpers.
 #   $(TEST_WORKFLOWS) - Test workflow helpers without external writes.
 #
-$(TEST): $(BUILD_DEPENDS) $(TEST_UNIT) $(TEST_WORKFLOWS)
+$(TEST): $(BUILD_DEPENDS) $(TEST_UNIT) $(TEST_MAKE_HELPERS) $(TEST_WORKFLOWS)
 	$(MARAUDARR_IMAGE_TEST_CMD)
-	$(MAKE_HELPERS_TEST_CMD)
 	MARAUDARR_TEST_OUTPUT="$(MARAUDARR_TEST_OUTPUT)" \
 	PYTHON_BIN="$(PYTHON_BIN)" \
 		test/generator/test-maraudarr-matrix.sh
 
 #
-# $(DOCS_PYTHON_TARGET): Creates an isolated Python environment for developer
-#                        documentation tooling.
+# $(DOCS_PYTHON_STAMP): Creates an isolated documentation environment with the
+#                       exact supported Python release.
 #
 # Dependencies: None.
 #
-$(DOCS_PYTHON_TARGET):
+$(DOCS_PYTHON_STAMP):
 	$(call announce,📚 Creating the isolated developer documentation toolchain...)
-	@$(PYTHON_BIN) -m venv "$(DOCS_VENV)" || { \
-		$(call print_line_inline,$(COLOR_ERROR),Python venv support is required to build documentation.); \
-		$(call print_detail_inline,$(COLOR_MUTED),Install Python with venv support, then run make $(DOCS).); \
-		exit 1; \
-	}
+	@$(DOCS_PYTHON_SETUP_CMD) \
+		--python-bin "$(DOCS_PYTHON_BIN)" \
+		--python-version "$(DOCS_PYTHON_VERSION)" \
+		--venv-path "$(DOCS_VENV)" \
+		--python-target "$(DOCS_PYTHON_TARGET)" \
+		--stamp-path "$(DOCS_PYTHON_STAMP)"
 
 #
 # $(DOCS_INSTALL_STAMP): Installs the hash-verified developer documentation
@@ -828,9 +853,9 @@ $(DOCS_PYTHON_TARGET):
 #
 # Dependencies:
 #   $(DOCS_REQUIREMENTS) - Declare exact, hash-verified documentation packages.
-#   $(DOCS_PYTHON_TARGET) - Provide the isolated Python environment.
+#   $(DOCS_PYTHON_STAMP) - Provide the version-matched Python environment.
 #
-$(DOCS_INSTALL_STAMP): $(DOCS_REQUIREMENTS) | $(DOCS_PYTHON_TARGET)
+$(DOCS_INSTALL_STAMP): $(DOCS_REQUIREMENTS) | $(DOCS_PYTHON_STAMP)
 	$(call announce,📦 Installing hash-verified developer documentation tools...)
 	@$(DOCS_PIP_INSTALL)
 	@touch "$(DOCS_INSTALL_STAMP)"
@@ -922,25 +947,14 @@ $(COMPOSE_SERVICES): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 #
 $(ENV): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 	@$(PLUNDARR_COMPOSE) config --environment | \
-	awk -F '=' ' \
-		NR == FNR { \
-			if ($$0 ~ /^[A-Za-z_][A-Za-z0-9_]*=/) values[$$1] = $$0; \
-			next; \
-		} \
-		$$0 ~ /^[A-Za-z_][A-Za-z0-9_]*=/ && $$1 in values { \
-			print values[$$1] \
-		} \
-	' - $(COMPOSE_ENV_FILE)
+	$(AWK_BIN) $(AWK_ASSIGNMENT_OPTIONS) $(AWK_FILE_OPTION) \
+	$(ORDER_ENVIRONMENT_AWK) - $(COMPOSE_ENV_FILE)
 
 #
 # $(PRINT_CONFIG): Prints the raw uncommented docker compose yaml configuration.
 #
 $(PRINT_CONFIG): $(CHECK_RENDERED)
-	@awk '{ \
-		sub(/#.*/, ""); \
-		sub(/[[:space:]]+$$/, ""); \
-		if (NF) print \
-	}' $(COMPOSE_FILE)
+	@$(AWK_BIN) $(AWK_FILE_OPTION) $(STRIP_COMMENTS_AWK) $(COMPOSE_FILE)
 
 #
 # $(PRINT_ENV): Prints the raw uncommented docker compose env configuration.
@@ -949,11 +963,7 @@ $(PRINT_CONFIG): $(CHECK_RENDERED)
 #   $(CHECK_ENV) - Ensure the environment file exists.
 #
 $(PRINT_ENV): $(CHECK_ENV)
-	@awk '{ \
-		sub(/#.*/, ""); \
-		sub(/[[:space:]]+$$/, ""); \
-		if (NF) print \
-	}' $(COMPOSE_ENV_FILE)
+	@$(AWK_BIN) $(AWK_FILE_OPTION) $(STRIP_COMMENTS_AWK) $(COMPOSE_ENV_FILE)
 
 #
 # $(LOGS): View output from stack containers.
@@ -1024,8 +1034,9 @@ $(HELP):
 	$(call help_line,$(PRINT_ENV),Print raw environment settings without comments.)
 	$(call help_heading,🧪 Test and build)
 	$(call help_line,$(TEST_UNIT),Run Maraudarr Python unit tests.)
+	$(call help_line,$(TEST_MAKE_HELPERS),Test reusable Make and Compose helpers.)
 	$(call help_line,$(TEST),Run all generator and automation-helper tests.)
-	$(call help_line,$(TEST_WORKFLOWS),Test Discord and registry workflow helpers.)
+	$(call help_line,$(TEST_WORKFLOWS),Test workflow helpers and shared publishing policies.)
 	$(call help_line,$(TEST_VPN),Check a running VPN tunnel.)
 	$(call help_line,$(TEST_E2E),Run the focused VPN end-to-end test.)
 	$(call help_line,$(TEST_STACK),Run the complete stack test.)

@@ -23,6 +23,8 @@
 # a DS1522+ with 32 GB memory. The kernel only consumes memory for watches
 # actually in use, so increasing the ceiling does not force full allocation.
 #
+# Usage: scripts/linux/set-inotify-limits.sh
+#
 # The script:
 #   - Detects a usable sysctl binary.
 #   - Raises inotify watch, instance, and queue limits immediately.

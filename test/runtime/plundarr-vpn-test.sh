@@ -9,6 +9,8 @@
 #                       port-forwarding support through the actual Privateerr
 #                       and Gluetun Docker Compose containers.
 #
+# Usage: test/runtime/plundarr-vpn-test.sh
+#
 # The script:
 #   - Locates Privateerr and Gluetun containers from Docker Compose.
 #   - Verifies both containers are running and healthy.
@@ -69,7 +71,7 @@ fi
 #
 # Bind every Compose command to the generated deployment pair.
 #
-docker_compose+=(--env-file "${PLUNDARR_ENV_FILE}" -f "${PLUNDARR_COMPOSE_FILE}")
+docker_compose+=(--env-file "${PLUNDARR_ENV_FILE}" --file "${PLUNDARR_COMPOSE_FILE}")
 
 #
 # Ensure the log directory exists before writing validation output.
@@ -120,7 +122,7 @@ container_id_for_service() {
     service_name="$1"
 
     # Use Docker Compose to get the container ID for the specified service.
-    "${docker_compose[@]}" ps -q "${service_name}" \
+    "${docker_compose[@]}" ps --quiet "${service_name}" \
         | tail -n 1
 }
 
@@ -143,7 +145,7 @@ require_running_container() {
     fi
 
     # Check the container's running state using Docker inspect.
-    if [[ "$(docker inspect -f '{{.State.Running}}' "${container_id}")" != "true" ]]; then
+    if [[ "$(docker inspect --format '{{.State.Running}}' "${container_id}")" != "true" ]]; then
         log "${service_name} container is not running."
         exit 1
     fi
@@ -162,7 +164,7 @@ require_healthy_container() {
     service_name="$2"
 
     # Check the container's health status using Docker inspect.
-    health_status="$(docker inspect -f '{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' "${container_id}")"
+    health_status="$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' "${container_id}")"
 
     # If the health status is not "healthy", log an error and exit.
     if [[ "${health_status}" != "healthy" ]]; then
@@ -186,7 +188,7 @@ wait_for_healthy_container() {
 
     # Wait for the container to become healthy, up to PLUNDARR_WAIT_SECONDS.
     while true; do
-        health_status="$(docker inspect -f '{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' "${container_id}")"
+        health_status="$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' "${container_id}")"
 
         # If the container is healthy, return success.
         if [[ "${health_status}" == "healthy" ]]; then
@@ -295,7 +297,7 @@ grep -q '^PIA_PORT_FORWARDING_SUPPORTED=true' "${metadata_path}"
 #
 log "Checking Gluetun VPN status inside Gluetun."
 docker exec \
-    -e PLUNDARR_HEALTH_URL="${PLUNDARR_HEALTH_URL}" \
+    --env PLUNDARR_HEALTH_URL="${PLUNDARR_HEALTH_URL}" \
     "${gluetun_container_id}" \
     sh -ec 'wget -qO- "${PLUNDARR_HEALTH_URL}" >/dev/null'
 
@@ -339,7 +341,7 @@ if [[ -n "${PLUNDARR_QBITTORRENT_SERVICE}" ]]; then
     log "Checking qBittorrent port-forwarding preferences."
     qbittorrent_preferences="$(
         docker exec \
-            -e PLUNDARR_QBITTORRENT_URL="${PLUNDARR_QBITTORRENT_URL}" \
+            --env PLUNDARR_QBITTORRENT_URL="${PLUNDARR_QBITTORRENT_URL}" \
             "${gluetun_container_id}" \
             sh -ec 'wget -qO- "${PLUNDARR_QBITTORRENT_URL}/api/v2/app/preferences"'
     )"

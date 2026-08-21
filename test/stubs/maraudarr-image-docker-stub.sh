@@ -8,6 +8,8 @@
 # maraudarr-image-docker-stub.sh: Simulate the Docker commands used by the
 #                                 Maraudarr image resolver tests.
 #
+# Usage: test/stubs/maraudarr-image-docker-stub.sh <docker arguments>
+#
 
 #
 # Fail on errors and unset variables.

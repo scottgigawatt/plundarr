@@ -13,6 +13,8 @@
 # after a reboot or Container Manager update. Run this script as root from a
 # boot-up task after creating a docker group and adding trusted users to it.
 #
+# Usage: scripts/synology/docker-socket.sh
+#
 # The script:
 #   - Verifies it is running as root.
 #   - Verifies the Synology docker group exists.

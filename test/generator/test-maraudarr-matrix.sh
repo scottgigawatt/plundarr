@@ -8,6 +8,8 @@
 # test-maraudarr-matrix.sh: Generate and validate representative Maraudarr
 #                           voyages without starting service containers.
 #
+# Usage: test/generator/test-maraudarr-matrix.sh
+#
 
 #
 # Fail on errors and unset variables.
@@ -49,7 +51,7 @@ run_case() {
     # Validate the generated Compose chart and its environment file.
     docker compose \
         --env-file "${case_output}/.env" \
-        -f "${case_output}/docker-compose.yml" \
+        --file "${case_output}/docker-compose.yml" \
         config \
         --quiet
 
@@ -84,7 +86,7 @@ run_distribution_case() {
     # Validate the generated Compose chart and its environment file.
     docker compose \
         --env-file "${preset_output}/.env" \
-        -f "${preset_output}/docker-compose.yml" \
+        --file "${preset_output}/docker-compose.yml" \
         config \
         --quiet
 

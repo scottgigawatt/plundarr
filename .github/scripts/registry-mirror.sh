@@ -5,13 +5,13 @@
 #
 # Licensed under the Apache License, Version 2.0.
 #
-# registry-mirror.sh: Mirror published Maraudarr tags from GHCR to Docker Hub
-#                     and verify that both registries expose matching digests.
+# registry-mirror.sh: Mirror published container-image tags from GHCR to Docker
+#                     Hub and verify that both registries expose matching digests.
 #
 # Usage: GHCR_TOKEN=<token> DOCKERHUB_TOKEN=<token> registry-mirror.sh \
-#        <--mirror|--verify> --ghcr-image <image> --dockerhub-image <image> \
-#        --ghcr-username <name> --dockerhub-username <name> \
-#        --published-tags <tags>
+#            <--mirror|--verify> --ghcr-image <image> --dockerhub-image <image> \
+#            --ghcr-username <name> --dockerhub-username <name> \
+#            --published-tags <tags>
 #
 
 #
