@@ -24,6 +24,7 @@
 - [ ] `make test-e2e` if VPN, Privateerr, Gluetun, or downloader behavior changed
 - [ ] `make test-stack` if Compose healthchecks, service wiring, or full-stack behavior changed
 - [ ] `make restore-test-config PRESET=<preset>` restored example generated config
+- [ ] Any `make nuke` validation used only an isolated disposable preset/project
 - [ ] `pre-commit run --all-files`
 
 ## Secrets check 🛡️

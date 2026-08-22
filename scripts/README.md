@@ -8,11 +8,13 @@ the job and review its header before running it with elevated privileges.
 
 | Hold       | Script                                                                 | Purpose                                                            |
 | ---------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| 🧮 AWK     | [`awk/collect-dockerfile-base-images.awk`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/awk/collect-dockerfile-base-images.awk) | Resolve declared external Dockerfile base-image references         |
 | 🧮 AWK     | [`awk/format-compose-status.awk`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/awk/format-compose-status.awk)             | Align Compose status rows and stack distinct published ports       |
 | 🧮 AWK     | [`awk/order-environment.awk`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/awk/order-environment.awk)                 | Order resolved values like the selected preset environment file    |
 | 🧮 AWK     | [`awk/strip-comments.awk`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/awk/strip-comments.awk)                       | Remove comments and blank lines from raw configuration output      |
 | 🐳 Compose | [`compose/backup.sh`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/compose/backup.sh)                                 | Archive one preset's config without replacing an existing backup   |
 | 🐳 Compose | [`compose/check-pia-credentials.sh`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/compose/check-pia-credentials.sh) | Report missing or example PIA credentials before Privateerr starts |
+| 🐳 Compose | [`compose/nuke.sh`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/compose/nuke.sh)                                 | Remove resources owned by one selected Compose project             |
 | 🐳 Compose | [`compose/ps.sh`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/compose/ps.sh)                                       | Print a compact status table for one generated project             |
 | 🐳 Compose | [`compose/restart.sh`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/compose/restart.sh)                             | Wait for Docker, stop a project safely, and start it again         |
 | 📚 Docs    | [`docs/prepare-python.sh`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/docs/prepare-python.sh)                     | Prepare the exact Python environment used to build documentation   |
@@ -27,6 +29,13 @@ the job and review its header before running it with elevated privileges.
 > them on another DSM release or Linux host.
 
 ## AWK Programs 🧮
+
+### `awk/collect-dockerfile-base-images.awk`
+
+Records global Dockerfile `ARG` defaults, resolves `${NAME}` and `$NAME` in
+`FROM`, ignores internal stages and `scratch`, and resets state between input
+files. Unresolved references are skipped. The nuke helper uses the output for
+best-effort cleanup without force-removing shared or in-use base images.
 
 ### `awk/format-compose-status.awk`
 
@@ -63,6 +72,19 @@ Privateerr deployment would start without real `PIA_USER` and `PIA_PASS`
 values. Invalid credentials produce a color-aware diagnostic with a corrective
 action; redirected output remains plain text and `NO_COLOR` disables terminal
 color. `make up`, `make test-e2e`, and `make test-stack` call it automatically.
+
+### `compose/nuke.sh`
+
+Validates one selected Compose model before deleting anything, captures its
+service images, runs project-scoped teardown with volumes, orphans, and service
+images, then removes explicitly supplied local image references and one named
+Buildx builder. Plundarr calls the same helper separately for the generated
+project and the explicitly named `maraudarr` generator project.
+
+Repeated `--dockerfile` and `--additional-image` arguments avoid shell command
+evaluation. Missing resources are harmless; unexpected Compose, Docker, or
+builder failures stop the helper. Repository files, `.env`, config, and backups
+remain Make's protected responsibility.
 
 ### `compose/ps.sh`
 

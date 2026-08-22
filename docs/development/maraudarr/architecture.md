@@ -84,6 +84,10 @@ footer, and first-run secrets replace placeholders only when no existing value
 is available. `COMPOSE_PROJECT_NAME` remains generator-owned so preset identity
 cannot drift accidentally.
 
+The default Plundarr preset therefore owns the `plundarr` Compose project.
+Maraudarr's local build/run chart is always invoked with the separate explicit
+project name `maraudarr`, preventing either lifecycle from removing the other.
+
 ## 5. Stage, Validate, and Publish Output
 
 Compose and environment files are written to a temporary directory inside the
@@ -96,6 +100,10 @@ Config seeding follows a different safety rule: missing seeds are copied,
 project-owned README files may be refreshed, and existing application files are
 never replaced. Destructive cleanup belongs exclusively to the explicit
 `make delete-config` target.
+
+`make nuke` removes project Docker resources and transient runtime residue but
+does not call `delete-config`; generated `.env`, backups, and application state
+remain intact.
 
 ## Failure Boundaries
 
