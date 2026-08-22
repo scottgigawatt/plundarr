@@ -62,13 +62,6 @@ ENSURE_BUILDX_BUILDER=ensure-buildx-builder
 ENSURE_MARAUDARR_IMAGE=ensure-maraudarr-image
 
 #
-# Compatibility alias target names.
-#
-RUN=run
-START=start
-STOP=stop
-
-#
 # Common public targets shared by Plundarr and Privateerr.
 #
 COMMON_TARGETS= \
@@ -126,21 +119,12 @@ INTERNAL_TARGETS= \
 	$(ENSURE_MARAUDARR_IMAGE)
 
 #
-# Compatibility aliases retained for existing callers.
-#
-ALIAS_TARGETS= \
-	$(RUN) \
-	$(START) \
-	$(STOP)
-
-#
 # Complete target inventory used by .PHONY.
 #
 TARGETS= \
 	$(COMMON_TARGETS) \
 	$(PROJECT_TARGETS) \
-	$(INTERNAL_TARGETS) \
-	$(ALIAS_TARGETS)
+	$(INTERNAL_TARGETS)
 
 #
 # Punctuation expanded after Make parses $(call ...) arguments.
@@ -1175,29 +1159,3 @@ $(DOCS_INSTALL_STAMP): $(DOCS_REQUIREMENTS) | $(DOCS_PYTHON_STAMP)
 	$(call announce,📦 Installing hash-verified developer documentation tools...)
 	@$(DOCS_PIP_INSTALL)
 	@touch "$(DOCS_INSTALL_STAMP)"
-
-#
-# $(START): Alias for up.
-#
-# Dependencies:
-#   $(UP) - Start the service stack.
-#
-$(START): $(UP)
-
-#
-# $(STOP): Alias for down.
-#
-# Dependencies:
-#   $(DOWN) - Stop and remove the stack.
-#
-$(STOP): $(DOWN)
-
-#
-# $(RUN): Alias for up, open, logs.
-#
-# Dependencies:
-#   $(UP) - Start the service stack.
-#
-$(RUN): $(UP)
-	@$(MAKE) --no-print-directory $(OPEN)
-	@$(MAKE) --no-print-directory $(LOGS)
