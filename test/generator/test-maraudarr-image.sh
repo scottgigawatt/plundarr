@@ -136,6 +136,7 @@ run_case() {
         --no-print-directory \
         ensure-maraudarr-image \
         MARAUDARR_IMAGE="${TEST_IMAGE}" \
+        DOCKER_BUILDX=true \
         > "${output_path}" 2>&1
     actual_status=$?
     set -e
