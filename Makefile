@@ -159,46 +159,40 @@ PRIVATEERR_GENERATED_METADATA  ?= $(CONFIG_PATH)/gluetun/wireguard/privateerr.en
 #
 # Docker Compose options.
 #
-PRESET                    ?= plundarr
-ADD_SERVICES              ?=
-REMOVE_SERVICES           ?=
-DEPLOYMENT_ROOT           ?= dist
-DEPLOYMENT_PATH           ?= $(DEPLOYMENT_ROOT)/$(PRESET)
-RENDERED_COMPOSE_FILE     ?= $(DEPLOYMENT_PATH)/docker-compose.yml
-COMPOSE_FILE              ?= $(RENDERED_COMPOSE_FILE)
-ENV_FILE                  ?= $(DEPLOYMENT_PATH)/.env
-COMPOSE_ENV_FILE          ?= $(ENV_FILE)
-COMPOSE_DOWN_TIMEOUT      ?= 30
-COMPOSE_DOWN_OPTIONS      ?= \
-	--timeout $(COMPOSE_DOWN_TIMEOUT) \
-	--remove-orphans
-COMPOSE_NUKE_OPTIONS      ?= \
-	--timeout $(COMPOSE_DOWN_TIMEOUT) \
-	--volumes \
-	--remove-orphans \
-	--rmi all
-COMPOSE_UP_OPTIONS        ?= --force-recreate --pull always --detach --remove-orphans
-COMPOSE_E2E_OPTIONS       ?= --force-recreate --pull always --detach --remove-orphans
-COMPOSE_E2E_WAIT          ?= 300
-COMPOSE_STACK_WAIT        ?= 600
-COMPOSE_LOGS_OPTIONS      ?= --follow
-MARAUDARR_IMAGE           ?= ghcr.io/scottgigawatt/maraudarr:latest
+PRESET                         ?= plundarr
+ADD_SERVICES                   ?=
+REMOVE_SERVICES                ?=
+DEPLOYMENT_ROOT                ?= dist
+DEPLOYMENT_PATH                ?= $(DEPLOYMENT_ROOT)/$(PRESET)
+RENDERED_COMPOSE_FILE          ?= $(DEPLOYMENT_PATH)/docker-compose.yml
+COMPOSE_FILE                   ?= $(RENDERED_COMPOSE_FILE)
+ENV_FILE                       ?= $(DEPLOYMENT_PATH)/.env
+COMPOSE_ENV_FILE               ?= $(ENV_FILE)
+COMPOSE_DOWN_TIMEOUT           ?= 30
+COMPOSE_DOWN_OPTIONS           ?= --timeout $(COMPOSE_DOWN_TIMEOUT) --remove-orphans
+COMPOSE_NUKE_OPTIONS           ?= --timeout $(COMPOSE_DOWN_TIMEOUT) --volumes --remove-orphans --rmi all
+COMPOSE_UP_OPTIONS             ?= --force-recreate --pull always --detach --remove-orphans
+COMPOSE_E2E_OPTIONS            ?= --force-recreate --pull always --detach --remove-orphans
+COMPOSE_E2E_WAIT               ?= 300
+COMPOSE_STACK_WAIT             ?= 600
+COMPOSE_LOGS_OPTIONS           ?= --follow
+MARAUDARR_IMAGE                ?= ghcr.io/scottgigawatt/maraudarr:latest
 MARAUDARR_COMPOSE_PROJECT_NAME ?= maraudarr
-MARAUDARR_COMPOSE_FILE    ?= docker-compose.maraudarr.yml
-MARAUDARR_ENV_FILE        ?= example.maraudarr.env
-MARAUDARR_OUTPUT          ?= /output
-MARAUDARR_OUTPUT_ROOT     ?= $(MARAUDARR_OUTPUT)/$(DEPLOYMENT_ROOT)
-MARAUDARR_BUILD_OPTIONS   ?= --pull --no-cache
-MARAUDARR_BUILD_PLATFORMS ?= linux/amd64,linux/arm64,linux/arm/v7
-MARAUDARR_MULTIARCH_IMAGE ?= maraudarr:multiarch-local
-MARAUDARR_TEST_OUTPUT     ?= /tmp/maraudarr-matrix
-MARAUDARR_TEST_PRESET     ?= plundarr
-MARAUDARR_TEST_ADD        ?=
-MARAUDARR_TEST_REMOVE     ?=
-MARAUDARR_TEST_FILE       ?= config/README.md
-CONFIG_PATH               ?= $(DEPLOYMENT_PATH)/config
-CONFIG_BACKUP_PATH        ?= $(DEPLOYMENT_PATH)/backups
-PYTHON_BIN                ?= python3
+MARAUDARR_COMPOSE_FILE         ?= docker-compose.maraudarr.yml
+MARAUDARR_ENV_FILE             ?= example.maraudarr.env
+MARAUDARR_OUTPUT               ?= /output
+MARAUDARR_OUTPUT_ROOT          ?= $(MARAUDARR_OUTPUT)/$(DEPLOYMENT_ROOT)
+MARAUDARR_BUILD_OPTIONS        ?= --pull --no-cache
+MARAUDARR_BUILD_PLATFORMS      ?= linux/amd64,linux/arm64,linux/arm/v7
+MARAUDARR_MULTIARCH_IMAGE      ?= maraudarr:multiarch-local
+MARAUDARR_TEST_OUTPUT          ?= /tmp/maraudarr-matrix
+MARAUDARR_TEST_PRESET          ?= plundarr
+MARAUDARR_TEST_ADD             ?=
+MARAUDARR_TEST_REMOVE          ?=
+MARAUDARR_TEST_FILE            ?= config/README.md
+CONFIG_PATH                    ?= $(DEPLOYMENT_PATH)/config
+CONFIG_BACKUP_PATH             ?= $(DEPLOYMENT_PATH)/backups
+PYTHON_BIN                     ?= python3
 
 #
 # Disposable runtime state. Persistent application config and backups must
