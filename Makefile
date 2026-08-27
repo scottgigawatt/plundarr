@@ -8,11 +8,12 @@
 #
 
 #
-# Makefile target names.
+# Common target names shared by Plundarr and Privateerr.
 #
 BUILD_DEPENDS=build-depends
 CHECK_ENV=check-env
 CHECK_PIA=check-pia
+ENSURE_BUILDX_BUILDER=ensure-buildx-builder
 ALL=all
 UP=up
 DOWN=down
@@ -38,36 +39,36 @@ HELP=help
 #
 # Plundarr-specific public target names.
 #
+PULL_IMAGE=pull-image
 SHIP=ship
 CONFIGURE=configure
 PRESETS=presets
 AVAILABLE_SERVICES=services
 COMPOSE_SERVICES=compose-services
 OPEN=open
-PULL_IMAGE=pull-image
-DELETE_CONFIG=delete-config
-TEST_VPN=test-vpn
-TEST_STACK=test-stack
 TEST_IMAGE=test-image
 TEST_UNIT=test-unit
+TEST_VPN=test-vpn
+TEST_STACK=test-stack
+DOCS_INSTALL=docs-install
 DOCS=docs
 DOCS_SERVE=docs-serve
-DOCS_INSTALL=docs-install
+DELETE_CONFIG=delete-config
 
 #
 # Internal prerequisite target names.
 #
 CHECK_RENDERED=check-rendered
-ENSURE_BUILDX_BUILDER=ensure-buildx-builder
 ENSURE_MARAUDARR_IMAGE=ensure-maraudarr-image
 
 #
-# Common public targets shared by Plundarr and Privateerr.
+# Common targets shared by Plundarr and Privateerr.
 #
 COMMON_TARGETS= \
 	$(BUILD_DEPENDS) \
 	$(CHECK_ENV) \
 	$(CHECK_PIA) \
+	$(ENSURE_BUILDX_BUILDER) \
 	$(ALL) \
 	$(UP) \
 	$(DOWN) \
@@ -94,28 +95,27 @@ COMMON_TARGETS= \
 # Public targets unique to this repository.
 #
 PROJECT_TARGETS= \
+	$(PULL_IMAGE) \
 	$(SHIP) \
 	$(CONFIGURE) \
 	$(PRESETS) \
 	$(AVAILABLE_SERVICES) \
 	$(COMPOSE_SERVICES) \
 	$(OPEN) \
-	$(PULL_IMAGE) \
-	$(DELETE_CONFIG) \
-	$(TEST_VPN) \
-	$(TEST_STACK) \
 	$(TEST_IMAGE) \
 	$(TEST_UNIT) \
+	$(TEST_VPN) \
+	$(TEST_STACK) \
+	$(DOCS_INSTALL) \
 	$(DOCS) \
 	$(DOCS_SERVE) \
-	$(DOCS_INSTALL)
+	$(DELETE_CONFIG)
 
 #
-# Internal prerequisites and file targets.
+# Project-specific internal prerequisite targets.
 #
 INTERNAL_TARGETS= \
 	$(CHECK_RENDERED) \
-	$(ENSURE_BUILDX_BUILDER) \
 	$(ENSURE_MARAUDARR_IMAGE)
 
 #
@@ -539,6 +539,19 @@ $(CHECK_PIA): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 	fi
 
 #
+# $(ENSURE_BUILDX_BUILDER): Create the repository-owned Buildx builder when missing.
+#
+# Dependencies:
+#   $(BUILD_DEPENDS) - Ensure Docker and Docker Compose are installed.
+#
+$(ENSURE_BUILDX_BUILDER): $(BUILD_DEPENDS)
+	@if ! $(DOCKER_BUILDX) inspect "$(BUILDX_BUILDER_NAME)" >/dev/null 2>&1; then \
+		$(DOCKER_BUILDX) create \
+			--name "$(BUILDX_BUILDER_NAME)" \
+			--driver "$(BUILDX_BUILDER_DRIVER)" >/dev/null; \
+	fi
+
+#
 # $(ALL): Default makefile target. Starts the service stack.
 #
 # Dependencies:
@@ -833,21 +846,21 @@ $(HELP):
 	$(call help_line,$(CLEAN),Remove only disposable developer artifacts.)
 	$(call help_line,$(NUKE),‼️ DANGER ‼️ remove Plundarr and Maraudarr Docker resources.)
 	$(call help_heading,🧭 Plundarr and Maraudarr tools)
+	$(call help_line,$(PULL_IMAGE),Pull the latest published Maraudarr image.)
 	$(call help_line,$(SHIP),Generate a preset deployment (default: plundarr).)
 	$(call help_line,$(CONFIGURE),Open the interactive preset and service selector.)
 	$(call help_line,$(PRESETS),List presets and their default services.)
 	$(call help_line,$(AVAILABLE_SERVICES),List every selectable service.)
 	$(call help_line,$(COMPOSE_SERVICES),List rendered Compose services.)
 	$(call help_line,$(OPEN),Open selected-stack web interfaces on macOS.)
-	$(call help_line,$(PULL_IMAGE),Pull the latest published Maraudarr image.)
-	$(call help_line,$(DELETE_CONFIG),‼️ DANGER ‼️ delete the selected preset config tree.)
-	$(call help_line,$(TEST_VPN),Check a running VPN tunnel.)
-	$(call help_line,$(TEST_STACK),Run the complete stack test.)
 	$(call help_line,$(TEST_IMAGE),Test one hardened Maraudarr image and its terminal UI.)
 	$(call help_line,$(TEST_UNIT),Run Maraudarr Python unit tests.)
+	$(call help_line,$(TEST_VPN),Check a running VPN tunnel.)
+	$(call help_line,$(TEST_STACK),Run the complete stack test.)
+	$(call help_line,$(DOCS_INSTALL),Install or refresh pinned documentation tools.)
 	$(call help_line,$(DOCS),Build the strict developer documentation site.)
 	$(call help_line,$(DOCS_SERVE),Preview developer documentation locally.)
-	$(call help_line,$(DOCS_INSTALL),Install or refresh pinned documentation tools.)
+	$(call help_line,$(DELETE_CONFIG),‼️ DANGER ‼️ delete the selected preset config tree.)
 	$(call announce_warning,⚠️  Destructive targets never run automatically. Back up config before using them.)
 
 #
@@ -923,6 +936,63 @@ $(SHIP): $(ENSURE_MARAUDARR_IMAGE)
 $(CONFIGURE): $(ENSURE_MARAUDARR_IMAGE)
 	$(call announce,🧭 Openin' Maraudarr's interactive voyage planner...)
 	@$(MARAUDARR_RUN_INTERACTIVE) configure --output-root "$(MARAUDARR_OUTPUT_ROOT)"
+
+#
+# $(PRESETS): Lists presets and their exact default services.
+#
+# Dependencies:
+#   $(ENSURE_MARAUDARR_IMAGE) - Prepare a local Maraudarr image.
+#
+$(PRESETS): $(ENSURE_MARAUDARR_IMAGE)
+	$(call announce,🗺️ Maraudarr preset voyages)
+	@if [ -t 1 ] && [ -z "$$NO_COLOR" ]; then \
+		$(MARAUDARR_RUN_STYLED) presets; \
+	else \
+		$(MARAUDARR_RUN) --plain presets; \
+	fi
+
+#
+# $(AVAILABLE_SERVICES): Lists every selectable Plundarr service.
+#
+# Dependencies:
+#   $(ENSURE_MARAUDARR_IMAGE) - Prepare a local Maraudarr image.
+#
+$(AVAILABLE_SERVICES): $(ENSURE_MARAUDARR_IMAGE)
+	$(call announce,🧰 Maraudarr service cargo)
+	@if [ -t 1 ] && [ -z "$$NO_COLOR" ]; then \
+		$(MARAUDARR_RUN_STYLED) services; \
+	else \
+		$(MARAUDARR_RUN) --plain services; \
+	fi
+
+#
+# $(COMPOSE_SERVICES): Lists services in the rendered Docker Compose file.
+#
+# Dependencies:
+#   $(BUILD_DEPENDS) - Ensure build dependencies are installed.
+#   $(CHECK_ENV) - Ensure the environment file exists.
+#   $(CHECK_RENDERED) - Ensure the rendered Compose file exists.
+#
+$(COMPOSE_SERVICES): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
+	$(PLUNDARR_COMPOSE) config --services
+
+#
+# $(OPEN): Opens the compose services in the default web browser.
+#
+# Dependencies:
+#   $(BUILD_DEPENDS) - Ensure build dependencies are installed.
+#   $(CHECK_ENV) - Ensure the environment file exists.
+#   $(CHECK_RENDERED) - Ensure the rendered Compose file exists.
+#
+$(OPEN): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
+	$(call announce,Opening selected Compose services in the default browser. 🌐)
+	open \
+		$(foreach port,$(GLUETUN_WEB_PORTS), \
+			$(call localhost_url,$(GLUETUN_SERVICE),$(port))) \
+		$(foreach mapping,$(DIRECT_WEB_PORTS), \
+			$(call localhost_url, \
+				$(word 1,$(subst :, ,$(mapping))), \
+				$(word 2,$(subst :, ,$(mapping)))))
 
 #
 # $(TEST_IMAGE): Runs runtime-dependent UI tests inside one hardened image, then
@@ -1018,17 +1088,6 @@ $(TEST_STACK): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED) $(RESTORE_TEST_CO
 	exit "$$status"
 
 #
-# $(DELETE_CONFIG): Deletes the complete generated config directory. This target
-#                   is intentionally explicit because application state is lost.
-#
-# Dependencies: None.
-#
-$(DELETE_CONFIG):
-	$(call announce_warning,Removing the complete Plundarr config hold. ☠️)
-	rm -rf "$(CONFIG_PATH)"
-	$(call announce_detail,Run make $(SHIP) to regenerate selected service folders and seed files. 🗺️)
-
-#
 # $(DOCS_INSTALL): Ensures the pinned documentation toolchain is ready.
 #
 # Dependencies:
@@ -1057,74 +1116,15 @@ $(DOCS_SERVE): $(DOCS_INSTALL)
 	$(DOCS_MKDOCS) serve --dev-addr "$(DOCS_SERVE_ADDRESS)"
 
 #
-# $(PRESETS): Lists presets and their exact default services.
+# $(DELETE_CONFIG): Deletes the complete generated config directory. This target
+#                   is intentionally explicit because application state is lost.
 #
-# Dependencies:
-#   $(ENSURE_MARAUDARR_IMAGE) - Prepare a local Maraudarr image.
+# Dependencies: None.
 #
-$(PRESETS): $(ENSURE_MARAUDARR_IMAGE)
-	$(call announce,🗺️ Maraudarr preset voyages)
-	@if [ -t 1 ] && [ -z "$$NO_COLOR" ]; then \
-		$(MARAUDARR_RUN_STYLED) presets; \
-	else \
-		$(MARAUDARR_RUN) --plain presets; \
-	fi
-
-#
-# $(AVAILABLE_SERVICES): Lists every selectable Plundarr service.
-#
-# Dependencies:
-#   $(ENSURE_MARAUDARR_IMAGE) - Prepare a local Maraudarr image.
-#
-$(AVAILABLE_SERVICES): $(ENSURE_MARAUDARR_IMAGE)
-	$(call announce,🧰 Maraudarr service cargo)
-	@if [ -t 1 ] && [ -z "$$NO_COLOR" ]; then \
-		$(MARAUDARR_RUN_STYLED) services; \
-	else \
-		$(MARAUDARR_RUN) --plain services; \
-	fi
-
-#
-# $(COMPOSE_SERVICES): Lists services in the rendered Docker Compose file.
-#
-# Dependencies:
-#   $(BUILD_DEPENDS) - Ensure build dependencies are installed.
-#   $(CHECK_ENV) - Ensure the environment file exists.
-#   $(CHECK_RENDERED) - Ensure the rendered Compose file exists.
-#
-$(COMPOSE_SERVICES): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
-	$(PLUNDARR_COMPOSE) config --services
-
-#
-# $(OPEN): Opens the compose services in the default web browser.
-#
-# Dependencies:
-#   $(BUILD_DEPENDS) - Ensure build dependencies are installed.
-#   $(CHECK_ENV) - Ensure the environment file exists.
-#   $(CHECK_RENDERED) - Ensure the rendered Compose file exists.
-#
-$(OPEN): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
-	$(call announce,Opening selected Compose services in the default browser. 🌐)
-	open \
-		$(foreach port,$(GLUETUN_WEB_PORTS), \
-			$(call localhost_url,$(GLUETUN_SERVICE),$(port))) \
-		$(foreach mapping,$(DIRECT_WEB_PORTS), \
-			$(call localhost_url, \
-				$(word 1,$(subst :, ,$(mapping))), \
-				$(word 2,$(subst :, ,$(mapping)))))
-
-#
-# $(ENSURE_BUILDX_BUILDER): Create the repository-owned Buildx builder when missing.
-#
-# Dependencies:
-#   $(BUILD_DEPENDS) - Ensure Docker and Docker Compose are installed.
-#
-$(ENSURE_BUILDX_BUILDER): $(BUILD_DEPENDS)
-	@if ! $(DOCKER_BUILDX) inspect "$(BUILDX_BUILDER_NAME)" >/dev/null 2>&1; then \
-		$(DOCKER_BUILDX) create \
-			--name "$(BUILDX_BUILDER_NAME)" \
-			--driver "$(BUILDX_BUILDER_DRIVER)" >/dev/null; \
-	fi
+$(DELETE_CONFIG):
+	$(call announce_warning,Removing the complete Plundarr config hold. ☠️)
+	rm -rf "$(CONFIG_PATH)"
+	$(call announce_detail,Run make $(SHIP) to regenerate selected service folders and seed files. 🗺️)
 
 #
 # $(DOCS_PYTHON_STAMP): Creates an isolated documentation environment with the
