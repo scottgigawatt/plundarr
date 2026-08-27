@@ -305,6 +305,20 @@ This removes only generated documentation, Python caches, and test logs.
 Deployment charts, `.env` files, config, backups, containers, volumes, and
 images stay put.
 
+### ⚓ Stop or Scuttle a Stack
+
+`make down PRESET=<preset>` stops the selected generated project and removes
+its containers, networks, and orphans while preserving volumes, images, `.env`,
+config, backups, and generated credentials.
+
+> [!CAUTION]
+> `make nuke PRESET=<preset>` removes Docker resources for both the selected
+> generated project and the explicitly separate `maraudarr` generator project,
+> including volumes, service/local images, and the `plundarr-local` Buildx
+> cache. It preserves every deployment chart, `.env`, backup, and persistent
+> application config directory. Only `make delete-config PRESET=<preset>`
+> deletes application state. Shared or in-use Dockerfile base images remain.
+
 ## Navigatin' Troubled Waters ☠️🌊
 
 > [!TIP]

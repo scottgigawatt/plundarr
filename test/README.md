@@ -16,6 +16,7 @@ Welcome to the test hold, where Plundarr checks that Privateerr and Gluetun left
 | 🛡️ Policy    | [`policy/check-image-tag-policy.sh`](https://github.com/scottgigawatt/plundarr/blob/main/test/policy/check-image-tag-policy.sh)         | Enforce canonical image tags in every metadata-action block         |
 | 🧮 Policy    | [`policy/awk/check-image-tags.awk`](https://github.com/scottgigawatt/plundarr/blob/main/test/policy/awk/check-image-tags.awk)           | Parse and validate workflow image-tag metadata blocks               |
 | 🧮 Policy    | [`policy/awk/collect-build-pins.awk`](https://github.com/scottgigawatt/plundarr/blob/main/test/policy/awk/collect-build-pins.awk)       | Extract and validate digest-pinned build dependency values          |
+| 🌊 Runtime   | [`runtime/test-compose-cleanup-live.sh`](https://github.com/scottgigawatt/plundarr/blob/main/test/runtime/test-compose-cleanup-live.sh) | Verify isolated `down` and `nuke` ownership on a real Docker daemon |
 | 🌊 Runtime   | [`runtime/plundarr-stack-wait.sh`](https://github.com/scottgigawatt/plundarr/blob/main/test/runtime/plundarr-stack-wait.sh)             | Wait for a generated stack to become healthy                        |
 | 🌊 Runtime   | [`runtime/plundarr-vpn-test.sh`](https://github.com/scottgigawatt/plundarr/blob/main/test/runtime/plundarr-vpn-test.sh)                 | Validate Privateerr, Gluetun, and selected downloader state         |
 | 🎭 Stubs     | [`stubs/compose-docker-stub.sh`](https://github.com/scottgigawatt/plundarr/blob/main/test/stubs/compose-docker-stub.sh)                 | Supply deterministic Docker output to Compose helper tests          |
@@ -107,6 +108,20 @@ repository and proves that valid input passes while mismatched pins, missing
 aliases, and noncanonical tag rules fail with useful diagnostics.
 
 ### Running Stack Check
+
+Run the isolated cleanup acceptance after changing Compose lifecycle or nuke
+behavior:
+
+> [!CAUTION]
+>
+> ```sh
+> test/runtime/test-compose-cleanup-live.sh
+> ```
+
+It creates uniquely named disposable projects and unrelated sentinels on the
+real Docker daemon. The test proves `down` preserves volumes and images, then
+proves `nuke` removes only its project resources and named builder. It never
+uses `dist/`, a repository `.env`, or PIA credentials.
 
 Use this when the full Plundarr stack is already running:
 
@@ -208,6 +223,12 @@ Useful cleanup commands:
 
 `make delete-config` is deliberately absent from that routine cleanup example:
 it destroys the selected deployment's application state.
+
+`clean-test` uses the volume-preserving `down` path. `nuke` removes Docker
+resources for the selected generated project and the separate `maraudarr`
+generator project, then clears disposable runtime state and restores examples.
+It never invokes `delete-config`, and it preserves `.env`, backups, and
+persistent application config.
 
 > [!TIP]
 > 🏴‍☠️ Run cleanup before committing after any real VPN voyage. _Future ye will thank past ye!_

@@ -112,6 +112,10 @@ stack. The explicit `make delete-config` target owns destructive config cleanup.
 targets must remain clearly marked as destructive in `make help` and public
 documentation; `make clean` must never touch deployments, `.env`
 files, configuration, backups, containers, volumes, or images.
+`make down` preserves volumes and images. `make nuke` also removes the separate
+`maraudarr` Compose project and repository-owned Buildx cache while preserving
+the selected deployment's `.env`, config, and backups; it must never invoke
+`delete-config`.
 
 ## Shell, Documentation, And Automation Style
 
