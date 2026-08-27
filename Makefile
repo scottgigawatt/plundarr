@@ -303,13 +303,13 @@ MARAUDARR_SMOKE_CMD       ?= test/generator/maraudarr-image-smoke.sh
 #
 # Reusable Compose helpers and AWK programs.
 #
-PLUNDARR_PS_CMD          ?= scripts/compose/ps.sh
-PIA_CREDENTIAL_CHECK_CMD ?= scripts/compose/check-pia-credentials.sh
-COMPOSE_NUKE_CMD         ?= scripts/compose/nuke.sh
-CONFIG_BACKUP_CMD        ?= scripts/compose/backup.sh
+PLUNDARR_PS_CMD            ?= scripts/compose/ps.sh
+PIA_CREDENTIAL_CHECK_CMD   ?= scripts/compose/check-pia-credentials.sh
+COMPOSE_NUKE_CMD           ?= scripts/compose/nuke.sh
+CONFIG_BACKUP_CMD          ?= scripts/compose/backup.sh
 DOCKERFILE_BASE_IMAGES_AWK ?= scripts/awk/collect-dockerfile-base-images.awk
-ORDER_ENVIRONMENT_AWK    ?= scripts/awk/order-environment.awk
-STRIP_COMMENTS_AWK       ?= scripts/awk/strip-comments.awk
+ORDER_ENVIRONMENT_AWK      ?= scripts/awk/order-environment.awk
+STRIP_COMMENTS_AWK         ?= scripts/awk/strip-comments.awk
 
 #
 # Dockerfile inputs used for best-effort base-image cleanup.
@@ -319,8 +319,8 @@ DOCKERFILES ?= docker/Dockerfile
 #
 # Docker commands used directly instead of through Compose.
 #
-DOCKER_BIN    ?= docker
-DOCKER_BUILDX ?= $(DOCKER_BIN) buildx
+DOCKER_BIN            ?= docker
+DOCKER_BUILDX         ?= $(DOCKER_BIN) buildx
 BUILDX_BUILDER_NAME   ?= plundarr-local
 BUILDX_BUILDER_DRIVER ?= docker-container
 
