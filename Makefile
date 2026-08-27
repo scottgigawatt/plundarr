@@ -8,7 +8,7 @@
 #
 
 #
-# Common target names shared by Plundarr and Privateerr.
+# Common target names.
 #
 BUILD_DEPENDS=build-depends
 CHECK_ENV=check-env
@@ -37,7 +37,7 @@ NUKE=nuke
 HELP=help
 
 #
-# Plundarr-specific public target names.
+# Project target names.
 #
 PULL_IMAGE=pull-image
 SHIP=ship
@@ -56,13 +56,13 @@ DOCS_SERVE=docs-serve
 DELETE_CONFIG=delete-config
 
 #
-# Internal prerequisite target names.
+# Internal target names.
 #
 CHECK_RENDERED=check-rendered
 ENSURE_MARAUDARR_IMAGE=ensure-maraudarr-image
 
 #
-# Common targets shared by Plundarr and Privateerr.
+# Common targets.
 #
 COMMON_TARGETS= \
 	$(BUILD_DEPENDS) \
@@ -92,7 +92,7 @@ COMMON_TARGETS= \
 	$(HELP)
 
 #
-# Public targets unique to this repository.
+# Project targets.
 #
 PROJECT_TARGETS= \
 	$(PULL_IMAGE) \
@@ -112,14 +112,14 @@ PROJECT_TARGETS= \
 	$(DELETE_CONFIG)
 
 #
-# Project-specific internal prerequisite targets.
+# Internal targets.
 #
 INTERNAL_TARGETS= \
 	$(CHECK_RENDERED) \
 	$(ENSURE_MARAUDARR_IMAGE)
 
 #
-# Complete target inventory used by .PHONY.
+# Complete target inventory.
 #
 TARGETS= \
 	$(COMMON_TARGETS) \

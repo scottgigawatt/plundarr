@@ -310,7 +310,7 @@ grep -F 'BUILDX_BUILDER="plundarr-local" true --project-name "maraudarr"' \
     "${test_output}/build.out" >/dev/null
 
 #
-# Keep shared target groups and framed dependency comments reviewable.
+# Keep target groups and framed dependency comments reviewable.
 #
 common_targets=$(awk '
     /^COMMON_TARGETS=/ { active = 1 }
