@@ -130,6 +130,31 @@ class MaraudarrTests(unittest.TestCase):
                 self.assertNotIn("watchtower", default.service_ids)
                 self.assertIn("watchtower", selected.service_ids)
 
+    def test_watchtower_preset_selects_only_the_updater(self) -> None:
+        """Keep the standalone updater focused and available for one-shot runs."""
+
+        plan = self.catalog.resolve("watchtower")
+        compose = render_compose(self.catalog, plan)
+        environment = render_environment(
+            self.catalog,
+            plan,
+            None,
+            generate_secrets=False,
+        )
+
+        self.assertEqual(plan.service_ids, ("watchtower",))
+        self.assertIn("image: nickfedor/watchtower:${WATCHTOWER_TAG}", compose)
+        self.assertNotIn("DOCKER_API_VERSION", compose)
+        self.assertIn('WATCHTOWER_TAG="${WATCHTOWER_TAG:-latest}"', environment)
+        self.assertIn(
+            'WATCHTOWER_INCLUDE_STOPPED="${WATCHTOWER_INCLUDE_STOPPED:-false}"',
+            environment,
+        )
+        self.assertIn(
+            'WATCHTOWER_REVIVE_STOPPED="${WATCHTOWER_REVIVE_STOPPED:-false}"',
+            environment,
+        )
+
     def test_standalone_media_server_presets_select_one_core_service(self) -> None:
         """Keep the standalone Jellyfin and Plex presets deliberately focused."""
 
@@ -266,6 +291,11 @@ class MaraudarrTests(unittest.TestCase):
                 "172.31.0.0/16",
                 "/volume1/plex",
             ),
+            "watchtower": (
+                "watchtower",
+                "172.25.0.0/16",
+                "/volume1/plex",
+            ),
         }
 
         for preset_id, (project, subnet, media_root) in cases.items():
@@ -304,7 +334,14 @@ class MaraudarrTests(unittest.TestCase):
     def test_fresh_presets_can_share_one_docker_host(self) -> None:
         """Keep project names, networks, containers, and host ports distinct."""
 
-        preset_ids = ("plundarr", "boudoirr", "jellyfin", "plex", "custom")
+        preset_ids = (
+            "plundarr",
+            "boudoirr",
+            "jellyfin",
+            "plex",
+            "watchtower",
+            "custom",
+        )
         plans = {
             preset_id: self.catalog.resolve(
                 preset_id,

@@ -8,12 +8,12 @@
 
 services:
   #
-  # Define the 'watchtower' service for controlled image updates.
+  # Define the 'watchtower' service for host-wide image updates.
   #
   watchtower:
     # Docker image and container information
     <<: *default-container                                                # Pull in the default container information
-    image: containrrr/watchtower:${WATCHTOWER_TAG}                        # Run using the specified tag
+    image: nickfedor/watchtower:${WATCHTOWER_TAG}                         # Run using the specified floating tag
     container_name: ${COMPOSE_PROJECT_NAME}-watchtower-${WATCHTOWER_TAG}  # Namespace the container name by project and tag
     hostname: watchtower                                                  # Set the container hostname
 
@@ -23,13 +23,12 @@ services:
     # Define the container environment
     environment:
       <<: *default-environment                                     # Pull in the default environment
-      DOCKER_API_VERSION: ${WATCHTOWER_DOCKER_API_VERSION}         # Docker daemon API version
       WATCHTOWER_POLL_INTERVAL: ${WATCHTOWER_POLL_INTERVAL}        # Seconds between update checks
       WATCHTOWER_CLEANUP: ${WATCHTOWER_CLEANUP}                    # Clean old images after updates
-      WATCHTOWER_INCLUDE_STOPPED: ${WATCHTOWER_INCLUDE_STOPPED}    # Update stopped containers as well
-      WATCHTOWER_REVIVE_STOPPED: ${WATCHTOWER_REVIVE_STOPPED}      # Start stopped containers after update
-      WATCHTOWER_NOTIFICATIONS: ${WATCHTOWER_NOTIFICATIONS}        # Send notifications for updates
-      WATCHTOWER_NOTIFICATION_URL: ${WATCHTOWER_NOTIFICATION_URL}  # URL for webhook notifications
+      WATCHTOWER_INCLUDE_STOPPED: ${WATCHTOWER_INCLUDE_STOPPED}    # Include stopped containers when enabled
+      WATCHTOWER_REVIVE_STOPPED: ${WATCHTOWER_REVIVE_STOPPED}      # Start updated stopped containers when enabled
+      WATCHTOWER_NOTIFICATIONS: ${WATCHTOWER_NOTIFICATIONS}        # Optional notification backend
+      WATCHTOWER_NOTIFICATION_URL: ${WATCHTOWER_NOTIFICATION_URL}  # Optional notification destination
 
     # Mount host directories into the container
     volumes:

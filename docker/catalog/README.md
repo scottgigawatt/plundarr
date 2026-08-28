@@ -17,7 +17,8 @@ library profile to select its read-only mounts.
 Preset `core` services cannot be removed. Preset `defaults` are only preselected
 in the interactive picker and may be unchecked. Plundarr and Boudoirr use this
 boundary to default to qBittorrent while leaving SABnzbd, NZBGet, and Watchtower
-as independent opt-in services.
+as independent opt-in services. The focused Watchtower preset makes the same
+updater available as its own persistent or one-shot project.
 
 > [!IMPORTANT]
 > Keep service IDs aligned with their directory names. Maraudarr derives

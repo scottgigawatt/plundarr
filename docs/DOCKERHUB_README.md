@@ -39,6 +39,7 @@ preset directly:
 > ```sh
 > make ship PRESET=jellyfin
 > make ship PRESET=plex
+> make ship PRESET=watchtower
 > make ship PRESET=boudoirr ADD_SERVICES=jellyfin
 > make ship ADD_SERVICES=sonarr-anime
 > ```
@@ -48,6 +49,8 @@ SABnzbd, NZBGet, and Watchtower remain optional selections through
 `make configure` or `ADD_SERVICES`. Plundarr includes one Sonarr instance;
 `sonarr-anime` adds the optional second instance. Review
 `dist/<preset>/.env`, then start the generated stack with `make up PRESET=<preset>`.
+The standalone Watchtower project may instead run one update pass with
+`make watchtower-run-once PRESET=watchtower`.
 
 ## Image Details
 

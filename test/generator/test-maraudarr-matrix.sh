@@ -107,6 +107,7 @@ run_distribution_case plundarr
 run_distribution_case boudoirr
 run_distribution_case jellyfin
 run_distribution_case plex
+run_distribution_case watchtower
 run_distribution_case custom --add homepage
 
 #
@@ -166,6 +167,7 @@ run_case plex \
 #
 run_case standalone-jellyfin --preset jellyfin
 run_case standalone-plex --preset plex
+run_case standalone-watchtower --preset watchtower
 
 #
 # Default Boudoirr voyage with qBittorrent only.

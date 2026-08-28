@@ -36,18 +36,19 @@ dist/<preset>/
 Run these commands from the repository root. Make keeps the Docker wiring out
 of sight and prints only the useful status and Maraudarr output.
 
-| Command                    | What It Does                                                |
-| -------------------------- | ----------------------------------------------------------- |
-| `make ship`                | Prepares Maraudarr and generates the default Plundarr stack |
-| `make configure`           | Opens the interactive preset and service picker             |
-| `make presets`             | Lists every preset and its exact defaults                   |
-| `make services`            | Lists every selectable service                              |
-| `make pull-image`          | Pulls the latest published Maraudarr image from GHCR        |
-| `make build`               | Builds the Maraudarr image locally from this directory      |
-| `make test-unit`           | Runs Maraudarr's Python unit tests                          |
-| `make test-workflows`      | Checks workflow helpers and shared publishing policy        |
-| `make test`                | Runs unit, helper, policy, and real Compose matrix tests    |
-| `make build-platforms`     | Verifies all published CPU architectures                    |
+| Command                                      | What It Does                                                |
+| -------------------------------------------- | ----------------------------------------------------------- |
+| `make ship`                                  | Prepares Maraudarr and generates the default Plundarr stack |
+| `make configure`                             | Opens the interactive preset and service picker             |
+| `make presets`                               | Lists every preset and its exact defaults                   |
+| `make services`                              | Lists every selectable service                              |
+| `make watchtower-run-once PRESET=watchtower` | Runs one host update pass and exits                         |
+| `make pull-image`                            | Pulls the latest published Maraudarr image from GHCR        |
+| `make build`                                 | Builds the Maraudarr image locally from this directory      |
+| `make test-unit`                             | Runs Maraudarr's Python unit tests                          |
+| `make test-workflows`                        | Checks workflow helpers and shared publishing policy        |
+| `make test`                                  | Runs unit, helper, policy, and real Compose matrix tests    |
+| `make build-platforms`                       | Verifies all published CPU architectures                    |
 
 Maraudarr uses a matching local image first. When none exists, Make tries GHCR
 and automatically builds from this checkout if the published image is not yet
@@ -70,6 +71,7 @@ Add optional cargo without opening the interactive prompts:
 > make ship PRESET=boudoirr ADD_SERVICES=jellyfin
 > make ship PRESET=jellyfin
 > make ship PRESET=plex
+> make ship PRESET=watchtower
 > make ship ADD_SERVICES=sonarr-anime
 > ```
 
@@ -89,6 +91,11 @@ and opts into update checks:
 
 The default Plundarr voyage includes one Sonarr instance. `sonarr-anime` is an
 opt-in second instance with its own configuration and library path.
+
+The `watchtower` preset runs the maintained `nickfedor/watchtower:latest` image
+persistently. Use `make watchtower-run-once PRESET=watchtower` instead for one
+host-wide update pass that exits when complete. Run only one persistent
+Watchtower daemon per Docker host.
 
 ## What Be in This Image? 📦
 

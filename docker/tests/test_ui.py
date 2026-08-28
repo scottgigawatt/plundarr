@@ -41,6 +41,7 @@ class MaraudarrUiTests(unittest.TestCase):
         listing = output.getvalue()
         self.assertIn("🗺️ Preset voyages", listing)
         self.assertIn("🏴‍☠️ Plundarr", listing)
+        self.assertIn("🔭 Watchtower", listing)
         self.assertIn("Included by default:", listing)
 
     def test_plain_service_listing_groups_services_by_category(self) -> None:

@@ -71,7 +71,8 @@ Plundarr has two clearly separate parts:
 
 > [!NOTE]
 >
-> - `<preset>` is `plundarr`, `boudoirr`, `jellyfin`, `plex`, or `custom`.
+> - `<preset>` is `plundarr`, `boudoirr`, `jellyfin`, `plex`, `watchtower`, or
+>   `custom`.
 > - Add-ons change the services aboard without changing the directory name.
 > - For example, `make ship ADD_SERVICES=plex` would deploy to `dist/plundarr/`.
 
@@ -107,6 +108,7 @@ exact services included before ye add or remove anything:
 | 🔞&nbsp;`boudoirr`    | Whisparr automation                  | [Privateerr](https://github.com/scottgigawatt/privateerr), [Gluetun](https://github.com/qdm12/gluetun), [FlareSolverr](https://github.com/FlareSolverr/FlareSolverr), [Prowlarr](https://github.com/Prowlarr/Prowlarr), [qBittorrent](https://github.com/qbittorrent/qBittorrent), [Whisparr](https://github.com/Whisparr/Whisparr), and [Cleanuparr](https://github.com/Cleanuparr/Cleanuparr)                                                                                                                                                                                                                                                                                       |
 | 🎞️&nbsp;`jellyfin`    | Standalone movies and TV playback    | [Jellyfin](https://jellyfin.org/docs/)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | 🎬&nbsp;`plex`        | Standalone movies and TV playback    | [Plex Media Server](https://support.plex.tv/articles/categories/plex-media-server/)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| 🔭&nbsp;`watchtower`  | Standalone container image updates   | [Watchtower](https://watchtower.nickfedor.com/)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | 🧩&nbsp;`custom`      | A stack assembled service by service | Nothing; every service is selected explicitly                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 
 Plundarr and Boudoirr use qBittorrent as their only default downloader. On
@@ -124,7 +126,7 @@ required foundation services and shows the resolved fleet before writing it.
 | ⬇️&nbsp;Download&nbsp;clients | [qBittorrent](https://github.com/qbittorrent/qBittorrent), [SABnzbd](https://sabnzbd.org/wiki/), and [NZBGet](https://nzbget.com/documentation/)                                                                                                                                                                                                                              |
 | ⚙️&nbsp;Automation            | [FlareSolverr](https://github.com/FlareSolverr/FlareSolverr), [Prowlarr](https://wiki.servarr.com/prowlarr), [Radarr](https://wiki.servarr.com/radarr), [Sonarr](https://wiki.servarr.com/sonarr), [Sonarr Anime](https://wiki.servarr.com/sonarr), [Whisparr](https://wiki.servarr.com/whisparr), [Bazarr](https://wiki.bazarr.media/), and [Seerr](https://docs.seerr.dev/) |
 | 🎞️&nbsp;Media&nbsp;servers    | [Jellyfin](https://jellyfin.org/docs/) and [Plex Media Server](https://support.plex.tv/articles/categories/plex-media-server/)                                                                                                                                                                                                                                                |
-| 🧰&nbsp;Operations            | [Cleanuparr](https://cleanuparr.github.io/Cleanuparr/), [Speedtest Tracker](https://docs.speedtest-tracker.dev/), [Apprise](https://github.com/caronc/apprise-api), [Duplicati](https://docs.duplicati.com/), [Homepage](https://gethomepage.dev/latest/), and [Watchtower](https://containrrr.dev/watchtower/)                                                               |
+| 🧰&nbsp;Operations            | [Cleanuparr](https://cleanuparr.github.io/Cleanuparr/), [Speedtest Tracker](https://docs.speedtest-tracker.dev/), [Apprise](https://github.com/caronc/apprise-api), [Duplicati](https://docs.duplicati.com/), [Homepage](https://gethomepage.dev/latest/), and [Watchtower](https://watchtower.nickfedor.com/)                                                          |
 
 > [!NOTE]
 >
@@ -235,11 +237,33 @@ make ship ADD_SERVICES=sabnzbd
 make ship REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=nzbget
 ```
 
-#### 🔭 Add Watchtower Container Update Checks
+#### 🔭 Run Watchtower
+
+Add the persistent updater to an existing preset:
 
 ```sh
 make ship PRESET=boudoirr ADD_SERVICES=sabnzbd,watchtower
 ```
+
+Or generate Watchtower as its own persistent project:
+
+```sh
+make ship PRESET=watchtower
+make up PRESET=watchtower
+```
+
+Use that same generated project for one update pass that exits when complete:
+
+```sh
+make watchtower-run-once PRESET=watchtower
+```
+
+> [!WARNING]
+> Watchtower can update every running container visible through the Docker
+> socket unless that container carries an explicit
+> `com.centurylinklabs.watchtower.enable=false` label. Run only one persistent
+> Watchtower daemon per Docker host, and stop it before starting a one-shot
+> pass.
 
 - `ADD_SERVICES` and `REMOVE_SERVICES` accept comma-separated service IDs.
 - Preset core services cannot be removed.
