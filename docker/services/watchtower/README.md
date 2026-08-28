@@ -24,5 +24,5 @@ make watchtower-run-once PRESET=watchtower
 ```
 
 Stop a persistent Watchtower before starting a one-shot pass. Stopped
-containers stay untouched unless both stopped-container settings are changed
-deliberately in the generated `.env`.
+containers are included in update checks by default but remain stopped after
+an update unless `WATCHTOWER_REVIVE_STOPPED` is enabled in the generated `.env`.

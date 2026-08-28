@@ -147,11 +147,15 @@ class MaraudarrTests(unittest.TestCase):
         self.assertNotIn("DOCKER_API_VERSION", compose)
         self.assertIn('WATCHTOWER_TAG="${WATCHTOWER_TAG:-latest}"', environment)
         self.assertIn(
-            'WATCHTOWER_INCLUDE_STOPPED="${WATCHTOWER_INCLUDE_STOPPED:-false}"',
+            'WATCHTOWER_INCLUDE_STOPPED="${WATCHTOWER_INCLUDE_STOPPED:-true}"',
             environment,
         )
         self.assertIn(
             'WATCHTOWER_REVIVE_STOPPED="${WATCHTOWER_REVIVE_STOPPED:-false}"',
+            environment,
+        )
+        self.assertIn(
+            'WATCHTOWER_NOTIFICATIONS="${WATCHTOWER_NOTIFICATIONS:-shoutrrr}"',
             environment,
         )
 

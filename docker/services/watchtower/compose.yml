@@ -27,7 +27,7 @@ services:
       WATCHTOWER_CLEANUP: ${WATCHTOWER_CLEANUP}                    # Clean old images after updates
       WATCHTOWER_INCLUDE_STOPPED: ${WATCHTOWER_INCLUDE_STOPPED}    # Include stopped containers when enabled
       WATCHTOWER_REVIVE_STOPPED: ${WATCHTOWER_REVIVE_STOPPED}      # Start updated stopped containers when enabled
-      WATCHTOWER_NOTIFICATIONS: ${WATCHTOWER_NOTIFICATIONS}        # Optional notification backend
+      WATCHTOWER_NOTIFICATIONS: ${WATCHTOWER_NOTIFICATIONS}        # Notification backend
       WATCHTOWER_NOTIFICATION_URL: ${WATCHTOWER_NOTIFICATION_URL}  # Optional notification destination
 
     # Mount host directories into the container
