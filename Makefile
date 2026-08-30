@@ -503,7 +503,7 @@ DEPENDENCIES=docker
 # Targets that are not files (i.e. never up-to-date); these will run every
 # time the target is called or required.
 #
-.DEFAULT_GOAL := $(ALL)
+.DEFAULT_GOAL := $(HELP)
 .PHONY: $(TARGETS)
 
 #
