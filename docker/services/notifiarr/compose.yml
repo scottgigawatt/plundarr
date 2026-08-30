@@ -1,0 +1,33 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# compose.yml: Maraudarr service chart for Notifiarr.
+#
+
+services:
+  #
+  # Define the 'notifiarr' service for host and application notifications.
+  #
+  notifiarr:
+    # Docker image and container information
+    <<: *default-container                                              # Pull in the default container information
+    image: golift/notifiarr:${NOTIFIARR_TAG}                            # Run the official Notifiarr image
+    container_name: ${COMPOSE_PROJECT_NAME}-notifiarr-${NOTIFIARR_TAG}  # Namespace the container name by project and tag
+    hostname: notifiarr                                                 # Keep the client identity stable across recreations
+
+    # Define the container environment
+    environment:
+      <<: *default-environment  # Pull in the default environment
+
+    # Define the host and container ports
+    ports:
+      - ${NOTIFIARR_WEBUI_PORT}:5454  # Notifiarr web UI port
+
+    # Mount host directories into the container
+    volumes:
+      - ${NOTIFIARR_CONFIG_PATH}:/config:rw  # Persistent Notifiarr configuration
+      - /var/run/utmp:/var/run/utmp:ro       # Count logged-in host users
+      - /etc/machine-id:/etc/machine-id:ro   # Keep the host identity stable
+      - /etc/localtime:/etc/localtime:ro     # Use the host timezone data

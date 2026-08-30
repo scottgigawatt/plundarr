@@ -41,6 +41,7 @@ class MaraudarrUiTests(unittest.TestCase):
         listing = output.getvalue()
         self.assertIn("🗺️ Preset voyages", listing)
         self.assertIn("🏴‍☠️ Plundarr", listing)
+        self.assertIn("🎭 Duplex", listing)
         self.assertIn("🔭 Watchtower", listing)
         self.assertIn("Included by default:", listing)
 
@@ -57,7 +58,25 @@ class MaraudarrUiTests(unittest.TestCase):
         self.assertIn("🧰 Service cargo", listing)
         self.assertIn("🛡️ VPN foundation", listing)
         self.assertIn("⬇️ Download clients", listing)
+        self.assertIn("🎭 Plex utilities", listing)
         self.assertIn("qBittorrent", listing)
+
+    def test_duplex_success_reminds_users_to_review_external_paths(self) -> None:
+        """Call out the host-specific Kometa and Plex paths before launch."""
+
+        output = io.StringIO()
+        plan = self.catalog.resolve("duplex")
+        with redirect_stdout(output):
+            UI(plain=True).success(
+                plan,
+                "dist/duplex/docker-compose.yml",
+                "dist/duplex/.env",
+                "dist/duplex/config",
+            )
+
+        listing = output.getvalue()
+        self.assertIn("Check Kometa, Plex, and config paths in .env.", listing)
+        self.assertIn("make up PRESET=duplex", listing)
 
     @unittest.skipUnless(RICH_AVAILABLE, "Rich is not installed")
     def test_styled_tables_keep_emoji_outside_grid_cells(self) -> None:

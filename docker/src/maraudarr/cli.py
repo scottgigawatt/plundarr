@@ -148,8 +148,8 @@ def main(arguments: list[str] | None = None) -> int:
         ``SystemExit`` behavior.
     """
     raw_arguments = list(sys.argv[1:] if arguments is None else arguments)
-    # Accept --plain before or after the subcommand even though argparse defines
-    # it globally, then restore the normalized flag on the parsed namespace.
+
+    # Normalize --plain so argparse accepts it before or after the subcommand.
     plain_requested = "--plain" in raw_arguments
     raw_arguments = [item for item in raw_arguments if item != "--plain"]
     arguments_namespace = _parser().parse_args(raw_arguments)

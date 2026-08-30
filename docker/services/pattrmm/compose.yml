@@ -1,0 +1,31 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# compose.yml: Maraudarr service chart for PATTRMM.
+#
+
+services:
+  #
+  # Define the 'pattrmm' service for Kometa helper metadata generation.
+  #
+  pattrmm:
+    # Docker image and container information
+    <<: *default-container                                          # Pull in the default container information
+    image: ghcr.io/insertdisc/pattrmm:${PATTRMM_TAG}                # Run using the specified floating tag
+    container_name: ${COMPOSE_PROJECT_NAME}-pattrmm-${PATTRMM_TAG}  # Namespace the container name by project and tag
+    hostname: pattrmm                                               # Set the container hostname
+
+    # Define the container environment
+    environment:
+      <<: *default-environment       # Pull in the default environment
+      PATTRMM_TIME: ${PATTRMM_TIME}  # Set the daily run time
+      PUID: ${PATTRMM_PUID}          # Set the host user ID
+      GUID: ${PATTRMM_PGID}          # Set the host group ID expected by PATTRMM
+
+    # Mount PATTRMM state and the independently managed Kometa configuration
+    volumes:
+      - ${PATTRMM_CONFIG_PATH}/data:/data:rw                # Generated metadata and working data
+      - ${PATTRMM_CONFIG_PATH}/preferences:/preferences:rw  # PATTRMM preferences and templates
+      - ${KOMETA_CONFIG_PATH}:/config:rw                    # Kometa config and generated YAML files

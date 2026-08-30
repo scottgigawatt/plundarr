@@ -1,0 +1,27 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# compose.yml: Maraudarr service chart for ImageMaid.
+#
+
+services:
+  #
+  # Define the 'imagemaid' service for Plex artwork maintenance.
+  #
+  imagemaid:
+    # Docker image and container information
+    <<: *default-container                                                # Pull in the default container information
+    image: kometateam/imagemaid:${IMAGE_MAID_TAG}                         # Run the official ImageMaid image
+    container_name: ${COMPOSE_PROJECT_NAME}-imagemaid-${IMAGE_MAID_TAG}   # Namespace the container name by project and tag
+    hostname: imagemaid                                                   # Set the container hostname
+
+    # Define the container environment
+    environment:
+      <<: *default-environment  # Pull in the default environment
+
+    # Mount ImageMaid state and the Plex application-data directory
+    volumes:
+      - ${IMAGEMAID_CONFIG_PATH}:/config:rw  # ImageMaid options, cache, database, and logs
+      - ${IMAGEMAID_PLEX_PATH}:/plex:rw      # Plex Cache, Metadata, and Plug-in Support directories

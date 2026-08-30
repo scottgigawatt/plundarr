@@ -1,0 +1,51 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# compose.yml: Maraudarr one-shot service chart for Kometa Overlay Reset.
+#
+
+services:
+  #
+  # Define the 'overlay-reset' recovery tool without joining normal stack startup.
+  #
+  overlay-reset:
+    # Docker image and container information
+    <<: *default-container                                                      # Pull in the default container information
+    image: kometateam/overlay-reset:${OVERLAY_RESET_TAG}                        # Run the official Overlay Reset image
+    container_name: ${COMPOSE_PROJECT_NAME}-overlay-reset-${OVERLAY_RESET_TAG}  # Namespace the container name by project and tag
+    hostname: overlay-reset                                                     # Set the container hostname
+
+    # Keep this destructive utility outside ordinary Compose startup
+    profiles:
+      - tools
+    restart: "no"
+
+    # Define the container environment
+    environment:
+      <<: *default-environment                           # Pull in the default environment
+      PLEX_URL: ${OVERLAY_RESET_PLEX_URL}                # Plex server URL
+      PLEX_TOKEN: ${OVERLAY_RESET_PLEX_TOKEN}            # Plex authentication token
+      PLEX_LIBRARY: ${OVERLAY_RESET_PLEX_LIBRARY}        # Plex library to inspect or reset
+      KOMETA_ASSET: ${OVERLAY_RESET_KOMETA_ASSET}        # Optional Kometa asset folder
+      KOMETA_ORIGINAL: ${OVERLAY_RESET_KOMETA_ORIGINAL}  # Optional Kometa originals folder
+      TMDBAPI: ${OVERLAY_RESET_TMDB_API_KEY}             # Optional TMDb API key
+      START: ${OVERLAY_RESET_START}                      # Optional first Plex item
+      ITEMS: ${OVERLAY_RESET_ITEMS}                      # Optional pipe-separated item list
+      LABELS: ${OVERLAY_RESET_LABELS}                    # Optional pipe-separated label list
+      TIMEOUT: ${OVERLAY_RESET_TIMEOUT}                  # Plex request timeout
+      NO_VERIFY_SSL: ${OVERLAY_RESET_NO_VERIFY_SSL}      # Disable TLS verification when explicitly enabled
+      DRY_RUN: ${OVERLAY_RESET_DRY_RUN}                  # Report changes without modifying Plex
+      KOMETA_FLAT: ${OVERLAY_RESET_KOMETA_FLAT}          # Use flat Kometa asset paths
+      NO_MAIN: ${OVERLAY_RESET_NO_MAIN}                  # Skip main show or movie posters
+      SEASON: ${OVERLAY_RESET_SEASON}                    # Restore season posters
+      EPISODE: ${OVERLAY_RESET_EPISODE}                  # Restore episode posters
+      IGNORE_RESUME: ${OVERLAY_RESET_IGNORE_RESUME}      # Ignore automatic resume state
+      TRACE: ${OVERLAY_RESET_TRACE}                      # Enable trace logging
+      LOG_REQUESTS: ${OVERLAY_RESET_LOG_REQUESTS}        # Log every request
+
+    # Mount tool state and read-only Kometa assets
+    volumes:
+      - ${OVERLAY_RESET_CONFIG_PATH}:/config:rw  # Logs and automatic resume state
+      - ${KOMETA_CONFIG_PATH}:/kometa:ro         # Kometa assets and original posters

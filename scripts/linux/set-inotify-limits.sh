@@ -133,7 +133,9 @@ if [ -d /etc/sysctl.d ]; then
 
     # Use a here-document to write the configuration file.
     cat > "$CONF_FILE" <<EOF
-# Managed by plundarr: inotify limits for Plex
+#
+# Managed by Plundarr: inotify limits for Plex
+#
 fs.inotify.max_user_watches=$WATCHES
 fs.inotify.max_user_instances=$INSTANCES
 fs.inotify.max_queued_events=$QUEUED_EVENTS

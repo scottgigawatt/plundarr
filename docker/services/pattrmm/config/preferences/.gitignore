@@ -1,0 +1,3 @@
+# Preserve this generated state directory without committing runtime files.
+*
+!.gitignore

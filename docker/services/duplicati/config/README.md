@@ -10,10 +10,8 @@ Duplicati be yer steadfast mate, keepin' backups of all yer important data, ensu
 
 The LinuxServer Duplicati image requires `DUPLICATI_SETTINGS_ENCRYPTION_KEY` for a new config directory. If that key be missing, Duplicati stops during init and the web UI never opens on port `8200`.
 
-Set `DUPLICATI_SETTINGS_ENCRYPTION_KEY` and `DUPLICATI_WEBSERVICE_PASSWORD` in
-the generated preset's `.env` before launchin' a fresh stack.
+Set `DUPLICATI_SETTINGS_ENCRYPTION_KEY` and `DUPLICATI_WEBSERVICE_PASSWORD` in the generated preset's `.env` before launchin' a fresh stack.
 
-If ye need more details, inspect yer generated `dist/<preset>/docker-compose.yml`
-and `.env` files.
+If ye need more details, inspect yer generated `dist/<preset>/docker-compose.yml` and `.env` files.
 
 Arrr, may yer backups be as safe and sound as gold doubloons in a pirate's chest! 💰🏴‍☠️

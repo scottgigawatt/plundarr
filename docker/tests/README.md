@@ -8,13 +8,8 @@
 
 # Maraudarr Test Hold 🧪
 
-Unit tests here cover catalog resolution, comment-preserving rendering,
-environment-value preservation, generated secrets, Homepage cards, and config
-directory generation.
+Unit tests here cover catalog resolution, comment-preserving rendering, environment-value preservation, generated secrets, Homepage cards, and config directory generation.
 
-The repository-level matrix in `test/generator/test-maraudarr-matrix.sh` complements
-these tests with real `docker compose config` validation across representative
-presets and service combinations.
+The repository-level matrix in `test/generator/test-maraudarr-matrix.sh` complements these tests with real `docker compose config` validation across representative presets and service combinations.
 
-Coverage-guided harnesses live in `fuzz/`. ClusterFuzzLite packages them with
-Atheris and exercises relevant parser changes during pull-request validation.
+Coverage-guided harnesses live in `fuzz/`. ClusterFuzzLite packages them with Atheris and exercises relevant parser changes during pull-request validation.

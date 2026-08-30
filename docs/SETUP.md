@@ -1,9 +1,6 @@
 # Plundarr Docker Setup Guide ⚓🐳🏴‍☠️
 
-Avast ye! This guide rigs a Docker Compose fleet with PIA WireGuard and port
-forwarding. Plundarr is tested on Synology DiskStations running DSM
-7.4.1-90080 and on macOS Tahoe 26; compatible Linux Docker hosts can sail by
-the same chart. 🏴‍☠️
+Avast ye! This guide rigs a Docker Compose fleet with PIA WireGuard and port forwarding. Plundarr is tested on Synology DiskStations running DSM 7.4 and on macOS Tahoe 26; compatible Linux Docker hosts can sail by the same chart. 🏴‍☠️
 
 ## Choose Yer Voyage 🧭
 
@@ -24,26 +21,23 @@ Or generate a known voyage directly:
 > make ship PRESET=boudoirr ADD_SERVICES=jellyfin
 > make ship PRESET=jellyfin
 > make ship PRESET=plex
+> make ship PRESET=duplex
 > make ship PRESET=watchtower
 > make ship ADD_SERVICES=sonarr-anime
 > ```
 
-Plundarr and Boudoirr use qBittorrent as their only default downloader.
-SABnzbd, NZBGet, and Watchtower remain optional choices. Use
-`ADD_SERVICES` and `REMOVE_SERVICES` for repeatable changes:
+Plundarr and Boudoirr use qBittorrent as their only default downloader and include Watchtower as a removable default. SABnzbd and NZBGet remain optional choices. Use `ADD_SERVICES` and `REMOVE_SERVICES` for repeatable changes:
 
-For Usenet only, remove the default torrent client and its cleanup companion.
-To keep torrents and add Usenet plus update checks, leave the defaults intact:
+For Usenet only, remove the default torrent client and its cleanup companion. To keep torrents and add Usenet plus update checks, leave the defaults intact:
 
 > [!TIP]
 >
 > ```sh
 > make ship REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=sabnzbd
-> make ship PRESET=boudoirr ADD_SERVICES=sabnzbd,watchtower
+> make ship PRESET=boudoirr ADD_SERVICES=sabnzbd
 > ```
 
-Default Plundarr includes one Sonarr instance for television. The separate
-Sonarr Anime instance appears only when selected through `make configure` or `ADD_SERVICES=sonarr-anime`.
+Default Plundarr includes one Sonarr instance for television. The separate Sonarr Anime instance appears only when selected through `make configure` or `ADD_SERVICES=sonarr-anime`.
 
 Maraudarr generates each voyage using the following directory structure:
 
@@ -56,8 +50,7 @@ Review that preset's `.env` before launch, especially user IDs, host paths, time
 
 ## Chartin' the Docker Network Waters 🌍🧭
 
-Maraudarr assigns each preset a distinct Docker IPAM network. Most captains do
-not need to change these values.
+Maraudarr assigns each preset a distinct Docker IPAM network. Most captains do not need to change these values.
 
 Fresh presets receive distinct project and network defaults:
 
@@ -67,36 +60,22 @@ Fresh presets receive distinct project and network defaults:
 | Boudoirr   | `boudoirr`   | `172.29.0.0/16` | Selected service ports offset by `10000` |
 | Jellyfin   | `jellyfin`   | `172.30.0.0/16` | Jellyfin `28096` (`8096` + `20000`)      |
 | Plex       | `plex`       | `172.31.0.0/16` | Plex host networking                     |
+| Duplex     | `duplex`     | `172.26.0.0/16` | Tautulli `8181`; Notifiarr `5454`        |
 | Watchtower | `watchtower` | `172.25.0.0/16` | No published ports                       |
 | Custom     | `custom`     | `172.27.0.0/16` | Selected service ports offset by `30000` |
 
-Container names include the project, service, and image tag, such as
-`plundarr-bazarr-latest`. The default Plundarr, default Boudoirr, standalone
-Jellyfin, standalone Plex, and standalone Watchtower voyages can therefore run
-side by side without sharing container names, subnets, or published ports. The
-host-port bands retain the familiar tail of common ports: qBittorrent is `8080`
-for Plundarr and `18080` for Boudoirr. Existing values in a preset's `.env`
-remain preserved during regeneration, so review and change older project names,
-network values, or ports before placing an existing deployment beside another
-preset.
+Container names include the project, service, and image tag, such as `plundarr-bazarr-latest`. Fresh preset identities therefore avoid sharing container names, subnets, or published ports. The host-port bands retain the familiar tail of common ports: qBittorrent is `8080` for Plundarr and `18080` for Boudoirr. Existing values in a preset's `.env` remain preserved during regeneration, so review and change older project names, network values, or ports before placing an existing deployment beside another preset.
 
-Change the generated values whenever they overlap another Docker network, VPN,
-LAN route, or host service. When a collision exists, update
-`COMPOSE_NETWORK_SUBNET`, `COMPOSE_NETWORK_IP_RANGE`, and
-`COMPOSE_NETWORK_GATEWAY` together in that preset's `.env`; otherwise keep the
-generated defaults. See the [Docker Compose IPAM documentation](https://docs.docker.com/compose/compose-file/06-networks/#ipam)
-for custom network planning. Plex uses host networking, so only one Plex server
-can claim its standard host ports unless Plex itself is configured differently.
+Change the generated values whenever they overlap another Docker network, VPN, LAN route, or host service. When a collision exists, update `COMPOSE_NETWORK_SUBNET`, `COMPOSE_NETWORK_IP_RANGE`, and `COMPOSE_NETWORK_GATEWAY` together in that preset's `.env`; otherwise keep the generated defaults. See the [Docker Compose IPAM documentation](https://docs.docker.com/compose/compose-file/06-networks/#ipam) for custom network planning. Plex uses host networking, so only one Plex server can claim its standard host ports unless Plex itself is configured differently.
 
 ## Watchtower Update Modes 🔭
 
-Use Watchtower as an optional persistent service in another preset, or generate
-its focused standalone project:
+Plundarr and Boudoirr include Watchtower as a removable persistent default. Duplex leaves it unselected, and any preset may add it explicitly. Generate its focused standalone project when Watchtower should live on its own:
 
 > [!TIP]
 >
 > ```sh
-> make ship ADD_SERVICES=watchtower
+> make ship PRESET=duplex ADD_SERVICES=watchtower
 > make ship PRESET=watchtower
 > make up PRESET=watchtower
 > ```
@@ -110,11 +89,51 @@ The standalone project can instead perform one update pass and exit:
 > ```
 
 > [!WARNING]
-> Watchtower controls the host Docker daemon through its socket. By default it
-> examines eligible running and stopped containers across that Docker host, not
-> only services in the generated Compose project. Containers labeled
-> `com.centurylinklabs.watchtower.enable=false` remain excluded. Run one
-> persistent Watchtower daemon per host and stop it before a one-shot pass.
+> Watchtower controls the host Docker daemon through its socket. By default it examines eligible running and stopped containers across that Docker host, not only services in the generated Compose project. Containers labeled `com.centurylinklabs.watchtower.enable=false` remain excluded. Run one persistent Watchtower daemon per host and stop it before a one-shot pass.
+
+## Duplex Plex Utilities 🎭
+
+Generate the Duplex preset directly:
+
+> [!TIP]
+>
+> ```sh
+> make ship PRESET=duplex
+> ```
+
+Kometa, ImageMaid, and Tautulli are Duplex core services. PATTRMM, Notifiarr, and Overlay Reset are included by default but removable through `make configure` or `REMOVE_SERVICES`. Watchtower remains available through `ADD_SERVICES=watchtower` but is not selected by Duplex.
+
+Before launch, review `dist/duplex/.env` and set these host-specific values:
+
+| Setting                           | Purpose                                                                |
+| --------------------------------- | ---------------------------------------------------------------------- |
+| `KOMETA_CONFIG_PATH`              | Independent checkout containing Kometa `config.yml`, assets, and files |
+| `KOMETA_TIMES`                    | Comma-separated stable-image run times in `HH:MM` format               |
+| `IMAGEMAID_PLEX_PATH`             | Plex directory containing `Cache`, `Metadata`, and `Plug-in Support`   |
+| `TAUTULLI_PUID` / `TAUTULLI_PGID` | Host identity allowed to write Tautulli state                          |
+| `TAUTULLI_WEBUI_PORT`             | Tautulli host port; defaults to `8181`                                 |
+| `NOTIFIARR_WEBUI_PORT`            | Notifiarr host port; defaults to `5454`                                |
+
+Kometa's configuration remains separate from Plundarr. Point `KOMETA_CONFIG_PATH` at an existing host checkout or clone a configuration repository there yourself; Maraudarr neither creates a Git submodule nor manages that repository. This follows Kometa's supported Docker pattern of mounting the configuration directory at `/config`. ImageMaid likewise follows its supported two-mount pattern with writable `/config` and `/plex` paths.
+
+Start the persistent Duplex services normally:
+
+> [!TIP]
+>
+> ```sh
+> make up PRESET=duplex
+> ```
+
+Overlay Reset stays behind the `tools` Compose profile, so the command above does not start it. To perform one disposable dry-run pass:
+
+> [!CAUTION]
+> Kometa documents Overlay Reset as destructive with no undo and recommends it only as a last-resort repair tool. Confirm the exact Plex URL, token, and library in `.env`, leave `OVERLAY_RESET_DRY_RUN=True`, and inspect the output before deliberately changing that value to `False`.
+>
+> ```sh
+> make kometa-overlay-reset PRESET=duplex
+> ```
+
+See Kometa's current [Docker walkthrough](https://kometa.wiki/en/latest/kometa/install/docker/), [runtime variable reference](https://kometa.wiki/en/latest/kometa/environmental/), [ImageMaid guide](https://kometa.wiki/en/latest/kometa/scripts/imagemaid/), and [Overlay Reset guide](https://kometa.wiki/en/latest/kometa/scripts/overlay-reset/) for application-level options.
 
 ## Batten Down the Hatches 🖥️⚓
 
@@ -125,13 +144,9 @@ Fer them sailin' with Synology DiskStations, here be the riggin' details ye need
 > [!WARNING]
 > 🏴‍☠️ Misfirin' yer firewall could leave yer crew stranded! Double-check them source IPs and subnet details before ye weigh anchor.
 
-If the Synology firewall is enabled, add one allow rule for every deployed
-preset that uses a bridge network. One Plundarr deployment needs one rule;
-deploying Plundarr, Boudoirr, and Jellyfin side by side needs three rules. Plex
-uses host networking and does not need a preset-subnet rule.
+If the Synology firewall is enabled, add one allow rule for every deployed preset that uses a bridge network. One Plundarr deployment needs one rule; deploying Plundarr, Boudoirr, and Jellyfin side by side needs three rules. Plex uses host networking and does not need a preset-subnet rule.
 
-Use the subnet from that preset's generated `.env`. For the default Plundarr
-voyage:
+Use the subnet from that preset's generated `.env`. For the default Plundarr voyage:
 
 1. Open **Control Panel** → **Security** → **Firewall**.
 2. Select **Edit Rules**, then select **Create**.
@@ -147,22 +162,17 @@ voyage:
 
 4. Select **OK** to save the rule.
 
-Repeat the rule with `172.29.0.0` for Boudoirr, `172.30.0.0` for standalone
-Jellyfin, or the generated subnet for a custom voyage. Every listed preset uses
-the `255.255.0.0` mask by default. These rules allow internal container traffic
-while Gluetun carries selected downloader traffic through PIA.
+Repeat the rule with `172.29.0.0` for Boudoirr, `172.30.0.0` for standalone Jellyfin, `172.26.0.0` for Duplex, or the generated subnet for a custom voyage. Every listed preset uses the `255.255.0.0` mask by default. These rules allow internal container traffic while Gluetun carries selected downloader traffic through PIA.
 
 ### Launchin' Yer Fleet 📦🚀
 
 > [!NOTE]
-> 📜 Plundarr is tested with Container Manager on DSM 7.4.1-90080. Keep DSM and
-> Container Manager current before launching the fleet.
+> 📜 Plundarr is tested with Container Manager on DSM 7.4. Keep DSM and Container Manager current before launching the fleet.
 
 To deploy a project using Synology Container Manager:
 
 1. Log in to the Synology DSM web interface.
-2. Run `make configure` from the cloned repository to chart the selected
-   `dist/<preset>/docker-compose.yml`, `.env`, and `config/` directories.
+2. Run `make configure` from the cloned repository to chart the selected `dist/<preset>/docker-compose.yml`, `.env`, and `config/` directories.
 3. Open **Container Manager**, then open the **Project** tab.
 4. Select **Create** and use these values:
 

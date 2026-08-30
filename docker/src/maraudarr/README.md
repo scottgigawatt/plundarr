@@ -1,7 +1,6 @@
 # Maraudarr Python Package ⚒️
 
-This package owns catalog loading, dependency resolution, comment-preserving
-rendering, config seeding, and the terminal interface.
+This package owns catalog loading, dependency resolution, comment-preserving rendering, config seeding, and the terminal interface.
 
 | Module       | Responsibility                                       |
 | :----------- | :--------------------------------------------------- |
@@ -14,7 +13,4 @@ rendering, config seeding, and the terminal interface.
 
 Run the package tests from the repository root with `make test`.
 
-The [Maraudarr developer guide](../../../docs/development/maraudarr/index.md)
-explains the complete generation flow. Public Python interfaces are rendered
-from their source docstrings in the
-[generated API reference](../../../docs/development/maraudarr/reference/index.md).
+The [Maraudarr developer guide](../../../docs/development/maraudarr/index.md) explains the complete generation flow. Public Python interfaces are rendered from their source docstrings in the [generated API reference](../../../docs/development/maraudarr/reference/index.md).

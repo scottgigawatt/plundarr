@@ -315,6 +315,41 @@ grep -F 'The selected deployment does not include watchtower.' \
     "${test_output}/watchtower-missing.out" >/dev/null
 
 #
+# Keep Kometa Overlay Reset profile-gated, one-shot, and disposable.
+#
+NO_COLOR=1 make --dry-run kometa-overlay-reset \
+    DOCKER_COMPOSE=true \
+    DEPENDENCIES=true \
+    ENV_FILE="${test_output}/stack.env" \
+    COMPOSE_ENV_FILE="${test_output}/stack.env" \
+    COMPOSE_FILE="${test_output}/compose.yml" \
+    PROFILED_COMPOSE_SERVICES=overlay-reset \
+    >"${test_output}/overlay-reset.out"
+grep -F 'ps --quiet "overlay-reset"' \
+    "${test_output}/overlay-reset.out" >/dev/null
+grep -F 'pull "overlay-reset"' \
+    "${test_output}/overlay-reset.out" >/dev/null
+grep -F 'run --rm --no-deps "overlay-reset"' \
+    "${test_output}/overlay-reset.out" >/dev/null
+
+#
+# Reject one-shot execution when the selected chart omits Overlay Reset.
+#
+if NO_COLOR=1 make --no-print-directory kometa-overlay-reset \
+    DOCKER_COMPOSE=true \
+    DEPENDENCIES=true \
+    ENV_FILE="${test_output}/stack.env" \
+    COMPOSE_ENV_FILE="${test_output}/stack.env" \
+    COMPOSE_FILE="${test_output}/compose.yml" \
+    PROFILED_COMPOSE_SERVICES=homepage \
+    >"${test_output}/overlay-reset-missing.out" 2>&1; then
+    echo "The one-shot target accepted a deployment without Overlay Reset." >&2
+    exit 1
+fi
+grep -F 'The selected deployment does not include overlay-reset.' \
+    "${test_output}/overlay-reset-missing.out" >/dev/null
+
+#
 # Keep Plundarr and Maraudarr cleanup separate without deleting application config.
 #
 NO_COLOR=1 make --dry-run nuke \
@@ -360,7 +395,7 @@ common_targets=$(awk '
         exit
     }
 ' Makefile)
-test "${common_targets}" = "BUILD_DEPENDS CHECK_ENV CHECK_PIA ENSURE_BUILDX_BUILDER ALL UP WATCHTOWER_RUN_ONCE DOWN PS LOGS CONFIG ENV PRINT_CONFIG PRINT_ENV BUILD BUILD_PLATFORMS TEST TEST_MAKE_HELPERS TEST_WORKFLOWS TEST_E2E BACKUP RESTORE_TEST_CONFIG CLEAN_TEST CLEAN NUKE HELP"
+test "${common_targets}" = "BUILD_DEPENDS CHECK_ENV CHECK_PIA ENSURE_BUILDX_BUILDER ALL UP WATCHTOWER_RUN_ONCE KOMETA_OVERLAY_RESET DOWN PS LOGS CONFIG ENV PRINT_CONFIG PRINT_ENV BUILD BUILD_PLATFORMS TEST TEST_MAKE_HELPERS TEST_WORKFLOWS TEST_E2E BACKUP RESTORE_TEST_CONFIG CLEAN_TEST CLEAN NUKE HELP"
 common_recipe_order=$(awk '
     /^\$\([A-Z0-9_]+\)(:| )/ {
         target = $0
@@ -370,7 +405,7 @@ common_recipe_order=$(awk '
             targets = targets " "
         }
         targets = targets target
-        if (++count == 26) {
+        if (++count == 27) {
             print targets
             exit
         }
@@ -406,7 +441,7 @@ project_recipe_order=$(awk -v project_targets=" ${project_targets} " '
     END { print targets }
 ' Makefile)
 test "${project_recipe_order}" = "${project_targets}"
-grep -F ".DEFAULT_GOAL := \$(ALL)" Makefile >/dev/null
+grep -F ".DEFAULT_GOAL := \$(HELP)" Makefile >/dev/null
 for target_group in COMMON_TARGETS PROJECT_TARGETS INTERNAL_TARGETS; do
     grep -F "${target_group}=" Makefile >/dev/null
 done

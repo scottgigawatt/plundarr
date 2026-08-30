@@ -9,19 +9,6 @@
 
 vulnerabilities:
   #
-  # Docker Compose carries the Moby CVE, but Maraudarr performs only offline
-  # validation without daemon or authorization-plugin access. Keep the
-  # exception scoped to that binary and require review at the expiry date.
-  #
-  - id: CVE-2026-34040
-    paths:
-      - usr/local/bin/docker-compose
-    expired_at: 2026-08-31
-    statement: >-
-      Maraudarr invokes only offline Compose config without a Docker socket;
-      the vulnerable Moby daemon authorization-plugin path is unreachable.
-
-  #
   # Docker Compose carries the Go module-verification CVEs, but Maraudarr never
   # downloads modules or contacts GOPROXY or GOSUMDB. Keep both exceptions
   # scoped to the offline validation binary until an upstream release updates

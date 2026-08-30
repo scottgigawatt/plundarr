@@ -172,7 +172,9 @@ fi
 
 host_version=$(interpreter_version "${python_bin}")
 
+#
 # Require the documented patch release so dependency hashes remain reproducible.
+#
 if [ "${host_version}" != "${python_version}" ]; then
     printf 'Python %s is required; %s reports %s.\n' \
         "${python_version}" "${python_bin}" "${host_version}" >&2
@@ -183,12 +185,16 @@ fi
 
 environment_version=""
 
+#
 # Read the existing environment version only when its interpreter is executable.
+#
 if [ -x "${python_target}" ]; then
     environment_version=$(interpreter_version "${python_target}")
 fi
 
+#
 # Replace only an absent or version-mismatched documentation environment.
+#
 if [ "${environment_version}" != "${python_version}" ]; then
     rm -rf -- "${venv_path}"
 
