@@ -49,7 +49,7 @@ Normal user-facing commands use `--output-root` so a resolved preset owns its ow
 
 Writes to Compose and environment output must remain atomic. Config generation may add missing seed files and refresh project-owned README files, but must not delete databases or replace user-owned application configuration.
 
-Profile-gated utilities remain selectable services but must not appear in ordinary Compose startup. Overlay Reset uses the `tools` profile and is invoked through the repository's `make overlay-reset PRESET=duplex` target.
+Profile-gated utilities remain selectable services but must not appear in ordinary Compose startup. Overlay Reset uses the `tools` profile and is invoked through the repository's `make kometa-overlay-reset PRESET=duplex` target.
 
 ## Python Rules
 

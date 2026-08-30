@@ -130,7 +130,7 @@ Overlay Reset stays behind the `tools` Compose profile, so the command above doe
 > Kometa documents Overlay Reset as destructive with no undo and recommends it only as a last-resort repair tool. Confirm the exact Plex URL, token, and library in `.env`, leave `OVERLAY_RESET_DRY_RUN=True`, and inspect the output before deliberately changing that value to `False`.
 >
 > ```sh
-> make overlay-reset PRESET=duplex
+> make kometa-overlay-reset PRESET=duplex
 > ```
 
 See Kometa's current [Docker walkthrough](https://kometa.wiki/en/latest/kometa/install/docker/), [runtime variable reference](https://kometa.wiki/en/latest/kometa/environmental/), [ImageMaid guide](https://kometa.wiki/en/latest/kometa/scripts/imagemaid/), and [Overlay Reset guide](https://kometa.wiki/en/latest/kometa/scripts/overlay-reset/) for application-level options.

@@ -3,7 +3,7 @@
 Provides Kometa Overlay Reset as a profile-gated, disposable recovery tool. Normal `make up` runs do not start it. Invoke it explicitly with:
 
 ```sh
-make overlay-reset PRESET=duplex
+make kometa-overlay-reset PRESET=duplex
 ```
 
 > [!CAUTION]

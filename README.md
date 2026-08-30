@@ -249,7 +249,7 @@ make watchtower-run-once PRESET=watchtower
 Review the generated Duplex `.env`, leave `OVERLAY_RESET_DRY_RUN=True`, and run:
 
 ```sh
-make overlay-reset PRESET=duplex
+make kometa-overlay-reset PRESET=duplex
 ```
 
 > [!CAUTION]

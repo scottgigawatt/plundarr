@@ -39,7 +39,7 @@ Run these commands from the repository root. Make keeps the Docker wiring out of
 | `make presets` | Lists every preset and its exact defaults |
 | `make services` | Lists every selectable service |
 | `make watchtower-run-once PRESET=watchtower` | Runs one host update pass and exits |
-| `make overlay-reset PRESET=duplex` | Runs profile-gated Overlay Reset once and exits |
+| `make kometa-overlay-reset PRESET=duplex` | Runs profile-gated Kometa Overlay Reset once and exits |
 | `make pull-image` | Pulls the latest published Maraudarr image from GHCR |
 | `make build` | Builds the Maraudarr image locally from this directory |
 | `make test-unit` | Runs Maraudarr's Python unit tests |
@@ -86,7 +86,7 @@ The default Plundarr voyage includes one Sonarr instance. `sonarr-anime` is an o
 
 The `watchtower` preset runs the maintained `nickfedor/watchtower:latest` image persistently. Use `make watchtower-run-once PRESET=watchtower` instead for one host-wide update pass that exits when complete. Run only one persistent Watchtower daemon per Docker host.
 
-The `duplex` preset uses Kometa, ImageMaid, PATTRMM, Tautulli, Notifiarr, and Overlay Reset. Kometa's config is an external checkout selected with `KOMETA_CONFIG_PATH`; Maraudarr does not create a submodule or manage that repository. PATTRMM, Notifiarr, and Overlay Reset are removable defaults, while Watchtower remains available as an explicit addition. The Overlay Reset service is profile-gated and defaults to a dry run when invoked with `make overlay-reset PRESET=duplex`.
+The `duplex` preset uses Kometa, ImageMaid, PATTRMM, Tautulli, Notifiarr, and Overlay Reset. Kometa's config is an external checkout selected with `KOMETA_CONFIG_PATH`; Maraudarr does not create a submodule or manage that repository. PATTRMM, Notifiarr, and Overlay Reset are removable defaults, while Watchtower remains available as an explicit addition. The Kometa Overlay Reset service is profile-gated and defaults to a dry run when invoked with `make kometa-overlay-reset PRESET=duplex`.
 
 ## What Be in This Image? 📦
 

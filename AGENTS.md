@@ -111,7 +111,7 @@ Comment every Dockerfile build stage and each non-obvious instruction group. Sta
 
 The generated Plundarr deployment must remain one complete, commented `docker-compose.yml` file. Synology Container Manager compatibility is a core constraint.
 
-Profile-gated maintenance utilities must stay out of ordinary `make up` runs. Kometa Overlay Reset uses the `tools` profile and the explicit `make overlay-reset PRESET=duplex` one-shot target.
+Profile-gated maintenance utilities must stay out of ordinary `make up` runs. Kometa Overlay Reset uses the `tools` profile and the explicit `make kometa-overlay-reset PRESET=duplex` one-shot target.
 
 Maraudarr must remain:
 
