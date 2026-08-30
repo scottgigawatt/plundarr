@@ -3,8 +3,8 @@
 Runs the maintained `nickfedor/watchtower:latest` image as either a persistent
 updater or a one-shot update pass. The floating `latest` tag is intentional.
 
-Watchtower can inspect every running container visible through the mounted
-Docker socket. Containers explicitly labeled
+Watchtower can inspect eligible running and stopped containers visible through
+the mounted Docker socket. Containers explicitly labeled
 `com.centurylinklabs.watchtower.enable=false` remain excluded; Plundarr applies
 that protection to Watchtower itself and the Privateerr/Gluetun VPN bootstrap
 chain. Run only one persistent Watchtower daemon on a Docker host.

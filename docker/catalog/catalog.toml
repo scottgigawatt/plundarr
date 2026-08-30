@@ -355,7 +355,7 @@ compose_summary = [
   "docker-compose.yml: Docker Compose configuration for running Watchtower",
   "                    persistently or as one host-wide update pass.",
   "",
-  "Watchtower uses the Docker socket to update eligible running containers.",
+  "Watchtower uses the Docker socket to update eligible host containers.",
   "Containers with an explicit disable label remain outside its control.",
 ]
 core = ["watchtower"]

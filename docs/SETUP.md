@@ -111,8 +111,8 @@ The standalone project can instead perform one update pass and exit:
 
 > [!WARNING]
 > Watchtower controls the host Docker daemon through its socket. By default it
-> examines running containers across that Docker host, not only services in the
-> generated Compose project. Containers labeled
+> examines eligible running and stopped containers across that Docker host, not
+> only services in the generated Compose project. Containers labeled
 > `com.centurylinklabs.watchtower.enable=false` remain excluded. Run one
 > persistent Watchtower daemon per host and stop it before a one-shot pass.
 

@@ -259,8 +259,8 @@ make watchtower-run-once PRESET=watchtower
 ```
 
 > [!WARNING]
-> Watchtower can update every running container visible through the Docker
-> socket unless that container carries an explicit
+> Watchtower can update eligible running and stopped containers visible through
+> the Docker socket unless a container carries an explicit
 > `com.centurylinklabs.watchtower.enable=false` label. Run only one persistent
 > Watchtower daemon per Docker host, and stop it before starting a one-shot
 > pass.
