@@ -1,4 +1,3 @@
 # SABnzbd Service Chart 📰
 
-Adds the Usenet downloader behind Gluetun, including its Web UI port and
-service-specific download path settings.
+Adds the Usenet downloader behind Gluetun, including its Web UI port and service-specific download path settings.

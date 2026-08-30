@@ -12,10 +12,10 @@ services:
   #
   pattrmm:
     # Docker image and container information
-    <<: *default-container                                             # Pull in the default container information
-    image: ghcr.io/insertdisc/pattrmm:${PATTRMM_TAG}                   # Run using the specified floating tag
-    container_name: ${COMPOSE_PROJECT_NAME}-pattrmm-${PATTRMM_TAG}     # Namespace the container name by project and tag
-    hostname: pattrmm                                                  # Set the container hostname
+    <<: *default-container                                          # Pull in the default container information
+    image: ghcr.io/insertdisc/pattrmm:${PATTRMM_TAG}                # Run using the specified floating tag
+    container_name: ${COMPOSE_PROJECT_NAME}-pattrmm-${PATTRMM_TAG}  # Namespace the container name by project and tag
+    hostname: pattrmm                                               # Set the container hostname
 
     # Define the container environment
     environment:

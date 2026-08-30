@@ -13,7 +13,7 @@ services:
   whisparr:
     # Docker image and container information
     <<: *arr-stack-container                                          # Pull in arr-stack container config
-    image: ghcr.io/hotio/whisparr:${WHISPARR_TAG}                     # Run using the specified tag
+    image: ghcr.io/hotio/whisparr:${WHISPARR_TAG}                     # Run the floating v3 release channel
     container_name: ${COMPOSE_PROJECT_NAME}-whisparr-${WHISPARR_TAG}  # Namespace the container name by project and tag
     hostname: whisparr                                                # Set the container hostname
 

@@ -9,7 +9,8 @@
     //
 
     //
-    // Match repository-wide line endings, indentation, and conservative prose.
+    // Match repository-wide line endings and indentation while preserving the
+    // authored one-line prose and compact GitHub alert structure.
     //
     "$schema": "https://json.schemastore.org/prettierrc",
     "endOfLine": "lf",

@@ -4,8 +4,7 @@ icon: material/language-python
 
 # Python Reference Map 🐍
 
-These pages are generated from Maraudarr's public Python docstrings and type
-annotations during every strict documentation build.
+These pages are generated from Maraudarr's public Python docstrings and type annotations during every strict documentation build.
 
 | Module                                      | Reference               |
 | :------------------------------------------ | :---------------------- |
@@ -16,6 +15,4 @@ annotations during every strict documentation build.
 | Comment-preserving text operations          | [Text helpers](text.md) |
 | Rich and plain terminal output              | [Terminal UI](ui.md)    |
 
-Names beginning with `_` remain private implementation details and are omitted
-from this reference. Consult the linked source views and the
-[architecture guide](../architecture.md) when changing those helpers.
+Names beginning with `_` remain private implementation details and are omitted from this reference. Consult the linked source views and the [architecture guide](../architecture.md) when changing those helpers.

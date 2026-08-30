@@ -12,10 +12,10 @@ services:
   #
   tautulli:
     # Docker image and container information
-    <<: *default-container                                              # Pull in the default container information
-    image: ghcr.io/tautulli/tautulli:${TAUTULLI_TAG}                    # Run the official Tautulli image
-    container_name: ${COMPOSE_PROJECT_NAME}-tautulli-${TAUTULLI_TAG}    # Namespace the container name by project and tag
-    hostname: tautulli                                                  # Set the container hostname
+    <<: *default-container                                            # Pull in the default container information
+    image: ghcr.io/tautulli/tautulli:${TAUTULLI_TAG}                  # Run the official Tautulli image
+    container_name: ${COMPOSE_PROJECT_NAME}-tautulli-${TAUTULLI_TAG}  # Namespace the container name by project and tag
+    hostname: tautulli                                                # Set the container hostname
 
     # Define the container environment
     environment:

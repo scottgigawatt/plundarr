@@ -32,5 +32,4 @@ Render the service into yer final chart:
 > make ship ADD_SERVICES=sonarr-anime
 > ```
 
-For more details, set yer sights on the generated
-`dist/<preset>/docker-compose.yml` and `.env` files.
+For more details, set yer sights on the generated `dist/<preset>/docker-compose.yml` and `.env` files.

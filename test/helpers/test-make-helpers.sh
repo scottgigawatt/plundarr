@@ -317,25 +317,25 @@ grep -F 'The selected deployment does not include watchtower.' \
 #
 # Keep Kometa Overlay Reset profile-gated, one-shot, and disposable.
 #
-NO_COLOR=1 make --dry-run overlay-reset-run-once \
+NO_COLOR=1 make --dry-run overlay-reset \
     DOCKER_COMPOSE=true \
     DEPENDENCIES=true \
     ENV_FILE="${test_output}/stack.env" \
     COMPOSE_ENV_FILE="${test_output}/stack.env" \
     COMPOSE_FILE="${test_output}/compose.yml" \
     PROFILED_COMPOSE_SERVICES=overlay-reset \
-    >"${test_output}/overlay-reset-run-once.out"
+    >"${test_output}/overlay-reset.out"
 grep -F 'ps --quiet "overlay-reset"' \
-    "${test_output}/overlay-reset-run-once.out" >/dev/null
+    "${test_output}/overlay-reset.out" >/dev/null
 grep -F 'pull "overlay-reset"' \
-    "${test_output}/overlay-reset-run-once.out" >/dev/null
+    "${test_output}/overlay-reset.out" >/dev/null
 grep -F 'run --rm --no-deps "overlay-reset"' \
-    "${test_output}/overlay-reset-run-once.out" >/dev/null
+    "${test_output}/overlay-reset.out" >/dev/null
 
 #
 # Reject one-shot execution when the selected chart omits Overlay Reset.
 #
-if NO_COLOR=1 make --no-print-directory overlay-reset-run-once \
+if NO_COLOR=1 make --no-print-directory overlay-reset \
     DOCKER_COMPOSE=true \
     DEPENDENCIES=true \
     ENV_FILE="${test_output}/stack.env" \
@@ -395,7 +395,7 @@ common_targets=$(awk '
         exit
     }
 ' Makefile)
-test "${common_targets}" = "BUILD_DEPENDS CHECK_ENV CHECK_PIA ENSURE_BUILDX_BUILDER ALL UP WATCHTOWER_RUN_ONCE OVERLAY_RESET_RUN_ONCE DOWN PS LOGS CONFIG ENV PRINT_CONFIG PRINT_ENV BUILD BUILD_PLATFORMS TEST TEST_MAKE_HELPERS TEST_WORKFLOWS TEST_E2E BACKUP RESTORE_TEST_CONFIG CLEAN_TEST CLEAN NUKE HELP"
+test "${common_targets}" = "BUILD_DEPENDS CHECK_ENV CHECK_PIA ENSURE_BUILDX_BUILDER ALL UP WATCHTOWER_RUN_ONCE OVERLAY_RESET DOWN PS LOGS CONFIG ENV PRINT_CONFIG PRINT_ENV BUILD BUILD_PLATFORMS TEST TEST_MAKE_HELPERS TEST_WORKFLOWS TEST_E2E BACKUP RESTORE_TEST_CONFIG CLEAN_TEST CLEAN NUKE HELP"
 common_recipe_order=$(awk '
     /^\$\([A-Z0-9_]+\)(:| )/ {
         target = $0

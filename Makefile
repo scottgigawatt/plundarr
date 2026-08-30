@@ -17,7 +17,7 @@ ENSURE_BUILDX_BUILDER=ensure-buildx-builder
 ALL=all
 UP=up
 WATCHTOWER_RUN_ONCE=watchtower-run-once
-OVERLAY_RESET_RUN_ONCE=overlay-reset-run-once
+OVERLAY_RESET=overlay-reset
 DOWN=down
 PS=ps
 LOGS=logs
@@ -74,7 +74,7 @@ COMMON_TARGETS= \
 	$(ALL) \
 	$(UP) \
 	$(WATCHTOWER_RUN_ONCE) \
-	$(OVERLAY_RESET_RUN_ONCE) \
+	$(OVERLAY_RESET) \
 	$(DOWN) \
 	$(PS) \
 	$(LOGS) \
@@ -179,7 +179,7 @@ COMPOSE_DOWN_OPTIONS           ?= --timeout $(COMPOSE_DOWN_TIMEOUT) --remove-orp
 COMPOSE_NUKE_OPTIONS           ?= --timeout $(COMPOSE_DOWN_TIMEOUT) --volumes --remove-orphans --rmi all
 COMPOSE_UP_OPTIONS             ?= --force-recreate --pull always --detach --remove-orphans
 WATCHTOWER_RUN_ONCE_OPTIONS    ?= --rm --no-deps
-OVERLAY_RESET_RUN_ONCE_OPTIONS ?= --rm --no-deps
+OVERLAY_RESET_OPTIONS          ?= --rm --no-deps
 COMPOSE_E2E_OPTIONS            ?= --force-recreate --pull always --detach --remove-orphans
 COMPOSE_E2E_WAIT               ?= 300
 COMPOSE_STACK_WAIT             ?= 600
@@ -607,15 +607,15 @@ $(WATCHTOWER_RUN_ONCE): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 	$(PLUNDARR_COMPOSE) run $(WATCHTOWER_RUN_ONCE_OPTIONS) "$(WATCHTOWER_SERVICE)" --run-once
 
 #
-# $(OVERLAY_RESET_RUN_ONCE): Pulls and runs the profile-gated Kometa Overlay
-#                            Reset utility once, then removes its container.
+# $(OVERLAY_RESET): Pulls and runs the profile-gated Kometa Overlay Reset
+#                   utility once, then removes its container.
 #
 # Dependencies:
 #   $(BUILD_DEPENDS) - Ensure build dependencies are installed.
 #   $(CHECK_ENV) - Ensure the environment file exists.
 #   $(CHECK_RENDERED) - Ensure the rendered Compose file exists.
 #
-$(OVERLAY_RESET_RUN_ONCE): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
+$(OVERLAY_RESET): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 	@if [ -z "$(filter $(OVERLAY_RESET_SERVICE),$(PROFILED_COMPOSE_SERVICES))" ]; then \
 		$(call print_line_inline,$(COLOR_ERROR),The selected deployment does not include $(OVERLAY_RESET_SERVICE).); \
 		$(call print_detail_inline,$(COLOR_MUTED),Run: make $(SHIP) PRESET=duplex); \
@@ -629,7 +629,7 @@ $(OVERLAY_RESET_RUN_ONCE): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 	fi
 	$(call announce_warning,Kometa Overlay Reset has no undo; the generated default is a dry run. ⚠️)
 	$(PLUNDARR_COMPOSE) pull "$(OVERLAY_RESET_SERVICE)"
-	$(PLUNDARR_COMPOSE) run $(OVERLAY_RESET_RUN_ONCE_OPTIONS) "$(OVERLAY_RESET_SERVICE)"
+	$(PLUNDARR_COMPOSE) run $(OVERLAY_RESET_OPTIONS) "$(OVERLAY_RESET_SERVICE)"
 
 #
 # $(DOWN): Stops containers and removes containers and networks.
@@ -884,7 +884,7 @@ $(HELP):
 	$(call help_heading,🚀 Run the stack)
 	$(call help_line,$(UP),Start or recreate the selected stack.)
 	$(call help_line,$(WATCHTOWER_RUN_ONCE),Run one Watchtower update pass and exit.)
-	$(call help_line,$(OVERLAY_RESET_RUN_ONCE),Run Kometa Overlay Reset once and exit.)
+	$(call help_line,$(OVERLAY_RESET),Run Kometa Overlay Reset once and exit.)
 	$(call help_line,$(DOWN),Stop the selected stack while preserving volumes and images.)
 	$(call help_line,$(PS),Show a compact container status table.)
 	$(call help_line,$(LOGS),Follow selected-stack logs.)

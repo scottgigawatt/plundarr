@@ -12,10 +12,10 @@ services:
   #
   notifiarr:
     # Docker image and container information
-    <<: *default-container                                                 # Pull in the default container information
-    image: golift/notifiarr:${NOTIFIARR_TAG}                               # Run the official Notifiarr image
-    container_name: ${COMPOSE_PROJECT_NAME}-notifiarr-${NOTIFIARR_TAG}     # Namespace the container name by project and tag
-    hostname: notifiarr                                                    # Keep the client identity stable across recreations
+    <<: *default-container                                              # Pull in the default container information
+    image: golift/notifiarr:${NOTIFIARR_TAG}                            # Run the official Notifiarr image
+    container_name: ${COMPOSE_PROJECT_NAME}-notifiarr-${NOTIFIARR_TAG}  # Namespace the container name by project and tag
+    hostname: notifiarr                                                 # Keep the client identity stable across recreations
 
     # Define the container environment
     environment:

@@ -12,10 +12,10 @@ services:
   #
   overlay-reset:
     # Docker image and container information
-    <<: *default-container                                                         # Pull in the default container information
-    image: kometateam/overlay-reset:${OVERLAY_RESET_TAG}                           # Run the official Overlay Reset image
-    container_name: ${COMPOSE_PROJECT_NAME}-overlay-reset-${OVERLAY_RESET_TAG}     # Namespace the container name by project and tag
-    hostname: overlay-reset                                                        # Set the container hostname
+    <<: *default-container                                                      # Pull in the default container information
+    image: kometateam/overlay-reset:${OVERLAY_RESET_TAG}                        # Run the official Overlay Reset image
+    container_name: ${COMPOSE_PROJECT_NAME}-overlay-reset-${OVERLAY_RESET_TAG}  # Namespace the container name by project and tag
+    hostname: overlay-reset                                                     # Set the container hostname
 
     # Keep this destructive utility outside ordinary Compose startup
     profiles:
@@ -24,7 +24,7 @@ services:
 
     # Define the container environment
     environment:
-      <<: *default-environment                         # Pull in the default environment
+      <<: *default-environment                           # Pull in the default environment
       PLEX_URL: ${OVERLAY_RESET_PLEX_URL}                # Plex server URL
       PLEX_TOKEN: ${OVERLAY_RESET_PLEX_TOKEN}            # Plex authentication token
       PLEX_LIBRARY: ${OVERLAY_RESET_PLEX_LIBRARY}        # Plex library to inspect or reset

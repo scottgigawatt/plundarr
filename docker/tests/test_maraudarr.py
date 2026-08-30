@@ -93,6 +93,19 @@ class MaraudarrTests(unittest.TestCase):
         self.assertNotIn("  jellyfin:", compose)
         self.assertNotIn("  plex:", compose)
 
+    def test_whisparr_defaults_to_the_v3_release_channel(self) -> None:
+        """Keep Boudoirr on Whisparr v3 instead of hotio's v2 latest tag."""
+
+        environment = render_environment(
+            self.catalog,
+            self.catalog.resolve("boudoirr"),
+            None,
+            generate_secrets=False,
+        )
+
+        self.assertIn('WHISPARR_TAG="${WHISPARR_TAG:-v3}"', environment)
+        self.assertNotIn('WHISPARR_TAG="${WHISPARR_TAG:-latest}"', environment)
+
     def test_automation_presets_support_optional_downloader_modes(self) -> None:
         """Keep torrent-only, Usenet-only, and combined modes selectable."""
 
