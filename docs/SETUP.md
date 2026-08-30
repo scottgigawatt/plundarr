@@ -105,14 +105,14 @@ Kometa, ImageMaid, and Tautulli are Duplex core services. PATTRMM, Notifiarr, an
 
 Before launch, review `dist/duplex/.env` and set these host-specific values:
 
-| Setting | Purpose |
-| --- | --- |
-| `KOMETA_CONFIG_PATH` | Independent checkout containing Kometa `config.yml`, assets, and files |
-| `KOMETA_TIMES` | Comma-separated stable-image run times in `HH:MM` format |
-| `IMAGEMAID_PLEX_PATH` | Plex directory containing `Cache`, `Metadata`, and `Plug-in Support` |
-| `TAUTULLI_PUID` / `TAUTULLI_PGID` | Host identity allowed to write Tautulli state |
-| `TAUTULLI_WEBUI_PORT` | Tautulli host port; defaults to `8181` |
-| `NOTIFIARR_WEBUI_PORT` | Notifiarr host port; defaults to `5454` |
+| Setting                           | Purpose                                                                |
+| --------------------------------- | ---------------------------------------------------------------------- |
+| `KOMETA_CONFIG_PATH`              | Independent checkout containing Kometa `config.yml`, assets, and files |
+| `KOMETA_TIMES`                    | Comma-separated stable-image run times in `HH:MM` format               |
+| `IMAGEMAID_PLEX_PATH`             | Plex directory containing `Cache`, `Metadata`, and `Plug-in Support`   |
+| `TAUTULLI_PUID` / `TAUTULLI_PGID` | Host identity allowed to write Tautulli state                          |
+| `TAUTULLI_WEBUI_PORT`             | Tautulli host port; defaults to `8181`                                 |
+| `NOTIFIARR_WEBUI_PORT`            | Notifiarr host port; defaults to `5454`                                |
 
 Kometa's configuration remains separate from Plundarr. Point `KOMETA_CONFIG_PATH` at an existing host checkout or clone a configuration repository there yourself; Maraudarr neither creates a Git submodule nor manages that repository. This follows Kometa's supported Docker pattern of mounting the configuration directory at `/config`. ImageMaid likewise follows its supported two-mount pattern with writable `/config` and `/plex` paths.
 
@@ -188,13 +188,13 @@ Refer to the [official Synology documentation](https://kb.synology.com/en-id/DSM
 
 ## Jellyfin and Plex Libraries 🎞️
 
-| Server | Host mount behavior | Libraries to add | Notes |
-| --- | --- | --- | --- |
-| Jellyfin with Plundarr or standalone | `JELLYFIN_DATA_PATH` mounts read/write at `/data` | `/data/movies`, `/data/tv` | Persistent `/config` and `/cache`; logs stay under `/config/log`. |
-| Jellyfin with Boudoirr | The shared Whisparr/Jellyfin high-level data root mounts read/write at `/data` | `/data/movies`, `/data/scenes` | Set `WHISPARR_DATA_PATH` and `JELLYFIN_DATA_PATH` to the same host directory. |
-| Plex with Plundarr | Separate read-only library mounts | Movies, TV, anime | Plex also has persistent config and transcode mounts. |
-| Plex with Boudoirr | Separate read-only library mounts | Movies, scenes | Choose Plex explicitly; it is not included by default. |
-| Plex standalone | Separate read-only library mounts | Movies, TV | Uses host networking. |
+| Server                               | Host mount behavior                                                            | Libraries to add               | Notes                                                                         |
+| ------------------------------------ | ------------------------------------------------------------------------------ | ------------------------------ | ----------------------------------------------------------------------------- |
+| Jellyfin with Plundarr or standalone | `JELLYFIN_DATA_PATH` mounts read/write at `/data`                              | `/data/movies`, `/data/tv`     | Persistent `/config` and `/cache`; logs stay under `/config/log`.             |
+| Jellyfin with Boudoirr               | The shared Whisparr/Jellyfin high-level data root mounts read/write at `/data` | `/data/movies`, `/data/scenes` | Set `WHISPARR_DATA_PATH` and `JELLYFIN_DATA_PATH` to the same host directory. |
+| Plex with Plundarr                   | Separate read-only library mounts                                              | Movies, TV, anime              | Plex also has persistent config and transcode mounts.                         |
+| Plex with Boudoirr                   | Separate read-only library mounts                                              | Movies, scenes                 | Choose Plex explicitly; it is not included by default.                        |
+| Plex standalone                      | Separate read-only library mounts                                              | Movies, TV                     | Uses host networking.                                                         |
 
 ---
 

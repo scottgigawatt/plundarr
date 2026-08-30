@@ -4,22 +4,22 @@ These documented AWK programs and host helpers support generated Compose project
 
 ## Script Chart 🧭
 
-| Hold | Script | Purpose |
-| --- | --- | --- |
-| 🧮 AWK | [`awk/collect-dockerfile-base-images.awk`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/awk/collect-dockerfile-base-images.awk) | Resolve declared external Dockerfile base-image references |
-| 🧮 AWK | [`awk/format-compose-status.awk`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/awk/format-compose-status.awk) | Align Compose status rows and stack distinct published ports |
-| 🧮 AWK | [`awk/order-environment.awk`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/awk/order-environment.awk) | Order resolved values like the selected preset environment file |
-| 🧮 AWK | [`awk/strip-comments.awk`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/awk/strip-comments.awk) | Remove comments and blank lines from raw configuration output |
-| 🐳 Compose | [`compose/backup.sh`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/compose/backup.sh) | Archive one preset's config without replacing an existing backup |
-| 🐳 Compose | [`compose/check-pia-credentials.sh`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/compose/check-pia-credentials.sh) | Report missing or example PIA credentials before Privateerr starts |
-| 🐳 Compose | [`compose/nuke.sh`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/compose/nuke.sh) | Remove resources owned by one selected Compose project |
-| 🐳 Compose | [`compose/ps.sh`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/compose/ps.sh) | Print a compact status table for one generated project |
-| 🐳 Compose | [`compose/restart.sh`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/compose/restart.sh) | Wait for Docker, stop a project safely, and start it again |
-| 📚 Docs | [`docs/prepare-python.sh`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/docs/prepare-python.sh) | Prepare the exact Python environment used to build documentation |
-| 🐧 Linux | [`linux/set-inotify-limits.sh`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/linux/set-inotify-limits.sh) | Raise inotify limits for large Plex libraries |
-| ⚓ Synology | [`synology/docker-socket.sh`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/synology/docker-socket.sh) | Restore trusted `docker` group access to the Docker socket |
-| ⚓ Synology | [`synology/entware.sh`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/synology/entware.sh) | Mount and start Entware during boot |
-| ⚓ Synology | [`synology/tun.sh`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/synology/tun.sh) | Ensure `/dev/net/tun` exists for VPN containers |
+| Hold       | Script                                                                                                                                         | Purpose                                                            |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| 🧮 AWK     | [`awk/collect-dockerfile-base-images.awk`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/awk/collect-dockerfile-base-images.awk) | Resolve declared external Dockerfile base-image references         |
+| 🧮 AWK     | [`awk/format-compose-status.awk`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/awk/format-compose-status.awk)                   | Align Compose status rows and stack distinct published ports       |
+| 🧮 AWK     | [`awk/order-environment.awk`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/awk/order-environment.awk)                           | Order resolved values like the selected preset environment file    |
+| 🧮 AWK     | [`awk/strip-comments.awk`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/awk/strip-comments.awk)                                 | Remove comments and blank lines from raw configuration output      |
+| 🐳 Compose | [`compose/backup.sh`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/compose/backup.sh)                                           | Archive one preset's config without replacing an existing backup   |
+| 🐳 Compose | [`compose/check-pia-credentials.sh`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/compose/check-pia-credentials.sh)             | Report missing or example PIA credentials before Privateerr starts |
+| 🐳 Compose | [`compose/nuke.sh`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/compose/nuke.sh)                                               | Remove resources owned by one selected Compose project             |
+| 🐳 Compose | [`compose/ps.sh`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/compose/ps.sh)                                                   | Print a compact status table for one generated project             |
+| 🐳 Compose | [`compose/restart.sh`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/compose/restart.sh)                                         | Wait for Docker, stop a project safely, and start it again         |
+| 📚 Docs    | [`docs/prepare-python.sh`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/docs/prepare-python.sh)                                 | Prepare the exact Python environment used to build documentation   |
+| 🐧 Linux   | [`linux/set-inotify-limits.sh`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/linux/set-inotify-limits.sh)                       | Raise inotify limits for large Plex libraries                      |
+| ⚓ Synology | [`synology/docker-socket.sh`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/synology/docker-socket.sh)                           | Restore trusted `docker` group access to the Docker socket         |
+| ⚓ Synology | [`synology/entware.sh`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/synology/entware.sh)                                       | Mount and start Entware during boot                                |
+| ⚓ Synology | [`synology/tun.sh`](https://github.com/scottgigawatt/plundarr/blob/main/scripts/synology/tun.sh)                                               | Ensure `/dev/net/tun` exists for VPN containers                    |
 
 > [!IMPORTANT]
 > Scripts under `scripts/synology/` run directly on a Synology NAS. They are maintained against DSM 7.4; review paths and privileges before using them on another DSM release or Linux host.

@@ -85,15 +85,15 @@ The animation shows the `make configure`, `make up`, and `make ps` workflows for
 
 Choose a preset in `make configure`, or pass it to `make ship`. These are the exact services included before ye add or remove anything:
 
-| Preset | Best For | Included Out of the Box |
-| --- | --- | --- |
-| 🏴‍☠️&nbsp;`plundarr` | Movies and TV automation | [Privateerr](https://github.com/scottgigawatt/privateerr), [Gluetun](https://github.com/qdm12/gluetun), [FlareSolverr](https://github.com/FlareSolverr/FlareSolverr), [Prowlarr](https://github.com/Prowlarr/Prowlarr), [qBittorrent](https://github.com/qbittorrent/qBittorrent), [Radarr](https://github.com/Radarr/Radarr), [Sonarr](https://github.com/Sonarr/Sonarr), [Bazarr](https://github.com/morpheus65535/bazarr), [Seerr](https://github.com/seerr-team/seerr), [Cleanuparr](https://github.com/Cleanuparr/Cleanuparr), [Speedtest Tracker](https://docs.speedtest-tracker.dev/), [Duplicati](https://www.duplicati.com), [Homepage](https://gethomepage.dev/latest/), and [Watchtower](https://watchtower.nickfedor.com/) |
-| 🔞&nbsp;`boudoirr` | Whisparr automation | [Privateerr](https://github.com/scottgigawatt/privateerr), [Gluetun](https://github.com/qdm12/gluetun), [FlareSolverr](https://github.com/FlareSolverr/FlareSolverr), [Prowlarr](https://github.com/Prowlarr/Prowlarr), [qBittorrent](https://github.com/qbittorrent/qBittorrent), [Whisparr](https://github.com/Whisparr/Whisparr), [Cleanuparr](https://github.com/Cleanuparr/Cleanuparr), and [Watchtower](https://watchtower.nickfedor.com/) |
-| 🎞️&nbsp;`jellyfin` | Standalone movies and TV playback | [Jellyfin](https://jellyfin.org/docs/) |
-| 🎬&nbsp;`plex` | Standalone movies and TV playback | [Plex Media Server](https://support.plex.tv/articles/categories/plex-media-server/) |
-| 🎭&nbsp;`duplex` | Plex metadata and maintenance | [Kometa](https://kometa.wiki/), [ImageMaid](https://kometa.wiki/en/latest/kometa/scripts/imagemaid/), [PATTRMM](https://github.com/InsertDisc/pattrmm), [Tautulli](https://tautulli.com/), [Notifiarr](https://notifiarr.wiki/), and profile-gated [Kometa Overlay Reset](https://kometa.wiki/en/latest/kometa/scripts/overlay-reset/) |
-| 🔭&nbsp;`watchtower` | Standalone container image updates | [Watchtower](https://watchtower.nickfedor.com/) |
-| 🧩&nbsp;`custom` | A stack assembled service by service | Nothing; every service is selected explicitly |
+| Preset                | Best For                             | Included Out of the Box                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| --------------------- | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 🏴‍☠️&nbsp;`plundarr`    | Movies and TV automation             | [Privateerr](https://github.com/scottgigawatt/privateerr), [Gluetun](https://github.com/qdm12/gluetun), [FlareSolverr](https://github.com/FlareSolverr/FlareSolverr), [Prowlarr](https://github.com/Prowlarr/Prowlarr), [qBittorrent](https://github.com/qbittorrent/qBittorrent), [Radarr](https://github.com/Radarr/Radarr), [Sonarr](https://github.com/Sonarr/Sonarr), [Bazarr](https://github.com/morpheus65535/bazarr), [Seerr](https://github.com/seerr-team/seerr), [Cleanuparr](https://github.com/Cleanuparr/Cleanuparr), [Speedtest Tracker](https://docs.speedtest-tracker.dev/), [Duplicati](https://www.duplicati.com), [Homepage](https://gethomepage.dev/latest/), and [Watchtower](https://watchtower.nickfedor.com/) |
+| 🔞&nbsp;`boudoirr`    | Whisparr automation                  | [Privateerr](https://github.com/scottgigawatt/privateerr), [Gluetun](https://github.com/qdm12/gluetun), [FlareSolverr](https://github.com/FlareSolverr/FlareSolverr), [Prowlarr](https://github.com/Prowlarr/Prowlarr), [qBittorrent](https://github.com/qbittorrent/qBittorrent), [Whisparr](https://github.com/Whisparr/Whisparr), [Cleanuparr](https://github.com/Cleanuparr/Cleanuparr), and [Watchtower](https://watchtower.nickfedor.com/)                                                                                                                                                                                                                                                                                       |
+| 🎞️&nbsp;`jellyfin`    | Standalone movies and TV playback    | [Jellyfin](https://jellyfin.org/docs/)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| 🎬&nbsp;`plex`        | Standalone movies and TV playback    | [Plex Media Server](https://support.plex.tv/articles/categories/plex-media-server/)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| 🎭&nbsp;`duplex`      | Plex metadata and maintenance        | [Kometa](https://kometa.wiki/), [ImageMaid](https://kometa.wiki/en/latest/kometa/scripts/imagemaid/), [PATTRMM](https://github.com/InsertDisc/pattrmm), [Tautulli](https://tautulli.com/), [Notifiarr](https://notifiarr.wiki/), and profile-gated [Kometa Overlay Reset](https://kometa.wiki/en/latest/kometa/scripts/overlay-reset/)                                                                                                                                                                                                                                                                                                                                                                                                 |
+| 🔭&nbsp;`watchtower`  | Standalone container image updates   | [Watchtower](https://watchtower.nickfedor.com/)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| 🧩&nbsp;`custom`      | A stack assembled service by service | Nothing; every service is selected explicitly                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 
 Plundarr and Boudoirr use qBittorrent as their only default downloader and include Watchtower as a removable update companion. SABnzbd, NZBGet, Jellyfin, and Plex are not present by default, but may be added using `make ship ADD_SERVICES=sabnzbd,jellyfin`.
 
@@ -101,14 +101,14 @@ Plundarr and Boudoirr use qBittorrent as their only default downloader and inclu
 
 Every catalog service can be added to a compatible preset. Maraudarr adds any required foundation services and shows the resolved fleet before writing it.
 
-| Cargo Hold | Selectable Services |
-| --- | --- |
-| 🛡️&nbsp;VPN&nbsp;foundation | [Privateerr](https://github.com/scottgigawatt/privateerr) and [Gluetun](https://github.com/qdm12/gluetun) |
-| ⬇️&nbsp;Download&nbsp;clients | [qBittorrent](https://github.com/qbittorrent/qBittorrent), [SABnzbd](https://sabnzbd.org/wiki/), and [NZBGet](https://nzbget.com/documentation/) |
-| ⚙️&nbsp;Automation | [FlareSolverr](https://github.com/FlareSolverr/FlareSolverr), [Prowlarr](https://wiki.servarr.com/prowlarr), [Radarr](https://wiki.servarr.com/radarr), [Sonarr](https://wiki.servarr.com/sonarr), [Sonarr Anime](https://wiki.servarr.com/sonarr), [Whisparr](https://wiki.servarr.com/whisparr), [Bazarr](https://wiki.bazarr.media/), and [Seerr](https://docs.seerr.dev/) |
-| 🎞️&nbsp;Media&nbsp;servers | [Jellyfin](https://jellyfin.org/docs/) and [Plex Media Server](https://support.plex.tv/articles/categories/plex-media-server/) |
-| 🎭&nbsp;Plex&nbsp;utilities | [Kometa](https://kometa.wiki/), [ImageMaid](https://kometa.wiki/en/latest/kometa/scripts/imagemaid/), [PATTRMM](https://github.com/InsertDisc/pattrmm), and [Tautulli](https://tautulli.com/) |
-| 🧰&nbsp;Operations | [Cleanuparr](https://cleanuparr.github.io/Cleanuparr/), [Speedtest Tracker](https://docs.speedtest-tracker.dev/), [Apprise](https://github.com/caronc/apprise-api), [Notifiarr](https://notifiarr.wiki/), [Duplicati](https://docs.duplicati.com/), [Homepage](https://gethomepage.dev/latest/), [Watchtower](https://watchtower.nickfedor.com/), and [Kometa Overlay Reset](https://kometa.wiki/en/latest/kometa/scripts/overlay-reset/) |
+| Cargo Hold                    | Selectable Services                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 🛡️&nbsp;VPN&nbsp;foundation   | [Privateerr](https://github.com/scottgigawatt/privateerr) and [Gluetun](https://github.com/qdm12/gluetun)                                                                                                                                                                                                                                                                                                                                 |
+| ⬇️&nbsp;Download&nbsp;clients | [qBittorrent](https://github.com/qbittorrent/qBittorrent), [SABnzbd](https://sabnzbd.org/wiki/), and [NZBGet](https://nzbget.com/documentation/)                                                                                                                                                                                                                                                                                          |
+| ⚙️&nbsp;Automation            | [FlareSolverr](https://github.com/FlareSolverr/FlareSolverr), [Prowlarr](https://wiki.servarr.com/prowlarr), [Radarr](https://wiki.servarr.com/radarr), [Sonarr](https://wiki.servarr.com/sonarr), [Sonarr Anime](https://wiki.servarr.com/sonarr), [Whisparr](https://wiki.servarr.com/whisparr), [Bazarr](https://wiki.bazarr.media/), and [Seerr](https://docs.seerr.dev/)                                                             |
+| 🎞️&nbsp;Media&nbsp;servers    | [Jellyfin](https://jellyfin.org/docs/) and [Plex Media Server](https://support.plex.tv/articles/categories/plex-media-server/)                                                                                                                                                                                                                                                                                                            |
+| 🎭&nbsp;Plex&nbsp;utilities   | [Kometa](https://kometa.wiki/), [ImageMaid](https://kometa.wiki/en/latest/kometa/scripts/imagemaid/), [PATTRMM](https://github.com/InsertDisc/pattrmm), and [Tautulli](https://tautulli.com/)                                                                                                                                                                                                                                             |
+| 🧰&nbsp;Operations            | [Cleanuparr](https://cleanuparr.github.io/Cleanuparr/), [Speedtest Tracker](https://docs.speedtest-tracker.dev/), [Apprise](https://github.com/caronc/apprise-api), [Notifiarr](https://notifiarr.wiki/), [Duplicati](https://docs.duplicati.com/), [Homepage](https://gethomepage.dev/latest/), [Watchtower](https://watchtower.nickfedor.com/), and [Kometa Overlay Reset](https://kometa.wiki/en/latest/kometa/scripts/overlay-reset/) |
 
 > [!NOTE]
 > 📚 Readarr has been scuttled from this fleet; use [Calibre Web Automated](https://github.com/scottgigawatt/calibre-web-automated) for book cargo.
@@ -143,23 +143,23 @@ dist/
 
 Maraudarr writes only settings used by the selected services:
 
-| Setting | Why Ye Care |
-| --- | --- |
-| 🔐&nbsp;`PIA_USER` | Privateerr username; `make up` rejects empty or generated example values |
-| 🔐&nbsp;`PIA_PASS` | Privateerr password; `make up` rejects empty or generated example values |
-| 👤&nbsp;`DEFAULT_PUID` | User ID that must be able to read and write the mounted files |
-| 👤&nbsp;`DEFAULT_PGID` | Group ID that must be able to read and write the mounted files |
-| 📦&nbsp;`HOST_DOWNLOADS_PATH` | Shared download root for automation services |
-| 🎥&nbsp;`HOST_MOVIES_PATH` | Movies path used by automation services and Plex |
-| 📺&nbsp;`HOST_TV_PATH` | TV path used by automation services and Plex |
-| 🐉&nbsp;`HOST_ANIME_TV_PATH` | Anime TV path used when Sonarr Anime is selected |
-| 🔞&nbsp;`HOST_SCENES_PATH` | Scenes path used by Boudoirr automation and Plex |
-| 🔞&nbsp;`WHISPARR_DATA_PATH` | High-level media root mounted into Whisparr at `/data` |
-| 🎞️&nbsp;`JELLYFIN_DATA_PATH` | High-level media root mounted into Jellyfin at `/data` |
-| 🎭&nbsp;`KOMETA_CONFIG_PATH` | Independent Kometa config checkout mounted at `/config` |
-| 🖼️&nbsp;`IMAGEMAID_PLEX_PATH` | Plex application-data directory containing artwork state |
-| 🕰️&nbsp;`TZ` | Timezone used by the containers |
-| 🚪&nbsp;`*_WEBUI_PORT` | Change only when a host port is already occupied |
+| Setting                        | Why Ye Care                                                              |
+| ------------------------------ | ------------------------------------------------------------------------ |
+| 🔐&nbsp;`PIA_USER`             | Privateerr username; `make up` rejects empty or generated example values |
+| 🔐&nbsp;`PIA_PASS`             | Privateerr password; `make up` rejects empty or generated example values |
+| 👤&nbsp;`DEFAULT_PUID`         | User ID that must be able to read and write the mounted files            |
+| 👤&nbsp;`DEFAULT_PGID`         | Group ID that must be able to read and write the mounted files           |
+| 📦&nbsp;`HOST_DOWNLOADS_PATH`  | Shared download root for automation services                             |
+| 🎥&nbsp;`HOST_MOVIES_PATH`     | Movies path used by automation services and Plex                         |
+| 📺&nbsp;`HOST_TV_PATH`         | TV path used by automation services and Plex                             |
+| 🐉&nbsp;`HOST_ANIME_TV_PATH`   | Anime TV path used when Sonarr Anime is selected                         |
+| 🔞&nbsp;`HOST_SCENES_PATH`     | Scenes path used by Boudoirr automation and Plex                         |
+| 🔞&nbsp;`WHISPARR_DATA_PATH`   | High-level media root mounted into Whisparr at `/data`                   |
+| 🎞️&nbsp;`JELLYFIN_DATA_PATH`   | High-level media root mounted into Jellyfin at `/data`                   |
+| 🎭&nbsp;`KOMETA_CONFIG_PATH`   | Independent Kometa config checkout mounted at `/config`                  |
+| 🖼️&nbsp;`IMAGEMAID_PLEX_PATH`  | Plex application-data directory containing artwork state                 |
+| 🕰️&nbsp;`TZ`                   | Timezone used by the containers                                          |
+| 🚪&nbsp;`*_WEBUI_PORT`         | Change only when a host port is already occupied                         |
 
 > [!TIP]
 > 🗺️ Fresh paths match the selected preset. Service configuration stays under that preset's `dist/<preset>/config/` directory unless ye change its path in `.env`.
@@ -318,26 +318,26 @@ This removes only generated documentation, Python caches, and test logs. Deploym
 
 ## More Treasure Maps & Crew Codes 🗺️
 
-| Scroll | When Ye Need It |
-| --- | --- |
-| 📚&nbsp;[Developer Chart Room](https://scottgigawatt.github.io/plundarr/) | Maraudarr architecture and Python reference |
-| ⚒️&nbsp;[Maraudarr Overview](https://scottgigawatt.github.io/plundarr/development/maraudarr/) | Generator behavior, service charts, and testing |
-| 🖥️&nbsp;[Synology Setup](https://scottgigawatt.github.io/plundarr/SETUP/) | Container Manager and host-path preparation |
-| 🛠️&nbsp;[Contributing](https://scottgigawatt.github.io/plundarr/CONTRIBUTING/) | Repository standards and pull requests |
-| 🤝&nbsp;[Code of Conduct](https://scottgigawatt.github.io/plundarr/CODE_OF_CONDUCT/) | Expectations for every member of the crew |
-| 🛡️&nbsp;[Security](https://scottgigawatt.github.io/plundarr/SECURITY/) | Private vulnerability reporting |
-| 🧪&nbsp;[Testing Hold](https://scottgigawatt.github.io/plundarr/project-guides/testing/) | VPN, end-to-end, and stack validation |
-| 🦜&nbsp;[Synology Helper Scripts](https://scottgigawatt.github.io/plundarr/project-guides/scripts/) | Host-specific helper usage |
+| Scroll                                                                                              | When Ye Need It                                 |
+| --------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| 📚&nbsp;[Developer Chart Room](https://scottgigawatt.github.io/plundarr/)                           | Maraudarr architecture and Python reference     |
+| ⚒️&nbsp;[Maraudarr Overview](https://scottgigawatt.github.io/plundarr/development/maraudarr/)       | Generator behavior, service charts, and testing |
+| 🖥️&nbsp;[Synology Setup](https://scottgigawatt.github.io/plundarr/SETUP/)                           | Container Manager and host-path preparation     |
+| 🛠️&nbsp;[Contributing](https://scottgigawatt.github.io/plundarr/CONTRIBUTING/)                      | Repository standards and pull requests          |
+| 🤝&nbsp;[Code of Conduct](https://scottgigawatt.github.io/plundarr/CODE_OF_CONDUCT/)                | Expectations for every member of the crew       |
+| 🛡️&nbsp;[Security](https://scottgigawatt.github.io/plundarr/SECURITY/)                              | Private vulnerability reporting                 |
+| 🧪&nbsp;[Testing Hold](https://scottgigawatt.github.io/plundarr/project-guides/testing/)            | VPN, end-to-end, and stack validation           |
+| 🦜&nbsp;[Synology Helper Scripts](https://scottgigawatt.github.io/plundarr/project-guides/scripts/) | Host-specific helper usage                      |
 
 ## Ship's Log 🏝️
 
-| Compatibility | Status | Details |
-| --- | --- | --- |
-| 🗄️&nbsp;Synology&nbsp;DiskStation | ✅&nbsp;Tested | DSM 7.4 with Container Manager projects |
-| 🍎&nbsp;macOS | ✅&nbsp;Tested | macOS Tahoe 26 with Docker Desktop and Docker Compose |
-| 🐧&nbsp;Other&nbsp;Docker&nbsp;hosts | 🧭&nbsp;Expected | Expected to work with a compatible Docker Engine and Docker Compose |
-| 🏗️&nbsp;Maraudarr&nbsp;architectures | ✅&nbsp;Published | `linux/amd64`, `linux/arm64`, and `linux/arm/v7` |
-| 📦&nbsp;Container&nbsp;registries | ✅&nbsp;Mirrored | 📦&nbsp;[GitHub&nbsp;Container&nbsp;Registry](https://github.com/scottgigawatt/plundarr/pkgs/container/maraudarr) and 🐳&nbsp;[Docker&nbsp;Hub](https://hub.docker.com/r/scottgigawatt/maraudarr) |
+| Compatibility                         | Status           | Details                                                                                                                                                                                           |
+| ------------------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 🗄️&nbsp;Synology&nbsp;DiskStation     | ✅&nbsp;Tested    | DSM 7.4 with Container Manager projects                                                                                                                                                           |
+| 🍎&nbsp;macOS                         | ✅&nbsp;Tested    | macOS Tahoe 26 with Docker Desktop and Docker Compose                                                                                                                                             |
+| 🐧&nbsp;Other&nbsp;Docker&nbsp;hosts  | 🧭&nbsp;Expected  | Expected to work with a compatible Docker Engine and Docker Compose                                                                                                                               |
+| 🏗️&nbsp;Maraudarr&nbsp;architectures  | ✅&nbsp;Published | `linux/amd64`, `linux/arm64`, and `linux/arm/v7`                                                                                                                                                  |
+| 📦&nbsp;Container&nbsp;registries     | ✅&nbsp;Mirrored  | 📦&nbsp;[GitHub&nbsp;Container&nbsp;Registry](https://github.com/scottgigawatt/plundarr/pkgs/container/maraudarr) and 🐳&nbsp;[Docker&nbsp;Hub](https://hub.docker.com/r/scottgigawatt/maraudarr) |
 
 > [!WARNING]
 > ⚔️ Third-party service images may support fewer architectures than Maraudarr.
