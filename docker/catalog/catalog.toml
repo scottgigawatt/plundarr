@@ -170,6 +170,39 @@ category = "Media servers"
 url = "https://jellyfin.org"
 order = 420
 
+# Kometa manages Plex collections, metadata, and overlays from an external config tree.
+[services.kometa]
+title = "Kometa"
+description = "Manages Plex collections, metadata, and overlays on a schedule."
+category = "Plex utilities"
+url = "https://kometa.wiki"
+order = 430
+
+# ImageMaid reports on and cleans Plex artwork from its application data tree.
+[services.imagemaid]
+title = "ImageMaid"
+description = "Reports on and cleans Plex artwork with operator-selected safeguards."
+category = "Plex utilities"
+url = "https://kometa.wiki/en/latest/kometa/scripts/imagemaid/"
+order = 440
+
+# PATTRMM remains a removable Kometa helper rather than a Duplex core service.
+[services.pattrmm]
+title = "PATTRMM"
+description = "Generates returning-soon metadata and overlays for Kometa."
+category = "Plex utilities"
+url = "https://github.com/InsertDisc/pattrmm"
+order = 450
+requires = ["kometa"]
+
+# Tautulli records Plex activity and usage history.
+[services.tautulli]
+title = "Tautulli"
+description = "Monitors Plex activity, history, and usage statistics."
+category = "Plex utilities"
+url = "https://tautulli.com"
+order = 460
+
 # Homepage is the optional dashboard for the generated fleet.
 [services.homepage]
 title = "Homepage"
@@ -207,6 +240,14 @@ url = "https://github.com/caronc/apprise-api"
 order = 610
 recommended = ["speedtest-tracker"]
 
+# Notifiarr connects the host and media applications to Notifiarr notifications.
+[services.notifiarr]
+title = "Notifiarr"
+description = "Connects the Docker host and media applications to Notifiarr."
+category = "Monitoring and notifications"
+url = "https://notifiarr.wiki/pages/client/install/"
+order = 620
+
 # Duplicati backs up selected configuration and host data.
 [services.duplicati]
 title = "Duplicati"
@@ -215,13 +256,22 @@ category = "Operations"
 url = "https://www.duplicati.com"
 order = 700
 
-# Watchtower is opt-in for media stacks and anchors its standalone preset.
+# Watchtower defaults into automation presets and anchors its standalone preset.
 [services.watchtower]
 title = "Watchtower"
 description = "Updates eligible Docker host containers on a schedule or in one pass."
 category = "Operations"
 url = "https://github.com/nicholas-fedor/watchtower"
 order = 900
+
+# Overlay Reset is profile-gated and runs only through an explicit one-shot command.
+[services.overlay-reset]
+title = "Kometa Overlay Reset"
+description = "Provides a dry-run-first, one-shot repair tool for Plex overlays."
+category = "Operations"
+url = "https://kometa.wiki/en/latest/kometa/scripts/overlay-reset/"
+order = 910
+requires = ["kometa"]
 
 #
 # Plundarr is the default general-purpose media automation voyage.
@@ -260,7 +310,7 @@ core = [
   "duplicati",
   "homepage",
 ]
-defaults = ["qbittorrent", "cleanuparr"]
+defaults = ["qbittorrent", "cleanuparr", "watchtower"]
 
 #
 # Boudoirr reuses the same catalog for an adult-media-focused stack.
@@ -287,7 +337,7 @@ compose_summary = [
   "environment-specific settings for a seamless VPN setup.",
 ]
 core = ["privateerr", "gluetun", "flaresolverr", "prowlarr", "whisparr"]
-defaults = ["qbittorrent", "cleanuparr"]
+defaults = ["qbittorrent", "cleanuparr", "watchtower"]
 
 #
 # Jellyfin keeps the standalone deployment deliberately small.
@@ -336,6 +386,31 @@ compose_summary = [
 ]
 core = ["plex"]
 defaults = []
+
+#
+# Duplex collects Plex maintenance, monitoring, notifications, and recovery.
+#
+# PATTRMM and the operational companions remain removable preset defaults.
+[presets.duplex]
+title = "Duplex"
+description = "Plex metadata, artwork, monitoring, notifications, and recovery tools."
+project_name = "duplex"
+network_subnet = "172.26.0.0/16"
+network_ip_range = "172.26.5.0/24"
+network_gateway = "172.26.5.254"
+media_root = "/volume1/plex"
+media_libraries = []
+host_port_offset = 0
+compose_summary = [
+  "docker-compose.yml: Docker Compose configuration for running Duplex's",
+  "                    Plex metadata, artwork, monitoring, notification,",
+  "                    and recovery utilities.",
+  "",
+  "Kometa uses an external configuration checkout. Overlay Reset stays behind",
+  "the tools profile and runs only when explicitly invoked as a one-shot job.",
+]
+core = ["kometa", "imagemaid", "tautulli"]
+defaults = ["pattrmm", "notifiarr", "overlay-reset"]
 
 #
 # Watchtower provides a focused host-wide container update project.

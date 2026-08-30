@@ -71,8 +71,8 @@ Plundarr has two clearly separate parts:
 
 > [!NOTE]
 >
-> - `<preset>` is `plundarr`, `boudoirr`, `jellyfin`, `plex`, `watchtower`, or
->   `custom`.
+> - `<preset>` is `plundarr`, `boudoirr`, `jellyfin`, `plex`, `duplex`,
+>   `watchtower`, or `custom`.
 > - Add-ons change the services aboard without changing the directory name.
 > - For example, `make ship ADD_SERVICES=plex` would deploy to `dist/plundarr/`.
 
@@ -104,16 +104,18 @@ exact services included before ye add or remove anything:
 
 | Preset                | Best For                             | Included Out of the Box                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | --------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 🏴‍☠️&nbsp;`plundarr`    | Movies and TV automation             | [Privateerr](https://github.com/scottgigawatt/privateerr), [Gluetun](https://github.com/qdm12/gluetun), [FlareSolverr](https://github.com/FlareSolverr/FlareSolverr), [Prowlarr](https://github.com/Prowlarr/Prowlarr), [qBittorrent](https://github.com/qbittorrent/qBittorrent), [Radarr](https://github.com/Radarr/Radarr), [Sonarr](https://github.com/Sonarr/Sonarr), [Bazarr](https://github.com/morpheus65535/bazarr), [Seerr](https://github.com/seerr-team/seerr), [Cleanuparr](https://github.com/Cleanuparr/Cleanuparr), [Speedtest Tracker](https://docs.speedtest-tracker.dev/), [Duplicati](https://www.duplicati.com), and [Homepage](https://gethomepage.dev/latest/) |
-| 🔞&nbsp;`boudoirr`    | Whisparr automation                  | [Privateerr](https://github.com/scottgigawatt/privateerr), [Gluetun](https://github.com/qdm12/gluetun), [FlareSolverr](https://github.com/FlareSolverr/FlareSolverr), [Prowlarr](https://github.com/Prowlarr/Prowlarr), [qBittorrent](https://github.com/qbittorrent/qBittorrent), [Whisparr](https://github.com/Whisparr/Whisparr), and [Cleanuparr](https://github.com/Cleanuparr/Cleanuparr)                                                                                                                                                                                                                                                                                       |
+| 🏴‍☠️&nbsp;`plundarr`    | Movies and TV automation             | [Privateerr](https://github.com/scottgigawatt/privateerr), [Gluetun](https://github.com/qdm12/gluetun), [FlareSolverr](https://github.com/FlareSolverr/FlareSolverr), [Prowlarr](https://github.com/Prowlarr/Prowlarr), [qBittorrent](https://github.com/qbittorrent/qBittorrent), [Radarr](https://github.com/Radarr/Radarr), [Sonarr](https://github.com/Sonarr/Sonarr), [Bazarr](https://github.com/morpheus65535/bazarr), [Seerr](https://github.com/seerr-team/seerr), [Cleanuparr](https://github.com/Cleanuparr/Cleanuparr), [Speedtest Tracker](https://docs.speedtest-tracker.dev/), [Duplicati](https://www.duplicati.com), [Homepage](https://gethomepage.dev/latest/), and [Watchtower](https://watchtower.nickfedor.com/) |
+| 🔞&nbsp;`boudoirr`    | Whisparr automation                  | [Privateerr](https://github.com/scottgigawatt/privateerr), [Gluetun](https://github.com/qdm12/gluetun), [FlareSolverr](https://github.com/FlareSolverr/FlareSolverr), [Prowlarr](https://github.com/Prowlarr/Prowlarr), [qBittorrent](https://github.com/qbittorrent/qBittorrent), [Whisparr](https://github.com/Whisparr/Whisparr), [Cleanuparr](https://github.com/Cleanuparr/Cleanuparr), and [Watchtower](https://watchtower.nickfedor.com/)                                                                                                                                                                                                                               |
 | 🎞️&nbsp;`jellyfin`    | Standalone movies and TV playback    | [Jellyfin](https://jellyfin.org/docs/)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | 🎬&nbsp;`plex`        | Standalone movies and TV playback    | [Plex Media Server](https://support.plex.tv/articles/categories/plex-media-server/)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| 🎭&nbsp;`duplex`      | Plex metadata and maintenance        | [Kometa](https://kometa.wiki/), [ImageMaid](https://kometa.wiki/en/latest/kometa/scripts/imagemaid/), [PATTRMM](https://github.com/InsertDisc/pattrmm), [Tautulli](https://tautulli.com/), [Notifiarr](https://notifiarr.wiki/), and profile-gated [Kometa Overlay Reset](https://kometa.wiki/en/latest/kometa/scripts/overlay-reset/)                                                                                                                                                                                                                                                                                                                                                                  |
 | 🔭&nbsp;`watchtower`  | Standalone container image updates   | [Watchtower](https://watchtower.nickfedor.com/)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | 🧩&nbsp;`custom`      | A stack assembled service by service | Nothing; every service is selected explicitly                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 
-Plundarr and Boudoirr use qBittorrent as their only default downloader. On
-those presets, SABnzbd, NZBGet, Jellyfin, Plex, and Watchtower are not present
-by default, but may be added using `make ship ADD_SERVICES=sabnzbd,jellyfin`.
+Plundarr and Boudoirr use qBittorrent as their only default downloader and
+include Watchtower as a removable update companion. SABnzbd, NZBGet, Jellyfin,
+and Plex are not present by default, but may be added using
+`make ship ADD_SERVICES=sabnzbd,jellyfin`.
 
 ### Cargo Ye Can Add 🧩
 
@@ -126,7 +128,8 @@ required foundation services and shows the resolved fleet before writing it.
 | ⬇️&nbsp;Download&nbsp;clients | [qBittorrent](https://github.com/qbittorrent/qBittorrent), [SABnzbd](https://sabnzbd.org/wiki/), and [NZBGet](https://nzbget.com/documentation/)                                                                                                                                                                                                                              |
 | ⚙️&nbsp;Automation            | [FlareSolverr](https://github.com/FlareSolverr/FlareSolverr), [Prowlarr](https://wiki.servarr.com/prowlarr), [Radarr](https://wiki.servarr.com/radarr), [Sonarr](https://wiki.servarr.com/sonarr), [Sonarr Anime](https://wiki.servarr.com/sonarr), [Whisparr](https://wiki.servarr.com/whisparr), [Bazarr](https://wiki.bazarr.media/), and [Seerr](https://docs.seerr.dev/) |
 | 🎞️&nbsp;Media&nbsp;servers    | [Jellyfin](https://jellyfin.org/docs/) and [Plex Media Server](https://support.plex.tv/articles/categories/plex-media-server/)                                                                                                                                                                                                                                                |
-| 🧰&nbsp;Operations            | [Cleanuparr](https://cleanuparr.github.io/Cleanuparr/), [Speedtest Tracker](https://docs.speedtest-tracker.dev/), [Apprise](https://github.com/caronc/apprise-api), [Duplicati](https://docs.duplicati.com/), [Homepage](https://gethomepage.dev/latest/), and [Watchtower](https://watchtower.nickfedor.com/)                                                          |
+| 🎭&nbsp;Plex&nbsp;utilities   | [Kometa](https://kometa.wiki/), [ImageMaid](https://kometa.wiki/en/latest/kometa/scripts/imagemaid/), [PATTRMM](https://github.com/InsertDisc/pattrmm), and [Tautulli](https://tautulli.com/)                                                                                                                                                                                   |
+| 🧰&nbsp;Operations            | [Cleanuparr](https://cleanuparr.github.io/Cleanuparr/), [Speedtest Tracker](https://docs.speedtest-tracker.dev/), [Apprise](https://github.com/caronc/apprise-api), [Notifiarr](https://notifiarr.wiki/), [Duplicati](https://docs.duplicati.com/), [Homepage](https://gethomepage.dev/latest/), [Watchtower](https://watchtower.nickfedor.com/), and [Kometa Overlay Reset](https://kometa.wiki/en/latest/kometa/scripts/overlay-reset/) |
 
 > [!NOTE]
 >
@@ -182,6 +185,8 @@ Maraudarr writes only settings used by the selected services:
 | 🔞&nbsp;`HOST_SCENES_PATH`           | Scenes path used by Boudoirr automation and Plex                                |
 | 🔞&nbsp;`WHISPARR_DATA_PATH`         | High-level media root mounted into Whisparr at `/data`                          |
 | 🎞️&nbsp;`JELLYFIN_DATA_PATH`         | High-level media root mounted into Jellyfin at `/data`                          |
+| 🎭&nbsp;`KOMETA_CONFIG_PATH`          | Independent Kometa config checkout mounted at `/config`                        |
+| 🖼️&nbsp;`IMAGEMAID_PLEX_PATH`         | Plex application-data directory containing artwork state                       |
 | 🕰️&nbsp;`TZ`                         | Timezone used by the containers                                                 |
 | 🚪&nbsp;`*_WEBUI_PORT`               | Change only when a host port is already occupied                                |
 
@@ -223,6 +228,23 @@ make ship PRESET=jellyfin
 make ship PRESET=plex
 ```
 
+#### 🎭 Generate Duplex
+
+```sh
+make ship PRESET=duplex
+```
+
+Kometa's configuration remains an independent checkout. Set
+`KOMETA_CONFIG_PATH` to the host directory containing its `config.yml`, assets,
+metadata, and overlays. `IMAGEMAID_PLEX_PATH` must point to Plex's application
+data directory containing `Cache`, `Metadata`, and `Plug-in Support`.
+
+PATTRMM, Notifiarr, and Overlay Reset are included Duplex defaults that may be
+removed in `make configure` or with `REMOVE_SERVICES`. Watchtower stays
+available through `ADD_SERVICES=watchtower` but is not a Duplex default. Overlay
+Reset remains behind the `tools` Compose profile and is not started by
+`make up`.
+
 #### 🧩 Add Common Extras
 
 ```sh
@@ -242,7 +264,7 @@ make ship REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=nzbget
 Add the persistent updater to an existing preset:
 
 ```sh
-make ship PRESET=boudoirr ADD_SERVICES=sabnzbd,watchtower
+make ship PRESET=duplex ADD_SERVICES=watchtower
 ```
 
 Or generate Watchtower as its own persistent project:
@@ -264,6 +286,19 @@ make watchtower-run-once PRESET=watchtower
 > `com.centurylinklabs.watchtower.enable=false` label. Run only one persistent
 > Watchtower daemon per Docker host, and stop it before starting a one-shot
 > pass.
+
+#### ⚠️ Run Kometa Overlay Reset Once
+
+Review the generated Duplex `.env`, leave `OVERLAY_RESET_DRY_RUN=True`, and run:
+
+```sh
+make overlay-reset-run-once PRESET=duplex
+```
+
+> [!CAUTION]
+> Kometa Overlay Reset is a last-resort repair tool with no undo. Inspect the
+> dry-run output first. Set `OVERLAY_RESET_DRY_RUN=False` only when ye intend to
+> remove overlays from the exact `OVERLAY_RESET_PLEX_LIBRARY` named in `.env`.
 
 - `ADD_SERVICES` and `REMOVE_SERVICES` accept comma-separated service IDs.
 - Preset core services cannot be removed.

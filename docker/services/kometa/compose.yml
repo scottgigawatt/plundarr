@@ -1,0 +1,28 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# compose.yml: Maraudarr service chart for Kometa.
+#
+
+services:
+  #
+  # Define the 'kometa' service for scheduled Plex metadata management.
+  #
+  kometa:
+    # Docker image and container information
+    <<: *default-container                                        # Pull in the default container information
+    image: kometateam/kometa:${KOMETA_TAG}                        # Run the official Kometa image
+    container_name: ${COMPOSE_PROJECT_NAME}-kometa-${KOMETA_TAG}  # Namespace the container name by project and tag
+    hostname: kometa                                              # Set the container hostname
+
+    # Define the container environment
+    environment:
+      <<: *default-environment       # Pull in the default environment
+      KOMETA_DEBUG: ${KOMETA_DEBUG}  # Toggle extra debug logging
+      KOMETA_TIMES: ${KOMETA_TIMES}  # Schedule one or more daily runs
+
+    # Mount the independently managed Kometa configuration checkout
+    volumes:
+      - ${KOMETA_CONFIG_PATH}:/config:rw  # Kometa config, assets, metadata, and logs

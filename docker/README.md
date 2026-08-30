@@ -43,6 +43,7 @@ of sight and prints only the useful status and Maraudarr output.
 | `make presets`                               | Lists every preset and its exact defaults                   |
 | `make services`                              | Lists every selectable service                              |
 | `make watchtower-run-once PRESET=watchtower` | Runs one host update pass and exits                         |
+| `make overlay-reset-run-once PRESET=duplex`  | Runs profile-gated Overlay Reset once and exits             |
 | `make pull-image`                            | Pulls the latest published Maraudarr image from GHCR        |
 | `make build`                                 | Builds the Maraudarr image locally from this directory      |
 | `make test-unit`                             | Runs Maraudarr's Python unit tests                          |
@@ -71,13 +72,15 @@ Add optional cargo without opening the interactive prompts:
 > make ship PRESET=boudoirr ADD_SERVICES=jellyfin
 > make ship PRESET=jellyfin
 > make ship PRESET=plex
+> make ship PRESET=duplex
 > make ship PRESET=watchtower
 > make ship ADD_SERVICES=sonarr-anime
 > ```
 
 `ADD_SERVICES` and `REMOVE_SERVICES` accept comma-separated service IDs.
-Plundarr and Boudoirr preselect qBittorrent as their only downloader; SABnzbd,
-NZBGet, and Watchtower remain ordinary opt-in choices:
+Plundarr and Boudoirr preselect qBittorrent as their only downloader and include
+Watchtower as a removable default. SABnzbd and NZBGet remain ordinary opt-in
+choices:
 
 The first command selects Usenet only. The second keeps torrents, adds Usenet,
 and opts into update checks:
@@ -86,7 +89,7 @@ and opts into update checks:
 >
 > ```sh
 > make ship REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=sabnzbd
-> make ship PRESET=boudoirr ADD_SERVICES=sabnzbd,watchtower
+> make ship PRESET=boudoirr ADD_SERVICES=sabnzbd
 > ```
 
 The default Plundarr voyage includes one Sonarr instance. `sonarr-anime` is an
@@ -96,6 +99,14 @@ The `watchtower` preset runs the maintained `nickfedor/watchtower:latest` image
 persistently. Use `make watchtower-run-once PRESET=watchtower` instead for one
 host-wide update pass that exits when complete. Run only one persistent
 Watchtower daemon per Docker host.
+
+The `duplex` preset uses Kometa, ImageMaid, PATTRMM, Tautulli, Notifiarr, and
+Overlay Reset. Kometa's config is an external checkout selected with
+`KOMETA_CONFIG_PATH`; Maraudarr does not create a submodule or manage that
+repository. PATTRMM, Notifiarr, and Overlay Reset are removable defaults, while
+Watchtower remains available as an explicit addition. The Overlay Reset service
+is profile-gated and defaults to a dry run when invoked with
+`make overlay-reset-run-once PRESET=duplex`.
 
 ## What Be in This Image? 📦
 

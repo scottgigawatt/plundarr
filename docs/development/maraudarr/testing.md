@@ -26,12 +26,13 @@ not hide source behavior.
 
 This includes unit tests, packaged-image fallback checks, all product presets,
 Boudoirr's optional media-server combinations, torrent-only, Usenet-only, and
-combined downloader modes, plus opt-in and standalone Watchtower. It also tests
-the compact Compose status, one-shot Watchtower, and secret-safe PIA preflight
-helpers. The matrix generates all six presets beneath one `dist/` root. Every
+combined downloader modes, the Duplex core/default split, plus default,
+opt-in, and standalone Watchtower placements. It also tests the compact Compose
+status, one-shot Watchtower and Overlay Reset, and secret-safe PIA preflight
+helpers. The matrix generates all seven presets beneath one `dist/` root. Every
 generated Compose/environment pair is inspected by Docker Compose without
-starting application containers. Unit coverage also keeps preset project
-names, Docker networks,
+starting application containers. Unit coverage also keeps preset project names,
+Docker networks,
 project/service/tag container names, and published ports collision-free.
 
 ## Workflow Helpers

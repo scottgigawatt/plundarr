@@ -1,0 +1,32 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# compose.yml: Maraudarr service chart for Tautulli.
+#
+
+services:
+  #
+  # Define the 'tautulli' service for Plex activity monitoring.
+  #
+  tautulli:
+    # Docker image and container information
+    <<: *default-container                                              # Pull in the default container information
+    image: ghcr.io/tautulli/tautulli:${TAUTULLI_TAG}                    # Run the official Tautulli image
+    container_name: ${COMPOSE_PROJECT_NAME}-tautulli-${TAUTULLI_TAG}    # Namespace the container name by project and tag
+    hostname: tautulli                                                  # Set the container hostname
+
+    # Define the container environment
+    environment:
+      <<: *default-environment  # Pull in the default environment
+      PUID: ${TAUTULLI_PUID}    # Set the host user ID
+      PGID: ${TAUTULLI_PGID}    # Set the host group ID
+
+    # Define the host and container ports
+    ports:
+      - ${TAUTULLI_WEBUI_PORT}:8181  # Tautulli web UI port
+
+    # Mount host directories into the container
+    volumes:
+      - ${TAUTULLI_CONFIG_PATH}:/config:rw  # Persistent Tautulli database and configuration

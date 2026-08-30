@@ -84,7 +84,6 @@
         icon: tautulli.svg
         href: {{HOMEPAGE_VAR_TAUTULLI_HREF}}
         description: Plex monitoring
-        container: tautulli-latest
         widget:
           type: tautulli
           url: {{HOMEPAGE_VAR_TAUTULLI_URL}}

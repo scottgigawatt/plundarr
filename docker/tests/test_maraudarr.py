@@ -64,6 +64,7 @@ class MaraudarrTests(unittest.TestCase):
                 "speedtest-tracker",
                 "duplicati",
                 "homepage",
+                "watchtower",
             ),
         )
         self.assertNotIn("sonarr-anime", plan.service_ids)
@@ -84,6 +85,7 @@ class MaraudarrTests(unittest.TestCase):
                 "qbittorrent",
                 "whisparr",
                 "cleanuparr",
+                "watchtower",
             ),
         )
         self.assertNotIn("depends_on:", extract_service(compose, "cleanuparr"))
@@ -119,16 +121,16 @@ class MaraudarrTests(unittest.TestCase):
                 self.assertIn("qbittorrent", combined)
                 self.assertIn("sabnzbd", combined)
 
-    def test_watchtower_is_opt_in_for_automation_presets(self) -> None:
-        """Leave Watchtower unchecked until a user explicitly selects it."""
+    def test_watchtower_is_a_removable_automation_preset_default(self) -> None:
+        """Default Watchtower in automation presets without making it core."""
 
         for preset_id in ("plundarr", "boudoirr"):
             with self.subTest(preset=preset_id):
                 default = self.catalog.resolve(preset_id)
-                selected = self.catalog.resolve(preset_id, add={"watchtower"})
+                removed = self.catalog.resolve(preset_id, remove={"watchtower"})
 
-                self.assertNotIn("watchtower", default.service_ids)
-                self.assertIn("watchtower", selected.service_ids)
+                self.assertIn("watchtower", default.service_ids)
+                self.assertNotIn("watchtower", removed.service_ids)
 
     def test_watchtower_preset_selects_only_the_updater(self) -> None:
         """Keep the standalone updater focused and available for one-shot runs."""
@@ -158,6 +160,58 @@ class MaraudarrTests(unittest.TestCase):
             'WATCHTOWER_NOTIFICATIONS="${WATCHTOWER_NOTIFICATIONS:-shoutrrr}"',
             environment,
         )
+
+    def test_duplex_preset_matches_the_live_service_shape(self) -> None:
+        """Keep Plex utilities faithful while leaving companions removable."""
+
+        plan = self.catalog.resolve("duplex")
+        compose = render_compose(self.catalog, plan)
+        environment = render_environment(
+            self.catalog,
+            plan,
+            None,
+            generate_secrets=False,
+        )
+
+        self.assertEqual(
+            plan.service_ids,
+            (
+                "kometa",
+                "imagemaid",
+                "pattrmm",
+                "tautulli",
+                "notifiarr",
+                "overlay-reset",
+            ),
+        )
+        self.assertIn("image: kometateam/kometa:${KOMETA_TAG}", compose)
+        self.assertIn("image: kometateam/imagemaid:${IMAGE_MAID_TAG}", compose)
+        self.assertIn("image: ghcr.io/tautulli/tautulli:${TAUTULLI_TAG}", compose)
+        self.assertIn("${KOMETA_CONFIG_PATH}:/config:rw", compose)
+        self.assertIn("${IMAGEMAID_PLEX_PATH}:/plex:rw", compose)
+        self.assertIn("profiles:\n      - tools", extract_service(compose, "overlay-reset"))
+        self.assertNotIn("WATCHTOWER_DOCKER_CONFIG", compose)
+        self.assertIn('KOMETA_TAG="${KOMETA_TAG:-latest}"', environment)
+        self.assertIn('OVERLAY_RESET_DRY_RUN="${OVERLAY_RESET_DRY_RUN:-True}"', environment)
+        self.assertNotIn("  watchtower:", compose)
+
+    def test_duplex_companions_are_removable_but_core_utilities_are_not(self) -> None:
+        """Preserve the requested core and default boundary for Duplex."""
+
+        plan = self.catalog.resolve(
+            "duplex",
+            remove={
+                "kometa",
+                "imagemaid",
+                "pattrmm",
+                "tautulli",
+                "notifiarr",
+                "watchtower",
+                "overlay-reset",
+            },
+        )
+
+        self.assertEqual(plan.service_ids, ("kometa", "imagemaid", "tautulli"))
 
     def test_standalone_media_server_presets_select_one_core_service(self) -> None:
         """Keep the standalone Jellyfin and Plex presets deliberately focused."""
@@ -295,6 +349,11 @@ class MaraudarrTests(unittest.TestCase):
                 "172.31.0.0/16",
                 "/volume1/plex",
             ),
+            "duplex": (
+                "duplex",
+                "172.26.0.0/16",
+                "/volume1/plex",
+            ),
             "watchtower": (
                 "watchtower",
                 "172.25.0.0/16",
@@ -343,6 +402,7 @@ class MaraudarrTests(unittest.TestCase):
             "boudoirr",
             "jellyfin",
             "plex",
+            "duplex",
             "watchtower",
             "custom",
         )
@@ -414,6 +474,8 @@ class MaraudarrTests(unittest.TestCase):
         self.assertIn(18080, published_ports["boudoirr"])
         self.assertIn(21011, published_ports["boudoirr"])
         self.assertIn(28096, published_ports["jellyfin"])
+        self.assertIn(8181, published_ports["duplex"])
+        self.assertIn(5454, published_ports["duplex"])
         self.assertIn(33000, published_ports["custom"])
 
         boudoirr_homepage = render_environment(
@@ -622,7 +684,7 @@ class MaraudarrTests(unittest.TestCase):
 
         plan = self.catalog.resolve(
             "plundarr",
-            add={"jellyfin", "nzbget", "sonarr-anime"},
+            add={"jellyfin", "nzbget", "sonarr-anime", "tautulli"},
         )
         homepage = render_homepage_services(self.catalog, plan)
 
@@ -653,13 +715,36 @@ class MaraudarrTests(unittest.TestCase):
         self.assertNotIn("HOMEPAGE_VAR_RADARR", compose)
         self.assertNotIn("HOMEPAGE_VAR_PLEX", compose)
         self.assertNotIn("HOMEPAGE_VAR_NZBGET", compose)
+        self.assertNotIn("HOMEPAGE_VAR_TAUTULLI", compose)
         self.assertNotIn("HOMEPAGE_VAR_RADARR", environment)
         self.assertNotIn("HOMEPAGE_VAR_PLEX", environment)
         self.assertNotIn("HOMEPAGE_VAR_NZBGET", environment)
+        self.assertNotIn("HOMEPAGE_VAR_TAUTULLI", environment)
         self.assertNotIn("- Radarr:", homepage)
         self.assertNotIn("- Plex:", homepage)
         self.assertNotIn("- NZBGet:", homepage)
+        self.assertNotIn("- Tautulli:", homepage)
         self.assertTrue(homepage.endswith("[]\n"))
+
+    def test_homepage_tautulli_card_requires_the_tautulli_service(self) -> None:
+        """Do not render a phantom Tautulli card for Plex-only stacks."""
+
+        plex_only = self.catalog.resolve(
+            "custom",
+            selected={"homepage", "plex"},
+        )
+        with_tautulli = self.catalog.resolve(
+            "custom",
+            selected={"homepage", "plex", "tautulli"},
+        )
+
+        self.assertNotIn(
+            "- Tautulli:",
+            render_homepage_services(self.catalog, plex_only),
+        )
+        tautulli_homepage = render_homepage_services(self.catalog, with_tautulli)
+        self.assertIn("- Tautulli:", tautulli_homepage)
+        self.assertNotIn("container: tautulli-latest", tautulli_homepage)
 
     #
     # Catalog source and generated style enforcement.
@@ -853,6 +938,29 @@ class MaraudarrTests(unittest.TestCase):
                 ).is_file()
             )
             self.assertFalse((config_path / "plex").exists())
+
+    def test_duplex_keeps_kometa_external_and_seeds_local_state_only(self) -> None:
+        """Leave Kometa external while preparing the other Duplex state roots."""
+
+        plan = self.catalog.resolve("duplex")
+
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            _, _, config_path = write_stack(
+                self.catalog,
+                plan,
+                Path(temporary_directory),
+            )
+
+            self.assertFalse((config_path / "kometa").exists())
+            for service_id in (
+                "imagemaid",
+                "pattrmm",
+                "tautulli",
+                "notifiarr",
+                "overlay-reset",
+            ):
+                with self.subTest(service=service_id):
+                    self.assertTrue((config_path / service_id / "README.md").is_file())
 
 
 if __name__ == "__main__":

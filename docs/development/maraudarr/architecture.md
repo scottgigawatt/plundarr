@@ -54,7 +54,8 @@ network default, media root, media library profile, and host-port offset.
 
 Core services are restored in step 3 and cannot be removed. Default services
 are only the preset's initial checkbox state, so users can replace qBittorrent
-with a Usenet client or select both without a separate add-on mechanism.
+with a Usenet client, remove Watchtower where it defaults, or select both
+download modes without a separate add-on mechanism.
 
 The result is an immutable `StackPlan`. Renderers consume that plan rather than
 repeating selection logic.

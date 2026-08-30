@@ -107,6 +107,7 @@ run_distribution_case plundarr
 run_distribution_case boudoirr
 run_distribution_case jellyfin
 run_distribution_case plex
+run_distribution_case duplex
 run_distribution_case watchtower
 run_distribution_case custom --add homepage
 
@@ -170,6 +171,14 @@ run_case standalone-plex --preset plex
 run_case standalone-watchtower --preset watchtower
 
 #
+# Duplex includes its removable companions and profile-gated recovery tool.
+#
+run_case duplex --preset duplex
+run_case duplex-core \
+    --preset duplex \
+    --remove pattrmm,notifiarr,overlay-reset
+
+#
 # Default Boudoirr voyage with qBittorrent only.
 #
 run_case boudoirr --preset boudoirr
@@ -183,7 +192,7 @@ run_case boudoirr-usenet \
     --add sabnzbd
 run_case boudoirr-addons \
     --preset boudoirr \
-    --add sabnzbd,watchtower
+    --add sabnzbd
 
 #
 # Boudoirr can choose either media server without gaining one by default.
@@ -207,7 +216,7 @@ run_case custom-homepage \
 #
 run_case everything \
     --preset plundarr \
-    --add apprise,jellyfin,nzbget,plex,sabnzbd,sonarr-anime,watchtower,whisparr
+    --add apprise,imagemaid,jellyfin,notifiarr,nzbget,overlay-reset,pattrmm,plex,sabnzbd,sonarr-anime,tautulli,watchtower,whisparr
 
 #
 # Report one clear success line after every Compose chart passes.

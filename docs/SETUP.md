@@ -24,13 +24,14 @@ Or generate a known voyage directly:
 > make ship PRESET=boudoirr ADD_SERVICES=jellyfin
 > make ship PRESET=jellyfin
 > make ship PRESET=plex
+> make ship PRESET=duplex
 > make ship PRESET=watchtower
 > make ship ADD_SERVICES=sonarr-anime
 > ```
 
-Plundarr and Boudoirr use qBittorrent as their only default downloader.
-SABnzbd, NZBGet, and Watchtower remain optional choices. Use
-`ADD_SERVICES` and `REMOVE_SERVICES` for repeatable changes:
+Plundarr and Boudoirr use qBittorrent as their only default downloader and
+include Watchtower as a removable default. SABnzbd and NZBGet remain optional
+choices. Use `ADD_SERVICES` and `REMOVE_SERVICES` for repeatable changes:
 
 For Usenet only, remove the default torrent client and its cleanup companion.
 To keep torrents and add Usenet plus update checks, leave the defaults intact:
@@ -39,7 +40,7 @@ To keep torrents and add Usenet plus update checks, leave the defaults intact:
 >
 > ```sh
 > make ship REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=sabnzbd
-> make ship PRESET=boudoirr ADD_SERVICES=sabnzbd,watchtower
+> make ship PRESET=boudoirr ADD_SERVICES=sabnzbd
 > ```
 
 Default Plundarr includes one Sonarr instance for television. The separate
@@ -67,15 +68,15 @@ Fresh presets receive distinct project and network defaults:
 | Boudoirr   | `boudoirr`   | `172.29.0.0/16` | Selected service ports offset by `10000` |
 | Jellyfin   | `jellyfin`   | `172.30.0.0/16` | Jellyfin `28096` (`8096` + `20000`)      |
 | Plex       | `plex`       | `172.31.0.0/16` | Plex host networking                     |
+| Duplex     | `duplex`     | `172.26.0.0/16` | Tautulli `8181`; Notifiarr `5454`        |
 | Watchtower | `watchtower` | `172.25.0.0/16` | No published ports                       |
 | Custom     | `custom`     | `172.27.0.0/16` | Selected service ports offset by `30000` |
 
 Container names include the project, service, and image tag, such as
-`plundarr-bazarr-latest`. The default Plundarr, default Boudoirr, standalone
-Jellyfin, standalone Plex, and standalone Watchtower voyages can therefore run
-side by side without sharing container names, subnets, or published ports. The
-host-port bands retain the familiar tail of common ports: qBittorrent is `8080`
-for Plundarr and `18080` for Boudoirr. Existing values in a preset's `.env`
+`plundarr-bazarr-latest`. Fresh preset identities therefore avoid sharing
+container names, subnets, or published ports. The host-port bands retain the
+familiar tail of common ports: qBittorrent is `8080` for Plundarr and `18080`
+for Boudoirr. Existing values in a preset's `.env`
 remain preserved during regeneration, so review and change older project names,
 network values, or ports before placing an existing deployment beside another
 preset.
@@ -90,13 +91,14 @@ can claim its standard host ports unless Plex itself is configured differently.
 
 ## Watchtower Update Modes 🔭
 
-Use Watchtower as an optional persistent service in another preset, or generate
-its focused standalone project:
+Plundarr and Boudoirr include Watchtower as a removable persistent default.
+Duplex leaves it unselected, and any preset may add it explicitly. Generate its
+focused standalone project when Watchtower should live on its own:
 
 > [!TIP]
 >
 > ```sh
-> make ship ADD_SERVICES=watchtower
+> make ship PRESET=duplex ADD_SERVICES=watchtower
 > make ship PRESET=watchtower
 > make up PRESET=watchtower
 > ```
@@ -115,6 +117,66 @@ The standalone project can instead perform one update pass and exit:
 > only services in the generated Compose project. Containers labeled
 > `com.centurylinklabs.watchtower.enable=false` remain excluded. Run one
 > persistent Watchtower daemon per host and stop it before a one-shot pass.
+
+## Duplex Plex Utilities 🎭
+
+Generate the Duplex preset directly:
+
+> [!TIP]
+>
+> ```sh
+> make ship PRESET=duplex
+> ```
+
+Kometa, ImageMaid, and Tautulli are Duplex core services. PATTRMM, Notifiarr,
+and Overlay Reset are included by default but removable through
+`make configure` or `REMOVE_SERVICES`. Watchtower remains available through
+`ADD_SERVICES=watchtower` but is not selected by Duplex.
+
+Before launch, review `dist/duplex/.env` and set these host-specific values:
+
+| Setting                   | Purpose                                                                 |
+| ------------------------- | ----------------------------------------------------------------------- |
+| `KOMETA_CONFIG_PATH`      | Independent checkout containing Kometa `config.yml`, assets, and files |
+| `KOMETA_TIMES`            | Comma-separated stable-image run times in `HH:MM` format                |
+| `IMAGEMAID_PLEX_PATH`     | Plex directory containing `Cache`, `Metadata`, and `Plug-in Support`    |
+| `TAUTULLI_PUID` / `TAUTULLI_PGID` | Host identity allowed to write Tautulli state                    |
+| `TAUTULLI_WEBUI_PORT`     | Tautulli host port; defaults to `8181`                                  |
+| `NOTIFIARR_WEBUI_PORT`    | Notifiarr host port; defaults to `5454`                                 |
+
+Kometa's configuration remains separate from Plundarr. Point
+`KOMETA_CONFIG_PATH` at an existing host checkout or clone a configuration
+repository there yourself; Maraudarr neither creates a Git submodule nor
+manages that repository. This follows Kometa's supported Docker pattern of
+mounting the configuration directory at `/config`. ImageMaid likewise follows
+its supported two-mount pattern with writable `/config` and `/plex` paths.
+
+Start the persistent Duplex services normally:
+
+> [!TIP]
+>
+> ```sh
+> make up PRESET=duplex
+> ```
+
+Overlay Reset stays behind the `tools` Compose profile, so the command above
+does not start it. To perform one disposable dry-run pass:
+
+> [!CAUTION]
+> Kometa documents Overlay Reset as destructive with no undo and recommends it
+> only as a last-resort repair tool. Confirm the exact Plex URL, token, and
+> library in `.env`, leave `OVERLAY_RESET_DRY_RUN=True`, and inspect the output
+> before deliberately changing that value to `False`.
+>
+> ```sh
+> make overlay-reset-run-once PRESET=duplex
+> ```
+
+See Kometa's current [Docker walkthrough](https://kometa.wiki/en/latest/kometa/install/docker/),
+[runtime variable reference](https://kometa.wiki/en/latest/kometa/environmental/),
+[ImageMaid guide](https://kometa.wiki/en/latest/kometa/scripts/imagemaid/), and
+[Overlay Reset guide](https://kometa.wiki/en/latest/kometa/scripts/overlay-reset/)
+for application-level options.
 
 ## Batten Down the Hatches 🖥️⚓
 
@@ -148,9 +210,10 @@ voyage:
 4. Select **OK** to save the rule.
 
 Repeat the rule with `172.29.0.0` for Boudoirr, `172.30.0.0` for standalone
-Jellyfin, or the generated subnet for a custom voyage. Every listed preset uses
-the `255.255.0.0` mask by default. These rules allow internal container traffic
-while Gluetun carries selected downloader traffic through PIA.
+Jellyfin, `172.26.0.0` for Duplex, or the generated subnet for a custom voyage.
+Every listed preset uses the `255.255.0.0` mask by default. These rules allow
+internal container traffic while Gluetun carries selected downloader traffic
+through PIA.
 
 ### Launchin' Yer Fleet 📦🚀
 

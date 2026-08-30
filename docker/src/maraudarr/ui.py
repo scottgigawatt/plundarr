@@ -52,6 +52,7 @@ PRESET_ICONS = {
     "boudoirr": "🔞",
     "jellyfin": "🎞️",
     "plex": "📺",
+    "duplex": "🎭",
     "watchtower": "🔭",
     "custom": "🧩",
 }
@@ -63,6 +64,7 @@ CATEGORY_ICONS = {
     "Media automation": "⚙️",
     "Media experience": "🍿",
     "Media servers": "📺",
+    "Plex utilities": "🎭",
     "Operations": "🧹",
     "Monitoring and notifications": "📡",
 }
@@ -354,6 +356,17 @@ class UI:
         steps = []
         if "privateerr" in selected:
             steps.append("Set PIA_USER and PIA_PASS in .env.")
+        if selected.intersection(
+            {
+                "imagemaid",
+                "kometa",
+                "notifiarr",
+                "overlay-reset",
+                "pattrmm",
+                "tautulli",
+            }
+        ):
+            steps.append("Check Kometa, Plex, and config paths in .env.")
         if selected.intersection(
             {
                 "bazarr",

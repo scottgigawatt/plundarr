@@ -17,6 +17,7 @@ ENSURE_BUILDX_BUILDER=ensure-buildx-builder
 ALL=all
 UP=up
 WATCHTOWER_RUN_ONCE=watchtower-run-once
+OVERLAY_RESET_RUN_ONCE=overlay-reset-run-once
 DOWN=down
 PS=ps
 LOGS=logs
@@ -73,6 +74,7 @@ COMMON_TARGETS= \
 	$(ALL) \
 	$(UP) \
 	$(WATCHTOWER_RUN_ONCE) \
+	$(OVERLAY_RESET_RUN_ONCE) \
 	$(DOWN) \
 	$(PS) \
 	$(LOGS) \
@@ -136,20 +138,21 @@ COMMA=,
 #
 # Docker Compose service names.
 #
-PRIVATEERR_SERVICE  ?= privateerr
-GLUETUN_SERVICE     ?= gluetun
-PROWLARR_SERVICE    ?= prowlarr
-RADARR_SERVICE      ?= radarr
-SONARR_SERVICE      ?= sonarr
-BAZARR_SERVICE      ?= bazarr
-QBITTORRENT_SERVICE ?= qbittorrent
-SABNZBD_SERVICE     ?= sabnzbd
-NZBGET_SERVICE      ?= nzbget
-CLEANUPARR_SERVICE  ?= cleanuparr
-DUPLICATI_SERVICE   ?= duplicati
-SEERR_SERVICE       ?= seerr
-HOMEPAGE_SERVICE    ?= homepage
-WATCHTOWER_SERVICE  ?= watchtower
+PRIVATEERR_SERVICE    ?= privateerr
+GLUETUN_SERVICE       ?= gluetun
+PROWLARR_SERVICE      ?= prowlarr
+RADARR_SERVICE        ?= radarr
+SONARR_SERVICE        ?= sonarr
+BAZARR_SERVICE        ?= bazarr
+QBITTORRENT_SERVICE   ?= qbittorrent
+SABNZBD_SERVICE       ?= sabnzbd
+NZBGET_SERVICE        ?= nzbget
+CLEANUPARR_SERVICE    ?= cleanuparr
+DUPLICATI_SERVICE     ?= duplicati
+SEERR_SERVICE         ?= seerr
+HOMEPAGE_SERVICE      ?= homepage
+WATCHTOWER_SERVICE    ?= watchtower
+OVERLAY_RESET_SERVICE ?= overlay-reset
 
 #
 # Config reset paths.
@@ -176,6 +179,7 @@ COMPOSE_DOWN_OPTIONS           ?= --timeout $(COMPOSE_DOWN_TIMEOUT) --remove-orp
 COMPOSE_NUKE_OPTIONS           ?= --timeout $(COMPOSE_DOWN_TIMEOUT) --volumes --remove-orphans --rmi all
 COMPOSE_UP_OPTIONS             ?= --force-recreate --pull always --detach --remove-orphans
 WATCHTOWER_RUN_ONCE_OPTIONS    ?= --rm --no-deps
+OVERLAY_RESET_RUN_ONCE_OPTIONS ?= --rm --no-deps
 COMPOSE_E2E_OPTIONS            ?= --force-recreate --pull always --detach --remove-orphans
 COMPOSE_E2E_WAIT               ?= 300
 COMPOSE_STACK_WAIT             ?= 600
@@ -262,6 +266,7 @@ CLEAN_ARTIFACT_FIND_MATCH := -type d -name '__pycache__' -o -type f \( -name '*.
 # Rendered service selection used by runtime tests.
 #
 SELECTED_COMPOSE_SERVICES  = $(strip $(shell $(PLUNDARR_COMPOSE) config --services 2>/dev/null))
+PROFILED_COMPOSE_SERVICES  = $(strip $(shell $(PLUNDARR_COMPOSE) --profile "*" config --services 2>/dev/null))
 VPN_QBITTORRENT_SERVICE   ?= $(filter $(QBITTORRENT_SERVICE),$(SELECTED_COMPOSE_SERVICES))
 E2E_DOWNLOAD_SERVICES     ?= $(filter $(QBITTORRENT_SERVICE) $(SABNZBD_SERVICE) $(NZBGET_SERVICE),$(SELECTED_COMPOSE_SERVICES))
 GLUETUN_DOWNLOADER_PORTS  ?= $(if $(filter $(QBITTORRENT_SERVICE),$(SELECTED_COMPOSE_SERVICES)),8080,) \
@@ -602,6 +607,31 @@ $(WATCHTOWER_RUN_ONCE): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 	$(PLUNDARR_COMPOSE) run $(WATCHTOWER_RUN_ONCE_OPTIONS) "$(WATCHTOWER_SERVICE)" --run-once
 
 #
+# $(OVERLAY_RESET_RUN_ONCE): Pulls and runs the profile-gated Kometa Overlay
+#                            Reset utility once, then removes its container.
+#
+# Dependencies:
+#   $(BUILD_DEPENDS) - Ensure build dependencies are installed.
+#   $(CHECK_ENV) - Ensure the environment file exists.
+#   $(CHECK_RENDERED) - Ensure the rendered Compose file exists.
+#
+$(OVERLAY_RESET_RUN_ONCE): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
+	@if [ -z "$(filter $(OVERLAY_RESET_SERVICE),$(PROFILED_COMPOSE_SERVICES))" ]; then \
+		$(call print_line_inline,$(COLOR_ERROR),The selected deployment does not include $(OVERLAY_RESET_SERVICE).); \
+		$(call print_detail_inline,$(COLOR_MUTED),Run: make $(SHIP) PRESET=duplex); \
+		exit 1; \
+	fi
+	@running_containers=$$($(PLUNDARR_COMPOSE) ps --quiet "$(OVERLAY_RESET_SERVICE)") || exit $$?; \
+	if [ -n "$$running_containers" ]; then \
+		$(call print_line_inline,$(COLOR_ERROR),Kometa Overlay Reset is already running for this project.); \
+		$(call print_detail_inline,$(COLOR_MUTED),Wait for it to finish before starting another pass.); \
+		exit 1; \
+	fi
+	$(call announce_warning,Kometa Overlay Reset has no undo; the generated default is a dry run. ⚠️)
+	$(PLUNDARR_COMPOSE) pull "$(OVERLAY_RESET_SERVICE)"
+	$(PLUNDARR_COMPOSE) run $(OVERLAY_RESET_RUN_ONCE_OPTIONS) "$(OVERLAY_RESET_SERVICE)"
+
+#
 # $(DOWN): Stops containers and removes containers and networks.
 #
 # Dependencies:
@@ -854,6 +884,7 @@ $(HELP):
 	$(call help_heading,🚀 Run the stack)
 	$(call help_line,$(UP),Start or recreate the selected stack.)
 	$(call help_line,$(WATCHTOWER_RUN_ONCE),Run one Watchtower update pass and exit.)
+	$(call help_line,$(OVERLAY_RESET_RUN_ONCE),Run Kometa Overlay Reset once and exit.)
 	$(call help_line,$(DOWN),Stop the selected stack while preserving volumes and images.)
 	$(call help_line,$(PS),Show a compact container status table.)
 	$(call help_line,$(LOGS),Follow selected-stack logs.)

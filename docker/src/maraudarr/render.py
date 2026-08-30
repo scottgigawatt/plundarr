@@ -151,7 +151,7 @@ def _prepare_service(
     if service_id == "homepage":
         homepage_groups = {
             "Homepage Plex click target and widget": include_native_plex,
-            "Homepage Tautulli click target and widget": include_native_plex,
+            "Homepage Tautulli click target and widget": "tautulli" in selected,
             "Homepage Radarr click target and widget": "radarr" in selected,
             "Homepage Sonarr click target and widget": "sonarr" in selected,
             "Homepage Bazarr click target and widget": "bazarr" in selected,
@@ -243,7 +243,7 @@ def _filter_homepage_env(
     """Remove Homepage environment groups for unavailable integrations."""
     groups = {
         "Homepage Plex click-target and widget variables": include_native_plex,
-        "Homepage Tautulli click-target and widget variables": include_native_plex,
+        "Homepage Tautulli click-target and widget variables": "tautulli" in selected,
         "Homepage Radarr click-target and widget variables": "radarr" in selected,
         "Homepage Sonarr click-target and widget variables": "sonarr" in selected,
         "Homepage Sonarr Anime click-target and widget variables": (
@@ -554,7 +554,7 @@ def render_homepage_services(catalog: Catalog, plan: StackPlan) -> str:
     data_cards = []
     if selected.intersection({"radarr", "sonarr"}):
         data_cards.append(_filter_calendar(_homepage_card(source, "Calendar"), selected))
-    if include_plex_homepage:
+    if "tautulli" in selected:
         data_cards.append(_homepage_card(source, "Tautulli"))
 
     download_cards = []

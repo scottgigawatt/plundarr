@@ -16,9 +16,15 @@ library profile to select its read-only mounts.
 
 Preset `core` services cannot be removed. Preset `defaults` are only preselected
 in the interactive picker and may be unchecked. Plundarr and Boudoirr use this
-boundary to default to qBittorrent while leaving SABnzbd, NZBGet, and Watchtower
-as independent opt-in services. The focused Watchtower preset makes the same
-updater available as its own persistent or one-shot project.
+boundary to default to qBittorrent and Watchtower while leaving SABnzbd and
+NZBGet as independent opt-in services. The focused Watchtower preset makes the
+same updater available as its own persistent or one-shot project.
+
+Duplex keeps Kometa, ImageMaid, and Tautulli in `core`. PATTRMM, Notifiarr, and
+the profile-gated Overlay Reset tool live in `defaults`, so the generated preset
+includes them out of the box while the interactive picker may remove them.
+Watchtower remains selectable but is not a Duplex default. PATTRMM and Overlay
+Reset require Kometa because both consume its external configuration tree.
 
 > [!IMPORTANT]
 > Keep service IDs aligned with their directory names. Maraudarr derives
