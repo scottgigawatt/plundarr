@@ -215,12 +215,12 @@ category = "Operations"
 url = "https://www.duplicati.com"
 order = 700
 
-# Watchtower is an opt-in image update checker, never a preset default.
+# Watchtower is opt-in for media stacks and anchors its standalone preset.
 [services.watchtower]
 title = "Watchtower"
-description = "Checks selected containers for image updates."
+description = "Updates eligible Docker host containers on a schedule or in one pass."
 category = "Operations"
-url = "https://github.com/containrrr/watchtower"
+url = "https://github.com/nicholas-fedor/watchtower"
 order = 900
 
 #
@@ -335,6 +335,30 @@ compose_summary = [
   "configuration and transcode directories.",
 ]
 core = ["plex"]
+defaults = []
+
+#
+# Watchtower provides a focused host-wide container update project.
+#
+# This preset runs one persistent updater and also supports one-shot execution.
+[presets.watchtower]
+title = "Watchtower"
+description = "A standalone updater for eligible containers on one Docker host."
+project_name = "watchtower"
+network_subnet = "172.25.0.0/16"
+network_ip_range = "172.25.5.0/24"
+network_gateway = "172.25.5.254"
+media_root = "/volume1/plex"
+media_libraries = []
+host_port_offset = 0
+compose_summary = [
+  "docker-compose.yml: Docker Compose configuration for running Watchtower",
+  "                    persistently or as one host-wide update pass.",
+  "",
+  "Watchtower uses the Docker socket to update eligible host containers.",
+  "Containers with an explicit disable label remain outside its control.",
+]
+core = ["watchtower"]
 defaults = []
 
 #

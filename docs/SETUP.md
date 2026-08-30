@@ -24,6 +24,7 @@ Or generate a known voyage directly:
 > make ship PRESET=boudoirr ADD_SERVICES=jellyfin
 > make ship PRESET=jellyfin
 > make ship PRESET=plex
+> make ship PRESET=watchtower
 > make ship ADD_SERVICES=sonarr-anime
 > ```
 
@@ -60,22 +61,24 @@ not need to change these values.
 
 Fresh presets receive distinct project and network defaults:
 
-| Preset   | Project    | Subnet          | Published Ports                          |
-| -------- | ---------- | --------------- | ---------------------------------------- |
-| Plundarr | `plundarr` | `172.28.0.0/16` | Standard service ports                   |
-| Boudoirr | `boudoirr` | `172.29.0.0/16` | Selected service ports offset by `10000` |
-| Jellyfin | `jellyfin` | `172.30.0.0/16` | Jellyfin `28096` (`8096` + `20000`)      |
-| Plex     | `plex`     | `172.31.0.0/16` | Plex host networking                     |
-| Custom   | `custom`   | `172.27.0.0/16` | Selected service ports offset by `30000` |
+| Preset     | Project      | Subnet          | Published Ports                          |
+| ---------- | ------------ | --------------- | ---------------------------------------- |
+| Plundarr   | `plundarr`   | `172.28.0.0/16` | Standard service ports                   |
+| Boudoirr   | `boudoirr`   | `172.29.0.0/16` | Selected service ports offset by `10000` |
+| Jellyfin   | `jellyfin`   | `172.30.0.0/16` | Jellyfin `28096` (`8096` + `20000`)      |
+| Plex       | `plex`       | `172.31.0.0/16` | Plex host networking                     |
+| Watchtower | `watchtower` | `172.25.0.0/16` | No published ports                       |
+| Custom     | `custom`     | `172.27.0.0/16` | Selected service ports offset by `30000` |
 
 Container names include the project, service, and image tag, such as
 `plundarr-bazarr-latest`. The default Plundarr, default Boudoirr, standalone
-Jellyfin, and standalone Plex voyages can therefore run side by side without
-sharing container names, subnets, or published ports. The host-port bands retain
-the familiar tail of common ports: qBittorrent is `8080` for Plundarr and
-`18080` for Boudoirr. Existing values in a preset's `.env` remain preserved
-during regeneration, so review and change older project names, network values,
-or ports before placing an existing deployment beside another preset.
+Jellyfin, standalone Plex, and standalone Watchtower voyages can therefore run
+side by side without sharing container names, subnets, or published ports. The
+host-port bands retain the familiar tail of common ports: qBittorrent is `8080`
+for Plundarr and `18080` for Boudoirr. Existing values in a preset's `.env`
+remain preserved during regeneration, so review and change older project names,
+network values, or ports before placing an existing deployment beside another
+preset.
 
 Change the generated values whenever they overlap another Docker network, VPN,
 LAN route, or host service. When a collision exists, update
@@ -84,6 +87,34 @@ LAN route, or host service. When a collision exists, update
 generated defaults. See the [Docker Compose IPAM documentation](https://docs.docker.com/compose/compose-file/06-networks/#ipam)
 for custom network planning. Plex uses host networking, so only one Plex server
 can claim its standard host ports unless Plex itself is configured differently.
+
+## Watchtower Update Modes 🔭
+
+Use Watchtower as an optional persistent service in another preset, or generate
+its focused standalone project:
+
+> [!TIP]
+>
+> ```sh
+> make ship ADD_SERVICES=watchtower
+> make ship PRESET=watchtower
+> make up PRESET=watchtower
+> ```
+
+The standalone project can instead perform one update pass and exit:
+
+> [!TIP]
+>
+> ```sh
+> make watchtower-run-once PRESET=watchtower
+> ```
+
+> [!WARNING]
+> Watchtower controls the host Docker daemon through its socket. By default it
+> examines eligible running and stopped containers across that Docker host, not
+> only services in the generated Compose project. Containers labeled
+> `com.centurylinklabs.watchtower.enable=false` remain excluded. Run one
+> persistent Watchtower daemon per host and stop it before a one-shot pass.
 
 ## Batten Down the Hatches 🖥️⚓
 

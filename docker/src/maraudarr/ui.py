@@ -52,6 +52,7 @@ PRESET_ICONS = {
     "boudoirr": "🔞",
     "jellyfin": "🎞️",
     "plex": "📺",
+    "watchtower": "🔭",
     "custom": "🧩",
 }
 

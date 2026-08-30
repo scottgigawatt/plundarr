@@ -280,6 +280,41 @@ if grep -E 'down .*--volumes|down .*--rmi' "${test_output}/down.out" >/dev/null;
 fi
 
 #
+# Keep the standalone Watchtower pass one-shot and disposable.
+#
+NO_COLOR=1 make --dry-run watchtower-run-once \
+    DOCKER_COMPOSE=true \
+    DEPENDENCIES=true \
+    ENV_FILE="${test_output}/stack.env" \
+    COMPOSE_ENV_FILE="${test_output}/stack.env" \
+    COMPOSE_FILE="${test_output}/compose.yml" \
+    SELECTED_COMPOSE_SERVICES=watchtower \
+    >"${test_output}/watchtower-run-once.out"
+grep -F 'ps --quiet "watchtower"' \
+    "${test_output}/watchtower-run-once.out" >/dev/null
+grep -F 'pull "watchtower"' \
+    "${test_output}/watchtower-run-once.out" >/dev/null
+grep -F 'run --rm --no-deps "watchtower" --run-once' \
+    "${test_output}/watchtower-run-once.out" >/dev/null
+
+#
+# Reject one-shot execution when the selected chart omits Watchtower.
+#
+if NO_COLOR=1 make --no-print-directory watchtower-run-once \
+    DOCKER_COMPOSE=true \
+    DEPENDENCIES=true \
+    ENV_FILE="${test_output}/stack.env" \
+    COMPOSE_ENV_FILE="${test_output}/stack.env" \
+    COMPOSE_FILE="${test_output}/compose.yml" \
+    SELECTED_COMPOSE_SERVICES=homepage \
+    >"${test_output}/watchtower-missing.out" 2>&1; then
+    echo "The one-shot target accepted a deployment without Watchtower." >&2
+    exit 1
+fi
+grep -F 'The selected deployment does not include watchtower.' \
+    "${test_output}/watchtower-missing.out" >/dev/null
+
+#
 # Keep Plundarr and Maraudarr cleanup separate without deleting application config.
 #
 NO_COLOR=1 make --dry-run nuke \
@@ -325,7 +360,7 @@ common_targets=$(awk '
         exit
     }
 ' Makefile)
-test "${common_targets}" = "BUILD_DEPENDS CHECK_ENV CHECK_PIA ENSURE_BUILDX_BUILDER ALL UP DOWN PS LOGS CONFIG ENV PRINT_CONFIG PRINT_ENV BUILD BUILD_PLATFORMS TEST TEST_MAKE_HELPERS TEST_WORKFLOWS TEST_E2E BACKUP RESTORE_TEST_CONFIG CLEAN_TEST CLEAN NUKE HELP"
+test "${common_targets}" = "BUILD_DEPENDS CHECK_ENV CHECK_PIA ENSURE_BUILDX_BUILDER ALL UP WATCHTOWER_RUN_ONCE DOWN PS LOGS CONFIG ENV PRINT_CONFIG PRINT_ENV BUILD BUILD_PLATFORMS TEST TEST_MAKE_HELPERS TEST_WORKFLOWS TEST_E2E BACKUP RESTORE_TEST_CONFIG CLEAN_TEST CLEAN NUKE HELP"
 common_recipe_order=$(awk '
     /^\$\([A-Z0-9_]+\)(:| )/ {
         target = $0
@@ -335,7 +370,7 @@ common_recipe_order=$(awk '
             targets = targets " "
         }
         targets = targets target
-        if (++count == 25) {
+        if (++count == 26) {
             print targets
             exit
         }

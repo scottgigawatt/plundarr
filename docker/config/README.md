@@ -33,7 +33,7 @@ scrolls. 🏴‍☠️
 | 🌬️ `speedtest-tracker` | Measure the wind in yer sails (or yer bandwidth)         |
 | 🔔 `apprise`           | Delivers notification cargo to supported services        |
 | 🔞 `whisparr`          | Adult media automation for the Boudoirr voyage           |
-| 🔭 `watchtower`        | Optional container image update lookout                  |
+| 🔭 `watchtower`        | Optional or standalone container image updater           |
 
 > [!TIP]
 > Each folder follows the same general format. Config files go in, persistent storage stays. If ye be usin' `docker-compose`, these mounts be auto-mapped for ye.

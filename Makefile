@@ -16,6 +16,7 @@ CHECK_PIA=check-pia
 ENSURE_BUILDX_BUILDER=ensure-buildx-builder
 ALL=all
 UP=up
+WATCHTOWER_RUN_ONCE=watchtower-run-once
 DOWN=down
 PS=ps
 LOGS=logs
@@ -71,6 +72,7 @@ COMMON_TARGETS= \
 	$(ENSURE_BUILDX_BUILDER) \
 	$(ALL) \
 	$(UP) \
+	$(WATCHTOWER_RUN_ONCE) \
 	$(DOWN) \
 	$(PS) \
 	$(LOGS) \
@@ -147,6 +149,7 @@ CLEANUPARR_SERVICE  ?= cleanuparr
 DUPLICATI_SERVICE   ?= duplicati
 SEERR_SERVICE       ?= seerr
 HOMEPAGE_SERVICE    ?= homepage
+WATCHTOWER_SERVICE  ?= watchtower
 
 #
 # Config reset paths.
@@ -172,6 +175,7 @@ COMPOSE_DOWN_TIMEOUT           ?= 30
 COMPOSE_DOWN_OPTIONS           ?= --timeout $(COMPOSE_DOWN_TIMEOUT) --remove-orphans
 COMPOSE_NUKE_OPTIONS           ?= --timeout $(COMPOSE_DOWN_TIMEOUT) --volumes --remove-orphans --rmi all
 COMPOSE_UP_OPTIONS             ?= --force-recreate --pull always --detach --remove-orphans
+WATCHTOWER_RUN_ONCE_OPTIONS    ?= --rm --no-deps
 COMPOSE_E2E_OPTIONS            ?= --force-recreate --pull always --detach --remove-orphans
 COMPOSE_E2E_WAIT               ?= 300
 COMPOSE_STACK_WAIT             ?= 600
@@ -573,6 +577,31 @@ $(UP): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED) $(CHECK_PIA)
 	$(PLUNDARR_COMPOSE) up $(COMPOSE_UP_OPTIONS)
 
 #
+# $(WATCHTOWER_RUN_ONCE): Pulls the floating Watchtower image, updates eligible
+#                         host containers once, and exits.
+#
+# Dependencies:
+#   $(BUILD_DEPENDS) - Ensure build dependencies are installed.
+#   $(CHECK_ENV) - Ensure the environment file exists.
+#   $(CHECK_RENDERED) - Ensure the rendered Compose file exists.
+#
+$(WATCHTOWER_RUN_ONCE): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
+	@if [ -z "$(filter $(WATCHTOWER_SERVICE),$(SELECTED_COMPOSE_SERVICES))" ]; then \
+		$(call print_line_inline,$(COLOR_ERROR),The selected deployment does not include $(WATCHTOWER_SERVICE).); \
+		$(call print_detail_inline,$(COLOR_MUTED),Run: make $(SHIP) PRESET=watchtower); \
+		exit 1; \
+	fi
+	@running_containers=$$($(PLUNDARR_COMPOSE) ps --quiet "$(WATCHTOWER_SERVICE)") || exit $$?; \
+	if [ -n "$$running_containers" ]; then \
+		$(call print_line_inline,$(COLOR_ERROR),Persistent Watchtower is already running for this project.); \
+		$(call print_detail_inline,$(COLOR_MUTED),Stop it before starting a one-shot update pass.); \
+		exit 1; \
+	fi
+	$(call announce,Pullin' the latest Watchtower before one update pass. 🔭)
+	$(PLUNDARR_COMPOSE) pull "$(WATCHTOWER_SERVICE)"
+	$(PLUNDARR_COMPOSE) run $(WATCHTOWER_RUN_ONCE_OPTIONS) "$(WATCHTOWER_SERVICE)" --run-once
+
+#
 # $(DOWN): Stops containers and removes containers and networks.
 #
 # Dependencies:
@@ -824,6 +853,7 @@ $(HELP):
 	$(call announce_detail,Usage: make <target> [PRESET=<preset>] [ADD_SERVICES=id$(COMMA)...] [REMOVE_SERVICES=id$(COMMA)...])
 	$(call help_heading,🚀 Run the stack)
 	$(call help_line,$(UP),Start or recreate the selected stack.)
+	$(call help_line,$(WATCHTOWER_RUN_ONCE),Run one Watchtower update pass and exit.)
 	$(call help_line,$(DOWN),Stop the selected stack while preserving volumes and images.)
 	$(call help_line,$(PS),Show a compact container status table.)
 	$(call help_line,$(LOGS),Follow selected-stack logs.)
