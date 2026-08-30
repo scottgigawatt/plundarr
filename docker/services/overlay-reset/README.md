@@ -1,4 +1,4 @@
-# Kometa Overlay Reset Service Chart ⚠️
+# Kometa Overlay Reset service chart ⚠️
 
 Provides Kometa Overlay Reset as a profile-gated, disposable recovery tool. Normal `make up` runs do not start it. Invoke it explicitly with:
 

@@ -2,11 +2,11 @@
 icon: material/hammer-wrench
 ---
 
-# Maraudarr Developer Overview ⚒️
+# Maraudarr developer overview ⚒️
 
 Maraudarr is the short-lived Python application that assembles a selected Plundarr stack. It reads project-owned catalog and template sources, resolves service dependencies, preserves existing environment values, validates the result with Docker Compose, and writes the final deployment atomically.
 
-## Responsibilities
+## Understand responsibilities
 
 Maraudarr owns:
 
@@ -21,7 +21,7 @@ Maraudarr owns:
 
 Maraudarr does **not** start the generated stack, manage long-running service state, resolve Compose variables into the generated chart, or delete existing configuration.
 
-## Source Map
+## Explore the source map
 
 | Module       | Responsibility                                    |
 | :----------- | :------------------------------------------------ |
@@ -34,7 +34,7 @@ Maraudarr does **not** start the generated stack, manage long-running service st
 
 The package uses the conventional `docker/src/maraudarr/` layout. Runtime dependencies and build metadata remain under `docker/` because that directory is the complete Maraudarr image context.
 
-## Public and Private Interfaces
+## Separate public and private interfaces
 
 The [Python reference](reference/index.md) is generated from public classes, methods, and functions. Names beginning with `_` are intentionally excluded because they are implementation details rather than compatibility promises. Private helpers still carry concise source documentation and targeted comments where their transformations are not obvious.
 

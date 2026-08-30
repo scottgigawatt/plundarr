@@ -1,12 +1,12 @@
-# 🎥 Radarr Configuration 🏴‍☠️
+# Radarr configuration 🎥
 
 Shiver me timbers! This be the treasure chest holdin' the configuration files fer the **Radarr** service. These files will be mounted into the Radarr container as the service config directory, guidin' yer movie collection to safe harbor.
 
-## Purpose 🌊
+## Understand the service 🌊
 
 Radarr be yer trusty mate, helpin' ye manage and organize yer movie collection, makin' sure ye never miss out on any cinematic treasures.
 
-## Downloads and Movie Imports 📦
+## Configure downloads and movie imports 📦
 
 Radarr sees qBittorrent and SABnzbd downloads at `/downloads` and yer movie library at `/movies`. In Plundarr, `/downloads` maps to `HOST_DOWNLOADS_PATH`, while qBittorrent writes under `/downloads/torrents` and SABnzbd writes under `/downloads/usenet`.
 

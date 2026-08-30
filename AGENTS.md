@@ -36,9 +36,11 @@ The current catalog includes `plundarr`, `boudoirr`, `jellyfin`, `plex`, `duplex
 
 ## Documentation Voice
 
-Public Markdown should be funny, lightly pirate-themed, readable, and useful. Preserve centered badges, tables, GitHub callouts, emoji, and the established visual style in the root README. Do not let jokes obscure commands, warnings, paths, or troubleshooting instructions.
+Public Markdown should be funny, lightly pirate-themed, readable, and useful. Put the operational meaning first and use pirate language mainly in short introductions, transitions, and sign-offs. Commands, paths, user-interface labels, warnings, security guidance, destructive actions, and troubleshooting instructions stay literal.
 
-Use GitHub callouts where they improve scanning:
+Follow `docs/documentation-style.md` for audience, structure, sentence-case headings, filenames, links, code blocks, alerts, advanced Markdown, and rendered review. Use searchable words before decorative emoji in headings. Emoji must not carry meaning by itself.
+
+Reserve GitHub alerts for information readers must notice while scanning:
 
 - `[!NOTE]`
 - `[!TIP]`
@@ -48,11 +50,13 @@ Use GitHub callouts where they improve scanning:
 
 MkDocs converts this native GitHub syntax through `pymdownx.quotes`; do not maintain a second `!!!` admonition form for the published site.
 
-Keep prose-first alert source compact: put the first quoted content line immediately after `> [!TYPE]` without an empty `>` line between them. When an alert begins with a fenced code block or list, retain one empty quoted line because Markdown requires it to delimit that block. Use later blank quoted lines only to separate meaningful paragraphs or blocks inside one alert.
+Most pages should need no more than one or two alerts. Do not wrap routine commands in alerts or place alerts back to back. Keep prose-first alert source compact: put the first quoted content line immediately after `> [!TYPE]` without an empty `>` line between them. When an alert begins with a fenced code block or list, retain one empty quoted line because Markdown requires it to delimit that block. Use later blank quoted lines only to separate meaningful paragraphs or blocks inside one alert.
 
 Write each ordinary Markdown prose paragraph on one physical source line and let editors apply visual word wrapping. Preserve semantic blank lines, lists, tables, code fences, deliberate hard breaks, and other structures that require their own lines. Configure Markdown editors to wrap visually rather than hard-wrapping prose at a fixed column.
 
-Put helpful copyable command examples inside `[!TIP]` callouts when the surrounding section is teaching a command sequence. Use `[!IMPORTANT]` for required command sequences and `[!CAUTION]` when commands carry meaningful risk. Keep explanations outside the code fence and do not add prompt characters or prose comments inside those examples.
+Put routine copyable commands in ordinary `sh` fences. Use `[!IMPORTANT]` when information is required for success and `[!CAUTION]` when a command carries meaningful risk. Keep explanations outside the code fence and do not add prompt characters or prose comments inside those examples. Use `console` for terminal transcripts and `text` for non-executable output.
+
+Keep `README.md`, `AGENTS.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`, and `SUPPORT.md` in their established form. Name ordinary documentation pages with lowercase kebab-case.
 
 ## Code Comment Style
 

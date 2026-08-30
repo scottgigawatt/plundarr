@@ -1,13 +1,5 @@
-# 📜 Seerr Configuration Directory ⚓️
+# Seerr configuration 📜
 
-Welcome aboard, mateys! This be the chest holdin' the configuration files fer the **Seerr** service.
+Seerr stores its database, settings, logs, authentication data, and connected media-service credentials in this directory. Complete the first-run wizard through the Web UI, then connect the selected Plex or Jellyfin server and automation services.
 
-## Purpose 🌊
-
-Seerr be yer trusted mate for managing media requests, keepin' track of what the crew wants to watch, and makin' sure all be satisfied.
-
-When the Plundarr Docker stack is set afloat, this directory will be mounted into the Seerr container to store and manage its precious settings.
-
-Fer more information on how this fits into the grand Plundarr setup, inspect yer generated `dist/<preset>/docker-compose.yml` and `.env` files.
-
-Hoist the sails and configure wisely, ye scallywags! 🏴‍☠️
+Protect this directory as durable, sensitive application state. A fresh `make ship` preserves it; `make delete-config` removes it.

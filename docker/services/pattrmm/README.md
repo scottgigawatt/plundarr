@@ -1,4 +1,4 @@
-# PATTRMM Service Chart 📅
+# PATTRMM service chart 📅
 
 Runs PATTRMM on its daily internal schedule and shares the external Kometa configuration checkout so generated metadata and overlay files land where Kometa can use them.
 

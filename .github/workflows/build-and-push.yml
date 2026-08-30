@@ -29,7 +29,7 @@ on:
       - "scripts/compose/**"
       - "Makefile"
       - "LICENSE"
-      - "docs/DOCKERHUB_README.md"
+      - "docs/docker-hub-description.md"
       - ".github/discord/**"
       - ".github/scripts/discord-notifier.sh"
       - ".github/scripts/registry-mirror.sh"
@@ -349,7 +349,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
           repository: ${{ github.repository_owner }}/maraudarr
           short-description: "Generate polished Plundarr Docker Compose stacks from presets and selectable services."
-          readme-filepath: ./docs/DOCKERHUB_README.md
+          readme-filepath: ./docs/docker-hub-description.md
 
       #
       # Report the final job state to both optional Discord destinations. These

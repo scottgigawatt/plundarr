@@ -1,3 +1,3 @@
-# Apprise Service Chart 🔔
+# Apprise service chart 🔔
 
 Adds the hardened, API-only Apprise notification service used by Speedtest Tracker and other applications that support Apprise endpoints.

@@ -1,4 +1,4 @@
-# Kometa Service Chart 🎭
+# Kometa service chart 🎭
 
 Runs the official Kometa image as a persistent scheduled service. The independently managed configuration checkout is mounted at `/config`; Maraudarr does not clone, seed, or replace that repository.
 

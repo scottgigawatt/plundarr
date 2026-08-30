@@ -1,4 +1,4 @@
-# Notifiarr Service Chart 🔔
+# Notifiarr service chart 🔔
 
 Runs the official Notifiarr client with a stable hostname, persistent config, and the host identity mounts recommended for Docker installations. Drive and RAID monitoring remain disabled because those features require privileged access.
 

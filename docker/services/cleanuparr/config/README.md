@@ -1,18 +1,8 @@
-# 🧹 Cleanuparr Configuration ⚓️
+# Cleanuparr configuration 🧹
 
-> [!NOTE]
-> 🏴‍☠️ These be the sacred scrolls Cleanuparr reads from to swab yer decks and keep yer holds spotless!
+Cleanuparr stores its settings, rules, logs, and service credentials in this directory. Connect only the download clients and automation services that share the generated stack's paths.
 
-## Purpose 🌊
-
-> [!TIP]
-> 🧹 Let Cleanuparr do the dirty work, so ye can spend less time mop-handlin’ and more time treasure-huntin’.
-
-Cleanuparr be yer diligent deckhand, automatin' the cleanup of unwanted or blocked files from Sonarr, Radarr, and yer trusty download mates like qBittorrent. It scours the decks for incomplete or blocked downloads, clears out malicious or troublesome booty like `*.lnk` or `*.zipx` files, and enforces blacklists or whitelists to keep yer haul pristine. Once the foul cargo be cast overboard, Cleanuparr can even chart a new course and trigger a search to replace what was lost.
-
-For more knowledge, consult yer generated `dist/<preset>/docker-compose.yml` and `.env` files.
-
-Keep yer volumes clean an' yer seas calm! 🧹🏴‍☠️
+Start with report-oriented or conservative rules, review the matches, and then enable deletion or replacement searches deliberately. File allowlists and blocklists should reflect the crew's actual download policy rather than a copied example.
 
 > [!CAUTION]
-> ☠️ Forget to run Cleanuparr, and ye might find yer ship overrun with digital barnacles and unwanted stowaways!
+> Cleanup rules can remove downloaded files and trigger replacement searches. Back up this state and verify rule scope before enabling destructive actions.

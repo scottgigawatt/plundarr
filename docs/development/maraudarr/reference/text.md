@@ -1,3 +1,3 @@
-# Text Helper API
+# Text helper API
 
 ::: maraudarr.text

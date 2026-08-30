@@ -1,4 +1,4 @@
-# Maraudarr Python Package ⚒️
+# Maraudarr Python package ⚒️
 
 This package owns catalog loading, dependency resolution, comment-preserving rendering, config seeding, and the terminal interface.
 

@@ -1,4 +1,4 @@
-# Tautulli Service Chart 📈
+# Tautulli service chart 📈
 
 Runs Tautulli's official GHCR image with persistent configuration, history, statistics, and backups under `TAUTULLI_CONFIG_PATH`. The host port defaults to `8181`.
 

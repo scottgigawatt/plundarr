@@ -1,11 +1,5 @@
-# 🕵️‍♂️ Prowlarr Configuration ⚓️
+# Prowlarr configuration 🧭
 
-Welcome aboard, mateys! This here directory holds the configuration files for the **Prowlarr** service. These files will be mounted into the Prowlarr container as the service config directory.
+Prowlarr stores its database, settings, logs, indexer credentials, and application API key in this directory. Add indexers through the Web UI, then connect Prowlarr to the selected Radarr and Sonarr instances.
 
-## Purpose 🌊
-
-Prowlarr be yer indexer manager, helpin' ye find and organize the best treasures (indexers) across the seven seas.
-
-For more details on how this fits into the full Plundarr setup, inspect yer generated `dist/<preset>/docker-compose.yml` and `.env` files.
-
-May yer indexer hunts be bountiful and yer seas calm! 🏴‍☠️
+Keep this generated application state private and back it up before destructive cleanup.

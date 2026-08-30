@@ -1,4 +1,4 @@
-# Maraudarr Source Hold 🐍
+# Maraudarr source hold 🐍
 
 The Python application uses a standard `src` layout so development imports do not accidentally resolve files from the repository root.
 

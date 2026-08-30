@@ -1,12 +1,12 @@
-# 📰 SABnzbd Configuration 🏴‍☠️
+# SABnzbd configuration 📰
 
 Ahoy, matey! This be the config hold for **SABnzbd**, Plundarr's Usenet download runner. SABnzbd grabs NZBs, repairs the cargo, extracts the haul, and drops completed files where Radarr and Sonarr can find them.
 
-## Purpose 🌊
+## Understand the service 🌊
 
 SABnzbd gives the stack a Usenet path alongside qBittorrent's torrent path. The SABnzbd service routes it through Gluetun and writes only under `/downloads/usenet`, while Radarr and Sonarr mount the broader `/downloads` path for imports.
 
-## Download Folders 📦
+## Configure download folders 📦
 
 Plundarr maps `HOST_USENET_DOWNLOADS_PATH` to `/downloads/usenet` inside SABnzbd. Use this low-risk Synology layout:
 
@@ -36,13 +36,13 @@ Folder/Path: tv
 
 That makes completed jobs land in `/downloads/usenet/movies` and `/downloads/usenet/tv`. Then set the SABnzbd download client category in Radarr to `radarr` and in Sonarr to `sonarr`. Keep media roots at `/movies` for Radarr and `/tv` for Sonarr.
 
-## Shared Gluetun Port 🧭
+## Use the shared Gluetun port 🧭
 
 qBittorrent uses internal port `8080` inside Gluetun's network namespace. SABnzbd uses internal port `8085`, so both download clients can share Gluetun cleanly.
 
 Use `SABNZBD_WEBUI_PORT` in the generated preset's `.env` to choose the host-side port. Plundarr defaults the host port to `8081` and maps it to SABnzbd's fixed internal `8085`. Leave the internal port alone unless ye also update the Compose healthcheck and Gluetun port mapping.
 
-## Homepage Widget 🗺️
+## Configure the Homepage widget 🗺️
 
 After SABnzbd starts, copy its API key into `HOMEPAGE_VAR_SABNZBD_KEY` in the generated preset's `.env` if ye want Homepage to show the widget status.
 

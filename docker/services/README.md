@@ -1,4 +1,4 @@
-# Maraudarr Service Charts 🧩🏴‍☠️
+# Maraudarr service charts 🧩🏴‍☠️
 
 Every selectable Plundarr service owns one directory in this hold. There are no separate core, extra, or addon charts.
 
