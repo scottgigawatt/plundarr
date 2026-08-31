@@ -72,11 +72,17 @@ Maraudarr writes:
 
 ```text
 dist/
-└── plundarr/
-    ├── docker-compose.yml
-    ├── example.env
-    ├── .env
-    └── config/
+├── plundarr/
+│   ├── docker-compose.yml
+│   ├── example.env
+│   ├── .env
+│   └── config/
+├── boudoirr/
+├── jellyfin/
+├── plex/
+├── duplex/
+├── watchtower/
+└── custom/
 ```
 
 When generation finishes, Maraudarr exits. The files in `dist/plundarr/` are the Plundarr deployment you configure, start, stop, and maintain.
