@@ -12,10 +12,10 @@ services:
   #
   calibre-web-automated:
     # Docker image and container information
-    <<: *arr-stack-container                                                                    # Pull in the arr-stack container config
-    image: crocodilestick/calibre-web-automated:${CWA_TAG}                                      # Run using the specified tag
-    container_name: ${COMPOSE_PROJECT_NAME}-calibre-web-automated-${CWA_TAG}                    # Namespace the container name by project and tag
-    hostname: calibre-web-automated                                                             # Set the container hostname
+    <<: *arr-stack-container                                                  # Pull in the arr-stack container config
+    image: crocodilestick/calibre-web-automated:${CWA_TAG}                    # Run using the specified tag
+    container_name: ${COMPOSE_PROJECT_NAME}-calibre-web-automated-${CWA_TAG}  # Namespace the container name by project and tag
+    hostname: calibre-web-automated                                           # Set the container hostname
 
     # Keep database migrations and application updates under operator control
     labels: *disable-watchtower-updates
@@ -32,9 +32,9 @@ services:
 
     # Mount host directories into the container
     volumes:
-      - ${CWA_CONFIG_PATH}:/config:rw             # Persistent application configuration and databases
-      - ${CWA_INGEST_PATH}:/cwa-book-ingest:rw    # Destructive automatic-import staging directory
-      - ${CWA_LIBRARY_PATH}:/calibre-library:rw   # Calibre database and managed ebook library
+      - ${CWA_CONFIG_PATH}:/config:rw            # Persistent application configuration and databases
+      - ${CWA_INGEST_PATH}:/cwa-book-ingest:rw   # Destructive automatic-import staging directory
+      - ${CWA_LIBRARY_PATH}:/calibre-library:rw  # Calibre database and managed ebook library
 
     # Define container healthcheck to verify Calibre-Web Automated connectivity
     healthcheck:
