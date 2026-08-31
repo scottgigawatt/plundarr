@@ -5,7 +5,7 @@
 
 <!-- markdownlint-disable MD033 -->
 <p align="center">
-  <a href="https://github.com/scottgigawatt/plundarr/actions/workflows/build-and-push.yml"><img src="https://github.com/scottgigawatt/plundarr/actions/workflows/build-and-push.yml/badge.svg" alt="Maraudarr build status" /></a>
+  <a href="https://github.com/scottgigawatt/plundarr/actions/workflows/build-and-push.yml"><img src="https://img.shields.io/github/actions/workflow/status/scottgigawatt/plundarr/build-and-push.yml?branch=main&label=Maraudarr%20build&logo=githubactions" alt="Maraudarr build status" /></a>
   <img src="https://img.shields.io/github/license/scottgigawatt/plundarr?label=License" alt="Apache 2.0 license" />
   <img src="https://img.shields.io/badge/Platforms-amd64%20%7C%20arm64%20%7C%20arm%2Fv7-blue?logo=docker" alt="Published for amd64, arm64, and arm/v7" />
   <img src="https://img.shields.io/badge/Scanned-Trivy-1904DA?logo=aqua" alt="Container image scanned with Trivy" />
