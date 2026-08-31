@@ -1,0 +1,47 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# compose.yml: Maraudarr service chart for Calibre-Web Automated.
+#
+
+services:
+  #
+  # Define the 'calibre-web-automated' service for managing an ebook library.
+  #
+  calibre-web-automated:
+    # Docker image and container information
+    <<: *arr-stack-container                                                  # Pull in the arr-stack container config
+    image: crocodilestick/calibre-web-automated:${CWA_TAG}                    # Run using the specified tag
+    container_name: ${COMPOSE_PROJECT_NAME}-calibre-web-automated-${CWA_TAG}  # Namespace the container name by project and tag
+    hostname: calibre-web-automated                                           # Set the container hostname
+
+    # Keep database migrations and application updates under operator control
+    labels: *disable-watchtower-updates
+
+    # Define the container environment
+    environment:
+      <<: *arr-stack-environment                     # Pull in the arr-stack environment
+      CWA_PORT_OVERRIDE: "8083"                      # Keep the internal web server on the charted port
+      NETWORK_SHARE_MODE: ${CWA_NETWORK_SHARE_MODE}  # Select local-disk or network-share database behavior
+
+    # Define the host and container ports
+    ports:
+      - ${CWA_WEBUI_PORT}:8083  # Calibre-Web Automated web UI port
+
+    # Mount host directories into the container
+    volumes:
+      - ${CWA_CONFIG_PATH}:/config:rw            # Persistent application configuration and databases
+      - ${CWA_INGEST_PATH}:/cwa-book-ingest:rw   # Destructive automatic-import staging directory
+      - ${CWA_LIBRARY_PATH}:/calibre-library:rw  # Calibre database and managed ebook library
+
+    # Define container healthcheck to verify Calibre-Web Automated connectivity
+    healthcheck:
+      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
+      test:                              # Check the internal web server port
+        - CMD
+        - nc
+        - -z
+        - 127.0.0.1
+        - "8083"

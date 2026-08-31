@@ -1,0 +1,3 @@
+# Keep the generated application-state directory without tracking its contents.
+*
+!.gitignore

@@ -107,6 +107,7 @@ run_distribution_case plundarr
 run_distribution_case boudoirr
 run_distribution_case jellyfin
 run_distribution_case plex
+run_distribution_case calibre-web-automated
 run_distribution_case duplex
 run_distribution_case watchtower
 run_distribution_case custom --add homepage
@@ -168,7 +169,15 @@ run_case plex \
 #
 run_case standalone-jellyfin --preset jellyfin
 run_case standalone-plex --preset plex
+run_case standalone-calibre-web-automated --preset calibre-web-automated
 run_case standalone-watchtower --preset watchtower
+
+#
+# Calibre-Web Automated remains removable from the default Plundarr voyage.
+#
+run_case plundarr-without-calibre-web-automated \
+    --preset plundarr \
+    --remove calibre-web-automated
 
 #
 # Duplex includes its removable companions and profile-gated recovery tool.

@@ -154,6 +154,9 @@ def _prepare_service(
             "Homepage Tautulli click target and widget": "tautulli" in selected,
             "Homepage Radarr click target and widget": "radarr" in selected,
             "Homepage Sonarr click target and widget": "sonarr" in selected,
+            "Homepage Calibre-Web Automated click target and widget": (
+                "calibre-web-automated" in selected
+            ),
             "Homepage Bazarr click target and widget": "bazarr" in selected,
             "Homepage Seerr click target and widget": "seerr" in selected,
             "Homepage Prowlarr click target and widget": "prowlarr" in selected,
@@ -188,6 +191,19 @@ def _prepare_service(
                 "      HOMEPAGE_VAR_JELLYFIN_HREF: ${HOMEPAGE_VAR_JELLYFIN_HREF}                         # Homepage Jellyfin click target\n"
                 "      HOMEPAGE_VAR_JELLYFIN_URL: ${HOMEPAGE_VAR_JELLYFIN_URL}:${JELLYFIN_WEBUI_PORT}  # Homepage Jellyfin widget URL\n"
                 "      HOMEPAGE_VAR_JELLYFIN_KEY: ${HOMEPAGE_VAR_JELLYFIN_KEY}                         # Homepage Jellyfin API key\n"
+            )
+            block = block.replace(anchor, insertion + anchor, 1)
+        if "calibre-web-automated" in selected:
+            anchor = "\n      # Homepage Speedtest Tracker click target and widget"
+            if anchor not in block:
+                anchor = "\n    # Define the host and container ports"
+            insertion = (
+                "\n      # Homepage Calibre-Web Automated click target and widget\n"
+                "      HOMEPAGE_VAR_CWA_HREF: ${HOMEPAGE_VAR_CWA_HREF}                                        # Homepage CWA click target\n"
+                "      HOMEPAGE_VAR_CWA_URL: ${HOMEPAGE_VAR_CWA_URL}                                          # Homepage CWA widget URL\n"
+                "      HOMEPAGE_VAR_CWA_USER: ${HOMEPAGE_VAR_CWA_USER}                                        # Homepage CWA username\n"
+                "      HOMEPAGE_VAR_CWA_PASS: ${HOMEPAGE_VAR_CWA_PASS}                                        # Homepage CWA password\n"
+                "      HOMEPAGE_VAR_CWA_CONTAINER: ${COMPOSE_PROJECT_NAME}-calibre-web-automated-${CWA_TAG}  # Homepage CWA container\n"
             )
             block = block.replace(anchor, insertion + anchor, 1)
     return block.rstrip("\n") + "\n"
@@ -250,6 +266,9 @@ def _filter_homepage_env(
             "sonarr-anime" in selected
         ),
         "Homepage Jellyfin click-target and widget variables": "jellyfin" in selected,
+        "Homepage Calibre-Web Automated click-target and widget variables": (
+            "calibre-web-automated" in selected
+        ),
         "Homepage Bazarr click-target and widget variables": "bazarr" in selected,
         "Homepage Seerr click-target and widget variables": "seerr" in selected,
         "Homepage Prowlarr click-target and widget variables": "prowlarr" in selected,
@@ -410,13 +429,13 @@ def render_environment(
     media_root = plan.preset.media_root.rstrip("/")
     preset_defaults = {
         "COMPOSE_PROJECT_NAME": ("plundarr", plan.preset.project_name),
-        "COMPOSE_NETWORK_SUBNET": ("172.28.0.0/16", plan.preset.network_subnet),
+        "COMPOSE_NETWORK_SUBNET": ("172.20.0.0/16", plan.preset.network_subnet),
         "COMPOSE_NETWORK_IP_RANGE": (
-            "172.28.5.0/24",
+            "172.20.5.0/24",
             plan.preset.network_ip_range,
         ),
         "COMPOSE_NETWORK_GATEWAY": (
-            "172.28.5.254",
+            "172.20.5.254",
             plan.preset.network_gateway,
         ),
         "HOST_MOVIES_PATH": ("/volume1/plex/movies", f"{media_root}/movies"),
@@ -542,10 +561,15 @@ def render_homepage_services(catalog: Catalog, plan: StackPlan) -> str:
         ("bazarr", "Bazarr"),
         ("seerr", "Seerr"),
         ("jellyfin", "Jellyfin"),
+        ("calibre-web-automated", "Calibre-Web Automated"),
     ):
         if service_id not in selected:
             continue
-        if service_id in {"sonarr-anime", "jellyfin"}:
+        if service_id in {
+            "sonarr-anime",
+            "jellyfin",
+            "calibre-web-automated",
+        }:
             fragment = homepage_root / "fragments" / f"{service_id}.yaml"
             media_cards.append(fragment.read_text().strip("\n"))
         else:

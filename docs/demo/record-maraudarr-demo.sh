@@ -102,9 +102,9 @@ mkdir -p \
 export PLUNDARR_DEMO_DIR="$DEMO_CHECKOUT"
 export MARAUDARR_IMAGE
 export COMPOSE_PROJECT_NAME="plundarr-readme-demo"
-export COMPOSE_NETWORK_SUBNET="172.26.0.0/16"
-export COMPOSE_NETWORK_IP_RANGE="172.26.5.0/24"
-export COMPOSE_NETWORK_GATEWAY="172.26.5.254"
+export COMPOSE_NETWORK_SUBNET="10.254.0.0/16"
+export COMPOSE_NETWORK_IP_RANGE="10.254.5.0/24"
+export COMPOSE_NETWORK_GATEWAY="10.254.5.254"
 export COMPOSE_UP_OPTIONS="--force-recreate --pull never --detach --remove-orphans"
 
 #

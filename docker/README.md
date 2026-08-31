@@ -62,12 +62,13 @@ Add optional cargo without opening the interactive prompts:
 make ship PRESET=boudoirr ADD_SERVICES=jellyfin
 make ship PRESET=jellyfin
 make ship PRESET=plex
+make ship PRESET=calibre-web-automated
 make ship PRESET=duplex
 make ship PRESET=watchtower
 make ship ADD_SERVICES=sonarr-anime
 ```
 
-`ADD_SERVICES` and `REMOVE_SERVICES` accept comma-separated service IDs. Plundarr and Boudoirr preselect qBittorrent as their only downloader and include Watchtower as a removable default. SABnzbd and NZBGet remain ordinary opt-in choices:
+`ADD_SERVICES` and `REMOVE_SERVICES` accept comma-separated service IDs. Plundarr and Boudoirr preselect qBittorrent as their only downloader and include Watchtower as a removable default. Plundarr also includes Calibre-Web Automated as a removable default, while the `calibre-web-automated` preset generates the focused ebook service by itself. SABnzbd and NZBGet remain ordinary opt-in choices:
 
 The first command selects Usenet only. The second keeps torrents, adds Usenet, and opts into update checks:
 
@@ -77,6 +78,8 @@ make ship PRESET=boudoirr ADD_SERVICES=sabnzbd
 ```
 
 The default Plundarr voyage includes one Sonarr instance. `sonarr-anime` is an opt-in second instance with its own configuration and library path.
+
+Calibre-Web Automated keeps its configuration, destructive ingest directory, and Calibre library on three separate mounts. Its image supports `linux/amd64` and `linux/arm64`; Watchtower does not update it automatically because application releases may migrate persistent databases.
 
 The `watchtower` preset runs the maintained `nickfedor/watchtower:latest` image persistently. Use `make watchtower-run-once PRESET=watchtower` instead for one host-wide update pass that exits when complete. Run only one persistent Watchtower daemon per Docker host.
 

@@ -1,0 +1,11 @@
+    - Calibre-Web Automated:
+        icon: calibre-web.png
+        href: {{HOMEPAGE_VAR_CWA_HREF}}
+        description: Ebook library and automatic ingest
+        container: {{HOMEPAGE_VAR_CWA_CONTAINER}}
+        widget:
+          type: calibreweb
+          fields: ["books", "authors", "series"]
+          url: {{HOMEPAGE_VAR_CWA_URL}}
+          username: {{HOMEPAGE_VAR_CWA_USER}}
+          password: {{HOMEPAGE_VAR_CWA_PASS}}

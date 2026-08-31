@@ -63,7 +63,7 @@ Maraudarr images are published to [GitHub Container Registry](https://github.com
 
 ## Generate the default stack ⚡
 
-Before you begin, install Git, Docker with Docker Compose, and Make. The default `plundarr` preset is VPN-enabled and requires an active PIA subscription; the standalone media-server and utility presets do not. This first voyage creates the movie and television automation preset with qBittorrent as its downloader:
+Before you begin, install Git, Docker with Docker Compose, and Make. The default `plundarr` preset is VPN-enabled and requires an active PIA subscription; the standalone media-server and utility presets do not. This first voyage creates the movie, television, and ebook stack with qBittorrent as its downloader and Calibre-Web Automated as a removable default:
 
 ```sh
 git clone https://github.com/scottgigawatt/plundarr.git
@@ -75,20 +75,14 @@ Maraudarr writes:
 
 ```text
 dist/
-├── plundarr/
-│   ├── docker-compose.yml
-│   ├── example.env
-│   ├── .env
-│   └── config/
-├── boudoirr/
-├── jellyfin/
-├── plex/
-├── duplex/
-├── watchtower/
-└── custom/
+└── plundarr/
+    ├── docker-compose.yml
+    ├── example.env
+    ├── .env
+    └── config/
 ```
 
-When generation finishes, Maraudarr exits. The files in `dist/plundarr/` are the Plundarr deployment you configure, start, stop, and maintain.
+When generation finishes, Maraudarr exits. The files in `dist/plundarr/` are the Plundarr deployment you configure, start, stop, and maintain. Other preset selections use their matching `dist/<preset>/` directory.
 
 > [!IMPORTANT]
 > Review `dist/plundarr/.env` before launch. Set real PIA credentials for VPN-enabled presets and confirm host storage paths, user and group IDs, timezone, network values, and published ports.
@@ -118,10 +112,11 @@ Use `make configure` for an interactive picker or pass `PRESET` to `make ship` f
 
 | 🗺️ Preset | 🎯 Primary purpose |
 | --- | --- |
-| 🏴‍☠️ `plundarr` | Movies and television automation with a VPN-protected torrent downloader |
+| 🏴‍☠️ `plundarr` | Movies, television, and ebooks with a VPN-protected torrent downloader |
 | 🔞 `boudoirr` | Whisparr automation with a VPN-protected torrent downloader |
 | 🎞️ `jellyfin` | Standalone Jellyfin media server |
 | 🎬 `plex` | Standalone Plex Media Server |
+| 📚 `calibre-web-automated` | Standalone ebook library and automatic ingest service |
 | 🎭 `duplex` | Plex metadata, artwork, monitoring, and maintenance tools |
 | 🔭 `watchtower` | Standalone container image updates |
 | 🧩 `custom` | A stack assembled service by service |
@@ -143,13 +138,28 @@ Generate common combinations:
 
 ```sh
 make ship PRESET=boudoirr ADD_SERVICES=jellyfin
+make ship PRESET=calibre-web-automated
 make ship ADD_SERVICES=sonarr-anime
 make ship ADD_SERVICES=sabnzbd
 make ship REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=nzbget
+make ship REMOVE_SERVICES=calibre-web-automated
 make ship PRESET=duplex ADD_SERVICES=watchtower
 ```
 
 Regeneration preserves existing values by variable name and does not replace application state. Values for temporarily unselected services remain in a marked footer so they can return when the service is selected again.
+
+### Configure Calibre-Web Automated
+
+Calibre-Web Automated is removable default cargo in Plundarr and also has a focused standalone preset:
+
+```sh
+make ship PRESET=calibre-web-automated
+make up PRESET=calibre-web-automated
+```
+
+Set `CWA_CONFIG_PATH`, `CWA_INGEST_PATH`, and `CWA_LIBRARY_PATH` to three separate host directories. The ingest directory is destructive: CWA removes books after processing them, so finish downloads elsewhere and move only completed files into it. Preserve the complete config directory and the Calibre library containing `metadata.db` in backups. Set `CWA_NETWORK_SHARE_MODE=true` only for NFS or SMB storage.
+
+CWA image updates remain excluded from Watchtower so database migrations stay under operator control. The published CWA image supports `linux/amd64` and `linux/arm64`, not `linux/arm/v7`.
 
 ### Configure Duplex
 
@@ -190,7 +200,7 @@ Maraudarr writes only variables used by the selected services. Start with these 
 
 - **Credentials:** `PIA_USER` and `PIA_PASS` for VPN-enabled presets.
 - **Host identity:** `DEFAULT_PUID`, `DEFAULT_PGID`, and service-specific user or group IDs.
-- **Storage:** Download, movie, television, anime, scene, Jellyfin, Plex, Kometa, and backup paths selected by the stack.
+- **Storage:** Download, movie, television, anime, scene, ebook, Jellyfin, Plex, Kometa, and backup paths selected by the stack.
 - **Networking:** Project subnet, gateway, address range, and `*_WEBUI_PORT` values when defaults collide.
 - **Time:** `TZ` and service schedules.
 

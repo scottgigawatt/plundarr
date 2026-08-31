@@ -60,6 +60,7 @@ class MaraudarrTests(unittest.TestCase):
                 "sonarr",
                 "bazarr",
                 "seerr",
+                "calibre-web-automated",
                 "cleanuparr",
                 "speedtest-tracker",
                 "duplicati",
@@ -145,6 +146,18 @@ class MaraudarrTests(unittest.TestCase):
                 self.assertIn("watchtower", default.service_ids)
                 self.assertNotIn("watchtower", removed.service_ids)
 
+    def test_calibre_web_automated_is_a_removable_plundarr_default(self) -> None:
+        """Default CWA in Plundarr without making the ebook service core."""
+
+        default = self.catalog.resolve("plundarr")
+        removed = self.catalog.resolve(
+            "plundarr",
+            remove={"calibre-web-automated"},
+        )
+
+        self.assertIn("calibre-web-automated", default.service_ids)
+        self.assertNotIn("calibre-web-automated", removed.service_ids)
+
     def test_watchtower_preset_selects_only_the_updater(self) -> None:
         """Keep the standalone updater focused and available for one-shot runs."""
 
@@ -227,10 +240,14 @@ class MaraudarrTests(unittest.TestCase):
         self.assertEqual(plan.service_ids, ("kometa", "imagemaid", "tautulli"))
 
     def test_standalone_media_server_presets_select_one_core_service(self) -> None:
-        """Keep the standalone Jellyfin and Plex presets deliberately focused."""
+        """Keep standalone media-server presets deliberately focused."""
 
         self.assertEqual(self.catalog.resolve("jellyfin").service_ids, ("jellyfin",))
         self.assertEqual(self.catalog.resolve("plex").service_ids, ("plex",))
+        self.assertEqual(
+            self.catalog.resolve("calibre-web-automated").service_ids,
+            ("calibre-web-automated",),
+        )
         self.assertEqual(
             self.catalog.preset("jellyfin").media_libraries, ("movies", "tv")
         )
@@ -303,6 +320,7 @@ class MaraudarrTests(unittest.TestCase):
         self.assertIn("/app/nzbget/nzbget", compose)
         self.assertIn("HOMEPAGE_VAR_NZBGET_USER", compose)
         self.assertIn("HOMEPAGE_VAR_SONARR_ANIME_KEY", compose)
+        self.assertIn("HOMEPAGE_VAR_CWA_USER", compose)
         self.assertEqual(3, compose.count("<<: *rootless-container"))
         self.assertIn("http://127.0.0.1:8000/status", compose)
 
@@ -344,32 +362,37 @@ class MaraudarrTests(unittest.TestCase):
         cases = {
             "plundarr": (
                 "plundarr",
-                "172.28.0.0/16",
+                "172.20.0.0/16",
                 "/volume1/plex",
             ),
             "boudoirr": (
                 "boudoirr",
-                "172.29.0.0/16",
+                "172.21.0.0/16",
                 "/volume1/jellyfin",
             ),
             "jellyfin": (
                 "jellyfin",
-                "172.30.0.0/16",
+                "172.22.0.0/16",
                 "/volume1/jellyfin",
             ),
             "plex": (
                 "plex",
-                "172.31.0.0/16",
+                "172.23.0.0/16",
                 "/volume1/plex",
+            ),
+            "calibre-web-automated": (
+                "calibre-web-automated",
+                "172.24.0.0/16",
+                "/volume1/books/calibre",
             ),
             "duplex": (
                 "duplex",
-                "172.26.0.0/16",
+                "172.25.0.0/16",
                 "/volume1/plex",
             ),
             "watchtower": (
                 "watchtower",
-                "172.25.0.0/16",
+                "172.27.0.0/16",
                 "/volume1/plex",
             ),
         }
@@ -415,6 +438,7 @@ class MaraudarrTests(unittest.TestCase):
             "boudoirr",
             "jellyfin",
             "plex",
+            "calibre-web-automated",
             "duplex",
             "watchtower",
             "custom",
@@ -432,6 +456,7 @@ class MaraudarrTests(unittest.TestCase):
         ]
 
         self.assertEqual(len(project_names), len(set(project_names)))
+        self.assertTrue(all(network.is_private for network in networks))
         for first, second in combinations(networks, 2):
             self.assertFalse(first.overlaps(second), f"{first} overlaps {second}")
 
@@ -487,6 +512,8 @@ class MaraudarrTests(unittest.TestCase):
         self.assertIn(18080, published_ports["boudoirr"])
         self.assertIn(21011, published_ports["boudoirr"])
         self.assertIn(28096, published_ports["jellyfin"])
+        self.assertIn(48213, published_ports["calibre-web-automated"])
+        self.assertIn(8213, published_ports["plundarr"])
         self.assertIn(8181, published_ports["duplex"])
         self.assertIn(5454, published_ports["duplex"])
         self.assertIn(33000, published_ports["custom"])
@@ -501,6 +528,27 @@ class MaraudarrTests(unittest.TestCase):
             'HOMEPAGE_VAR_QBITTORRENT_HREF="${HOMEPAGE_VAR_QBITTORRENT_HREF:-http://host.or.ip:18080}"',
             boudoirr_homepage,
         )
+
+    def test_preset_networks_follow_the_documented_private_sequence(self) -> None:
+        """Keep preset subnet, pool, and gateway allocations predictable."""
+
+        expected_octets = {
+            "plundarr": 20,
+            "boudoirr": 21,
+            "jellyfin": 22,
+            "plex": 23,
+            "calibre-web-automated": 24,
+            "duplex": 25,
+            "watchtower": 27,
+            "custom": 28,
+        }
+
+        for preset_id, octet in expected_octets.items():
+            preset = self.catalog.preset(preset_id)
+            with self.subTest(preset=preset_id):
+                self.assertEqual(preset.network_subnet, f"172.{octet}.0.0/16")
+                self.assertEqual(preset.network_ip_range, f"172.{octet}.5.0/24")
+                self.assertEqual(preset.network_gateway, f"172.{octet}.5.254")
 
     def test_existing_boudoirr_port_values_survive_a_rebuild(self) -> None:
         """Preserve operator-selected ports instead of applying a fresh offset."""
@@ -704,6 +752,7 @@ class MaraudarrTests(unittest.TestCase):
         media_group = homepage[: homepage.index("- Data:")]
         downloads_group = homepage[homepage.index("- Downloads:") :]
         self.assertIn("- Jellyfin:", media_group)
+        self.assertIn("- Calibre-Web Automated:", media_group)
         self.assertIn("- Sonarr Anime:", media_group)
         self.assertIn("{{HOMEPAGE_VAR_SONARR_ANIME_CONTAINER}}", media_group)
         self.assertIn("- qBittorrent:", downloads_group)
@@ -729,14 +778,17 @@ class MaraudarrTests(unittest.TestCase):
         self.assertNotIn("HOMEPAGE_VAR_PLEX", compose)
         self.assertNotIn("HOMEPAGE_VAR_NZBGET", compose)
         self.assertNotIn("HOMEPAGE_VAR_TAUTULLI", compose)
+        self.assertNotIn("HOMEPAGE_VAR_CWA", compose)
         self.assertNotIn("HOMEPAGE_VAR_RADARR", environment)
         self.assertNotIn("HOMEPAGE_VAR_PLEX", environment)
         self.assertNotIn("HOMEPAGE_VAR_NZBGET", environment)
         self.assertNotIn("HOMEPAGE_VAR_TAUTULLI", environment)
+        self.assertNotIn("HOMEPAGE_VAR_CWA", environment)
         self.assertNotIn("- Radarr:", homepage)
         self.assertNotIn("- Plex:", homepage)
         self.assertNotIn("- NZBGet:", homepage)
         self.assertNotIn("- Tautulli:", homepage)
+        self.assertNotIn("- Calibre-Web Automated:", homepage)
         self.assertTrue(homepage.endswith("[]\n"))
 
     def test_homepage_tautulli_card_requires_the_tautulli_service(self) -> None:
@@ -869,18 +921,45 @@ class MaraudarrTests(unittest.TestCase):
                 if service.id == "nzbget":
                     self.assertIn("\n        - /app/nzbget/nzbget\n", compose)
                     self.assertIn("\n        - /config/nzbget.conf\n", compose)
+                if service.id == "calibre-web-automated":
+                    self.assertIn("\n        - nc\n", compose)
+                    self.assertIn("\n        - \"8083\"\n", compose)
 
         self.assertEqual(shell_healthchecks, set())
 
     #
     # Media-server selection and generated filesystem behavior.
     #
-    def test_plex_and_jellyfin_are_independent_media_server_choices(self) -> None:
-        """Allow Plex and Jellyfin to be selected independently or together."""
+    def test_calibre_web_automated_keeps_state_mounts_and_updates_explicit(
+        self,
+    ) -> None:
+        """Preserve the upstream CWA storage and internal-port contract."""
+
+        compose = render_compose(
+            self.catalog,
+            self.catalog.resolve("calibre-web-automated"),
+        )
+        service = extract_service(compose, "calibre-web-automated")
+
+        self.assertIn("CWA_PORT_OVERRIDE: \"8083\"", service)
+        self.assertIn("NETWORK_SHARE_MODE: ${CWA_NETWORK_SHARE_MODE}", service)
+        self.assertIn("${CWA_CONFIG_PATH}:/config:rw", service)
+        self.assertIn("${CWA_INGEST_PATH}:/cwa-book-ingest:rw", service)
+        self.assertIn("${CWA_LIBRARY_PATH}:/calibre-library:rw", service)
+        self.assertIn("labels: *disable-watchtower-updates", service)
+        self.assertNotIn("\n    user:", service)
+
+    def test_media_servers_are_independent_choices(self) -> None:
+        """Allow Plex, Jellyfin, and CWA to be selected together."""
 
         plan = self.catalog.resolve(
             "custom",
-            selected={"homepage", "jellyfin", "plex"},
+            selected={
+                "homepage",
+                "jellyfin",
+                "plex",
+                "calibre-web-automated",
+            },
         )
 
         compose = render_compose(self.catalog, plan)
@@ -888,9 +967,11 @@ class MaraudarrTests(unittest.TestCase):
 
         self.assertIn("  plex:", compose)
         self.assertIn("  jellyfin:", compose)
+        self.assertIn("  calibre-web-automated:", compose)
         self.assertIn("network_mode: host", compose)
         self.assertIn("- Plex:", homepage)
         self.assertIn("- Jellyfin:", homepage)
+        self.assertIn("- Calibre-Web Automated:", homepage)
 
     def test_plex_library_mounts_follow_the_selected_preset(self) -> None:
         """Mount only the library set expected by each Plex deployment."""
@@ -921,7 +1002,13 @@ class MaraudarrTests(unittest.TestCase):
 
         plan = self.catalog.resolve(
             "custom",
-            selected={"homepage", "jellyfin", "nzbget", "qbittorrent"},
+            selected={
+                "homepage",
+                "jellyfin",
+                "nzbget",
+                "qbittorrent",
+                "calibre-web-automated",
+            },
         )
 
         with tempfile.TemporaryDirectory() as temporary_directory:
@@ -941,6 +1028,12 @@ class MaraudarrTests(unittest.TestCase):
             self.assertTrue((config_path / "jellyfin" / "README.md").is_file())
             self.assertTrue((config_path / "jellyfin" / "config").is_dir())
             self.assertTrue((config_path / "jellyfin" / "cache").is_dir())
+            self.assertTrue(
+                (config_path / "calibre-web-automated" / "config").is_dir()
+            )
+            self.assertTrue(
+                (config_path / "calibre-web-automated" / "ingest").is_dir()
+            )
             self.assertTrue((config_path / "nzbget" / "README.md").is_file())
             self.assertTrue(
                 (

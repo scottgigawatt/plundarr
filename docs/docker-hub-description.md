@@ -30,13 +30,14 @@ Run `make configure` for the interactive preset and service picker, or choose a 
 ```sh
 make ship PRESET=jellyfin
 make ship PRESET=plex
+make ship PRESET=calibre-web-automated
 make ship PRESET=duplex
 make ship PRESET=watchtower
 make ship PRESET=boudoirr ADD_SERVICES=jellyfin
 make ship ADD_SERVICES=sonarr-anime
 ```
 
-Plundarr and Boudoirr use qBittorrent as their only default downloader and include Watchtower as a removable default. SABnzbd and NZBGet remain optional selections through `make configure` or `ADD_SERVICES`. Plundarr includes one Sonarr instance; `sonarr-anime` adds the optional second instance. Review `dist/<preset>/.env`, then start the generated stack with `make up PRESET=<preset>`. The standalone Watchtower project may instead run one update pass with `make watchtower-run-once PRESET=watchtower`.
+Plundarr and Boudoirr use qBittorrent as their only default downloader and include Watchtower as a removable default. Plundarr also includes Calibre-Web Automated as a removable default, and `PRESET=calibre-web-automated` generates the ebook library and ingest service by itself. SABnzbd and NZBGet remain optional selections through `make configure` or `ADD_SERVICES`. Plundarr includes one Sonarr instance; `sonarr-anime` adds the optional second instance. Review `dist/<preset>/.env`, then start the generated stack with `make up PRESET=<preset>`. The standalone Watchtower project may instead run one update pass with `make watchtower-run-once PRESET=watchtower`.
 
 The Duplex preset keeps Kometa's configuration in an independent host checkout selected by `KOMETA_CONFIG_PATH`. Its PATTRMM, Notifiarr, and Overlay Reset defaults are removable; Watchtower may be added explicitly. Kometa Overlay Reset is excluded from normal startup by its Compose profile and runs explicitly with `make kometa-overlay-reset PRESET=duplex`; its generated default is dry-run.
 
