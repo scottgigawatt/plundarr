@@ -1,21 +1,45 @@
 <!-- markdownlint-disable-next-line MD033 MD041 -->
-<p align="center">
-  <em>🏴‍☠️ Generate one media stack, edit one environment file, and keep the fleet under control.</em>
-</p>
+<hr />
 
 <!-- markdownlint-disable MD033 -->
 <p align="center">
-  <a href="https://github.com/scottgigawatt/plundarr/actions/workflows/build-and-push.yml"><img src="https://img.shields.io/github/actions/workflow/status/scottgigawatt/plundarr/build-and-push.yml?branch=main&label=Maraudarr%20build&logo=githubactions" alt="Maraudarr build status" /></a>
-  <img src="https://img.shields.io/github/license/scottgigawatt/plundarr?label=License" alt="Apache 2.0 license" />
-  <img src="https://img.shields.io/badge/Platforms-amd64%20%7C%20arm64%20%7C%20arm%2Fv7-blue?logo=docker" alt="Published for amd64, arm64, and arm/v7" />
-  <img src="https://img.shields.io/badge/Scanned-Trivy-1904DA?logo=aqua" alt="Container image scanned with Trivy" />
-  <img src="https://img.shields.io/badge/Tested-Synology%20%7C%20macOS-blue" alt="Tested on Synology and macOS" />
+  <em>🏴‍☠️ Enjoyin' the spoils? Drop us a ⭐ an' let the whole crew know this chart helped.</em>
+</p>
+
+<p align="center">
+  <a href="https://github.com/scottgigawatt/plundarr/stargazers"><img src="https://img.shields.io/github/stars/scottgigawatt/plundarr?style=social&amp;label=Treasure%20Hunters" alt="GitHub stars: Treasure Hunters" /></a>
+  <a href="https://github.com/scottgigawatt/plundarr/forks"><img src="https://img.shields.io/github/forks/scottgigawatt/plundarr?style=social&amp;label=Mutinous%20Forks" alt="GitHub forks: Mutinous Forks" /></a>
+  <a href="https://github.com/scottgigawatt/plundarr/watchers"><img src="https://img.shields.io/github/watchers/scottgigawatt/plundarr?style=social&amp;label=Crow%27s%20Nest%20Lookouts" alt="GitHub watchers: Crow's Nest Lookouts" /></a>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Containers-Ahoy%21-2496ED?logo=docker&amp;logoColor=white" alt="Containers: Ahoy!" />
+  <img src="https://img.shields.io/badge/Cloaked-by%20PIA%20%26%20WireGuard-2EA44F?logo=wireguard&amp;logoColor=white" alt="Cloaked by PIA and WireGuard" />
+  <a href="./LICENSE"><img src="https://img.shields.io/github/license/scottgigawatt/plundarr?label=Legal%20Scroll&amp;color=1677B8" alt="Legal Scroll: Apache 2.0 license" /></a>
+  <a href="https://github.com/scottgigawatt/plundarr/commits/main"><img src="https://img.shields.io/github/last-commit/scottgigawatt/plundarr?label=Last%20Plunder&amp;logo=git&amp;color=2EA44F" alt="Date of the last commit to main" /></a>
+  <img src="https://img.shields.io/badge/Sea--Tested-Synology%20%7C%20macOS-1677B8" alt="Sea-tested on Synology and macOS" />
+  <img src="https://img.shields.io/badge/Rum%20Supply-Full-E66A24" alt="Rum supply: Full" />
+</p>
+
+<p align="center">
+  <a href="https://github.com/scottgigawatt/plundarr/actions/workflows/build-and-push.yml"><img src="https://img.shields.io/github/actions/workflow/status/scottgigawatt/plundarr/build-and-push.yml?branch=main&amp;label=Maraudarr%20build&amp;logo=githubactions&amp;logoColor=white" alt="Maraudarr build status on main" /></a>
+  <a href="https://github.com/scottgigawatt/plundarr/pkgs/container/maraudarr"><img src="https://img.shields.io/badge/Fleet-amd64%20%7C%20arm64%20%7C%20arm%2Fv7-1677B8?logo=docker&amp;logoColor=white" alt="Maraudarr images for amd64, arm64, and arm/v7" /></a>
+  <a href="https://github.com/scottgigawatt/plundarr/actions/workflows/build-and-push.yml"><img src="https://img.shields.io/badge/Bilge%20Check-Trivy-1904DA?logo=aqua&amp;logoColor=white" alt="Container images scanned with Trivy" /></a>
+</p>
+
+<p align="center">─── ⛧ ───</p>
+
+<p align="center">
+  <em>☠️ Questions or cursed code? Cross the Styx — <strong>enter 🔥HADES🔥</strong>.</em>
 </p>
 
 <p align="center">
   <a href="https://discord.gg/BpEGzWwGYf"><img src="https://img.shields.io/discord/1403601106315116626?label=%F0%9F%94%A5HADES%F0%9F%94%A5&logo=discord&logoColor=white&color=5865F2" alt="HADES Discord community" /></a>
 </p>
 <!-- markdownlint-enable MD033 -->
+
+<!-- markdownlint-disable-next-line MD033 -->
+<hr />
 
 # Plundarr 🏴‍☠️
 
