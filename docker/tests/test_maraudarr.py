@@ -47,6 +47,12 @@ class MaraudarrTests(unittest.TestCase):
         """Keep the Plundarr preset service order stable and documented."""
 
         plan = self.catalog.resolve("plundarr")
+        environment = render_environment(
+            self.catalog,
+            plan,
+            None,
+            generate_secrets=False,
+        )
 
         self.assertEqual(
             plan.service_ids,
@@ -71,6 +77,7 @@ class MaraudarrTests(unittest.TestCase):
         self.assertNotIn("sonarr-anime", plan.service_ids)
         self.assertNotIn("lidarr", plan.service_ids)
         self.assertNotIn("recyclarr", plan.service_ids)
+        self.assertNotIn("HOST_MUSIC_PATH", environment)
 
     def test_boudoirr_preset_reuses_the_shared_service_catalog(self) -> None:
         """Build Boudoirr from shared services without Plundarr-only edges."""
@@ -881,8 +888,25 @@ class MaraudarrTests(unittest.TestCase):
             None,
             generate_secrets=False,
         )
+        homepage_service = extract_service(compose, "homepage")
         homepage = render_homepage_services(self.catalog, plan)
 
+        self.assertIn(
+            "HOMEPAGE_VAR_LIDARR_URL: ${HOMEPAGE_VAR_LIDARR_URL}:8686",
+            homepage_service,
+        )
+        self.assertNotIn(
+            "HOMEPAGE_VAR_LIDARR_URL: ${HOMEPAGE_VAR_LIDARR_URL}:${LIDARR_WEBUI_PORT}",
+            homepage_service,
+        )
+        self.assertIn(
+            'LIDARR_WEBUI_PORT="${LIDARR_WEBUI_PORT:-38686}"',
+            environment,
+        )
+        self.assertIn(
+            'HOMEPAGE_VAR_LIDARR_HREF="${HOMEPAGE_VAR_LIDARR_HREF:-http://host.or.ip:38686}"',
+            environment,
+        )
         self.assertIn("HOMEPAGE_VAR_LIDARR_CONTAINER", compose)
         self.assertIn("HOMEPAGE_VAR_LIDARR_KEY", environment)
         self.assertIn("- Lidarr:", homepage)

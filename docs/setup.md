@@ -123,6 +123,7 @@ The [Synology Container Manager project documentation](https://kb.synology.com/e
 | Server | Host mount behavior | Libraries to add | Notes |
 | --- | --- | --- | --- |
 | Jellyfin with Plundarr or standalone | `JELLYFIN_DATA_PATH` mounts read/write at `/data` | `/data/movies`, `/data/tv` | Persistent `/config` and `/cache` |
+| Jellyfin with Plundarr and Lidarr | `JELLYFIN_DATA_PATH` mounts read/write at `/data`; `HOST_MUSIC_PATH` resolves to its `music` child | `/data/movies`, `/data/tv`, `/data/music` | Keep both paths beneath the same host media root |
 | Jellyfin with Boudoirr | The Whisparr and Jellyfin data roots share `/data` | `/data/movies`, `/data/scenes` | Set both high-level paths to the same host directory |
 | Plex with Plundarr | Separate read-only library mounts | Movies, television, anime | Persistent config and transcode mounts |
 | Plex with Plundarr and Lidarr | Separate read-only library mounts | Movies, television, anime, music at `/music` | Lidarr writes the same host music library |
@@ -130,7 +131,7 @@ The [Synology Container Manager project documentation](https://kb.synology.com/e
 | Plex standalone | Separate read-only library mounts | Movies, television | Uses host networking |
 | Calibre-Web Automated with Plundarr or standalone | `CWA_LIBRARY_PATH` mounts read/write at `/calibre-library` | Calibre library containing `metadata.db` | Config and ingest use separate mounts |
 
-Application libraries are configured in Jellyfin, Plex, or Calibre-Web Automated after the containers start. Maraudarr prepares consistent mounts but does not create media-server library records.
+Media-server libraries are configured in Jellyfin, Plex, or Calibre-Web Automated after the containers start. Maraudarr prepares consistent mounts but does not create library records. Configure Lidarr's `/music` root folder separately in Lidarr.
 
 ## Configure Lidarr
 
