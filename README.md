@@ -16,6 +16,9 @@
   <img src="https://img.shields.io/badge/Containers-Ahoy%21-2496ED?logo=docker&amp;logoColor=white" alt="Containers: Ahoy!" />
   <img src="https://img.shields.io/badge/Cloaked-by%20PIA%20%26%20WireGuard-2EA44F?logo=wireguard&amp;logoColor=white" alt="Cloaked by PIA and WireGuard" />
   <a href="./LICENSE"><img src="https://img.shields.io/github/license/scottgigawatt/plundarr?label=Legal%20Scroll&amp;color=1677B8" alt="Legal Scroll: Apache 2.0 license" /></a>
+</p>
+
+<p align="center">
   <a href="https://github.com/scottgigawatt/plundarr/commits/main"><img src="https://img.shields.io/github/last-commit/scottgigawatt/plundarr?label=Last%20Plunder&amp;logo=git&amp;color=2EA44F" alt="Date of the last commit to main" /></a>
   <img src="https://img.shields.io/badge/Sea--Tested-Synology%20%7C%20macOS-1677B8" alt="Sea-tested on Synology and macOS" />
   <img src="https://img.shields.io/badge/Rum%20Supply-Full-E66A24" alt="Rum supply: Full" />
