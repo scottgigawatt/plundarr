@@ -6,9 +6,9 @@ Welcome to the test hold, where Plundarr checks that Privateerr and Gluetun left
 
 | Hold | Script | Purpose |
 | --- | --- | --- |
-| 🧭 Generator | [`generator/maraudarr-image-smoke.sh`](https://github.com/scottgigawatt/plundarr/blob/main/test/generator/maraudarr-image-smoke.sh) | Test image UI and validate one disposable deployment |
-| 🧭 Generator | [`generator/test-maraudarr-image.sh`](https://github.com/scottgigawatt/plundarr/blob/main/test/generator/test-maraudarr-image.sh) | Verify local, pulled, built, and unavailable image resolution paths |
-| 🧭 Generator | [`generator/test-maraudarr-matrix.sh`](https://github.com/scottgigawatt/plundarr/blob/main/test/generator/test-maraudarr-matrix.sh) | Generate and validate representative preset and add-on combinations |
+| 🧭 Compose generation | [`generator/maraudarr-image-smoke.sh`](https://github.com/scottgigawatt/plundarr/blob/main/test/generator/maraudarr-image-smoke.sh) | Test image UI and validate one disposable deployment |
+| 🧭 Compose generation | [`generator/test-maraudarr-image.sh`](https://github.com/scottgigawatt/plundarr/blob/main/test/generator/test-maraudarr-image.sh) | Verify local, pulled, built, and unavailable image resolution paths |
+| 🧭 Compose generation | [`generator/test-maraudarr-matrix.sh`](https://github.com/scottgigawatt/plundarr/blob/main/test/generator/test-maraudarr-matrix.sh) | Generate and validate representative preset and add-on combinations |
 | 🧰 Helpers | [`helpers/test-make-helpers.sh`](https://github.com/scottgigawatt/plundarr/blob/main/test/helpers/test-make-helpers.sh) | Test Make's AWK, backup, PIA preflight, and Compose status helpers |
 | 🧰 Helpers | [`helpers/test-policy-checks.sh`](https://github.com/scottgigawatt/plundarr/blob/main/test/helpers/test-policy-checks.sh) | Test valid and invalid publishing-policy fixtures offline |
 | 🧰 Helpers | [`helpers/test-workflow-helpers.sh`](https://github.com/scottgigawatt/plundarr/blob/main/test/helpers/test-workflow-helpers.sh) | Test release, Discord, and registry helper behavior offline |
@@ -23,7 +23,7 @@ Welcome to the test hold, where Plundarr checks that Privateerr and Gluetun left
 | 🎭 Stubs | [`stubs/maraudarr-image-docker-stub.sh`](https://github.com/scottgigawatt/plundarr/blob/main/test/stubs/maraudarr-image-docker-stub.sh) | Simulate Maraudarr image discovery and retrieval outcomes |
 | 🎭 Stubs | [`stubs/workflow-skopeo-stub.sh`](https://github.com/scottgigawatt/plundarr/blob/main/test/stubs/workflow-skopeo-stub.sh) | Simulate registry inspection without network access |
 
-The subfolders separate generator contracts, reusable helper tests, publishing policy checks, live-stack runtime checks, and deterministic command stubs. Make targets remain the public interface; invoke individual scripts only while diagnosing a focused failure.
+The subfolders separate Compose-generation contracts, reusable helper tests, publishing policy checks, live-stack runtime checks, and deterministic command stubs. Make targets remain the public interface; invoke individual scripts only while diagnosing a focused failure.
 
 ## Understand what gets tested 🦜
 
@@ -173,6 +173,6 @@ make clean
 
 `make delete-config` is deliberately absent from that routine cleanup example: it destroys the selected deployment's application state.
 
-`clean-test` uses the volume-preserving `down` path. `nuke` removes Docker resources for the selected generated project and the separate `maraudarr` generator project, then clears disposable runtime state and restores examples. It never invokes `delete-config`, and it preserves `.env`, backups, and persistent application config.
+`clean-test` uses the volume-preserving `down` path. `nuke` removes Docker resources for the selected generated project and the separate `maraudarr` Compose project that runs Maraudarr, then clears disposable runtime state and restores examples. It never invokes `delete-config`, and it preserves `.env`, backups, and persistent application config.
 
 Run cleanup before committing after any real VPN voyage. Future ye will thank past ye. 🏴‍☠️

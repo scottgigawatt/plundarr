@@ -4,7 +4,7 @@ This guide generates a Plundarr deployment, reviews the host-specific settings, 
 
 ## Generate a deployment
 
-Run the interactive generator from the repository:
+Run the interactive Maraudarr Docker Compose project generator from the repository:
 
 ```sh
 make configure

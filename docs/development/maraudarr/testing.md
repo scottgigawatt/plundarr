@@ -1,6 +1,6 @@
 # Test Maraudarr 🧪
 
-Choose the smallest validation that proves the changed boundary, then broaden for generator, image, workflow, or documentation changes.
+Choose the smallest validation that proves the changed boundary, then broaden for Compose-generation, image, workflow, or documentation changes.
 
 ## Run unit tests
 

@@ -52,7 +52,7 @@ pre-commit run --all-files
 
 Generated-stack checks such as `make config`, `make env`, `make up`, `make test-vpn`, `make test-e2e`, and `make test-stack` accept `PRESET=<preset>` when the change is preset-specific.
 
-`make down PRESET=<preset>` preserves volumes and images. `make clean` is repository-only and never touches `dist/` or Docker. `make nuke` removes the selected project's Docker resources plus the separate `maraudarr` generator project and scoped Buildx cache, but preserves deployment `.env`, backups, and persistent config. Only `make delete-config` deletes application state.
+`make down PRESET=<preset>` preserves volumes and images. `make clean` is repository-only and never touches `dist/` or Docker. `make nuke` removes the selected project's Docker resources plus the separate `maraudarr` Compose project that runs Maraudarr and its scoped Buildx cache, but preserves deployment `.env`, backups, and persistent config. Only `make delete-config` deletes application state.
 
 > [!IMPORTANT]
 > 🧪 VPN and port-forwarding testing uses real PIA credentials from the selected preset's `.env`. That voyage should happen locally, not with secrets flung into public waters.

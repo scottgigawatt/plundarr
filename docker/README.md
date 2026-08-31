@@ -15,7 +15,7 @@
 
 # Maraudarr ⚒️
 
-Maraudarr is the short-lived generator image inside the Plundarr repository. It loads a preset, resolves required services, preserves the handwritten Compose comments, and writes a deployable Plundarr project into the mounted repository:
+Maraudarr is the short-lived Docker Compose project generator image inside the Plundarr repository. It loads a preset, resolves required services, preserves the handwritten Compose comments, and writes a deployable Plundarr project into the mounted repository:
 
 ```text
 dist/<preset>/

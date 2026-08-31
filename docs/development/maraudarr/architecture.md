@@ -57,7 +57,7 @@ The source templates are intentionally readable, commented Compose and environme
 
 ## 4. Preserve environment state
 
-Existing assignments are indexed by variable name. Selected variables keep their user-managed lines, temporarily inactive service values move to a marked footer, and first-run secrets replace placeholders only when no existing value is available. `COMPOSE_PROJECT_NAME` remains generator-owned so preset identity cannot drift accidentally.
+Existing assignments are indexed by variable name. Selected variables keep their user-managed lines, temporarily inactive service values move to a marked footer, and first-run secrets replace placeholders only when no existing value is available. `COMPOSE_PROJECT_NAME` remains Maraudarr-owned so preset identity cannot drift accidentally.
 
 The default Plundarr preset therefore owns the `plundarr` Compose project. Maraudarr's local build/run chart is always invoked with the separate explicit project name `maraudarr`, preventing either lifecycle from removing the other.
 

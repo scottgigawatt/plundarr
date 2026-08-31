@@ -10,12 +10,12 @@
 
 ## Project Purpose
 
-Plundarr is a generated, single-file Docker Compose media stack intended for Docker Compose and Synology Container Manager. Maraudarr is the companion generator image that assembles the selected services, environment variables, and initial configuration directories.
+Plundarr is a generated, single-file Docker Compose media stack intended for Docker Compose and Synology Container Manager. Maraudarr is the companion Docker Compose project generator image that assembles the selected services, environment variables, and initial configuration directories.
 
 Keep the names distinct:
 
 - **Plundarr** is the generated stack in `dist/<preset>/docker-compose.yml`, `.env`, and `config/`.
-- **Maraudarr** is the short-lived generator image and Python application under `docker/`.
+- **Maraudarr** is the short-lived Docker Compose project generator image and Python application under `docker/`.
 
 The current catalog includes `plundarr`, `boudoirr`, `jellyfin`, `plex`, `duplex`, `watchtower`, and `custom` presets. Synology compatibility means DSM 7.4 with Container Manager; public documentation should not pin a DSM build number.
 
@@ -139,7 +139,7 @@ Use the same published image-tag contract as Privateerr:
 
 ## Validation Expectations
 
-Run the smallest applicable set, broadening it for generator, image, or workflow changes:
+Run the smallest applicable set, broadening it for Compose project generation, image, or workflow changes:
 
 ```sh
 make help

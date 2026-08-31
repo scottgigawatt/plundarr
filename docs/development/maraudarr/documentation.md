@@ -37,7 +37,7 @@ Private helpers are filtered out of the generated API reference, but they are no
 Good private-helper documentation explains matters such as:
 
 - Why a marker-based text edit is safe for the owned template shape.
-- Why one environment variable remains generator-owned.
+- Why one environment variable remains Maraudarr-owned.
 - Why config README files may refresh while application files may not.
 - Why validation tolerates a missing Docker executable but rejects bad Compose.
 

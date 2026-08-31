@@ -1,6 +1,6 @@
 # Maraudarr 🏴‍☠️⚒️
 
-Maraudarr is the short-lived generator image for [Plundarr](https://github.com/scottgigawatt/plundarr). It turns presets and selectable service charts into one commented Docker Compose file, one matching environment file, and the selected service config directories.
+Maraudarr is the short-lived Docker Compose project generator image for [Plundarr](https://github.com/scottgigawatt/plundarr). It turns presets and selectable service charts into one commented Docker Compose file, one matching environment file, and the selected service config directories.
 
 > [!IMPORTANT]
 > Plundarr is the generated media stack. Maraudarr creates that stack and exits; it is not a long-running media service.

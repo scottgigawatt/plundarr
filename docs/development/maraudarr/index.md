@@ -30,7 +30,7 @@ Maraudarr does **not** start the generated stack, manage long-running service st
 | `render.py`  | Render and atomically write deployment artifacts  |
 | `text.py`    | Extract and format text while preserving comments |
 | `ui.py`      | Present rich and plain terminal experiences       |
-| `cli.py`     | Parse commands and orchestrate one generator run  |
+| `cli.py`     | Parse commands and orchestrate one generation run |
 
 The package uses the conventional `docker/src/maraudarr/` layout. Runtime dependencies and build metadata remain under `docker/` because that directory is the complete Maraudarr image context.
 

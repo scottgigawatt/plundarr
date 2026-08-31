@@ -54,7 +54,7 @@ Reads resolved Compose environment values from standard input and fails when a P
 
 ### `compose/nuke.sh`
 
-Validates one selected Compose model before deleting anything, captures its service images, runs project-scoped teardown with volumes, orphans, and service images, then removes explicitly supplied local image references and one named Buildx builder. Plundarr calls the same helper separately for the generated project and the explicitly named `maraudarr` generator project.
+Validates one selected Compose model before deleting anything, captures its service images, runs project-scoped teardown with volumes, orphans, and service images, then removes explicitly supplied local image references and one named Buildx builder. Plundarr calls the same helper separately for the generated project and the explicitly named `maraudarr` Compose project that runs Maraudarr.
 
 Repeated `--dockerfile` and `--additional-image` arguments avoid shell command evaluation. Missing resources are harmless; unexpected Compose, Docker, or builder failures stop the helper. Repository files, `.env`, config, and backups remain Make's protected responsibility.
 
