@@ -69,6 +69,8 @@ class MaraudarrTests(unittest.TestCase):
             ),
         )
         self.assertNotIn("sonarr-anime", plan.service_ids)
+        self.assertNotIn("lidarr", plan.service_ids)
+        self.assertNotIn("recyclarr", plan.service_ids)
 
     def test_boudoirr_preset_reuses_the_shared_service_catalog(self) -> None:
         """Build Boudoirr from shared services without Plundarr-only edges."""
@@ -263,6 +265,32 @@ class MaraudarrTests(unittest.TestCase):
         self.assertEqual(plan.service_ids, ("privateerr", "gluetun", "qbittorrent"))
         self.assertEqual(set(plan.auto_added), {"privateerr", "gluetun"})
 
+    def test_lidarr_and_recyclarr_add_their_integrated_service_chain(
+        self,
+    ) -> None:
+        """Resolve both opt-in services with their integrated dependency edges."""
+
+        plan = self.catalog.resolve(
+            "custom",
+            selected={"lidarr", "recyclarr"},
+        )
+
+        self.assertEqual(
+            plan.service_ids,
+            (
+                "flaresolverr",
+                "prowlarr",
+                "radarr",
+                "sonarr",
+                "lidarr",
+                "recyclarr",
+            ),
+        )
+        self.assertEqual(
+            set(plan.auto_added),
+            {"flaresolverr", "prowlarr", "radarr", "sonarr"},
+        )
+
     def test_nzbget_adds_the_vpn_foundation(self) -> None:
         """Route a custom NZBGet selection through Privateerr and Gluetun."""
 
@@ -340,6 +368,31 @@ class MaraudarrTests(unittest.TestCase):
         self.assertNotIn("HOMEPAGE_VAR_NZBGET_HREF", environment)
         self.assertLess(environment.index("PROWLARR_TAG"), environment.index("RADARR_TAG"))
         self.assertLess(environment.index("SPEEDTEST_TRACKER_TAG"), environment.index("APPRISE_TAG"))
+
+    def test_lidarr_and_recyclarr_render_their_upstream_contracts(self) -> None:
+        """Keep music automation and explicit synchronization integration-safe."""
+
+        plan = self.catalog.resolve("plundarr", add={"lidarr", "recyclarr"})
+        compose = render_compose(self.catalog, plan)
+        environment = render_environment(
+            self.catalog,
+            plan,
+            None,
+            generate_secrets=False,
+        )
+        lidarr = extract_service(compose, "lidarr")
+        recyclarr = extract_service(compose, "recyclarr")
+
+        self.assertIn("lscr.io/linuxserver/lidarr:${LIDARR_TAG}", lidarr)
+        self.assertIn("${HOST_MUSIC_PATH}:/music:rw", lidarr)
+        self.assertIn("http://127.0.0.1:8686/ping", lidarr)
+        self.assertIn("prowlarr:\n        condition: service_healthy", lidarr)
+        self.assertIn("ghcr.io/recyclarr/recyclarr:${RECYCLARR_TAG}", recyclarr)
+        self.assertIn("profiles:\n      - tools", recyclarr)
+        self.assertIn("${RECYCLARR_CONFIG_PATH}:/config:rw", recyclarr)
+        self.assertNotIn("ports:", recyclarr)
+        self.assertIn('RECYCLARR_TAG="${RECYCLARR_TAG:-8}"', environment)
+        self.assertIn('HOST_MUSIC_PATH="${HOST_MUSIC_PATH:-/volume1/plex/music}"', environment)
 
     def test_environment_keeps_operator_edit_guidance(self) -> None:
         """Keep concise source guidance beside values novice operators change."""
@@ -779,16 +832,19 @@ class MaraudarrTests(unittest.TestCase):
         self.assertNotIn("HOMEPAGE_VAR_NZBGET", compose)
         self.assertNotIn("HOMEPAGE_VAR_TAUTULLI", compose)
         self.assertNotIn("HOMEPAGE_VAR_CWA", compose)
+        self.assertNotIn("HOMEPAGE_VAR_LIDARR", compose)
         self.assertNotIn("HOMEPAGE_VAR_RADARR", environment)
         self.assertNotIn("HOMEPAGE_VAR_PLEX", environment)
         self.assertNotIn("HOMEPAGE_VAR_NZBGET", environment)
         self.assertNotIn("HOMEPAGE_VAR_TAUTULLI", environment)
         self.assertNotIn("HOMEPAGE_VAR_CWA", environment)
+        self.assertNotIn("HOMEPAGE_VAR_LIDARR", environment)
         self.assertNotIn("- Radarr:", homepage)
         self.assertNotIn("- Plex:", homepage)
         self.assertNotIn("- NZBGet:", homepage)
         self.assertNotIn("- Tautulli:", homepage)
         self.assertNotIn("- Calibre-Web Automated:", homepage)
+        self.assertNotIn("- Lidarr:", homepage)
         self.assertTrue(homepage.endswith("[]\n"))
 
     def test_homepage_tautulli_card_requires_the_tautulli_service(self) -> None:
@@ -810,6 +866,30 @@ class MaraudarrTests(unittest.TestCase):
         tautulli_homepage = render_homepage_services(self.catalog, with_tautulli)
         self.assertIn("- Tautulli:", tautulli_homepage)
         self.assertNotIn("container: tautulli-latest", tautulli_homepage)
+
+    def test_lidarr_homepage_card_and_calendar_follow_selection(self) -> None:
+        """Render Lidarr variables, widget, and calendar only with Lidarr."""
+
+        plan = self.catalog.resolve(
+            "custom",
+            selected={"homepage", "lidarr"},
+        )
+        compose = render_compose(self.catalog, plan)
+        environment = render_environment(
+            self.catalog,
+            plan,
+            None,
+            generate_secrets=False,
+        )
+        homepage = render_homepage_services(self.catalog, plan)
+
+        self.assertIn("HOMEPAGE_VAR_LIDARR_CONTAINER", compose)
+        self.assertIn("HOMEPAGE_VAR_LIDARR_KEY", environment)
+        self.assertIn("- Lidarr:", homepage)
+        self.assertIn("type: lidarr", homepage)
+        self.assertIn("service_name: Lidarr", homepage)
+        self.assertNotIn("service_name: Radarr", homepage)
+        self.assertNotIn("service_name: Sonarr", homepage)
 
     #
     # Catalog source and generated style enforcement.
@@ -977,15 +1057,16 @@ class MaraudarrTests(unittest.TestCase):
         """Mount only the library set expected by each Plex deployment."""
 
         cases = {
-            "plundarr": ({"movies", "tv", "anime"}, {"scenes"}),
-            "boudoirr": ({"movies", "scenes"}, {"tv", "anime"}),
-            "plex": ({"movies", "tv"}, {"anime", "scenes"}),
+            "plundarr": ({"movies", "tv", "anime"}, {"scenes", "music"}),
+            "boudoirr": ({"movies", "scenes"}, {"tv", "anime", "music"}),
+            "plex": ({"movies", "tv"}, {"anime", "scenes", "music"}),
         }
         mounts = {
             "movies": "${HOST_MOVIES_PATH}:/movies:ro",
             "tv": "${HOST_TV_PATH}:/tv:ro",
             "anime": "${HOST_ANIME_TV_PATH}:/anime:ro",
             "scenes": "${HOST_SCENES_PATH}:/scenes:ro",
+            "music": "${HOST_MUSIC_PATH}:/music:ro",
         }
 
         for preset_id, (included, excluded) in cases.items():
@@ -996,6 +1077,10 @@ class MaraudarrTests(unittest.TestCase):
                     self.assertIn(mounts[library], plex)
                 for library in excluded:
                     self.assertNotIn(mounts[library], plex)
+
+        plan = self.catalog.resolve("plex", add={"lidarr"})
+        plex = extract_service(render_compose(self.catalog, plan), "plex")
+        self.assertIn(mounts["music"], plex)
 
     def test_write_stack_creates_only_selected_config_directories(self) -> None:
         """Create configuration directories only for selected services."""
@@ -1008,6 +1093,7 @@ class MaraudarrTests(unittest.TestCase):
                 "nzbget",
                 "qbittorrent",
                 "calibre-web-automated",
+                "recyclarr",
             },
         )
 
@@ -1036,6 +1122,9 @@ class MaraudarrTests(unittest.TestCase):
             )
             self.assertTrue((config_path / "nzbget" / "README.md").is_file())
             self.assertTrue(
+                (config_path / "recyclarr" / "recyclarr.yml").is_file()
+            )
+            self.assertTrue(
                 (
                     config_path
                     / "qbittorrent"
@@ -1044,6 +1133,22 @@ class MaraudarrTests(unittest.TestCase):
                 ).is_file()
             )
             self.assertFalse((config_path / "plex").exists())
+
+    def test_recyclarr_seed_survives_stack_regeneration(self) -> None:
+        """Preserve operator-managed Recyclarr rules after their first seed."""
+
+        plan = self.catalog.resolve("custom", selected={"recyclarr"})
+
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            output_path = Path(temporary_directory)
+            _, _, config_path = write_stack(self.catalog, plan, output_path)
+            recyclarr_path = config_path / "recyclarr" / "recyclarr.yml"
+            operator_config = "# operator-owned\nradarr: {}\n"
+            recyclarr_path.write_text(operator_config)
+
+            write_stack(self.catalog, plan, output_path)
+
+            self.assertEqual(recyclarr_path.read_text(), operator_config)
 
     def test_duplex_keeps_kometa_external_and_seeds_local_state_only(self) -> None:
         """Leave Kometa external while preparing the other Duplex state roots."""

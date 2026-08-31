@@ -157,6 +157,11 @@ run_case full \
     --preset plundarr \
     --add apprise,jellyfin,sabnzbd,sonarr-anime
 
+# Opt-in music automation and quality synchronization share the Plundarr chart.
+run_case music-and-quality-automation \
+    --preset plundarr \
+    --add lidarr,recyclarr
+
 #
 # Containerized Plex voyage verifies the alternative media server chart.
 #
@@ -225,7 +230,7 @@ run_case custom-homepage \
 #
 run_case everything \
     --preset plundarr \
-    --add apprise,imagemaid,jellyfin,notifiarr,nzbget,overlay-reset,pattrmm,plex,sabnzbd,sonarr-anime,tautulli,watchtower,whisparr
+    --add apprise,imagemaid,jellyfin,lidarr,notifiarr,nzbget,overlay-reset,pattrmm,plex,recyclarr,sabnzbd,sonarr-anime,tautulli,watchtower,whisparr
 
 #
 # Report one clear success line after every Compose chart passes.

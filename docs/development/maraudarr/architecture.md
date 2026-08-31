@@ -50,7 +50,7 @@ The result is an immutable `StackPlan`. Renderers consume that plan rather than 
 
 The source templates are intentionally readable, commented Compose and environment fragments. Maraudarr performs narrow text transformations so the generated deployment retains those comments and unresolved `${VARIABLES}`.
 
-`text.py` locates service declarations, framed environment sections, shared anchors, and footer blocks. `render.py` combines selected fragments and applies conditional additions such as Gluetun ports, Homepage cards, preset-aware media libraries, collision-free project port defaults, and fresh environment values. Jellyfin remains deliberately invariant: every preset mounts one writable media root at `/data`.
+`text.py` locates service declarations, framed environment sections, shared anchors, and footer blocks. `render.py` combines selected fragments and applies conditional additions such as Gluetun ports, Homepage cards and calendar integrations, preset-aware media libraries, the Lidarr-selected Plex music mount, collision-free project port defaults, and fresh environment values. Jellyfin remains deliberately invariant: every preset mounts one writable media root at `/data`.
 
 > [!IMPORTANT]
 > Replacing this layer with a generic YAML load-and-dump cycle would discard comments and weaken the generated file as an operator-facing artifact.

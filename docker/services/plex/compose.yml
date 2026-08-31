@@ -32,6 +32,7 @@ services:
       - ${HOST_TV_PATH}:/tv:ro                # Television library
       - ${HOST_ANIME_TV_PATH}:/anime:ro       # Anime television library
       - ${HOST_SCENES_PATH}:/scenes:ro        # Scene library
+      - ${HOST_MUSIC_PATH}:/music:ro          # Music library
 
     # Define container healthcheck to verify Plex connectivity
     healthcheck:

@@ -18,6 +18,8 @@ ALL=all
 UP=up
 WATCHTOWER_RUN_ONCE=watchtower-run-once
 KOMETA_OVERLAY_RESET=kometa-overlay-reset
+RECYCLARR_PREVIEW=recyclarr-preview
+RECYCLARR_SYNC=recyclarr-sync
 DOWN=down
 PS=ps
 LOGS=logs
@@ -75,6 +77,8 @@ COMMON_TARGETS= \
 	$(UP) \
 	$(WATCHTOWER_RUN_ONCE) \
 	$(KOMETA_OVERLAY_RESET) \
+	$(RECYCLARR_PREVIEW) \
+	$(RECYCLARR_SYNC) \
 	$(DOWN) \
 	$(PS) \
 	$(LOGS) \
@@ -153,6 +157,8 @@ SEERR_SERVICE         ?= seerr
 HOMEPAGE_SERVICE      ?= homepage
 WATCHTOWER_SERVICE    ?= watchtower
 OVERLAY_RESET_SERVICE ?= overlay-reset
+RECYCLARR_SERVICE     ?= recyclarr
+LIDARR_SERVICE        ?= lidarr
 
 #
 # Config reset paths.
@@ -180,6 +186,7 @@ COMPOSE_NUKE_OPTIONS           ?= --timeout $(COMPOSE_DOWN_TIMEOUT) --volumes --
 COMPOSE_UP_OPTIONS             ?= --force-recreate --pull always --detach --remove-orphans
 WATCHTOWER_RUN_ONCE_OPTIONS    ?= --rm --no-deps
 KOMETA_OVERLAY_RESET_OPTIONS   ?= --rm --no-deps
+RECYCLARR_RUN_OPTIONS          ?= --rm --no-deps
 COMPOSE_E2E_OPTIONS            ?= --force-recreate --pull always --detach --remove-orphans
 COMPOSE_E2E_WAIT               ?= 300
 COMPOSE_STACK_WAIT             ?= 600
@@ -289,6 +296,7 @@ DIRECT_WEB_PORTS  ?= \
 	$(PROWLARR_SERVICE):9696 \
 	$(RADARR_SERVICE):7878 \
 	$(SONARR_SERVICE):8989 \
+	$(if $(filter $(LIDARR_SERVICE),$(SELECTED_COMPOSE_SERVICES)),$(LIDARR_SERVICE):8686,) \
 	$(BAZARR_SERVICE):6767 \
 	$(DUPLICATI_SERVICE):8200 \
 	$(SEERR_SERVICE):5055 \
@@ -632,6 +640,44 @@ $(KOMETA_OVERLAY_RESET): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 	$(PLUNDARR_COMPOSE) run $(KOMETA_OVERLAY_RESET_OPTIONS) "$(OVERLAY_RESET_SERVICE)"
 
 #
+# $(RECYCLARR_PREVIEW): Pulls and previews the profile-gated Recyclarr sync
+#                       without changing Radarr or Sonarr.
+#
+# Dependencies:
+#   $(BUILD_DEPENDS) - Ensure build dependencies are installed.
+#   $(CHECK_ENV) - Ensure the environment file exists.
+#   $(CHECK_RENDERED) - Ensure the rendered Compose file exists.
+#
+$(RECYCLARR_PREVIEW): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
+	@if [ -z "$(filter $(RECYCLARR_SERVICE),$(PROFILED_COMPOSE_SERVICES))" ]; then \
+		$(call print_line_inline,$(COLOR_ERROR),The selected deployment does not include $(RECYCLARR_SERVICE).); \
+		$(call print_detail_inline,$(COLOR_MUTED),Run: make $(SHIP) PRESET=$(PRESET) ADD_SERVICES=$(RECYCLARR_SERVICE)); \
+		exit 1; \
+	fi
+	$(call announce,Previewin' the Recyclarr synchronization plan. ♻️)
+	$(PLUNDARR_COMPOSE) pull "$(RECYCLARR_SERVICE)"
+	$(PLUNDARR_COMPOSE) run $(RECYCLARR_RUN_OPTIONS) "$(RECYCLARR_SERVICE)" sync --preview
+
+#
+# $(RECYCLARR_SYNC): Pulls and applies the profile-gated Recyclarr sync to the
+#                     configured Radarr and Sonarr instances.
+#
+# Dependencies:
+#   $(BUILD_DEPENDS) - Ensure build dependencies are installed.
+#   $(CHECK_ENV) - Ensure the environment file exists.
+#   $(CHECK_RENDERED) - Ensure the rendered Compose file exists.
+#
+$(RECYCLARR_SYNC): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
+	@if [ -z "$(filter $(RECYCLARR_SERVICE),$(PROFILED_COMPOSE_SERVICES))" ]; then \
+		$(call print_line_inline,$(COLOR_ERROR),The selected deployment does not include $(RECYCLARR_SERVICE).); \
+		$(call print_detail_inline,$(COLOR_MUTED),Run: make $(SHIP) PRESET=$(PRESET) ADD_SERVICES=$(RECYCLARR_SERVICE)); \
+		exit 1; \
+	fi
+	$(call announce_warning,Recyclarr will change the configured Radarr and Sonarr instances. ⚠️)
+	$(PLUNDARR_COMPOSE) pull "$(RECYCLARR_SERVICE)"
+	$(PLUNDARR_COMPOSE) run $(RECYCLARR_RUN_OPTIONS) "$(RECYCLARR_SERVICE)" sync
+
+#
 # $(DOWN): Stops containers and removes containers and networks.
 #
 # Dependencies:
@@ -885,6 +931,8 @@ $(HELP):
 	$(call help_line,$(UP),Start or recreate the selected stack.)
 	$(call help_line,$(WATCHTOWER_RUN_ONCE),Run one Watchtower update pass and exit.)
 	$(call help_line,$(KOMETA_OVERLAY_RESET),Run Kometa Overlay Reset once and exit.)
+	$(call help_line,$(RECYCLARR_PREVIEW),Preview Recyclarr changes without applying them.)
+	$(call help_line,$(RECYCLARR_SYNC),Apply the configured Recyclarr synchronization.)
 	$(call help_line,$(DOWN),Stop the selected stack while preserving volumes and images.)
 	$(call help_line,$(PS),Show a compact container status table.)
 	$(call help_line,$(LOGS),Follow selected-stack logs.)

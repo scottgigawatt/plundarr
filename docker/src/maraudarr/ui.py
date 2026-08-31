@@ -370,11 +370,14 @@ class UI:
             steps.append("Check Kometa, Plex, and config paths in .env.")
         if "calibre-web-automated" in selected:
             steps.append("Check CWA config, ingest, and library paths in .env.")
+        if "recyclarr" in selected:
+            steps.append("Set Recyclarr API keys and preview the sync before applying it.")
         if selected.intersection(
             {
                 "bazarr",
                 "duplicati",
                 "jellyfin",
+                "lidarr",
                 "nzbget",
                 "plex",
                 "qbittorrent",

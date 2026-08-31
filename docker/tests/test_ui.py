@@ -61,6 +61,28 @@ class MaraudarrUiTests(unittest.TestCase):
         self.assertIn("⬇️ Download clients", listing)
         self.assertIn("🎭 Plex utilities", listing)
         self.assertIn("qBittorrent", listing)
+        self.assertIn("Lidarr", listing)
+        self.assertIn("Recyclarr", listing)
+
+    def test_recyclarr_success_requires_a_preview_before_sync(self) -> None:
+        """Call out Recyclarr's API credentials and preview-first workflow."""
+
+        output = io.StringIO()
+        plan = self.catalog.resolve("plundarr", add={"lidarr", "recyclarr"})
+        with redirect_stdout(output):
+            UI(plain=True).success(
+                plan,
+                "dist/plundarr/docker-compose.yml",
+                "dist/plundarr/.env",
+                "dist/plundarr/config",
+            )
+
+        listing = output.getvalue()
+        self.assertIn(
+            "Set Recyclarr API keys and preview the sync before applying it.",
+            listing,
+        )
+        self.assertIn("Check download, media, and config paths in .env.", listing)
 
     def test_duplex_success_reminds_users_to_review_external_paths(self) -> None:
         """Call out the host-specific Kometa and Plex paths before launch."""

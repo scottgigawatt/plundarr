@@ -143,6 +143,25 @@ url = "https://github.com/morpheus65535/bazarr"
 order = 340
 requires = ["radarr", "sonarr"]
 
+# Lidarr manages music discovery, downloads, and library organization.
+[services.lidarr]
+title = "Lidarr"
+description = "Finds, tracks, and organizes music."
+category = "Media automation"
+url = "https://github.com/Lidarr/Lidarr"
+order = 350
+requires = ["prowlarr"]
+recommended = ["qbittorrent"]
+
+# Recyclarr applies version-controlled quality guidance to selected arr services.
+[services.recyclarr]
+title = "Recyclarr"
+description = "Syncs curated quality profiles and custom formats to Radarr and Sonarr."
+category = "Media automation"
+url = "https://recyclarr.dev"
+order = 360
+requires = ["radarr", "sonarr"]
+
 #
 # Media request, playback, and dashboard services.
 #

@@ -1,0 +1,35 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# compose.yml: Maraudarr profile-gated service chart for Recyclarr.
+#
+
+services:
+  #
+  # Define the 'recyclarr' synchronization tool without joining normal startup.
+  #
+  recyclarr:
+    # Docker image and container information
+    <<: *rootless-container                                             # Pull in the rootless container config
+    image: ghcr.io/recyclarr/recyclarr:${RECYCLARR_TAG}                 # Run the supported major release channel
+    container_name: ${COMPOSE_PROJECT_NAME}-recyclarr-${RECYCLARR_TAG}  # Namespace the container name by project and tag
+    hostname: recyclarr                                                 # Set the container hostname
+
+    # Keep this explicit synchronization utility outside ordinary Compose startup
+    profiles:
+      - tools
+    restart: "no"
+
+    # Define values consumed by the generated Recyclarr configuration
+    environment:
+      <<: *default-environment
+      RECYCLARR_RADARR_URL: ${RECYCLARR_RADARR_URL}
+      RECYCLARR_RADARR_API_KEY: ${RECYCLARR_RADARR_API_KEY}
+      RECYCLARR_SONARR_URL: ${RECYCLARR_SONARR_URL}
+      RECYCLARR_SONARR_API_KEY: ${RECYCLARR_SONARR_API_KEY}
+
+    # Mount persistent, operator-managed synchronization configuration
+    volumes:
+      - ${RECYCLARR_CONFIG_PATH}:/config:rw  # Recyclarr configuration and cache
