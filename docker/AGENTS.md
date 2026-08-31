@@ -57,7 +57,7 @@ Use four-space indentation, type hints, small focused functions, and standard li
 
 Separate a standalone explanatory comment from the preceding statement with a blank line. Prefer one concise comment line over hard-wrapping one sentence into multiple comment lines.
 
-Keep imports rooted at `maraudarr`. Tests must exercise generated comments, environment preservation, selected config folders, Plex and Jellyfin choices, and real Docker Compose validation in the matrix script.
+Keep imports rooted at `maraudarr`. Tests must exercise generated comments, environment preservation, selected config folders, Plex, Jellyfin, and Calibre-Web Automated choices, and real Docker Compose validation in the matrix script.
 
 ## Image Rules
 

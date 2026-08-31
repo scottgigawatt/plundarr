@@ -16,6 +16,7 @@ Maraudarr copies this README into every generated `dist/<preset>/config/` direct
 | 🛡️ `gluetun`           | PIA WireGuard tunnel and port-forwarding quartermaster   |
 | 🗺️ `homepage`          | Provides a dashboard for selected services               |
 | 🎞️ `jellyfin`          | Open media server for movies, television, and anime      |
+| 📚 `calibre-web-automated` | Serves and automatically ingests a Calibre ebook library |
 | 🎬 `plex`              | Containerized Plex Media Server option                   |
 | 📜 `seerr`             | Manages media requests                                   |
 | 🕵️‍♂️ `privateerr`        | PIA WireGuard and port-forwarding mapmaker for Gluetun   |

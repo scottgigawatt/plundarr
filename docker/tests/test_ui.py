@@ -41,6 +41,7 @@ class MaraudarrUiTests(unittest.TestCase):
         listing = output.getvalue()
         self.assertIn("🗺️ Preset voyages", listing)
         self.assertIn("🏴‍☠️ Plundarr", listing)
+        self.assertIn("📚 Calibre-Web Automated", listing)
         self.assertIn("🎭 Duplex", listing)
         self.assertIn("🔭 Watchtower", listing)
         self.assertIn("Included by default:", listing)
@@ -77,6 +78,23 @@ class MaraudarrUiTests(unittest.TestCase):
         listing = output.getvalue()
         self.assertIn("Check Kometa, Plex, and config paths in .env.", listing)
         self.assertIn("make up PRESET=duplex", listing)
+
+    def test_calibre_web_automated_success_calls_out_storage_paths(self) -> None:
+        """Remind standalone CWA users to review its persistent mounts."""
+
+        output = io.StringIO()
+        plan = self.catalog.resolve("calibre-web-automated")
+        with redirect_stdout(output):
+            UI(plain=True).success(
+                plan,
+                "dist/calibre-web-automated/docker-compose.yml",
+                "dist/calibre-web-automated/.env",
+                "dist/calibre-web-automated/config",
+            )
+
+        listing = output.getvalue()
+        self.assertIn("Check CWA config, ingest, and library paths in .env.", listing)
+        self.assertIn("make up PRESET=calibre-web-automated", listing)
 
     @unittest.skipUnless(RICH_AVAILABLE, "Rich is not installed")
     def test_styled_tables_keep_emoji_outside_grid_cells(self) -> None:

@@ -17,7 +17,7 @@ Keep the names distinct:
 - **Plundarr** is the generated stack in `dist/<preset>/docker-compose.yml`, `.env`, and `config/`.
 - **Maraudarr** is the short-lived Docker Compose project generator image and Python application under `docker/`.
 
-The current catalog includes `plundarr`, `boudoirr`, `jellyfin`, `plex`, `duplex`, `watchtower`, and `custom` presets. Synology compatibility means DSM 7.4 with Container Manager; public documentation should not pin a DSM build number.
+The current catalog includes `plundarr`, `boudoirr`, `jellyfin`, `plex`, `calibre-web-automated`, `duplex`, `watchtower`, and `custom` presets. Synology compatibility means DSM 7.4 with Container Manager; public documentation should not pin a DSM build number.
 
 ## Repository Layout
 

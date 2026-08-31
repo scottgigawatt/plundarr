@@ -1,0 +1,3 @@
+# Keep the generated ingest directory without tracking transient books.
+*
+!.gitignore

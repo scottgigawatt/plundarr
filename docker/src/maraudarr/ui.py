@@ -52,6 +52,7 @@ PRESET_ICONS = {
     "boudoirr": "🔞",
     "jellyfin": "🎞️",
     "plex": "📺",
+    "calibre-web-automated": "📚",
     "duplex": "🎭",
     "watchtower": "🔭",
     "custom": "🧩",
@@ -367,6 +368,8 @@ class UI:
             }
         ):
             steps.append("Check Kometa, Plex, and config paths in .env.")
+        if "calibre-web-automated" in selected:
+            steps.append("Check CWA config, ingest, and library paths in .env.")
         if selected.intersection(
             {
                 "bazarr",

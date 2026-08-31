@@ -170,6 +170,14 @@ category = "Media servers"
 url = "https://jellyfin.org"
 order = 420
 
+# Calibre-Web Automated manages one Calibre ebook library and ingest directory.
+[services.calibre-web-automated]
+title = "Calibre-Web Automated"
+description = "Manages, serves, and automatically ingests an ebook library."
+category = "Media servers"
+url = "https://github.com/crocodilestick/Calibre-Web-Automated"
+order = 425
+
 # Kometa manages Plex collections, metadata, and overlays from an external config tree.
 [services.kometa]
 title = "Kometa"
@@ -276,14 +284,14 @@ requires = ["kometa"]
 #
 # Plundarr is the default general-purpose media automation voyage.
 #
-# This preset combines automation, requests, monitoring, backup, and qBittorrent.
+# This preset combines automation, requests, ebooks, monitoring, backup, and qBittorrent.
 [presets.plundarr]
 title = "Plundarr"
-description = "Movies, television, subtitles, requests, monitoring, and a VPN-protected torrent client."
+description = "Movies, television, subtitles, ebooks, requests, monitoring, and a VPN-protected torrent client."
 project_name = "plundarr"
-network_subnet = "172.28.0.0/16"
-network_ip_range = "172.28.5.0/24"
-network_gateway = "172.28.5.254"
+network_subnet = "172.20.0.0/16"
+network_ip_range = "172.20.5.0/24"
+network_gateway = "172.20.5.254"
 media_root = "/volume1/plex"
 media_libraries = ["movies", "tv", "anime"]
 host_port_offset = 0
@@ -310,7 +318,7 @@ core = [
   "duplicati",
   "homepage",
 ]
-defaults = ["qbittorrent", "cleanuparr", "watchtower"]
+defaults = ["qbittorrent", "calibre-web-automated", "cleanuparr", "watchtower"]
 
 #
 # Boudoirr reuses the same catalog for an adult-media-focused stack.
@@ -320,9 +328,9 @@ defaults = ["qbittorrent", "cleanuparr", "watchtower"]
 title = "Boudoirr"
 description = "Whisparr-focused automation with one VPN-protected torrent client by default."
 project_name = "boudoirr"
-network_subnet = "172.29.0.0/16"
-network_ip_range = "172.29.5.0/24"
-network_gateway = "172.29.5.254"
+network_subnet = "172.21.0.0/16"
+network_ip_range = "172.21.5.0/24"
+network_gateway = "172.21.5.254"
 media_root = "/volume1/jellyfin"
 media_libraries = ["movies", "scenes"]
 host_port_offset = 10000
@@ -347,9 +355,9 @@ defaults = ["qbittorrent", "cleanuparr", "watchtower"]
 title = "Jellyfin"
 description = "A standalone Jellyfin server with movies and television beneath one media root."
 project_name = "jellyfin"
-network_subnet = "172.30.0.0/16"
-network_ip_range = "172.30.5.0/24"
-network_gateway = "172.30.5.254"
+network_subnet = "172.22.0.0/16"
+network_ip_range = "172.22.5.0/24"
+network_gateway = "172.22.5.254"
 media_root = "/volume1/jellyfin"
 media_libraries = ["movies", "tv"]
 host_port_offset = 20000
@@ -371,9 +379,9 @@ defaults = []
 title = "Plex"
 description = "A standalone Plex server with movie and television libraries."
 project_name = "plex"
-network_subnet = "172.31.0.0/16"
-network_ip_range = "172.31.5.0/24"
-network_gateway = "172.31.5.254"
+network_subnet = "172.23.0.0/16"
+network_ip_range = "172.23.5.0/24"
+network_gateway = "172.23.5.254"
 media_root = "/volume1/plex"
 media_libraries = ["movies", "tv"]
 host_port_offset = 0
@@ -388,6 +396,31 @@ core = ["plex"]
 defaults = []
 
 #
+# Calibre-Web Automated keeps the standalone ebook deployment focused.
+#
+# This preset renders CWA with separate config, ingest, and library mounts.
+[presets.calibre-web-automated]
+title = "Calibre-Web Automated"
+description = "A standalone Calibre-Web Automated ebook library and ingest service."
+project_name = "calibre-web-automated"
+network_subnet = "172.24.0.0/16"
+network_ip_range = "172.24.5.0/24"
+network_gateway = "172.24.5.254"
+media_root = "/volume1/books/calibre"
+media_libraries = []
+host_port_offset = 40000
+compose_summary = [
+  "docker-compose.yml: Docker Compose configuration for running a standalone",
+  "                    Calibre-Web Automated ebook library on Plundarr's",
+  "                    shared foundation.",
+  "",
+  "CWA receives separate application, destructive ingest, and Calibre library",
+  "mounts while image updates remain under operator control.",
+]
+core = ["calibre-web-automated"]
+defaults = []
+
+#
 # Duplex collects Plex maintenance, monitoring, notifications, and recovery.
 #
 # PATTRMM and the operational companions remain removable preset defaults.
@@ -395,9 +428,9 @@ defaults = []
 title = "Duplex"
 description = "Plex metadata, artwork, monitoring, notifications, and recovery tools."
 project_name = "duplex"
-network_subnet = "172.26.0.0/16"
-network_ip_range = "172.26.5.0/24"
-network_gateway = "172.26.5.254"
+network_subnet = "172.25.0.0/16"
+network_ip_range = "172.25.5.0/24"
+network_gateway = "172.25.5.254"
 media_root = "/volume1/plex"
 media_libraries = []
 host_port_offset = 0
@@ -420,9 +453,9 @@ defaults = ["pattrmm", "notifiarr", "overlay-reset"]
 title = "Watchtower"
 description = "A standalone updater for eligible containers on one Docker host."
 project_name = "watchtower"
-network_subnet = "172.25.0.0/16"
-network_ip_range = "172.25.5.0/24"
-network_gateway = "172.25.5.254"
+network_subnet = "172.27.0.0/16"
+network_ip_range = "172.27.5.0/24"
+network_gateway = "172.27.5.254"
 media_root = "/volume1/plex"
 media_libraries = []
 host_port_offset = 0
@@ -444,9 +477,9 @@ defaults = []
 title = "Custom"
 description = "Begin with an empty cargo hold and select every service yourself."
 project_name = "custom"
-network_subnet = "172.27.0.0/16"
-network_ip_range = "172.27.5.0/24"
-network_gateway = "172.27.5.254"
+network_subnet = "172.28.0.0/16"
+network_ip_range = "172.28.5.0/24"
+network_gateway = "172.28.5.254"
 media_root = "/volume1/plex"
 media_libraries = ["movies", "tv"]
 host_port_offset = 30000
