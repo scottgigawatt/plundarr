@@ -1,8 +1,8 @@
-# Plundarr Script Hold 🏴‍☠️
+# Plundarr script hold 🏴‍☠️
 
 These documented AWK programs and host helpers support generated Compose projects, Linux hosts, and Synology DiskStations. Pick the smallest tool for the job and review its header before running it with elevated privileges.
 
-## Script Chart 🧭
+## Find a script 🧭
 
 | Hold       | Script                                                                                                                                         | Purpose                                                            |
 | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
@@ -24,7 +24,7 @@ These documented AWK programs and host helpers support generated Compose project
 > [!IMPORTANT]
 > Scripts under `scripts/synology/` run directly on a Synology NAS. They are maintained against DSM 7.4; review paths and privileges before using them on another DSM release or Linux host.
 
-## AWK Programs 🧮
+## AWK programs 🧮
 
 ### `awk/collect-dockerfile-base-images.awk`
 
@@ -42,7 +42,7 @@ Records resolved Docker Compose environment assignments, then prints only variab
 
 Removes comments, trailing whitespace, and empty lines from configuration output. `make print-config` and `make print-env` share this program so both raw views follow one filtering contract.
 
-## Compose Helpers 🐳
+## Compose helpers 🐳
 
 ### `compose/backup.sh`
 
@@ -54,7 +54,7 @@ Reads resolved Compose environment values from standard input and fails when a P
 
 ### `compose/nuke.sh`
 
-Validates one selected Compose model before deleting anything, captures its service images, runs project-scoped teardown with volumes, orphans, and service images, then removes explicitly supplied local image references and one named Buildx builder. Plundarr calls the same helper separately for the generated project and the explicitly named `maraudarr` generator project.
+Validates one selected Compose model before deleting anything, captures its service images, runs project-scoped teardown with volumes, orphans, and service images, then removes explicitly supplied local image references and one named Buildx builder. Plundarr calls the same helper separately for the generated project and the explicitly named `maraudarr` Compose project that runs Maraudarr.
 
 Repeated `--dockerfile` and `--additional-image` arguments avoid shell command evaluation. Missing resources are harmless; unexpected Compose, Docker, or builder failures stop the helper. Repository files, `.env`, config, and backups remain Make's protected responsibility.
 
@@ -66,51 +66,43 @@ Resolves the selected Compose project and prints only its containers in a termin
 
 Waits for Docker, stops a Compose project while preserving named volumes, and starts the project again in detached mode.
 
-> [!TIP]
->
-> ```sh
-> sh /volume1/docker/plundarr/scripts/compose/restart.sh /volume1/docker/plundarr/dist/plundarr
-> ```
+```sh
+sh /volume1/docker/plundarr/scripts/compose/restart.sh /volume1/docker/plundarr/dist/plundarr
+```
 
-## Documentation Helpers 📚
+## Documentation helpers 📚
 
 ### `docs/prepare-python.sh`
 
 Validates the exact supported Python patch release, safely replaces an absent or incompatible documentation virtual environment, and writes the versioned stamp consumed by Make. `make docs` is the normal entry point and passes every path through explicit long options.
 
-## Linux Helpers 🐧
+## Linux helpers 🐧
 
 ### `linux/set-inotify-limits.sh`
 
 Raises Linux inotify limits so Plex can monitor large media libraries without running out of watches.
 
-> [!TIP]
->
-> ```sh
-> sh /volume1/docker/plundarr/scripts/linux/set-inotify-limits.sh
-> ```
+```sh
+sh /volume1/docker/plundarr/scripts/linux/set-inotify-limits.sh
+```
 
-## Synology Helpers ⚓
+## Synology helpers ⚓
 
 ### `synology/tun.sh`
 
 Ensures `/dev/net/tun` exists for Gluetun and other VPN containers.
 
-> [!TIP]
->
-> ```sh
-> sh /volume1/docker/plundarr/scripts/synology/tun.sh
-> ```
+```sh
+sh /volume1/docker/plundarr/scripts/synology/tun.sh
+```
 
 ### `synology/entware.sh`
 
 Mounts and starts Entware at boot, adds its profile to `/etc/profile`, and updates the package list.
 
-> [!TIP]
->
-> ```sh
-> sh /volume1/docker/plundarr/scripts/synology/entware.sh
-> ```
+```sh
+sh /volume1/docker/plundarr/scripts/synology/entware.sh
+```
 
 ### `synology/docker-socket.sh`
 
@@ -118,8 +110,6 @@ Waits for Container Manager to create `/var/run/docker.sock`, then grants the `d
 
 Create a `docker` group in **DSM → Control Panel → User & Group → Group**, add only trusted Docker users, and run the boot task as `root`:
 
-> [!TIP]
->
-> ```sh
-> sh /volume1/docker/plundarr/scripts/synology/docker-socket.sh
-> ```
+```sh
+sh /volume1/docker/plundarr/scripts/synology/docker-socket.sh
+```

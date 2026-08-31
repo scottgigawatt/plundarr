@@ -1,4 +1,4 @@
-# 🎞️ Jellyfin Configuration
+# Jellyfin configuration 🎞️
 
 Jellyfin stores its database, metadata, plugins, and application logs beneath `config/`; its disposable transcode and image cache lives beneath `cache/`. Both directories are created here and remain configurable in the generated preset's `.env` file.
 

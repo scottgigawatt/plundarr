@@ -1,17 +1,8 @@
-# 🏴‍☠️ Duplicati Configuration 🔄
+# Duplicati configuration 🔄
 
-Ahoy, matey! This be the stash of configuration files fer the **Duplicati** service. These here files will be mounted into the Duplicati container as the service config directory, protectin' yer precious data like a chest o' treasure.
+Duplicati stores backup definitions, schedules, logs, and its local database in this directory. The backup source and destination mounts remain separate and are selected through the generated preset's `.env` file.
 
-## Purpose 🌊
+Before first launch, set `DUPLICATI_SETTINGS_ENCRYPTION_KEY` and `DUPLICATI_WEBSERVICE_PASSWORD` in `.env`. A missing encryption key prevents a new configuration from initializing, while losing an existing key can make stored settings unreadable.
 
-Duplicati be yer steadfast mate, keepin' backups of all yer important data, ensuring it be safe from any storm or scallywag.
-
-## First Launch Key 🗝️
-
-The LinuxServer Duplicati image requires `DUPLICATI_SETTINGS_ENCRYPTION_KEY` for a new config directory. If that key be missing, Duplicati stops during init and the web UI never opens on port `8200`.
-
-Set `DUPLICATI_SETTINGS_ENCRYPTION_KEY` and `DUPLICATI_WEBSERVICE_PASSWORD` in the generated preset's `.env` before launchin' a fresh stack.
-
-If ye need more details, inspect yer generated `dist/<preset>/docker-compose.yml` and `.env` files.
-
-Arrr, may yer backups be as safe and sound as gold doubloons in a pirate's chest! 💰🏴‍☠️
+> [!IMPORTANT]
+> Preserve the encryption key with the backup metadata, but never commit it to the repository.

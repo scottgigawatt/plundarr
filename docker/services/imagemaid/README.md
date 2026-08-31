@@ -1,4 +1,4 @@
-# ImageMaid Service Chart 🧹
+# ImageMaid service chart 🧹
 
 Runs the official ImageMaid companion for Plex artwork reporting and cleanup. It keeps its own state under `IMAGEMAID_CONFIG_PATH` and receives the Plex application-data directory at `/plex`.
 

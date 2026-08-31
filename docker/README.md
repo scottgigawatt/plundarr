@@ -15,7 +15,7 @@
 
 # Maraudarr ⚒️
 
-Maraudarr is the short-lived generator image inside the Plundarr repository. It loads a preset, resolves required services, preserves the handwritten Compose comments, and writes a deployable Plundarr project into the mounted repository:
+Maraudarr is the short-lived Docker Compose project generator image inside the Plundarr repository. It loads a preset, resolves required services, preserves the handwritten Compose comments, and writes a deployable Plundarr project into the mounted repository:
 
 ```text
 dist/<preset>/
@@ -28,11 +28,11 @@ dist/<preset>/
 > [!IMPORTANT]
 > **Plundarr** is the generated media stack. **Maraudarr** is only the tool that builds it. The image does not run the selected media services.
 
-## Take the Quick Passage 🧭
+## Take the quick passage 🧭
 
 Run these commands from the repository root. Make keeps the Docker wiring out of sight and prints only the useful status and Maraudarr output.
 
-| Command | What It Does |
+| Command | What it does |
 | --- | --- |
 | `make ship` | Prepares Maraudarr and generates the default Plundarr stack |
 | `make configure` | Opens the interactive preset and service picker |
@@ -47,40 +47,34 @@ Run these commands from the repository root. Make keeps the Docker wiring out of
 | `make test` | Runs unit, helper, policy, and real Compose matrix tests |
 | `make build-platforms` | Verifies all published CPU architectures |
 
-Maraudarr uses a matching local image first. When none exists, Make tries GHCR and automatically builds from this checkout if the published image is not yet available. No pull-skip variable be needed.
+Maraudarr uses a matching local image first. When none exists, Make tries GHCR and automatically builds from this checkout if the published image is not yet available. No pull-skip variable is needed.
 
 Refresh or rebuild Maraudarr explicitly when ye want a different image:
 
-> [!TIP]
->
-> ```sh
-> make pull-image
-> make build
-> ```
+```sh
+make pull-image
+make build
+```
 
 Add optional cargo without opening the interactive prompts:
 
-> [!TIP]
->
-> ```sh
-> make ship PRESET=boudoirr ADD_SERVICES=jellyfin
-> make ship PRESET=jellyfin
-> make ship PRESET=plex
-> make ship PRESET=duplex
-> make ship PRESET=watchtower
-> make ship ADD_SERVICES=sonarr-anime
-> ```
+```sh
+make ship PRESET=boudoirr ADD_SERVICES=jellyfin
+make ship PRESET=jellyfin
+make ship PRESET=plex
+make ship PRESET=duplex
+make ship PRESET=watchtower
+make ship ADD_SERVICES=sonarr-anime
+```
 
 `ADD_SERVICES` and `REMOVE_SERVICES` accept comma-separated service IDs. Plundarr and Boudoirr preselect qBittorrent as their only downloader and include Watchtower as a removable default. SABnzbd and NZBGet remain ordinary opt-in choices:
 
 The first command selects Usenet only. The second keeps torrents, adds Usenet, and opts into update checks:
 
-> [!TIP]
->
-> ```sh
-> make ship REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=sabnzbd
-> make ship PRESET=boudoirr ADD_SERVICES=sabnzbd
-> ```
+```sh
+make ship REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=sabnzbd
+make ship PRESET=boudoirr ADD_SERVICES=sabnzbd
+```
 
 The default Plundarr voyage includes one Sonarr instance. `sonarr-anime` is an opt-in second instance with its own configuration and library path.
 
@@ -88,7 +82,7 @@ The `watchtower` preset runs the maintained `nickfedor/watchtower:latest` image 
 
 The `duplex` preset uses Kometa, ImageMaid, PATTRMM, Tautulli, Notifiarr, and Overlay Reset. Kometa's config is an external checkout selected with `KOMETA_CONFIG_PATH`; Maraudarr does not create a submodule or manage that repository. PATTRMM, Notifiarr, and Overlay Reset are removable defaults, while Watchtower remains available as an explicit addition. The Kometa Overlay Reset service is profile-gated and defaults to a dry run when invoked with `make kometa-overlay-reset PRESET=duplex`.
 
-## What Be in This Image? 📦
+## Explore the image contents 📦
 
 The `docker/` directory is the complete build context. Nothing outside it is copied into Maraudarr.
 
@@ -103,7 +97,7 @@ The `docker/` directory is the complete build context. Nothing outside it is cop
 
 Folder-level README files explain each maintenance boundary. The scoped [`AGENTS.md`](AGENTS.md) records the same rules for coding agents.
 
-## Keep the Powder Dry 🔐
+## Understand runtime guardrails 🔐
 
 The published image and Make targets use a deliberately narrow runtime:
 
@@ -119,7 +113,7 @@ The published image and Make targets use a deliberately narrow runtime:
 
 Maraudarr validates every generated pair with its bundled standalone `docker-compose config --quiet` command before replacing a preset's output. The explicit `make delete-config PRESET=<preset>` target is the only normal path that removes a complete config hold.
 
-## Registry Charts 🗂️
+## Choose a registry tag 🗂️
 
 Release workflows publish the same multi-architecture manifest to:
 
@@ -142,26 +136,21 @@ Published platforms are `linux/amd64`, `linux/arm64`, and `linux/arm/v7`. Builds
 > [!NOTE]
 > GHCR may show `unknown/unknown` attestation entries beside runnable platforms. Those are provenance or SBOM manifests, not broken container images.
 
-## Maintain the Riggin' 🛠️
+## Maintain Maraudarr 🛠️
 
 Run host-side tests while editing Python or service charts:
 
-> [!TIP]
->
-> ```sh
-> make test-unit
-> ```
+```sh
+make test-unit
+```
 
 Then fire the complete checks:
 
-> [!IMPORTANT]
->
-> ```sh
-> make test
-> make build
-> make build-platforms
-> pre-commit run --all-files
-> ```
+```sh
+make test
+make build
+make build-platforms
+pre-commit run --all-files
+```
 
-> [!TIP]
-> New services belong under `services/<name>/`. Do not revive aggregate "extras" or "addons" charts; one service directory is one maintainable unit.
+New services belong under `services/<name>/`. Do not revive aggregate "extras" or "addons" charts; one service directory is one maintainable unit.

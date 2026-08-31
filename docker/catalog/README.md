@@ -1,4 +1,4 @@
-# Maraudarr Catalog 🗺️
+# Maraudarr catalog 🗺️
 
 This hold contains the metadata Maraudarr uses to order services, resolve dependencies, describe interactive choices, and define named presets.
 

@@ -1,12 +1,12 @@
-# 📺 Sonarr Anime Configuration 🏴‍☠️
+# Sonarr Anime configuration 📺
 
 Avast, matey! This hold stores the configuration scrolls fer the optional **Sonarr Anime** service. It runs as a second Sonarr instance with its own database, settings, port, and anime TV root.
 
-## Purpose 🌊
+## Understand the service 🌊
 
 Sonarr Anime keeps animated TV cargo separate from the main Sonarr library so quality profiles, release profiles, naming rules, and root folders can sail their own course.
 
-## Downloads and Anime Imports 📦
+## Configure downloads and anime imports 📦
 
 Sonarr Anime sees download clients at `/downloads` and imports finished anime into `/tv`. In Plundarr, `/tv` maps to `HOST_ANIME_TV_PATH` for this service only.
 
@@ -24,12 +24,10 @@ SABnzbd category folder/path: anime-tv
 
 For Usenet, point SABnzbd completed jobs at `/downloads/usenet` and temporary jobs at `/downloads/usenet/incomplete`; the `sonarr-anime` category then lands episode jobs in `/downloads/usenet/anime-tv`.
 
-Render the service into yer final chart:
+Render the service into the final chart:
 
-> [!TIP]
->
-> ```sh
-> make ship ADD_SERVICES=sonarr-anime
-> ```
+```sh
+make ship ADD_SERVICES=sonarr-anime
+```
 
 For more details, set yer sights on the generated `dist/<preset>/docker-compose.yml` and `.env` files.

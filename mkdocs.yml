@@ -34,28 +34,30 @@ edit_uri: edit/main/docs/
 nav:
   - Chart Room: index.md
   - Maraudarr:
-      - Developer Overview: development/maraudarr/index.md
+      - Developer overview: development/maraudarr/index.md
       - Architecture: development/maraudarr/architecture.md
-      - Add a Service: development/maraudarr/adding-a-service.md
-      - Documentation Style: development/maraudarr/documentation.md
+      - Add a service: development/maraudarr/adding-a-service.md
+      - Python documentation: development/maraudarr/documentation.md
       - Testing: development/maraudarr/testing.md
   - Python Reference:
-      - Reference Map: development/maraudarr/reference/index.md
+      - Reference map: development/maraudarr/reference/index.md
       - Catalog: development/maraudarr/reference/catalog.md
-      - Command Line: development/maraudarr/reference/cli.md
+      - Command line: development/maraudarr/reference/cli.md
       - Models: development/maraudarr/reference/models.md
       - Rendering: development/maraudarr/reference/render.md
-      - Text Helpers: development/maraudarr/reference/text.md
+      - Text helpers: development/maraudarr/reference/text.md
       - Terminal UI: development/maraudarr/reference/ui.md
   - Project Guides:
-      - Guide Map: project-guides/index.md
-      - Synology Setup: SETUP.md
-      - Testing Hold: project-guides/testing.md
-      - Script Hold: project-guides/scripts.md
+      - Guide map: project-guides/index.md
+      - Synology setup: setup.md
+      - Testing: project-guides/testing.md
+      - Host scripts: project-guides/scripts.md
+      - Documentation style: documentation-style.md
       - Contributing: CONTRIBUTING.md
       - Security: SECURITY.md
+      - Support: SUPPORT.md
       - Code of Conduct: CODE_OF_CONDUCT.md
-      - Registry README: DOCKERHUB_README.md
+      - Docker Hub description: docker-hub-description.md
 
 #
 # Configure Material's visual identity and navigation behavior. Project-owned

@@ -1,12 +1,12 @@
-# 📺 Sonarr Configuration 🏴‍☠️
+# Sonarr configuration 📺
 
 Avast, me hearties! This here be the treasure chest where ye store the configuration scrolls fer the **Sonarr** service. These scrolls will be hoisted into the Sonarr container as the service config directory, keepin' yer TV show library in shipshape order.
 
-## Purpose 🌊
+## Understand the service 🌊
 
 Sonarr be yer trusty mate, helpin' ye manage and organize yer TV show library, makin' sure ye never miss an episode of yer favorite series.
 
-## Downloads and TV Imports 📦
+## Configure downloads and television imports 📦
 
 Sonarr sees qBittorrent and SABnzbd downloads at `/downloads` and yer TV library at `/tv`. In Plundarr, `/downloads` maps to `HOST_DOWNLOADS_PATH`, while qBittorrent writes under `/downloads/torrents` and SABnzbd writes under `/downloads/usenet`.
 

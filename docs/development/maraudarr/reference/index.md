@@ -2,7 +2,7 @@
 icon: material/language-python
 ---
 
-# Python Reference Map 🐍
+# Python reference map 🐍
 
 These pages are generated from Maraudarr's public Python docstrings and type annotations during every strict documentation build.
 

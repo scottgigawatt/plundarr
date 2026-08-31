@@ -1,4 +1,4 @@
-# 🔞 Whisparr Configuration
+# Whisparr configuration 🔞
 
 Whisparr stores its database and application settings here. Its media library and shared download tree are configured separately in the generated preset's `.env` file.
 

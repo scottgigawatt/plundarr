@@ -1,8 +1,8 @@
-# Security Policy 🛡️🏴‍☠️
+# Security policy 🛡️🏴‍☠️
 
 Ahoy, security-minded sailor. If ye spot a cursed leak, a leaky hull, or a suspicious barnacle clingin' to Plundarr, this be the proper chart for reportin' it.
 
-## Supported Versions ⚓
+## Supported versions ⚓
 
 Plundarr sails mostly by the `main` branch. Since this project be a small vessel, security fixes target the newest chart instead of older treasure maps.
 
@@ -15,7 +15,7 @@ Plundarr sails mostly by the `main` branch. Since this project be a small vessel
 > [!IMPORTANT]
 > 🧭 Plundarr consumes the published Privateerr image for PIA WireGuard config and port-forwarding metadata. Privateerr uses upstream PIA manual connection scripts, and issues in those scripts should also be reported to the PIA project.
 
-## Reporting a Vulnerability 🦜
+## Report a vulnerability 🦜
 
 Please do not open a public GitHub issue for secrets, credential leaks, auth bypasses, or anything that could help another scallywag attack a user.
 
@@ -25,11 +25,11 @@ Report vulnerabilities using GitHub's private vulnerability reporting feature:
 2. Choose **Report a vulnerability**.
 3. Include clear steps to reproduce, affected files, logs, image tags, and any relevant Docker Compose settings.
 
-Ye can also send a message through the [🔥HADES🔥](https://discord.gg/BpEGzWwGYf) Discord server if ye need to hail the captain quickly.
+Do not send vulnerability details through Discord, discussions, issues, or pull requests. Those routes are for non-sensitive support and public collaboration.
 
-If private vulnerability reporting is unavailable, open a GitHub issue with only a brief non-sensitive note asking for a secure reporting channel, or use Discord to ask where to send details. Keep the dangerous details off the public deck.
+If private vulnerability reporting is unavailable, open a GitHub issue containing only a brief, non-sensitive request for a private reporting channel. Do not describe the vulnerability publicly.
 
-## What to Include 📜
+## Include useful evidence 📜
 
 Helpful reports include:
 
@@ -42,7 +42,7 @@ Helpful reports include:
 > [!WARNING]
 > 💣 Never include real usernames, passwords, WireGuard private keys, generated `wg0.conf` files, forwarded ports, or live `privateerr.env` metadata in a public report.
 
-## Response Expectations 🕰️
+## Understand response expectations 🕰️
 
 This be a small maintainer ship, not a giant navy. I will do my best to:
 
@@ -53,8 +53,10 @@ This be a small maintainer ship, not a giant navy. I will do my best to:
 
 If a report is declined, I will try to explain why without leakin' dangerous details into open waters.
 
-## Stack Security 🔎
+## Understand stack security 🔎
 
-Plundarr pulls published container images for the stack and keeps configuration in service-specific directories. Pull fresh images before long voyages so base image fixes can reach yer ship.
+Plundarr pulls published container images for the stack and keeps configuration in service-specific directories. Pull updated stable images regularly so accepted security fixes reach the deployment.
+
+Use the [support guide](SUPPORT.md) for non-sensitive setup questions and reproducible bugs.
 
 Fair winds, sharp eyes, and may yer secrets stay below deck. ☠️

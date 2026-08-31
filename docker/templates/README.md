@@ -1,4 +1,4 @@
-# Shared Chart Timber 🪵
+# Shared chart timber 🪵
 
 These files contain the common pieces wrapped around every generated Plundarr stack:
 

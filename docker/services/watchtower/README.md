@@ -1,4 +1,4 @@
-# Watchtower Service Chart 🔭
+# Watchtower service chart 🔭
 
 Runs the maintained `nickfedor/watchtower:latest` image as either a persistent updater or a one-shot update pass. The floating `latest` tag is intentional.
 

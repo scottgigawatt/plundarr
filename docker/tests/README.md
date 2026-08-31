@@ -6,7 +6,7 @@
   README.md: Describe Maraudarr's unit, integration, and fuzz testing layout.
   -->
 
-# Maraudarr Test Hold 🧪
+# Maraudarr test hold 🧪
 
 Unit tests here cover catalog resolution, comment-preserving rendering, environment-value preservation, generated secrets, Homepage cards, and config directory generation.
 

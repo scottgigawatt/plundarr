@@ -1,3 +1,3 @@
-# Command-Line API
+# Command-line API
 
 ::: maraudarr.cli

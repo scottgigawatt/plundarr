@@ -1,8 +1,8 @@
-# Maraudarr Architecture 🗺️
+# Maraudarr architecture 🗺️
 
 Maraudarr separates selection, representation, rendering, validation, and writing so each boundary can be tested without launching the generated stack.
 
-## Generation Flow
+## Follow the generation flow
 
 This is the path of one successful Maraudarr generation run, from the user's service choices to safely published Plundarr files and preserved application configuration. It describes project generation, not container startup.
 
@@ -27,11 +27,11 @@ flowchart TB
     Publish -->|"then apply safe seeds"| Config
 ```
 
-## 1. Parse Intent
+## 1. Parse intent
 
 `maraudarr.cli` accepts an interactive `configure` voyage or a deterministic `build` command. The CLI normalizes service additions and removals, then writes normal user-facing output to `dist/<preset>/`; `--output` remains available for an exact automation directory. It does not decide dependency order or edit source templates.
 
-## 2. Load and Resolve the Catalog
+## 2. Load and resolve the catalog
 
 `Catalog` reads the TOML catalog and validates every referenced Compose, environment, dependency, recommendation, preset service, project identity, network default, media root, media library profile, and host-port offset. `Catalog.resolve` then:
 
@@ -46,7 +46,7 @@ Core services are restored in step 3 and cannot be removed. Default services are
 
 The result is an immutable `StackPlan`. Renderers consume that plan rather than repeating selection logic.
 
-## 3. Render Without Flattening Intent
+## 3. Render without flattening intent
 
 The source templates are intentionally readable, commented Compose and environment fragments. Maraudarr performs narrow text transformations so the generated deployment retains those comments and unresolved `${VARIABLES}`.
 
@@ -55,13 +55,13 @@ The source templates are intentionally readable, commented Compose and environme
 > [!IMPORTANT]
 > Replacing this layer with a generic YAML load-and-dump cycle would discard comments and weaken the generated file as an operator-facing artifact.
 
-## 4. Preserve Environment State
+## 4. Preserve environment state
 
-Existing assignments are indexed by variable name. Selected variables keep their user-managed lines, temporarily inactive service values move to a marked footer, and first-run secrets replace placeholders only when no existing value is available. `COMPOSE_PROJECT_NAME` remains generator-owned so preset identity cannot drift accidentally.
+Existing assignments are indexed by variable name. Selected variables keep their user-managed lines, temporarily inactive service values move to a marked footer, and first-run secrets replace placeholders only when no existing value is available. `COMPOSE_PROJECT_NAME` remains Maraudarr-owned so preset identity cannot drift accidentally.
 
 The default Plundarr preset therefore owns the `plundarr` Compose project. Maraudarr's local build/run chart is always invoked with the separate explicit project name `maraudarr`, preventing either lifecycle from removing the other.
 
-## 5. Stage, Validate, and Publish Output
+## 5. Stage, validate, and publish output
 
 Compose and environment files are written to a temporary directory inside the requested preset directory. Maraudarr asks Docker Compose to validate that staged pair, then atomically replaces the public files only after validation succeeds. A missing Docker executable is tolerated for dependency-free source testing; an installed Docker Compose that rejects the chart is a hard failure.
 
@@ -69,7 +69,7 @@ Config seeding follows a different safety rule: missing seeds are copied, projec
 
 `make nuke` removes project Docker resources and transient runtime residue but does not call `delete-config`; generated `.env`, backups, and application state remain intact.
 
-## Failure Boundaries
+## Understand failure boundaries
 
 | Error family    | Meaning                                                                     |
 | :-------------- | :-------------------------------------------------------------------------- |
