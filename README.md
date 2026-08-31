@@ -43,22 +43,24 @@
 
 # Plundarr 🏴‍☠️
 
-Plundarr generates a complete, single-file Docker Compose media stack from the services you select. Each deployment lands in `dist/<preset>/` with one commented `docker-compose.yml`, one editable `.env`, and the selected service configuration directories.
+Plundarr is a generated, ready-to-run Docker Compose media stack built from the services you select. Maraudarr—the Docker Compose project generator included in this repository—turns that selection into one complete deployment under `dist/<preset>/`, with a commented `docker-compose.yml`, an editable `.env`, and the selected service configuration directories.
 
-The generated project works with Docker Compose and Synology Container Manager. Routine configuration stays in the deployment's `.env`; you do not need to assemble Compose fragments by hand.
+Each generated Compose project works with Docker Compose and Synology Container Manager. Routine configuration stays in the deployment's `.env`; you do not need to assemble Compose fragments by hand.
 
 ## Understand Plundarr and Maraudarr
 
-The project has two deliberately separate parts:
+The repository has two deliberately separate parts:
 
-- **Maraudarr is the generator.** It resolves presets, services, and dependencies; preserves existing environment values and application state; validates the generated project; and exits.
-- **Plundarr is the generated deployment.** It remains on your host and runs the selected services from `dist/<preset>/`.
+- **Maraudarr is the Docker Compose project generator.** It resolves the selected preset, services, and dependencies; writes and validates the complete Compose project under `dist/<preset>/`; preserves existing environment values and application state; and exits.
+- **Plundarr is the generated Docker Compose deployment.** It remains on your host and runs the selected services from `dist/<preset>/` after Maraudarr has finished.
 
-Maraudarr images are published to [GitHub Container Registry](https://github.com/scottgigawatt/plundarr/pkgs/container/maraudarr) and [Docker Hub](https://hub.docker.com/r/scottgigawatt/maraudarr). `make ship` uses the published image when available and can build it from the checkout as a fallback.
+VPN-enabled presets use [Privateerr](https://github.com/scottgigawatt/privateerr) to generate PIA WireGuard configuration and [Gluetun](https://github.com/qdm12/gluetun) to establish and maintain the actual VPN tunnel.
+
+Maraudarr images are published to [GitHub Container Registry](https://github.com/scottgigawatt/plundarr/pkgs/container/maraudarr) and [Docker Hub](https://hub.docker.com/r/scottgigawatt/maraudarr). `make ship` runs that Compose project generator from the published image when available and can build it from the checkout as a fallback.
 
 ## Generate the default stack ⚡
 
-The default voyage creates the `plundarr` preset with qBittorrent as its downloader:
+Before you begin, install Git, Docker with Docker Compose, and Make. The default `plundarr` preset is VPN-enabled and requires an active PIA subscription; the standalone media-server and utility presets do not. This first voyage creates the movie and television automation preset with qBittorrent as its downloader:
 
 ```sh
 git clone https://github.com/scottgigawatt/plundarr.git
@@ -76,6 +78,8 @@ dist/
     ├── .env
     └── config/
 ```
+
+When generation finishes, Maraudarr exits. The files in `dist/plundarr/` are the Plundarr deployment you configure, start, stop, and maintain.
 
 > [!IMPORTANT]
 > Review `dist/plundarr/.env` before launch. Set real PIA credentials for VPN-enabled presets and confirm host storage paths, user and group IDs, timezone, network values, and published ports.
@@ -103,15 +107,15 @@ You can inspect or replay the [recording source](./docs/demo/record-maraudarr-de
 
 Use `make configure` for an interactive picker or pass `PRESET` to `make ship` for a repeatable build.
 
-| Preset | Primary purpose |
+| 🗺️ Preset | 🎯 Primary purpose |
 | --- | --- |
-| `plundarr` | Movies and television automation with a VPN-protected torrent downloader |
-| `boudoirr` | Whisparr automation with a VPN-protected torrent downloader |
-| `jellyfin` | Standalone Jellyfin media server |
-| `plex` | Standalone Plex Media Server |
-| `duplex` | Plex metadata, artwork, monitoring, and maintenance tools |
-| `watchtower` | Standalone container image updates |
-| `custom` | A stack assembled service by service |
+| 🏴‍☠️ `plundarr` | Movies and television automation with a VPN-protected torrent downloader |
+| 🔞 `boudoirr` | Whisparr automation with a VPN-protected torrent downloader |
+| 🎞️ `jellyfin` | Standalone Jellyfin media server |
+| 🎬 `plex` | Standalone Plex Media Server |
+| 🎭 `duplex` | Plex metadata, artwork, monitoring, and maintenance tools |
+| 🔭 `watchtower` | Standalone container image updates |
+| 🧩 `custom` | A stack assembled service by service |
 
 Inspect the current catalog before generating:
 
@@ -217,7 +221,7 @@ VPN and full-stack tests can use real PIA credentials and launch containers. Rea
 - [Developer documentation](https://scottgigawatt.github.io/plundarr/): Maraudarr architecture, extension guides, and Python reference.
 - [Docker and Synology setup](docs/setup.md): Networks, firewall rules, Container Manager, and library mounts.
 - [Host helper scripts](scripts/README.md): Linux, Synology, backup, restart, and status helpers.
-- [Testing](test/README.md): Generator, workflow, VPN, and stack validation.
+- [Testing](test/README.md): Maraudarr, generated Compose projects, workflows, VPN connections, and full-stack validation.
 - [Support](docs/SUPPORT.md): Usage questions, bugs, documentation requests, and safe reporting routes.
 - [Contributing](docs/CONTRIBUTING.md): Development setup and pull request expectations.
 - [Security policy](docs/SECURITY.md): Supported versions and private vulnerability reporting.
