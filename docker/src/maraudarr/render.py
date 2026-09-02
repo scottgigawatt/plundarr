@@ -451,7 +451,6 @@ def render_environment(
             f"{media_root}/anime-tv",
         ),
         "HOST_SCENES_PATH": ("/volume1/plex/scenes", f"{media_root}/scenes"),
-        "HOST_MUSIC_PATH": ("/volume1/plex/music", f"{media_root}/music"),
         "JELLYFIN_DATA_PATH": ("/volume1/jellyfin", media_root),
         "WHISPARR_DATA_PATH": ("/volume1/media/adult", media_root),
     }

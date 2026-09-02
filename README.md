@@ -159,7 +159,7 @@ Add Lidarr to Plundarr for music automation:
 make ship ADD_SERVICES=lidarr
 ```
 
-Set `HOST_MUSIC_PATH` to the host music library. Lidarr receives it read/write at `/music` and shares `/downloads` with the selected download clients. Open Lidarr after launch, use `/music` as its root folder, then connect Prowlarr and a download client. When Plex is also selected, Maraudarr adds the same library read-only at `/music`; Jellyfin reaches it as `/data/music` when its data root and the Plundarr media root point to the same host directory. The generated Homepage card requires a Lidarr API key in `HOMEPAGE_VAR_LIDARR_KEY`.
+`HOST_MUSIC_PATH` defaults to `/volume1/music/Music/Media/Music`; change it when the host music library lives elsewhere. Lidarr receives it read/write at `/music` and shares `/downloads` with the selected download clients. Open Lidarr after launch, use `/music` as its root folder, then connect Prowlarr and a download client. When Plex is also selected, Maraudarr adds the same library read-only at `/music`; Jellyfin reaches it as `/data/music` when its data root and the Plundarr media root point to the same host directory. The generated Homepage card requires a Lidarr API key in `HOMEPAGE_VAR_LIDARR_KEY`.
 
 The [LinuxServer Lidarr image](https://docs.linuxserver.io/images/docker-lidarr/) supports `linux/amd64` and `linux/arm64`, not `linux/arm/v7`. The [Homepage Lidarr widget guide](https://gethomepage.dev/widgets/services/lidarr/) documents the API key and supported fields used by the generated card.
 

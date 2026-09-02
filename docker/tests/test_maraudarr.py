@@ -399,7 +399,10 @@ class MaraudarrTests(unittest.TestCase):
         self.assertIn("${RECYCLARR_CONFIG_PATH}:/config:rw", recyclarr)
         self.assertNotIn("ports:", recyclarr)
         self.assertIn('RECYCLARR_TAG="${RECYCLARR_TAG:-8}"', environment)
-        self.assertIn('HOST_MUSIC_PATH="${HOST_MUSIC_PATH:-/volume1/plex/music}"', environment)
+        self.assertIn(
+            'HOST_MUSIC_PATH="${HOST_MUSIC_PATH:-/volume1/music/Music/Media/Music}"',
+            environment,
+        )
 
     def test_environment_keeps_operator_edit_guidance(self) -> None:
         """Keep concise source guidance beside values novice operators change."""

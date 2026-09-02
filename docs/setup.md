@@ -145,7 +145,7 @@ Review these values in `dist/plundarr/.env`:
 
 | Setting | Purpose |
 | --- | --- |
-| `HOST_MUSIC_PATH` | Host music library mounted read/write at `/music` in Lidarr |
+| `HOST_MUSIC_PATH` | Host music library mounted read/write at `/music` in Lidarr; defaults to `/volume1/music/Music/Media/Music` |
 | `LIDARR_WEBUI_PORT` | Host port for Lidarr; defaults to `8686` |
 | `LIDARR_CONFIG_PATH` | Persistent Lidarr database and application settings |
 | `HOMEPAGE_VAR_LIDARR_KEY` | Lidarr API key used by the optional Homepage widget |
