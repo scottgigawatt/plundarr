@@ -29,3 +29,24 @@ vulnerabilities:
     statement: >-
       Maraudarr invokes only offline Compose config with networking disabled;
       the vulnerable GOPROXY module-download path is unreachable.
+
+  #
+  # Docker Compose also carries SSH-server and gRPC-server CVEs, but Maraudarr
+  # exposes neither interface. Keep both exceptions scoped to the offline
+  # validation binary until an upstream stable release updates the Go modules.
+  #
+  - id: CVE-2026-56854
+    paths:
+      - usr/local/bin/docker-compose
+    expired_at: 2026-09-15
+    statement: >-
+      Maraudarr invokes only offline Compose config with networking disabled;
+      it never starts the vulnerable SSH authentication server path.
+
+  - id: CVE-2026-84304
+    paths:
+      - usr/local/bin/docker-compose
+    expired_at: 2026-09-15
+    statement: >-
+      Maraudarr invokes only offline Compose config with networking disabled;
+      it never starts the vulnerable gRPC HTTP/2 server path.
