@@ -128,7 +128,7 @@ make presets
 make services
 ```
 
-The catalog includes VPN foundations, torrent and Usenet clients, media automation, Jellyfin and Plex, Plex utilities, notifications, backups, dashboards, monitoring, and maintenance tools. Maraudarr adds required dependencies and displays the resolved fleet before writing it.
+The catalog includes VPN foundations, torrent and Usenet clients, movie, television, music, subtitle, and quality-profile automation, Jellyfin and Plex, Plex utilities, notifications, backups, dashboards, monitoring, and maintenance tools. Maraudarr adds required dependencies and displays the resolved fleet before writing it.
 
 ## Customize a deployment 🧩
 
@@ -139,6 +139,9 @@ Generate common combinations:
 ```sh
 make ship PRESET=boudoirr ADD_SERVICES=jellyfin
 make ship PRESET=calibre-web-automated
+make ship ADD_SERVICES=lidarr
+make ship ADD_SERVICES=recyclarr
+make ship ADD_SERVICES=lidarr,recyclarr
 make ship ADD_SERVICES=sonarr-anime
 make ship ADD_SERVICES=sabnzbd
 make ship REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=nzbget
@@ -147,6 +150,40 @@ make ship PRESET=duplex ADD_SERVICES=watchtower
 ```
 
 Regeneration preserves existing values by variable name and does not replace application state. Values for temporarily unselected services remain in a marked footer so they can return when the service is selected again.
+
+### Configure Lidarr
+
+Add Lidarr to Plundarr for music automation:
+
+```sh
+make ship ADD_SERVICES=lidarr
+```
+
+`HOST_MUSIC_PATH` defaults to `/volume1/music/Music/Media/Music`; change it when the host music library lives elsewhere. Lidarr receives it read/write at `/music` and shares `/downloads` with the selected download clients. Open Lidarr after launch, use `/music` as its root folder, then connect Prowlarr and a download client. When Plex is also selected, Maraudarr adds the same library read-only at `/music`; Jellyfin reaches it as `/data/music` when its data root and the Plundarr media root point to the same host directory. The generated Homepage card requires a Lidarr API key in `HOMEPAGE_VAR_LIDARR_KEY`.
+
+The [LinuxServer Lidarr image](https://docs.linuxserver.io/images/docker-lidarr/) supports `linux/amd64` and `linux/arm64`, not `linux/arm/v7`. The [Homepage Lidarr widget guide](https://gethomepage.dev/widgets/services/lidarr/) documents the API key and supported fields used by the generated card.
+
+### Preview and sync Recyclarr
+
+Add the profile-gated Recyclarr tool. Its catalog dependencies ensure Radarr and Sonarr are present:
+
+```sh
+make ship ADD_SERVICES=recyclarr
+```
+
+Set the selected service URLs and API keys in `dist/plundarr/.env`, then review the regeneration-safe starter file at `dist/plundarr/config/recyclarr/recyclarr.yml`. The starter syncs only upstream quality-size definitions and leaves old custom formats intact.
+
+Preview first, then deliberately apply the same configuration:
+
+```sh
+make recyclarr-preview
+make recyclarr-sync
+```
+
+> [!CAUTION]
+> `make recyclarr-sync` changes the configured Radarr and Sonarr instances. Recyclarr never starts during ordinary `make up`; use the preview output to verify the target instances and proposed changes before applying them.
+
+See the official [Recyclarr feature reference](https://recyclarr.dev/guide/features/) and [`sync` command reference](https://recyclarr.dev/cli/sync/) before extending the starter configuration.
 
 ### Configure Calibre-Web Automated
 

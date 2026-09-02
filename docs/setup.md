@@ -20,6 +20,8 @@ make ship PRESET=plex
 make ship PRESET=calibre-web-automated
 make ship PRESET=duplex
 make ship PRESET=watchtower
+make ship ADD_SERVICES=lidarr
+make ship ADD_SERVICES=recyclarr
 make ship ADD_SERVICES=sonarr-anime
 ```
 
@@ -121,13 +123,66 @@ The [Synology Container Manager project documentation](https://kb.synology.com/e
 | Server | Host mount behavior | Libraries to add | Notes |
 | --- | --- | --- | --- |
 | Jellyfin with Plundarr or standalone | `JELLYFIN_DATA_PATH` mounts read/write at `/data` | `/data/movies`, `/data/tv` | Persistent `/config` and `/cache` |
+| Jellyfin with Plundarr and Lidarr | `JELLYFIN_DATA_PATH` mounts read/write at `/data`; `HOST_MUSIC_PATH` resolves to its `music` child | `/data/movies`, `/data/tv`, `/data/music` | Keep both paths beneath the same host media root |
 | Jellyfin with Boudoirr | The Whisparr and Jellyfin data roots share `/data` | `/data/movies`, `/data/scenes` | Set both high-level paths to the same host directory |
 | Plex with Plundarr | Separate read-only library mounts | Movies, television, anime | Persistent config and transcode mounts |
+| Plex with Plundarr and Lidarr | Separate read-only library mounts | Movies, television, anime, music at `/music` | Lidarr writes the same host music library |
 | Plex with Boudoirr | Separate read-only library mounts | Movies, scenes | Plex must be selected explicitly |
 | Plex standalone | Separate read-only library mounts | Movies, television | Uses host networking |
 | Calibre-Web Automated with Plundarr or standalone | `CWA_LIBRARY_PATH` mounts read/write at `/calibre-library` | Calibre library containing `metadata.db` | Config and ingest use separate mounts |
 
-Application libraries are configured in Jellyfin, Plex, or Calibre-Web Automated after the containers start. Maraudarr prepares consistent mounts but does not create media-server library records.
+Media-server libraries are configured in Jellyfin, Plex, or Calibre-Web Automated after the containers start. Maraudarr prepares consistent mounts but does not create library records. Configure Lidarr's `/music` root folder separately in Lidarr.
+
+## Configure Lidarr
+
+Generate Plundarr with the music automation service:
+
+```sh
+make ship ADD_SERVICES=lidarr
+```
+
+Review these values in `dist/plundarr/.env`:
+
+| Setting | Purpose |
+| --- | --- |
+| `HOST_MUSIC_PATH` | Host music library mounted read/write at `/music` in Lidarr; defaults to `/volume1/music/Music/Media/Music` |
+| `LIDARR_WEBUI_PORT` | Host port for Lidarr; defaults to `8686` |
+| `LIDARR_CONFIG_PATH` | Persistent Lidarr database and application settings |
+| `HOMEPAGE_VAR_LIDARR_KEY` | Lidarr API key used by the optional Homepage widget |
+
+Lidarr automatically adds Prowlarr and its indexing dependency. Configure `/music` as the Lidarr root folder and connect a selected downloader after launch. Plex receives the same host path read-only at `/music` whenever Plex and Lidarr are selected together. Jellyfin can expose it as `/data/music` when `JELLYFIN_DATA_PATH` points to the parent media root.
+
+The [LinuxServer Lidarr image](https://docs.linuxserver.io/images/docker-lidarr/) supports `linux/amd64` and `linux/arm64`, not `linux/arm/v7`. The [Homepage Lidarr widget guide](https://gethomepage.dev/widgets/services/lidarr/) documents the API key and supported fields used by the generated card.
+
+## Preview and sync Recyclarr
+
+Generate Plundarr with Recyclarr, then set API access for the in-stack Radarr and Sonarr instances. Selecting Recyclarr adds both services and their indexing chain when the preset does not already contain them:
+
+```sh
+make ship ADD_SERVICES=recyclarr
+```
+
+| Setting | Purpose |
+| --- | --- |
+| `RECYCLARR_RADARR_URL` | Radarr base URL; defaults to the in-stack service |
+| `RECYCLARR_RADARR_API_KEY` | Radarr API key required before synchronization |
+| `RECYCLARR_SONARR_URL` | Sonarr base URL; defaults to the in-stack service |
+| `RECYCLARR_SONARR_API_KEY` | Sonarr API key required before synchronization |
+| `RECYCLARR_CONFIG_PATH` | Regeneration-safe Recyclarr configuration and cache directory |
+
+Maraudarr seeds `config/recyclarr/recyclarr.yml` once. The starter syncs upstream quality-size definitions only, does not delete old custom formats, and can be extended with the templates and profiles appropriate for the library.
+
+Preview and apply Recyclarr through separate profile-aware targets:
+
+```sh
+make recyclarr-preview PRESET=plundarr
+make recyclarr-sync PRESET=plundarr
+```
+
+> [!CAUTION]
+> The sync target changes the configured Radarr and Sonarr instances. Confirm the URLs, API keys, configuration, and preview output before running it. Ordinary `make up` does not start Recyclarr.
+
+See the official [Recyclarr feature reference](https://recyclarr.dev/guide/features/) and [`sync` command reference](https://recyclarr.dev/cli/sync/) before adding custom formats, quality profiles, naming rules, or additional instances.
 
 ## Configure Calibre-Web Automated
 

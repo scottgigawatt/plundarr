@@ -37,6 +37,17 @@
           url: {{HOMEPAGE_VAR_SONARR_URL}}
           key: {{HOMEPAGE_VAR_SONARR_KEY}}
 
+    - Lidarr:
+        icon: lidarr.svg
+        href: {{HOMEPAGE_VAR_LIDARR_HREF}}
+        description: Music management
+        container: {{HOMEPAGE_VAR_LIDARR_CONTAINER}}
+        widget:
+          type: lidarr
+          fields: ["wanted", "queued", "artists"]
+          url: {{HOMEPAGE_VAR_LIDARR_URL}}
+          key: {{HOMEPAGE_VAR_LIDARR_KEY}}
+
     - Bazarr:
         icon: bazarr.svg
         href: {{HOMEPAGE_VAR_BAZARR_HREF}}
@@ -77,6 +88,12 @@
               service_group: Media
               service_name: Sonarr
               color: teal
+              params:
+                unmonitored: true
+            - type: lidarr
+              service_group: Media
+              service_name: Lidarr
+              color: indigo
               params:
                 unmonitored: true
 

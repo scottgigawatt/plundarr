@@ -40,6 +40,8 @@ Run these commands from the repository root. Make keeps the Docker wiring out of
 | `make services` | Lists every selectable service |
 | `make watchtower-run-once PRESET=watchtower` | Runs one host update pass and exits |
 | `make kometa-overlay-reset PRESET=duplex` | Runs profile-gated Kometa Overlay Reset once and exits |
+| `make recyclarr-preview PRESET=plundarr` | Previews profile-gated Recyclarr changes |
+| `make recyclarr-sync PRESET=plundarr` | Applies the reviewed Recyclarr configuration |
 | `make pull-image` | Pulls the latest published Maraudarr image from GHCR |
 | `make build` | Builds the Maraudarr image locally from this directory |
 | `make test-unit` | Runs Maraudarr's Python unit tests |
@@ -65,6 +67,7 @@ make ship PRESET=plex
 make ship PRESET=calibre-web-automated
 make ship PRESET=duplex
 make ship PRESET=watchtower
+make ship ADD_SERVICES=lidarr,recyclarr
 make ship ADD_SERVICES=sonarr-anime
 ```
 
@@ -78,6 +81,8 @@ make ship PRESET=boudoirr ADD_SERVICES=sabnzbd
 ```
 
 The default Plundarr voyage includes one Sonarr instance. `sonarr-anime` is an opt-in second instance with its own configuration and library path.
+
+Lidarr and Recyclarr are opt-in Plundarr additions. Lidarr adds Prowlarr automatically, shares the download root, and writes the music library selected by `HOST_MUSIC_PATH`; its LinuxServer image supports `linux/amd64` and `linux/arm64`, not `linux/arm/v7`. Recyclarr remains behind the `tools` profile and runs only through `make recyclarr-preview` or the deliberate `make recyclarr-sync` target. Its starter configuration is seeded once and preserved during regeneration.
 
 Calibre-Web Automated keeps its configuration, destructive ingest directory, and Calibre library on three separate mounts. Its image supports `linux/amd64` and `linux/arm64`; Watchtower does not update it automatically because application releases may migrate persistent databases.
 

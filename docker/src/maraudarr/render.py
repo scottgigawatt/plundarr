@@ -135,13 +135,17 @@ def _prepare_service(
         library_variables = {
             "anime": "${HOST_ANIME_TV_PATH}",
             "movies": "${HOST_MOVIES_PATH}",
+            "music": "${HOST_MUSIC_PATH}",
             "scenes": "${HOST_SCENES_PATH}",
             "tv": "${HOST_TV_PATH}",
         }
+        included_libraries = set(media_libraries)
+        if "lidarr" in selected:
+            included_libraries.add("music")
         excluded_variables = {
             variable
             for library, variable in library_variables.items()
-            if library not in media_libraries
+            if library not in included_libraries
         }
         block = "\n".join(
             line
@@ -154,6 +158,7 @@ def _prepare_service(
             "Homepage Tautulli click target and widget": "tautulli" in selected,
             "Homepage Radarr click target and widget": "radarr" in selected,
             "Homepage Sonarr click target and widget": "sonarr" in selected,
+            "Homepage Lidarr click target and widget": "lidarr" in selected,
             "Homepage Calibre-Web Automated click target and widget": (
                 "calibre-web-automated" in selected
             ),
@@ -265,6 +270,7 @@ def _filter_homepage_env(
         "Homepage Sonarr Anime click-target and widget variables": (
             "sonarr-anime" in selected
         ),
+        "Homepage Lidarr click-target and widget variables": "lidarr" in selected,
         "Homepage Jellyfin click-target and widget variables": "jellyfin" in selected,
         "Homepage Calibre-Web Automated click-target and widget variables": (
             "calibre-web-automated" in selected
@@ -557,6 +563,7 @@ def render_homepage_services(catalog: Catalog, plan: StackPlan) -> str:
     for service_id, label in (
         ("radarr", "Radarr"),
         ("sonarr", "Sonarr"),
+        ("lidarr", "Lidarr"),
         ("sonarr-anime", "Sonarr Anime"),
         ("bazarr", "Bazarr"),
         ("seerr", "Seerr"),
@@ -576,7 +583,7 @@ def render_homepage_services(catalog: Catalog, plan: StackPlan) -> str:
             media_cards.append(_homepage_card(source, label))
 
     data_cards = []
-    if selected.intersection({"radarr", "sonarr"}):
+    if selected.intersection({"radarr", "sonarr", "lidarr"}):
         data_cards.append(_filter_calendar(_homepage_card(source, "Calendar"), selected))
     if "tautulli" in selected:
         data_cards.append(_homepage_card(source, "Tautulli"))

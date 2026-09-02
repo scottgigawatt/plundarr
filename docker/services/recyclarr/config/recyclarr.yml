@@ -1,0 +1,18 @@
+# yaml-language-server: $schema=https://schemas.recyclarr.dev/latest/config-schema.json
+
+# Sync only quality-size definitions until the operator adds explicit templates.
+radarr:
+  plundarr_movies:
+    base_url: !env_var RECYCLARR_RADARR_URL
+    api_key: !env_var RECYCLARR_RADARR_API_KEY
+    delete_old_custom_formats: false
+    quality_definition:
+      type: movie
+
+sonarr:
+  plundarr_series:
+    base_url: !env_var RECYCLARR_SONARR_URL
+    api_key: !env_var RECYCLARR_SONARR_API_KEY
+    delete_old_custom_formats: false
+    quality_definition:
+      type: series

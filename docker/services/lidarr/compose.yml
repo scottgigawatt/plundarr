@@ -1,0 +1,44 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# compose.yml: Maraudarr service chart for Lidarr.
+#
+
+services:
+  #
+  # Define the 'lidarr' service for managing music.
+  #
+  lidarr:
+    # Docker image and container information
+    <<: *arr-stack-container                                      # Pull in arr-stack container config
+    image: lscr.io/linuxserver/lidarr:${LIDARR_TAG}               # Run using the specified tag
+    container_name: ${COMPOSE_PROJECT_NAME}-lidarr-${LIDARR_TAG}  # Namespace the container name by project and tag
+    hostname: lidarr                                              # Set the container hostname
+
+    # Define the host and container ports
+    ports:
+      - ${LIDARR_WEBUI_PORT}:8686  # Lidarr web UI port
+
+    # Mount host directories into the container
+    volumes:
+      - ${LIDARR_CONFIG_PATH}:/config:rw      # Database and Lidarr configs
+      - ${HOST_DOWNLOADS_PATH}:/downloads:rw  # Location of download managers output directory
+      - ${HOST_MUSIC_PATH}:/music:rw          # Location of music library on disk
+
+    # Define container healthcheck to verify Lidarr connectivity
+    healthcheck:
+      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
+      test:                              # Check Lidarr ping endpoint
+        - CMD
+        - wget
+        - --no-verbose
+        - --tries=1
+        - --spider
+        - http://127.0.0.1:8686/ping
+
+    # Specify container service dependencies
+    depends_on:
+      prowlarr:
+        condition: service_healthy  # Wait until Prowlarr is healthy
