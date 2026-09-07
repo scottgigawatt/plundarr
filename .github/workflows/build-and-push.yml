@@ -209,7 +209,7 @@ jobs:
       # architecture on the hosted runner.
       #
       - name: "Summon Cross-Arch Cannons 🧨"
-        uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8  # v4
+        uses: docker/setup-qemu-action@1f40c72289eff860ee54a304f1438e3cff362e0a  # v4
 
       #
       # Create the Buildx builder that produces one multi-architecture manifest.
