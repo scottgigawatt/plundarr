@@ -58,7 +58,7 @@ jobs:
       # Initialize CodeQL for the current matrix language before analysis begins.
       #
       - name: "Wake the CodeQL Spyglass 🔭"
-        uses: github/codeql-action/init@cdf488f595d80d6e07e03d4674febd5ab45fa938  # v4
+        uses: github/codeql-action/init@b96794f015dfd88f77b49b1c93e0fa7110f94c63  # v4
         with:
           languages: ${{ matrix.language }}
 
@@ -67,6 +67,6 @@ jobs:
       # category so Python and Actions results remain easy to distinguish.
       #
       - name: "Read Maraudarr's Scrolls 📜"
-        uses: github/codeql-action/analyze@cdf488f595d80d6e07e03d4674febd5ab45fa938  # v4
+        uses: github/codeql-action/analyze@b96794f015dfd88f77b49b1c93e0fa7110f94c63  # v4
         with:
           category: "/language:${{ matrix.language }}"
