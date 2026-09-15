@@ -413,9 +413,13 @@ class MaraudarrTests(unittest.TestCase):
                     with tempfile.TemporaryDirectory() as temporary_directory:
                         env_path = Path(temporary_directory) / ".env"
                         env_path.write_text(original)
-                        environment = render_environment(self.catalog, plan, env_path)
+                        environment = render_environment(
+                            self.catalog, plan, env_path, generate_secrets=False
+                        )
                         env_path.write_text(environment)
-                        regenerated = render_environment(self.catalog, plan, env_path)
+                        regenerated = render_environment(
+                            self.catalog, plan, env_path, generate_secrets=False
+                        )
                     self.assertEqual(environment, regenerated)
                     self.assertIn(f'PIA_AUTOCONNECT="{autoconnect}"', environment)
                     self.assertIn('PIA_USER="captain"', environment)
