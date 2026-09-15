@@ -7,19 +7,46 @@
 #
 # test-test-volume-cleanup.sh: Reject unowned volumes and propagate Docker failures.
 #
+# Purpose: Verify test-volume cleanup boundaries without contacting Docker.
 # Usage: test/helpers/test-test-volume-cleanup.sh
 #
 
-# Use only a Docker stub and a disposable invocation log.
+#
+# Directory for isolated ownership-check fixtures.
+#
+test_output=""
+
+#
+# Fail on errors and unset variables.
+#
 set -eu
+
+#
+# cleanup: Remove the isolated ownership-check directory.
+#
+# Parameters: None.
+#
+# Returns: Nothing.
+#
+cleanup() {
+    if [ -n "${test_output}" ] && [ -d "${test_output}" ]; then
+        rm -rf "${test_output}"
+    fi
+}
+
+#
+# Create an isolated invocation log and register cleanup on exit.
+#
 test_output=$(mktemp -d)
-trap 'rm -rf "${test_output}"' 0 1 2 15
+trap cleanup 0 1 2 15
 DOCKER_BIN="$(pwd)/test/stubs/docker-test-volume-stub.sh"
 export DOCKER_BIN
 export TEST_VOLUME_LOG="${test_output}/docker.log"
 helper=test/runtime/remove-test-volume.sh
 
-# Names alone never authorize deletion; both labels must match this run.
+#
+# Verify both ownership labels and require Docker failures to reach the caller.
+#
 for scenario in owned absent wrong-project wrong-run missing-labels daemon-error inspect-error remove-error; do
     export TEST_VOLUME_CASE=${scenario}
     : >"${TEST_VOLUME_LOG}"
@@ -31,9 +58,17 @@ for scenario in owned absent wrong-project wrong-run missing-labels daemon-error
             [ "${status}" -eq 0 ]
             grep -F -x 'volume rm plundarr-test-example_data' "${TEST_VOLUME_LOG}" >/dev/null
             ;;
-        absent) [ "${status}" -eq 0 ] ;;
-        *) [ "${status}" -ne 0 ] ;;
+        absent)
+            [ "${status}" -eq 0 ]
+            ;;
+        *)
+            [ "${status}" -ne 0 ]
+            ;;
     esac
+
+    #
+    # Rejected volumes and failed inspections must never reach the removal command.
+    #
     case "${scenario}" in
         owned|remove-error) ;;
         *)
@@ -45,7 +80,9 @@ for scenario in owned absent wrong-project wrong-run missing-labels daemon-error
     esac
 done
 
+#
 # Reject production names and mismatched prefixes before even inspecting Docker.
+#
 for project in production plundarr plundarr-test- plundarr-test-other 'plundarr-test-unsafe/name'; do
     : >"${TEST_VOLUME_LOG}"
     if "${helper}" "${project}" plundarr-test-example_data \

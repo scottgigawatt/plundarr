@@ -7,13 +7,29 @@
 #
 # docker-test-volume-stub.sh: Simulate volume ownership and Docker failures.
 #
-# Usage: TEST_VOLUME_LOG=<path> TEST_VOLUME_CASE=<case> test/stubs/docker-test-volume-stub.sh <arguments>
+# Purpose: Record cleanup requests and return deterministic responses without Docker.
+# Usage: TEST_VOLUME_LOG=<path> TEST_VOLUME_CASE=<case>
+#        test/stubs/docker-test-volume-stub.sh <arguments>
 #
 
-# Record exact invocations without contacting Docker.
+#
+# Fail on errors and unset variables.
+#
 set -eu
+
+#
+# Require an isolated invocation log.
+#
 : "${TEST_VOLUME_LOG:?TEST_VOLUME_LOG is required}"
+
+#
+# Record every call without interpreting its arguments.
+#
 printf '%s\n' "$*" >>"${TEST_VOLUME_LOG}"
+
+#
+# Return deterministic discovery, ownership, and removal results.
+#
 case "$1 $2" in
     'volume ls')
         case "${TEST_VOLUME_CASE}" in
@@ -24,10 +40,18 @@ case "$1 $2" in
         ;;
     'volume inspect')
         case "${TEST_VOLUME_CASE}" in
-            owned|remove-error) echo 'plundarr-test-example|plundarr-test-example' ;;
-            wrong-project) echo 'production|plundarr-test-example' ;;
-            wrong-run) echo 'plundarr-test-example|another-run' ;;
-            missing-labels) echo '<no value>|<no value>' ;;
+            owned|remove-error)
+                echo 'plundarr-test-example|plundarr-test-example'
+                ;;
+            wrong-project)
+                echo 'production|plundarr-test-example'
+                ;;
+            wrong-run)
+                echo 'plundarr-test-example|another-run'
+                ;;
+            missing-labels)
+                echo '<no value>|<no value>'
+                ;;
             inspect-error) exit 43 ;;
             *) exit 99 ;;
         esac
