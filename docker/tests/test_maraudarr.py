@@ -376,6 +376,56 @@ class MaraudarrTests(unittest.TestCase):
         self.assertLess(environment.index("PROWLARR_TAG"), environment.index("RADARR_TAG"))
         self.assertLess(environment.index("SPEEDTEST_TRACKER_TAG"), environment.index("APPRISE_TAG"))
 
+    def test_privateerr_region_controls_follow_service_selection(self) -> None:
+        """Expose region selection wherever the VPN dependency is generated."""
+
+        for preset in self.catalog.presets:
+            with self.subTest(preset=preset):
+                plan = self.catalog.resolve(
+                    preset, add={"qbittorrent"} if preset == "custom" else set()
+                )
+                compose = render_compose(self.catalog, plan)
+                environment = render_environment(self.catalog, plan, None)
+                if "privateerr" not in plan.service_ids:
+                    self.assertNotIn("PIA_PREFERRED_REGION", environment)
+                    self.assertNotIn("PIA_AUTOCONNECT", environment)
+                    self.assertNotIn("PREFERRED_REGION:", compose)
+                    continue
+                privateerr = extract_service(compose, "privateerr")
+                self.assertIn("AUTOCONNECT: ${PIA_AUTOCONNECT}", privateerr)
+                self.assertIn("PREFERRED_REGION: ${PIA_PREFERRED_REGION}", privateerr)
+                self.assertIn('PIA_AUTOCONNECT="${PIA_AUTOCONNECT:-true}"', environment)
+                self.assertIn(
+                    'PIA_PREFERRED_REGION="${PIA_PREFERRED_REGION:-ca_toronto}"',
+                    environment,
+                )
+
+    def test_privateerr_region_controls_survive_regeneration(self) -> None:
+        """Add missing defaults while preserving both operator selection modes."""
+
+        plan = self.catalog.resolve("plundarr")
+        for autoconnect in ("true", "false"):
+            for preferred_region in (None, "ca_vancouver"):
+                with self.subTest(autoconnect=autoconnect, region=preferred_region):
+                    original = f'PIA_AUTOCONNECT="{autoconnect}"\nPIA_USER="captain"\n'
+                    if preferred_region is not None:
+                        original += f'PIA_PREFERRED_REGION="{preferred_region}"\n'
+                    with tempfile.TemporaryDirectory() as temporary_directory:
+                        env_path = Path(temporary_directory) / ".env"
+                        env_path.write_text(original)
+                        environment = render_environment(self.catalog, plan, env_path)
+                        env_path.write_text(environment)
+                        regenerated = render_environment(self.catalog, plan, env_path)
+                    self.assertEqual(environment, regenerated)
+                    self.assertIn(f'PIA_AUTOCONNECT="{autoconnect}"', environment)
+                    self.assertIn('PIA_USER="captain"', environment)
+                    expected = (
+                        f'PIA_PREFERRED_REGION="{preferred_region}"'
+                        if preferred_region is not None
+                        else 'PIA_PREFERRED_REGION="${PIA_PREFERRED_REGION:-ca_toronto}"'
+                    )
+                    self.assertIn(expected, environment)
+
     def test_lidarr_and_recyclarr_render_their_upstream_contracts(self) -> None:
         """Keep music automation and explicit synchronization integration-safe."""
 
