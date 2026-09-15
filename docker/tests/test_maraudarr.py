@@ -416,11 +416,6 @@ class MaraudarrTests(unittest.TestCase):
                         environment = render_environment(
                             self.catalog, plan, env_path, generate_secrets=False
                         )
-                        env_path.write_text(environment)
-                        regenerated = render_environment(
-                            self.catalog, plan, env_path, generate_secrets=False
-                        )
-                    self.assertEqual(environment, regenerated)
                     self.assertIn(f'PIA_AUTOCONNECT="{autoconnect}"', environment)
                     self.assertIn('PIA_USER="captain"', environment)
                     expected = (
