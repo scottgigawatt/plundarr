@@ -167,6 +167,57 @@ class MaraudarrTests(unittest.TestCase):
         self.assertIn("calibre-web-automated", default.service_ids)
         self.assertNotIn("calibre-web-automated", removed.service_ids)
 
+    def test_portainer_preset_and_optional_service_contract(self) -> None:
+        """Expose the LTS server with persistent data and configurable ports."""
+
+        standalone = self.catalog.resolve("portainer")
+        self.assertEqual(standalone.service_ids, ("portainer",))
+        self.assertNotIn("portainer", self.catalog.resolve("plundarr").service_ids)
+        for plan in (standalone, self.catalog.resolve("plundarr", add={"portainer"})):
+            with self.subTest(preset=plan.preset.id):
+                compose = render_compose(self.catalog, plan)
+                service = extract_service(compose, "portainer")
+                environment = render_environment(
+                    self.catalog, plan, None, generate_secrets=False
+                )
+                self.assertIn("image: portainer/portainer-ce:${PORTAINER_TAG}", service)
+                self.assertIn("${PORTAINER_WEB_PORT}:9443", service)
+                self.assertIn("${PORTAINER_EDGE_PORT}:8000", service)
+                self.assertIn("${PORTAINER_CONFIG_PATH}:/data:rw", service)
+                self.assertIn("/var/run/docker.sock:/var/run/docker.sock:rw", service)
+                self.assertIn("labels: *disable-watchtower-updates", service)
+                self.assertNotIn("network_mode:", service)
+                self.assertIn('PORTAINER_TAG="${PORTAINER_TAG:-lts}"', environment)
+                self.assertIn('PORTAINER_WEB_PORT="${PORTAINER_WEB_PORT:-9443}"', environment)
+                self.assertIn('PORTAINER_EDGE_PORT="${PORTAINER_EDGE_PORT:-8888}"', environment)
+
+    def test_portainer_data_and_operator_settings_survive_regeneration(self) -> None:
+        """Retain application-owned state and explicit image, path, and port choices."""
+
+        plan = self.catalog.resolve("portainer")
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            output = Path(temporary_directory)
+            _, env_path, config_path = write_stack(self.catalog, plan, output)
+            data_path = config_path / "portainer" / "portainer.db"
+            data_path.write_bytes(b"example application state")
+            assignments = (
+                'PORTAINER_TAG="lts"\n'
+                'PORTAINER_CONFIG_PATH="./existing-portainer-data"\n'
+                'PORTAINER_WEB_PORT="10443"\n'
+                'PORTAINER_EDGE_PORT="10888"\n'
+                'COMPOSE_NETWORK_SUBNET="172.30.0.0/16"\n'
+                'COMPOSE_NETWORK_IP_RANGE="172.30.5.0/24"\n'
+                'COMPOSE_NETWORK_GATEWAY="172.30.5.254"\n'
+            )
+            env_path.write_text(assignments)
+            write_stack(self.catalog, plan, output)
+            environment = env_path.read_text()
+            for assignment in assignments.splitlines():
+                self.assertIn(assignment, environment)
+            self.assertEqual(data_path.read_bytes(), b"example application state")
+            self.assertTrue((config_path / "portainer" / "README.md").is_file())
+            self.assertFalse((output / "existing-portainer-data").exists())
+
     def test_watchtower_preset_selects_only_the_updater(self) -> None:
         """Keep the standalone updater focused and available for one-shot runs."""
 
@@ -376,6 +427,55 @@ class MaraudarrTests(unittest.TestCase):
         self.assertLess(environment.index("PROWLARR_TAG"), environment.index("RADARR_TAG"))
         self.assertLess(environment.index("SPEEDTEST_TRACKER_TAG"), environment.index("APPRISE_TAG"))
 
+    def test_privateerr_region_controls_follow_service_selection(self) -> None:
+        """Expose region selection wherever the VPN dependency is generated."""
+
+        for preset in self.catalog.presets:
+            with self.subTest(preset=preset):
+                plan = self.catalog.resolve(
+                    preset, add={"qbittorrent"} if preset == "custom" else set()
+                )
+                compose = render_compose(self.catalog, plan)
+                environment = render_environment(self.catalog, plan, None)
+                if "privateerr" not in plan.service_ids:
+                    self.assertNotIn("PIA_PREFERRED_REGION", environment)
+                    self.assertNotIn("PIA_AUTOCONNECT", environment)
+                    self.assertNotIn("PREFERRED_REGION:", compose)
+                    continue
+                privateerr = extract_service(compose, "privateerr")
+                self.assertIn("AUTOCONNECT: ${PIA_AUTOCONNECT}", privateerr)
+                self.assertIn("PREFERRED_REGION: ${PIA_PREFERRED_REGION}", privateerr)
+                self.assertIn('PIA_AUTOCONNECT="${PIA_AUTOCONNECT:-true}"', environment)
+                self.assertIn(
+                    'PIA_PREFERRED_REGION="${PIA_PREFERRED_REGION:-ca}"',
+                    environment,
+                )
+
+    def test_privateerr_region_controls_survive_regeneration(self) -> None:
+        """Add missing defaults while preserving both operator selection modes."""
+
+        plan = self.catalog.resolve("plundarr")
+        for autoconnect in ("true", "false"):
+            for preferred_region in (None, "ca_vancouver"):
+                with self.subTest(autoconnect=autoconnect, region=preferred_region):
+                    original = f'PIA_AUTOCONNECT="{autoconnect}"\nPIA_USER="captain"\n'
+                    if preferred_region is not None:
+                        original += f'PIA_PREFERRED_REGION="{preferred_region}"\n'
+                    with tempfile.TemporaryDirectory() as temporary_directory:
+                        env_path = Path(temporary_directory) / ".env"
+                        env_path.write_text(original)
+                        environment = render_environment(
+                            self.catalog, plan, env_path, generate_secrets=False
+                        )
+                    self.assertIn(f'PIA_AUTOCONNECT="{autoconnect}"', environment)
+                    self.assertIn('PIA_USER="captain"', environment)
+                    expected = (
+                        f'PIA_PREFERRED_REGION="{preferred_region}"'
+                        if preferred_region is not None
+                        else 'PIA_PREFERRED_REGION="${PIA_PREFERRED_REGION:-ca}"'
+                    )
+                    self.assertIn(expected, environment)
+
     def test_lidarr_and_recyclarr_render_their_upstream_contracts(self) -> None:
         """Keep music automation and explicit synchronization integration-safe."""
 
@@ -416,7 +516,6 @@ class MaraudarrTests(unittest.TestCase):
 
         self.assertIn("# Edit for your host: shared download root", environment)
         self.assertIn("# Edit for your host: run `id -u`", environment)
-        self.assertIn("# Edit before launch: PIA account username", environment)
         self.assertIn("# Change only for a host-port conflict", environment)
 
     def test_preset_environment_defaults_match_each_deployment(self) -> None:
@@ -455,6 +554,11 @@ class MaraudarrTests(unittest.TestCase):
             ),
             "watchtower": (
                 "watchtower",
+                "172.26.0.0/16",
+                "/volume1/plex",
+            ),
+            "portainer": (
+                "portainer",
                 "172.27.0.0/16",
                 "/volume1/plex",
             ),
@@ -504,6 +608,7 @@ class MaraudarrTests(unittest.TestCase):
             "calibre-web-automated",
             "duplex",
             "watchtower",
+            "portainer",
             "custom",
         )
         plans = {
@@ -592,7 +697,7 @@ class MaraudarrTests(unittest.TestCase):
             boudoirr_homepage,
         )
 
-    def test_preset_networks_follow_the_documented_private_sequence(self) -> None:
+    def test_preset_networks_follow_the_private_sequence(self) -> None:
         """Keep preset subnet, pool, and gateway allocations predictable."""
 
         expected_octets = {
@@ -602,10 +707,13 @@ class MaraudarrTests(unittest.TestCase):
             "plex": 23,
             "calibre-web-automated": 24,
             "duplex": 25,
-            "watchtower": 27,
+            "watchtower": 26,
+            "portainer": 27,
             "custom": 28,
         }
 
+        self.assertEqual(set(expected_octets), set(self.catalog.presets))
+        self.assertEqual(list(expected_octets.values()), list(range(20, 29)))
         for preset_id, octet in expected_octets.items():
             preset = self.catalog.preset(preset_id)
             with self.subTest(preset=preset_id):

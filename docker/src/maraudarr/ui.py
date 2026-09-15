@@ -55,6 +55,7 @@ PRESET_ICONS = {
     "calibre-web-automated": "📚",
     "duplex": "🎭",
     "watchtower": "🔭",
+    "portainer": "🚢",
     "custom": "🧩",
 }
 

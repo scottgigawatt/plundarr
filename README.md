@@ -119,6 +119,7 @@ Use `make configure` for an interactive picker or pass `PRESET` to `make ship` f
 | 📚 `calibre-web-automated` | Standalone ebook library and automatic ingest service |
 | 🎭 `duplex` | Plex metadata, artwork, monitoring, and maintenance tools |
 | 🔭 `watchtower` | Standalone container image updates |
+| 🚢 `portainer` | Standalone Docker management with Portainer CE |
 | 🧩 `custom` | A stack assembled service by service |
 
 Inspect the current catalog before generating:
@@ -213,6 +214,10 @@ Kometa Overlay Reset remains behind the `tools` Compose profile and never starts
 ```sh
 make kometa-overlay-reset PRESET=duplex
 ```
+
+### Run Portainer
+
+Generate the standalone Portainer Community Edition server with `make ship PRESET=portainer`. It defaults to the official `lts` channel. Follow the [Portainer deployment guide](docs/project-guides/portainer.md) for data paths, HTTPS ports, and startup.
 
 ### Run Watchtower
 
