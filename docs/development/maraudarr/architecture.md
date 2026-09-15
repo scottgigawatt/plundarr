@@ -44,6 +44,8 @@ flowchart TB
 
 Core services are restored in step 3 and cannot be removed. Default services are only the preset's initial checkbox state, so users can replace qBittorrent with a Usenet client, remove Watchtower where it defaults, or select both download modes without a separate add-on mechanism.
 
+A logical service may declare `compose_services` to include several containers from one source chart. Tracearr owns its application, database, and Redis this way, so selection and removal always apply to the complete group.
+
 The result is an immutable `StackPlan`. Renderers consume that plan rather than repeating selection logic.
 
 ## 3. Render without flattening intent

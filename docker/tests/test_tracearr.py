@@ -34,7 +34,7 @@ class TracearrTests(unittest.TestCase):
 
     def test_monitoring_defaults_are_removable_and_portable(self) -> None:
         """Keep Tracearr preferred in Plundarr and both monitors opt-in elsewhere."""
-        required = {"tracearr", "tracearr-db", "tracearr-redis"}
+        required = {"tracearr"}
         self.assertTrue(required.issubset(self.catalog.resolve("plundarr").service_ids))
         removed = self.catalog.resolve("plundarr", remove={"tracearr"})
         self.assertTrue(required.isdisjoint(removed.service_ids))
@@ -62,7 +62,13 @@ class TracearrTests(unittest.TestCase):
         ])
         self.assertNotIn("name:", footer)
         self.assertNotIn("external:", footer)
-        for service_id in plan.service_ids:
+        self.assertEqual(plan.service_ids, ("tracearr",))
+        self.assertEqual(plan.auto_added, ())
+        self.assertEqual(
+            plan.services[0].compose_services,
+            ("tracearr-db", "tracearr-redis", "tracearr"),
+        )
+        for service_id in plan.services[0].compose_services:
             service = extract_service(compose, service_id)
             if service_id == "tracearr":
                 self.assertNotIn("disable-watchtower-updates", service)
@@ -70,18 +76,34 @@ class TracearrTests(unittest.TestCase):
                 self.assertIn("labels: *disable-watchtower-updates", service)
             if service_id != "tracearr":
                 self.assertNotIn("    ports:", service)
-        database = self.catalog.resolve("custom", selected={"tracearr-db"})
-        database_compose = render_compose(self.catalog, database)
-        self.assertIn("  tracearr-db-data: {}", database_compose)
-        self.assertNotIn("tracearr-backups", database_compose)
+        for service_id in ("tracearr-db", "tracearr-redis"):
+            self.assertNotIn(service_id, self.catalog.services)
+            with self.assertRaises(CatalogError):
+                self.catalog.resolve("custom", selected={service_id})
         self.assertIn("condition: service_healthy", compose)
 
     def test_catalog_rejects_invalid_and_duplicate_volume_declarations(self) -> None:
         """Catch unsafe volume keys and accidental ownership collisions early."""
         original = self.catalog.services["tracearr"]
-        for volumes in (("../outside",), ("tracearr-db-data",), ("same", "same")):
+        for volumes in (("../outside",), ("same", "same")):
             with self.subTest(volumes=volumes):
                 self.catalog.services["tracearr"] = replace(original, named_volumes=volumes)
+                with self.assertRaises(CatalogError):
+                    self.catalog._validate()
+
+    def test_catalog_rejects_invalid_compose_groups(self) -> None:
+        """Reject incomplete groups and conflicting Compose ownership."""
+        original = self.catalog.services["tracearr"]
+        groups = (
+            (),
+            ("tracearr-db",),
+            ("tracearr", "missing-container"),
+            ("tracearr", "tracearr"),
+            ("tracearr", "homepage"),
+        )
+        for names in groups:
+            with self.subTest(names=names):
+                self.catalog.services["tracearr"] = replace(original, compose_services=names)
                 with self.assertRaises(CatalogError):
                     self.catalog._validate()
 

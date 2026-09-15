@@ -10,7 +10,7 @@ A fresh Plundarr generation includes Tracearr:
 make ship PRESET=plundarr
 ```
 
-For an existing project, select Tracearr in `make configure` or explicitly include it while generating. Maraudarr automatically includes its TimescaleDB and Redis dependencies:
+For an existing project, select Tracearr in `make configure` or explicitly include it while generating. The single `tracearr` selection includes the application, TimescaleDB, and Redis together; its internal containers are not separate choices:
 
 ```sh
 make ship PRESET=duplex ADD_SERVICES=tracearr

@@ -10,9 +10,11 @@ Preset `core` services cannot be removed. Preset `defaults` are only preselected
 
 Preset bridge networks have distinct, sequential defaults. Operators can change the subnet, address pool, and gateway together in the generated `.env` to suit their host.
 
-Tracearr is a removable Plundarr default; its database and Redis dependencies are included automatically. Tautulli remains optional in every preset. Duplex keeps Kometa and ImageMaid in `core`. PATTRMM, Notifiarr, and the profile-gated Overlay Reset tool live in `defaults`, so the generated preset includes them out of the box while the interactive picker may remove them. Watchtower remains selectable but is not a Duplex default. PATTRMM and Overlay Reset require Kometa because both consume its external configuration tree.
+Tracearr is a removable Plundarr default; its application, database, and Redis containers are one logical selection in `services/tracearr/`. Tautulli remains optional in every preset. Duplex keeps Kometa and ImageMaid in `core`. PATTRMM, Notifiarr, and the profile-gated Overlay Reset tool live in `defaults`, so the generated preset includes them out of the box while the interactive picker may remove them. Watchtower remains selectable but is not a Duplex default. PATTRMM and Overlay Reset require Kometa because both consume its external configuration tree.
 
 > [!IMPORTANT]
 > Keep service IDs aligned with their directory names. Maraudarr derives `services/<id>/compose.yml`, `environment.env`, and `config/` from that ID.
+
+Services default to one Compose key matching their primary `service` name. A `compose_services` list may group multiple definitions from the same chart into one inseparable catalog selection. The primary key remains the owner of generated config. Every key must exist in that chart and have a unique catalog owner.
 
 Services may declare `named_volumes` containing unique project-local storage keys. Maraudarr emits only selected declarations; Docker Compose applies the project prefix. No global volume names or external volume ownership are generated.

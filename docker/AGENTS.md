@@ -22,14 +22,14 @@ This directory is the complete Docker build context for Maraudarr. Do not make t
 - `tests/`: Unit tests for catalog, rendering, and config generation.
 - `catalog/`: Preset and service metadata.
 - `templates/`: Shared Compose and environment foundations.
-- `services/<name>/compose.yml`: Exactly one selectable service definition.
+- `services/<name>/compose.yml`: One logical selectable service, containing one or more Compose service definitions.
 - `services/<name>/environment.env`: Settings owned by that service.
 - `services/<name>/config/`: Optional files copied into generated `config/<name>/`; omit this directory for intentionally external state such as the Kometa checkout.
 - `config/`: Files copied into the root of a generated preset's `config/`.
 
 ## Catalog Rules
 
-Every selectable service lives in its own directory and has one catalog entry. Do not create separate "extra" or "addon" aggregate files. Keep service order, dependencies, source paths, and descriptions explicit and documented in `catalog/catalog.toml`.
+Every selectable service lives in its own directory and has one catalog entry. A logical group such as Tracearr keeps its application and dedicated dependencies in that directory with one `compose.yml`, one `environment.env`, and one README. Declare its ordered container keys in `compose_services`; internal containers are not separate catalog choices. Do not create separate "extra" or "addon" aggregate files. Keep service order, dependencies, source paths, and descriptions explicit and documented in `catalog/catalog.toml`.
 
 Services using named Docker volumes declare their unique keys in catalog `named_volumes`. The renderer emits only selected declarations without global names, so Compose scopes storage to the project. Document backup exports and destructive teardown behavior; omit empty config seed directories for volume-only dependencies.
 

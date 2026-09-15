@@ -43,6 +43,12 @@ Write the service README for maintainers: state what the chart owns, name its un
 
 For named Docker volumes, add `named_volumes = ["example-data"]` to the service catalog entry and reference that key in its Compose chart. The renderer declares selected volumes at the top level without a global `name` or `external` flag. Keys must be unique across services. Document how operators export backups before `make nuke`, which deletes these volumes. Omit `config/` when a service has no host config seeds.
 
+## Group dedicated containers
+
+When an application and its dedicated dependencies must always deploy together, keep them in one service directory with a shared `compose.yml`, `environment.env`, and README. Declare their ordered Compose keys in the catalog, for example `compose_services = ["tracearr-db", "tracearr-redis", "tracearr"]`. The list must include the primary service key and cannot reuse a key owned by another catalog entry. All definitions must exist in that same chart. Omit this field for single-container services.
+
+Use `requires` for dependencies that are independently selectable services. Internal members of a group are not separate catalog entries or picker choices. Define database settings before application connection URIs in the shared environment fragment so Compose can resolve those references.
+
 ## Handle environment values and secrets
 
 Put service-owned defaults in `environment.env`. Never place real credentials in source. If a safe first run requires a generated secret, add that variable to `_generate_first_run_secrets` and test both fresh generation and preservation of an existing value.

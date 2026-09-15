@@ -275,24 +275,6 @@ category = "Monitoring and notifications"
 url = "https://notifiarr.wiki/pages/client/install/"
 order = 620
 
-# Tracearr dependencies stay private to the generated project network.
-[services.tracearr-db]
-title = "Tracearr database"
-description = "Stores Tracearr history in PostgreSQL with TimescaleDB and Toolkit."
-category = "Monitoring and notifications"
-url = "https://docs.tracearr.com/getting-started/installation"
-order = 630
-named_volumes = ["tracearr-db-data"]
-
-# Redis supports Tracearr background jobs and caching.
-[services.tracearr-redis]
-title = "Tracearr Redis"
-description = "Provides Tracearr's persistent queue and cache."
-category = "Monitoring and notifications"
-url = "https://docs.tracearr.com/getting-started/installation"
-order = 640
-named_volumes = ["tracearr-redis-data"]
-
 # Tracearr is the preferred, removable Plundarr media-monitoring service.
 [services.tracearr]
 title = "Tracearr"
@@ -300,8 +282,9 @@ description = "Monitors Plex, Jellyfin, and Emby streams and viewing history."
 category = "Monitoring and notifications"
 url = "https://tracearr.com"
 order = 650
-requires = ["tracearr-db", "tracearr-redis"]
-named_volumes = ["tracearr-backups"]
+# All three containers are one selectable service with shared settings and storage.
+compose_services = ["tracearr-db", "tracearr-redis", "tracearr"]
+named_volumes = ["tracearr-db-data", "tracearr-redis-data", "tracearr-backups"]
 
 # Duplicati backs up selected configuration and host data.
 [services.duplicati]

@@ -69,8 +69,6 @@ class MaraudarrTests(unittest.TestCase):
                 "calibre-web-automated",
                 "cleanuparr",
                 "speedtest-tracker",
-                "tracearr-db",
-                "tracearr-redis",
                 "tracearr",
                 "duplicati",
                 "homepage",
@@ -1039,18 +1037,22 @@ class MaraudarrTests(unittest.TestCase):
             self.catalog.resolve("custom", selected=set(self.catalog.services)),
         )
 
-        for service in self.catalog.services.values():
-            block = extract_service(compose, service.service)
+        for name in (
+            name
+            for service in self.catalog.services.values()
+            for name in service.compose_services
+        ):
+            block = extract_service(compose, name)
             tag_match = re.search(
                 r"^\s*image:.*\$\{([A-Z][A-Z0-9_]*_TAG)\}",
                 block,
                 re.MULTILINE,
             )
-            with self.subTest(service=service.id):
+            with self.subTest(service=name):
                 self.assertIsNotNone(tag_match)
                 tag_variable = tag_match.group(1)
                 self.assertIn(
-                    f"container_name: ${{COMPOSE_PROJECT_NAME}}-{service.id}-${{{tag_variable}}}",
+                    f"container_name: ${{COMPOSE_PROJECT_NAME}}-{name}-${{{tag_variable}}}",
                     block,
                 )
 
@@ -1064,8 +1066,14 @@ class MaraudarrTests(unittest.TestCase):
             "hostname:",
             "network_mode:",
         )
-        for service in self.catalog.services.values():
-            source = self.catalog.source_path(service.compose).read_text()
+        for service, name in (
+            (service, name)
+            for service in self.catalog.services.values()
+            for name in service.compose_services
+        ):
+            source = extract_service(
+                self.catalog.source_path(service.compose).read_text(), name
+            )
             block = source.split("# Docker image and container information", 1)[1]
             block = block.split("\n\n", 1)[0]
             comment_columns = {
@@ -1073,11 +1081,11 @@ class MaraudarrTests(unittest.TestCase):
                 for line in block.splitlines()
                 if line.strip().startswith(identity_keys) and "#" in line
             }
-            with self.subTest(service=service.id):
+            with self.subTest(service=name):
                 self.assertEqual(
                     len(comment_columns),
                     1,
-                    f"Service '{service.id}' identity comments are not aligned.",
+                    f"Service '{name}' identity comments are not aligned.",
                 )
 
     def test_inline_comments_have_two_spaces_before_the_hash(self) -> None:

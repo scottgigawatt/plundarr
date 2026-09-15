@@ -237,16 +237,17 @@ def render_compose(catalog: Catalog, plan: StackPlan) -> str:
     service_blocks = []
     for service in plan.services:
         source = catalog.source_path(service.compose).read_text()
-        block = extract_service(source, service.service)
-        service_blocks.append(
-            _prepare_service(
-                block,
-                service.id,
-                selected,
-                include_native_plex,
-                plan.preset.media_libraries,
+        for name in service.compose_services:
+            block = extract_service(source, name)
+            service_blocks.append(
+                _prepare_service(
+                    block,
+                    service.id if name == service.service else name,
+                    selected,
+                    include_native_plex,
+                    plan.preset.media_libraries,
+                )
             )
-        )
 
     # Compose supplies the project prefix; avoid explicit global volume names.
     volume_lines = [
