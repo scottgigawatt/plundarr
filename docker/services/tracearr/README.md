@@ -6,4 +6,8 @@ One catalog entry owns all three containers in this directory: `tracearr`, `trac
 
 The host port defaults to `3080`; the container and Homepage widget use `3000`. Tracearr is eligible for automatic Watchtower updates; its database and Redis remain excluded. See the [monitoring guide](../../../docs/project-guides/monitoring.md) for setup, supported architectures, backup exports, and cleanup behavior.
 
-The database uses the upstream-recommended TimescaleDB HA image with PostgreSQL 18 and Toolkit. Redis uses append-only persistence for queued jobs. Both use project-scoped named volumes and have no published host ports. The shared environment fragment defines database settings before application connection URIs so Compose can resolve their references.
+The database uses the upstream-recommended TimescaleDB HA image with PostgreSQL 18 and Toolkit. The `pg18` default follows PostgreSQL 18 patch and TimescaleDB releases; set `TRACEARR_DB_TAG` to an exact upstream tag when a fixed version is needed.
+
+Set `TRACEARR_DB_NOFILE_SOFT` and `TRACEARR_DB_NOFILE_HARD` in `.env` to adjust the database open-file limits; both default to `65536`, and the soft limit must not exceed the hard limit.
+
+Redis uses append-only persistence for queued jobs. The database and Redis use project-scoped named volumes and have no published host ports. The shared environment fragment defines database settings before application connection URIs so Compose can resolve their references.

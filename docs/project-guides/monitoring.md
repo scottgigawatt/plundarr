@@ -39,8 +39,9 @@ Edit the generated `dist/<preset>/.env`. The standard deployment follows [Tracea
 | `TRACEARR_DB_USER` / `TRACEARR_DB_NAME` | `tracearr` | PostgreSQL account and database name |
 | `TRACEARR_DATABASE_URL` | Derived from database settings | Application PostgreSQL connection URI |
 | `TRACEARR_REDIS_URL` | `redis://tracearr-redis:6379` | Application Redis connection URI |
-| `TRACEARR_DB_TAG` | `pg18.4-ts2.29.1` | Pinned TimescaleDB HA / PostgreSQL 18 image |
+| `TRACEARR_DB_TAG` | `pg18` | TimescaleDB HA channel tracking PostgreSQL 18 patch and TimescaleDB releases |
 | `TRACEARR_DB_SHM_SIZE` | `512mb` | Database shared-memory allocation |
+| `TRACEARR_DB_NOFILE_SOFT` / `TRACEARR_DB_NOFILE_HARD` | `65536` | Database open-file limits; soft must not exceed hard |
 | `TRACEARR_REDIS_TAG` | `8-alpine` | Redis image channel |
 | `TRACEARR_LOG_LEVEL` | `info` | Application logging verbosity |
 | `TRACEARR_TRUST_PROXY` | `false` | Enable only behind a trusted reverse proxy |

@@ -21,11 +21,11 @@ services:
     labels: *disable-watchtower-updates
 
     # Match upstream shared-memory and TimescaleDB import requirements
-    shm_size: ${TRACEARR_DB_SHM_SIZE}  # Shared memory available to PostgreSQL
+    shm_size: ${TRACEARR_DB_SHM_SIZE}     # Shared memory available to PostgreSQL
     ulimits:
       nofile:
-        soft: 65536  # Initial open-file limit
-        hard: 65536  # Maximum open-file limit
+        soft: ${TRACEARR_DB_NOFILE_SOFT}  # Initial open-file limit
+        hard: ${TRACEARR_DB_NOFILE_HARD}  # Maximum open-file limit
 
     # Apply the database settings required by Tracearr
     command:
