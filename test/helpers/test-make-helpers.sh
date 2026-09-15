@@ -265,6 +265,19 @@ if grep -E '(^|[[:space:]])docker([[:space:]]|$)|rm -rf .*dist|rm -rf .*\.env|de
 fi
 
 #
+# Reject free-form teardown overrides before any deployment command can run.
+#
+for options in '--volumes' '-v' '--timeout 30 --volumes' ''; do
+    if make --dry-run down COMPOSE_DOWN_OPTIONS="${options}" \
+        >"${test_output}/unsafe-down.out" 2>&1; then
+        echo "Make accepted a free-form teardown override." >&2
+        exit 1
+    fi
+    grep -F 'COMPOSE_DOWN_OPTIONS is not configurable' \
+        "${test_output}/unsafe-down.out" >/dev/null
+done
+
+#
 # Keep ordinary down volume- and image-preserving.
 #
 NO_COLOR=1 make --dry-run down \
@@ -273,7 +286,7 @@ NO_COLOR=1 make --dry-run down \
     COMPOSE_ENV_FILE="${test_output}/stack.env" \
     COMPOSE_FILE="${test_output}/compose.yml" \
     >"${test_output}/down.out"
-grep -F 'down --timeout 30 --remove-orphans' "${test_output}/down.out" >/dev/null
+grep -F 'down --timeout "30" --remove-orphans' "${test_output}/down.out" >/dev/null
 if grep -E 'down .*--volumes|down .*--rmi' "${test_output}/down.out" >/dev/null; then
     echo "The down target includes destructive volume or image options." >&2
     exit 1

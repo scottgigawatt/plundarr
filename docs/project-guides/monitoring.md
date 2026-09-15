@@ -66,7 +66,7 @@ Existing operator-edited Homepage files are preserved. Add the [Tracearr widget]
 
 ## Back up and update
 
-Tracearr's database, Redis state, and backup workspace use project-scoped named Docker volumes. Docker manages their permissions; regeneration and `make down` preserve them. Watchtower can update Tracearr automatically. Its database and Redis remain excluded from unattended updates. Review upstream release notes and export a backup before deliberately changing image tags or database versions.
+Tracearr's database, Redis state, and backup workspace use project-scoped named Docker volumes. Docker manages their permissions; regeneration, `make down`, and `make nuke` preserve them. Watchtower can update Tracearr automatically. Its database and Redis remain excluded from unattended updates. Review upstream release notes and export a backup before deliberately changing image tags or database versions.
 
 Create a consistent application backup, then export it into the generated config tree so your existing host backup tooling can collect it:
 
@@ -80,6 +80,6 @@ make backup PRESET=plundarr
 `make backup` archives the host config tree; it does not dump databases or copy named volumes. Duplicati likewise needs exported backup files in its configured source paths. Downloading a backup through Tracearr's web interface is another option. Use the application's backup and restore interface for restoration; do not copy live PostgreSQL data files.
 
 > [!CAUTION]
-> `make nuke` deletes this project's named volumes, including Tracearr history and backups still inside its backup volume. Export and verify a backup first. `make delete-config` deletes the host config tree, including exports stored there. Keep a separate backup copy before either destructive operation.
+> `make delete-config` deletes the host config tree, including exported backups stored there. Keep a separate verified backup before using it. The database and internal backup volumes survive deployment cleanup, including `make nuke`.
 
 Retain the matching `.env` and an off-host copy of exported backups. Your viewing history deserves a lifeboat.

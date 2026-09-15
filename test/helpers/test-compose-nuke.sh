@@ -83,7 +83,7 @@ grep -F "compose --project-name test-project --env-file ${test_output}/project.e
     "${test_output}/nuke.log" >/dev/null
 grep -F "compose --project-name test-project --env-file ${test_output}/project.env --file ${test_output}/compose-file.yml config --images" \
     "${test_output}/nuke.log" >/dev/null
-grep -F "compose --project-name test-project --env-file ${test_output}/project.env --file ${test_output}/compose-file.yml down --timeout 45 --volumes --remove-orphans --rmi all" \
+grep -F "compose --project-name test-project --env-file ${test_output}/project.env --file ${test_output}/compose-file.yml down --timeout 45 --remove-orphans --rmi all" \
     "${test_output}/nuke.log" >/dev/null
 grep -F 'image rm test/service:local' "${test_output}/nuke.log" >/dev/null
 grep -F 'image rm test/additional:local' "${test_output}/nuke.log" >/dev/null
@@ -93,7 +93,7 @@ grep -F "Retaining shared or in-use base image: test/shared-base:1" \
 grep -F 'buildx rm --force test-builder' "${test_output}/nuke.log" >/dev/null
 
 test "$(grep -c 'image rm test/service:local' "${test_output}/nuke.log")" -eq 1
-if grep -E 'system prune|image prune|volume prune|builder prune|--all-inactive|buildx rm --force unrelated-builder' \
+if grep -E -- '--volumes|(^| )-v( |$)|volume rm|system prune|image prune|volume prune|builder prune|--all-inactive|buildx rm --force unrelated-builder' \
     "${test_output}/nuke.log" >/dev/null; then
     echo "Compose nuke helper invoked a global or unrelated cleanup command." >&2
     exit 1

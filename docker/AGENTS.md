@@ -31,7 +31,7 @@ This directory is the complete Docker build context for Maraudarr. Do not make t
 
 Every selectable service lives in its own directory and has one catalog entry. A logical group such as Tracearr keeps its application and dedicated dependencies in that directory with one `compose.yml`, one `environment.env`, and one README. Declare its ordered container keys in `compose_services`; internal containers are not separate catalog choices. Do not create separate "extra" or "addon" aggregate files. Keep service order, dependencies, source paths, and descriptions explicit and documented in `catalog/catalog.toml`.
 
-Services using named Docker volumes declare their unique keys in catalog `named_volumes`. The renderer emits only selected declarations without global names, so Compose scopes storage to the project. Document backup exports and destructive teardown behavior; omit empty config seed directories for volume-only dependencies.
+Services using named Docker volumes declare their unique keys in catalog `named_volumes`. The renderer emits only selected declarations without global names, so Compose scopes storage to the project. Deployment cleanup must preserve these volumes. Document backup exports and host-config deletion separately; omit empty config seed directories for volume-only dependencies.
 
 Keep the category comments and add a concise comment immediately above every service and preset table so catalog readers can understand both the group and the entry's role without reading the renderer.
 

@@ -277,7 +277,7 @@ make test
 `make clean` removes disposable repository artifacts only. `make down PRESET=<preset>` stops the selected project while preserving volumes, images, `.env`, config, backups, and generated credentials.
 
 > [!CAUTION]
-> `make nuke PRESET=<preset>` removes attributable Docker resources, images, volumes, and scoped build cache for the selected deployment and the separate Maraudarr project. It preserves deployment files and bind-mounted config, but deletes state in named volumes, including Tracearr history and its internal backups. Export backups first. `make delete-config PRESET=<preset>` deletes the host config tree, including exported backups stored there.
+> `make nuke PRESET=<preset>` stops the selected deployment and removes its containers, networks, eligible images, and the separate Maraudarr project and scoped build cache. It preserves application volumes, including Tracearr history and internal backups, deployment files, and bind-mounted config. Restarting may require image downloads. `make delete-config PRESET=<preset>` deletes the host config tree, including exported backups stored there.
 
 VPN and full-stack tests can use real PIA credentials and launch containers. Read the [testing guide](test/README.md) before running `make test-vpn`, `make test-e2e`, or `make test-stack`.
 

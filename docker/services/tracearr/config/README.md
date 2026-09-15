@@ -4,6 +4,6 @@ Tracearr stores its database and backup workspace in project-scoped Docker volum
 
 Create a backup through Tracearr's web interface or its backup CLI, then export `/data/backup/` from the `tracearr` service into this directory. The repository's `make backup` command archives host config files only; it does not dump Tracearr's database. Keep a separate copy of exports and the generated `.env`.
 
-Regeneration preserves exports. `make nuke` removes the database and backup volumes, while `make delete-config` removes this host directory and its exports. Export and verify a backup before destructive cleanup.
+Regeneration preserves exports. `make nuke` preserves the database and backup volumes. `make delete-config` removes this host directory and its exports. Keep a separate verified backup before deleting host configuration.
 
 See the [monitoring guide](https://github.com/scottgigawatt/plundarr/blob/main/docs/project-guides/monitoring.md) for complete commands and supported setup.

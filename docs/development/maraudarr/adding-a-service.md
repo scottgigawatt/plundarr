@@ -41,7 +41,7 @@ Write the service README for maintainers: state what the chart owns, name its un
 - Add `depends_on` health conditions only for real startup requirements.
 - Use two spaces before inline Compose comments and align logical groups.
 
-For named Docker volumes, add `named_volumes = ["example-data"]` to the service catalog entry and reference that key in its Compose chart. The renderer declares selected volumes at the top level without a global `name` or `external` flag. Keys must be unique across services. Document how operators export backups before `make nuke`, which deletes these volumes. Omit `config/` when a service has no host config seeds.
+For named Docker volumes, add `named_volumes = ["example-data"]` to the service catalog entry and reference that key in its Compose chart. The renderer declares selected volumes at the top level without a global `name` or `external` flag. Keys must be unique across services. Deployment cleanup, including `make nuke`, preserves these volumes. Document application backup exports because host config archives do not include named-volume state. Omit `config/` when a service has no host config seeds.
 
 ## Group dedicated containers
 
