@@ -17,14 +17,17 @@ services:
     container_name: ${COMPOSE_PROJECT_NAME}-tracearr-db-${TRACEARR_DB_TAG}  # Namespace by project and tag
     hostname: tracearr-db                                                   # Private database hostname
 
+    # Keep database upgrades under operator control
     labels: *disable-watchtower-updates
 
     # Match upstream shared-memory and TimescaleDB import requirements
-    shm_size: ${TRACEARR_DB_SHM_SIZE}
+    shm_size: ${TRACEARR_DB_SHM_SIZE}  # Shared memory available to PostgreSQL
     ulimits:
       nofile:
-        soft: 65536
-        hard: 65536
+        soft: 65536  # Initial open-file limit
+        hard: 65536  # Maximum open-file limit
+
+    # Apply the database settings required by Tracearr
     command:
       - postgres
       - -c
@@ -38,20 +41,23 @@ services:
       - -c
       - max_connections=150
 
+    # Define the container environment
     environment:
-      POSTGRES_USER: tracearr
-      POSTGRES_DB: tracearr
-      POSTGRES_PASSWORD: ${TRACEARR_DB_PASSWORD}
+      POSTGRES_USER: ${TRACEARR_DB_USER}          # PostgreSQL account used by Tracearr
+      POSTGRES_DB: ${TRACEARR_DB_NAME}            # Database containing Tracearr state
+      POSTGRES_PASSWORD: ${TRACEARR_DB_PASSWORD}  # Password for the PostgreSQL account
 
+    # Mount persistent volumes into the container
     volumes:
-      - tracearr-db-data:/home/postgres/pgdata/data:rw
+      - tracearr-db-data:/home/postgres/pgdata/data:rw  # PostgreSQL data owned by the database user
 
+    # Define container healthcheck to verify PostgreSQL connectivity
     healthcheck:
-      <<: *default-healthcheck-settings
-      test:
+      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
+      test:                              # Check whether PostgreSQL accepts connections
         - CMD
         - pg_isready
         - -U
-        - tracearr
+        - ${TRACEARR_DB_USER}
         - -d
-        - tracearr
+        - ${TRACEARR_DB_NAME}

@@ -17,40 +17,41 @@ services:
     container_name: ${COMPOSE_PROJECT_NAME}-tracearr-${TRACEARR_TAG}  # Namespace by project and tag
     hostname: tracearr                                                # Project-local service hostname
 
-    # Database upgrades and matching application releases require intentional updates
-    labels: *disable-watchtower-updates
-
+    # Define the container environment
     environment:
-      <<: *default-environment
-      NODE_ENV: production
-      HOST: 0.0.0.0
-      PORT: 3000
-      DATABASE_URL: postgres://tracearr:${TRACEARR_DB_PASSWORD}@tracearr-db:5432/tracearr
-      REDIS_URL: redis://tracearr-redis:6379
-      JWT_SECRET: ${TRACEARR_JWT_SECRET}
-      COOKIE_SECRET: ${TRACEARR_COOKIE_SECRET}
-      BETTER_AUTH_SECRET: ${TRACEARR_AUTH_SECRET}
-      LOG_LEVEL: ${TRACEARR_LOG_LEVEL}
-      TRUST_PROXY: ${TRACEARR_TRUST_PROXY}
+      <<: *default-environment                     # Pull in the default environment
+      NODE_ENV: ${TRACEARR_NODE_ENV}               # Node.js runtime mode
+      HOST: ${TRACEARR_HOST}                       # Address on which the application listens
+      PORT: ${TRACEARR_PORT}                       # Container web UI and API port
+      DATABASE_URL: ${TRACEARR_DATABASE_URL}       # PostgreSQL connection URI
+      REDIS_URL: ${TRACEARR_REDIS_URL}             # Redis queue and cache connection URI
+      JWT_SECRET: ${TRACEARR_JWT_SECRET}           # Sign application authentication tokens
+      COOKIE_SECRET: ${TRACEARR_COOKIE_SECRET}     # Encrypt session cookies
+      BETTER_AUTH_SECRET: ${TRACEARR_AUTH_SECRET}  # Sign and encrypt login sessions
+      LOG_LEVEL: ${TRACEARR_LOG_LEVEL}             # Application logging verbosity
+      TRUST_PROXY: ${TRACEARR_TRUST_PROXY}         # Trust headers from a configured reverse proxy
 
+    # Define the host and container ports
     ports:
-      - ${TRACEARR_WEBUI_PORT}:3000  # Web interface and API
+      - ${TRACEARR_WEBUI_PORT}:${TRACEARR_PORT}  # Tracearr web UI and API port
 
-    # Keep backups writable by the upstream non-root user
+    # Mount persistent volumes into the container
     volumes:
-      - tracearr-backups:/data/backup:rw
+      - tracearr-backups:/data/backup:rw  # Backup workspace owned by the application user
 
+    # Define container healthcheck to verify Tracearr connectivity
     healthcheck:
-      <<: *default-healthcheck-settings
-      test:
+      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
+      test:                              # Check Tracearr readiness endpoint
         - CMD
         - wget
         - -q
         - --spider
-        - "http://127.0.0.1:3000/health"
+        - http://127.0.0.1:${TRACEARR_PORT}/health
 
+    # Specify container service dependencies
     depends_on:
       tracearr-db:
-        condition: service_healthy
+        condition: service_healthy  # Wait until PostgreSQL is healthy
       tracearr-redis:
-        condition: service_healthy
+        condition: service_healthy  # Wait until Redis is healthy

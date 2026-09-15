@@ -17,15 +17,23 @@ services:
     container_name: ${COMPOSE_PROJECT_NAME}-tracearr-redis-${TRACEARR_REDIS_TAG}  # Namespace by project and tag
     hostname: tracearr-redis                                                      # Private queue and cache hostname
 
+    # Keep Redis upgrades under operator control
     labels: *disable-watchtower-updates
 
-    command: ["redis-server", "--appendonly", "yes"]
-    volumes:
-      - tracearr-redis-data:/data:rw
+    # Persist queued jobs between container restarts
+    command:
+      - redis-server
+      - --appendonly
+      - "yes"
 
+    # Mount persistent volumes into the container
+    volumes:
+      - tracearr-redis-data:/data:rw  # Persistent Redis queue and cache data
+
+    # Define container healthcheck to verify Redis connectivity
     healthcheck:
-      <<: *default-healthcheck-settings
-      test:
+      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
+      test:                              # Check Redis responds to a ping
         - CMD
         - redis-cli
         - ping

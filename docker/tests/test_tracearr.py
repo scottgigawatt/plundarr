@@ -64,7 +64,10 @@ class TracearrTests(unittest.TestCase):
         self.assertNotIn("external:", footer)
         for service_id in plan.service_ids:
             service = extract_service(compose, service_id)
-            self.assertIn("labels: *disable-watchtower-updates", service)
+            if service_id == "tracearr":
+                self.assertNotIn("disable-watchtower-updates", service)
+            else:
+                self.assertIn("labels: *disable-watchtower-updates", service)
             if service_id != "tracearr":
                 self.assertNotIn("    ports:", service)
         database = self.catalog.resolve("custom", selected={"tracearr-db"})
@@ -121,6 +124,6 @@ class TracearrTests(unittest.TestCase):
                     self.assertEqual(f"HOMEPAGE_VAR_{monitor.upper()}_KEY" in compose, monitor in monitors)
                     self.assertEqual(f"HOMEPAGE_VAR_{monitor.upper()}_KEY" in environment, monitor in monitors)
                 if "tracearr" in monitors:
-                    self.assertIn("http://tracearr:3000", environment)
+                    self.assertIn("HOMEPAGE_VAR_TRACEARR_URL:-http://tracearr:${TRACEARR_PORT}}", environment)
                     self.assertNotIn("${HOMEPAGE_VAR_TRACEARR_URL}:${TRACEARR_WEBUI_PORT}", compose)
                     self.assertIn("view: summary", homepage)
