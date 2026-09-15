@@ -1,0 +1,57 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# compose.yml: Maraudarr service chart for tracearr-db.
+#
+
+services:
+  #
+  # Define the 'tracearr-db' service.
+  #
+  tracearr-db:
+    # Docker image and container information
+    <<: *default-container                                                  # Pull in the default container information
+    image: timescale/timescaledb-ha:${TRACEARR_DB_TAG}                      # Upstream recommended PostgreSQL 18 baseline
+    container_name: ${COMPOSE_PROJECT_NAME}-tracearr-db-${TRACEARR_DB_TAG}  # Namespace by project and tag
+    hostname: tracearr-db                                                   # Private database hostname
+
+    labels: *disable-watchtower-updates
+
+    # Match upstream shared-memory and TimescaleDB import requirements
+    shm_size: ${TRACEARR_DB_SHM_SIZE}
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    command:
+      - postgres
+      - -c
+      - timescaledb.license=timescale
+      - -c
+      - timescaledb.max_tuples_decompressed_per_dml_transaction=100000
+      - -c
+      - max_locks_per_transaction=4096
+      - -c
+      - timescaledb.telemetry_level=off
+      - -c
+      - max_connections=150
+
+    environment:
+      POSTGRES_USER: tracearr
+      POSTGRES_DB: tracearr
+      POSTGRES_PASSWORD: ${TRACEARR_DB_PASSWORD}
+
+    volumes:
+      - tracearr-db-data:/home/postgres/pgdata/data:rw
+
+    healthcheck:
+      <<: *default-healthcheck-settings
+      test:
+        - CMD
+        - pg_isready
+        - -U
+        - tracearr
+        - -d
+        - tracearr

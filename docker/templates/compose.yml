@@ -57,8 +57,8 @@ x-rootless-container: &rootless-container  # YAML anchor for rootless containers
 # Labels for containers that should not be updated unattended by Watchtower.
 #
 # Privateerr and Gluetun coordinate VPN configuration, tunnel startup, and
-# port-forwarding behavior. Calibre-Web Automated and Portainer can migrate persistent
-# databases during upgrades. Update these services intentionally after checking
+# port-forwarding behavior. Calibre-Web Automated, Portainer, and Tracearr can migrate
+# persistent databases during upgrades. Update these services intentionally after checking
 # release notes so their stateful changes happen under supervision.
 #
 x-disable-watchtower-updates: &disable-watchtower-updates  # Disable unattended Watchtower updates

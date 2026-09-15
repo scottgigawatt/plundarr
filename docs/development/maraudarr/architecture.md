@@ -67,7 +67,7 @@ Compose and environment files are written to a temporary directory inside the re
 
 Config seeding follows a different safety rule: missing seeds are copied, project-owned README files may be refreshed, and existing application files are never replaced. Destructive cleanup belongs exclusively to the explicit `make delete-config` target.
 
-`make nuke` removes project Docker resources and transient runtime residue but does not call `delete-config`; generated `.env`, backups, and application state remain intact.
+`make nuke` removes project Docker resources and transient runtime residue but does not call `delete-config`; generated `.env`, host backups, and bind-mounted application state remain intact. Named-volume state, including Tracearr databases and internal backups, is deleted; export backups first.
 
 ## Understand failure boundaries
 

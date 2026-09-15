@@ -46,7 +46,7 @@ Removes comments, trailing whitespace, and empty lines from configuration output
 
 ### `compose/backup.sh`
 
-Archives one generated preset's complete config directory with a timestamped name. An incrementing suffix prevents a same-second backup from replacing an existing archive. `make backup PRESET=<preset>` is the normal entry point.
+Archives one generated preset's complete config directory with a timestamped name. An incrementing suffix prevents a same-second backup from replacing an existing archive. `make backup PRESET=<preset>` is the normal entry point. This archives host config files only; export [Tracearr backups](https://github.com/scottgigawatt/plundarr/blob/main/docs/project-guides/monitoring.md#back-up-and-update) first so named-volume database state is included.
 
 ### `compose/check-pia-credentials.sh`
 
@@ -56,7 +56,7 @@ Reads resolved Compose environment values from standard input and fails when a P
 
 Validates one selected Compose model before deleting anything, captures its service images, runs project-scoped teardown with volumes, orphans, and service images, then removes explicitly supplied local image references and one named Buildx builder. Plundarr calls the same helper separately for the generated project and the explicitly named `maraudarr` Compose project that runs Maraudarr.
 
-Repeated `--dockerfile` and `--additional-image` arguments avoid shell command evaluation. Missing resources are harmless; unexpected Compose, Docker, or builder failures stop the helper. Repository files, `.env`, config, and backups remain Make's protected responsibility.
+Repeated `--dockerfile` and `--additional-image` arguments avoid shell command evaluation. Missing resources are harmless; unexpected Compose, Docker, or builder failures stop the helper. Repository files, `.env`, bind-mounted config, and host backups remain Make's protected responsibility. Named-volume application state and internal backups are deleted; export Tracearr backups before teardown.
 
 ### `compose/ps.sh`
 

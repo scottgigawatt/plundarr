@@ -31,6 +31,8 @@ This directory is the complete Docker build context for Maraudarr. Do not make t
 
 Every selectable service lives in its own directory and has one catalog entry. Do not create separate "extra" or "addon" aggregate files. Keep service order, dependencies, source paths, and descriptions explicit and documented in `catalog/catalog.toml`.
 
+Services using named Docker volumes declare their unique keys in catalog `named_volumes`. The renderer emits only selected declarations without global names, so Compose scopes storage to the project. Document backup exports and destructive teardown behavior; omit empty config seed directories for volume-only dependencies.
+
 Keep the category comments and add a concise comment immediately above every service and preset table so catalog readers can understand both the group and the entry's role without reading the renderer.
 
 All TOML in this build context uses two-space indentation for multi-line arrays. Comment every table and any dependency or metadata choice whose purpose is not obvious from its key.

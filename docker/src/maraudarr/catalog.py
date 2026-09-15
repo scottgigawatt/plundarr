@@ -11,6 +11,7 @@
 from __future__ import annotations
 
 import os
+import re
 from ipaddress import IPv4Address, IPv4Network, ip_address, ip_network
 from pathlib import Path
 
@@ -92,6 +93,9 @@ class Catalog:
                 values.get("environment", f"{base_path}/environment.env")
             ),
             service=service_name,
+            named_volumes=tuple(
+                str(item) for item in values.get("named_volumes", [])
+            ),
             requires=tuple(str(item) for item in values.get("requires", [])),
             recommended=tuple(
                 str(item) for item in values.get("recommended", [])
@@ -119,7 +123,18 @@ class Catalog:
 
     def _validate(self) -> None:
         """Reject missing sources and cross-references before resolution."""
+        volume_owners: dict[str, str] = {}
         for service in self.services.values():
+            for volume in service.named_volumes:
+                if not re.fullmatch(r"[a-z][a-z0-9_-]*", volume):
+                    raise CatalogError(
+                        f"Service '{service.id}' has invalid named volume: {volume!r}."
+                    )
+                if volume in volume_owners:
+                    raise CatalogError(
+                        f"Named volume '{volume}' has multiple declarations."
+                    )
+                volume_owners[volume] = service.id
             for relative_path in (service.compose, service.environment):
                 if not self.source_path(relative_path).is_file():
                     raise CatalogError(

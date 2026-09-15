@@ -29,6 +29,7 @@ class Service:
         service: Compose service key extracted from the source chart.
         requires: Service IDs added automatically as hard dependencies.
         recommended: Related service IDs shown as non-mandatory companions.
+        named_volumes: Project-scoped Compose volume keys owned by this service.
     """
 
     id: str
@@ -42,6 +43,7 @@ class Service:
     service: str
     requires: tuple[str, ...]
     recommended: tuple[str, ...]
+    named_volumes: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)

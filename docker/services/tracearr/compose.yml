@@ -1,0 +1,56 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# compose.yml: Maraudarr service chart for tracearr.
+#
+
+services:
+  #
+  # Define the 'tracearr' service.
+  #
+  tracearr:
+    # Docker image and container information
+    <<: *default-container                                            # Pull in the default container information
+    image: ghcr.io/connorgallopo/tracearr:${TRACEARR_TAG}             # Official stable channel
+    container_name: ${COMPOSE_PROJECT_NAME}-tracearr-${TRACEARR_TAG}  # Namespace by project and tag
+    hostname: tracearr                                                # Project-local service hostname
+
+    # Database upgrades and matching application releases require intentional updates
+    labels: *disable-watchtower-updates
+
+    environment:
+      <<: *default-environment
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 3000
+      DATABASE_URL: postgres://tracearr:${TRACEARR_DB_PASSWORD}@tracearr-db:5432/tracearr
+      REDIS_URL: redis://tracearr-redis:6379
+      JWT_SECRET: ${TRACEARR_JWT_SECRET}
+      COOKIE_SECRET: ${TRACEARR_COOKIE_SECRET}
+      BETTER_AUTH_SECRET: ${TRACEARR_AUTH_SECRET}
+      LOG_LEVEL: ${TRACEARR_LOG_LEVEL}
+      TRUST_PROXY: ${TRACEARR_TRUST_PROXY}
+
+    ports:
+      - ${TRACEARR_WEBUI_PORT}:3000  # Web interface and API
+
+    # Keep backups writable by the upstream non-root user
+    volumes:
+      - tracearr-backups:/data/backup:rw
+
+    healthcheck:
+      <<: *default-healthcheck-settings
+      test:
+        - CMD
+        - wget
+        - -q
+        - --spider
+        - "http://127.0.0.1:3000/health"
+
+    depends_on:
+      tracearr-db:
+        condition: service_healthy
+      tracearr-redis:
+        condition: service_healthy

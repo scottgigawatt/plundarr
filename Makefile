@@ -953,7 +953,7 @@ $(HELP):
 	$(call help_line,$(RESTORE_TEST_CONFIG),Restore example VPN config files for tests.)
 	$(call help_line,$(CLEAN_TEST),Stop the stack and restore example test config.)
 	$(call help_line,$(CLEAN),Remove only disposable developer artifacts.)
-	$(call help_line,$(NUKE),‼️ DANGER ‼️ remove Plundarr and Maraudarr Docker resources.)
+	$(call help_line,$(NUKE),‼️ DANGER ‼️ remove Docker resources including named-volume application data.)
 	$(call help_heading,🧭 Plundarr and Maraudarr tools)
 	$(call help_line,$(PULL_IMAGE),Pull the latest published Maraudarr image.)
 	$(call help_line,$(SHIP),Generate a preset deployment (default: plundarr).)
