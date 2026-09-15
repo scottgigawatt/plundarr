@@ -5,10 +5,10 @@ Deployments containing Privateerr include these controls in the generated `.env`
 | Setting | Default | Behavior |
 | --- | --- | --- |
 | `PIA_AUTOCONNECT` | `true` | Select the lowest-latency eligible region; `false` uses the preferred region. |
-| `PIA_PREFERRED_REGION` | `ca_toronto` | PIA region ID to use when automatic selection is disabled. |
+| `PIA_PREFERRED_REGION` | `ca` | PIA region ID to use when automatic selection is disabled. |
 | `PIA_PF` | `true` | Filter automatic selection to regions that advertise port forwarding. |
 
-To select Toronto, change `PIA_AUTOCONNECT` to `false`. To choose another region, also edit `PIA_PREFERRED_REGION`; Canadian examples include `ca` (Montreal), `ca_vancouver`, and `ca_ontario`. Set `PIA_AUTOCONNECT` back to `true` to resume automatic selection; the saved preferred region is ignored until you disable it again. Dedicated-IP deployments use `PIA_DIP_TOKEN` instead of region selection.
+To select Montreal, change `PIA_AUTOCONNECT` to `false`. To choose another region, also edit `PIA_PREFERRED_REGION`; Canadian alternatives include `ca_toronto` (Toronto), `ca_vancouver`, and `ca_ontario`. Set `PIA_AUTOCONNECT` back to `true` to resume automatic selection; the saved preferred region is ignored until you disable it again. Dedicated-IP deployments use `PIA_DIP_TOKEN` instead of region selection.
 
 Apply changes by recreating the complete selected stack. Replace `YOUR-PRESET` with your generated preset name:
 

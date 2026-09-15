@@ -447,7 +447,7 @@ class MaraudarrTests(unittest.TestCase):
                 self.assertIn("PREFERRED_REGION: ${PIA_PREFERRED_REGION}", privateerr)
                 self.assertIn('PIA_AUTOCONNECT="${PIA_AUTOCONNECT:-true}"', environment)
                 self.assertIn(
-                    'PIA_PREFERRED_REGION="${PIA_PREFERRED_REGION:-ca_toronto}"',
+                    'PIA_PREFERRED_REGION="${PIA_PREFERRED_REGION:-ca}"',
                     environment,
                 )
 
@@ -472,7 +472,7 @@ class MaraudarrTests(unittest.TestCase):
                     expected = (
                         f'PIA_PREFERRED_REGION="{preferred_region}"'
                         if preferred_region is not None
-                        else 'PIA_PREFERRED_REGION="${PIA_PREFERRED_REGION:-ca_toronto}"'
+                        else 'PIA_PREFERRED_REGION="${PIA_PREFERRED_REGION:-ca}"'
                     )
                     self.assertIn(expected, environment)
 
