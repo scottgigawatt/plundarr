@@ -30,6 +30,7 @@ Maraudarr copies this README into every generated `dist/<preset>/config/` direct
 | 🔔 `apprise`           | Delivers notification cargo to supported services        |
 | 🔞 `whisparr`          | Adult media automation for the Boudoirr voyage           |
 | 🔭 `watchtower`        | Optional or standalone container image updater           |
+| 🚢 `portainer`         | Optional or standalone Docker management interface      |
 
 Each folder follows the same general format: configuration files go in and persistent state stays. Docker Compose maps these directories automatically.
 

@@ -8,7 +8,7 @@ Each preset owns its Compose project name, network defaults, high-level media ro
 
 Preset `core` services cannot be removed. Preset `defaults` are only preselected in the interactive picker and may be unchecked. Plundarr and Boudoirr use this boundary to default to qBittorrent and Watchtower while leaving SABnzbd and NZBGet as independent opt-in services. Calibre-Web Automated is another removable Plundarr default and the only core service in its standalone preset. The focused Watchtower preset makes the same updater available as its own persistent or one-shot project.
 
-Preset bridge subnets occupy the private, sequential `172.20.0.0/16` through `172.28.0.0/16` range, with `172.26.0.0/16` intentionally left outside this catalog for the separately deployed Paperless project. Each bridge uses its preset's `.5.0/24` address pool and `.5.254` gateway.
+Preset bridge networks have distinct, sequential defaults. Operators can change the subnet, address pool, and gateway together in the generated `.env` to suit their host.
 
 Duplex keeps Kometa, ImageMaid, and Tautulli in `core`. PATTRMM, Notifiarr, and the profile-gated Overlay Reset tool live in `defaults`, so the generated preset includes them out of the box while the interactive picker may remove them. Watchtower remains selectable but is not a Duplex default. PATTRMM and Overlay Reset require Kometa because both consume its external configuration tree.
 

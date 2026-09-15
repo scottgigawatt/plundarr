@@ -67,6 +67,7 @@ make ship PRESET=plex
 make ship PRESET=calibre-web-automated
 make ship PRESET=duplex
 make ship PRESET=watchtower
+make ship PRESET=portainer
 make ship ADD_SERVICES=lidarr,recyclarr
 make ship ADD_SERVICES=sonarr-anime
 ```
@@ -85,6 +86,8 @@ The default Plundarr voyage includes one Sonarr instance. `sonarr-anime` is an o
 Lidarr and Recyclarr are opt-in Plundarr additions. Lidarr adds Prowlarr automatically, shares the download root, and writes the music library selected by `HOST_MUSIC_PATH`; its LinuxServer image supports `linux/amd64` and `linux/arm64`, not `linux/arm/v7`. Recyclarr remains behind the `tools` profile and runs only through `make recyclarr-preview` or the deliberate `make recyclarr-sync` target. Its starter configuration is seeded once and preserved during regeneration.
 
 Calibre-Web Automated keeps its configuration, destructive ingest directory, and Calibre library on three separate mounts. Its image supports `linux/amd64` and `linux/arm64`; Watchtower does not update it automatically because application releases may migrate persistent databases.
+
+The `portainer` preset runs only Portainer Community Edition on its official `lts` channel, with persistent data and configurable HTTPS and Edge ports. See the [Portainer deployment guide](../docs/project-guides/portainer.md).
 
 The `watchtower` preset runs the maintained `nickfedor/watchtower:latest` image persistently. Use `make watchtower-run-once PRESET=watchtower` instead for one host-wide update pass that exits when complete. Run only one persistent Watchtower daemon per Docker host.
 

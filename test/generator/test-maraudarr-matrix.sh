@@ -110,6 +110,7 @@ run_distribution_case plex
 run_distribution_case calibre-web-automated
 run_distribution_case duplex
 run_distribution_case watchtower
+run_distribution_case portainer
 run_distribution_case custom --add homepage
 
 #
@@ -176,6 +177,8 @@ run_case standalone-jellyfin --preset jellyfin
 run_case standalone-plex --preset plex
 run_case standalone-calibre-web-automated --preset calibre-web-automated
 run_case standalone-watchtower --preset watchtower
+run_case standalone-portainer --preset portainer
+run_case plundarr-with-portainer --preset plundarr --add portainer
 
 #
 # Calibre-Web Automated remains removable from the default Plundarr voyage.
@@ -230,7 +233,7 @@ run_case custom-homepage \
 #
 run_case everything \
     --preset plundarr \
-    --add apprise,imagemaid,jellyfin,lidarr,notifiarr,nzbget,overlay-reset,pattrmm,plex,recyclarr,sabnzbd,sonarr-anime,tautulli,watchtower,whisparr
+    --add portainer,apprise,imagemaid,jellyfin,lidarr,notifiarr,nzbget,overlay-reset,pattrmm,plex,recyclarr,sabnzbd,sonarr-anime,tautulli,watchtower,whisparr
 
 #
 # Report one clear success line after every Compose chart passes.

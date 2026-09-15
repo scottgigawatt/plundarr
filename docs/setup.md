@@ -20,6 +20,7 @@ make ship PRESET=plex
 make ship PRESET=calibre-web-automated
 make ship PRESET=duplex
 make ship PRESET=watchtower
+make ship PRESET=portainer
 make ship ADD_SERVICES=lidarr
 make ship ADD_SERVICES=recyclarr
 make ship ADD_SERVICES=sonarr-anime
@@ -44,23 +45,11 @@ dist/<preset>/
 > [!IMPORTANT]
 > Review the generated `.env` before launch. Confirm user and group IDs, host storage paths, timezone, project network values, and published ports. Presets containing Privateerr and Gluetun also require real `PIA_USER` and `PIA_PASS` values; startup rejects missing or generated example credentials.
 
+For VPN-enabled deployments, see [Choose a VPN region](project-guides/vpn.md) to configure automatic selection or pin a preferred region through `.env`.
+
 ## Plan project networks
 
 Maraudarr gives each preset a distinct Compose project, bridge network, and default host-port range so fresh deployments can run side by side.
-
-| Preset | Project | Default subnet | Published ports |
-| --- | --- | --- | --- |
-| Plundarr | `plundarr` | `172.20.0.0/16` | Standard service ports; CWA `8213` |
-| Boudoirr | `boudoirr` | `172.21.0.0/16` | Selected ports offset by `10000` |
-| Jellyfin | `jellyfin` | `172.22.0.0/16` | Jellyfin `28096` |
-| Plex | `plex` | `172.23.0.0/16` | Plex host networking |
-| Calibre-Web Automated | `calibre-web-automated` | `172.24.0.0/16` | CWA `48213` |
-| Duplex | `duplex` | `172.25.0.0/16` | Tautulli `8181`; Notifiarr `5454` |
-| Paperless reservation | External project | `172.26.0.0/16` | Reserved outside the Maraudarr catalog |
-| Watchtower | `watchtower` | `172.27.0.0/16` | No published ports |
-| Custom | `custom` | `172.28.0.0/16` | Selected ports offset by `30000` |
-
-Every bridge-network preset uses `.5.0/24` as its container address pool and `.5.254` as its gateway inside the listed `/16`. The `172.26.0.0/16` reservation keeps the separately deployed Paperless project in sequence without pretending it is a Maraudarr preset. Container names include the project, service, and image tag, such as `plundarr-bazarr-latest`.
 
 Change the generated network only when it overlaps another Docker network, virtual private network (VPN), local-area network route, or host service. Update `COMPOSE_NETWORK_SUBNET`, `COMPOSE_NETWORK_IP_RANGE`, and `COMPOSE_NETWORK_GATEWAY` together. The [Docker Compose IPAM reference](https://docs.docker.com/compose/compose-file/06-networks/#ipam) explains custom address planning.
 
@@ -80,34 +69,6 @@ Omit `PRESET` for the default `plundarr` deployment. Inspect the resolved Compos
 make config PRESET=<preset>
 make ps PRESET=<preset>
 ```
-
-## Choose a VPN region 🧭
-
-Deployments containing Privateerr include these controls in the generated `.env`:
-
-| Setting | Default | Behavior |
-| --- | --- | --- |
-| `PIA_AUTOCONNECT` | `true` | Select the lowest-latency eligible region; `false` uses the preferred region. |
-| `PIA_PREFERRED_REGION` | `ca_toronto` | PIA region ID to use when automatic selection is disabled. |
-| `PIA_PF` | `true` | Filter automatic selection to regions that advertise port forwarding. |
-
-To select Toronto, change `PIA_AUTOCONNECT` to `false`. To choose another region, also edit `PIA_PREFERRED_REGION`; Canadian examples include `ca` (Montreal), `ca_vancouver`, and `ca_ontario`. Set `PIA_AUTOCONNECT` back to `true` to resume automatic selection; the saved preferred region is ignored until you disable it again. Dedicated-IP deployments use `PIA_DIP_TOKEN` instead of region selection.
-
-Apply changes by recreating the complete selected stack. Replace `YOUR-PRESET` with your generated preset name:
-
-```sh
-make up PRESET=YOUR-PRESET
-```
-
-For a deployment managed directly with Docker Compose, run this from its generated project directory:
-
-```sh
-docker compose up --detach --force-recreate
-```
-
-In Synology Container Manager, rebuild the existing project using its updated `.env`. A container restart alone does not reload environment changes. Recreate the complete project so Gluetun and applications sharing its network are recreated together. Privateerr generates fresh WireGuard configuration and metadata before Gluetun starts; keep the generated Compose mappings in place.
-
-Check Privateerr's logs for the selected region and Gluetun's logs for successful port forwarding. PIA's advertised forwarding support does not guarantee its forwarding API is currently available. If a region's API fails, choose another forwarding-capable region in `.env` and recreate the project. No manual Compose edits are needed. Steer around the storm, captain.
 
 ## Configure the Synology firewall
 

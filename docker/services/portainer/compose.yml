@@ -1,0 +1,32 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# compose.yml: Maraudarr service chart for Portainer Community Edition.
+#
+
+services:
+  #
+  # Define the 'portainer' service for Docker management.
+  #
+  portainer:
+    # Docker image and container information
+    <<: *default-container                                              # Pull in the default container information
+    image: portainer/portainer-ce:${PORTAINER_TAG}                      # Run the selected Portainer channel
+    container_name: ${COMPOSE_PROJECT_NAME}-portainer-${PORTAINER_TAG}  # Namespace the container name by project and tag
+    hostname: portainer                                                 # Set the container hostname
+
+    # Keep database upgrades under operator control
+    labels: *disable-watchtower-updates
+
+    # Publish HTTPS and Edge agent tunnel ports
+    ports:
+      - ${PORTAINER_WEB_PORT}:9443   # HTTPS management interface
+      - ${PORTAINER_EDGE_PORT}:8000  # Edge agent tunnel
+
+    # Persist Portainer data and connect to the host Docker API
+    volumes:
+      - ${PORTAINER_CONFIG_PATH}:/data:rw             # Portainer database and configuration
+      - /var/run/docker.sock:/var/run/docker.sock:rw  # Manage the local Docker environment
+      - /etc/localtime:/etc/localtime:ro              # Use the host timezone data

@@ -50,6 +50,8 @@ nav:
   - Project Guides:
       - Guide map: project-guides/index.md
       - Synology setup: setup.md
+      - VPN regions: project-guides/vpn.md
+      - Portainer: project-guides/portainer.md
       - Testing: project-guides/testing.md
       - Host scripts: project-guides/scripts.md
       - Documentation style: documentation-style.md

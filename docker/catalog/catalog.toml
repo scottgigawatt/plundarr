@@ -291,6 +291,14 @@ category = "Operations"
 url = "https://github.com/nicholas-fedor/watchtower"
 order = 900
 
+# Portainer provides an optional Docker management interface.
+[services.portainer]
+title = "Portainer"
+description = "Manages Docker environments through the Portainer Community Edition web interface."
+category = "Operations"
+url = "https://www.portainer.io/"
+order = 905
+
 # Overlay Reset is profile-gated and runs only through an explicit one-shot command.
 [services.overlay-reset]
 title = "Kometa Overlay Reset"
@@ -472,9 +480,9 @@ defaults = ["pattrmm", "notifiarr", "overlay-reset"]
 title = "Watchtower"
 description = "A standalone updater for eligible containers on one Docker host."
 project_name = "watchtower"
-network_subnet = "172.27.0.0/16"
-network_ip_range = "172.27.5.0/24"
-network_gateway = "172.27.5.254"
+network_subnet = "172.26.0.0/16"
+network_ip_range = "172.26.5.0/24"
+network_gateway = "172.26.5.254"
 media_root = "/volume1/plex"
 media_libraries = []
 host_port_offset = 0
@@ -486,6 +494,29 @@ compose_summary = [
   "Containers with an explicit disable label remain outside its control.",
 ]
 core = ["watchtower"]
+defaults = []
+
+#
+# Portainer provides a standalone Docker management project.
+#
+# This preset runs only the Community Edition server.
+[presets.portainer]
+title = "Portainer"
+description = "A standalone Portainer Community Edition server for Docker management."
+project_name = "portainer"
+network_subnet = "172.27.0.0/16"
+network_ip_range = "172.27.5.0/24"
+network_gateway = "172.27.5.254"
+media_root = "/volume1/plex"
+media_libraries = []
+host_port_offset = 0
+compose_summary = [
+  "docker-compose.yml: Docker Compose configuration for running Portainer",
+  "                    Community Edition with persistent local data.",
+  "",
+  "Portainer uses the Docker socket to manage containers on this host.",
+]
+core = ["portainer"]
 defaults = []
 
 #
