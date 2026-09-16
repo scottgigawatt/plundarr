@@ -78,11 +78,9 @@ The workflow-helper suite validates release-tag inputs, Discord payloads, regist
 
 Run the isolated cleanup acceptance after changing Compose lifecycle or nuke behavior:
 
-> [!CAUTION]
->
-> ```sh
-> test/runtime/test-compose-cleanup-live.sh
-> ```
+```sh
+test/runtime/test-compose-cleanup-live.sh
+```
 
 It creates random `plundarr-test-` projects and unrelated sentinels on the real Docker daemon. The test proves `down` preserves volumes and images, then proves `nuke` removes containers, networks, eligible images, and its named builder while retaining application volumes. It restarts the stack and verifies stored contents. It never uses `dist/`, a repository `.env`, or PIA credentials.
 
@@ -172,7 +170,7 @@ make restore-test-config
 make clean
 ```
 
-`make delete-config` is deliberately absent from that routine cleanup example: it destroys the selected deployment's application state.
+`make delete-config` is deliberately absent from that routine cleanup example: it deletes the selected deployment's host configuration and exported backups. Named-volume data remains intact.
 
 `clean-test` uses the volume-preserving `down` path. `nuke` removes Docker resources for the selected generated project and the separate `maraudarr` Compose project that runs Maraudarr, then clears disposable runtime state and restores examples. It never invokes `delete-config`, and it preserves application volumes, `.env`, backups, and persistent application config.
 

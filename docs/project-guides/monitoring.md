@@ -66,16 +66,31 @@ Existing operator-edited Homepage files are preserved. Add the [Tracearr widget]
 
 ## Back up and update
 
-Tracearr's database, Redis state, and backup workspace use project-scoped named Docker volumes. Docker manages their permissions; regeneration, `make down`, and `make nuke` preserve them. Watchtower can update Tracearr automatically. Its database and Redis remain excluded from unattended updates. Review upstream release notes and export a backup before deliberately changing image tags or database versions.
+Tracearr's database, Redis state, and backup workspace use project-scoped named Docker volumes. Docker manages their permissions; regeneration, `make down`, and `make nuke` preserve them.
 
-Create a consistent application backup, then export it into the generated config tree so your existing host backup tooling can collect it:
+Watchtower can update Tracearr automatically. Its database and Redis are excluded from Watchtower updates. `make up` still pulls all selected images, so it can update a floating database or Redis tag. Review upstream release notes and export a backup before updating; use an exact image tag in `.env` when you need a fixed version.
 
-```sh
-docker compose --project-directory dist/plundarr exec -T tracearr node apps/server/scripts/backup.ts
-mkdir -p dist/plundarr/config/tracearr/backups
-docker compose --project-directory dist/plundarr cp tracearr:/data/backup/. dist/plundarr/config/tracearr/backups/
-make backup PRESET=plundarr
-```
+With Tracearr running, create and export a consistent application backup. These commands use the `plundarr` preset; substitute your deployment directory and preset when using another project.
+
+1. Create a backup and confirm the command reports success.
+
+   ```sh
+   docker compose --project-directory dist/plundarr exec -T tracearr node apps/server/scripts/backup.ts
+   ```
+
+2. Copy the backup files from the application volume into the host config tree.
+
+   ```sh
+   mkdir -p dist/plundarr/config/tracearr/backups
+   docker compose --project-directory dist/plundarr cp tracearr:/data/backup/. dist/plundarr/config/tracearr/backups/
+   ```
+
+3. Confirm the exported backup archive exists, then include it in the host config backup.
+
+   ```sh
+   ls -lh dist/plundarr/config/tracearr/backups/
+   make backup PRESET=plundarr
+   ```
 
 `make backup` archives the host config tree; it does not dump databases or copy named volumes. Duplicati likewise needs exported backup files in its configured source paths. Downloading a backup through Tracearr's web interface is another option. Use the application's backup and restore interface for restoration; do not copy live PostgreSQL data files.
 
