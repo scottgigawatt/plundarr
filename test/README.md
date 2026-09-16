@@ -78,13 +78,13 @@ The workflow-helper suite validates release-tag inputs, Discord payloads, regist
 
 Run the isolated cleanup acceptance after changing Compose lifecycle or nuke behavior:
 
-> [!CAUTION]
->
-> ```sh
-> test/runtime/test-compose-cleanup-live.sh
-> ```
+```sh
+test/runtime/test-compose-cleanup-live.sh
+```
 
-It creates uniquely named disposable projects and unrelated sentinels on the real Docker daemon. The test proves `down` preserves volumes and images, then proves `nuke` removes only its project resources and named builder. It never uses `dist/`, a repository `.env`, or PIA credentials.
+It creates random `plundarr-test-` projects and unrelated sentinels on the real Docker daemon. The test proves `down` preserves volumes and images, then proves `nuke` removes containers, networks, eligible images, and its named builder while retaining application volumes. It restarts the stack and verifies stored contents. It never uses `dist/`, a repository `.env`, or PIA credentials.
+
+Test teardown records volumes created by that run and calls `runtime/remove-test-volume.sh` for each exact name. The helper requires a matching test-name prefix, Compose project label, and test-run label before removal; names alone never authorize deletion. Missing volumes are harmless, and failed ownership checks or Docker failures prevent that volume from being removed. If cleanup fails, the test retains its resource ledger and exits with an error. `helpers/test-test-volume-cleanup.sh` checks rejection paths with a Docker stub.
 
 Use this when the full Plundarr stack is already running:
 
@@ -162,17 +162,16 @@ These files match the Privateerr examples exactly. Cleanup targets copy them bac
 Useful cleanup commands:
 
 > [!CAUTION]
-> `make nuke` removes the selected deployment's Docker resources. It preserves `.env`, backups, and persistent application config.
+> `make nuke` stops services and removes containers, networks, eligible images, and scoped build cache. Application volumes, `.env`, host backups, and persistent application config remain intact. Restarting may require image downloads.
 
 ```sh
 make clean-test
 make restore-test-config
-make nuke
 make clean
 ```
 
-`make delete-config` is deliberately absent from that routine cleanup example: it destroys the selected deployment's application state.
+`make delete-config` is deliberately absent from that routine cleanup example: it deletes the selected deployment's host configuration and exported backups. Named-volume data remains intact.
 
-`clean-test` uses the volume-preserving `down` path. `nuke` removes Docker resources for the selected generated project and the separate `maraudarr` Compose project that runs Maraudarr, then clears disposable runtime state and restores examples. It never invokes `delete-config`, and it preserves `.env`, backups, and persistent application config.
+`clean-test` uses the volume-preserving `down` path. `nuke` removes Docker resources for the selected generated project and the separate `maraudarr` Compose project that runs Maraudarr, then clears disposable runtime state and restores examples. It never invokes `delete-config`, and it preserves application volumes, `.env`, backups, and persistent application config.
 
 Run cleanup before committing after any real VPN voyage. Future ye will thank past ye. 🏴‍☠️

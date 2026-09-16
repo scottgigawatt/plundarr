@@ -228,6 +228,11 @@ run_case custom-homepage \
     --preset custom \
     --add homepage
 
+# Monitoring dependencies and optional alternatives remain independently selectable.
+run_case tracearr --preset custom --add tracearr,homepage
+run_case plundarr-without-tracearr --preset plundarr --remove tracearr
+run_case duplex-monitoring --preset duplex --add tracearr,tautulli,homepage
+
 #
 # Every catalog service in one chart catches cross-service interpolation errors.
 #

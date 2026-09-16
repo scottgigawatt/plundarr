@@ -6,7 +6,7 @@
 # Licensed under the Apache License, Version 2.0.
 #
 # nuke.sh: Remove Docker resources attributable to one Compose project while
-#          leaving repository files, bind-mounted config, and backups intact.
+#          preserving application volumes, repository files, and host backups.
 #
 # Usage: scripts/compose/nuke.sh --docker-bin <path> --compose-mode <mode>
 #        --compose-file <path> --env-file <path> --down-timeout <seconds>
@@ -333,11 +333,10 @@ sort -u "${temporary_directory}/base-images.raw" \
     >"${temporary_directory}/base-images"
 
 #
-# Remove the selected Compose project and its directly attributable resources.
+# Remove containers, networks, and images while preserving every application volume.
 #
 compose_project down \
     --timeout "${down_timeout}" \
-    --volumes \
     --remove-orphans \
     --rmi all \
     || fail "Docker Compose could not remove ${project_description}."
@@ -371,4 +370,4 @@ if [ -n "${builder_name}" ]; then
     fi
 fi
 
-echo "Removed Docker resources for ${project_description}."
+echo "Removed containers, networks, and eligible images for ${project_description}; application volumes preserved."

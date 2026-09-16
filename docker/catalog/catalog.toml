@@ -275,6 +275,17 @@ category = "Monitoring and notifications"
 url = "https://notifiarr.wiki/pages/client/install/"
 order = 620
 
+# Tracearr is the preferred, removable Plundarr media-monitoring service.
+[services.tracearr]
+title = "Tracearr"
+description = "Monitors Plex, Jellyfin, and Emby streams and viewing history."
+category = "Monitoring and notifications"
+url = "https://tracearr.com"
+order = 650
+# All three containers are one selectable service with shared settings and storage.
+compose_services = ["tracearr-db", "tracearr-redis", "tracearr"]
+named_volumes = ["tracearr-db-data", "tracearr-redis-data", "tracearr-backups"]
+
 # Duplicati backs up selected configuration and host data.
 [services.duplicati]
 title = "Duplicati"
@@ -345,7 +356,7 @@ core = [
   "duplicati",
   "homepage",
 ]
-defaults = ["qbittorrent", "calibre-web-automated", "cleanuparr", "watchtower"]
+defaults = ["qbittorrent", "calibre-web-automated", "cleanuparr", "watchtower", "tracearr"]
 
 #
 # Boudoirr reuses the same catalog for an adult-media-focused stack.
@@ -448,12 +459,12 @@ core = ["calibre-web-automated"]
 defaults = []
 
 #
-# Duplex collects Plex maintenance, monitoring, notifications, and recovery.
+# Duplex collects Plex maintenance, notifications, and recovery.
 #
 # PATTRMM and the operational companions remain removable preset defaults.
 [presets.duplex]
 title = "Duplex"
-description = "Plex metadata, artwork, monitoring, notifications, and recovery tools."
+description = "Plex metadata, artwork, notifications, and recovery tools."
 project_name = "duplex"
 network_subnet = "172.25.0.0/16"
 network_ip_range = "172.25.5.0/24"
@@ -463,13 +474,13 @@ media_libraries = []
 host_port_offset = 0
 compose_summary = [
   "docker-compose.yml: Docker Compose configuration for running Duplex's",
-  "                    Plex metadata, artwork, monitoring, notification,",
+  "                    Plex metadata, artwork, notification,",
   "                    and recovery utilities.",
   "",
   "Kometa uses an external configuration checkout. Overlay Reset stays behind",
   "the tools profile and runs only when explicitly invoked as a one-shot job.",
 ]
-core = ["kometa", "imagemaid", "tautulli"]
+core = ["kometa", "imagemaid"]
 defaults = ["pattrmm", "notifiarr", "overlay-reset"]
 
 #

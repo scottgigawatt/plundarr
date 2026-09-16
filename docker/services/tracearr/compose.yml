@@ -1,0 +1,143 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# compose.yml: Maraudarr service chart for tracearr.
+#
+
+services:
+  #
+  # Define the 'tracearr-db' service.
+  #
+  tracearr-db:
+    # Docker image and container information
+    <<: *default-container                                                  # Pull in the default container information
+    image: timescale/timescaledb-ha:${TRACEARR_DB_TAG}                      # Upstream recommended PostgreSQL 18 baseline
+    container_name: ${COMPOSE_PROJECT_NAME}-tracearr-db-${TRACEARR_DB_TAG}  # Namespace by project and tag
+    hostname: tracearr-db                                                   # Private database hostname
+
+    # Keep database upgrades under operator control
+    labels: *disable-watchtower-updates
+
+    # Match upstream shared-memory and TimescaleDB import requirements
+    shm_size: ${TRACEARR_DB_SHM_SIZE}     # Shared memory available to PostgreSQL
+    ulimits:
+      nofile:
+        soft: ${TRACEARR_DB_NOFILE_SOFT}  # Initial open-file limit
+        hard: ${TRACEARR_DB_NOFILE_HARD}  # Maximum open-file limit
+
+    # Apply the database settings required by Tracearr
+    command:
+      - postgres
+      - -c
+      - timescaledb.license=timescale
+      - -c
+      - timescaledb.max_tuples_decompressed_per_dml_transaction=100000
+      - -c
+      - max_locks_per_transaction=4096
+      - -c
+      - timescaledb.telemetry_level=off
+      - -c
+      - max_connections=150
+
+    # Define the container environment
+    environment:
+      POSTGRES_USER: ${TRACEARR_DB_USER}          # PostgreSQL account used by Tracearr
+      POSTGRES_DB: ${TRACEARR_DB_NAME}            # Database containing Tracearr state
+      POSTGRES_PASSWORD: ${TRACEARR_DB_PASSWORD}  # Password for the PostgreSQL account
+
+    # Mount persistent volumes into the container
+    volumes:
+      - tracearr-db-data:/home/postgres/pgdata/data:rw  # PostgreSQL data owned by the database user
+
+    # Define container healthcheck to verify PostgreSQL connectivity
+    healthcheck:
+      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
+      test:                              # Check whether PostgreSQL accepts connections
+        - CMD
+        - pg_isready
+        - -U
+        - ${TRACEARR_DB_USER}
+        - -d
+        - ${TRACEARR_DB_NAME}
+
+  #
+  # Define the 'tracearr-redis' service.
+  #
+  tracearr-redis:
+    # Docker image and container information
+    <<: *default-container                                                        # Pull in the default container information
+    image: redis:${TRACEARR_REDIS_TAG}                                            # Supported Redis major
+    container_name: ${COMPOSE_PROJECT_NAME}-tracearr-redis-${TRACEARR_REDIS_TAG}  # Namespace by project and tag
+    hostname: tracearr-redis                                                      # Private queue and cache hostname
+
+    # Keep Redis upgrades under operator control
+    labels: *disable-watchtower-updates
+
+    # Persist queued jobs between container restarts
+    command:
+      - redis-server
+      - --appendonly
+      - "yes"
+
+    # Mount persistent volumes into the container
+    volumes:
+      - tracearr-redis-data:/data:rw  # Persistent Redis queue and cache data
+
+    # Define container healthcheck to verify Redis connectivity
+    healthcheck:
+      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
+      test:                              # Check Redis responds to a ping
+        - CMD
+        - redis-cli
+        - ping
+
+  #
+  # Define the 'tracearr' service.
+  #
+  tracearr:
+    # Docker image and container information
+    <<: *default-container                                            # Pull in the default container information
+    image: ghcr.io/connorgallopo/tracearr:${TRACEARR_TAG}             # Official stable channel
+    container_name: ${COMPOSE_PROJECT_NAME}-tracearr-${TRACEARR_TAG}  # Namespace by project and tag
+    hostname: tracearr                                                # Project-local service hostname
+
+    # Define the container environment
+    environment:
+      <<: *default-environment                     # Pull in the default environment
+      NODE_ENV: ${TRACEARR_NODE_ENV}               # Node.js runtime mode
+      HOST: ${TRACEARR_HOST}                       # Address on which the application listens
+      PORT: ${TRACEARR_PORT}                       # Container web UI and API port
+      DATABASE_URL: ${TRACEARR_DATABASE_URL}       # PostgreSQL connection URI
+      REDIS_URL: ${TRACEARR_REDIS_URL}             # Redis queue and cache connection URI
+      JWT_SECRET: ${TRACEARR_JWT_SECRET}           # Sign application authentication tokens
+      COOKIE_SECRET: ${TRACEARR_COOKIE_SECRET}     # Encrypt session cookies
+      BETTER_AUTH_SECRET: ${TRACEARR_AUTH_SECRET}  # Sign and encrypt login sessions
+      LOG_LEVEL: ${TRACEARR_LOG_LEVEL}             # Application logging verbosity
+      TRUST_PROXY: ${TRACEARR_TRUST_PROXY}         # Trust headers from a configured reverse proxy
+
+    # Define the host and container ports
+    ports:
+      - ${TRACEARR_WEBUI_PORT}:${TRACEARR_PORT}  # Tracearr web UI and API port
+
+    # Mount persistent volumes into the container
+    volumes:
+      - tracearr-backups:/data/backup:rw  # Backup workspace owned by the application user
+
+    # Define container healthcheck to verify Tracearr connectivity
+    healthcheck:
+      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
+      test:                              # Check Tracearr readiness endpoint
+        - CMD
+        - wget
+        - -q
+        - --spider
+        - http://127.0.0.1:${TRACEARR_PORT}/health
+
+    # Specify container service dependencies
+    depends_on:
+      tracearr-db:
+        condition: service_healthy  # Wait until PostgreSQL is healthy
+      tracearr-redis:
+        condition: service_healthy  # Wait until Redis is healthy

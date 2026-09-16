@@ -44,6 +44,8 @@ flowchart TB
 
 Core services are restored in step 3 and cannot be removed. Default services are only the preset's initial checkbox state, so users can replace qBittorrent with a Usenet client, remove Watchtower where it defaults, or select both download modes without a separate add-on mechanism.
 
+A logical service may declare `compose_services` to include several containers from one source chart. Tracearr owns its application, database, and Redis this way, so selection and removal always apply to the complete group.
+
 The result is an immutable `StackPlan`. Renderers consume that plan rather than repeating selection logic.
 
 ## 3. Render without flattening intent
@@ -67,7 +69,7 @@ Compose and environment files are written to a temporary directory inside the re
 
 Config seeding follows a different safety rule: missing seeds are copied, project-owned README files may be refreshed, and existing application files are never replaced. Destructive cleanup belongs exclusively to the explicit `make delete-config` target.
 
-`make nuke` removes project Docker resources and transient runtime residue but does not call `delete-config`; generated `.env`, backups, and application state remain intact.
+`make nuke` removes project Docker resources and transient runtime residue but does not call `delete-config`; generated `.env`, host backups, and bind-mounted application state remain intact. All application volumes, including Tracearr databases and internal backups, remain intact. Only isolated tests may delete their recorded volumes after verifying ownership labels.
 
 ## Understand failure boundaries
 

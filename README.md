@@ -117,7 +117,7 @@ Use `make configure` for an interactive picker or pass `PRESET` to `make ship` f
 | 🎞️ `jellyfin` | Standalone Jellyfin media server |
 | 🎬 `plex` | Standalone Plex Media Server |
 | 📚 `calibre-web-automated` | Standalone ebook library and automatic ingest service |
-| 🎭 `duplex` | Plex metadata, artwork, monitoring, and maintenance tools |
+| 🎭 `duplex` | Plex metadata, artwork, and maintenance tools |
 | 🔭 `watchtower` | Standalone container image updates |
 | 🚢 `portainer` | Standalone Docker management with Portainer CE |
 | 🧩 `custom` | A stack assembled service by service |
@@ -199,6 +199,10 @@ Set `CWA_CONFIG_PATH`, `CWA_INGEST_PATH`, and `CWA_LIBRARY_PATH` to three separa
 
 CWA image updates remain excluded from Watchtower so database migrations stay under operator control. The published CWA image supports `linux/amd64` and `linux/arm64`, not `linux/arm/v7`.
 
+### Monitor media servers
+
+Tracearr is the preferred, removable monitor in Plundarr. Maraudarr includes its private TimescaleDB and Redis dependencies and generates its credentials. Tautulli remains optional in every preset. See the [monitoring guide](docs/project-guides/monitoring.md) for selection, Homepage integration, and exporting backups from Docker volumes.
+
 ### Configure Duplex
 
 Generate the Plex maintenance preset:
@@ -273,7 +277,7 @@ make test
 `make clean` removes disposable repository artifacts only. `make down PRESET=<preset>` stops the selected project while preserving volumes, images, `.env`, config, backups, and generated credentials.
 
 > [!CAUTION]
-> `make nuke PRESET=<preset>` removes attributable Docker resources, images, volumes, and scoped build cache for the selected deployment and the separate Maraudarr project. It preserves deployment files and application config. Only `make delete-config PRESET=<preset>` deletes application state; back up the deployment before using it.
+> `make nuke PRESET=<preset>` stops the selected deployment and removes its containers, networks, eligible images, and the separate Maraudarr project and scoped build cache. It preserves application volumes, including Tracearr history and internal backups, deployment files, and bind-mounted config. Restarting may require image downloads. `make delete-config PRESET=<preset>` deletes the host config tree, including exported backups stored there.
 
 VPN and full-stack tests can use real PIA credentials and launch containers. Read the [testing guide](test/README.md) before running `make test-vpn`, `make test-e2e`, or `make test-stack`.
 

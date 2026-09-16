@@ -155,6 +155,7 @@ def _prepare_service(
     if service_id == "homepage":
         homepage_groups = {
             "Homepage Plex click target and widget": include_native_plex,
+            "Homepage Tracearr click target and widget": "tracearr" in selected,
             "Homepage Tautulli click target and widget": "tautulli" in selected,
             "Homepage Radarr click target and widget": "radarr" in selected,
             "Homepage Sonarr click target and widget": "sonarr" in selected,
@@ -236,23 +237,34 @@ def render_compose(catalog: Catalog, plan: StackPlan) -> str:
     service_blocks = []
     for service in plan.services:
         source = catalog.source_path(service.compose).read_text()
-        block = extract_service(source, service.service)
-        service_blocks.append(
-            _prepare_service(
-                block,
-                service.id,
-                selected,
-                include_native_plex,
-                plan.preset.media_libraries,
+        for name in service.compose_services:
+            block = extract_service(source, name)
+            service_blocks.append(
+                _prepare_service(
+                    block,
+                    service.id if name == service.service else name,
+                    selected,
+                    include_native_plex,
+                    plan.preset.media_libraries,
+                )
             )
-        )
 
+    # Compose supplies the project prefix; avoid explicit global volume names.
+    volume_lines = [
+        f"  # Persistent storage owned by {service.id}.\n  {volume}: {{}}"
+        for service in plan.services
+        for volume in service.named_volumes
+    ]
+    volume_section = (
+        "\nvolumes:\n" + "\n".join(volume_lines) + "\n" if volume_lines else ""
+    )
     return (
         render_header(plan)
         + extract_foundation(base_source)
         + "\n\n".join(block.rstrip("\n") for block in service_blocks)
         + "\n\n"
         + extract_footer(base_source)
+        + volume_section
     )
 
 
@@ -264,6 +276,7 @@ def _filter_homepage_env(
     """Remove Homepage environment groups for unavailable integrations."""
     groups = {
         "Homepage Plex click-target and widget variables": include_native_plex,
+        "Homepage Tracearr click-target and widget variables": "tracearr" in selected,
         "Homepage Tautulli click-target and widget variables": "tautulli" in selected,
         "Homepage Radarr click-target and widget variables": "radarr" in selected,
         "Homepage Sonarr click-target and widget variables": "sonarr" in selected,
@@ -377,6 +390,10 @@ def _generate_first_run_secrets(rendered: str, existing: dict[str, str]) -> str:
         "DUPLICATI_SETTINGS_ENCRYPTION_KEY": secrets.token_urlsafe(32),
         "DUPLICATI_WEBSERVICE_PASSWORD": secrets.token_urlsafe(18),
         "NZBGET_PASS": secrets.token_urlsafe(18),
+        "TRACEARR_DB_PASSWORD": secrets.token_hex(32),
+        "TRACEARR_JWT_SECRET": secrets.token_hex(32),
+        "TRACEARR_COOKIE_SECRET": secrets.token_hex(32),
+        "TRACEARR_AUTH_SECRET": secrets.token_hex(32),
     }
     for key, value in generated.items():
         if key in existing:
@@ -585,6 +602,8 @@ def render_homepage_services(catalog: Catalog, plan: StackPlan) -> str:
     data_cards = []
     if selected.intersection({"radarr", "sonarr", "lidarr"}):
         data_cards.append(_filter_calendar(_homepage_card(source, "Calendar"), selected))
+    if "tracearr" in selected:
+        data_cards.append(_homepage_card(source, "Tracearr"))
     if "tautulli" in selected:
         data_cards.append(_homepage_card(source, "Tautulli"))
 

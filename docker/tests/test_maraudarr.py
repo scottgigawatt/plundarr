@@ -69,6 +69,7 @@ class MaraudarrTests(unittest.TestCase):
                 "calibre-web-automated",
                 "cleanuparr",
                 "speedtest-tracker",
+                "tracearr",
                 "duplicati",
                 "homepage",
                 "watchtower",
@@ -265,14 +266,13 @@ class MaraudarrTests(unittest.TestCase):
                 "kometa",
                 "imagemaid",
                 "pattrmm",
-                "tautulli",
                 "notifiarr",
                 "overlay-reset",
             ),
         )
         self.assertIn("image: kometateam/kometa:${KOMETA_TAG}", compose)
         self.assertIn("image: kometateam/imagemaid:${IMAGE_MAID_TAG}", compose)
-        self.assertIn("image: ghcr.io/tautulli/tautulli:${TAUTULLI_TAG}", compose)
+        self.assertNotIn("  tautulli:", compose)
         self.assertIn("${KOMETA_CONFIG_PATH}:/config:rw", compose)
         self.assertIn("${IMAGEMAID_PLEX_PATH}:/plex:rw", compose)
         self.assertIn("profiles:\n      - tools", extract_service(compose, "overlay-reset"))
@@ -290,14 +290,13 @@ class MaraudarrTests(unittest.TestCase):
                 "kometa",
                 "imagemaid",
                 "pattrmm",
-                "tautulli",
                 "notifiarr",
                 "watchtower",
                 "overlay-reset",
             },
         )
 
-        self.assertEqual(plan.service_ids, ("kometa", "imagemaid", "tautulli"))
+        self.assertEqual(plan.service_ids, ("kometa", "imagemaid"))
 
     def test_standalone_media_server_presets_select_one_core_service(self) -> None:
         """Keep standalone media-server presets deliberately focused."""
@@ -682,7 +681,8 @@ class MaraudarrTests(unittest.TestCase):
         self.assertIn(28096, published_ports["jellyfin"])
         self.assertIn(48213, published_ports["calibre-web-automated"])
         self.assertIn(8213, published_ports["plundarr"])
-        self.assertIn(8181, published_ports["duplex"])
+        self.assertNotIn(8181, published_ports["duplex"])
+        self.assertIn(3080, published_ports["plundarr"])
         self.assertIn(5454, published_ports["duplex"])
         self.assertIn(33000, published_ports["custom"])
 
@@ -1037,18 +1037,22 @@ class MaraudarrTests(unittest.TestCase):
             self.catalog.resolve("custom", selected=set(self.catalog.services)),
         )
 
-        for service in self.catalog.services.values():
-            block = extract_service(compose, service.service)
+        for name in (
+            name
+            for service in self.catalog.services.values()
+            for name in service.compose_services
+        ):
+            block = extract_service(compose, name)
             tag_match = re.search(
                 r"^\s*image:.*\$\{([A-Z][A-Z0-9_]*_TAG)\}",
                 block,
                 re.MULTILINE,
             )
-            with self.subTest(service=service.id):
+            with self.subTest(service=name):
                 self.assertIsNotNone(tag_match)
                 tag_variable = tag_match.group(1)
                 self.assertIn(
-                    f"container_name: ${{COMPOSE_PROJECT_NAME}}-{service.id}-${{{tag_variable}}}",
+                    f"container_name: ${{COMPOSE_PROJECT_NAME}}-{name}-${{{tag_variable}}}",
                     block,
                 )
 
@@ -1062,8 +1066,14 @@ class MaraudarrTests(unittest.TestCase):
             "hostname:",
             "network_mode:",
         )
-        for service in self.catalog.services.values():
-            source = self.catalog.source_path(service.compose).read_text()
+        for service, name in (
+            (service, name)
+            for service in self.catalog.services.values()
+            for name in service.compose_services
+        ):
+            source = extract_service(
+                self.catalog.source_path(service.compose).read_text(), name
+            )
             block = source.split("# Docker image and container information", 1)[1]
             block = block.split("\n\n", 1)[0]
             comment_columns = {
@@ -1071,11 +1081,11 @@ class MaraudarrTests(unittest.TestCase):
                 for line in block.splitlines()
                 if line.strip().startswith(identity_keys) and "#" in line
             }
-            with self.subTest(service=service.id):
+            with self.subTest(service=name):
                 self.assertEqual(
                     len(comment_columns),
                     1,
-                    f"Service '{service.id}' identity comments are not aligned.",
+                    f"Service '{name}' identity comments are not aligned.",
                 )
 
     def test_inline_comments_have_two_spaces_before_the_hash(self) -> None:
@@ -1301,7 +1311,6 @@ class MaraudarrTests(unittest.TestCase):
             for service_id in (
                 "imagemaid",
                 "pattrmm",
-                "tautulli",
                 "notifiarr",
                 "overlay-reset",
             ):

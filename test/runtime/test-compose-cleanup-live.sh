@@ -31,44 +31,77 @@ PROTECTED_DIRECTORY="${TEMPORARY_DIRECTORY}/protected"
 COMPOSE_FILE="${FIXTURE_DIRECTORY}/docker-compose.yml"
 DOCKERFILE="${FIXTURE_DIRECTORY}/Dockerfile"
 ENV_FILE="${FIXTURE_DIRECTORY}/fixture.env"
-PROJECT_NAME="cleanup-live-$$"
+PROJECT_NAME="plundarr-test-$(od -An -N12 -tx1 /dev/urandom | tr -d ' \n')"
+SENTINEL_PROJECT="${PROJECT_NAME}-sentinel"
+VOLUME_CLEANUP="${REPOSITORY_ROOT}/test/runtime/remove-test-volume.sh"
+VOLUME_LEDGER="${TEMPORARY_DIRECTORY}/created-volumes"
+: >"${VOLUME_LEDGER}"
 BUILDER_NAME="${PROJECT_NAME}-builder"
 SENTINEL_BUILDER_NAME="${PROJECT_NAME}-sentinel-builder"
 SERVICE_IMAGE="${PROJECT_NAME}-service:local"
 SENTINEL_IMAGE="${PROJECT_NAME}-sentinel:local"
 SENTINEL_CONTAINER="${PROJECT_NAME}-sentinel"
 SENTINEL_NETWORK="${PROJECT_NAME}-sentinel"
-SENTINEL_VOLUME="${PROJECT_NAME}-sentinel"
+SENTINEL_VOLUME="${SENTINEL_PROJECT}_data"
 PROJECT_VOLUME="${PROJECT_NAME}_fixture-data"
-ANONYMOUS_VOLUME=""
+SCRATCH_VOLUME="${PROJECT_NAME}_scratch-data"
 SELECTED_BUILDER_BEFORE=""
 
 #
-# cleanup: Remove only resources carrying this test's unique names.
+# cleanup: Remove this run's resources and only its recorded, verified test volumes.
 #
 # Parameters: None.
 #
-# Returns: Nothing. Cleanup failures are ignored while preserving test status.
+# Returns: Preserves test failures and reports failed cleanup as an error.
 #
 cleanup() {
+    cleanup_status=$?
+    trap - 0
     docker compose \
         --project-name "${PROJECT_NAME}" \
         --env-file "${ENV_FILE}" \
         --file "${COMPOSE_FILE}" \
-        down --timeout 5 --volumes --remove-orphans --rmi all \
-        >/dev/null 2>&1 || true
+        down --timeout 5 --remove-orphans --rmi all \
+        >/dev/null 2>&1 || cleanup_status=1
     docker container rm --force "${SENTINEL_CONTAINER}" >/dev/null 2>&1 || true
     docker network rm "${SENTINEL_NETWORK}" >/dev/null 2>&1 || true
-    docker volume rm "${SENTINEL_VOLUME}" >/dev/null 2>&1 || true
-    docker volume rm "${PROJECT_VOLUME}" >/dev/null 2>&1 || true
-    if [ -n "${ANONYMOUS_VOLUME}" ]; then
-        docker volume rm "${ANONYMOUS_VOLUME}" >/dev/null 2>&1 || true
-    fi
+    while read -r owner volume; do
+        "${VOLUME_CLEANUP}" "${owner}" "${volume}" || cleanup_status=1
+    done <"${VOLUME_LEDGER}"
     docker image rm "${SERVICE_IMAGE}" >/dev/null 2>&1 || true
     docker image rm "${SENTINEL_IMAGE}" >/dev/null 2>&1 || true
     docker buildx rm --force "${BUILDER_NAME}" >/dev/null 2>&1 || true
     docker buildx rm --force "${SENTINEL_BUILDER_NAME}" >/dev/null 2>&1 || true
-    rm -rf "${TEMPORARY_DIRECTORY}"
+    if [ "${cleanup_status}" -eq 0 ]; then
+        rm -rf "${TEMPORARY_DIRECTORY}"
+    else
+        echo "Test failed or cleanup was incomplete; resource ledger retained at ${VOLUME_LEDGER}." >&2
+    fi
+    exit "${cleanup_status}"
+}
+
+#
+# create_test_volume: Create and record a previously absent, labeled test volume.
+#
+# Parameters: $1 - Exact test project name.
+#             $2 - Logical Compose volume key.
+#
+# Returns: Fails if the name already exists or Docker cannot create the volume.
+#
+create_test_volume() {
+    owner=$1
+    key=$2
+    volume="${owner}_${key}"
+    existing_volumes=$(docker volume ls --format '{{.Name}}')
+    if printf '%s\n' "${existing_volumes}" | grep -F -x "${volume}" >/dev/null; then
+        fail "Refusing to reuse an existing volume: ${volume}"
+    fi
+    docker volume create \
+        --label "com.docker.compose.project=${owner}" \
+        --label "com.docker.compose.volume=${key}" \
+        --label "io.plundarr.test-run=${owner}" \
+        "${volume}" >/dev/null
+    printf '%s %s\n' "${owner}" "${volume}" >>"${VOLUME_LEDGER}"
 }
 
 #
@@ -157,19 +190,6 @@ project_container() {
 }
 
 #
-# anonymous_volume: Print the fixture container's anonymous volume name.
-#
-# Parameters: $1 - Fixture container ID.
-#
-# Returns: Prints the volume mounted at /scratch.
-#
-anonymous_volume() {
-    docker container inspect \
-        --format '{{range .Mounts}}{{if eq .Destination "/scratch"}}{{.Name}}{{end}}{{end}}' \
-        "$1"
-}
-
-#
 # Create files that are isolated from both repositories and contain no secrets.
 #
 mkdir -p "${FIXTURE_DIRECTORY}" "${PROTECTED_DIRECTORY}"
@@ -187,11 +207,12 @@ services:
     command: ["sh", "-c", "sleep 600"]
     volumes:
       - fixture-data:/data
-      - /scratch
+      - scratch-data:/scratch
       - ${PROTECTED_DIRECTORY}:/protected:ro
 
 volumes:
   fixture-data:
+  scratch-data:
 EOF
 cat >"${ENV_FILE}" <<EOF
 SERVICE_IMAGE=${SERVICE_IMAGE}
@@ -201,7 +222,8 @@ printf '%s\n' 'protected fixture state' >"${PROTECTED_DIRECTORY}/marker.txt"
 PROTECTED_CHECKSUM=$(cksum "${PROTECTED_DIRECTORY}/marker.txt")
 ENV_CHECKSUM=$(cksum "${ENV_FILE}")
 
-trap cleanup 0 1 2 15
+trap cleanup 0
+trap 'exit 130' 1 2 15
 
 #
 # Create unrelated resources and builders with exact disposable names.
@@ -210,7 +232,9 @@ SELECTED_BUILDER_BEFORE=$(selected_builder)
 docker pull busybox:1.37 >/dev/null
 docker image tag busybox:1.37 "${SENTINEL_IMAGE}"
 docker network create "${SENTINEL_NETWORK}" >/dev/null
-docker volume create "${SENTINEL_VOLUME}" >/dev/null
+create_test_volume "${SENTINEL_PROJECT}" data
+create_test_volume "${PROJECT_NAME}" fixture-data
+create_test_volume "${PROJECT_NAME}" scratch-data
 docker container run \
     --detach \
     --name "${SENTINEL_CONTAINER}" \
@@ -225,8 +249,8 @@ docker buildx create \
     --driver docker-container >/dev/null
 
 #
-# Ordinary down removes containers and networks but preserves both volume
-# kinds, the local image, protected files, and unrelated Docker resources.
+# Ordinary down removes containers and networks but preserves both named
+# volumes, the local image, protected files, and unrelated Docker resources.
 #
 BUILDX_BUILDER="${BUILDER_NAME}" docker compose \
     --project-name "${PROJECT_NAME}" \
@@ -235,8 +259,7 @@ BUILDX_BUILDER="${BUILDER_NAME}" docker compose \
     up --detach --build
 CONTAINER_ID=$(project_container)
 [ -n "${CONTAINER_ID}" ] || fail "Compose did not create the fixture container."
-ANONYMOUS_VOLUME=$(anonymous_volume "${CONTAINER_ID}")
-[ -n "${ANONYMOUS_VOLUME}" ] || fail "Compose did not create an anonymous volume."
+docker exec "${CONTAINER_ID}" sh -c 'printf "%s\n" "database marker" > /data/marker; printf "%s\n" "scratch marker" > /scratch/marker'
 
 docker compose \
     --project-name "${PROJECT_NAME}" \
@@ -247,22 +270,13 @@ docker compose \
 [ -z "$(project_container)" ] || fail "Ordinary down retained the fixture container."
 assert_absent "project network after down" docker network inspect "${PROJECT_NAME}_default"
 assert_present "named volume after down" docker volume inspect "${PROJECT_VOLUME}"
-assert_present "anonymous volume after down" docker volume inspect "${ANONYMOUS_VOLUME}"
+assert_present "scratch volume after down" docker volume inspect "${SCRATCH_VOLUME}"
 assert_present "service image after down" docker image inspect "${SERVICE_IMAGE}"
 [ "$(cksum "${PROTECTED_DIRECTORY}/marker.txt")" = "${PROTECTED_CHECKSUM}" ] \
     || fail "Ordinary down changed protected bind-mounted state."
 
 #
-# Remove the first phase's deliberately preserved Docker artifacts so the nuke
-# phase starts as a fresh project and can prove its own complete ownership.
-#
-docker volume rm "${PROJECT_VOLUME}" "${ANONYMOUS_VOLUME}" >/dev/null
-ANONYMOUS_VOLUME=""
-docker image rm "${SERVICE_IMAGE}" >/dev/null
-
-#
-# Recreate the isolated project, then require nuke to remove its complete Docker
-# scope and named builder without disturbing any unrelated sentinel resource.
+# Recreate the isolated project with the same volumes, then exercise nuke.
 #
 BUILDX_BUILDER="${BUILDER_NAME}" docker compose \
     --project-name "${PROJECT_NAME}" \
@@ -271,8 +285,8 @@ BUILDX_BUILDER="${BUILDER_NAME}" docker compose \
     up --detach --build
 CONTAINER_ID=$(project_container)
 [ -n "${CONTAINER_ID}" ] || fail "Compose did not recreate the fixture container."
-ANONYMOUS_VOLUME=$(anonymous_volume "${CONTAINER_ID}")
-[ -n "${ANONYMOUS_VOLUME}" ] || fail "Compose did not recreate an anonymous volume."
+[ "$(docker exec "${CONTAINER_ID}" cat /data/marker)" = "database marker" ] \
+    || fail "Ordinary down changed the stored data."
 
 "${NUKE_HELPER}" \
     --docker-bin docker \
@@ -284,8 +298,8 @@ ANONYMOUS_VOLUME=$(anonymous_volume "${CONTAINER_ID}")
 
 [ -z "$(project_container)" ] || fail "Nuke retained the fixture container."
 assert_absent "project network after nuke" docker network inspect "${PROJECT_NAME}_default"
-assert_absent "named volume after nuke" docker volume inspect "${PROJECT_VOLUME}"
-assert_absent "anonymous volume after nuke" docker volume inspect "${ANONYMOUS_VOLUME}"
+assert_present "named volume after nuke" docker volume inspect "${PROJECT_VOLUME}"
+assert_present "scratch volume after nuke" docker volume inspect "${SCRATCH_VOLUME}"
 assert_absent "service image after nuke" docker image inspect "${SERVICE_IMAGE}"
 if builder_exists "${BUILDER_NAME}"; then
     fail "Nuke retained the configured project builder."
@@ -315,4 +329,19 @@ builder_exists "${SENTINEL_BUILDER_NAME}" \
     --down-timeout 5 \
     --builder-name "${BUILDER_NAME}"
 
-echo "Live Compose cleanup acceptance passed."
+#
+# Restart against the preserved volumes and verify their contents before test cleanup.
+#
+docker image tag busybox:1.37 "${SERVICE_IMAGE}"
+docker compose \
+    --project-name "${PROJECT_NAME}" \
+    --env-file "${ENV_FILE}" \
+    --file "${COMPOSE_FILE}" \
+    up --detach --no-build
+CONTAINER_ID=$(project_container)
+[ "$(docker exec "${CONTAINER_ID}" cat /data/marker)" = "database marker" ] \
+    || fail "Nuke changed the stored database marker."
+[ "$(docker exec "${CONTAINER_ID}" cat /scratch/marker)" = "scratch marker" ] \
+    || fail "Nuke changed the stored scratch marker."
+
+echo "Live Compose cleanup acceptance passed; removing verified test-owned resources."

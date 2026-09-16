@@ -26,9 +26,11 @@ class Service:
         order: Primary deterministic position in generated output.
         compose: Catalog-root-relative Compose source path.
         environment: Catalog-root-relative environment source path.
-        service: Compose service key extracted from the source chart.
+        service: Primary Compose service key used for config ownership.
+        compose_services: Ordered Compose service keys deployed as one selection.
         requires: Service IDs added automatically as hard dependencies.
         recommended: Related service IDs shown as non-mandatory companions.
+        named_volumes: Project-scoped Compose volume keys owned by this service.
     """
 
     id: str
@@ -42,6 +44,8 @@ class Service:
     service: str
     requires: tuple[str, ...]
     recommended: tuple[str, ...]
+    compose_services: tuple[str, ...]
+    named_volumes: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)

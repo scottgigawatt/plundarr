@@ -97,6 +97,16 @@
               params:
                 unmonitored: true
 
+    - Tracearr:
+        icon: tracearr.svg
+        href: {{HOMEPAGE_VAR_TRACEARR_HREF}}
+        description: Media server monitoring
+        widget:
+          type: tracearr
+          url: {{HOMEPAGE_VAR_TRACEARR_URL}}
+          key: {{HOMEPAGE_VAR_TRACEARR_KEY}}
+          view: summary
+
     - Tautulli:
         icon: tautulli.svg
         href: {{HOMEPAGE_VAR_TAUTULLI_HREF}}

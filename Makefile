@@ -181,8 +181,12 @@ COMPOSE_FILE                   ?= $(RENDERED_COMPOSE_FILE)
 ENV_FILE                       ?= $(DEPLOYMENT_PATH)/.env
 COMPOSE_ENV_FILE               ?= $(ENV_FILE)
 COMPOSE_DOWN_TIMEOUT           ?= 30
-COMPOSE_DOWN_OPTIONS           ?= --timeout $(COMPOSE_DOWN_TIMEOUT) --remove-orphans
-COMPOSE_NUKE_OPTIONS           ?= --timeout $(COMPOSE_DOWN_TIMEOUT) --volumes --remove-orphans --rmi all
+
+# Teardown flags are fixed so deployment commands cannot request volume deletion.
+ifneq ($(origin COMPOSE_DOWN_OPTIONS),undefined)
+$(error COMPOSE_DOWN_OPTIONS is not configurable. Use COMPOSE_DOWN_TIMEOUT instead)
+endif
+COMPOSE_DOWN_OPTIONS           = --timeout "$(COMPOSE_DOWN_TIMEOUT)" --remove-orphans
 COMPOSE_UP_OPTIONS             ?= --force-recreate --pull always --detach --remove-orphans
 WATCHTOWER_RUN_ONCE_OPTIONS    ?= --rm --no-deps
 KOMETA_OVERLAY_RESET_OPTIONS   ?= --rm --no-deps
@@ -311,6 +315,7 @@ MARAUDARR_IMAGE_TEST_CMD  ?= test/generator/test-maraudarr-image.sh
 WORKFLOW_HELPERS_TEST_CMD ?= test/helpers/test-workflow-helpers.sh
 MAKE_HELPERS_TEST_CMD     ?= test/helpers/test-make-helpers.sh
 COMPOSE_NUKE_TEST_CMD     ?= test/helpers/test-compose-nuke.sh
+TEST_VOLUME_CLEANUP_CMD   ?= test/helpers/test-test-volume-cleanup.sh
 BASE_IMAGES_TEST_CMD      ?= test/helpers/test-dockerfile-base-images.sh
 POLICY_HELPERS_TEST_CMD   ?= test/helpers/test-policy-checks.sh
 BUILD_PIN_POLICY_TEST_CMD ?= test/policy/check-build-pin-policy.sh
@@ -798,6 +803,7 @@ $(TEST_MAKE_HELPERS):
 	$(MAKE_HELPERS_TEST_CMD)
 	$(BASE_IMAGES_TEST_CMD)
 	$(COMPOSE_NUKE_TEST_CMD)
+	$(TEST_VOLUME_CLEANUP_CMD)
 
 #
 # $(TEST_WORKFLOWS): Tests workflow helpers and shared publishing policies locally.
@@ -897,7 +903,7 @@ $(CLEAN):
 #   $(CHECK_RENDERED) - Ensure the rendered Compose file exists.
 #
 $(NUKE): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
-	$(call announce_warning,Firin' the clean broadside across Plundarr and Maraudarr. Repo-safe files stay aboard. 💣)
+	$(call announce_warning,Firin' the clean broadside across Plundarr and Maraudarr. Application volumes and host files stay aboard. 💣)
 	$(COMPOSE_NUKE_CMD) \
 		--docker-bin "$(DOCKER_BIN)" \
 		--compose-file "$(COMPOSE_FILE)" \
@@ -953,7 +959,7 @@ $(HELP):
 	$(call help_line,$(RESTORE_TEST_CONFIG),Restore example VPN config files for tests.)
 	$(call help_line,$(CLEAN_TEST),Stop the stack and restore example test config.)
 	$(call help_line,$(CLEAN),Remove only disposable developer artifacts.)
-	$(call help_line,$(NUKE),‼️ DANGER ‼️ remove Plundarr and Maraudarr Docker resources.)
+	$(call help_line,$(NUKE),‼️ DANGER ‼️ remove containers$(COMMA) networks$(COMMA) images$(COMMA) and build cache; preserve application volumes.)
 	$(call help_heading,🧭 Plundarr and Maraudarr tools)
 	$(call help_line,$(PULL_IMAGE),Pull the latest published Maraudarr image.)
 	$(call help_line,$(SHIP),Generate a preset deployment (default: plundarr).)
