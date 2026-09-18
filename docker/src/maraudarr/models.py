@@ -10,7 +10,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass(frozen=True)
@@ -30,7 +30,7 @@ class Service:
         compose_services: Ordered Compose service keys deployed as one selection.
         requires: Service IDs added automatically as hard dependencies.
         recommended: Related service IDs shown as non-mandatory companions.
-        named_volumes: Project-scoped Compose volume keys owned by this service.
+        named_volumes: Project-scoped Compose volume keys and storage descriptions.
     """
 
     id: str
@@ -45,7 +45,7 @@ class Service:
     requires: tuple[str, ...]
     recommended: tuple[str, ...]
     compose_services: tuple[str, ...]
-    named_volumes: tuple[str, ...] = ()
+    named_volumes: dict[str, str] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)

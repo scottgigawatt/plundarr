@@ -115,6 +115,90 @@ def extract_foundation(source: str) -> str:
     return source[start:end]
 
 
+def align_env_comments(source: str) -> str:
+    """Align inline comments within contiguous environment assignment groups.
+
+    Args:
+        source: Rendered environment text after value substitutions.
+
+    Returns:
+        Text with two or more spaces before aligned inline comments. Values,
+        comment text, uncommented assignments, and section boundaries are preserved.
+    """
+    assignment = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*=")
+    lines = source.splitlines(keepends=True)
+    group: list[tuple[int, str, str, str]] = []
+    for index, line in enumerate([*lines, ""]):
+        if not assignment.match(line):
+            if group:
+                width = max(len(code) for _, code, _, _ in group)
+                for position, code, comment, ending in group:
+                    lines[position] = f"{code.ljust(width)}  {comment}{ending}"
+                group = []
+            continue
+
+        # Only unquoted, unescaped hashes preceded by whitespace start comments.
+        quote = ""
+        escaped = False
+        for offset in range(line.index("=") + 1, len(line)):
+            character = line[offset]
+            if escaped:
+                escaped = False
+            elif character == "\\":
+                escaped = True
+            elif quote:
+                if character == quote:
+                    quote = ""
+            elif character in ("'", '"'):
+                quote = character
+            elif character == "#" and line[offset - 1] in " \t":
+                code = line[:offset].rstrip(" \t")
+                comment = line[offset:].rstrip("\r\n")
+                ending = line[len(line.rstrip("\r\n")):]
+                group.append((index, code, comment, ending))
+                break
+    return "".join(lines)
+
+
+def prune_unused_anchors(foundation: str, content: str) -> str:
+    """Keep shared anchor blocks reachable from the rendered stack.
+
+    Args:
+        foundation: Extracted foundation with blank-separated anchor blocks.
+        content: Rendered services and footer whose aliases select anchors.
+
+    Returns:
+        Foundation with unused anchor blocks and their comments removed.
+        Referenced anchors retain their original order and source text.
+
+    Note:
+        Project charts use standalone mapping or sequence aliases. Match those
+        values without treating comments, quoted strings, or shell globs as aliases.
+    """
+    anchor_pattern = re.compile(r"^x-[\w-]+: &([\w-]+)(?:\s+#.*)?$", re.MULTILINE)
+    alias_pattern = re.compile(
+        r"^\s*(?:[\w<>-]+:|-)\s+\*([\w-]+)\s*(?:#.*)?$", re.MULTILINE
+    )
+    blocks = foundation.rstrip("\n").split("\n\n")
+    anchors = {}
+    for block in blocks:
+        match = anchor_pattern.search(block)
+        if match:
+            anchors[match.group(1)] = block
+
+    # Follow anchor dependencies so indirect defaults survive pruning too.
+    needed = set(alias_pattern.findall(content))
+    pending = list(needed)
+    while pending:
+        name = pending.pop()
+        dependencies = set(alias_pattern.findall(anchors.get(name, ""))) - needed
+        needed.update(dependencies)
+        pending.extend(dependencies)
+
+    unused_blocks = {block for name, block in anchors.items() if name not in needed}
+    return "\n\n".join(block for block in blocks if block not in unused_blocks) + "\n"
+
+
 def extract_footer(source: str) -> str:
     """Extract the final networks section from the base Compose template.
 

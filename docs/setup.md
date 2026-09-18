@@ -237,7 +237,7 @@ Start the persistent Duplex services:
 make up PRESET=duplex
 ```
 
-Overlay Reset stays outside normal startup behind the `tools` profile.
+Overlay Reset is opt-in. Add it with `make ship PRESET=duplex ADD_SERVICES=overlay-reset`; it stays outside normal startup behind the `tools` profile.
 
 > [!CAUTION]
 > Kometa Overlay Reset is destructive and has no undo. Confirm the Plex URL, token, and library, keep `OVERLAY_RESET_DRY_RUN=True`, and inspect the output before deliberately setting it to `False`.

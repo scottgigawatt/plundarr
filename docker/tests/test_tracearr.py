@@ -57,9 +57,12 @@ class TracearrTests(unittest.TestCase):
         plan = self.catalog.resolve("custom", selected={"tracearr"})
         compose = render_compose(self.catalog, plan)
         footer = compose.split("\nvolumes:\n", 1)[1]
-        self.assertEqual(re.findall(r"^  ([a-z-]+): \{\}$", footer, re.M), [
+        self.assertEqual(re.findall(r"^  ([a-z-]+): \{\}  +#", footer, re.M), [
             "tracearr-db-data", "tracearr-redis-data", "tracearr-backups"
         ])
+        self.assertIn("# Tracearr PostgreSQL database containing application state and viewing history", footer)
+        self.assertIn("# Tracearr Redis queue and cache data, persisted between container restarts", footer)
+        self.assertIn("# Tracearr backup workspace mounted at /data/backup", footer)
         self.assertNotIn("name:", footer)
         self.assertNotIn("external:", footer)
         self.assertEqual(plan.service_ids, ("tracearr",))
@@ -85,11 +88,19 @@ class TracearrTests(unittest.TestCase):
     def test_catalog_rejects_invalid_and_duplicate_volume_declarations(self) -> None:
         """Catch unsafe volume keys and accidental ownership collisions early."""
         original = self.catalog.services["tracearr"]
-        for volumes in (("../outside",), ("same", "same")):
+        for volumes in ({"../outside": "Invalid path."}, {"data": ""}, {"data": "First line.\nSecond line."}):
             with self.subTest(volumes=volumes):
                 self.catalog.services["tracearr"] = replace(original, named_volumes=volumes)
                 with self.assertRaises(CatalogError):
                     self.catalog._validate()
+
+        self.catalog.services["tracearr"] = original
+        self.catalog.services["homepage"] = replace(
+            self.catalog.services["homepage"],
+            named_volumes={"tracearr-db-data": "Duplicate storage ownership."},
+        )
+        with self.assertRaises(CatalogError):
+            self.catalog._validate()
 
     def test_catalog_rejects_invalid_compose_groups(self) -> None:
         """Reject incomplete groups and conflicting Compose ownership."""

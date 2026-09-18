@@ -91,7 +91,7 @@ The `portainer` preset runs only Portainer Community Edition on its official `lt
 
 The `watchtower` preset runs the maintained `nickfedor/watchtower:latest` image persistently. Use `make watchtower-run-once PRESET=watchtower` instead for one host-wide update pass that exits when complete. Run only one persistent Watchtower daemon per Docker host.
 
-The `duplex` preset uses Kometa, ImageMaid, PATTRMM, Notifiarr, and Overlay Reset. Kometa's config is an external checkout selected with `KOMETA_CONFIG_PATH`; Maraudarr does not create a submodule or manage that repository. PATTRMM, Notifiarr, and Overlay Reset are removable defaults, while Tracearr, Tautulli, and Watchtower remain available as explicit additions. The Kometa Overlay Reset service is profile-gated and defaults to a dry run when invoked with `make kometa-overlay-reset PRESET=duplex`.
+The `duplex` preset uses Kometa, ImageMaid, PATTRMM, and Notifiarr. Kometa's config is an external checkout selected with `KOMETA_CONFIG_PATH`; Maraudarr does not create a submodule or manage that repository. PATTRMM and Notifiarr are removable defaults, while Overlay Reset, Tracearr, Tautulli, and Watchtower remain available as explicit additions. The Kometa Overlay Reset service is profile-gated and defaults to a dry run when invoked with `make kometa-overlay-reset PRESET=duplex`.
 
 ## Explore the image contents 📦
 

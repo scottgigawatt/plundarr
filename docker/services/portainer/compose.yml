@@ -17,9 +17,6 @@ services:
     container_name: ${COMPOSE_PROJECT_NAME}-portainer-${PORTAINER_TAG}  # Namespace the container name by project and tag
     hostname: portainer                                                 # Set the container hostname
 
-    # Keep database upgrades under operator control
-    labels: *disable-watchtower-updates
-
     # Publish HTTPS and Edge agent tunnel ports
     ports:
       - ${PORTAINER_WEB_PORT}:9443   # HTTPS management interface

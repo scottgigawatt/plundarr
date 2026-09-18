@@ -16,11 +16,11 @@ services:
     image: kometateam/overlay-reset:${OVERLAY_RESET_TAG}                        # Run the official Overlay Reset image
     container_name: ${COMPOSE_PROJECT_NAME}-overlay-reset-${OVERLAY_RESET_TAG}  # Namespace the container name by project and tag
     hostname: overlay-reset                                                     # Set the container hostname
+    restart: "no"                                                               # Exit after one run without automatic restarts
 
     # Keep this destructive utility outside ordinary Compose startup
-    profiles:
-      - tools
-    restart: "no"
+    profiles:  # Require a Compose profile to enable this service
+      - tools  # Group maintenance utilities under the tools profile
 
     # Define the container environment
     environment:

@@ -22,10 +22,12 @@ from pathlib import Path
 from maraudarr.catalog import Catalog
 from maraudarr.models import StackPlan
 from maraudarr.text import (
+    align_env_comments,
     aligned_yaml_lines,
     extract_footer,
     extract_foundation,
     extract_service,
+    prune_unused_anchors,
     remove_comment_group,
     strip_yaml_key,
 )
@@ -182,10 +184,10 @@ def _prepare_service(
                 anchor = "\n    # Define the host and container ports"
             insertion = (
                 "\n      # Homepage Sonarr Anime click target and widget\n"
-                "      HOMEPAGE_VAR_SONARR_ANIME_HREF: ${HOMEPAGE_VAR_SONARR_ANIME_HREF}                           # Homepage Sonarr Anime click target\n"
-                "      HOMEPAGE_VAR_SONARR_ANIME_URL: ${HOMEPAGE_VAR_SONARR_ANIME_URL}:${SONARR_ANIME_WEBUI_PORT}  # Homepage Sonarr Anime widget URL\n"
-                "      HOMEPAGE_VAR_SONARR_ANIME_KEY: ${HOMEPAGE_VAR_SONARR_ANIME_KEY}                             # Homepage Sonarr Anime API key\n"
-                "      HOMEPAGE_VAR_SONARR_ANIME_CONTAINER: ${COMPOSE_PROJECT_NAME}-sonarr-anime-${SONARR_ANIME_TAG}  # Homepage Sonarr Anime container\n"
+                "      HOMEPAGE_VAR_SONARR_ANIME_HREF: ${HOMEPAGE_VAR_SONARR_ANIME_HREF}\n"
+                "      HOMEPAGE_VAR_SONARR_ANIME_URL: ${HOMEPAGE_VAR_SONARR_ANIME_URL}:${SONARR_ANIME_WEBUI_PORT}\n"
+                "      HOMEPAGE_VAR_SONARR_ANIME_KEY: ${HOMEPAGE_VAR_SONARR_ANIME_KEY}\n"
+                "      HOMEPAGE_VAR_SONARR_ANIME_CONTAINER: ${COMPOSE_PROJECT_NAME}-sonarr-anime-${SONARR_ANIME_TAG}\n"
             )
             block = block.replace(anchor, insertion + anchor, 1)
         if "jellyfin" in selected:
@@ -194,9 +196,9 @@ def _prepare_service(
                 anchor = "\n    # Define the host and container ports"
             insertion = (
                 "\n      # Homepage Jellyfin click target and widget\n"
-                "      HOMEPAGE_VAR_JELLYFIN_HREF: ${HOMEPAGE_VAR_JELLYFIN_HREF}                         # Homepage Jellyfin click target\n"
-                "      HOMEPAGE_VAR_JELLYFIN_URL: ${HOMEPAGE_VAR_JELLYFIN_URL}:${JELLYFIN_WEBUI_PORT}  # Homepage Jellyfin widget URL\n"
-                "      HOMEPAGE_VAR_JELLYFIN_KEY: ${HOMEPAGE_VAR_JELLYFIN_KEY}                         # Homepage Jellyfin API key\n"
+                "      HOMEPAGE_VAR_JELLYFIN_HREF: ${HOMEPAGE_VAR_JELLYFIN_HREF}\n"
+                "      HOMEPAGE_VAR_JELLYFIN_URL: ${HOMEPAGE_VAR_JELLYFIN_URL}:${JELLYFIN_WEBUI_PORT}\n"
+                "      HOMEPAGE_VAR_JELLYFIN_KEY: ${HOMEPAGE_VAR_JELLYFIN_KEY}\n"
             )
             block = block.replace(anchor, insertion + anchor, 1)
         if "calibre-web-automated" in selected:
@@ -205,11 +207,11 @@ def _prepare_service(
                 anchor = "\n    # Define the host and container ports"
             insertion = (
                 "\n      # Homepage Calibre-Web Automated click target and widget\n"
-                "      HOMEPAGE_VAR_CWA_HREF: ${HOMEPAGE_VAR_CWA_HREF}                                        # Homepage CWA click target\n"
-                "      HOMEPAGE_VAR_CWA_URL: ${HOMEPAGE_VAR_CWA_URL}                                          # Homepage CWA widget URL\n"
-                "      HOMEPAGE_VAR_CWA_USER: ${HOMEPAGE_VAR_CWA_USER}                                        # Homepage CWA username\n"
-                "      HOMEPAGE_VAR_CWA_PASS: ${HOMEPAGE_VAR_CWA_PASS}                                        # Homepage CWA password\n"
-                "      HOMEPAGE_VAR_CWA_CONTAINER: ${COMPOSE_PROJECT_NAME}-calibre-web-automated-${CWA_TAG}  # Homepage CWA container\n"
+                "      HOMEPAGE_VAR_CWA_HREF: ${HOMEPAGE_VAR_CWA_HREF}\n"
+                "      HOMEPAGE_VAR_CWA_URL: ${HOMEPAGE_VAR_CWA_URL}\n"
+                "      HOMEPAGE_VAR_CWA_USER: ${HOMEPAGE_VAR_CWA_USER}\n"
+                "      HOMEPAGE_VAR_CWA_PASS: ${HOMEPAGE_VAR_CWA_PASS}\n"
+                "      HOMEPAGE_VAR_CWA_CONTAINER: ${COMPOSE_PROJECT_NAME}-calibre-web-automated-${CWA_TAG}\n"
             )
             block = block.replace(anchor, insertion + anchor, 1)
     return block.rstrip("\n") + "\n"
@@ -250,22 +252,26 @@ def render_compose(catalog: Catalog, plan: StackPlan) -> str:
             )
 
     # Compose supplies the project prefix; avoid explicit global volume names.
-    volume_lines = [
-        f"  # Persistent storage owned by {service.id}.\n  {volume}: {{}}"
+    volume_entries = [
+        (f"{volume}: {{}}", description)
         for service in plan.services
-        for volume in service.named_volumes
+        for volume, description in service.named_volumes.items()
     ]
     volume_section = (
-        "\nvolumes:\n" + "\n".join(volume_lines) + "\n" if volume_lines else ""
+        "\n#\n# Define the volumes section.\n#\nvolumes:\n"
+        + aligned_yaml_lines(volume_entries, indent=2)
+        + "\n"
+        if volume_entries
+        else ""
     )
-    return (
-        render_header(plan)
-        + extract_foundation(base_source)
-        + "\n\n".join(block.rstrip("\n") for block in service_blocks)
+    content = (
+        "\n\n".join(block.rstrip("\n") for block in service_blocks)
         + "\n\n"
         + extract_footer(base_source)
         + volume_section
     )
+    foundation = prune_unused_anchors(extract_foundation(base_source), content)
+    return render_header(plan) + foundation + content
 
 
 def _filter_homepage_env(
@@ -523,7 +529,8 @@ def render_environment(
         for service in catalog.services.values()
     ]
     known_keys = set().union(*(_assignment_keys(source) for source in all_sources))
-    return _preserve_inactive_values(rendered, existing, known_keys)
+    rendered = _preserve_inactive_values(rendered, existing, known_keys)
+    return align_env_comments(rendered)
 
 
 def _homepage_card(source: str, label: str) -> str:
