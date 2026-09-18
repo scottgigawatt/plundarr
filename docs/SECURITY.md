@@ -19,7 +19,7 @@ Plundarr sails mostly by the `main` branch. Since this project be a small vessel
 
 Please do not open a public GitHub issue for secrets, credential leaks, auth bypasses, or anything that could help another scallywag attack a user.
 
-Report vulnerabilities using GitHub's private vulnerability reporting feature:
+Report vulnerabilities using [GitHub's private vulnerability reporting form](https://github.com/scottgigawatt/plundarr/security/advisories/new). To find it from the repository:
 
 1. Go to the repository's **Security** tab.
 2. Choose **Report a vulnerability**.

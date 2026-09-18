@@ -26,6 +26,7 @@
 
 <p align="center">
   <a href="https://github.com/scottgigawatt/plundarr/actions/workflows/build-and-push.yml"><img src="https://img.shields.io/github/actions/workflow/status/scottgigawatt/plundarr/build-and-push.yml?branch=main&amp;label=Maraudarr%20build&amp;logo=githubactions&amp;logoColor=white" alt="Maraudarr build status on main" /></a>
+  <a href="https://hub.docker.com/r/scottgigawatt/maraudarr"><img src="https://img.shields.io/docker/pulls/scottgigawatt/maraudarr?label=Maraudarr%20pulls&amp;logo=docker&amp;logoColor=white&amp;color=FF69B4" alt="Maraudarr image pulls on Docker Hub" /></a>
   <a href="https://github.com/scottgigawatt/plundarr/pkgs/container/maraudarr"><img src="https://img.shields.io/badge/Fleet-amd64%20%7C%20arm64%20%7C%20arm%2Fv7-6D28D9?logo=docker&amp;logoColor=white" alt="Maraudarr images for amd64, arm64, and arm/v7" /></a>
   <a href="https://github.com/scottgigawatt/plundarr/actions/workflows/build-and-push.yml"><img src="https://img.shields.io/badge/Bilge%20Check-Trivy-BE185D?logo=aqua&amp;logoColor=white" alt="Container images scanned with Trivy" /></a>
 </p>
