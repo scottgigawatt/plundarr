@@ -188,12 +188,13 @@ run_case plundarr-without-calibre-web-automated \
     --remove calibre-web-automated
 
 #
-# Duplex includes its removable companions and profile-gated recovery tool.
+# Duplex includes removable companions; its recovery tool is opt-in.
 #
 run_case duplex --preset duplex
+run_case duplex-with-overlay-reset --preset duplex --add overlay-reset
 run_case duplex-core \
     --preset duplex \
-    --remove pattrmm,notifiarr,overlay-reset
+    --remove pattrmm,notifiarr
 
 #
 # Default Boudoirr voyage with qBittorrent only.

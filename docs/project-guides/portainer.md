@@ -27,4 +27,4 @@ The preset starts only Portainer, with no VPN or updater dependency. Portainer r
 
 To include Portainer in another preset, select it in `make configure` or use `ADD_SERVICES=portainer`. Review the generated port values because presets may offset published ports. Configure network values through `.env` if they overlap an existing host network.
 
-Regeneration preserves existing `.env` values and Portainer data. Recreate the project after editing `.env`; a plain container restart does not reload those settings. Portainer is excluded from unattended Watchtower updates so database upgrades remain under your control. Your containers, your helm.
+Regeneration preserves existing `.env` values and Portainer data. Recreate the project after editing `.env`; a plain container restart does not reload those settings. Portainer is eligible for automatic updates on its configured image tag when Watchtower monitors the host; the default tag is `lts`. Your containers, your helm.

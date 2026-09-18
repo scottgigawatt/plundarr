@@ -97,9 +97,7 @@ class Catalog:
             compose_services=tuple(
                 str(item) for item in values.get("compose_services", [service_name])
             ),
-            named_volumes=tuple(
-                str(item) for item in values.get("named_volumes", [])
-            ),
+            named_volumes=dict(values.get("named_volumes", {})),
             requires=tuple(str(item) for item in values.get("requires", [])),
             recommended=tuple(
                 str(item) for item in values.get("recommended", [])
@@ -130,7 +128,7 @@ class Catalog:
         volume_owners: dict[str, str] = {}
         compose_owners: dict[str, str] = {}
         for service in self.services.values():
-            for volume in service.named_volumes:
+            for volume, description in service.named_volumes.items():
                 if not re.fullmatch(r"[a-z][a-z0-9_-]*", volume):
                     raise CatalogError(
                         f"Service '{service.id}' has invalid named volume: {volume!r}."
@@ -138,6 +136,14 @@ class Catalog:
                 if volume in volume_owners:
                     raise CatalogError(
                         f"Named volume '{volume}' has multiple declarations."
+                    )
+                if (
+                    not isinstance(description, str)
+                    or not description.strip()
+                    or len(description.splitlines()) != 1
+                ):
+                    raise CatalogError(
+                        f"Named volume '{volume}' requires a single-line storage description."
                     )
                 volume_owners[volume] = service.id
             for relative_path in (service.compose, service.environment):

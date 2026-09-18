@@ -258,7 +258,7 @@ category = "Monitoring and notifications"
 url = "https://docs.speedtest-tracker.dev"
 order = 600
 
-# Apprise is the optional notification endpoint used by supported services.
+# Apprise delivers notifications and is core to Plundarr alongside Speedtest Tracker.
 [services.apprise]
 title = "Apprise"
 description = "Delivers Speedtest Tracker and other notifications."
@@ -284,7 +284,12 @@ url = "https://tracearr.com"
 order = 650
 # All three containers are one selectable service with shared settings and storage.
 compose_services = ["tracearr-db", "tracearr-redis", "tracearr"]
-named_volumes = ["tracearr-db-data", "tracearr-redis-data", "tracearr-backups"]
+
+# Describe the persistent storage used by each Tracearr container.
+[services.tracearr.named_volumes]
+tracearr-db-data = "Tracearr PostgreSQL database containing application state and viewing history"
+tracearr-redis-data = "Tracearr Redis queue and cache data, persisted between container restarts"
+tracearr-backups = "Tracearr backup workspace mounted at /data/backup"
 
 # Duplicati backs up selected configuration and host data.
 [services.duplicati]
@@ -353,6 +358,7 @@ core = [
   "bazarr",
   "seerr",
   "speedtest-tracker",
+  "apprise",
   "duplicati",
   "homepage",
 ]
@@ -477,11 +483,11 @@ compose_summary = [
   "                    Plex metadata, artwork, notification,",
   "                    and recovery utilities.",
   "",
-  "Kometa uses an external configuration checkout. Overlay Reset stays behind",
-  "the tools profile and runs only when explicitly invoked as a one-shot job.",
+  "Kometa uses an external configuration checkout. Optional Overlay Reset stays",
+  "behind the tools profile and runs only when explicitly invoked as a one-shot job.",
 ]
 core = ["kometa", "imagemaid"]
-defaults = ["pattrmm", "notifiarr", "overlay-reset"]
+defaults = ["pattrmm", "notifiarr"]
 
 #
 # Watchtower provides a focused host-wide container update project.

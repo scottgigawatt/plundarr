@@ -22,8 +22,8 @@ services:
 
     # Match upstream shared-memory and TimescaleDB import requirements
     shm_size: ${TRACEARR_DB_SHM_SIZE}     # Shared memory available to PostgreSQL
-    ulimits:
-      nofile:
+    ulimits:                              # Container process resource limits
+      nofile:                             # Open file descriptors per process
         soft: ${TRACEARR_DB_NOFILE_SOFT}  # Initial open-file limit
         hard: ${TRACEARR_DB_NOFILE_HARD}  # Maximum open-file limit
 

@@ -213,7 +213,7 @@ make ship PRESET=duplex
 
 Set `KOMETA_CONFIG_PATH` to an independently managed Kometa checkout containing its `config.yml`, assets, metadata, and overlays. Set `IMAGEMAID_PLEX_PATH` to Plex application data containing `Cache`, `Metadata`, and `Plug-in Support`.
 
-Kometa Overlay Reset remains behind the `tools` Compose profile and never starts during ordinary `make up` runs. Keep `OVERLAY_RESET_DRY_RUN=True`, inspect the dry-run output, and invoke the tool explicitly:
+Add Kometa Overlay Reset with `make ship PRESET=duplex ADD_SERVICES=overlay-reset` when needed. It remains behind the `tools` Compose profile and never starts during ordinary `make up` runs. Keep `OVERLAY_RESET_DRY_RUN=True`, inspect the dry-run output, and invoke the tool explicitly:
 
 ```sh
 make kometa-overlay-reset PRESET=duplex

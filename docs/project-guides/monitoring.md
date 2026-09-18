@@ -1,6 +1,6 @@
 # Monitor media servers with Tracearr 🔎
 
-Tracearr is Plundarr's preferred media monitor and a removable default. It connects to Plex, Jellyfin, or Emby over the network; the media server can run in another project or on another host. Duplex focuses on Kometa and ImageMaid, with removable PATTRMM, Notifiarr, and Overlay Reset companions. Tautulli remains an optional Plex monitor in every preset.
+Tracearr is Plundarr's preferred media monitor and a removable default. It connects to Plex, Jellyfin, or Emby over the network; the media server can run in another project or on another host. Duplex focuses on Kometa and ImageMaid, with removable PATTRMM and Notifiarr defaults and an opt-in Overlay Reset tool. Tautulli remains an optional Plex monitor in every preset.
 
 ## Select monitoring services
 

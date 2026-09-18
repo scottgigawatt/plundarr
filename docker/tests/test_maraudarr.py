@@ -69,6 +69,7 @@ class MaraudarrTests(unittest.TestCase):
                 "calibre-web-automated",
                 "cleanuparr",
                 "speedtest-tracker",
+                "apprise",
                 "tracearr",
                 "duplicati",
                 "homepage",
@@ -186,7 +187,7 @@ class MaraudarrTests(unittest.TestCase):
                 self.assertIn("${PORTAINER_EDGE_PORT}:8000", service)
                 self.assertIn("${PORTAINER_CONFIG_PATH}:/data:rw", service)
                 self.assertIn("/var/run/docker.sock:/var/run/docker.sock:rw", service)
-                self.assertIn("labels: *disable-watchtower-updates", service)
+                self.assertNotIn("disable-watchtower-updates", service)
                 self.assertNotIn("network_mode:", service)
                 self.assertIn('PORTAINER_TAG="${PORTAINER_TAG:-lts}"', environment)
                 self.assertIn('PORTAINER_WEB_PORT="${PORTAINER_WEB_PORT:-9443}"', environment)
@@ -267,7 +268,6 @@ class MaraudarrTests(unittest.TestCase):
                 "imagemaid",
                 "pattrmm",
                 "notifiarr",
-                "overlay-reset",
             ),
         )
         self.assertIn("image: kometateam/kometa:${KOMETA_TAG}", compose)
@@ -275,11 +275,20 @@ class MaraudarrTests(unittest.TestCase):
         self.assertNotIn("  tautulli:", compose)
         self.assertIn("${KOMETA_CONFIG_PATH}:/config:rw", compose)
         self.assertIn("${IMAGEMAID_PLEX_PATH}:/plex:rw", compose)
-        self.assertIn("profiles:\n      - tools", extract_service(compose, "overlay-reset"))
+        self.assertNotIn("  overlay-reset:", compose)
         self.assertNotIn("WATCHTOWER_DOCKER_CONFIG", compose)
         self.assertIn('KOMETA_TAG="${KOMETA_TAG:-latest}"', environment)
-        self.assertIn('OVERLAY_RESET_DRY_RUN="${OVERLAY_RESET_DRY_RUN:-True}"', environment)
+        self.assertNotIn("OVERLAY_RESET_DRY_RUN", environment)
         self.assertNotIn("  watchtower:", compose)
+
+        selected = self.catalog.resolve("duplex", add={"overlay-reset"})
+        tool = extract_service(render_compose(self.catalog, selected), "overlay-reset")
+        self.assertRegex(tool, r"profiles: +# [^\n]+\n      - tools +#")
+        self.assertIn('restart: "no"', tool)
+        self.assertIn(
+            'OVERLAY_RESET_DRY_RUN="${OVERLAY_RESET_DRY_RUN:-True}"',
+            render_environment(self.catalog, selected, None, generate_secrets=False),
+        )
 
     def test_duplex_companions_are_removable_but_core_utilities_are_not(self) -> None:
         """Preserve the requested core and default boundary for Duplex."""
@@ -377,6 +386,18 @@ class MaraudarrTests(unittest.TestCase):
     #
     # Generated Compose and environment rendering behavior.
     #
+    def test_portainer_compose_keeps_only_used_shared_anchors(self) -> None:
+        """Keep Portainer container defaults without unrelated anchors."""
+        compose = render_compose(self.catalog, self.catalog.resolve("portainer"))
+        self.assertEqual(
+            re.findall(r"^x-[\w-]+: &([\w-]+)", compose, re.MULTILINE),
+            ["default-container"],
+        )
+        self.assertNotIn("# Setup default healthcheck timing settings", compose)
+        self.assertNotIn("# Setup default variables for arr-stack containers.", compose)
+        self.assertIn("${PORTAINER_TAG}", compose)
+        self.assertIn("# Define the networks section.", compose)
+
     def test_compose_keeps_comments_variables_and_selected_services(self) -> None:
         """Preserve source comments and variables for selected services."""
 
@@ -1308,11 +1329,11 @@ class MaraudarrTests(unittest.TestCase):
             )
 
             self.assertFalse((config_path / "kometa").exists())
+            self.assertFalse((config_path / "overlay-reset").exists())
             for service_id in (
                 "imagemaid",
                 "pattrmm",
                 "notifiarr",
-                "overlay-reset",
             ):
                 with self.subTest(service=service_id):
                     self.assertTrue((config_path / service_id / "README.md").is_file())
