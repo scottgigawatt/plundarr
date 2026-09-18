@@ -94,7 +94,6 @@ jobs:
 
       #
       # Keep HIGH and CRITICAL fixed vulnerabilities out of the published image.
-      # Repository exceptions remain path-scoped and time-limited separately.
       #
       - name: "Scan Maraudarr for Bilge Rot 🔍"
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25  # v0.36.0
@@ -104,7 +103,6 @@ jobs:
           vuln-type: os,library
           severity: CRITICAL,HIGH
           ignore-unfixed: true
-          trivyignores: .trivyignore.yaml
           exit-code: 1
 
   #
