@@ -20,6 +20,7 @@ on:
     paths:
       - ".github/workflows/**"
       - ".github/renovate.json5"
+      - "docs/SECURITY.md"
       - "Makefile"
       - "docker/Dockerfile"
       - "docker/requirements.txt"
