@@ -25,12 +25,12 @@ services:
       GUID: ${PATTRMM_PGID}          # Set the host group ID expected by PATTRMM
 
     # Mount PATTRMM state and the independently managed Kometa configuration
-    volumes:
+    volumes:                                                # Mount application state and shared configuration
       - ${PATTRMM_CONFIG_PATH}/data:/data:rw                # Generated metadata and working data
       - ${PATTRMM_CONFIG_PATH}/preferences:/preferences:rw  # PATTRMM preferences and templates
       - ${KOMETA_CONFIG_PATH}:/config:rw                    # Kometa config and generated YAML files
-      - type: bind
-        source: ${KOMETA_RUNTIME_CONFIG_PATH}  # Live config shared with Kometa helpers
-        target: /config/config.yml
-        bind:
-          create_host_path: false  # Require a file instead of creating a directory
+      - type: bind                                          # Bind the existing runtime configuration file
+        source: ${KOMETA_RUNTIME_CONFIG_PATH}               # Live config shared by Kometa and PATTRMM
+        target: /config/config.yml                          # Expose the live config at its expected path
+        bind:                                               # Configure bind mount behavior
+          create_host_path: false                           # Fail if the source path does not exist
