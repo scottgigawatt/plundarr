@@ -913,8 +913,14 @@ class MaraudarrTests(unittest.TestCase):
                 self.assertNotIn(value, fresh)
                 self.assertNotIn(value, example)
 
-            env_path.write_text(migrated)
-            self.assertEqual(migrated, render_environment(self.catalog, plan, env_path))
+            # Keep generated credentials in memory while exercising preservation.
+            assignments = {
+                line.split("=", 1)[0]: line
+                for line in migrated.splitlines()
+                if re.match(r"^[A-Za-z_][A-Za-z0-9_]*=", line)
+            }
+            with patch("maraudarr.render._existing_values", return_value=assignments):
+                self.assertEqual(migrated, render_environment(self.catalog, plan, env_path))
 
             overrides = (
                 'HOMEPAGE_EXTERNAL_URL="https://homepage.example.com"\n'
