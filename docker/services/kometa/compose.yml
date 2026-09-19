@@ -24,5 +24,10 @@ services:
       KOMETA_TIMES: ${KOMETA_TIMES}  # Schedule one or more daily runs
 
     # Mount the independently managed Kometa configuration checkout
-    volumes:
-      - ${KOMETA_CONFIG_PATH}:/config:rw  # Kometa config, assets, metadata, and logs
+    volumes:                                   # Mount application state and shared configuration
+      - ${KOMETA_CONFIG_PATH}:/config:rw       # Kometa config, assets, metadata, and logs
+      - type: bind                             # Bind the existing runtime configuration file
+        source: ${KOMETA_RUNTIME_CONFIG_PATH}  # Live config shared by Kometa and PATTRMM
+        target: /config/config.yml             # Expose the live config at its expected path
+        bind:                                  # Configure bind mount behavior
+          create_host_path: false              # Fail if the source path does not exist

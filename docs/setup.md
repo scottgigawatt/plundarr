@@ -55,7 +55,7 @@ Maraudarr gives each preset a distinct Compose project, bridge network, and defa
 | Jellyfin | `jellyfin` | `172.22.0.0/16` | Jellyfin `28096` |
 | Plex | `plex` | `172.23.0.0/16` | Plex host networking |
 | Calibre-Web Automated | `calibre-web-automated` | `172.24.0.0/16` | CWA `48213` |
-| Duplex | `duplex` | `172.25.0.0/16` | Tautulli `8181`; Notifiarr `5454` |
+| Duplex | `duplex` | `172.25.0.0/16` | Notifiarr `5454` |
 | Paperless reservation | External project | `172.26.0.0/16` | Reserved outside the Maraudarr catalog |
 | Watchtower | `watchtower` | `172.27.0.0/16` | No published ports |
 | Custom | `custom` | `172.28.0.0/16` | Selected ports offset by `30000` |
@@ -223,13 +223,12 @@ make ship PRESET=duplex
 | Setting | Purpose |
 | --- | --- |
 | `KOMETA_CONFIG_PATH` | Independent Kometa checkout containing `config.yml`, assets, and metadata |
+| `KOMETA_RUNTIME_CONFIG_PATH` | Existing live YAML file shared by Kometa and PATTRMM; defaults to `${KOMETA_CONFIG_PATH}/config.yml` |
 | `KOMETA_TIMES` | Comma-separated stable-image run times in `HH:MM` format |
 | `IMAGEMAID_PLEX_PATH` | Plex application data containing `Cache`, `Metadata`, and `Plug-in Support` |
-| `TAUTULLI_PUID` and `TAUTULLI_PGID` | Host identity allowed to write Tautulli state |
-| `TAUTULLI_WEBUI_PORT` | Tautulli host port; defaults to `8181` |
 | `NOTIFIARR_WEBUI_PORT` | Notifiarr host port; defaults to `5454` |
 
-Kometa remains an independently managed checkout mounted at `/config`; Maraudarr does not clone or replace it. ImageMaid receives its own writable configuration directory and the Plex application-data directory at `/plex`.
+Kometa and PATTRMM share an external checkout; Maraudarr does not clone or replace it. Configure the shared file before starting, following the [Kometa service guide](https://github.com/scottgigawatt/plundarr/blob/main/docker/services/kometa/README.md). ImageMaid receives its own writable configuration directory and Plex application data at `/plex`.
 
 Start the persistent Duplex services:
 
