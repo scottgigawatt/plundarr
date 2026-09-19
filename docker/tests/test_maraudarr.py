@@ -290,6 +290,44 @@ class MaraudarrTests(unittest.TestCase):
             render_environment(self.catalog, selected, None, generate_secrets=False),
         )
 
+    def test_kometa_runtime_config_survives_regeneration(self) -> None:
+        """Keep shared private configuration external and preserve its selection."""
+
+        plan = self.catalog.resolve("duplex")
+        default_environment = render_environment(
+            self.catalog, plan, None, generate_secrets=False
+        )
+        self.assertIn(
+            'KOMETA_RUNTIME_CONFIG_PATH="${KOMETA_RUNTIME_CONFIG_PATH:-'
+            '${KOMETA_CONFIG_PATH}/config.yml}"',
+            default_environment,
+        )
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            external = root / "external checkout"
+            private = external / ".secrets" / "config.yml"
+            private.parent.mkdir(parents=True)
+            private.write_text("plex: {token: example}\n")
+            output = root / "deployment"
+            compose_path, env_path, config_path = write_stack(
+                self.catalog, plan, output
+            )
+            assignments = (
+                f'KOMETA_CONFIG_PATH="{external}"\n'
+                f'KOMETA_RUNTIME_CONFIG_PATH="{private}"\n'
+            )
+            env_path.write_text(assignments)
+            write_stack(self.catalog, plan, output)
+            for assignment in assignments.splitlines():
+                self.assertIn(assignment, env_path.read_text())
+            for service in ("kometa", "pattrmm"):
+                chart = extract_service(compose_path.read_text(), service)
+                self.assertIn("source: ${KOMETA_RUNTIME_CONFIG_PATH}", chart)
+                self.assertIn("target: /config/config.yml", chart)
+                self.assertIn("create_host_path: false", chart)
+            self.assertEqual(private.read_text(), "plex: {token: example}\n")
+            self.assertFalse((config_path / "kometa").exists())
+
     def test_duplex_companions_are_removable_but_core_utilities_are_not(self) -> None:
         """Preserve the requested core and default boundary for Duplex."""
 
