@@ -8,7 +8,7 @@
 #
 # The recording:
 #   - Opens Maraudarr's interactive configurator through Make.
-#   - Selects the default Plundarr voyage without optional cargo.
+#   - Keeps the current default Plundarr service selections.
 #   - Generates the complete Compose chart, environment, and configuration.
 #   - Applies the credential-free runtime override outside the visible capture.
 #   - Starts the selected Compose fleet and displays its container status.
@@ -35,7 +35,7 @@ Set Height 720
 Set Padding 20
 Set Framerate 12
 Set PlaybackSpeed 1.4
-Set LoopOffset 8%
+Set LoopOffset 0%
 Set TypingSpeed 35ms
 Set Theme "TokyoNight"
 Set CursorBlink false
@@ -66,16 +66,18 @@ Enter
 Sleep 2s
 
 #
-# Keep qBittorrent and skip every optional service group.
+# Keep the defaults across all six service categories.
 #
 Enter
-Sleep 700ms
+Sleep 1500ms
 Enter
-Sleep 700ms
+Sleep 1500ms
 Enter
-Sleep 700ms
+Sleep 1500ms
 Enter
-Sleep 700ms
+Sleep 1500ms
+Enter
+Sleep 1500ms
 Enter
 Sleep 2s
 
@@ -114,4 +116,4 @@ Sleep 35s
 Type "make ps"
 Sleep 500ms
 Enter
-Sleep 6s
+Sleep 12s
