@@ -12,10 +12,10 @@ services:
   #
   imagemaid:
     # Docker image and container information
-    <<: *default-container                                                # Pull in the default container information
-    image: kometateam/imagemaid:${IMAGE_MAID_TAG}                         # Run the official ImageMaid image
-    container_name: ${COMPOSE_PROJECT_NAME}-imagemaid-${IMAGE_MAID_TAG}   # Namespace the container name by project and tag
-    hostname: imagemaid                                                   # Set the container hostname
+    <<: *default-container                                               # Pull in the default container information
+    image: kometateam/imagemaid:${IMAGE_MAID_TAG}                        # Run the official ImageMaid image
+    container_name: ${COMPOSE_PROJECT_NAME}-imagemaid-${IMAGE_MAID_TAG}  # Namespace the container name by project and tag
+    hostname: imagemaid                                                  # Set the container hostname
 
     # Define the container environment
     environment:
