@@ -40,10 +40,22 @@
     ],
 
     //
-    // Track Maraudarr's digest-pinned donor images across every build entrypoint.
+    // Track the docs Python version and Maraudarr donor images across entrypoints.
     // Keep direct and shell-default forms separate so each pin is extracted once.
     //
     "customManagers": [
+        {
+            "customType": "regex",
+            "managerFilePatterns": [
+                "/^Makefile$/"
+            ],
+            "matchStrings": [
+                "DOCS_PYTHON_VERSION\\s+\\?=\\s*(?<currentValue>\\d+\\.\\d+\\.\\d+)"
+            ],
+            "depNameTemplate": "python",
+            "datasourceTemplate": "python-version",
+            "versioningTemplate": "python"
+        },
         {
             "customType": "regex",
             "managerFilePatterns": [
@@ -101,7 +113,11 @@
     //
     "packageRules": [
         {
-            "matchManagers": ["docker-compose", "dockerfile", "custom.regex"],
+            "groupName": "Python runtime",
+            "matchDepNames": ["python"]
+        },
+        {
+            "matchDatasources": ["docker"],
             "pinDigests": true
         },
         {
@@ -114,7 +130,7 @@
         },
         {
             "groupName": "Docker images",
-            "matchManagers": ["docker-compose", "dockerfile", "custom.regex"]
+            "matchDatasources": ["docker"]
         },
         {
             "description": "Keep Python dependencies exact and hash-verified",
