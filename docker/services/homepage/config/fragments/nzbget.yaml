@@ -8,4 +8,5 @@
           type: nzbget
           url: {{HOMEPAGE_VAR_NZBGET_URL}}
           username: {{HOMEPAGE_VAR_NZBGET_USER}}
-          password: {{HOMEPAGE_VAR_NZBGET_PASS}}
+          password: |2-
+            {{HOMEPAGE_VAR_NZBGET_PASS}}

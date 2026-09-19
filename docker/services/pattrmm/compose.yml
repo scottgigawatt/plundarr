@@ -29,3 +29,8 @@ services:
       - ${PATTRMM_CONFIG_PATH}/data:/data:rw                # Generated metadata and working data
       - ${PATTRMM_CONFIG_PATH}/preferences:/preferences:rw  # PATTRMM preferences and templates
       - ${KOMETA_CONFIG_PATH}:/config:rw                    # Kometa config and generated YAML files
+      - type: bind
+        source: ${KOMETA_RUNTIME_CONFIG_PATH}  # Live config shared with Kometa helpers
+        target: /config/config.yml
+        bind:
+          create_host_path: false  # Require a file instead of creating a directory

@@ -26,3 +26,8 @@ services:
     # Mount the independently managed Kometa configuration checkout
     volumes:
       - ${KOMETA_CONFIG_PATH}:/config:rw  # Kometa config, assets, metadata, and logs
+      - type: bind
+        source: ${KOMETA_RUNTIME_CONFIG_PATH}  # Live config shared with Kometa helpers
+        target: /config/config.yml
+        bind:
+          create_host_path: false  # Require a file instead of creating a directory
