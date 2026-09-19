@@ -1,5 +1,5 @@
 # Homepage service chart 🗺️
 
-Builds a dashboard from selected service cards. The `config/fragments/` hold contains optional cards, while Maraudarr writes the final `services.yaml`.
+Builds a dashboard from the selected services. Maraudarr assembles their cards into `config/homepage/services.yaml` and refreshes that file during regeneration. Widget passwords use literal YAML scalars to preserve punctuation.
 
-Widget passwords use literal YAML scalars so punctuation remains part of the credential. Regenerate the deployment to refresh `config/homepage/services.yaml`, or apply the same format to its existing `password` fields. Other existing configuration, including `settings.yaml`, is preserved; update its background explicitly when changing an existing deployment.
+Existing `settings.yaml` is preserved. Fresh deployments use `/images/backgrounds/canyon-waterfall.gif`; change `background` in an existing file to select it there.

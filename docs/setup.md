@@ -228,7 +228,7 @@ make ship PRESET=duplex
 | `IMAGEMAID_PLEX_PATH` | Plex application data containing `Cache`, `Metadata`, and `Plug-in Support` |
 | `NOTIFIARR_WEBUI_PORT` | Notifiarr host port; defaults to `5454` |
 
-Kometa remains an independently managed checkout mounted at `/config`; Maraudarr does not clone or replace it. The generated Kometa and PATTRMM services also mount `KOMETA_RUNTIME_CONFIG_PATH` at `/config/config.yml`. An ignored file such as `/path/to/kometa-config/.secrets/config.yml` can hold live credentials while the tracked template keeps placeholders. Create the file and grant both containers access before starting; Maraudarr preserves its path but never seeds or overwrites the external file. PATTRMM needs literal connection values in that YAML rather than Kometa environment-secret substitutions. ImageMaid receives its own writable configuration directory and the Plex application-data directory at `/plex`.
+Kometa and PATTRMM share an external checkout; Maraudarr does not clone or replace it. Configure the shared file before starting, following the [Kometa service guide](https://github.com/scottgigawatt/plundarr/blob/main/docker/services/kometa/README.md). ImageMaid receives its own writable configuration directory and Plex application data at `/plex`.
 
 Start the persistent Duplex services:
 
