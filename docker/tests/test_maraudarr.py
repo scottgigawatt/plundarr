@@ -878,6 +878,57 @@ class MaraudarrTests(unittest.TestCase):
         self.assertRegex(nzbget_password, r'^NZBGET_PASS="[A-Za-z0-9_-]{20,}"$')
         self.assertNotIn("changeme", nzbget_password)
 
+    def test_homepage_password_login_survives_generation_and_migration(self) -> None:
+        """Add authentication to old deployments without rotating existing values."""
+
+        plan = self.catalog.resolve("custom", selected={"homepage"})
+        compose = render_compose(self.catalog, plan)
+        keys = ("HOMEPAGE_AUTH_SECRET", "HOMEPAGE_AUTH_PASSWORD")
+        example = render_environment(self.catalog, plan, None, generate_secrets=False)
+        for key in (*keys, "HOMEPAGE_AUTH_ENABLED", "HOMEPAGE_EXTERNAL_URL"):
+            self.assertIn(f"{key}: ${{{key}}}", compose)
+        for key in keys:
+            self.assertIn(f'{key}="${{{key}:-}}"', example)
+        self.assertIn('HOMEPAGE_AUTH_ENABLED="${HOMEPAGE_AUTH_ENABLED:-true}"', example)
+        self.assertIn("http://127.0.0.1:3000/api/healthcheck", compose)
+        self.assertIn(
+            'HOMEPAGE_EXTERNAL_URL="${HOMEPAGE_EXTERNAL_URL:-http://host.or.ip:${HOMEPAGE_WEBUI_PORT}}"',
+            example,
+        )
+
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            env_path = Path(temporary_directory) / ".env"
+            old_values = 'HOMEPAGE_ALLOWED_HOSTS="homepage.example.com"\n'
+            env_path.write_text(old_values)
+            migrated = render_environment(self.catalog, plan, env_path)
+            self.assertIn(old_values, migrated)
+            generated = {}
+            for key in keys:
+                match = re.search(rf'^{key}="([A-Za-z0-9_-]{{32,}})"$', migrated, re.MULTILINE)
+                self.assertIsNotNone(match, key)
+                generated[key] = match.group(1)
+            self.assertNotEqual(*generated.values())
+            fresh = render_environment(self.catalog, plan, None)
+            for value in generated.values():
+                self.assertNotIn(value, fresh)
+                self.assertNotIn(value, example)
+
+            env_path.write_text(migrated)
+            self.assertEqual(migrated, render_environment(self.catalog, plan, env_path))
+
+            overrides = (
+                'HOMEPAGE_EXTERNAL_URL="https://homepage.example.com"\n'
+                'HOMEPAGE_AUTH_PASSWORD=\'operator-$-and-#-password\'\n'  # pragma: allowlist secret
+            )
+            env_path.write_text(old_values + overrides)
+            updated = render_environment(self.catalog, plan, env_path)
+            for line in overrides.splitlines():
+                self.assertIn(line, updated)
+
+        without_homepage = render_environment(self.catalog, self.catalog.resolve("boudoirr"), None)
+        for key in keys:
+            self.assertNotIn(key, without_homepage)
+
     def test_unselected_service_values_survive_preset_changes(self) -> None:
         """Carry inactive service values through preset changes and back."""
 

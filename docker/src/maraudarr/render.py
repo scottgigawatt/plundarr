@@ -395,6 +395,8 @@ def _generate_first_run_secrets(rendered: str, existing: dict[str, str]) -> str:
         ),
         "DUPLICATI_SETTINGS_ENCRYPTION_KEY": secrets.token_urlsafe(32),
         "DUPLICATI_WEBSERVICE_PASSWORD": secrets.token_urlsafe(18),
+        "HOMEPAGE_AUTH_SECRET": secrets.token_urlsafe(32),
+        "HOMEPAGE_AUTH_PASSWORD": secrets.token_urlsafe(24),
         "NZBGET_PASS": secrets.token_urlsafe(18),
         "TRACEARR_DB_PASSWORD": secrets.token_hex(32),
         "TRACEARR_JWT_SECRET": secrets.token_hex(32),
