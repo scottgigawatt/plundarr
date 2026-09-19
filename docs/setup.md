@@ -44,6 +44,14 @@ dist/<preset>/
 > [!IMPORTANT]
 > Review the generated `.env` before launch. Confirm user and group IDs, host storage paths, timezone, project network values, and published ports. Presets containing Privateerr and Gluetun also require real `PIA_USER` and `PIA_PASS` values; startup rejects missing or generated example credentials.
 
+## Configure Homepage password login
+
+Presets containing Homepage enable its native password login. Maraudarr generates `HOMEPAGE_AUTH_PASSWORD` and `HOMEPAGE_AUTH_SECRET` in `dist/<preset>/.env`, preserving existing values on later runs. Read the password locally from that file; no username is required.
+
+Before launch, set `HOMEPAGE_EXTERNAL_URL` to the URL you will open in your browser and `HOMEPAGE_ALLOWED_HOSTS` to its hostname, including a nonstandard port but omitting the scheme. For a Synology HTTPS reverse proxy, use values such as `https://homepage.example.com` and `homepage.example.com`, configure the certificate and proxy separately, and forward to `HOMEPAGE_WEBUI_PORT`. Recreate Homepage after changing `.env`.
+
+Existing deployments must regenerate their Compose and environment files with the updated Maraudarr image and run Homepage v2 or later; older custom image tags do not provide native login. Generated secrets are added when absent and remain stable across regeneration. Homepage does not rate-limit password attempts; public access also needs appropriate proxy access controls and rate limiting, or a VPN. See the generated `config/homepage/README.md` for password changes, session invalidation, and proxy details.
+
 ## Plan project networks
 
 Maraudarr gives each preset a distinct Compose project, bridge network, and default host-port range so fresh deployments can run side by side.
