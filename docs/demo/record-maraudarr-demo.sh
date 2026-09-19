@@ -37,6 +37,8 @@ DEMO_ROOT=$(mktemp -d "${TMPDIR:-/tmp}/plundarr-readme-demo.XXXXXX")
 DEMO_CHECKOUT="$DEMO_ROOT/plundarr"
 DEMO_DATA="$DEMO_ROOT/data"
 MARAUDARR_IMAGE="maraudarr:readme-demo-$$"
+VOLUME_LEDGER="$DEMO_ROOT/volumes"
+: > "$VOLUME_LEDGER"
 
 #
 # cleanup: Stop the temporary project and remove its disposable checkout.
@@ -54,6 +56,14 @@ cleanup() {
                 --timeout 15 --remove-orphans
         ) >/dev/null 2>&1 || true
     fi
+
+    # Remove only disposable volumes reserved by this run and labeled by Compose.
+    while IFS= read -r volume; do
+        project=$(docker volume inspect --format '{{ index .Labels "com.docker.compose.project" }}' "$volume" 2>/dev/null) || continue
+        if [ "$project" = "$COMPOSE_PROJECT_NAME" ]; then
+            docker volume rm "$volume" >/dev/null 2>&1 || true
+        fi
+    done < "$VOLUME_LEDGER"
 
     # Remove the disposable Maraudarr image and checkout.
     docker image rm --force "$MARAUDARR_IMAGE" >/dev/null 2>&1 || true
@@ -89,6 +99,7 @@ cp "$SCRIPT_PATH/docker-compose.demo.yml" "$DEMO_CHECKOUT/docker-compose.demo.ym
 # Create isolated host directories for every generated bind mount.
 #
 mkdir -p \
+    "$DEMO_DATA/books" \
     "$DEMO_DATA/backups" \
     "$DEMO_DATA/downloads/torrents" \
     "$DEMO_DATA/downloads/usenet" \
@@ -101,7 +112,7 @@ mkdir -p \
 #
 export PLUNDARR_DEMO_DIR="$DEMO_CHECKOUT"
 export MARAUDARR_IMAGE
-export COMPOSE_PROJECT_NAME="plundarr-readme-demo"
+export COMPOSE_PROJECT_NAME="demo-$$"
 export COMPOSE_NETWORK_SUBNET="10.254.0.0/16"
 export COMPOSE_NETWORK_IP_RANGE="10.254.5.0/24"
 export COMPOSE_NETWORK_GATEWAY="10.254.5.254"
@@ -138,6 +149,7 @@ export HOST_USENET_DOWNLOADS_PATH="$DEMO_DATA/downloads/usenet"
 export HOST_MOVIES_PATH="$DEMO_DATA/media/movies"
 export HOST_TV_PATH="$DEMO_DATA/media/tv"
 export HOST_ANIME_TV_PATH="$DEMO_DATA/media/anime-tv"
+export CWA_LIBRARY_PATH="$DEMO_DATA/books"
 export DUPLICATI_BACKUPS_PATH="$DEMO_DATA/backups"
 export HOMEPAGE_DATA_ROOT_PATH="$DEMO_DATA/media"
 
@@ -157,6 +169,8 @@ export CLEANUPARR_WEBUI_PORT="41011"
 export SPEEDTEST_TRACKER_WEBUI_PORT="39080"
 export DUPLICATI_WEBUI_PORT="48200"
 export HOMEPAGE_WEBUI_PORT="33000"
+export CWA_WEBUI_PORT="48213"
+export TRACEARR_WEBUI_PORT="43080"
 
 #
 # Build Maraudarr, generate the stack, and pre-pull images outside the recording.
@@ -165,6 +179,16 @@ export HOMEPAGE_WEBUI_PORT="33000"
     cd "$DEMO_CHECKOUT"
     make build >/dev/null
     make ship >/dev/null
+
+    # Reserve new project-specific volumes before the recording can create them.
+    for name in $(docker compose --env-file dist/plundarr/.env --file dist/plundarr/docker-compose.yml config --volumes); do
+        volume="${COMPOSE_PROJECT_NAME}_${name}"
+        if docker volume inspect "$volume" >/dev/null 2>&1; then
+            echo "Demo volume already exists: $volume" >&2
+            exit 1
+        fi
+        printf '%s\n' "$volume" >> "$VOLUME_LEDGER"
+    done
     docker compose \
         --env-file dist/plundarr/.env \
         --file dist/plundarr/docker-compose.yml \
@@ -176,7 +200,12 @@ export HOMEPAGE_WEBUI_PORT="33000"
 #
 mkdir -p "$REPOSITORY_ROOT/docs/assets"
 cd "$REPOSITORY_ROOT"
-vhs "$TAPE_PATH"
+RECORDED_ASSET="$DEMO_ROOT/maraudarr-demo.gif"
+vhs --output "$RECORDED_ASSET" "$TAPE_PATH"
+if [ ! -s "$RECORDED_ASSET" ]; then
+    echo "VHS did not produce a recording; the existing demo GIF was preserved." >&2
+    exit 1
+fi
 
 #
 # Optimize the recorded animation for the repository's added-file size limit.
@@ -184,11 +213,11 @@ vhs "$TAPE_PATH"
 OPTIMIZED_ASSET=$(mktemp "$DEMO_ROOT/maraudarr-demo.XXXXXX.gif")
 gifsicle \
     --optimize=3 \
-    --lossy=150 \
+    --lossy=100 \
     --colors 48 \
     --resize-width 800 \
     --resize-method lanczos3 \
-    --output "$OPTIMIZED_ASSET" "$ASSET_PATH"
+    --output "$OPTIMIZED_ASSET" "$RECORDED_ASSET"
 
 #
 # Move the optimized animation into the repository documentation assets.

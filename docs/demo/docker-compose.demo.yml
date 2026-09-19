@@ -7,13 +7,14 @@
 #                          README animation without real PIA credentials or a
 #                          live VPN connection.
 #
-# This configuration replaces only the Privateerr and Gluetun runtime commands
+# This configuration replaces the Privateerr, Gluetun, and Watchtower commands
 # inside the disposable recording checkout. Every selected application service
 # still starts from the complete Maraudarr-generated Compose chart.
 #
 # Services overridden:
 #   - privateerr:  Creates its health marker without contacting PIA.
 #   - gluetun:     Keeps the shared downloader network namespace available.
+#   - watchtower:  Uses an inert shell container without Docker API access.
 #
 
 #
@@ -53,3 +54,22 @@ services:
       test:  # Report the inert network namespace as ready
         - CMD
         - "true"
+
+  #
+  # Keep the default Watchtower selection visible without host-wide updates.
+  #
+  watchtower:
+    image: ghcr.io/scottgigawatt/privateerr:${PRIVATEERR_TAG}
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - exec sleep 3600
+
+    # Replace the inherited Docker socket mount with an inert device.
+    volumes:
+      - /dev/null:/var/run/docker.sock:ro
+
+    # Report the inert demonstration process as ready.
+    healthcheck:
+      test: ["CMD", "true"]
+      interval: 2s
+      start_period: 2s
