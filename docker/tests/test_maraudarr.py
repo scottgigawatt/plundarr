@@ -294,7 +294,8 @@ class MaraudarrTests(unittest.TestCase):
         """Render Neo's scheduler, external settings, and unprivileged identity."""
 
         plan = self.catalog.resolve("duplex")
-        chart = extract_service(render_compose(self.catalog, plan), "pattrmm")
+        compose = render_compose(self.catalog, plan)
+        chart = extract_service(compose, "pattrmm")
         environment = render_environment(
             self.catalog, plan, None, generate_secrets=False
         )
@@ -308,7 +309,19 @@ class MaraudarrTests(unittest.TestCase):
             self.assertIn(assignment, environment)
         for setting in ("PATTRMM_TIMES", "PATTRMM_SETTINGS"):
             self.assertIn(f"{setting}: ${{{setting}}}", chart)
-        self.assertIn("user: ${PATTRMM_PUID}:${PATTRMM_PGID}", chart)
+        self.assertIn("<<: *rootless-container", chart)
+        self.assertNotRegex(chart, r"(?m)^\s+(user|group_add):")
+
+        # Keep the inherited identity and supplementary group in the generated chart.
+        rootless = compose.split("x-rootless-container: &rootless-container", 1)[1]
+        rootless = rootless.split("\n\n", 1)[0]
+        self.assertIn("user: ${DEFAULT_PUID}:${DEFAULT_PGID}", rootless)
+        self.assertIn("group_add:", rootless)
+        self.assertIn("- ${DEFAULT_GROUP}", rootless)
+        for setting in ("PATTRMM_PUID", "PATTRMM_PGID"):
+            self.assertNotIn(setting, compose)
+            self.assertNotIn(setting, environment)
+
         self.assertIn("source: ${PATTRMM_SETTINGS_PATH}", chart)
         self.assertIn("target: /settings", chart)
         self.assertEqual(chart.count("read_only: true"), 2)

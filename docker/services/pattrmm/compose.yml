@@ -12,11 +12,10 @@ services:
   #
   pattrmm:
     # Docker image and container information
-    <<: *default-container                                          # Pull in the default container information
+    <<: *rootless-container                                         # Inherit the shared host identity and media group
     image: ghcr.io/insertdisc/pattrmm:${PATTRMM_TAG}                # Follow the Neo image channel
     container_name: ${COMPOSE_PROJECT_NAME}-pattrmm-${PATTRMM_TAG}  # Namespace the container name by project and tag
     hostname: pattrmm                                               # Set the container hostname
-    user: ${PATTRMM_PUID}:${PATTRMM_PGID}                           # Neo runs directly as this host identity
 
     # Define the container environment
     environment:

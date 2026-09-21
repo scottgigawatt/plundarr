@@ -8,7 +8,7 @@ Runs `ghcr.io/insertdisc/pattrmm:neo` and writes collection YAML and paired Plex
 
 Neo reads `/config/config.yml`, shared with Kometa through [its service settings](../kometa/README.md). Use literal private Plex URL/token and TMDb key, language, and region values. Do not commit that live file. Generated collection files and their paired text lists must remain together beneath the configured `collection_dir`.
 
-`PATTRMM_CONFIG_PATH/data` mounts writable at `/data` for the cache. Create this directory before startup and give `PATTRMM_PUID:PATTRMM_PGID` write access to it and the configured output directories in the Kometa checkout. Compose runs Neo directly as that identity. Settings and the runtime connection file only need read access.
+`PATTRMM_CONFIG_PATH/data` mounts writable at `/data` for the cache. Neo inherits the shared `rootless-container` anchor: `DEFAULT_PUID:DEFAULT_PGID` is its process identity, and `DEFAULT_GROUP` supplies the supplementary media-management group. Create the cache directory before startup and ensure that identity can write to it and the configured output directories in the Kometa checkout. Settings and the runtime connection file only need read access.
 
 ## Schedule and manual runs
 
