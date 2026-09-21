@@ -232,11 +232,16 @@ make ship PRESET=duplex
 | --- | --- |
 | `KOMETA_CONFIG_PATH` | Independent Kometa checkout containing `config.yml`, assets, and metadata |
 | `KOMETA_RUNTIME_CONFIG_PATH` | Existing live YAML file shared by Kometa and PATTRMM; defaults to `${KOMETA_CONFIG_PATH}/config.yml` |
+| `PATTRMM_SETTINGS_PATH` | Existing Neo settings directory; defaults to `${KOMETA_CONFIG_PATH}/pattrmm` |
+| `PATTRMM_SETTINGS` | Selected Neo settings filenames; defaults to `settings.yml` |
+| `PATTRMM_TIMES` | Neo generation times; defaults to `02:00,14:00`, before Kometa |
 | `KOMETA_TIMES` | Comma-separated stable-image run times in `HH:MM` format |
 | `IMAGEMAID_PLEX_PATH` | Plex application data containing `Cache`, `Metadata`, and `Plug-in Support` |
 | `NOTIFIARR_WEBUI_PORT` | Notifiarr host port; defaults to `5454` |
 
 Kometa and PATTRMM share an external checkout; Maraudarr does not clone or replace it. Configure the shared file before starting, following the [Kometa service guide](https://github.com/scottgigawatt/plundarr/blob/main/docker/services/kometa/README.md). ImageMaid receives its own writable configuration directory and Plex application data at `/plex`.
+
+PATTRMM uses the `neo` image channel. Prepare its authored settings directory and writable cache/output directories before startup, following the [Neo service guide](https://github.com/scottgigawatt/plundarr/blob/main/docker/services/pattrmm/README.md). Generate the collection files before the first Kometa run.
 
 Start the persistent Duplex services:
 

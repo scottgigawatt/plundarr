@@ -290,6 +290,79 @@ class MaraudarrTests(unittest.TestCase):
             render_environment(self.catalog, selected, None, generate_secrets=False),
         )
 
+    def test_pattrmm_neo_contract(self) -> None:
+        """Render Neo's scheduler, external settings, and unprivileged identity."""
+
+        plan = self.catalog.resolve("duplex")
+        compose = render_compose(self.catalog, plan)
+        chart = extract_service(compose, "pattrmm")
+        environment = render_environment(
+            self.catalog, plan, None, generate_secrets=False
+        )
+        for assignment in (
+            'PATTRMM_TAG="${PATTRMM_TAG:-neo}"',
+            'PATTRMM_TIMES="${PATTRMM_TIMES:-02:00,14:00}"',
+            'PATTRMM_SETTINGS="${PATTRMM_SETTINGS:-settings.yml}"',
+            'PATTRMM_SETTINGS_PATH="${PATTRMM_SETTINGS_PATH:-'
+            '${KOMETA_CONFIG_PATH}/pattrmm}"',
+        ):
+            self.assertIn(assignment, environment)
+        for setting in ("PATTRMM_TIMES", "PATTRMM_SETTINGS"):
+            self.assertIn(f"{setting}: ${{{setting}}}", chart)
+        self.assertIn("<<: *rootless-container", chart)
+        self.assertNotRegex(chart, r"(?m)^\s+(user|group_add):")
+
+        # Keep the inherited identity and supplementary group in the generated chart.
+        rootless = compose.split("x-rootless-container: &rootless-container", 1)[1]
+        rootless = rootless.split("\n\n", 1)[0]
+        self.assertIn("user: ${DEFAULT_PUID}:${DEFAULT_PGID}", rootless)
+        self.assertIn("group_add:", rootless)
+        self.assertIn("- ${DEFAULT_GROUP}", rootless)
+        for setting in ("PATTRMM_PUID", "PATTRMM_PGID"):
+            self.assertNotIn(setting, compose)
+            self.assertNotIn(setting, environment)
+
+        self.assertIn("source: ${PATTRMM_SETTINGS_PATH}", chart)
+        self.assertIn("target: /settings", chart)
+        self.assertEqual(chart.count("read_only: true"), 2)
+        self.assertEqual(chart.count("create_host_path: false"), 2)
+        self.assertIn("${PATTRMM_CONFIG_PATH}/data:/data:rw", chart)
+        self.assertIn("${KOMETA_CONFIG_PATH}:/config:rw", chart)
+        self.assertNotIn("PATTRMM_TIME:", chart)
+        self.assertNotIn("/preferences", chart)
+        self.assertNotRegex(chart, r"(?m)^\s+(PUID|GUID):")
+
+    def test_pattrmm_settings_remain_operator_owned(self) -> None:
+        """Preserve private paths, Neo settings, and cache during regeneration."""
+
+        plan = self.catalog.resolve("duplex")
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            settings = root / "external settings"
+            settings.mkdir()
+            settings_file = settings / "settings.yml"
+            settings_file.write_text("libraries: {}\n")
+            output = root / "deployment"
+            _, env_path, config_path = write_stack(self.catalog, plan, output)
+            data = config_path / "pattrmm" / "data"
+            data.mkdir(exist_ok=True)
+            cache = data / "operator-cache.json"
+            cache.write_text('{"preserve": true}\n')
+            assignments = (
+                f'PATTRMM_SETTINGS_PATH="{settings}"\n'
+                'PATTRMM_TIMES="01:30,13:30"\n'
+                'PATTRMM_SETTINGS="settings.yml"\n'
+                'PATTRMM_TAG="neo"\n'
+            )
+            env_path.write_text(assignments)
+            write_stack(self.catalog, plan, output)
+            for assignment in assignments.splitlines():
+                self.assertIn(assignment, env_path.read_text())
+            self.assertEqual(settings_file.read_text(), "libraries: {}\n")
+            self.assertEqual(cache.read_text(), '{"preserve": true}\n')
+            self.assertFalse((config_path / "pattrmm" / "settings").exists())
+            self.assertFalse((config_path / "pattrmm" / "preferences").exists())
+
     def test_kometa_runtime_config_survives_regeneration(self) -> None:
         """Keep shared private configuration external and preserve its selection."""
 
