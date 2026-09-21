@@ -215,10 +215,10 @@ order = 440
 
 # PATTRMM remains a removable Kometa helper rather than a Duplex core service.
 [services.pattrmm]
-title = "PATTRMM"
-description = "Generates returning-soon metadata and overlays for Kometa."
+title = "PATTRMM Neo"
+description = "Generates local lists and date-aware collections for Kometa."
 category = "Plex utilities"
-url = "https://github.com/InsertDisc/pattrmm"
+url = "https://github.com/InsertDisc/pattrmm/tree/neo"
 order = 450
 requires = ["kometa"]
 

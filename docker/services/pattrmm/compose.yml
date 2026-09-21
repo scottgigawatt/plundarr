@@ -3,34 +3,40 @@
 #
 # Licensed under the Apache License, Version 2.0.
 #
-# compose.yml: Maraudarr service chart for PATTRMM.
+# compose.yml: Maraudarr service chart for PATTRMM Neo.
 #
 
 services:
   #
-  # Define the 'pattrmm' service for Kometa helper metadata generation.
+  # Generate local collection lists with the PATTRMM Neo cores.
   #
   pattrmm:
     # Docker image and container information
     <<: *default-container                                          # Pull in the default container information
-    image: ghcr.io/insertdisc/pattrmm:${PATTRMM_TAG}                # Run using the specified floating tag
+    image: ghcr.io/insertdisc/pattrmm:${PATTRMM_TAG}                # Follow the Neo image channel
     container_name: ${COMPOSE_PROJECT_NAME}-pattrmm-${PATTRMM_TAG}  # Namespace the container name by project and tag
     hostname: pattrmm                                               # Set the container hostname
+    user: ${PATTRMM_PUID}:${PATTRMM_PGID}                           # Neo runs directly as this host identity
 
     # Define the container environment
     environment:
-      <<: *default-environment       # Pull in the default environment
-      PATTRMM_TIME: ${PATTRMM_TIME}  # Set the daily run time
-      PUID: ${PATTRMM_PUID}          # Set the host user ID
-      GUID: ${PATTRMM_PGID}          # Set the host group ID expected by PATTRMM
+      <<: *default-environment               # Pull in the default environment
+      PATTRMM_TIMES: ${PATTRMM_TIMES}        # Schedule one or more daily runs
+      PATTRMM_SETTINGS: ${PATTRMM_SETTINGS}  # Select named YAML files under /settings
 
     # Mount PATTRMM state and the independently managed Kometa configuration
-    volumes:                                                # Mount application state and shared configuration
-      - ${PATTRMM_CONFIG_PATH}/data:/data:rw                # Generated metadata and working data
-      - ${PATTRMM_CONFIG_PATH}/preferences:/preferences:rw  # PATTRMM preferences and templates
-      - ${KOMETA_CONFIG_PATH}:/config:rw                    # Kometa config and generated YAML files
-      - type: bind                                          # Bind the existing runtime configuration file
-        source: ${KOMETA_RUNTIME_CONFIG_PATH}               # Live config shared by Kometa and PATTRMM
-        target: /config/config.yml                          # Expose the live config at its expected path
-        bind:                                               # Configure bind mount behavior
-          create_host_path: false                           # Fail if the source path does not exist
+    volumes:                                   # Mount application state and shared configuration
+      - ${PATTRMM_CONFIG_PATH}/data:/data:rw   # Neo cache and working data
+      - ${KOMETA_CONFIG_PATH}:/config:rw       # Kometa config and generated YAML files
+      - type: bind                             # Require the operator's authored Neo settings
+        source: ${PATTRMM_SETTINGS_PATH}       # Settings directory, normally in the Kometa checkout
+        target: /settings                      # Neo reads selected YAML files from this directory
+        read_only: true                        # Keep authored settings separate from runtime writes
+        bind:                                  # Configure bind mount behavior
+          create_host_path: false              # Fail if the settings directory does not exist
+      - type: bind                             # Bind the existing runtime configuration file
+        source: ${KOMETA_RUNTIME_CONFIG_PATH}  # Live config shared by Kometa and PATTRMM
+        target: /config/config.yml             # Expose the live config at its expected path
+        read_only: true                        # Neo only reads the private connection values
+        bind:                                  # Configure bind mount behavior
+          create_host_path: false              # Fail if the source path does not exist
