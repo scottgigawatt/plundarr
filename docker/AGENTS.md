@@ -39,6 +39,8 @@ All TOML in this build context uses two-space indentation for multi-line arrays.
 
 ## Rendering Rules
 
+Follow the root environment and Compose comment rules in every service fragment: keep only operator editing prompts inline in `environment.env`, and place behavior, units, accepted values, and limits beside the corresponding Compose settings. Generated `.env` and `example.env` files inherit this convention from the source fragments. Preserve existing operator values and comments when regenerating deployments.
+
 Maraudarr preserves source comments and `${VARIABLES}`. Normal generation writes:
 
 - `/output/dist/<preset>/docker-compose.yml`
