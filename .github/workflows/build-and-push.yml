@@ -27,6 +27,8 @@ on:
       - "test/helpers/**"
       - "test/stubs/**"
       - "scripts/compose/**"
+      - "ruff.toml"
+      - ".pre-commit-config.yaml"
       - "Makefile"
       - "LICENSE"
       - "docs/docker-hub-description.md"
@@ -69,6 +71,12 @@ jobs:
       #
       - name: "Test the Stack Charts 🔎"
         run: make test
+
+      #
+      # Enforce the same Python lint, formatting, and repository checks after merges and before releases.
+      #
+      - name: "Scrub the Python Deck 🧽"
+        uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd  # v3.0.1
 
       #
       # Build one local architecture for runtime and vulnerability inspection.
