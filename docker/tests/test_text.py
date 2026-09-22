@@ -82,8 +82,10 @@ services:
     command: "echo *orphan"
 """
         result = prune_unused_anchors(foundation, content)
-        self.assertEqual(result, foundation[:foundation.index("# Unused settings")]
-                         + "# Services heading\nservices:\n")
+        self.assertEqual(
+            result,
+            foundation[: foundation.index("# Unused settings")] + "# Services heading\nservices:\n",
+        )
         self.assertEqual(prune_unused_anchors(result, content), result)
         self.assertEqual(
             prune_unused_anchors(foundation, "  example:\n    image: example\n"),
@@ -99,17 +101,17 @@ services:
             'SHORT="value # literal"   # First comment\n'
             'NO_COMMENT="keep # this"\n'
             "LONGER_KEY='value # literal'  # Second comment\n"
-            '\n# Separate group\n'
-            'X=one      # Third comment\n'
-            'YY=two  # Fourth comment\n'
+            "\n# Separate group\n"
+            "X=one      # Third comment\n"
+            "YY=two  # Fourth comment\n"
         )
         expected = (
             'SHORT="value # literal"       # First comment\n'
             'NO_COMMENT="keep # this"\n'
             "LONGER_KEY='value # literal'  # Second comment\n"
-            '\n# Separate group\n'
-            'X=one   # Third comment\n'
-            'YY=two  # Fourth comment\n'
+            "\n# Separate group\n"
+            "X=one   # Third comment\n"
+            "YY=two  # Fourth comment\n"
         )
         self.assertEqual(align_env_comments(source), expected)
         self.assertEqual(align_env_comments(expected), expected)

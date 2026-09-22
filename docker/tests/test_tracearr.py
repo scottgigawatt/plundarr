@@ -8,11 +8,11 @@
 
 """Cover Tracearr dependencies, storage, credentials, and Homepage integration."""
 
-from dataclasses import replace
-from pathlib import Path
 import re
 import tempfile
 import unittest
+from dataclasses import replace
+from pathlib import Path
 from unittest.mock import patch
 
 from maraudarr.catalog import Catalog, CatalogError
@@ -39,9 +39,9 @@ class TracearrTests(unittest.TestCase):
         removed = self.catalog.resolve("plundarr", remove={"tracearr"})
         self.assertTrue(required.isdisjoint(removed.service_ids))
         self.assertNotIn("\nvolumes:\n", render_compose(self.catalog, removed))
-        self.assertNotIn("TRACEARR_", render_environment(
-            self.catalog, removed, None, generate_secrets=False
-        ))
+        self.assertNotIn(
+            "TRACEARR_", render_environment(self.catalog, removed, None, generate_secrets=False)
+        )
         for preset in self.catalog.presets:
             if preset != "plundarr":
                 with self.subTest(preset=preset):
@@ -57,11 +57,17 @@ class TracearrTests(unittest.TestCase):
         plan = self.catalog.resolve("custom", selected={"tracearr"})
         compose = render_compose(self.catalog, plan)
         footer = compose.split("\nvolumes:\n", 1)[1]
-        self.assertEqual(re.findall(r"^  ([a-z-]+): \{\}  +#", footer, re.M), [
-            "tracearr-db-data", "tracearr-redis-data", "tracearr-backups"
-        ])
-        self.assertIn("# Tracearr PostgreSQL database containing application state and viewing history", footer)
-        self.assertIn("# Tracearr Redis queue and cache data, persisted between container restarts", footer)
+        self.assertEqual(
+            re.findall(r"^  ([a-z-]+): \{\}  +#", footer, re.M),
+            ["tracearr-db-data", "tracearr-redis-data", "tracearr-backups"],
+        )
+        self.assertIn(
+            "# Tracearr PostgreSQL database containing application state and viewing history",
+            footer,
+        )
+        self.assertIn(
+            "# Tracearr Redis queue and cache data, persisted between container restarts", footer
+        )
         self.assertIn("# Tracearr backup workspace mounted at /data/backup", footer)
         self.assertNotIn("name:", footer)
         self.assertNotIn("external:", footer)
@@ -88,7 +94,11 @@ class TracearrTests(unittest.TestCase):
     def test_catalog_rejects_invalid_and_duplicate_volume_declarations(self) -> None:
         """Catch unsafe volume keys and accidental ownership collisions early."""
         original = self.catalog.services["tracearr"]
-        for volumes in ({"../outside": "Invalid path."}, {"data": ""}, {"data": "First line.\nSecond line."}):
+        for volumes in (
+            {"../outside": "Invalid path."},
+            {"data": ""},
+            {"data": "First line.\nSecond line."},
+        ):
             with self.subTest(volumes=volumes):
                 self.catalog.services["tracearr"] = replace(original, named_volumes=volumes)
                 with self.assertRaises(CatalogError):
@@ -126,10 +136,13 @@ class TracearrTests(unittest.TestCase):
             with patch("maraudarr.render.validate_compose"):
                 _, env_path, config_path = write_stack(self.catalog, plan, output)
                 first = env_path.read_text()
-                secrets = dict(re.findall(
-                    r'^TRACEARR_(DB_PASSWORD|JWT_SECRET|COOKIE_SECRET|AUTH_SECRET)="([a-f0-9]{64})"$',
-                    first, re.M
-                ))
+                secrets = dict(
+                    re.findall(
+                        r'^TRACEARR_(DB_PASSWORD|JWT_SECRET|COOKIE_SECRET|AUTH_SECRET)="([a-f0-9]{64})"$',
+                        first,
+                        re.M,
+                    )
+                )
                 self.assertEqual(len(secrets), 4)
                 self.assertEqual(len(set(secrets.values())), 4)
                 example = (output / "example.env").read_text()
@@ -137,7 +150,9 @@ class TracearrTests(unittest.TestCase):
                 self.assertEqual(env_path.stat().st_mode & 0o777, 0o600)
                 state = config_path / "tautulli" / "example-state.txt"
                 state.write_text("operator-owned application state")
-                write_stack(self.catalog, self.catalog.resolve("custom", selected={"homepage"}), output)
+                write_stack(
+                    self.catalog, self.catalog.resolve("custom", selected={"homepage"}), output
+                )
                 write_stack(self.catalog, plan, output)
                 regenerated = env_path.read_text()
                 for key, value in secrets.items():
@@ -154,9 +169,15 @@ class TracearrTests(unittest.TestCase):
                 homepage = render_homepage_services(self.catalog, plan)
                 for monitor, label in (("tracearr", "Tracearr"), ("tautulli", "Tautulli")):
                     self.assertEqual(f"- {label}:" in homepage, monitor in monitors)
-                    self.assertEqual(f"HOMEPAGE_VAR_{monitor.upper()}_KEY" in compose, monitor in monitors)
-                    self.assertEqual(f"HOMEPAGE_VAR_{monitor.upper()}_KEY" in environment, monitor in monitors)
+                    self.assertEqual(
+                        f"HOMEPAGE_VAR_{monitor.upper()}_KEY" in compose, monitor in monitors
+                    )
+                    self.assertEqual(
+                        f"HOMEPAGE_VAR_{monitor.upper()}_KEY" in environment, monitor in monitors
+                    )
                 if "tracearr" in monitors:
-                    self.assertIn("HOMEPAGE_VAR_TRACEARR_URL:-http://tracearr:${TRACEARR_PORT}}", environment)
+                    self.assertIn(
+                        "HOMEPAGE_VAR_TRACEARR_URL:-http://tracearr:${TRACEARR_PORT}}", environment
+                    )
                     self.assertNotIn("${HOMEPAGE_VAR_TRACEARR_URL}:${TRACEARR_WEBUI_PORT}", compose)
                     self.assertIn("view: summary", homepage)

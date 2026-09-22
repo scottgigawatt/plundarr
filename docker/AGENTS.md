@@ -55,6 +55,8 @@ Profile-gated utilities remain selectable services but must not appear in ordina
 
 ## Python Rules
 
+Follow the shared shell and Python style in the root `AGENTS.md`. Root `ruff.toml` is authoritative for source and tests; the pull-request pre-commit gate runs both lint and format checks. Formatting changes must preserve generated comments and environment values.
+
 Use four-space indentation, type hints, small focused functions, and standard library facilities where practical. Each project-owned module and test file starts with the repository copyright block followed by a concise module docstring. Public classes and non-obvious helpers need useful docstrings.
 
 Separate a standalone explanatory comment from the preceding statement with a blank line. Prefer one concise comment line over hard-wrapping one sentence into multiple comment lines.

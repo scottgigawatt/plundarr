@@ -12,10 +12,9 @@ from __future__ import annotations
 
 import os
 import re
+import tomllib
 from ipaddress import IPv4Address, IPv4Network, ip_address, ip_network
 from pathlib import Path
-
-import tomllib
 
 from maraudarr.models import Preset, Service, StackPlan
 from maraudarr.text import TemplateError, extract_service
@@ -90,18 +89,14 @@ class Catalog:
             url=str(values["url"]),
             order=int(values["order"]),
             compose=str(values.get("compose", f"{base_path}/compose.yml")),
-            environment=str(
-                values.get("environment", f"{base_path}/environment.env")
-            ),
+            environment=str(values.get("environment", f"{base_path}/environment.env")),
             service=service_name,
             compose_services=tuple(
                 str(item) for item in values.get("compose_services", [service_name])
             ),
             named_volumes=dict(values.get("named_volumes", {})),
             requires=tuple(str(item) for item in values.get("requires", [])),
-            recommended=tuple(
-                str(item) for item in values.get("recommended", [])
-            ),
+            recommended=tuple(str(item) for item in values.get("recommended", [])),
         )
 
     @staticmethod
@@ -134,9 +129,7 @@ class Catalog:
                         f"Service '{service.id}' has invalid named volume: {volume!r}."
                     )
                 if volume in volume_owners:
-                    raise CatalogError(
-                        f"Named volume '{volume}' has multiple declarations."
-                    )
+                    raise CatalogError(f"Named volume '{volume}' has multiple declarations.")
                 if (
                     not isinstance(description, str)
                     or not description.strip()
@@ -167,8 +160,7 @@ class Catalog:
             for dependency in service.requires + service.recommended:
                 if dependency not in self.services:
                     raise CatalogError(
-                        f"Service '{service.id}' references unknown service "
-                        f"'{dependency}'."
+                        f"Service '{service.id}' references unknown service '{dependency}'."
                     )
 
         preset_networks: dict[str, IPv4Network] = {}
@@ -177,9 +169,7 @@ class Catalog:
             unknown_services = set(preset.services) - self.services.keys()
             if unknown_services:
                 names = ", ".join(sorted(unknown_services))
-                raise CatalogError(
-                    f"Preset '{preset.id}' references unknown services: {names}."
-                )
+                raise CatalogError(f"Preset '{preset.id}' references unknown services: {names}.")
             unknown_libraries = set(preset.media_libraries) - {
                 "anime",
                 "movies",
@@ -189,13 +179,10 @@ class Catalog:
             if unknown_libraries:
                 names = ", ".join(sorted(unknown_libraries))
                 raise CatalogError(
-                    f"Preset '{preset.id}' references unknown media libraries: "
-                    f"{names}."
+                    f"Preset '{preset.id}' references unknown media libraries: {names}."
                 )
             if preset.host_port_offset < 0:
-                raise CatalogError(
-                    f"Preset '{preset.id}' has a negative host port offset."
-                )
+                raise CatalogError(f"Preset '{preset.id}' has a negative host port offset.")
 
             try:
                 subnet = ip_network(preset.network_subnet)
@@ -205,22 +192,12 @@ class Catalog:
                 raise CatalogError(
                     f"Preset '{preset.id}' has invalid IPv4 network settings: {error}."
                 ) from error
-            if not isinstance(subnet, IPv4Network) or not isinstance(
-                gateway, IPv4Address
-            ):
-                raise CatalogError(
-                    f"Preset '{preset.id}' must use IPv4 network settings."
-                )
-            if not isinstance(ip_range, IPv4Network) or not ip_range.subnet_of(
-                subnet
-            ):
-                raise CatalogError(
-                    f"Preset '{preset.id}' IP range must be inside its subnet."
-                )
+            if not isinstance(subnet, IPv4Network) or not isinstance(gateway, IPv4Address):
+                raise CatalogError(f"Preset '{preset.id}' must use IPv4 network settings.")
+            if not isinstance(ip_range, IPv4Network) or not ip_range.subnet_of(subnet):
+                raise CatalogError(f"Preset '{preset.id}' IP range must be inside its subnet.")
             if gateway not in ip_range:
-                raise CatalogError(
-                    f"Preset '{preset.id}' gateway must be inside its IP range."
-                )
+                raise CatalogError(f"Preset '{preset.id}' gateway must be inside its IP range.")
             for other_id, other_network in preset_networks.items():
                 if subnet.overlaps(other_network):
                     raise CatalogError(

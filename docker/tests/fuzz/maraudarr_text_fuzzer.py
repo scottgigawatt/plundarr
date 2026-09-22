@@ -15,7 +15,6 @@ from collections.abc import Callable
 
 import atheris
 
-
 #
 # Instrument project imports so Atheris can guide new inputs toward previously
 # unexplored branches in Maraudarr rather than only observing the harness.

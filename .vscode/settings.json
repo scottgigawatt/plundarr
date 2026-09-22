@@ -44,6 +44,7 @@
         "centurylinklabs",
         "certifi",
         "changeme",
+        "charliermarsh",
         "Chartin",
         "cksum",
         "cleanuparr",
@@ -104,6 +105,7 @@
         "golift",
         "GOPROXY",
         "GOSUMDB",
+        "gpgsign",
         "griffelib",
         "griimick",
         "gsub",
@@ -391,6 +393,7 @@
         "editor.wordWrap": "on"
     },
     "[python]": {
+        "editor.defaultFormatter": "charliermarsh.ruff",
         "editor.detectIndentation": false,
         "editor.tabSize": 4,
         "editor.insertSpaces": true

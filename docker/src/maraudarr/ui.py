@@ -205,16 +205,8 @@ class UI:
             table.add_column("What it adds")
             previous_category = ""
             for index, service in enumerate(services):
-                category = (
-                    service.category
-                    if service.category != previous_category
-                    else ""
-                )
-                next_category = (
-                    services[index + 1].category
-                    if index + 1 < len(services)
-                    else None
-                )
+                category = service.category if service.category != previous_category else ""
+                next_category = services[index + 1].category if index + 1 < len(services) else None
                 table.add_row(
                     category,
                     service.title,
@@ -294,9 +286,7 @@ class UI:
                 "Cargo",
                 ", ".join(service.title for service in plan.services),
             )
-            self.console.print(
-                Panel(summary, title="⚓ Stack Manifest", border_style="#2a9d8f")
-            )
+            self.console.print(Panel(summary, title="⚓ Stack Manifest", border_style="#2a9d8f"))
             if plan.auto_added:
                 self.console.print(
                     "[bold #f2c14e]Dependency check:[/] "
@@ -412,10 +402,7 @@ class UI:
                 self.console.print(f"  {number}. {step}")
             return
 
-        print(
-            f"{plan.preset.title} ready: "
-            f"{compose_path}, {env_path}, and {config_path}"
-        )
+        print(f"{plan.preset.title} ready: {compose_path}, {env_path}, and {config_path}")
         for number, step in enumerate(steps, start=1):
             print(f"{number}. {step}")
 
@@ -445,8 +432,6 @@ class UI:
             message: Cancellation reason to present to the user.
         """
         if self.console:
-            self.console.print(
-                Panel(message, title="⚓ Voyage Cancelled", border_style="#f2c14e")
-            )
+            self.console.print(Panel(message, title="⚓ Voyage Cancelled", border_style="#f2c14e"))
         else:
             print(message)

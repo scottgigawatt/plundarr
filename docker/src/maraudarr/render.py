@@ -114,9 +114,7 @@ def _insert_gluetun_additions(block: str, selected: set[str]) -> str:
         anchor = "    # Mount host directories into the container\n"
         insertion = (
             "    # Define downloader host and container ports\n"
-            "    ports:\n"
-            + aligned_yaml_lines(port_entries, 6)
-            + "\n\n"
+            "    ports:\n" + aligned_yaml_lines(port_entries, 6) + "\n\n"
         )
         block = block.replace(anchor, insertion + anchor, 1)
     return block
@@ -174,9 +172,7 @@ def _prepare_service(
             "Homepage qBittorrent click target and widget": "qbittorrent" in selected,
             "Homepage SABnzbd click target and widget": "sabnzbd" in selected,
             "Homepage NZBGet click target and widget": "nzbget" in selected,
-            "Homepage Speedtest Tracker click target and widget": (
-                "speedtest-tracker" in selected
-            ),
+            "Homepage Speedtest Tracker click target and widget": ("speedtest-tracker" in selected),
         }
         for heading, keep in homepage_groups.items():
             if not keep:
@@ -289,9 +285,7 @@ def _filter_homepage_env(
         "Homepage Tautulli click-target and widget variables": "tautulli" in selected,
         "Homepage Radarr click-target and widget variables": "radarr" in selected,
         "Homepage Sonarr click-target and widget variables": "sonarr" in selected,
-        "Homepage Sonarr Anime click-target and widget variables": (
-            "sonarr-anime" in selected
-        ),
+        "Homepage Sonarr Anime click-target and widget variables": ("sonarr-anime" in selected),
         "Homepage Lidarr click-target and widget variables": "lidarr" in selected,
         "Homepage Jellyfin click-target and widget variables": "jellyfin" in selected,
         "Homepage Calibre-Web Automated click-target and widget variables": (
@@ -300,9 +294,7 @@ def _filter_homepage_env(
         "Homepage Bazarr click-target and widget variables": "bazarr" in selected,
         "Homepage Seerr click-target and widget variables": "seerr" in selected,
         "Homepage Prowlarr click-target and widget variables": "prowlarr" in selected,
-        "Homepage qBittorrent click-target and widget variables": (
-            "qbittorrent" in selected
-        ),
+        "Homepage qBittorrent click-target and widget variables": ("qbittorrent" in selected),
         "Homepage SABnzbd click-target and widget variables": "sabnzbd" in selected,
         "Homepage NZBGet click-target and widget variables": "nzbget" in selected,
         "Homepage Speedtest Tracker click-target and widget variables": (
@@ -374,9 +366,7 @@ def _preserve_inactive_values(
     inactive = [
         line
         for key, line in existing.items()
-        if key != "COMPOSE_PROJECT_NAME"
-        and key in known_keys
-        and key not in active_keys
+        if key != "COMPOSE_PROJECT_NAME" and key in known_keys and key not in active_keys
     ]
     if not inactive:
         return rendered
@@ -463,9 +453,7 @@ def render_environment(
             )
         rendered_sections.append(section)
 
-    rendered = "\n\n".join(
-        section.rstrip("\n") for section in rendered_sections
-    )
+    rendered = "\n\n".join(section.rstrip("\n") for section in rendered_sections)
     # Fresh environments inherit identity, network, and media defaults from
     # the selected preset. Existing user-managed values remain preserved below.
     media_root = plan.preset.media_root.rstrip("/")
@@ -630,7 +618,7 @@ def render_homepage_services(catalog: Catalog, plan: StackPlan) -> str:
     download_cards = []
     if "prowlarr" in selected:
         download_cards.append(_homepage_card(source, "Prowlarr"))
-    for service_id, label in (
+    for service_id, _label in (
         ("qbittorrent", "qBittorrent"),
         ("sabnzbd", "SABnzbd"),
         ("nzbget", "NZBGet"),
@@ -794,9 +782,7 @@ def validate_compose(output_dir: Path) -> None:
             continue
         if result.returncode:
             message = result.stderr.strip() or result.stdout.strip()
-            raise RenderError(
-                f"Docker Compose rejected the generated stack: {message}"
-            )
+            raise RenderError(f"Docker Compose rejected the generated stack: {message}")
         return
 
 

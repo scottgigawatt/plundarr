@@ -21,6 +21,7 @@
         "jq-syntax-highlighting.jq-syntax-highlighting",   // Highlight jq source; this is not a formatter.
         "luggage66.awk",                                   // Highlight AWK syntax and provide language snippets.
         "ms-azuretools.vscode-docker",                     // Navigate Dockerfiles, images, and Compose projects.
+        "charliermarsh.ruff",                               // Apply shared Python lint and formatting rules.
         "ms-python.python",                                // Provide Python language, testing, and debug support.
         "ms-vscode.makefile-tools",                        // Discover and run documented Make targets.
         "redhat.vscode-yaml",                              // Validate YAML with repository-specific schemas.

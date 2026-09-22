@@ -140,9 +140,7 @@ class MaraudarrTests(unittest.TestCase):
                 self.assertNotIn("qbittorrent", usenet)
 
             with self.subTest(preset=preset_id, mode="combined"):
-                combined = set(
-                    self.catalog.resolve(preset_id, add={"sabnzbd"}).service_ids
-                )
+                combined = set(self.catalog.resolve(preset_id, add={"sabnzbd"}).service_ids)
                 self.assertIn("qbittorrent", combined)
                 self.assertIn("sabnzbd", combined)
 
@@ -179,9 +177,7 @@ class MaraudarrTests(unittest.TestCase):
             with self.subTest(preset=plan.preset.id):
                 compose = render_compose(self.catalog, plan)
                 service = extract_service(compose, "portainer")
-                environment = render_environment(
-                    self.catalog, plan, None, generate_secrets=False
-                )
+                environment = render_environment(self.catalog, plan, None, generate_secrets=False)
                 self.assertIn("image: portainer/portainer-ce:${PORTAINER_TAG}", service)
                 self.assertIn("${PORTAINER_WEB_PORT}:9443", service)
                 self.assertIn("${PORTAINER_EDGE_PORT}:8000", service)
@@ -296,15 +292,12 @@ class MaraudarrTests(unittest.TestCase):
         plan = self.catalog.resolve("duplex")
         compose = render_compose(self.catalog, plan)
         chart = extract_service(compose, "pattrmm")
-        environment = render_environment(
-            self.catalog, plan, None, generate_secrets=False
-        )
+        environment = render_environment(self.catalog, plan, None, generate_secrets=False)
         for assignment in (
             'PATTRMM_TAG="${PATTRMM_TAG:-neo}"',
             'PATTRMM_TIMES="${PATTRMM_TIMES:-02:00,14:00}"',
             'PATTRMM_SETTINGS="${PATTRMM_SETTINGS:-settings.yml}"',
-            'PATTRMM_SETTINGS_PATH="${PATTRMM_SETTINGS_PATH:-'
-            '${KOMETA_CONFIG_PATH}/pattrmm}"',
+            'PATTRMM_SETTINGS_PATH="${PATTRMM_SETTINGS_PATH:-${KOMETA_CONFIG_PATH}/pattrmm}"',
         ):
             self.assertIn(assignment, environment)
         for setting in ("PATTRMM_TIMES", "PATTRMM_SETTINGS"):
@@ -367,9 +360,7 @@ class MaraudarrTests(unittest.TestCase):
         """Keep shared private configuration external and preserve its selection."""
 
         plan = self.catalog.resolve("duplex")
-        default_environment = render_environment(
-            self.catalog, plan, None, generate_secrets=False
-        )
+        default_environment = render_environment(self.catalog, plan, None, generate_secrets=False)
         self.assertIn(
             'KOMETA_RUNTIME_CONFIG_PATH="${KOMETA_RUNTIME_CONFIG_PATH:-'
             '${KOMETA_CONFIG_PATH}/config.yml}"',
@@ -382,12 +373,9 @@ class MaraudarrTests(unittest.TestCase):
             private.parent.mkdir(parents=True)
             private.write_text("plex: {token: example}\n")
             output = root / "deployment"
-            compose_path, env_path, config_path = write_stack(
-                self.catalog, plan, output
-            )
+            compose_path, env_path, config_path = write_stack(self.catalog, plan, output)
             assignments = (
-                f'KOMETA_CONFIG_PATH="{external}"\n'
-                f'KOMETA_RUNTIME_CONFIG_PATH="{private}"\n'
+                f'KOMETA_CONFIG_PATH="{external}"\nKOMETA_RUNTIME_CONFIG_PATH="{private}"\n'
             )
             env_path.write_text(assignments)
             write_stack(self.catalog, plan, output)
@@ -427,12 +415,8 @@ class MaraudarrTests(unittest.TestCase):
             self.catalog.resolve("calibre-web-automated").service_ids,
             ("calibre-web-automated",),
         )
-        self.assertEqual(
-            self.catalog.preset("jellyfin").media_libraries, ("movies", "tv")
-        )
-        self.assertEqual(
-            self.catalog.preset("boudoirr").media_libraries, ("movies", "scenes")
-        )
+        self.assertEqual(self.catalog.preset("jellyfin").media_libraries, ("movies", "tv"))
+        self.assertEqual(self.catalog.preset("boudoirr").media_libraries, ("movies", "scenes"))
 
     def test_dependencies_are_added_before_the_requested_service(self) -> None:
         """Auto-add required services before their selected dependent."""
@@ -556,7 +540,9 @@ class MaraudarrTests(unittest.TestCase):
         self.assertNotIn("# NZBGet environment variables", environment)
         self.assertNotIn("HOMEPAGE_VAR_NZBGET_HREF", environment)
         self.assertLess(environment.index("PROWLARR_TAG"), environment.index("RADARR_TAG"))
-        self.assertLess(environment.index("SPEEDTEST_TRACKER_TAG"), environment.index("APPRISE_TAG"))
+        self.assertLess(
+            environment.index("SPEEDTEST_TRACKER_TAG"), environment.index("APPRISE_TAG")
+        )
 
     def test_privateerr_region_controls_follow_service_selection(self) -> None:
         """Expose region selection wherever the VPN dependency is generated."""
@@ -750,9 +736,7 @@ class MaraudarrTests(unittest.TestCase):
             for preset_id in preset_ids
         }
         project_names = [plan.preset.project_name for plan in plans.values()]
-        networks = [
-            ip_network(plan.preset.network_subnet) for plan in plans.values()
-        ]
+        networks = [ip_network(plan.preset.network_subnet) for plan in plans.values()]
 
         self.assertEqual(len(project_names), len(set(project_names)))
         self.assertTrue(all(network.is_private for network in networks))
@@ -771,9 +755,7 @@ class MaraudarrTests(unittest.TestCase):
             )
             container_names[preset_id] = {
                 name.replace("${COMPOSE_PROJECT_NAME}", plan.preset.project_name)
-                for name in re.findall(
-                    r"^\s*container_name:\s+([^\s#]+)", compose, re.MULTILINE
-                )
+                for name in re.findall(r"^\s*container_name:\s+([^\s#]+)", compose, re.MULTILINE)
             }
             port_variables = set(
                 re.findall(
@@ -787,7 +769,7 @@ class MaraudarrTests(unittest.TestCase):
                 for variable in port_variables
                 if (
                     match := re.search(
-                    rf'^{re.escape(variable)}="\$\{{{re.escape(variable)}:-(\d+)\}}"(?:\s+#.*)?$',
+                        rf'^{re.escape(variable)}="\$\{{{re.escape(variable)}:-(\d+)\}}"(?:\s+#.*)?$',
                         environment,
                         re.MULTILINE,
                     )
@@ -795,12 +777,8 @@ class MaraudarrTests(unittest.TestCase):
             }
 
         for first, second in combinations(preset_ids, 2):
-            self.assertTrue(
-                container_names[first].isdisjoint(container_names[second])
-            )
-            self.assertTrue(
-                published_ports[first].isdisjoint(published_ports[second])
-            )
+            self.assertTrue(container_names[first].isdisjoint(container_names[second]))
+            self.assertTrue(published_ports[first].isdisjoint(published_ports[second]))
 
         self.assertIn(8191, published_ports["plundarr"])
         self.assertIn(9696, published_ports["plundarr"])
@@ -858,9 +836,7 @@ class MaraudarrTests(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as temporary_directory:
             env_path = Path(temporary_directory) / ".env"
-            existing_port = (
-                'QBITTORRENT_WEBUI_PORT="${QBITTORRENT_WEBUI_PORT:-28080}"'
-            )
+            existing_port = 'QBITTORRENT_WEBUI_PORT="${QBITTORRENT_WEBUI_PORT:-28080}"'
             env_path.write_text(existing_port + "\n")
             environment = render_environment(
                 self.catalog,
@@ -894,9 +870,7 @@ class MaraudarrTests(unittest.TestCase):
 
         self.assertIn('PIA_USER="captain"', environment)
         self.assertIn('TZ="Pacific/Honolulu"', environment)
-        self.assertIn(
-            'SPEEDTEST_TRACKER_APP_KEY="base64:keep-this-key"', environment
-        )
+        self.assertIn('SPEEDTEST_TRACKER_APP_KEY="base64:keep-this-key"', environment)
         self.assertIn(
             'DUPLICATI_WEBSERVICE_PASSWORD="keep-this-password"',  # pragma: allowlist secret
             environment,
@@ -938,14 +912,9 @@ class MaraudarrTests(unittest.TestCase):
             if line.startswith("DUPLICATI_WEBSERVICE_PASSWORD=")
         )
         nzbget_password = next(
-            line
-            for line in environment.splitlines()
-            if line.startswith("NZBGET_PASS=")
+            line for line in environment.splitlines() if line.startswith("NZBGET_PASS=")
         )
-        self.assertRegex(
-            speedtest_key,
-            r'^SPEEDTEST_TRACKER_APP_KEY="base64:[A-Za-z0-9+/]{43}="$'
-        )
+        self.assertRegex(speedtest_key, r'^SPEEDTEST_TRACKER_APP_KEY="base64:[A-Za-z0-9+/]{43}="$')
         self.assertNotIn("change-me", duplicati_key)
         self.assertNotIn("changeme", duplicati_password)
         self.assertRegex(nzbget_password, r'^NZBGET_PASS="[A-Za-z0-9_-]{20,}"$')
@@ -997,7 +966,7 @@ class MaraudarrTests(unittest.TestCase):
 
             overrides = (
                 'HOMEPAGE_EXTERNAL_URL="https://homepage.example.com"\n'
-                'HOMEPAGE_AUTH_PASSWORD=\'operator-$-and-#-password\'\n'  # pragma: allowlist secret
+                "HOMEPAGE_AUTH_PASSWORD='operator-$-and-#-password'\n"  # pragma: allowlist secret
             )
             env_path.write_text(old_values + overrides)
             updated = render_environment(self.catalog, plan, env_path)
@@ -1227,9 +1196,7 @@ class MaraudarrTests(unittest.TestCase):
         )
 
         for name in (
-            name
-            for service in self.catalog.services.values()
-            for name in service.compose_services
+            name for service in self.catalog.services.values() for name in service.compose_services
         ):
             block = extract_service(compose, name)
             tag_match = re.search(
@@ -1256,13 +1223,11 @@ class MaraudarrTests(unittest.TestCase):
             "network_mode:",
         )
         for service, name in (
-            (service, name)
-            for service in self.catalog.services.values()
-            for name in service.compose_services
+            (entry, name)
+            for entry in self.catalog.services.values()
+            for name in entry.compose_services
         ):
-            source = extract_service(
-                self.catalog.source_path(service.compose).read_text(), name
-            )
+            source = extract_service(self.catalog.source_path(service.compose).read_text(), name)
             block = source.split("# Docker image and container information", 1)[1]
             block = block.split("\n\n", 1)[0]
             comment_columns = {
@@ -1337,7 +1302,7 @@ class MaraudarrTests(unittest.TestCase):
                     self.assertIn("\n        - /config/nzbget.conf\n", compose)
                 if service.id == "calibre-web-automated":
                     self.assertIn("\n        - nc\n", compose)
-                    self.assertIn("\n        - \"8083\"\n", compose)
+                    self.assertIn('\n        - "8083"\n', compose)
 
         self.assertEqual(shell_healthchecks, set())
 
@@ -1355,7 +1320,7 @@ class MaraudarrTests(unittest.TestCase):
         )
         service = extract_service(compose, "calibre-web-automated")
 
-        self.assertIn("CWA_PORT_OVERRIDE: \"8083\"", service)
+        self.assertIn('CWA_PORT_OVERRIDE: "8083"', service)
         self.assertIn("NETWORK_SHARE_MODE: ${CWA_NETWORK_SHARE_MODE}", service)
         self.assertIn("${CWA_CONFIG_PATH}:/config:rw", service)
         self.assertIn("${CWA_INGEST_PATH}:/cwa-book-ingest:rw", service)
@@ -1448,23 +1413,12 @@ class MaraudarrTests(unittest.TestCase):
             self.assertTrue((config_path / "jellyfin" / "README.md").is_file())
             self.assertTrue((config_path / "jellyfin" / "config").is_dir())
             self.assertTrue((config_path / "jellyfin" / "cache").is_dir())
-            self.assertTrue(
-                (config_path / "calibre-web-automated" / "config").is_dir()
-            )
-            self.assertTrue(
-                (config_path / "calibre-web-automated" / "ingest").is_dir()
-            )
+            self.assertTrue((config_path / "calibre-web-automated" / "config").is_dir())
+            self.assertTrue((config_path / "calibre-web-automated" / "ingest").is_dir())
             self.assertTrue((config_path / "nzbget" / "README.md").is_file())
+            self.assertTrue((config_path / "recyclarr" / "recyclarr.yml").is_file())
             self.assertTrue(
-                (config_path / "recyclarr" / "recyclarr.yml").is_file()
-            )
-            self.assertTrue(
-                (
-                    config_path
-                    / "qbittorrent"
-                    / "qBittorrent"
-                    / "qBittorrent.conf"
-                ).is_file()
+                (config_path / "qbittorrent" / "qBittorrent" / "qBittorrent.conf").is_file()
             )
             self.assertFalse((config_path / "plex").exists())
 

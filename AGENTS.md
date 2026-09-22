@@ -111,6 +111,31 @@ Treat `.editorconfig` as the portable source of truth for indentation, line endi
 
 Comment every Dockerfile build stage and each non-obvious instruction group. Stage comments must explain both the artifact produced and why the stage is separate.
 
+## Shared shell and Python style
+
+Keep these conventions aligned between Privateerr and Plundarr while preserving each repository's architecture and test tooling.
+
+Use four spaces in shell and Python, two spaces in YAML, TOML, AWK, and jq, and four spaces in JSON and JSON with Comments. `.editorconfig` is the portable source of truth; VS Code settings must agree. Put a blank line before and after logical control-flow blocks, and place a concise explanatory comment above non-obvious checks, loops, and operations. Do not add comments that merely repeat the code.
+
+Shell functions use this exact documentation shape:
+
+```sh
+#
+# function_name: Describe the function's purpose.
+#
+# Parameters: $1 - Describe the first parameter.
+#             $2 - Describe the second parameter.
+#
+# Returns: Describe the return value or exit behavior.
+#
+```
+
+Use `Parameters: None.` when appropriate. Keep each short explanatory sentence on one comment line. Use targeted ShellCheck suppressions only when a documented runtime constraint prevents a correct code fix; never disable a diagnostic across the repository to hide individual findings. `.shellcheckrc` supplies shared source resolution for editors and checks.
+
+Python modules and tests start with the copyright, Apache-2.0, and filename summary block, followed by a useful module docstring. Prefer small functions, explicit types at application boundaries, standard-library facilities, and concise docstrings for public classes and non-obvious helpers. `ruff.toml` owns lint and formatting rules, including import order, four-space indentation, and Unix line endings. Run both Ruff lint and format checks during pull-request validation; editors and pre-commit must use the same configuration. Keep lint and test dependencies out of published production images.
+
+Run CSpell across project-owned files after changes. Correct misspellings; add genuine project vocabulary to `.vscode/settings.json` under `cSpell.words`. Do not add secrets or whole arbitrary strings to silence spelling diagnostics.
+
 ## Docker And Compose Rules
 
 The generated Plundarr deployment must remain one complete, commented `docker-compose.yml` file. Synology Container Manager compatibility is a core constraint.

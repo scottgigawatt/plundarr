@@ -86,6 +86,13 @@ repos:
   #
   # Enforce synchronized build pins and the shared image-tag channel policy.
   #
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.15.15
+    hooks:
+      - id: ruff-check
+      - id: ruff-format
+        args: [--check]
+
   - repo: local
     hooks:
       - id: check-build-pin-policy

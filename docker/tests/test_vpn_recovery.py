@@ -8,10 +8,10 @@
 
 """Verify recovery defaults, shared authentication, and existing deployment preservation."""
 
-from pathlib import Path
 import re
 import tempfile
 import unittest
+from pathlib import Path
 from unittest.mock import patch
 
 from maraudarr.catalog import Catalog
@@ -27,8 +27,12 @@ class VpnRecoveryTests(unittest.TestCase):
         self.root = Path(__file__).resolve().parents[1]
         self.catalog = Catalog(self.root)
         self.wrapper_path = Path("gluetun/scripts/gluetun-entrypoint-wrapper.sh")
-        self.current_wrapper = self.root / "services/gluetun/config/scripts/gluetun-entrypoint-wrapper.sh"
-        self.previous_wrapper = self.root / "tests/fixtures/gluetun-legacy/gluetun-entrypoint-wrapper.sh"
+        self.current_wrapper = (
+            self.root / "services/gluetun/config/scripts/gluetun-entrypoint-wrapper.sh"
+        )
+        self.previous_wrapper = (
+            self.root / "tests/fixtures/gluetun-legacy/gluetun-entrypoint-wrapper.sh"
+        )
 
     def test_defaults_follow_resolved_services_for_every_preset(self) -> None:
         """Enable paired recovery, including dependencies, but leave standalone generation off."""
@@ -36,7 +40,9 @@ class VpnRecoveryTests(unittest.TestCase):
             for added in ({"homepage"}, {"privateerr"}, {"gluetun"}, {"qbittorrent"}):
                 with self.subTest(preset=preset, added=added):
                     plan = self.catalog.resolve(preset, add=added)
-                    environment = render_environment(self.catalog, plan, None, generate_secrets=False)
+                    environment = render_environment(
+                        self.catalog, plan, None, generate_secrets=False
+                    )
                     compose = render_compose(self.catalog, plan)
                     if "privateerr" not in plan.service_ids:
                         self.assertNotIn("PRIVATEERR_AUTO_RECOVER", environment)
@@ -44,19 +50,33 @@ class VpnRecoveryTests(unittest.TestCase):
                         continue
 
                     enabled = "true" if "gluetun" in plan.service_ids else "false"
-                    self.assertIn(f'PRIVATEERR_AUTO_RECOVER="${{PRIVATEERR_AUTO_RECOVER:-{enabled}}}"', environment)
-                    self.assertIn('PRIVATEERR_GENERATION_TIMEOUT_SECONDS="${PRIVATEERR_GENERATION_TIMEOUT_SECONDS:-180}"', environment)
+                    self.assertIn(
+                        f'PRIVATEERR_AUTO_RECOVER="${{PRIVATEERR_AUTO_RECOVER:-{enabled}}}"',
+                        environment,
+                    )
+                    self.assertIn(
+                        'PRIVATEERR_GENERATION_TIMEOUT_SECONDS="${PRIVATEERR_GENERATION_TIMEOUT_SECONDS:-180}"',
+                        environment,
+                    )
                     privateerr = extract_service(compose, "privateerr")
-                    for name in ("PRIVATEERR_AUTO_RECOVER", "PRIVATEERR_GLUETUN_API_KEY", "PRIVATEERR_GENERATION_TIMEOUT_SECONDS"):
+                    for name in (
+                        "PRIVATEERR_AUTO_RECOVER",
+                        "PRIVATEERR_GLUETUN_API_KEY",
+                        "PRIVATEERR_GENERATION_TIMEOUT_SECONDS",
+                    ):
                         self.assertIn(f"{name}: ${{{name}}}", privateerr)
                     if "gluetun" not in plan.service_ids:
                         continue
 
                     gluetun = extract_service(compose, "gluetun")
                     self.assertIn("PRIVATEERR_AUTO_RECOVER: ${PRIVATEERR_AUTO_RECOVER}", gluetun)
-                    self.assertIn("PRIVATEERR_GLUETUN_API_KEY: ${PRIVATEERR_GLUETUN_API_KEY}", gluetun)
+                    self.assertIn(
+                        "PRIVATEERR_GLUETUN_API_KEY: ${PRIVATEERR_GLUETUN_API_KEY}", gluetun
+                    )
                     self.assertIn("condition: service_healthy", gluetun)
-                    self.assertNotRegex(gluetun, re.compile(r"^ {6}-[^\n]*:(8000|9999)(?:\s|$)", re.MULTILINE))
+                    self.assertNotRegex(
+                        gluetun, re.compile(r"^ {6}-[^\n]*:(8000|9999)(?:\s|$)", re.MULTILINE)
+                    )
                     if "qbittorrent" in plan.service_ids:
                         self.assertIn("VPN_PORT_FORWARDING_UP_COMMAND:", gluetun)
                         self.assertIn("VPN_PORT_FORWARDING_DOWN_COMMAND:", gluetun)
@@ -78,7 +98,11 @@ class VpnRecoveryTests(unittest.TestCase):
         self.assertNotIn(first_match.group(1), example)
 
         # Exercise secret preservation in memory instead of persisting generated credentials.
-        existing = {line.split("=", 1)[0]: line for line in first.splitlines() if re.match(r"^[A-Z_]+=", line)}
+        existing = {
+            line.split("=", 1)[0]: line
+            for line in first.splitlines()
+            if re.match(r"^[A-Z_]+=", line)
+        }
         overrides = {
             "PRIVATEERR_AUTO_RECOVER": 'PRIVATEERR_AUTO_RECOVER="false"',
             "PRIVATEERR_RECOVERY_INTERVAL_SECONDS": 'PRIVATEERR_RECOVERY_INTERVAL_SECONDS="45"',

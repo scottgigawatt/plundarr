@@ -1,0 +1,22 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# ruff.toml: Share Python linting and formatting rules between editors and pre-commit.
+#
+
+target-version = "py314"
+line-length = 100
+src = ["docker/src"]
+force-exclude = true
+extend-exclude = ["dist", ".venv-docs"]
+
+# Check correctness, imports, common bugs, and modern standard-library usage.
+[lint]
+select = ["E4", "E7", "E9", "F", "I", "B", "UP"]
+
+# Match EditorConfig's four-space indentation and Unix line endings.
+[format]
+indent-style = "space"
+line-ending = "lf"

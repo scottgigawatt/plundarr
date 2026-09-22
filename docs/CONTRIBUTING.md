@@ -96,3 +96,12 @@ Tiny pull requests be easier to review than a kraken-sized rewrite with six unre
 Do not report security problems in public issues, pull requests, or Discord. Use the [security policy](SECURITY.md) and GitHub private vulnerability reporting. Use the [support guide](SUPPORT.md) for non-sensitive questions.
 
 Fair winds, clean diffs, and may yer YAML indent on the first try. ☠️
+
+## Check Python style
+
+`ruff.toml` shares correctness, import-order, and formatting rules with Privateerr. The recommended Ruff editor extension reads this file. The existing pull-request pre-commit step enforces both lint and formatting checks, including Python tests; Ruff stays out of the Maraudarr runtime image.
+
+```sh
+pre-commit run ruff-check --all-files
+pre-commit run ruff-format --all-files
+```

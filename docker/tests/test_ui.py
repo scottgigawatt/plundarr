@@ -137,9 +137,7 @@ class MaraudarrUiTests(unittest.TestCase):
             list(self.catalog.presets.values()),
             self.catalog.services,
         )
-        ui.show_service_choices(
-            sorted(self.catalog.services.values(), key=lambda item: item.order)
-        )
+        ui.show_service_choices(sorted(self.catalog.services.values(), key=lambda item: item.order))
 
         listing = output.getvalue()
         self.assertIn("Plundarr", listing)
