@@ -440,10 +440,10 @@ def render_environment(
         section = catalog.source_path(service.environment).read_text()
 
         # A standalone configuration generator has no Gluetun tunnel to monitor.
-        if service.id == "privateerr" and "gluetun" in selected:
+        if service.id == "privateerr" and "gluetun" not in selected:
             section = section.replace(
-                "${PRIVATEERR_AUTO_RECOVER:-false}",
                 "${PRIVATEERR_AUTO_RECOVER:-true}",
+                "${PRIVATEERR_AUTO_RECOVER:-false}",
             )
         if service.id == "homepage":
             section = _filter_homepage_env(
