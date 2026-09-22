@@ -59,6 +59,17 @@ class VpnRecoveryTests(unittest.TestCase):
                         environment,
                     )
                     privateerr = extract_service(compose, "privateerr")
+                    self.assertNotIn("privileged:", privateerr)
+                    self.assertIn("cap_drop:\n      - ALL", privateerr)
+                    self.assertIn("no-new-privileges:true", privateerr)
+                    for setting in ("all", "default"):
+                        self.assertIn(
+                            f"net.ipv6.conf.{setting}.disable_ipv6: ${{PRIVATEERR_IPV6_DISABLED}}",
+                            privateerr,
+                        )
+                    self.assertIn(
+                        'PRIVATEERR_IPV6_DISABLED="${PRIVATEERR_IPV6_DISABLED:-1}"', environment
+                    )
                     for name in (
                         "PRIVATEERR_AUTO_RECOVER",
                         "PRIVATEERR_GLUETUN_API_KEY",
@@ -78,6 +89,12 @@ class VpnRecoveryTests(unittest.TestCase):
                         gluetun, re.compile(r"^ {6}-[^\n]*:(8000|9999)(?:\s|$)", re.MULTILINE)
                     )
                     if "qbittorrent" in plan.service_ids:
+                        application = extract_service(compose, "qbittorrent")
+                        self.assertIn("network_mode: service:gluetun", application)
+                        self.assertRegex(
+                            application,
+                            r"(?s)depends_on:\s+gluetun:.*condition: service_healthy.*restart: true",
+                        )
                         self.assertIn("VPN_PORT_FORWARDING_UP_COMMAND:", gluetun)
                         self.assertIn("VPN_PORT_FORWARDING_DOWN_COMMAND:", gluetun)
 
@@ -123,7 +140,7 @@ class VpnRecoveryTests(unittest.TestCase):
         plan = self.catalog.resolve("plundarr")
         with tempfile.TemporaryDirectory() as temporary:
             path = Path(temporary) / ".env"
-            original = 'PIA_AUTOCONNECT="false"\nPIA_PREFERRED_REGION="ca_toronto"\n'
+            original = 'PIA_AUTOCONNECT="false"\nPIA_PREFERRED_REGION="ca_toronto"\nPIA_DISABLE_IPV6="yes"\n'
             path.write_text(original)
             environment = render_environment(self.catalog, plan, path)
         for assignment in original.splitlines():

@@ -140,6 +140,8 @@ Run CSpell across project-owned files after changes. Correct misspellings; add g
 
 The generated Plundarr deployment must remain one complete, commented `docker-compose.yml` file. Synology Container Manager compatibility is a core constraint.
 
+Generated Privateerr services retain UID 0 for upstream scripts but drop all Linux capabilities and enable `no-new-privileges`. Docker applies namespace IPv6 settings before startup; use a compatible Privateerr release that skips redundant sysctl writes. Generated qBittorrent services follow explicit Compose-managed Gluetun restarts through `depends_on.restart: true`; tunnel recovery does not restart application containers.
+
 Profile-gated maintenance utilities must stay out of ordinary `make up` runs. Kometa Overlay Reset uses the `tools` profile and the explicit `make kometa-overlay-reset PRESET=duplex` one-shot target.
 
 Maraudarr must remain:

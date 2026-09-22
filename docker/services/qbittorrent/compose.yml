@@ -37,3 +37,4 @@ services:
     depends_on:
       gluetun:
         condition: service_healthy  # Wait until Gluetun reports healthy VPN connection
+        restart: true               # Follow explicit Compose-managed Gluetun updates

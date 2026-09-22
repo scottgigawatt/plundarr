@@ -65,3 +65,15 @@ Regeneration adds missing recovery settings and generates the shared key. It upg
 > Customized, symlinked, or older unrecognized wrappers remain untouched. Before recreating such a deployment, update the script selected by `GLUETUN_WRAPPER_SCRIPT_PATH` using the [current wrapper](https://github.com/scottgigawatt/plundarr/blob/main/docker/services/gluetun/config/scripts/gluetun-entrypoint-wrapper.sh), or set `PRIVATEERR_AUTO_RECOVER=false`. If you maintain `/gluetun/auth/config.toml` yourself, add Privateerr's recovery role with the same shared key; the wrapper preserves that file.
 
 Then recreate the complete stack with `make up PRESET=YOUR-PRESET`. In Synology Container Manager, rebuild the project using its regenerated Compose file and updated `.env`. Check Privateerr's logs for automatic recovery being enabled and Gluetun's logs for the tunnel becoming healthy. Keep the API key and VPN configuration out of support reports.
+
+## Run Privateerr without privileged mode
+
+Generated Privateerr services drop all Linux capabilities and enable `no-new-privileges`. The unmodified PIA scripts still run as UID 0, but Privateerr does not receive VPN device or network-administration privileges. Gluetun retains the privileges required to run its tunnel.
+
+The generated `.env` sets `PRIVATEERR_IPV6_DISABLED=1`, which Docker applies to Privateerr's own network namespace before startup. Keep `PIA_DISABLE_IPV6=yes`; the updated Privateerr wrapper recognizes the existing IPv6 settings and avoids redundant sysctl writes without hiding warnings. Regeneration preserves an existing PIA setting and adds the namespace setting. Keep Privateerr's mounted configuration directories writable by UID 0.
+
+Use a Privateerr release containing both recovery and the IPv6 wrapper update before recreating a generated deployment. An image-only Watchtower update retains existing container options, so older deployments remain privileged until their Compose configuration is updated and the container is recreated. Missing recovery settings continue to mean recovery is disabled. The bundled VPN services disable unattended Watchtower updates through their container labels.
+
+## Coordinate qBittorrent maintenance
+
+Every generated deployment containing qBittorrent uses `depends_on.gluetun.restart: true`. An explicit Compose restart or update of Gluetun also restarts qBittorrent so the application follows planned VPN-container maintenance. This setting does not react to health failures, Docker's automatic restart policy, or Watchtower replacements. Privateerr's API recovery keeps both containers running and does not trigger this dependency restart. Recreate the complete stack when changing the network namespace outside Compose.
