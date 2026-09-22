@@ -38,10 +38,18 @@ services:
       PIA_PASS: ${PIA_PASS}                      # Set PIA password
 
       # Privateerr environment variables
-      PRIVATEERR_METADATA_PATH: ${PRIVATEERR_METADATA_PATH}            # Path where Gluetun metadata will be generated
-      PRIVATEERR_HEALTHCHECK_MARKER: ${PRIVATEERR_HEALTHCHECK_MARKER}  # File written after successful generation
-      PRIVATEERR_KEEPALIVE: ${PRIVATEERR_KEEPALIVE}                    # Keep the container alive after successful generation
-      PRIVATEERR_LOG_PATH: ${PRIVATEERR_LOG_PATH}                      # Privateerr log file path
+      PRIVATEERR_METADATA_PATH: ${PRIVATEERR_METADATA_PATH}                            # Path where Gluetun metadata will be generated
+      PRIVATEERR_HEALTHCHECK_MARKER: ${PRIVATEERR_HEALTHCHECK_MARKER}                  # File written after successful generation
+      PRIVATEERR_KEEPALIVE: ${PRIVATEERR_KEEPALIVE}                                    # Keep the container alive after successful generation
+      PRIVATEERR_LOG_PATH: ${PRIVATEERR_LOG_PATH}                                      # Privateerr log file path
+      PRIVATEERR_AUTO_RECOVER: ${PRIVATEERR_AUTO_RECOVER}                              # Recover sustained tunnel outages through Gluetun's API
+      PRIVATEERR_GLUETUN_API_KEY: ${PRIVATEERR_GLUETUN_API_KEY}                        # Shared Gluetun control API key
+      PRIVATEERR_GLUETUN_URL: ${PRIVATEERR_GLUETUN_URL}                                # Internal control API address
+      PRIVATEERR_GLUETUN_HEALTH_URL: ${PRIVATEERR_GLUETUN_HEALTH_URL}                  # Internal health endpoint
+      PRIVATEERR_RECOVERY_INTERVAL_SECONDS: ${PRIVATEERR_RECOVERY_INTERVAL_SECONDS}    # Seconds between health probes
+      PRIVATEERR_RECOVERY_FAILURE_SECONDS: ${PRIVATEERR_RECOVERY_FAILURE_SECONDS}      # Startup grace and sustained failure threshold in seconds
+      PRIVATEERR_RECOVERY_COOLDOWN_SECONDS: ${PRIVATEERR_RECOVERY_COOLDOWN_SECONDS}    # Initial recovery retry delay in seconds
+      PRIVATEERR_GENERATION_TIMEOUT_SECONDS: ${PRIVATEERR_GENERATION_TIMEOUT_SECONDS}  # Maximum seconds for one PIA generation
 
     # Mount host directories into the container
     volumes:

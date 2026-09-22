@@ -50,7 +50,7 @@ nav:
   - Project Guides:
       - Guide map: project-guides/index.md
       - Synology setup: setup.md
-      - VPN regions: project-guides/vpn.md
+      - VPN regions and recovery: project-guides/vpn.md
       - Portainer: project-guides/portainer.md
       - Media monitoring: project-guides/monitoring.md
       - Testing: project-guides/testing.md

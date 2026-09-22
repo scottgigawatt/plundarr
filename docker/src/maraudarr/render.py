@@ -11,6 +11,7 @@
 from __future__ import annotations
 
 import base64
+import hashlib
 import os
 import re
 import secrets
@@ -96,9 +97,11 @@ def _insert_gluetun_additions(block: str, selected: set[str]) -> str:
         port_entries.append(("- ${NZBGET_WEBUI_PORT}:6789", "NZBGet web UI port"))
 
     if environment_entries:
-        anchor = (
-            "      PRIVATEERR_GLUETUN_METADATA_WAIT_SECONDS: "
-            "${PRIVATEERR_GLUETUN_METADATA_WAIT_SECONDS}\n"
+        # Insert after the metadata settings without depending on inline comment spacing.
+        anchor = next(
+            line + "\n"
+            for line in block.splitlines()
+            if line.lstrip().startswith("PRIVATEERR_GLUETUN_API_KEY:")
         )
         insertion = (
             "\n      # Define downloader port-forwarding commands for Gluetun\n"
@@ -398,6 +401,7 @@ def _generate_first_run_secrets(rendered: str, existing: dict[str, str]) -> str:
         "HOMEPAGE_AUTH_SECRET": secrets.token_urlsafe(32),
         "HOMEPAGE_AUTH_PASSWORD": secrets.token_urlsafe(24),
         "NZBGET_PASS": secrets.token_urlsafe(18),
+        "PRIVATEERR_GLUETUN_API_KEY": secrets.token_hex(32),
         "TRACEARR_DB_PASSWORD": secrets.token_hex(32),
         "TRACEARR_JWT_SECRET": secrets.token_hex(32),
         "TRACEARR_COOKIE_SECRET": secrets.token_hex(32),
@@ -444,6 +448,13 @@ def render_environment(
     rendered_sections = [base_source]
     for service in plan.services:
         section = catalog.source_path(service.environment).read_text()
+
+        # A standalone configuration generator has no Gluetun tunnel to monitor.
+        if service.id == "privateerr" and "gluetun" in selected:
+            section = section.replace(
+                "${PRIVATEERR_AUTO_RECOVER:-false}",
+                "${PRIVATEERR_AUTO_RECOVER:-true}",
+            )
         if service.id == "homepage":
             section = _filter_homepage_env(
                 section,
@@ -724,6 +735,20 @@ def write_config(catalog: Catalog, plan: StackPlan, output_dir: Path) -> Path:
             catalog.config_path(service),
             config_path / service.service,
         )
+
+    # Upgrade only the unchanged wrapper shipped before automatic recovery (5a5dc2f).
+    # Customized scripts, symlinks, and all application state remain operator-owned.
+    if "gluetun" in plan.service_ids:
+        wrapper = config_path / "gluetun/scripts/gluetun-entrypoint-wrapper.sh"
+        previous_digest = "1aa664f06e67e2b7e944ae773a33b82b7fb52af8b27b14600f273f9f91e98eee"  # pragma: allowlist secret
+        if (
+            not wrapper.is_symlink()
+            and hashlib.sha256(wrapper.read_bytes()).hexdigest() == previous_digest
+        ):
+            source = catalog.source_path(
+                "services/gluetun/config/scripts/gluetun-entrypoint-wrapper.sh"
+            )
+            _atomic_write(wrapper, source.read_text(), source.stat().st_mode & 0o777)
 
     if "homepage" in plan.service_ids:
         _atomic_write(
