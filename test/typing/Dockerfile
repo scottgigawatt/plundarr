@@ -17,6 +17,12 @@ ARG ALPINE_TAG=3.24@sha256:294b683cb724975bec92580e1e685676bd4b50bda910ddb8c51d4
 FROM alpine:${ALPINE_TAG}
 
 #
+# Use the fixed HTTP library until Alpine stable includes the security update.
+#
+ARG EDGE_APK_REPOSITORY=https://dl-cdn.alpinelinux.org/alpine/edge/main
+ARG NGHTTP2_APK_MIN_VERSION=1.70.0-r0
+
+#
 # Install validation tools only in this disposable development image.
 #
 RUN apk add --no-cache python3 py3-pip nodejs npm && \
@@ -26,14 +32,18 @@ RUN apk add --no-cache python3 py3-pip nodejs npm && \
 # Resolve imports against the same hash-verified dependencies as production.
 #
 COPY requirements.txt /tmp/requirements.txt
-RUN /opt/typecheck/bin/pip install --no-cache-dir --require-hashes -r /tmp/requirements.txt
+RUN /opt/typecheck/bin/pip install --no-cache-dir --require-hashes -r /tmp/requirements.txt && \
+    /opt/typecheck/bin/pip uninstall --yes pip
 
 #
-# Install the checker from its integrity-checked lockfile and remove bootstrap npm.
+# Install the locked checker, then remove package managers and their unused bundled libraries.
 #
 COPY package.json package-lock.json /opt/tools/
 RUN npm ci --prefix /opt/tools --omit=dev --ignore-scripts && \
-    apk del npm && \
+    apk del npm py3-pip && \
+    apk add --no-cache \
+        --repository="${EDGE_APK_REPOSITORY}" \
+        "nghttp2-libs>=${NGHTTP2_APK_MIN_VERSION}" && \
     rm -rf /root/.npm
 
 #
