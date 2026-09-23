@@ -15,7 +15,6 @@
     // Accept project names, dependencies, and intentional pirate vocabulary.
     //
     "cSpell.words": [
-        "pyrightconfig",
         "addgroup",
         "adduser",
         "APIKEY",
@@ -217,6 +216,7 @@
         "pymdownx",
         "Pypi",
         "pyproject",
+        "pyrightconfig",
         "pytest",
         "PYTHONDONTWRITEBYTECODE",
         "PYTHONPATH",
