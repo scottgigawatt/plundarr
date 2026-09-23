@@ -53,7 +53,6 @@ log() {
 # Wait for Privateerr to write metadata before Gluetun reads its settings.
 #
 while [ ! -s "${PRIVATEERR_METADATA_PATH}" ] || [ -d "$(dirname "${PRIVATEERR_METADATA_PATH}")/.privateerr-commit" ]; do
-
     #
     # If the metadata file is not found within the expected time, log an error and exit.
     #
@@ -75,7 +74,6 @@ done
 # An operator-supplied auth file remains authoritative for customized deployments.
 #
 if [ "${PRIVATEERR_AUTO_RECOVER}" = true ]; then
-
     #
     # Prevent Gluetun health-triggered restarts from racing Privateerr settings updates.
     #
@@ -132,7 +130,6 @@ AUTH
         HEALTH_SERVER_ADDRESS=0.0.0.0:9999
         export HEALTH_SERVER_ADDRESS
     fi
-
 fi
 
 #

@@ -57,7 +57,6 @@ qbittorrent_api() {
     post_data="${2:-}"
 
     # Use POST only when the caller supplied preference changes.
-
     if [ -n "${post_data}" ]; then
         wget -T 5 -q -O - --post-data "${post_data}" "${QBITTORRENT_API_URL}${api_path}"
     else
@@ -76,10 +75,8 @@ wait_for_qbittorrent() {
     deadline_seconds=$(($(date +%s) + QBITTORRENT_API_WAIT_SECONDS))
 
     # Allow qBittorrent to start after Gluetun becomes healthy.
-
     while ! qbittorrent_api "/api/v2/app/preferences" >/dev/null 2>&1; do
         # Stop retrying when the total startup allowance expires.
-
         if [ "$(date +%s)" -ge "${deadline_seconds}" ]; then
             log "qBittorrent Web API did not become ready at ${QBITTORRENT_API_URL}."
             exit 1
@@ -103,21 +100,18 @@ set_forwarded_port() {
     vpn_interface="$2"
 
     # Reject malformed ports before composing the JSON request.
-
     if ! printf '%s' "${forwarded_port}" | grep -Eq '^[0-9]+$'; then
         log "Forwarded port is not numeric: ${forwarded_port}"
         exit 1
     fi
 
     # Accept only usable TCP and UDP port numbers.
-
     if [ "${forwarded_port}" -lt 1 ] || [ "${forwarded_port}" -gt 65535 ]; then
         log "Forwarded port is outside valid range: ${forwarded_port}"
         exit 1
     fi
 
     # Accept only safe interface names and exclude the loopback interface.
-
     if ! printf '%s' "${vpn_interface}" | grep -Eq '^[A-Za-z0-9_-]+$' || [ "${vpn_interface}" = "lo" ]; then
         log "VPN interface is invalid: ${vpn_interface}"
         exit 1
