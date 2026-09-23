@@ -82,7 +82,7 @@ repos:
   # Check project-owned shell scripts for correctness and portability issues.
   #
   - repo: https://github.com/shellcheck-py/shellcheck-py
-    rev: v0.11.0.1
+    rev: v0.11.0.1-1
     hooks:
       - id: shellcheck
 
@@ -90,7 +90,7 @@ repos:
   # Enforce synchronized build pins and the shared image-tag channel policy.
   #
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.15
+    rev: v0.16.8
     hooks:
       - id: ruff-check
       - id: ruff-format

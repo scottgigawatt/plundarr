@@ -16,6 +16,17 @@
         ":enablePreCommit"
     ],
 
+    // Keep dependency ignores while allowing the real test/typing/Dockerfile.
+    "ignorePaths": [
+        "**/node_modules/**",
+        "**/bower_components/**",
+        "**/vendor/**",
+        "**/examples/**",
+        "**/__tests__/**",
+        "**/tests/**",
+        "**/__fixtures__/**"
+    ],
+
     //
     // Keep dependency work predictable for a single-maintainer repository.
     //
@@ -40,10 +51,22 @@
     ],
 
     //
-    // Track the docs Python version and Maraudarr donor images across entrypoints.
+    // Track the docs Python version, test tools, and shared image pins.
     // Keep direct and shell-default forms separate so each pin is extracted once.
     //
     "customManagers": [
+        // Track pinned npm tools installed inside the development image.
+        {
+            "customType": "regex",
+            "managerFilePatterns": [
+                "/^test/typing/Dockerfile$/"
+            ],
+            "matchStrings": [
+                "(?<depName>pyright)@(?<currentValue>\\d+\\.\\d+\\.\\d+)"
+            ],
+            "datasourceTemplate": "npm",
+            "versioningTemplate": "npm"
+        },
         {
             "customType": "regex",
             "managerFilePatterns": [
@@ -60,6 +83,7 @@
             "customType": "regex",
             "managerFilePatterns": [
                 "/^docker/Dockerfile$/",
+                "/^test/typing/Dockerfile$/",
                 "/^\\.github/workflows/build-and-push\\.yml$/"
             ],
             "matchStrings": [

@@ -78,6 +78,19 @@ Generated-stack checks such as `make config`, `make env`, `make up`, `make test-
 
 Workspace format-on-save is deliberately disabled. Prettier is available only for explicit formatting of supported CSS, JavaScript, JSON, and Markdown files, using the checked-in `.prettierrc.json5`. It does not parse jq, and the repository excludes jq, YAML, TOML, and aligned workspace JSONC from Prettier so their specialized validators and formatters cannot undo project-owned spacing. In particular, keep two spaces before pinned-action comments in workflow YAML.
 
+## Check Python style
+
+`ruff.toml` shares correctness, import-order, and formatting rules with Privateerr. The recommended Ruff editor extension reads this file. The existing pull-request pre-commit step enforces both lint and formatting checks, including Python tests; Ruff stays out of the Maraudarr runtime image.
+
+```sh
+pre-commit run ruff-check --all-files
+pre-commit run ruff-format --all-files
+```
+
+## Strict Python checks
+
+Run `make test-types` to check application code and tests with the pinned Pyright version in a disposable test container. Docker is the only host prerequisite. The root `pyrightconfig.json` is shared with VS Code/Pylance; select an interpreter with the project's dependencies installed for accurate editor import resolution. `make test` and pre-commit enforce the same check during pull requests and main/release validation. Ruff continues to own lint and formatting.
+
 ## Prepare a pull request 🪝
 
 Before opening a pull request:
@@ -96,16 +109,3 @@ Tiny pull requests be easier to review than a kraken-sized rewrite with six unre
 Do not report security problems in public issues, pull requests, or Discord. Use the [security policy](SECURITY.md) and GitHub private vulnerability reporting. Use the [support guide](SUPPORT.md) for non-sensitive questions.
 
 Fair winds, clean diffs, and may yer YAML indent on the first try. ☠️
-
-## Check Python style
-
-`ruff.toml` shares correctness, import-order, and formatting rules with Privateerr. The recommended Ruff editor extension reads this file. The existing pull-request pre-commit step enforces both lint and formatting checks, including Python tests; Ruff stays out of the Maraudarr runtime image.
-
-```sh
-pre-commit run ruff-check --all-files
-pre-commit run ruff-format --all-files
-```
-
-## Strict Python checks
-
-Run `make test-types` to check application code and tests with the pinned Pyright version in a disposable test container. Docker is the only host prerequisite. The root `pyrightconfig.json` is shared with VS Code/Pylance; select an interpreter with the project's dependencies installed for accurate editor import resolution. `make test` and pre-commit enforce the same check during pull requests and main/release validation. Ruff continues to own lint and formatting.
