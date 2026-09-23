@@ -11,7 +11,7 @@
 # ClusterFuzzLite builder. The digest keeps the toolchain deterministic while
 # Renovate tracks future updates.
 #
-FROM gcr.io/oss-fuzz-base/base-builder-python:v1@sha256:030add5351585b43fb46a1939aad7c82dc11c7e690eaaaf118e8b71e3b674519
+FROM gcr.io/oss-fuzz-base/base-builder-python:v1@sha256:2ad0b742d9375b89173186beafc97492fd9dfd0f38e1e77467594b784f376969
 
 #
 # Keep the complete checkout together so Maraudarr's self-contained Docker
