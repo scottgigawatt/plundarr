@@ -7,7 +7,7 @@
 #
 
 #
-# Alpine 3.24 is the last release to support Python 3.11, which is the last release to support the legacy typing module.
+# Use the same Alpine release as Maraudarr so strict checks see its Python runtime.
 #
 ARG ALPINE_TAG=3.24@sha256:294b683cb724975bec92580e1e685676bd4b50bda910ddb8c51d4cabeaec77e6
 
