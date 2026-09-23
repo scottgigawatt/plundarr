@@ -24,6 +24,7 @@ class VpnRecoveryTests(unittest.TestCase):
 
     def setUp(self) -> None:
         """Load the service catalog and bundled wrapper paths."""
+
         self.root = Path(__file__).resolve().parents[1]
         self.catalog = Catalog(self.root)
         self.wrapper_path = Path("gluetun/scripts/gluetun-entrypoint-wrapper.sh")
@@ -36,6 +37,8 @@ class VpnRecoveryTests(unittest.TestCase):
 
     def test_defaults_follow_resolved_services_for_every_preset(self) -> None:
         """Enable paired recovery, including dependencies, but leave standalone generation off."""
+
+        # Resolve explicit selections and their dependencies across every preset, including core services.
         for preset in self.catalog.presets:
             for added in ({"homepage"}, {"privateerr"}, {"gluetun"}, {"qbittorrent"}):
                 with self.subTest(preset=preset, added=added):
@@ -44,6 +47,8 @@ class VpnRecoveryTests(unittest.TestCase):
                         self.catalog, plan, None, generate_secrets=False
                     )
                     compose = render_compose(self.catalog, plan)
+
+                    # Stacks without Privateerr must not acquire unused recovery variables.
                     if "privateerr" not in plan.service_ids:
                         self.assertNotIn("PRIVATEERR_AUTO_RECOVER", environment)
                         self.assertNotIn("PRIVATEERR_GLUETUN_API_KEY", environment)
@@ -58,27 +63,34 @@ class VpnRecoveryTests(unittest.TestCase):
                         'PRIVATEERR_GENERATION_TIMEOUT_SECONDS="${PRIVATEERR_GENERATION_TIMEOUT_SECONDS:-180}"',
                         environment,
                     )
+
+                    # Check privilege removal and Docker-owned IPv6 policy independently of recovery mode.
                     privateerr = extract_service(compose, "privateerr")
                     self.assertNotIn("privileged:", privateerr)
                     self.assertIn("cap_drop:\n      - ALL", privateerr)
                     self.assertIn("no-new-privileges:true", privateerr)
+
                     for setting in ("all", "default"):
                         self.assertIn(
                             f"net.ipv6.conf.{setting}.disable_ipv6: ${{PRIVATEERR_IPV6_DISABLED}}",
                             privateerr,
                         )
+
                     self.assertIn(
                         'PRIVATEERR_IPV6_DISABLED="${PRIVATEERR_IPV6_DISABLED:-1}"', environment
                     )
+
                     for name in (
                         "PRIVATEERR_AUTO_RECOVER",
                         "PRIVATEERR_GLUETUN_API_KEY",
                         "PRIVATEERR_GENERATION_TIMEOUT_SECONDS",
                     ):
                         self.assertIn(f"{name}: ${{{name}}}", privateerr)
+
                     if "gluetun" not in plan.service_ids:
                         continue
 
+                    # Paired services share authentication while control and health ports remain internal.
                     gluetun = extract_service(compose, "gluetun")
                     self.assertIn("PRIVATEERR_AUTO_RECOVER: ${PRIVATEERR_AUTO_RECOVER}", gluetun)
                     self.assertIn(
@@ -88,6 +100,7 @@ class VpnRecoveryTests(unittest.TestCase):
                     self.assertNotRegex(
                         gluetun, re.compile(r"^ {6}-[^\n]*:(8000|9999)(?:\s|$)", re.MULTILINE)
                     )
+
                     if "qbittorrent" in plan.service_ids:
                         application = extract_service(compose, "qbittorrent")
                         self.assertIn("network_mode: service:gluetun", application)
@@ -100,8 +113,11 @@ class VpnRecoveryTests(unittest.TestCase):
 
     def test_key_is_generated_once_and_not_written_to_examples(self) -> None:
         """Give deployments distinct API keys without rotating a saved key or opt-out."""
+
         plan = self.catalog.resolve("custom", add={"gluetun"})
         first = render_environment(self.catalog, plan, None)
+
+        # Two new deployments must not share a generated control API key.
         second = render_environment(self.catalog, plan, None)
         pattern = r'^PRIVATEERR_GLUETUN_API_KEY="([a-f0-9]{64})"$'
         first_match = re.search(pattern, first, re.MULTILINE)
@@ -110,6 +126,7 @@ class VpnRecoveryTests(unittest.TestCase):
         assert second_match is not None
         self.assertNotEqual(first_match.group(1), second_match.group(1))
 
+        # Public examples retain an empty placeholder instead of a usable credential.
         example = render_environment(self.catalog, plan, None, generate_secrets=False)
         self.assertIn('PRIVATEERR_GLUETUN_API_KEY="${PRIVATEERR_GLUETUN_API_KEY:-}"', example)
         self.assertNotIn(first_match.group(1), example)
@@ -120,6 +137,8 @@ class VpnRecoveryTests(unittest.TestCase):
             for line in first.splitlines()
             if re.match(r"^[A-Z_]+=", line)
         }
+
+        # Regeneration must preserve an existing key, explicit opt-out, timers, and image pin.
         overrides = {
             "PRIVATEERR_AUTO_RECOVER": 'PRIVATEERR_AUTO_RECOVER="false"',
             "PRIVATEERR_RECOVERY_INTERVAL_SECONDS": 'PRIVATEERR_RECOVERY_INTERVAL_SECONDS="45"',
@@ -129,37 +148,51 @@ class VpnRecoveryTests(unittest.TestCase):
             "PRIVATEERR_TAG": 'PRIVATEERR_TAG="operator-pinned"',
         }
         existing.update(overrides)
+
         with patch("maraudarr.render._existing_values", return_value=existing):
             regenerated = render_environment(self.catalog, plan, Path("unused.env"))
+
         self.assertIn(first_match.group(0), regenerated)
+
         for assignment in overrides.values():
             self.assertIn(assignment, regenerated)
 
     def test_existing_environment_gains_recovery_without_changing_pia_settings(self) -> None:
         """Add new settings to an older deployment while keeping its selected region."""
+
         plan = self.catalog.resolve("plundarr")
+
         with tempfile.TemporaryDirectory() as temporary:
             path = Path(temporary) / ".env"
             original = 'PIA_AUTOCONNECT="false"\nPIA_PREFERRED_REGION="ca_toronto"\nPIA_DISABLE_IPV6="yes"\n'
             path.write_text(original)
             environment = render_environment(self.catalog, plan, path)
+
         for assignment in original.splitlines():
             self.assertIn(assignment, environment)
+
         self.assertIn('PRIVATEERR_AUTO_RECOVER="${PRIVATEERR_AUTO_RECOVER:-true}"', environment)
         self.assertRegex(environment, r'(?m)^PRIVATEERR_GLUETUN_API_KEY="[a-f0-9]{64}"$')
 
     def test_wrapper_upgrade_preserves_customizations_and_runtime_state(self) -> None:
         """Upgrade the exact legacy seed and leave custom wrappers, auth, and VPN state alone."""
+
         plan = self.catalog.resolve("custom", add={"gluetun"})
+
         for customized in (False, True):
             with self.subTest(customized=customized), tempfile.TemporaryDirectory() as temporary:
                 output = Path(temporary)
                 wrapper = output / "config" / self.wrapper_path
                 wrapper.parent.mkdir(parents=True)
                 previous = self.previous_wrapper.read_text()
+
+                # Only an exact legacy seed is eligible for replacement; even one operator edit opts out.
                 if customized:
                     previous += "\n# Operator customization.\n"
+
                 wrapper.write_text(previous)
+
+                # Authentication and live WireGuard files belong to the operator, not the seed upgrader.
                 auth = output / "config/gluetun/auth/config.toml"
                 auth.parent.mkdir()
                 auth.write_text("# Operator-managed authentication.\n")
@@ -172,18 +205,24 @@ class VpnRecoveryTests(unittest.TestCase):
                 self.assertEqual(wrapper.read_text(), expected)
                 self.assertEqual(auth.read_text(), "# Operator-managed authentication.\n")
                 self.assertEqual(state.read_text(), "# Operator-managed WireGuard state.\n")
+
+                # A second generation must leave the selected wrapper unchanged.
                 write_config(self.catalog, plan, output)
                 self.assertEqual(wrapper.read_text(), expected)
 
     def test_fresh_wrapper_is_seeded_and_symlink_is_preserved(self) -> None:
         """Install the new wrapper on first generation without replacing linked operator files."""
+
         plan = self.catalog.resolve("custom", add={"gluetun"})
+
         with tempfile.TemporaryDirectory() as temporary:
             output = Path(temporary)
             write_config(self.catalog, plan, output)
             wrapper = output / "config" / self.wrapper_path
             self.assertEqual(wrapper.read_text(), self.current_wrapper.read_text())
             self.assertTrue(wrapper.stat().st_mode & 0o100)
+
+            # Replace the fresh seed with an operator symlink and verify generation preserves its target.
             wrapper.unlink()
             external = output / "operator-wrapper.sh"
             external.write_text(self.previous_wrapper.read_text())

@@ -32,6 +32,7 @@ class MaraudarrUiTests(unittest.TestCase):
         """Show each preset's purpose and default services in clear sections."""
 
         output = io.StringIO()
+
         with redirect_stdout(output):
             UI(plain=True).show_presets(
                 list(self.catalog.presets.values()),
@@ -50,6 +51,7 @@ class MaraudarrUiTests(unittest.TestCase):
         """Use category headings instead of one undifferentiated service list."""
 
         output = io.StringIO()
+
         with redirect_stdout(output):
             UI(plain=True).show_service_choices(
                 sorted(self.catalog.services.values(), key=lambda item: item.order)
@@ -69,6 +71,7 @@ class MaraudarrUiTests(unittest.TestCase):
 
         output = io.StringIO()
         plan = self.catalog.resolve("plundarr", add={"lidarr", "recyclarr"})
+
         with redirect_stdout(output):
             UI(plain=True).success(
                 plan,
@@ -89,6 +92,7 @@ class MaraudarrUiTests(unittest.TestCase):
 
         output = io.StringIO()
         plan = self.catalog.resolve("duplex")
+
         with redirect_stdout(output):
             UI(plain=True).success(
                 plan,
@@ -106,6 +110,7 @@ class MaraudarrUiTests(unittest.TestCase):
 
         output = io.StringIO()
         plan = self.catalog.resolve("calibre-web-automated")
+
         with redirect_stdout(output):
             UI(plain=True).success(
                 plan,
@@ -126,6 +131,8 @@ class MaraudarrUiTests(unittest.TestCase):
 
         output = io.StringIO()
         ui = UI()
+
+        # Fix terminal width and disable color escapes so assertions describe visible content.
         ui.console = Console(
             color_system=None,
             file=output,
@@ -142,6 +149,8 @@ class MaraudarrUiTests(unittest.TestCase):
         listing = output.getvalue()
         self.assertIn("Plundarr", listing)
         self.assertIn("VPN foundation", listing)
+
+        # Styled table cells omit emoji whose display width varies between terminal renderers.
         self.assertNotIn("🏴‍☠️ Plundarr", listing)
         self.assertNotIn("🛡️ VPN foundation", listing)
 

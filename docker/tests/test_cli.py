@@ -59,8 +59,11 @@ class MaraudarrCliTests(unittest.TestCase):
         """Make direct image use follow the same deployment layout as Make."""
 
         arguments = argparse.Namespace(output=None, output_root=None)
+
+        # Remove any operator override so this case exercises the image default output root.
         environment = os.environ.copy()
         environment.pop("MARAUDARR_OUTPUT_ROOT", None)
+
         with patch.dict(os.environ, environment, clear=True):
             self.assertEqual(
                 _output_path(arguments, self.catalog.resolve("plex")),
