@@ -17,9 +17,11 @@ services:
     container_name: ${COMPOSE_PROJECT_NAME}-privateerr-${PRIVATEERR_TAG}  # Namespace the container name by project and tag
     hostname: privateerr                                                  # Set the container hostname
 
-    # Generate configuration without container privileges or capability escalation
+    # Drop Linux capabilities for security hardening
     cap_drop:
-      - ALL  # Upstream requires UID 0 but does not need Linux capabilities
+      - ALL  # Upstream PIA scripts require UID 0 but do not need Linux capabilities
+
+    # Prevent the container from acquiring additional privileges
     security_opt:
       - no-new-privileges:true  # Prevent subprocesses from acquiring additional privileges
 

@@ -1,6 +1,10 @@
+#
 # Copyright 2025-2026 Scott Gigawatt
+#
 # Licensed under the Apache License, Version 2.0.
+#
 # __init__.pyi: Type the Atheris API used by the optional native fuzzing harness.
+#
 
 """Describe only the fuzz APIs used here; Atheris stays in the fuzzing image."""
 

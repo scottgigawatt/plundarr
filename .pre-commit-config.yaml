@@ -7,6 +7,9 @@
 #                          and YAML validation hooks.
 #
 
+#
+# Define the pre-commit configuration for the repository
+#
 repos:
   #
   # Scan changed content for hardcoded secrets before it can be committed.
@@ -93,6 +96,9 @@ repos:
       - id: ruff-format
         args: [--check]
 
+  #
+  # Run custom scripts to enforce strict Python types and build pin policies.
+  #
   - repo: local
     hooks:
       - id: python-types

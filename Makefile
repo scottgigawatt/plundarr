@@ -173,22 +173,22 @@ PRIVATEERR_GENERATED_METADATA  ?= $(CONFIG_PATH)/gluetun/wireguard/privateerr.en
 #
 # Docker Compose options.
 #
-PRESET                         ?= plundarr
-ADD_SERVICES                   ?=
-REMOVE_SERVICES                ?=
-DEPLOYMENT_ROOT                ?= dist
-DEPLOYMENT_PATH                ?= $(DEPLOYMENT_ROOT)/$(PRESET)
-RENDERED_COMPOSE_FILE          ?= $(DEPLOYMENT_PATH)/docker-compose.yml
-COMPOSE_FILE                   ?= $(RENDERED_COMPOSE_FILE)
-ENV_FILE                       ?= $(DEPLOYMENT_PATH)/.env
-COMPOSE_ENV_FILE               ?= $(ENV_FILE)
-COMPOSE_DOWN_TIMEOUT           ?= 30
+PRESET                ?= plundarr
+ADD_SERVICES          ?=
+REMOVE_SERVICES       ?=
+DEPLOYMENT_ROOT       ?= dist
+DEPLOYMENT_PATH       ?= $(DEPLOYMENT_ROOT)/$(PRESET)
+RENDERED_COMPOSE_FILE ?= $(DEPLOYMENT_PATH)/docker-compose.yml
+COMPOSE_FILE          ?= $(RENDERED_COMPOSE_FILE)
+ENV_FILE              ?= $(DEPLOYMENT_PATH)/.env
+COMPOSE_ENV_FILE      ?= $(ENV_FILE)
+COMPOSE_DOWN_TIMEOUT  ?= 30
 
 # Teardown flags are fixed so deployment commands cannot request volume deletion.
 ifneq ($(origin COMPOSE_DOWN_OPTIONS),undefined)
 $(error COMPOSE_DOWN_OPTIONS is not configurable. Use COMPOSE_DOWN_TIMEOUT instead)
 endif
-COMPOSE_DOWN_OPTIONS           = --timeout "$(COMPOSE_DOWN_TIMEOUT)" --remove-orphans
+COMPOSE_DOWN_OPTIONS            = --timeout "$(COMPOSE_DOWN_TIMEOUT)" --remove-orphans
 COMPOSE_UP_OPTIONS             ?= --force-recreate --pull always --detach --remove-orphans
 WATCHTOWER_RUN_ONCE_OPTIONS    ?= --rm --no-deps
 KOMETA_OVERLAY_RESET_OPTIONS   ?= --rm --no-deps
@@ -214,7 +214,7 @@ MARAUDARR_TEST_FILE            ?= config/README.md
 CONFIG_PATH                    ?= $(DEPLOYMENT_PATH)/config
 CONFIG_BACKUP_PATH             ?= $(DEPLOYMENT_PATH)/backups
 PYTHON_BIN                     ?= python3
-MARAUDARR_TYPECHECK_CMD         ?= scripts/compose/typecheck.sh
+MARAUDARR_TYPECHECK_CMD        ?= scripts/compose/typecheck.sh
 
 #
 # Disposable runtime state. Persistent application config and backups must
