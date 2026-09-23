@@ -106,8 +106,8 @@ class VpnRecoveryTests(unittest.TestCase):
         pattern = r'^PRIVATEERR_GLUETUN_API_KEY="([a-f0-9]{64})"$'
         first_match = re.search(pattern, first, re.MULTILINE)
         second_match = re.search(pattern, second, re.MULTILINE)
-        self.assertIsNotNone(first_match)
-        self.assertIsNotNone(second_match)
+        assert first_match is not None
+        assert second_match is not None
         self.assertNotEqual(first_match.group(1), second_match.group(1))
 
         example = render_environment(self.catalog, plan, None, generate_secrets=False)

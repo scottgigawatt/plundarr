@@ -28,6 +28,8 @@ on:
       - "test/stubs/**"
       - "scripts/compose/**"
       - "ruff.toml"
+      - "pyrightconfig.json"
+      - "test/typing/**"
       - ".pre-commit-config.yaml"
       - "Makefile"
       - "LICENSE"

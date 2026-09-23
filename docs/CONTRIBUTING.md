@@ -105,3 +105,7 @@ Fair winds, clean diffs, and may yer YAML indent on the first try. ☠️
 pre-commit run ruff-check --all-files
 pre-commit run ruff-format --all-files
 ```
+
+## Strict Python checks
+
+Run `make test-types` to check application code and tests with the pinned Pyright version in a disposable test container. Docker is the only host prerequisite. The root `pyrightconfig.json` is shared with VS Code/Pylance; select an interpreter with the project's dependencies installed for accurate editor import resolution. `make test` and pre-commit enforce the same check during pull requests and main/release validation. Ruff continues to own lint and formatting.

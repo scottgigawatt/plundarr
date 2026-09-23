@@ -177,7 +177,7 @@ def prune_unused_anchors(foundation: str, content: str) -> str:
     anchor_pattern = re.compile(r"^x-[\w-]+: &([\w-]+)(?:\s+#.*)?$", re.MULTILINE)
     alias_pattern = re.compile(r"^\s*(?:[\w<>-]+:|-)\s+\*([\w-]+)\s*(?:#.*)?$", re.MULTILINE)
     blocks = foundation.rstrip("\n").split("\n\n")
-    anchors = {}
+    anchors: dict[str, str] = {}
     for block in blocks:
         match = anchor_pattern.search(block)
         if match:

@@ -13,25 +13,30 @@ from __future__ import annotations
 import os
 import sys
 from collections import defaultdict
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from prompt_toolkit.styles import Style
 
 from maraudarr.models import Preset, Service, StackPlan
 
+# The plain CLI remains usable when terminal presentation dependencies are absent.
 try:
-    import questionary
-    from questionary import Choice, Style
-    from rich import box
-    from rich.console import Console
-    from rich.panel import Panel
-    from rich.table import Table
-
-    RICH_AVAILABLE = True
+    import questionary as prompts
+    import rich.console as rich_console
 except ImportError:  # pragma: no cover - dependency-free developer execution
-    RICH_AVAILABLE = False
+    prompts = None
+    rich_console = None
+
+RICH_AVAILABLE = prompts is not None and rich_console is not None
 
 
-PIRATE_STYLE = None
-if RICH_AVAILABLE:
-    PIRATE_STYLE = Style(
+def _prompt_style() -> Style:
+    """Build terminal colors only when the interactive dependency is available."""
+    if prompts is None:
+        raise UserCancelled("Interactive configuration requires Questionary.")
+
+    return prompts.Style(
         [
             ("qmark", "fg:#f2c14e bold"),
             ("question", "bold"),
@@ -95,7 +100,7 @@ class UI:
                 The ``NO_COLOR`` environment variable also enables this mode.
         """
         self.plain = plain or not RICH_AVAILABLE or bool(os.environ.get("NO_COLOR"))
-        self.console = None if self.plain else Console()
+        self.console = None if self.plain or rich_console is None else rich_console.Console()
 
     def welcome(self) -> None:
         """Display Maraudarr's purpose before listing available choices."""
@@ -104,6 +109,8 @@ class UI:
             "Plundarr Docker Compose stack.[/bold]"
         )
         if self.console:
+            from rich.panel import Panel
+
             self.console.print(
                 Panel(
                     message,
@@ -128,6 +135,9 @@ class UI:
             service_lookup: Service metadata keyed by catalog identifier.
         """
         if self.console:
+            from rich import box
+            from rich.table import Table
+
             table = Table(
                 title="🗺️  Available Voyages",
                 box=box.ROUNDED,
@@ -176,12 +186,12 @@ class UI:
             UserCancelled: If no interactive terminal is available or the user
                 exits without choosing a preset.
         """
-        if self.plain or not sys.stdin.isatty():
+        if self.plain or prompts is None or not sys.stdin.isatty():
             raise UserCancelled("Interactive configuration requires a terminal.")
-        answer = questionary.select(
+        answer = prompts.select(
             "🗺️  Choose a voyage",
-            choices=[Choice(preset.title, preset.id) for preset in presets],
-            style=PIRATE_STYLE,
+            choices=[prompts.Choice(preset.title, preset.id) for preset in presets],
+            style=_prompt_style(),
             use_shortcuts=True,
         ).ask()
         if answer is None:
@@ -195,6 +205,9 @@ class UI:
             services: Selectable services in desired presentation order.
         """
         if self.console:
+            from rich import box
+            from rich.table import Table
+
             table = Table(
                 title="🧩 Available Cargo",
                 box=box.ROUNDED,
@@ -243,7 +256,7 @@ class UI:
             UserCancelled: If no interactive terminal is available or the user
                 exits any category prompt.
         """
-        if self.plain or not sys.stdin.isatty():
+        if self.plain or prompts is None or not sys.stdin.isatty():
             raise UserCancelled("Interactive configuration requires a terminal.")
 
         grouped_services: dict[str, list[Service]] = defaultdict(list)
@@ -252,17 +265,17 @@ class UI:
 
         chosen: set[str] = set()
         for category, category_services in grouped_services.items():
-            answers = questionary.checkbox(
+            answers = prompts.checkbox(
                 f"🧩 {category}",
                 choices=[
-                    Choice(
+                    prompts.Choice(
                         service.title,
                         service.id,
                         checked=service.id in selected,
                     )
                     for service in category_services
                 ],
-                style=PIRATE_STYLE,
+                style=_prompt_style(),
                 instruction="Space selects cargo; Enter continues",
             ).ask()
             if answers is None:
@@ -277,6 +290,9 @@ class UI:
             plan: Fully resolved stack plan, including automatic dependencies.
         """
         if self.console:
+            from rich.panel import Panel
+            from rich.table import Table
+
             summary = Table.grid(padding=(0, 2))
             summary.add_column(style="bold")
             summary.add_column()
@@ -307,12 +323,12 @@ class UI:
         Raises:
             UserCancelled: If the user dismisses the confirmation prompt.
         """
-        if self.plain or not sys.stdin.isatty():
+        if self.plain or prompts is None or not sys.stdin.isatty():
             return True
-        answer = questionary.confirm(
+        answer = prompts.confirm(
             "⚒️  Build this stack?",
             default=True,
-            style=PIRATE_STYLE,
+            style=_prompt_style(),
         ).ask()
         if answer is None:
             raise UserCancelled("Voyage cancelled before the stack was built.")
@@ -345,7 +361,7 @@ class UI:
             config_path: Display path to the generated config root.
         """
         selected = set(plan.service_ids)
-        steps = []
+        steps: list[str] = []
         if "privateerr" in selected:
             steps.append("Set PIA_USER and PIA_PASS in .env.")
         if selected.intersection(
@@ -383,6 +399,9 @@ class UI:
         steps.append(f"Start the stack with make up PRESET={plan.preset.id}.")
 
         if self.console:
+            from rich.panel import Panel
+            from rich.table import Table
+
             table = Table.grid(padding=(0, 2))
             table.add_column(style="bold")
             table.add_column()
@@ -417,6 +436,8 @@ class UI:
         if fix:
             body += f"\n\n[bold]Fix:[/] {fix}"
         if self.console:
+            from rich.panel import Panel
+
             self.console.print(
                 Panel(body, title="☠️ Maraudarr could not finish", border_style="red")
             )
@@ -432,6 +453,8 @@ class UI:
             message: Cancellation reason to present to the user.
         """
         if self.console:
+            from rich.panel import Panel
+
             self.console.print(Panel(message, title="⚓ Voyage Cancelled", border_style="#f2c14e"))
         else:
             print(message)

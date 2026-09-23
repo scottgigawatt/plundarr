@@ -17,7 +17,9 @@ from pathlib import Path
 from unittest.mock import patch
 
 from maraudarr.catalog import Catalog
-from maraudarr.cli import _output_path
+
+# Test the internal output policy without writing a generated deployment.
+from maraudarr.cli import _output_path  # pyright: ignore[reportPrivateUsage]
 
 
 class MaraudarrCliTests(unittest.TestCase):

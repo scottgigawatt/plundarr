@@ -34,6 +34,25 @@ from maraudarr.text import extract_service
 class MaraudarrTests(unittest.TestCase):
     """Exercise presets, dependencies, rendering, and value preservation."""
 
+    def test_catalog_rejects_invalid_field_types(self) -> None:
+        """Reject malformed TOML before conversion can hide invalid catalog values."""
+        source = (self.catalog.root / "catalog/catalog.toml").read_text()
+
+        for original, replacement in (
+            ("order = 100", "order = true"),
+            ('requires = ["privateerr"]', 'requires = "privateerr"'),
+            ('requires = ["privateerr"]', "requires = [42]"),
+            ("order = 100", "order = 100\nnamed_volumes = { data = 42 }"),
+        ):
+            with self.subTest(replacement=replacement), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                (root / "catalog").mkdir()
+                self.assertIn(original, source)
+                (root / "catalog/catalog.toml").write_text(source.replace(original, replacement, 1))
+
+                with self.assertRaises(CatalogError):
+                    Catalog(root)
+
     @classmethod
     def setUpClass(cls) -> None:
         """Load the shared service catalog once for this test class."""
@@ -944,10 +963,10 @@ class MaraudarrTests(unittest.TestCase):
             env_path.write_text(old_values)
             migrated = render_environment(self.catalog, plan, env_path)
             self.assertIn(old_values, migrated)
-            generated = {}
+            generated: dict[str, str] = {}
             for key in keys:
                 match = re.search(rf'^{key}="([A-Za-z0-9_-]{{32,}})"$', migrated, re.MULTILINE)
-                self.assertIsNotNone(match, key)
+                assert match is not None
                 generated[key] = match.group(1)
             self.assertNotEqual(*generated.values())
             fresh = render_environment(self.catalog, plan, None)
@@ -1205,7 +1224,7 @@ class MaraudarrTests(unittest.TestCase):
                 re.MULTILINE,
             )
             with self.subTest(service=name):
-                self.assertIsNotNone(tag_match)
+                assert tag_match is not None
                 tag_variable = tag_match.group(1)
                 self.assertIn(
                     f"container_name: ${{COMPOSE_PROJECT_NAME}}-{name}-${{{tag_variable}}}",
@@ -1282,7 +1301,7 @@ class MaraudarrTests(unittest.TestCase):
     def test_healthchecks_use_shell_only_when_required(self) -> None:
         """Execute probes directly unless shell expansion is required."""
 
-        shell_healthchecks = set()
+        shell_healthchecks: set[str] = set()
 
         for service in self.catalog.services.values():
             compose = self.catalog.source_path(service.compose).read_text()

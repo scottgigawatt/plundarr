@@ -13,7 +13,8 @@ from __future__ import annotations
 import sys
 from collections.abc import Callable
 
-import atheris
+# Native Atheris is installed only in the fuzz image; the local stub covers this harness.
+import atheris  # pyright: ignore[reportMissingModuleSource]
 
 #
 # Instrument project imports so Atheris can guide new inputs toward previously

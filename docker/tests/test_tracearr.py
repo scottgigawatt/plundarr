@@ -25,6 +25,7 @@ from maraudarr.render import (
 from maraudarr.text import extract_service
 
 
+# Revalidate deliberately mutated models to exercise internal catalog invariants.
 class TracearrTests(unittest.TestCase):
     """Verify monitoring behavior independently of external media servers."""
 
@@ -102,7 +103,7 @@ class TracearrTests(unittest.TestCase):
             with self.subTest(volumes=volumes):
                 self.catalog.services["tracearr"] = replace(original, named_volumes=volumes)
                 with self.assertRaises(CatalogError):
-                    self.catalog._validate()
+                    self.catalog._validate()  # pyright: ignore[reportPrivateUsage]
 
         self.catalog.services["tracearr"] = original
         self.catalog.services["homepage"] = replace(
@@ -110,7 +111,7 @@ class TracearrTests(unittest.TestCase):
             named_volumes={"tracearr-db-data": "Duplicate storage ownership."},
         )
         with self.assertRaises(CatalogError):
-            self.catalog._validate()
+            self.catalog._validate()  # pyright: ignore[reportPrivateUsage]
 
     def test_catalog_rejects_invalid_compose_groups(self) -> None:
         """Reject incomplete groups and conflicting Compose ownership."""
@@ -126,7 +127,7 @@ class TracearrTests(unittest.TestCase):
             with self.subTest(names=names):
                 self.catalog.services["tracearr"] = replace(original, compose_services=names)
                 with self.assertRaises(CatalogError):
-                    self.catalog._validate()
+                    self.catalog._validate()  # pyright: ignore[reportPrivateUsage]
 
     def test_secrets_and_existing_state_survive_regeneration(self) -> None:
         """Keep unique credentials private and stable when monitoring is toggled."""
@@ -161,7 +162,7 @@ class TracearrTests(unittest.TestCase):
 
     def test_homepage_monitor_combinations_and_internal_port(self) -> None:
         """Select each monitor independently and keep widget traffic internal."""
-        for monitors in (set(), {"tracearr"}, {"tautulli"}, {"tracearr", "tautulli"}):
+        for monitors in (set[str](), {"tracearr"}, {"tautulli"}, {"tracearr", "tautulli"}):
             with self.subTest(monitors=monitors):
                 plan = self.catalog.resolve("custom", selected=monitors | {"homepage"})
                 compose = render_compose(self.catalog, plan)

@@ -235,7 +235,7 @@ def render_compose(catalog: Catalog, plan: StackPlan) -> str:
     base_source = catalog.source_path("templates/compose.yml").read_text()
     selected = set(plan.service_ids)
     include_native_plex = plan.preset.id == "plundarr" or "plex" in selected
-    service_blocks = []
+    service_blocks: list[str] = []
     for service in plan.services:
         source = catalog.source_path(service.compose).read_text()
         for name in service.compose_services:
@@ -338,7 +338,7 @@ def _assignment_keys(source: str) -> set[str]:
 def _preserve_values(rendered: str, existing: dict[str, str]) -> str:
     """Replace rendered assignments with matching user-managed lines."""
     assignment = re.compile(r"^(?P<key>[A-Za-z_][A-Za-z0-9_]*)=")
-    lines = []
+    lines: list[str] = []
     for line in rendered.splitlines():
         match = assignment.match(line)
         if (
@@ -529,7 +529,7 @@ def render_environment(
         catalog.source_path(service.environment).read_text()
         for service in catalog.services.values()
     ]
-    known_keys = set().union(*(_assignment_keys(source) for source in all_sources))
+    known_keys = set[str]().union(*(_assignment_keys(source) for source in all_sources))
     rendered = _preserve_inactive_values(rendered, existing, known_keys)
     return align_env_comments(rendered)
 
@@ -550,7 +550,7 @@ def _homepage_card(source: str, label: str) -> str:
 
 def _filter_calendar(card: str, selected: set[str]) -> str:
     """Remove calendar integrations whose backing services are unselected."""
-    lines = []
+    lines: list[str] = []
     skip = False
     for line in card.splitlines():
         if line.startswith("            - type: "):
@@ -582,7 +582,7 @@ def render_homepage_services(catalog: Catalog, plan: StackPlan) -> str:
     include_plex_homepage = plan.preset.id == "plundarr" or "plex" in selected
     preamble = source[: source.find("- Media:")].rstrip()
 
-    media_cards = []
+    media_cards: list[str] = []
     if include_plex_homepage:
         media_cards.append(_homepage_card(source, "Plex"))
     for service_id, label in (
@@ -607,7 +607,7 @@ def render_homepage_services(catalog: Catalog, plan: StackPlan) -> str:
         else:
             media_cards.append(_homepage_card(source, label))
 
-    data_cards = []
+    data_cards: list[str] = []
     if selected.intersection({"radarr", "sonarr", "lidarr"}):
         data_cards.append(_filter_calendar(_homepage_card(source, "Calendar"), selected))
     if "tracearr" in selected:
@@ -615,7 +615,7 @@ def render_homepage_services(catalog: Catalog, plan: StackPlan) -> str:
     if "tautulli" in selected:
         data_cards.append(_homepage_card(source, "Tautulli"))
 
-    download_cards = []
+    download_cards: list[str] = []
     if "prowlarr" in selected:
         download_cards.append(_homepage_card(source, "Prowlarr"))
     for service_id, _label in (
@@ -629,7 +629,7 @@ def render_homepage_services(catalog: Catalog, plan: StackPlan) -> str:
     if "speedtest-tracker" in selected:
         download_cards.append(_homepage_card(source, "Speedtest Tracker"))
 
-    groups = []
+    groups: list[str] = []
     for title, cards in (
         ("Media", media_cards),
         ("Data", data_cards),

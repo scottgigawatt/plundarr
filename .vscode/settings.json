@@ -8,10 +8,14 @@
     //                formatting, spelling, schema, and validation rules.
     //
 
+    // Use the shared strict configuration for editor diagnostics.
+    "python.analysis.typeCheckingMode": "strict",
+
     //
     // Accept project names, dependencies, and intentional pirate vocabulary.
     //
     "cSpell.words": [
+        "pyrightconfig",
         "addgroup",
         "adduser",
         "APIKEY",
