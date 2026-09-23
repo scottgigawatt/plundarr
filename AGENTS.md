@@ -74,6 +74,14 @@ Prefer POSIX `#!/bin/sh` for host and simple container scripts. Bash is allowed 
 
 Keep Makefile variables centralized near the top. User-facing targets may use light pirate humor, but errors must identify the problem and corrective action. Every target should have the established framed comment and dependency notes. Keep `requirements-docs.txt` exact and SHA-256 hash-verified, and require pip's hash-checking mode whenever Make installs the documentation toolchain.
 
+## Environment and Compose comments
+
+Keep `.env`, `example.env`, named environment examples, and service `environment.env` fragments focused on values. Reserve their end-of-line comments for settings operators must review or commonly customize: credentials, host paths, user/group IDs, time zones, and host-port conflicts. Use short action-oriented prompts such as `Edit before launch:`, `Edit for your host:`, or `Change only for a host-port conflict`. A generated secret that needs no manual action does not need an inline environment comment.
+
+Put behavior explanations, accepted values, units, limits, dependencies between settings, and implementation details in aligned end-of-line comments beside the corresponding Compose entries. Explain numeric and boolean meanings where they are not obvious; for example, `1 disables IPv6; 0 enables IPv6`. Keep useful environment section headings, but do not move routine per-variable explanations into standalone environment comments to bypass this rule. Defaults belong in environment files, never Compose interpolation fallbacks.
+
+Align inline comments within each logical group with at least two spaces before `#`. When updating a local environment file, preserve every assignment value exactly, including credentials and operator overrides. Never print or commit real environment values.
+
 ## Generated Files And Secrets
 
 Maraudarr writes each normal deployment into `dist/<preset>/`. Do not resolve `${VARIABLES}` inside the generated Compose file. The generated `.env` remains the only file users need to edit after generation.
@@ -111,9 +119,40 @@ Treat `.editorconfig` as the portable source of truth for indentation, line endi
 
 Comment every Dockerfile build stage and each non-obvious instruction group. Stage comments must explain both the artifact produced and why the stage is separate.
 
+## Shared shell and Python style
+
+Keep these conventions aligned between Privateerr and Plundarr while preserving each repository's architecture and test tooling.
+
+Use four spaces in shell and Python, two spaces in YAML, TOML, AWK, and jq, and four spaces in JSON and JSON with Comments. `.editorconfig` is the portable source of truth; VS Code settings must agree. Put a blank line before and after logical control-flow blocks, and place a concise explanatory comment above non-obvious checks, loops, and operations. Do not add comments that merely repeat the code.
+
+Shell functions use this exact documentation shape:
+
+```sh
+#
+# function_name: Describe the function's purpose.
+#
+# Parameters: $1 - Describe the first parameter.
+#             $2 - Describe the second parameter.
+#
+# Returns: Describe the return value or exit behavior.
+#
+```
+
+Use `Parameters: None.` when appropriate. Keep each short explanatory sentence on one comment line. Use targeted ShellCheck suppressions only when a documented runtime constraint prevents a correct code fix; never disable a diagnostic across the repository to hide individual findings. `.shellcheckrc` supplies shared source resolution for editors and checks.
+
+Python modules and tests start with the copyright, Apache-2.0, and filename summary block, followed by a useful module docstring. Prefer small functions, explicit types at application boundaries, standard-library facilities, and concise docstrings for public classes and non-obvious helpers. `ruff.toml` owns lint and formatting rules, including import order, four-space indentation, and Unix line endings. Run both Ruff lint and format checks during pull-request validation; editors and pre-commit must use the same configuration. Keep lint and test dependencies out of published production images.
+
+Explain the scenario and intent of Python tests with concise docstrings and comments around controlled fixtures, injected failures, cleanup, and meaningful assertion groups. Use blank lines to separate setup, actions, and verification where it improves readability. Explain why a boundary matters rather than narrating obvious assignments or adding repetitive step labels.
+
+`pyrightconfig.json` owns strict Python checking for both editors and automation. Keep every project-owned Python module and test in scope, including optional fuzz harnesses. Use `make test-types` for the pinned containerized checker; `make test`, pre-commit, and PR/main/release validation must enforce it. Validate dynamic data at its boundary, annotate collection and callback contracts, and narrow optional values explicitly. Do not weaken strict mode or add blanket `Any` annotations to hide findings. Document any targeted diagnostic exception beside the intentional test or optional dependency. Keep checker packages in test images, never production images.
+
+Run CSpell across project-owned files after changes. Correct misspellings; add genuine project vocabulary to `.vscode/settings.json` under `cSpell.words`. Do not add secrets or whole arbitrary strings to silence spelling diagnostics.
+
 ## Docker And Compose Rules
 
 The generated Plundarr deployment must remain one complete, commented `docker-compose.yml` file. Synology Container Manager compatibility is a core constraint.
+
+Generated Privateerr services retain UID 0 for upstream scripts but drop all Linux capabilities and enable `no-new-privileges`. Docker applies namespace IPv6 settings before startup; use a compatible Privateerr release that skips redundant sysctl writes. Generated qBittorrent services follow explicit Compose-managed Gluetun restarts through `depends_on.restart: true`; tunnel recovery does not restart application containers.
 
 Profile-gated maintenance utilities must stay out of ordinary `make up` runs. Kometa Overlay Reset uses the `tools` profile and the explicit `make kometa-overlay-reset PRESET=duplex` one-shot target.
 

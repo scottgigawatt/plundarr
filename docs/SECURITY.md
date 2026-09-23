@@ -57,6 +57,12 @@ If a report is declined, I will try to explain why without leakin' dangerous det
 
 Plundarr pulls published container images for the stack and keeps configuration in service-specific directories. Pull updated stable images regularly so accepted security fixes reach the deployment.
 
+## Interpret Maraudarr image scans
+
+The September 23, 2026 scan reports three alerts in the digest-pinned Compose 5.5.1 binary. Docker's [CVE-2025-15558 advisory](https://github.com/docker/cli/security/advisories/GHSA-p436-gjf2-799p) concerns Windows plugin discovery and is already fixed in the bundled version. The [OpenPGP warning](https://pkg.go.dev/vuln/GO-2026-5932) concerns a package absent from the compiled binary. The [containerd CRI issue](https://github.com/containerd/containerd/security/advisories/GHSA-7jxh-36q5-gcqv) concerns daemon code, not the client libraries used by Compose.
+
+Maraudarr contains neither a Docker nor containerd daemon and generates projects without network access. These findings do not justify changing the current official Compose donor or adding scanner exclusions. They also do not assess the host's Docker daemon or the service images in a generated deployment. Recheck the exact image digest and upstream advisories when dependency versions change.
+
 Use the [support guide](SUPPORT.md) for non-sensitive setup questions and reproducible bugs.
 
 Fair winds, sharp eyes, and may yer secrets stay below deck. ☠️

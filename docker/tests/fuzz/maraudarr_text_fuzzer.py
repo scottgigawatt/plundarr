@@ -13,8 +13,8 @@ from __future__ import annotations
 import sys
 from collections.abc import Callable
 
-import atheris
-
+# Native Atheris is installed only in the fuzz image; the local stub covers this harness.
+import atheris  # pyright: ignore[reportMissingModuleSource]
 
 #
 # Instrument project imports so Atheris can guide new inputs toward previously
@@ -70,15 +70,13 @@ def fuzz_one_input(data: bytes) -> None:
     source = provider.ConsumeUnicodeNoSurrogates(MAX_SOURCE_CHARACTERS)
     name = provider.ConsumeUnicodeNoSurrogates(MAX_NAME_CHARACTERS)
 
-    # These extractors intentionally reject sources missing their required
-    # marker. Unexpected exception types remain visible to the fuzzing engine.
+    # Missing template markers are expected; other exception types must reach the fuzzing engine.
     _exercise_template_parser(extract_service, source, name)
     _exercise_template_parser(extract_foundation, source)
     _exercise_template_parser(extract_footer, source)
     _exercise_template_parser(extract_env_preamble, source)
 
-    # These helpers accept arbitrary text and therefore must never need an
-    # expected-exception allowlist.
+    # These helpers accept arbitrary text and must not need an expected-exception allowlist.
     sections = extract_env_sections(source)
     strip_yaml_key(source, name)
     remove_comment_group(source, name)

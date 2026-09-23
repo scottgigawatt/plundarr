@@ -11,6 +11,7 @@
 from __future__ import annotations
 
 import base64
+import hashlib
 import os
 import re
 import secrets
@@ -96,9 +97,11 @@ def _insert_gluetun_additions(block: str, selected: set[str]) -> str:
         port_entries.append(("- ${NZBGET_WEBUI_PORT}:6789", "NZBGet web UI port"))
 
     if environment_entries:
-        anchor = (
-            "      PRIVATEERR_GLUETUN_METADATA_WAIT_SECONDS: "
-            "${PRIVATEERR_GLUETUN_METADATA_WAIT_SECONDS}\n"
+        # Insert after the metadata settings without depending on inline comment spacing.
+        anchor = next(
+            line + "\n"
+            for line in block.splitlines()
+            if line.lstrip().startswith("PRIVATEERR_GLUETUN_API_KEY:")
         )
         insertion = (
             "\n      # Define downloader port-forwarding commands for Gluetun\n"
@@ -111,9 +114,7 @@ def _insert_gluetun_additions(block: str, selected: set[str]) -> str:
         anchor = "    # Mount host directories into the container\n"
         insertion = (
             "    # Define downloader host and container ports\n"
-            "    ports:\n"
-            + aligned_yaml_lines(port_entries, 6)
-            + "\n\n"
+            "    ports:\n" + aligned_yaml_lines(port_entries, 6) + "\n\n"
         )
         block = block.replace(anchor, insertion + anchor, 1)
     return block
@@ -171,9 +172,7 @@ def _prepare_service(
             "Homepage qBittorrent click target and widget": "qbittorrent" in selected,
             "Homepage SABnzbd click target and widget": "sabnzbd" in selected,
             "Homepage NZBGet click target and widget": "nzbget" in selected,
-            "Homepage Speedtest Tracker click target and widget": (
-                "speedtest-tracker" in selected
-            ),
+            "Homepage Speedtest Tracker click target and widget": ("speedtest-tracker" in selected),
         }
         for heading, keep in homepage_groups.items():
             if not keep:
@@ -236,7 +235,7 @@ def render_compose(catalog: Catalog, plan: StackPlan) -> str:
     base_source = catalog.source_path("templates/compose.yml").read_text()
     selected = set(plan.service_ids)
     include_native_plex = plan.preset.id == "plundarr" or "plex" in selected
-    service_blocks = []
+    service_blocks: list[str] = []
     for service in plan.services:
         source = catalog.source_path(service.compose).read_text()
         for name in service.compose_services:
@@ -286,9 +285,7 @@ def _filter_homepage_env(
         "Homepage Tautulli click-target and widget variables": "tautulli" in selected,
         "Homepage Radarr click-target and widget variables": "radarr" in selected,
         "Homepage Sonarr click-target and widget variables": "sonarr" in selected,
-        "Homepage Sonarr Anime click-target and widget variables": (
-            "sonarr-anime" in selected
-        ),
+        "Homepage Sonarr Anime click-target and widget variables": ("sonarr-anime" in selected),
         "Homepage Lidarr click-target and widget variables": "lidarr" in selected,
         "Homepage Jellyfin click-target and widget variables": "jellyfin" in selected,
         "Homepage Calibre-Web Automated click-target and widget variables": (
@@ -297,9 +294,7 @@ def _filter_homepage_env(
         "Homepage Bazarr click-target and widget variables": "bazarr" in selected,
         "Homepage Seerr click-target and widget variables": "seerr" in selected,
         "Homepage Prowlarr click-target and widget variables": "prowlarr" in selected,
-        "Homepage qBittorrent click-target and widget variables": (
-            "qbittorrent" in selected
-        ),
+        "Homepage qBittorrent click-target and widget variables": ("qbittorrent" in selected),
         "Homepage SABnzbd click-target and widget variables": "sabnzbd" in selected,
         "Homepage NZBGet click-target and widget variables": "nzbget" in selected,
         "Homepage Speedtest Tracker click-target and widget variables": (
@@ -343,7 +338,7 @@ def _assignment_keys(source: str) -> set[str]:
 def _preserve_values(rendered: str, existing: dict[str, str]) -> str:
     """Replace rendered assignments with matching user-managed lines."""
     assignment = re.compile(r"^(?P<key>[A-Za-z_][A-Za-z0-9_]*)=")
-    lines = []
+    lines: list[str] = []
     for line in rendered.splitlines():
         match = assignment.match(line)
         if (
@@ -371,9 +366,7 @@ def _preserve_inactive_values(
     inactive = [
         line
         for key, line in existing.items()
-        if key != "COMPOSE_PROJECT_NAME"
-        and key in known_keys
-        and key not in active_keys
+        if key != "COMPOSE_PROJECT_NAME" and key in known_keys and key not in active_keys
     ]
     if not inactive:
         return rendered
@@ -398,6 +391,7 @@ def _generate_first_run_secrets(rendered: str, existing: dict[str, str]) -> str:
         "HOMEPAGE_AUTH_SECRET": secrets.token_urlsafe(32),
         "HOMEPAGE_AUTH_PASSWORD": secrets.token_urlsafe(24),
         "NZBGET_PASS": secrets.token_urlsafe(18),
+        "PRIVATEERR_GLUETUN_API_KEY": secrets.token_hex(32),
         "TRACEARR_DB_PASSWORD": secrets.token_hex(32),
         "TRACEARR_JWT_SECRET": secrets.token_hex(32),
         "TRACEARR_COOKIE_SECRET": secrets.token_hex(32),
@@ -444,6 +438,13 @@ def render_environment(
     rendered_sections = [base_source]
     for service in plan.services:
         section = catalog.source_path(service.environment).read_text()
+
+        # A standalone configuration generator has no Gluetun tunnel to monitor.
+        if service.id == "privateerr" and "gluetun" not in selected:
+            section = section.replace(
+                "${PRIVATEERR_AUTO_RECOVER:-true}",
+                "${PRIVATEERR_AUTO_RECOVER:-false}",
+            )
         if service.id == "homepage":
             section = _filter_homepage_env(
                 section,
@@ -452,9 +453,7 @@ def render_environment(
             )
         rendered_sections.append(section)
 
-    rendered = "\n\n".join(
-        section.rstrip("\n") for section in rendered_sections
-    )
+    rendered = "\n\n".join(section.rstrip("\n") for section in rendered_sections)
     # Fresh environments inherit identity, network, and media defaults from
     # the selected preset. Existing user-managed values remain preserved below.
     media_root = plan.preset.media_root.rstrip("/")
@@ -530,7 +529,7 @@ def render_environment(
         catalog.source_path(service.environment).read_text()
         for service in catalog.services.values()
     ]
-    known_keys = set().union(*(_assignment_keys(source) for source in all_sources))
+    known_keys = set[str]().union(*(_assignment_keys(source) for source in all_sources))
     rendered = _preserve_inactive_values(rendered, existing, known_keys)
     return align_env_comments(rendered)
 
@@ -551,7 +550,7 @@ def _homepage_card(source: str, label: str) -> str:
 
 def _filter_calendar(card: str, selected: set[str]) -> str:
     """Remove calendar integrations whose backing services are unselected."""
-    lines = []
+    lines: list[str] = []
     skip = False
     for line in card.splitlines():
         if line.startswith("            - type: "):
@@ -583,7 +582,7 @@ def render_homepage_services(catalog: Catalog, plan: StackPlan) -> str:
     include_plex_homepage = plan.preset.id == "plundarr" or "plex" in selected
     preamble = source[: source.find("- Media:")].rstrip()
 
-    media_cards = []
+    media_cards: list[str] = []
     if include_plex_homepage:
         media_cards.append(_homepage_card(source, "Plex"))
     for service_id, label in (
@@ -608,7 +607,7 @@ def render_homepage_services(catalog: Catalog, plan: StackPlan) -> str:
         else:
             media_cards.append(_homepage_card(source, label))
 
-    data_cards = []
+    data_cards: list[str] = []
     if selected.intersection({"radarr", "sonarr", "lidarr"}):
         data_cards.append(_filter_calendar(_homepage_card(source, "Calendar"), selected))
     if "tracearr" in selected:
@@ -616,10 +615,10 @@ def render_homepage_services(catalog: Catalog, plan: StackPlan) -> str:
     if "tautulli" in selected:
         data_cards.append(_homepage_card(source, "Tautulli"))
 
-    download_cards = []
+    download_cards: list[str] = []
     if "prowlarr" in selected:
         download_cards.append(_homepage_card(source, "Prowlarr"))
-    for service_id, label in (
+    for service_id, _label in (
         ("qbittorrent", "qBittorrent"),
         ("sabnzbd", "SABnzbd"),
         ("nzbget", "NZBGet"),
@@ -630,7 +629,7 @@ def render_homepage_services(catalog: Catalog, plan: StackPlan) -> str:
     if "speedtest-tracker" in selected:
         download_cards.append(_homepage_card(source, "Speedtest Tracker"))
 
-    groups = []
+    groups: list[str] = []
     for title, cards in (
         ("Media", media_cards),
         ("Data", data_cards),
@@ -725,6 +724,20 @@ def write_config(catalog: Catalog, plan: StackPlan, output_dir: Path) -> Path:
             config_path / service.service,
         )
 
+    # Upgrade only the unchanged wrapper shipped before automatic recovery (5a5dc2f).
+    # Customized scripts, symlinks, and all application state remain operator-owned.
+    if "gluetun" in plan.service_ids:
+        wrapper = config_path / "gluetun/scripts/gluetun-entrypoint-wrapper.sh"
+        previous_digest = "1aa664f06e67e2b7e944ae773a33b82b7fb52af8b27b14600f273f9f91e98eee"  # pragma: allowlist secret
+        if (
+            not wrapper.is_symlink()
+            and hashlib.sha256(wrapper.read_bytes()).hexdigest() == previous_digest
+        ):
+            source = catalog.source_path(
+                "services/gluetun/config/scripts/gluetun-entrypoint-wrapper.sh"
+            )
+            _atomic_write(wrapper, source.read_text(), source.stat().st_mode & 0o777)
+
     if "homepage" in plan.service_ids:
         _atomic_write(
             config_path / "homepage" / "services.yaml",
@@ -769,9 +782,7 @@ def validate_compose(output_dir: Path) -> None:
             continue
         if result.returncode:
             message = result.stderr.strip() or result.stdout.strip()
-            raise RenderError(
-                f"Docker Compose rejected the generated stack: {message}"
-            )
+            raise RenderError(f"Docker Compose rejected the generated stack: {message}")
         return
 
 

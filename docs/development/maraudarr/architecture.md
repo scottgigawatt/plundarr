@@ -67,7 +67,7 @@ The default Plundarr preset therefore owns the `plundarr` Compose project. Marau
 
 Compose and environment files are written to a temporary directory inside the requested preset directory. Maraudarr asks Docker Compose to validate that staged pair, then atomically replaces the public files only after validation succeeds. A missing Docker executable is tolerated for dependency-free source testing; an installed Docker Compose that rejects the chart is a hard failure.
 
-Config seeding follows a different safety rule: missing seeds are copied, project-owned README files may be refreshed, and existing application files are never replaced. Destructive cleanup belongs exclusively to the explicit `make delete-config` target.
+Config seeding follows a different safety rule: missing seeds are copied, project-owned README files may be refreshed, and existing application files are never replaced. The VPN recovery migration additionally refreshes the previous bundled Gluetun wrapper only when its SHA-256 matches the known unmodified seed. Customized scripts and symlinks remain untouched. Destructive cleanup belongs exclusively to the explicit `make delete-config` target.
 
 `make nuke` removes project Docker resources and transient runtime residue but does not call `delete-config`; generated `.env`, host backups, and bind-mounted application state remain intact. All application volumes, including Tracearr databases and internal backups, remain intact. Only isolated tests may delete their recorded volumes after verifying ownership labels.
 

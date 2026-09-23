@@ -52,6 +52,7 @@ COMPOSE_SERVICES=compose-services
 OPEN=open
 TEST_IMAGE=test-image
 TEST_UNIT=test-unit
+TEST_TYPES=test-types
 TEST_VPN=test-vpn
 TEST_STACK=test-stack
 DOCS_INSTALL=docs-install
@@ -112,6 +113,7 @@ PROJECT_TARGETS= \
 	$(OPEN) \
 	$(TEST_IMAGE) \
 	$(TEST_UNIT) \
+	$(TEST_TYPES) \
 	$(TEST_VPN) \
 	$(TEST_STACK) \
 	$(DOCS_INSTALL) \
@@ -171,22 +173,22 @@ PRIVATEERR_GENERATED_METADATA  ?= $(CONFIG_PATH)/gluetun/wireguard/privateerr.en
 #
 # Docker Compose options.
 #
-PRESET                         ?= plundarr
-ADD_SERVICES                   ?=
-REMOVE_SERVICES                ?=
-DEPLOYMENT_ROOT                ?= dist
-DEPLOYMENT_PATH                ?= $(DEPLOYMENT_ROOT)/$(PRESET)
-RENDERED_COMPOSE_FILE          ?= $(DEPLOYMENT_PATH)/docker-compose.yml
-COMPOSE_FILE                   ?= $(RENDERED_COMPOSE_FILE)
-ENV_FILE                       ?= $(DEPLOYMENT_PATH)/.env
-COMPOSE_ENV_FILE               ?= $(ENV_FILE)
-COMPOSE_DOWN_TIMEOUT           ?= 30
+PRESET                ?= plundarr
+ADD_SERVICES          ?=
+REMOVE_SERVICES       ?=
+DEPLOYMENT_ROOT       ?= dist
+DEPLOYMENT_PATH       ?= $(DEPLOYMENT_ROOT)/$(PRESET)
+RENDERED_COMPOSE_FILE ?= $(DEPLOYMENT_PATH)/docker-compose.yml
+COMPOSE_FILE          ?= $(RENDERED_COMPOSE_FILE)
+ENV_FILE              ?= $(DEPLOYMENT_PATH)/.env
+COMPOSE_ENV_FILE      ?= $(ENV_FILE)
+COMPOSE_DOWN_TIMEOUT  ?= 30
 
 # Teardown flags are fixed so deployment commands cannot request volume deletion.
 ifneq ($(origin COMPOSE_DOWN_OPTIONS),undefined)
 $(error COMPOSE_DOWN_OPTIONS is not configurable. Use COMPOSE_DOWN_TIMEOUT instead)
 endif
-COMPOSE_DOWN_OPTIONS           = --timeout "$(COMPOSE_DOWN_TIMEOUT)" --remove-orphans
+COMPOSE_DOWN_OPTIONS            = --timeout "$(COMPOSE_DOWN_TIMEOUT)" --remove-orphans
 COMPOSE_UP_OPTIONS             ?= --force-recreate --pull always --detach --remove-orphans
 WATCHTOWER_RUN_ONCE_OPTIONS    ?= --rm --no-deps
 KOMETA_OVERLAY_RESET_OPTIONS   ?= --rm --no-deps
@@ -212,6 +214,7 @@ MARAUDARR_TEST_FILE            ?= config/README.md
 CONFIG_PATH                    ?= $(DEPLOYMENT_PATH)/config
 CONFIG_BACKUP_PATH             ?= $(DEPLOYMENT_PATH)/backups
 PYTHON_BIN                     ?= python3
+MARAUDARR_TYPECHECK_CMD        ?= scripts/compose/typecheck.sh
 
 #
 # Disposable runtime state. Persistent application config and backups must
@@ -785,10 +788,11 @@ $(BUILD_PLATFORMS): $(BUILD_DEPENDS) $(ENSURE_BUILDX_BUILDER)
 # Dependencies:
 #   $(BUILD_DEPENDS) - Ensure Docker and Docker Compose are installed.
 #   $(TEST_UNIT) - Run Maraudarr's Python unit tests.
+#   $(TEST_TYPES) - Check every Python source and test with strict Pyright.
 #   $(TEST_MAKE_HELPERS) - Test reusable Make and Compose helpers.
 #   $(TEST_WORKFLOWS) - Test workflow helpers without external writes.
 #
-$(TEST): $(BUILD_DEPENDS) $(TEST_UNIT) $(TEST_MAKE_HELPERS) $(TEST_WORKFLOWS)
+$(TEST): $(BUILD_DEPENDS) $(TEST_UNIT) $(TEST_TYPES) $(TEST_MAKE_HELPERS) $(TEST_WORKFLOWS)
 	$(MARAUDARR_IMAGE_TEST_CMD)
 	MARAUDARR_TEST_OUTPUT="$(MARAUDARR_TEST_OUTPUT)" \
 	PYTHON_BIN="$(PYTHON_BIN)" \
@@ -969,6 +973,7 @@ $(HELP):
 	$(call help_line,$(COMPOSE_SERVICES),List rendered Compose services.)
 	$(call help_line,$(OPEN),Open selected-stack web interfaces on macOS.)
 	$(call help_line,$(TEST_IMAGE),Test one hardened Maraudarr image and its terminal UI.)
+	$(call help_line,$(TEST_TYPES),Check all Python with strict Pyright in a test image.)
 	$(call help_line,$(TEST_UNIT),Run Maraudarr Python unit tests.)
 	$(call help_line,$(TEST_VPN),Check a running VPN tunnel.)
 	$(call help_line,$(TEST_STACK),Run the complete stack test.)
@@ -1142,6 +1147,14 @@ $(TEST_UNIT):
 		$(PYTHON_BIN) -m unittest discover \
 			--start-directory docker/tests \
 			--verbose
+
+#
+# $(TEST_TYPES): Check every Python source, test, and fuzz harness with strict Pyright.
+#
+# Dependencies: Docker builds the isolated checker with Maraudarr's pinned imports.
+#
+$(TEST_TYPES):
+	$(MARAUDARR_TYPECHECK_CMD)
 
 #
 # $(TEST_VPN): Validates a running stack's Privateerr and Gluetun VPN runtime state.

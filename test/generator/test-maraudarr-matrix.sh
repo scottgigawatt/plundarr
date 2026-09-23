@@ -229,6 +229,13 @@ run_case custom-homepage \
     --preset custom \
     --add homepage
 
+#
+# VPN recovery follows resolved dependencies; standalone Privateerr remains generation-only.
+#
+run_case custom-vpn --preset custom --add gluetun
+run_case custom-privateerr --preset custom --add privateerr
+run_case jellyfin-with-vpn --preset jellyfin --add gluetun
+
 # Monitoring dependencies and optional alternatives remain independently selectable.
 run_case tracearr --preset custom --add tracearr,homepage
 run_case plundarr-without-tracearr --preset plundarr --remove tracearr

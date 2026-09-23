@@ -23,6 +23,9 @@ on:
       - "docs/SECURITY.md"
       - "Makefile"
       - "docker/Dockerfile"
+      - "test/typing/Dockerfile"
+      - "test/typing/package.json"
+      - "test/typing/package-lock.json"
       - "docker/requirements.txt"
       - "requirements-docs.txt"
   schedule:

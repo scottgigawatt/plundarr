@@ -45,7 +45,7 @@ class Service:
     requires: tuple[str, ...]
     recommended: tuple[str, ...]
     compose_services: tuple[str, ...]
-    named_volumes: dict[str, str] = field(default_factory=dict)
+    named_volumes: dict[str, str] = field(default_factory=dict[str, str])
 
 
 @dataclass(frozen=True)

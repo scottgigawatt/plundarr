@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import re
 
-
 SERVICE_PATTERN = re.compile(r"^  ([A-Za-z0-9][A-Za-z0-9_-]*):\s*$")
 ENV_HEADER_PATTERN = re.compile(r"^#\n# (?P<title>[^\n]+)\n#\n", re.MULTILINE)
 
@@ -154,7 +153,7 @@ def align_env_comments(source: str) -> str:
             elif character == "#" and line[offset - 1] in " \t":
                 code = line[:offset].rstrip(" \t")
                 comment = line[offset:].rstrip("\r\n")
-                ending = line[len(line.rstrip("\r\n")):]
+                ending = line[len(line.rstrip("\r\n")) :]
                 group.append((index, code, comment, ending))
                 break
     return "".join(lines)
@@ -176,11 +175,9 @@ def prune_unused_anchors(foundation: str, content: str) -> str:
         values without treating comments, quoted strings, or shell globs as aliases.
     """
     anchor_pattern = re.compile(r"^x-[\w-]+: &([\w-]+)(?:\s+#.*)?$", re.MULTILINE)
-    alias_pattern = re.compile(
-        r"^\s*(?:[\w<>-]+:|-)\s+\*([\w-]+)\s*(?:#.*)?$", re.MULTILINE
-    )
+    alias_pattern = re.compile(r"^\s*(?:[\w<>-]+:|-)\s+\*([\w-]+)\s*(?:#.*)?$", re.MULTILINE)
     blocks = foundation.rstrip("\n").split("\n\n")
-    anchors = {}
+    anchors: dict[str, str] = {}
     for block in blocks:
         match = anchor_pattern.search(block)
         if match:
@@ -230,7 +227,9 @@ def extract_env_preamble(source: str) -> str:
     Raises:
         TemplateError: If the first setting marker is absent.
     """
-    first_setting = "#\n# Name of the project which adds namespace for all services and volumes.\n#\n"
+    first_setting = (
+        "#\n# Name of the project which adds namespace for all services and volumes.\n#\n"
+    )
     end = source.find(first_setting)
     if end < 0:
         raise TemplateError("Environment preamble marker was not found.")
@@ -256,7 +255,7 @@ def extract_env_sections(source: str) -> dict[str, str]:
         if title.startswith(("Copyright ", "Licensed under ", ".env file:")):
             continue
         end = matches[position + 1].start() if position + 1 < len(matches) else len(source)
-        sections[title] = source[match.start():end].strip("\n") + "\n"
+        sections[title] = source[match.start() : end].strip("\n") + "\n"
     return sections
 
 
@@ -331,6 +330,4 @@ def aligned_yaml_lines(entries: list[tuple[str, str]], indent: int) -> str:
         return ""
     prefix = " " * indent
     width = max(len(code) for code, _ in entries)
-    return "\n".join(
-        f"{prefix}{code.ljust(width)}  # {comment}" for code, comment in entries
-    )
+    return "\n".join(f"{prefix}{code.ljust(width)}  # {comment}" for code, comment in entries)

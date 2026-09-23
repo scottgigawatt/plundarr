@@ -8,6 +8,9 @@
     //                formatting, spelling, schema, and validation rules.
     //
 
+    // Use the shared strict configuration for editor diagnostics.
+    "python.analysis.typeCheckingMode": "strict",
+
     //
     // Accept project names, dependencies, and intentional pirate vocabulary.
     //
@@ -44,6 +47,7 @@
         "centurylinklabs",
         "certifi",
         "changeme",
+        "charliermarsh",
         "Chartin",
         "cksum",
         "cleanuparr",
@@ -104,6 +108,7 @@
         "golift",
         "GOPROXY",
         "GOSUMDB",
+        "gpgsign",
         "griffelib",
         "griimick",
         "gsub",
@@ -168,6 +173,7 @@
         "ndeloof",
         "networkin",
         "networkless",
+        "nghttp",
         "nickfedor",
         "noexec",
         "nofile",
@@ -195,6 +201,7 @@
         "plundarr",
         "Plundarrpedia",
         "plunderin",
+        "portforward",
         "Previewin",
         "printin",
         "Privateerr",
@@ -210,6 +217,7 @@
         "pymdownx",
         "Pypi",
         "pyproject",
+        "pyrightconfig",
         "pytest",
         "PYTHONDONTWRITEBYTECODE",
         "PYTHONPATH",
@@ -238,6 +246,7 @@
         "sailin",
         "SARIF",
         "scottgigawatt",
+        "SCRIPTDIR",
         "Scrubbin",
         "SEARCHTYPE",
         "Seerr",
@@ -261,6 +270,7 @@
         "subtweets",
         "superfences",
         "synogroup",
+        "sysctls",
         "tamasfe",
         "Tautulli",
         "testin",
@@ -282,6 +292,7 @@
         "ulimits",
         "understandin",
         "unhashed",
+        "upgrader",
         "upnp",
         "urandom",
         "urllib",
@@ -389,6 +400,7 @@
         "editor.wordWrap": "on"
     },
     "[python]": {
+        "editor.defaultFormatter": "charliermarsh.ruff",
         "editor.detectIndentation": false,
         "editor.tabSize": 4,
         "editor.insertSpaces": true

@@ -109,9 +109,7 @@ def _output_path(arguments: argparse.Namespace, plan: StackPlan) -> Path:
     if arguments.output:
         return Path(arguments.output).resolve()
 
-    output_root = arguments.output_root or os.environ.get(
-        "MARAUDARR_OUTPUT_ROOT", "/output/dist"
-    )
+    output_root = arguments.output_root or os.environ.get("MARAUDARR_OUTPUT_ROOT", "/output/dist")
     return (Path(output_root).resolve() / plan.preset.id).resolve()
 
 
@@ -167,9 +165,7 @@ def main(arguments: list[str] | None = None) -> int:
 
         if command == "services":
             ui.welcome()
-            ui.show_service_choices(
-                sorted(catalog.services.values(), key=lambda item: item.order)
-            )
+            ui.show_service_choices(sorted(catalog.services.values(), key=lambda item: item.order))
             return 0
 
         if command == "build":

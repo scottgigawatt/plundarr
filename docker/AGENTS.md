@@ -39,6 +39,8 @@ All TOML in this build context uses two-space indentation for multi-line arrays.
 
 ## Rendering Rules
 
+Follow the root environment and Compose comment rules in every service fragment: keep only operator editing prompts inline in `environment.env`, and place behavior, units, accepted values, and limits beside the corresponding Compose settings. Generated `.env` and `example.env` files inherit this convention from the source fragments. Preserve existing operator values and comments when regenerating deployments.
+
 Maraudarr preserves source comments and `${VARIABLES}`. Normal generation writes:
 
 - `/output/dist/<preset>/docker-compose.yml`
@@ -54,6 +56,8 @@ Writes to Compose and environment output must remain atomic. Config generation m
 Profile-gated utilities remain selectable services but must not appear in ordinary Compose startup. Overlay Reset uses the `tools` profile and is invoked through the repository's `make kometa-overlay-reset PRESET=duplex` target.
 
 ## Python Rules
+
+Follow the shared shell and Python style in the root `AGENTS.md`. Root `ruff.toml` and `pyrightconfig.json` are authoritative for source and tests. Run `make test-types` for strict checking, including the optional fuzz harness. The pull-request pre-commit gate enforces types, lint, and formatting. Formatting changes must preserve generated comments and environment values.
 
 Use four-space indentation, type hints, small focused functions, and standard library facilities where practical. Each project-owned module and test file starts with the repository copyright block followed by a concise module docstring. Public classes and non-obvious helpers need useful docstrings.
 

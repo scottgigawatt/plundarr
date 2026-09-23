@@ -45,8 +45,10 @@ services:
       GLUETUN_DEFAULT_ENTRYPOINT: ${GLUETUN_DEFAULT_ENTRYPOINT}              # Original Gluetun entrypoint
 
       # Define Privateerr metadata environment variables for Gluetun
-      PRIVATEERR_METADATA_PATH: ${PRIVATEERR_METADATA_PATH}
-      PRIVATEERR_GLUETUN_METADATA_WAIT_SECONDS: ${PRIVATEERR_GLUETUN_METADATA_WAIT_SECONDS}
+      PRIVATEERR_METADATA_PATH: ${PRIVATEERR_METADATA_PATH}                                  # Generated PIA server metadata
+      PRIVATEERR_GLUETUN_METADATA_WAIT_SECONDS: ${PRIVATEERR_GLUETUN_METADATA_WAIT_SECONDS}  # Maximum seconds to wait for metadata
+      PRIVATEERR_AUTO_RECOVER: ${PRIVATEERR_AUTO_RECOVER}                                    # Enable internal recovery access and disable competing restarts
+      PRIVATEERR_GLUETUN_API_KEY: ${PRIVATEERR_GLUETUN_API_KEY}                              # Same control API key used by Privateerr
 
     # Mount host directories into the container
     volumes:

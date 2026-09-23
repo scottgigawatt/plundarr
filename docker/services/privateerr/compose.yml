@@ -16,7 +16,19 @@ services:
     image: ghcr.io/scottgigawatt/privateerr:${PRIVATEERR_TAG}             # Pull Privateerr from GHCR
     container_name: ${COMPOSE_PROJECT_NAME}-privateerr-${PRIVATEERR_TAG}  # Namespace the container name by project and tag
     hostname: privateerr                                                  # Set the container hostname
-    privileged: true                                                      # Required for upstream IPv6 sysctl behavior
+
+    # Drop Linux capabilities for security hardening
+    cap_drop:
+      - ALL  # Upstream PIA scripts require UID 0 but do not need Linux capabilities
+
+    # Prevent the container from acquiring additional privileges
+    security_opt:
+      - no-new-privileges:true  # Prevent subprocesses from acquiring additional privileges
+
+    # Let Docker disable IPv6 in this container before the PIA scripts start
+    sysctls:
+      net.ipv6.conf.all.disable_ipv6: ${PRIVATEERR_IPV6_DISABLED}      # Existing interfaces: 1 disables IPv6; 0 enables IPv6
+      net.ipv6.conf.default.disable_ipv6: ${PRIVATEERR_IPV6_DISABLED}  # New interfaces: 1 disables IPv6; 0 enables IPv6
 
     # Add container labels
     labels: *disable-watchtower-updates  # VPN bootstrap component; update intentionally
@@ -25,23 +37,31 @@ services:
     environment:
       # PIA manual connection environment variables
       VPN_PROTOCOL: ${PIA_VPN_PROTOCOL}          # VPN configuration, WireGuard or openvpn
-      DISABLE_IPV6: ${PIA_DISABLE_IPV6}          # Toggle using IPV6, yes or no
+      DISABLE_IPV6: ${PIA_DISABLE_IPV6}          # yes requests upstream IPv6 disabling; no skips it
       DIP_TOKEN: ${PIA_DIP_TOKEN}                # Optional PIA dedicated IP token, token or no
-      AUTOCONNECT: ${PIA_AUTOCONNECT}            # Test and select server with the lowest latency, true or false
-      PREFERRED_REGION: ${PIA_PREFERRED_REGION}  # Region ID used when AUTOCONNECT is false
+      AUTOCONNECT: ${PIA_AUTOCONNECT}            # true selects the lowest-latency server; false uses PREFERRED_REGION
+      PREFERRED_REGION: ${PIA_PREFERRED_REGION}  # PIA region ID used when AUTOCONNECT=false
       PIA_CONF_PATH: ${PIA_CONF_PATH}            # Path of WireGuard config file to be written
-      PIA_CONNECT: ${PIA_CONNECT}                # Connect to VPN after config has been created, true or false
-      PIA_PF: ${PIA_PF}                          # Configure port forwarding, true or false
-      PIA_DNS: ${PIA_DNS}                        # Configure DNS, true or false
+      PIA_CONNECT: ${PIA_CONNECT}                # false generates files only; required for Gluetun recovery
+      PIA_PF: ${PIA_PF}                          # true selects a port-forwarding-capable region
+      PIA_DNS: ${PIA_DNS}                        # true includes PIA DNS settings in wg0.conf
       PIA_WG_SERVER_NAME: ${PIA_WG_SERVER_NAME}  # Optional WireGuard server name fallback
       PIA_USER: ${PIA_USER}                      # Set PIA username
       PIA_PASS: ${PIA_PASS}                      # Set PIA password
 
       # Privateerr environment variables
-      PRIVATEERR_METADATA_PATH: ${PRIVATEERR_METADATA_PATH}            # Path where Gluetun metadata will be generated
-      PRIVATEERR_HEALTHCHECK_MARKER: ${PRIVATEERR_HEALTHCHECK_MARKER}  # File written after successful generation
-      PRIVATEERR_KEEPALIVE: ${PRIVATEERR_KEEPALIVE}                    # Keep the container alive after successful generation
-      PRIVATEERR_LOG_PATH: ${PRIVATEERR_LOG_PATH}                      # Privateerr log file path
+      PRIVATEERR_METADATA_PATH: ${PRIVATEERR_METADATA_PATH}                            # Path where Gluetun metadata will be generated
+      PRIVATEERR_HEALTHCHECK_MARKER: ${PRIVATEERR_HEALTHCHECK_MARKER}                  # File written after successful generation
+      PRIVATEERR_KEEPALIVE: ${PRIVATEERR_KEEPALIVE}                                    # true keeps Privateerr running after generation; required for recovery
+      PRIVATEERR_LOG_PATH: ${PRIVATEERR_LOG_PATH}                                      # Privateerr log file path
+      PRIVATEERR_AUTO_RECOVER: ${PRIVATEERR_AUTO_RECOVER}                              # true enables API-based recovery; requires a shared API key
+      PRIVATEERR_GLUETUN_API_KEY: ${PRIVATEERR_GLUETUN_API_KEY}                        # Shared control API key: 20-128 alphanumeric characters; keep private
+      PRIVATEERR_GLUETUN_URL: ${PRIVATEERR_GLUETUN_URL}                                # Internal authenticated Gluetun control API
+      PRIVATEERR_GLUETUN_HEALTH_URL: ${PRIVATEERR_GLUETUN_HEALTH_URL}                  # Internal Gluetun tunnel health endpoint
+      PRIVATEERR_RECOVERY_INTERVAL_SECONDS: ${PRIVATEERR_RECOVERY_INTERVAL_SECONDS}    # Seconds between health probes
+      PRIVATEERR_RECOVERY_FAILURE_SECONDS: ${PRIVATEERR_RECOVERY_FAILURE_SECONDS}      # Startup grace and continuous failure threshold in seconds
+      PRIVATEERR_RECOVERY_COOLDOWN_SECONDS: ${PRIVATEERR_RECOVERY_COOLDOWN_SECONDS}    # Initial retry delay in seconds; doubles up to one hour
+      PRIVATEERR_GENERATION_TIMEOUT_SECONDS: ${PRIVATEERR_GENERATION_TIMEOUT_SECONDS}  # Maximum seconds for one PIA generation
 
     # Mount host directories into the container
     volumes:

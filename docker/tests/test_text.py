@@ -52,6 +52,8 @@ class TextTests(unittest.TestCase):
 
     def test_anchor_pruning_keeps_transitive_dependencies_and_comments(self) -> None:
         """Keep indirect defaults while discarding unused chains and prose aliases."""
+
+        # Model a selected anchor chain beside an unused chain that should disappear as a group.
         foundation = """# Base settings
 x-base: &base
   restart: unless-stopped  # Preserve this comment
@@ -76,14 +78,20 @@ x-orphan: &orphan
 # Services heading
 services:
 """
+
+        # Aliases inside comments and quoted commands must not keep unused anchors alive.
         content = """  example:
     <<: *selected
     # labels: *unused
     command: "echo *orphan"
 """
         result = prune_unused_anchors(foundation, content)
-        self.assertEqual(result, foundation[:foundation.index("# Unused settings")]
-                         + "# Services heading\nservices:\n")
+        self.assertEqual(
+            result,
+            foundation[: foundation.index("# Unused settings")] + "# Services heading\nservices:\n",
+        )
+
+        # A second pass must be stable, and an anchor-free service needs no shared definitions.
         self.assertEqual(prune_unused_anchors(result, content), result)
         self.assertEqual(
             prune_unused_anchors(foundation, "  example:\n    image: example\n"),
@@ -95,24 +103,28 @@ services:
     #
     def test_environment_comments_align_without_changing_values(self) -> None:
         """Align whole groups across uncommented values while keeping literal hashes."""
+
+        # Quoted hashes belong to values; only the trailing comments may move.
         source = (
             'SHORT="value # literal"   # First comment\n'
             'NO_COMMENT="keep # this"\n'
             "LONGER_KEY='value # literal'  # Second comment\n"
-            '\n# Separate group\n'
-            'X=one      # Third comment\n'
-            'YY=two  # Fourth comment\n'
+            "\n# Separate group\n"
+            "X=one      # Third comment\n"
+            "YY=two  # Fourth comment\n"
         )
         expected = (
             'SHORT="value # literal"       # First comment\n'
             'NO_COMMENT="keep # this"\n'
             "LONGER_KEY='value # literal'  # Second comment\n"
-            '\n# Separate group\n'
-            'X=one   # Third comment\n'
-            'YY=two  # Fourth comment\n'
+            "\n# Separate group\n"
+            "X=one   # Third comment\n"
+            "YY=two  # Fourth comment\n"
         )
         self.assertEqual(align_env_comments(source), expected)
         self.assertEqual(align_env_comments(expected), expected)
+
+        # An escaped quote must not make a literal hash look like the start of a comment.
         escaped = r'KEY="value \" # literal"  # Real comment' + "\n"
         self.assertEqual(align_env_comments(escaped), escaped)
 

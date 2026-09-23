@@ -5,9 +5,7 @@
 #
 # Licensed under the Apache License, Version 2.0.
 #
-# qbittorrent-port-forwarding.sh: This script updates qBittorrent's listening
-#                                 port when Gluetun receives or drops a VPN
-#                                 forwarded port.
+# qbittorrent-port-forwarding.sh: Keep qBittorrent bound to Gluetun's forwarded port.
 #
 # Usage: qbittorrent-port-forwarding.sh up <port> <vpn-interface> | down
 #
@@ -20,9 +18,9 @@
 #
 
 #
-# Fail on unset variables.
+# Stop on failed API updates and reject unset variables.
 #
-set -u
+set -eu
 
 #
 # Default script settings.
@@ -58,10 +56,12 @@ qbittorrent_api() {
     api_path="$1"
     post_data="${2:-}"
 
+    # Use POST only when the caller supplied preference changes.
+
     if [ -n "${post_data}" ]; then
-        wget -q -O - --post-data "${post_data}" "${QBITTORRENT_API_URL}${api_path}"
+        wget -T 5 -q -O - --post-data "${post_data}" "${QBITTORRENT_API_URL}${api_path}"
     else
-        wget -q -O - "${QBITTORRENT_API_URL}${api_path}"
+        wget -T 5 -q -O - "${QBITTORRENT_API_URL}${api_path}"
     fi
 }
 
@@ -73,17 +73,20 @@ qbittorrent_api() {
 # Returns: 0 when reachable; exits nonzero after the configured timeout.
 #
 wait_for_qbittorrent() {
-    elapsed_seconds=0
+    deadline_seconds=$(($(date +%s) + QBITTORRENT_API_WAIT_SECONDS))
+
+    # Allow qBittorrent to start after Gluetun becomes healthy.
 
     while ! qbittorrent_api "/api/v2/app/preferences" >/dev/null 2>&1; do
-        if [ "${elapsed_seconds}" -ge "${QBITTORRENT_API_WAIT_SECONDS}" ]; then
+        # Stop retrying when the total startup allowance expires.
+
+        if [ "$(date +%s)" -ge "${deadline_seconds}" ]; then
             log "qBittorrent Web API did not become ready at ${QBITTORRENT_API_URL}."
             exit 1
         fi
 
         log "Waiting for qBittorrent Web API."
         sleep 2
-        elapsed_seconds=$((elapsed_seconds + 2))
     done
 }
 
@@ -99,17 +102,23 @@ set_forwarded_port() {
     forwarded_port="$1"
     vpn_interface="$2"
 
+    # Reject malformed ports before composing the JSON request.
+
     if ! printf '%s' "${forwarded_port}" | grep -Eq '^[0-9]+$'; then
         log "Forwarded port is not numeric: ${forwarded_port}"
         exit 1
     fi
+
+    # Accept only usable TCP and UDP port numbers.
 
     if [ "${forwarded_port}" -lt 1 ] || [ "${forwarded_port}" -gt 65535 ]; then
         log "Forwarded port is outside valid range: ${forwarded_port}"
         exit 1
     fi
 
-    if [ -z "${vpn_interface}" ] || [ "${vpn_interface}" = "lo" ]; then
+    # Accept only safe interface names and exclude the loopback interface.
+
+    if ! printf '%s' "${vpn_interface}" | grep -Eq '^[A-Za-z0-9_-]+$' || [ "${vpn_interface}" = "lo" ]; then
         log "VPN interface is invalid: ${vpn_interface}"
         exit 1
     fi
@@ -137,6 +146,13 @@ reset_forwarded_port() {
 
     log "Reset qBittorrent listen_port and network interface."
 }
+
+#
+# Skip application updates when the optional downloader is explicitly disabled.
+#
+if [ "${QBITTORRENT_PORT_SYNC:-true}" = false ]; then
+    exit 0
+fi
 
 #
 # Dispatch supported commands.

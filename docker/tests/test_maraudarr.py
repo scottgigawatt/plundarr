@@ -34,6 +34,29 @@ from maraudarr.text import extract_service
 class MaraudarrTests(unittest.TestCase):
     """Exercise presets, dependencies, rendering, and value preservation."""
 
+    def test_catalog_rejects_invalid_field_types(self) -> None:
+        """Reject malformed TOML before conversion can hide invalid catalog values."""
+
+        source = (self.catalog.root / "catalog/catalog.toml").read_text()
+
+        # Change one field at a time so each malformed catalog fails for the intended reason.
+        for original, replacement in (
+            ("order = 100", "order = true"),
+            ('requires = ["privateerr"]', 'requires = "privateerr"'),
+            ('requires = ["privateerr"]', "requires = [42]"),
+            ("order = 100", "order = 100\nnamed_volumes = { data = 42 }"),
+        ):
+            with self.subTest(replacement=replacement), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                (root / "catalog").mkdir()
+
+                # Require the fixture anchor to exist so a catalog edit cannot silently disable this case.
+                self.assertIn(original, source)
+                (root / "catalog/catalog.toml").write_text(source.replace(original, replacement, 1))
+
+                with self.assertRaises(CatalogError):
+                    Catalog(root)
+
     @classmethod
     def setUpClass(cls) -> None:
         """Load the shared service catalog once for this test class."""
@@ -140,9 +163,7 @@ class MaraudarrTests(unittest.TestCase):
                 self.assertNotIn("qbittorrent", usenet)
 
             with self.subTest(preset=preset_id, mode="combined"):
-                combined = set(
-                    self.catalog.resolve(preset_id, add={"sabnzbd"}).service_ids
-                )
+                combined = set(self.catalog.resolve(preset_id, add={"sabnzbd"}).service_ids)
                 self.assertIn("qbittorrent", combined)
                 self.assertIn("sabnzbd", combined)
 
@@ -175,13 +196,13 @@ class MaraudarrTests(unittest.TestCase):
         standalone = self.catalog.resolve("portainer")
         self.assertEqual(standalone.service_ids, ("portainer",))
         self.assertNotIn("portainer", self.catalog.resolve("plundarr").service_ids)
+
+        # The same service contract must hold alone and when added to the complete stack.
         for plan in (standalone, self.catalog.resolve("plundarr", add={"portainer"})):
             with self.subTest(preset=plan.preset.id):
                 compose = render_compose(self.catalog, plan)
                 service = extract_service(compose, "portainer")
-                environment = render_environment(
-                    self.catalog, plan, None, generate_secrets=False
-                )
+                environment = render_environment(self.catalog, plan, None, generate_secrets=False)
                 self.assertIn("image: portainer/portainer-ce:${PORTAINER_TAG}", service)
                 self.assertIn("${PORTAINER_WEB_PORT}:9443", service)
                 self.assertIn("${PORTAINER_EDGE_PORT}:8000", service)
@@ -197,10 +218,13 @@ class MaraudarrTests(unittest.TestCase):
         """Retain application-owned state and explicit image, path, and port choices."""
 
         plan = self.catalog.resolve("portainer")
+
         with tempfile.TemporaryDirectory() as temporary_directory:
             output = Path(temporary_directory)
             _, env_path, config_path = write_stack(self.catalog, plan, output)
             data_path = config_path / "portainer" / "portainer.db"
+
+            # Populate application-owned data before regenerating with operator-selected settings.
             data_path.write_bytes(b"example application state")
             assignments = (
                 'PORTAINER_TAG="lts"\n'
@@ -214,10 +238,14 @@ class MaraudarrTests(unittest.TestCase):
             env_path.write_text(assignments)
             write_stack(self.catalog, plan, output)
             environment = env_path.read_text()
+
             for assignment in assignments.splitlines():
                 self.assertIn(assignment, environment)
+
             self.assertEqual(data_path.read_bytes(), b"example application state")
             self.assertTrue((config_path / "portainer" / "README.md").is_file())
+
+            # An external config override must not cause the generator to create or seed that path.
             self.assertFalse((output / "existing-portainer-data").exists())
 
     def test_watchtower_preset_selects_only_the_updater(self) -> None:
@@ -281,6 +309,7 @@ class MaraudarrTests(unittest.TestCase):
         self.assertNotIn("OVERLAY_RESET_DRY_RUN", environment)
         self.assertNotIn("  watchtower:", compose)
 
+        # Maintenance stays opt-in and profile-gated so an ordinary stack launch cannot run it.
         selected = self.catalog.resolve("duplex", add={"overlay-reset"})
         tool = extract_service(render_compose(self.catalog, selected), "overlay-reset")
         self.assertRegex(tool, r"profiles: +# [^\n]+\n      - tools +#")
@@ -296,19 +325,19 @@ class MaraudarrTests(unittest.TestCase):
         plan = self.catalog.resolve("duplex")
         compose = render_compose(self.catalog, plan)
         chart = extract_service(compose, "pattrmm")
-        environment = render_environment(
-            self.catalog, plan, None, generate_secrets=False
-        )
+        environment = render_environment(self.catalog, plan, None, generate_secrets=False)
+
         for assignment in (
             'PATTRMM_TAG="${PATTRMM_TAG:-neo}"',
             'PATTRMM_TIMES="${PATTRMM_TIMES:-02:00,14:00}"',
             'PATTRMM_SETTINGS="${PATTRMM_SETTINGS:-settings.yml}"',
-            'PATTRMM_SETTINGS_PATH="${PATTRMM_SETTINGS_PATH:-'
-            '${KOMETA_CONFIG_PATH}/pattrmm}"',
+            'PATTRMM_SETTINGS_PATH="${PATTRMM_SETTINGS_PATH:-${KOMETA_CONFIG_PATH}/pattrmm}"',
         ):
             self.assertIn(assignment, environment)
+
         for setting in ("PATTRMM_TIMES", "PATTRMM_SETTINGS"):
             self.assertIn(f"{setting}: ${{{setting}}}", chart)
+
         self.assertIn("<<: *rootless-container", chart)
         self.assertNotRegex(chart, r"(?m)^\s+(user|group_add):")
 
@@ -318,6 +347,7 @@ class MaraudarrTests(unittest.TestCase):
         self.assertIn("user: ${DEFAULT_PUID}:${DEFAULT_PGID}", rootless)
         self.assertIn("group_add:", rootless)
         self.assertIn("- ${DEFAULT_GROUP}", rootless)
+
         for setting in ("PATTRMM_PUID", "PATTRMM_PGID"):
             self.assertNotIn(setting, compose)
             self.assertNotIn(setting, environment)
@@ -336,6 +366,7 @@ class MaraudarrTests(unittest.TestCase):
         """Preserve private paths, Neo settings, and cache during regeneration."""
 
         plan = self.catalog.resolve("duplex")
+
         with tempfile.TemporaryDirectory() as temporary_directory:
             root = Path(temporary_directory)
             settings = root / "external settings"
@@ -347,6 +378,8 @@ class MaraudarrTests(unittest.TestCase):
             data = config_path / "pattrmm" / "data"
             data.mkdir(exist_ok=True)
             cache = data / "operator-cache.json"
+
+            # Exercise both externally managed settings and local cache preservation in one regeneration.
             cache.write_text('{"preserve": true}\n')
             assignments = (
                 f'PATTRMM_SETTINGS_PATH="{settings}"\n'
@@ -356,8 +389,10 @@ class MaraudarrTests(unittest.TestCase):
             )
             env_path.write_text(assignments)
             write_stack(self.catalog, plan, output)
+
             for assignment in assignments.splitlines():
                 self.assertIn(assignment, env_path.read_text())
+
             self.assertEqual(settings_file.read_text(), "libraries: {}\n")
             self.assertEqual(cache.read_text(), '{"preserve": true}\n')
             self.assertFalse((config_path / "pattrmm" / "settings").exists())
@@ -367,14 +402,13 @@ class MaraudarrTests(unittest.TestCase):
         """Keep shared private configuration external and preserve its selection."""
 
         plan = self.catalog.resolve("duplex")
-        default_environment = render_environment(
-            self.catalog, plan, None, generate_secrets=False
-        )
+        default_environment = render_environment(self.catalog, plan, None, generate_secrets=False)
         self.assertIn(
             'KOMETA_RUNTIME_CONFIG_PATH="${KOMETA_RUNTIME_CONFIG_PATH:-'
             '${KOMETA_CONFIG_PATH}/config.yml}"',
             default_environment,
         )
+
         with tempfile.TemporaryDirectory() as temporary_directory:
             root = Path(temporary_directory)
             external = root / "external checkout"
@@ -382,22 +416,23 @@ class MaraudarrTests(unittest.TestCase):
             private.parent.mkdir(parents=True)
             private.write_text("plex: {token: example}\n")
             output = root / "deployment"
-            compose_path, env_path, config_path = write_stack(
-                self.catalog, plan, output
-            )
+            compose_path, env_path, config_path = write_stack(self.catalog, plan, output)
             assignments = (
-                f'KOMETA_CONFIG_PATH="{external}"\n'
-                f'KOMETA_RUNTIME_CONFIG_PATH="{private}"\n'
+                f'KOMETA_CONFIG_PATH="{external}"\nKOMETA_RUNTIME_CONFIG_PATH="{private}"\n'
             )
             env_path.write_text(assignments)
             write_stack(self.catalog, plan, output)
+
             for assignment in assignments.splitlines():
                 self.assertIn(assignment, env_path.read_text())
+
+            # Both consumers must bind the selected file without creating a missing external source.
             for service in ("kometa", "pattrmm"):
                 chart = extract_service(compose_path.read_text(), service)
                 self.assertIn("source: ${KOMETA_RUNTIME_CONFIG_PATH}", chart)
                 self.assertIn("target: /config/config.yml", chart)
                 self.assertIn("create_host_path: false", chart)
+
             self.assertEqual(private.read_text(), "plex: {token: example}\n")
             self.assertFalse((config_path / "kometa").exists())
 
@@ -427,12 +462,8 @@ class MaraudarrTests(unittest.TestCase):
             self.catalog.resolve("calibre-web-automated").service_ids,
             ("calibre-web-automated",),
         )
-        self.assertEqual(
-            self.catalog.preset("jellyfin").media_libraries, ("movies", "tv")
-        )
-        self.assertEqual(
-            self.catalog.preset("boudoirr").media_libraries, ("movies", "scenes")
-        )
+        self.assertEqual(self.catalog.preset("jellyfin").media_libraries, ("movies", "tv"))
+        self.assertEqual(self.catalog.preset("boudoirr").media_libraries, ("movies", "scenes"))
 
     def test_dependencies_are_added_before_the_requested_service(self) -> None:
         """Auto-add required services before their selected dependent."""
@@ -499,6 +530,7 @@ class MaraudarrTests(unittest.TestCase):
     #
     def test_portainer_compose_keeps_only_used_shared_anchors(self) -> None:
         """Keep Portainer container defaults without unrelated anchors."""
+
         compose = render_compose(self.catalog, self.catalog.resolve("portainer"))
         self.assertEqual(
             re.findall(r"^x-[\w-]+: &([\w-]+)", compose, re.MULTILINE),
@@ -556,7 +588,9 @@ class MaraudarrTests(unittest.TestCase):
         self.assertNotIn("# NZBGet environment variables", environment)
         self.assertNotIn("HOMEPAGE_VAR_NZBGET_HREF", environment)
         self.assertLess(environment.index("PROWLARR_TAG"), environment.index("RADARR_TAG"))
-        self.assertLess(environment.index("SPEEDTEST_TRACKER_TAG"), environment.index("APPRISE_TAG"))
+        self.assertLess(
+            environment.index("SPEEDTEST_TRACKER_TAG"), environment.index("APPRISE_TAG")
+        )
 
     def test_privateerr_region_controls_follow_service_selection(self) -> None:
         """Expose region selection wherever the VPN dependency is generated."""
@@ -568,11 +602,14 @@ class MaraudarrTests(unittest.TestCase):
                 )
                 compose = render_compose(self.catalog, plan)
                 environment = render_environment(self.catalog, plan, None)
+
+                # Presets without VPN dependencies must not inherit unrelated region controls.
                 if "privateerr" not in plan.service_ids:
                     self.assertNotIn("PIA_PREFERRED_REGION", environment)
                     self.assertNotIn("PIA_AUTOCONNECT", environment)
                     self.assertNotIn("PREFERRED_REGION:", compose)
                     continue
+
                 privateerr = extract_service(compose, "privateerr")
                 self.assertIn("AUTOCONNECT: ${PIA_AUTOCONNECT}", privateerr)
                 self.assertIn("PREFERRED_REGION: ${PIA_PREFERRED_REGION}", privateerr)
@@ -586,20 +623,26 @@ class MaraudarrTests(unittest.TestCase):
         """Add missing defaults while preserving both operator selection modes."""
 
         plan = self.catalog.resolve("plundarr")
+
         for autoconnect in ("true", "false"):
             for preferred_region in (None, "ca_vancouver"):
                 with self.subTest(autoconnect=autoconnect, region=preferred_region):
                     original = f'PIA_AUTOCONNECT="{autoconnect}"\nPIA_USER="captain"\n'
+
                     if preferred_region is not None:
                         original += f'PIA_PREFERRED_REGION="{preferred_region}"\n'
+
                     with tempfile.TemporaryDirectory() as temporary_directory:
                         env_path = Path(temporary_directory) / ".env"
                         env_path.write_text(original)
                         environment = render_environment(
                             self.catalog, plan, env_path, generate_secrets=False
                         )
+
                     self.assertIn(f'PIA_AUTOCONNECT="{autoconnect}"', environment)
                     self.assertIn('PIA_USER="captain"', environment)
+
+                    # Only a missing region receives the new default; explicit operator selections stay intact.
                     expected = (
                         f'PIA_PREFERRED_REGION="{preferred_region}"'
                         if preferred_region is not None
@@ -619,6 +662,8 @@ class MaraudarrTests(unittest.TestCase):
             generate_secrets=False,
         )
         lidarr = extract_service(compose, "lidarr")
+
+        # Inspect each service block separately to catch settings placed on the wrong application.
         recyclarr = extract_service(compose, "recyclarr")
 
         self.assertIn("lscr.io/linuxserver/lidarr:${LIDARR_TAG}", lidarr)
@@ -717,11 +762,13 @@ class MaraudarrTests(unittest.TestCase):
                     f'HOST_MOVIES_PATH="${{HOST_MOVIES_PATH:-{media_root}/movies}}"',
                     environment,
                 )
+
                 if "jellyfin" in plan.service_ids:
                     self.assertIn(
                         f'JELLYFIN_DATA_PATH="${{JELLYFIN_DATA_PATH:-{media_root}}}"',
                         environment,
                     )
+
                 if "whisparr" in plan.service_ids:
                     self.assertIn(
                         f'WHISPARR_DATA_PATH="${{WHISPARR_DATA_PATH:-{media_root}}}"',
@@ -749,18 +796,20 @@ class MaraudarrTests(unittest.TestCase):
             )
             for preset_id in preset_ids
         }
+
+        # Compare namespace allocations before checking the rendered container and port identities.
         project_names = [plan.preset.project_name for plan in plans.values()]
-        networks = [
-            ip_network(plan.preset.network_subnet) for plan in plans.values()
-        ]
+        networks = [ip_network(plan.preset.network_subnet) for plan in plans.values()]
 
         self.assertEqual(len(project_names), len(set(project_names)))
         self.assertTrue(all(network.is_private for network in networks))
+
         for first, second in combinations(networks, 2):
             self.assertFalse(first.overlaps(second), f"{first} overlaps {second}")
 
         container_names: dict[str, set[str]] = {}
         published_ports: dict[str, set[int]] = {}
+
         for preset_id, plan in plans.items():
             compose = render_compose(self.catalog, plan)
             environment = render_environment(
@@ -771,10 +820,10 @@ class MaraudarrTests(unittest.TestCase):
             )
             container_names[preset_id] = {
                 name.replace("${COMPOSE_PROJECT_NAME}", plan.preset.project_name)
-                for name in re.findall(
-                    r"^\s*container_name:\s+([^\s#]+)", compose, re.MULTILINE
-                )
+                for name in re.findall(r"^\s*container_name:\s+([^\s#]+)", compose, re.MULTILINE)
             }
+
+            # Collect only published host-port variables, then resolve their documented environment defaults.
             port_variables = set(
                 re.findall(
                     r"^\s*-\s+\$\{([A-Z][A-Z0-9_]*PORT)\}:",
@@ -787,20 +836,17 @@ class MaraudarrTests(unittest.TestCase):
                 for variable in port_variables
                 if (
                     match := re.search(
-                    rf'^{re.escape(variable)}="\$\{{{re.escape(variable)}:-(\d+)\}}"(?:\s+#.*)?$',
+                        rf'^{re.escape(variable)}="\$\{{{re.escape(variable)}:-(\d+)\}}"(?:\s+#.*)?$',
                         environment,
                         re.MULTILINE,
                     )
                 )
             }
 
+        # Pairwise checks catch collisions between any two fresh presets sharing a Docker host.
         for first, second in combinations(preset_ids, 2):
-            self.assertTrue(
-                container_names[first].isdisjoint(container_names[second])
-            )
-            self.assertTrue(
-                published_ports[first].isdisjoint(published_ports[second])
-            )
+            self.assertTrue(container_names[first].isdisjoint(container_names[second]))
+            self.assertTrue(published_ports[first].isdisjoint(published_ports[second]))
 
         self.assertIn(8191, published_ports["plundarr"])
         self.assertIn(9696, published_ports["plundarr"])
@@ -818,6 +864,7 @@ class MaraudarrTests(unittest.TestCase):
         self.assertIn(5454, published_ports["duplex"])
         self.assertIn(33000, published_ports["custom"])
 
+        # Dashboard links must follow the same preset port offsets as the published application ports.
         boudoirr_homepage = render_environment(
             self.catalog,
             self.catalog.resolve("boudoirr", add={"homepage"}),
@@ -846,8 +893,10 @@ class MaraudarrTests(unittest.TestCase):
 
         self.assertEqual(set(expected_octets), set(self.catalog.presets))
         self.assertEqual(list(expected_octets.values()), list(range(20, 29)))
+
         for preset_id, octet in expected_octets.items():
             preset = self.catalog.preset(preset_id)
+
             with self.subTest(preset=preset_id):
                 self.assertEqual(preset.network_subnet, f"172.{octet}.0.0/16")
                 self.assertEqual(preset.network_ip_range, f"172.{octet}.5.0/24")
@@ -858,9 +907,7 @@ class MaraudarrTests(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as temporary_directory:
             env_path = Path(temporary_directory) / ".env"
-            existing_port = (
-                'QBITTORRENT_WEBUI_PORT="${QBITTORRENT_WEBUI_PORT:-28080}"'
-            )
+            existing_port = 'QBITTORRENT_WEBUI_PORT="${QBITTORRENT_WEBUI_PORT:-28080}"'
             env_path.write_text(existing_port + "\n")
             environment = render_environment(
                 self.catalog,
@@ -894,9 +941,7 @@ class MaraudarrTests(unittest.TestCase):
 
         self.assertIn('PIA_USER="captain"', environment)
         self.assertIn('TZ="Pacific/Honolulu"', environment)
-        self.assertIn(
-            'SPEEDTEST_TRACKER_APP_KEY="base64:keep-this-key"', environment
-        )
+        self.assertIn('SPEEDTEST_TRACKER_APP_KEY="base64:keep-this-key"', environment)
         self.assertIn(
             'DUPLICATI_WEBSERVICE_PASSWORD="keep-this-password"',  # pragma: allowlist secret
             environment,
@@ -922,6 +967,7 @@ class MaraudarrTests(unittest.TestCase):
                 Path(temporary_directory) / ".env",
             )
 
+        # Check each application's credential format without depending on random generated values.
         speedtest_key = next(
             line
             for line in environment.splitlines()
@@ -938,14 +984,9 @@ class MaraudarrTests(unittest.TestCase):
             if line.startswith("DUPLICATI_WEBSERVICE_PASSWORD=")
         )
         nzbget_password = next(
-            line
-            for line in environment.splitlines()
-            if line.startswith("NZBGET_PASS=")
+            line for line in environment.splitlines() if line.startswith("NZBGET_PASS=")
         )
-        self.assertRegex(
-            speedtest_key,
-            r'^SPEEDTEST_TRACKER_APP_KEY="base64:[A-Za-z0-9+/]{43}="$'
-        )
+        self.assertRegex(speedtest_key, r'^SPEEDTEST_TRACKER_APP_KEY="base64:[A-Za-z0-9+/]{43}="$')
         self.assertNotIn("change-me", duplicati_key)
         self.assertNotIn("changeme", duplicati_password)
         self.assertRegex(nzbget_password, r'^NZBGET_PASS="[A-Za-z0-9_-]{20,}"$')
@@ -958,10 +999,13 @@ class MaraudarrTests(unittest.TestCase):
         compose = render_compose(self.catalog, plan)
         keys = ("HOMEPAGE_AUTH_SECRET", "HOMEPAGE_AUTH_PASSWORD")
         example = render_environment(self.catalog, plan, None, generate_secrets=False)
+
         for key in (*keys, "HOMEPAGE_AUTH_ENABLED", "HOMEPAGE_EXTERNAL_URL"):
             self.assertIn(f"{key}: ${{{key}}}", compose)
+
         for key in keys:
             self.assertIn(f'{key}="${{{key}:-}}"', example)
+
         self.assertIn('HOMEPAGE_AUTH_ENABLED="${HOMEPAGE_AUTH_ENABLED:-true}"', example)
         self.assertIn("http://127.0.0.1:3000/api/healthcheck", compose)
         self.assertIn(
@@ -971,17 +1015,24 @@ class MaraudarrTests(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as temporary_directory:
             env_path = Path(temporary_directory) / ".env"
+
+            # Model an older deployment that has host validation but no native password-login settings.
             old_values = 'HOMEPAGE_ALLOWED_HOSTS="homepage.example.com"\n'
             env_path.write_text(old_values)
             migrated = render_environment(self.catalog, plan, env_path)
             self.assertIn(old_values, migrated)
-            generated = {}
+            generated: dict[str, str] = {}
+
             for key in keys:
                 match = re.search(rf'^{key}="([A-Za-z0-9_-]{{32,}})"$', migrated, re.MULTILINE)
-                self.assertIsNotNone(match, key)
+                assert match is not None
                 generated[key] = match.group(1)
+
             self.assertNotEqual(*generated.values())
+
+            # Separate deployments need distinct credentials, and examples must never contain those values.
             fresh = render_environment(self.catalog, plan, None)
+
             for value in generated.values():
                 self.assertNotIn(value, fresh)
                 self.assertNotIn(value, example)
@@ -992,19 +1043,23 @@ class MaraudarrTests(unittest.TestCase):
                 for line in migrated.splitlines()
                 if re.match(r"^[A-Za-z_][A-Za-z0-9_]*=", line)
             }
+
             with patch("maraudarr.render._existing_values", return_value=assignments):
                 self.assertEqual(migrated, render_environment(self.catalog, plan, env_path))
 
+            # Keep explicit URL and quoted password overrides intact, including dollar signs and hashes.
             overrides = (
                 'HOMEPAGE_EXTERNAL_URL="https://homepage.example.com"\n'
-                'HOMEPAGE_AUTH_PASSWORD=\'operator-$-and-#-password\'\n'  # pragma: allowlist secret
+                "HOMEPAGE_AUTH_PASSWORD='operator-$-and-#-password'\n"  # pragma: allowlist secret
             )
             env_path.write_text(old_values + overrides)
             updated = render_environment(self.catalog, plan, env_path)
+
             for line in overrides.splitlines():
                 self.assertIn(line, updated)
 
         without_homepage = render_environment(self.catalog, self.catalog.resolve("boudoirr"), None)
+
         for key in keys:
             self.assertNotIn(key, without_homepage)
 
@@ -1032,6 +1087,7 @@ class MaraudarrTests(unittest.TestCase):
                 f"{expected_value}\n"
             )
 
+            # Switch back to the original preset without duplicating its previously inactive setting.
             restored_environment = render_environment(self.catalog, plundarr, env_path)
             self.assertIn(expected_value, restored_environment)
             self.assertEqual(restored_environment.count(expected_value), 1)
@@ -1059,6 +1115,7 @@ class MaraudarrTests(unittest.TestCase):
     ) -> None:
         """Use standalone Compose when the Docker CLI is not installed."""
 
+        # Only a missing Docker executable should trigger the standalone Compose fallback.
         run.side_effect = [
             FileNotFoundError,
             CompletedProcess([], 0, "", ""),
@@ -1090,6 +1147,7 @@ class MaraudarrTests(unittest.TestCase):
     def test_compose_validation_rejects_invalid_output(self, run: Mock) -> None:
         """Treat a failure from an installed Compose command as authoritative."""
 
+        # An installed validator rejecting the chart is a real error, not a reason to try another binary.
         run.return_value = CompletedProcess([], 1, "", "invalid stack")
 
         with self.assertRaisesRegex(RenderError, "invalid stack"):
@@ -1109,6 +1167,7 @@ class MaraudarrTests(unittest.TestCase):
         )
         homepage = render_homepage_services(self.catalog, plan)
 
+        # Inspect group boundaries so a valid card cannot pass merely by appearing elsewhere on the page.
         media_group = homepage[: homepage.index("- Data:")]
         downloads_group = homepage[homepage.index("- Downloads:") :]
         self.assertIn("- Jellyfin:", media_group)
@@ -1127,6 +1186,7 @@ class MaraudarrTests(unittest.TestCase):
 
         compose = render_compose(self.catalog, plan)
         homepage = render_homepage_services(self.catalog, plan)
+
         with tempfile.TemporaryDirectory() as temporary_directory:
             environment = render_environment(
                 self.catalog,
@@ -1191,6 +1251,7 @@ class MaraudarrTests(unittest.TestCase):
         homepage_service = extract_service(compose, "homepage")
         homepage = render_homepage_services(self.catalog, plan)
 
+        # Widget traffic stays on the internal port while browser links use the published host port.
         self.assertIn(
             "HOMEPAGE_VAR_LIDARR_URL: ${HOMEPAGE_VAR_LIDARR_URL}:8686",
             homepage_service,
@@ -1226,10 +1287,9 @@ class MaraudarrTests(unittest.TestCase):
             self.catalog.resolve("custom", selected=set(self.catalog.services)),
         )
 
+        # Inspect expanded Compose groups as well as services that map to a single container.
         for name in (
-            name
-            for service in self.catalog.services.values()
-            for name in service.compose_services
+            name for service in self.catalog.services.values() for name in service.compose_services
         ):
             block = extract_service(compose, name)
             tag_match = re.search(
@@ -1237,8 +1297,9 @@ class MaraudarrTests(unittest.TestCase):
                 block,
                 re.MULTILINE,
             )
+
             with self.subTest(service=name):
-                self.assertIsNotNone(tag_match)
+                assert tag_match is not None
                 tag_variable = tag_match.group(1)
                 self.assertIn(
                     f"container_name: ${{COMPOSE_PROJECT_NAME}}-{name}-${{{tag_variable}}}",
@@ -1255,14 +1316,15 @@ class MaraudarrTests(unittest.TestCase):
             "hostname:",
             "network_mode:",
         )
+
         for service, name in (
-            (service, name)
-            for service in self.catalog.services.values()
-            for name in service.compose_services
+            (entry, name)
+            for entry in self.catalog.services.values()
+            for name in entry.compose_services
         ):
-            source = extract_service(
-                self.catalog.source_path(service.compose).read_text(), name
-            )
+            source = extract_service(self.catalog.source_path(service.compose).read_text(), name)
+
+            # Limit alignment checks to one logical identity block rather than the entire service chart.
             block = source.split("# Docker image and container information", 1)[1]
             block = block.split("\n\n", 1)[0]
             comment_columns = {
@@ -1270,6 +1332,7 @@ class MaraudarrTests(unittest.TestCase):
                 for line in block.splitlines()
                 if line.strip().startswith(identity_keys) and "#" in line
             }
+
             with self.subTest(service=name):
                 self.assertEqual(
                     len(comment_columns),
@@ -1288,6 +1351,7 @@ class MaraudarrTests(unittest.TestCase):
         for line_number, line in enumerate(compose.splitlines(), start=1):
             if "#" not in line or line.lstrip().startswith("#"):
                 continue
+
             hash_index = line.find("#")
             self.assertGreaterEqual(
                 len(line[:hash_index]) - len(line[:hash_index].rstrip(" ")),
@@ -1307,6 +1371,7 @@ class MaraudarrTests(unittest.TestCase):
                     r"<<: \*(?:arr-stack|default|rootless)-container",
                     f"Service '{service.id}' does not reuse a container anchor.",
                 )
+
                 if "healthcheck:" in compose:
                     self.assertIn(
                         "<<: *default-healthcheck-settings",
@@ -1317,28 +1382,34 @@ class MaraudarrTests(unittest.TestCase):
     def test_healthchecks_use_shell_only_when_required(self) -> None:
         """Execute probes directly unless shell expansion is required."""
 
-        shell_healthchecks = set()
+        shell_healthchecks: set[str] = set()
 
         for service in self.catalog.services.values():
             compose = self.catalog.source_path(service.compose).read_text()
+
             if "healthcheck:" not in compose:
                 continue
 
             with self.subTest(service=service.id):
                 self.assertNotIn("|| exit 1", compose)
+
                 if "\n        - CMD-SHELL\n" in compose:
                     shell_healthchecks.add(service.id)
                 else:
                     self.assertIn("\n        - CMD\n", compose)
+
                 if service.id == "privateerr":
                     self.assertIn("\n        - privateerr-healthcheck\n", compose)
+
                 if service.id == "nzbget":
                     self.assertIn("\n        - /app/nzbget/nzbget\n", compose)
                     self.assertIn("\n        - /config/nzbget.conf\n", compose)
+
                 if service.id == "calibre-web-automated":
                     self.assertIn("\n        - nc\n", compose)
-                    self.assertIn("\n        - \"8083\"\n", compose)
+                    self.assertIn('\n        - "8083"\n', compose)
 
+        # The current catalog needs no shell probes; additions must justify changing this expectation.
         self.assertEqual(shell_healthchecks, set())
 
     #
@@ -1355,7 +1426,7 @@ class MaraudarrTests(unittest.TestCase):
         )
         service = extract_service(compose, "calibre-web-automated")
 
-        self.assertIn("CWA_PORT_OVERRIDE: \"8083\"", service)
+        self.assertIn('CWA_PORT_OVERRIDE: "8083"', service)
         self.assertIn("NETWORK_SHARE_MODE: ${CWA_NETWORK_SHARE_MODE}", service)
         self.assertIn("${CWA_CONFIG_PATH}:/config:rw", service)
         self.assertIn("${CWA_INGEST_PATH}:/cwa-book-ingest:rw", service)
@@ -1403,12 +1474,15 @@ class MaraudarrTests(unittest.TestCase):
             "music": "${HOST_MUSIC_PATH}:/music:ro",
         }
 
+        # Check absent mounts as well as present ones so presets do not expose unrelated libraries.
         for preset_id, (included, excluded) in cases.items():
             with self.subTest(preset=preset_id):
                 plan = self.catalog.resolve(preset_id, add={"plex"})
                 plex = extract_service(render_compose(self.catalog, plan), "plex")
+
                 for library in included:
                     self.assertIn(mounts[library], plex)
+
                 for library in excluded:
                     self.assertNotIn(mounts[library], plex)
 
@@ -1439,6 +1513,7 @@ class MaraudarrTests(unittest.TestCase):
                 output_path,
             )
 
+            # Verify the generated project files before checking service-specific configuration seeds.
             self.assertTrue(compose_path.is_file())
             self.assertTrue(env_path.is_file())
             self.assertTrue((output_path / "example.env").is_file())
@@ -1448,23 +1523,12 @@ class MaraudarrTests(unittest.TestCase):
             self.assertTrue((config_path / "jellyfin" / "README.md").is_file())
             self.assertTrue((config_path / "jellyfin" / "config").is_dir())
             self.assertTrue((config_path / "jellyfin" / "cache").is_dir())
-            self.assertTrue(
-                (config_path / "calibre-web-automated" / "config").is_dir()
-            )
-            self.assertTrue(
-                (config_path / "calibre-web-automated" / "ingest").is_dir()
-            )
+            self.assertTrue((config_path / "calibre-web-automated" / "config").is_dir())
+            self.assertTrue((config_path / "calibre-web-automated" / "ingest").is_dir())
             self.assertTrue((config_path / "nzbget" / "README.md").is_file())
+            self.assertTrue((config_path / "recyclarr" / "recyclarr.yml").is_file())
             self.assertTrue(
-                (config_path / "recyclarr" / "recyclarr.yml").is_file()
-            )
-            self.assertTrue(
-                (
-                    config_path
-                    / "qbittorrent"
-                    / "qBittorrent"
-                    / "qBittorrent.conf"
-                ).is_file()
+                (config_path / "qbittorrent" / "qBittorrent" / "qBittorrent.conf").is_file()
             )
             self.assertFalse((config_path / "plex").exists())
 
@@ -1477,6 +1541,8 @@ class MaraudarrTests(unittest.TestCase):
             output_path = Path(temporary_directory)
             _, _, config_path = write_stack(self.catalog, plan, output_path)
             recyclarr_path = config_path / "recyclarr" / "recyclarr.yml"
+
+            # Replace the bundled seed with operator content before repeating generation.
             operator_config = "# operator-owned\nradarr: {}\n"
             recyclarr_path.write_text(operator_config)
 
@@ -1498,6 +1564,7 @@ class MaraudarrTests(unittest.TestCase):
 
             self.assertFalse((config_path / "kometa").exists())
             self.assertFalse((config_path / "overlay-reset").exists())
+
             for service_id in (
                 "imagemaid",
                 "pattrmm",

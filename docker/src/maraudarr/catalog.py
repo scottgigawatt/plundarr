@@ -12,10 +12,11 @@ from __future__ import annotations
 
 import os
 import re
+import tomllib
+from collections.abc import Mapping, Sequence
 from ipaddress import IPv4Address, IPv4Network, ip_address, ip_network
 from pathlib import Path
-
-import tomllib
+from typing import cast
 
 from maraudarr.models import Preset, Service, StackPlan
 from maraudarr.text import TemplateError, extract_service
@@ -23,6 +24,49 @@ from maraudarr.text import TemplateError, extract_service
 
 class CatalogError(ValueError):
     """Report invalid catalog data or an impossible stack request."""
+
+
+def _strings(value: object) -> tuple[str, ...]:
+    """Validate a catalog list before passing its items to immutable models."""
+    if not isinstance(value, list):
+        raise CatalogError("Expected a list of catalog strings.")
+
+    # TOML decoding establishes containers but cannot provide their generic item types.
+    items = cast(Sequence[object], value)
+    result: list[str] = []
+
+    for item in items:
+        if not isinstance(item, str):
+            raise CatalogError("Expected a string in a catalog list.")
+
+        result.append(item)
+
+    return tuple(result)
+
+
+def _integer(value: object) -> int:
+    """Require a TOML integer for ordering and port offsets."""
+    if not isinstance(value, int) or isinstance(value, bool):
+        raise CatalogError("Expected a catalog integer.")
+
+    return value
+
+
+def _volume_descriptions(value: object) -> dict[str, str]:
+    """Validate storage descriptions before they enter the typed service model."""
+    if not isinstance(value, dict):
+        raise CatalogError("Expected a named volume table.")
+
+    fields = cast(Mapping[object, object], value)
+    descriptions: dict[str, str] = {}
+
+    for name, description in fields.items():
+        if not isinstance(name, str) or not isinstance(description, str):
+            raise CatalogError("Named volumes require string names and storage descriptions.")
+
+        descriptions[name] = description
+
+    return descriptions
 
 
 def default_catalog_root() -> Path:
@@ -88,20 +132,14 @@ class Catalog:
             description=str(values["description"]),
             category=str(values["category"]),
             url=str(values["url"]),
-            order=int(values["order"]),
+            order=_integer(values["order"]),
             compose=str(values.get("compose", f"{base_path}/compose.yml")),
-            environment=str(
-                values.get("environment", f"{base_path}/environment.env")
-            ),
+            environment=str(values.get("environment", f"{base_path}/environment.env")),
             service=service_name,
-            compose_services=tuple(
-                str(item) for item in values.get("compose_services", [service_name])
-            ),
-            named_volumes=dict(values.get("named_volumes", {})),
-            requires=tuple(str(item) for item in values.get("requires", [])),
-            recommended=tuple(
-                str(item) for item in values.get("recommended", [])
-            ),
+            compose_services=_strings(values.get("compose_services", [service_name])),
+            named_volumes=_volume_descriptions(values.get("named_volumes", {})),
+            requires=_strings(values.get("requires", [])),
+            recommended=_strings(values.get("recommended", [])),
         )
 
     @staticmethod
@@ -111,16 +149,16 @@ class Catalog:
             id=preset_id,
             title=str(values["title"]),
             description=str(values["description"]),
-            compose_summary=tuple(str(item) for item in values["compose_summary"]),
+            compose_summary=_strings(values["compose_summary"]),
             project_name=str(values["project_name"]),
             network_subnet=str(values["network_subnet"]),
             network_ip_range=str(values["network_ip_range"]),
             network_gateway=str(values["network_gateway"]),
             media_root=str(values["media_root"]),
-            media_libraries=tuple(str(item) for item in values["media_libraries"]),
-            host_port_offset=int(values.get("host_port_offset", 0)),
-            core=tuple(str(item) for item in values.get("core", [])),
-            defaults=tuple(str(item) for item in values.get("defaults", [])),
+            media_libraries=_strings(values["media_libraries"]),
+            host_port_offset=_integer(values.get("host_port_offset", 0)),
+            core=_strings(values.get("core", [])),
+            defaults=_strings(values.get("defaults", [])),
         )
 
     def _validate(self) -> None:
@@ -134,14 +172,8 @@ class Catalog:
                         f"Service '{service.id}' has invalid named volume: {volume!r}."
                     )
                 if volume in volume_owners:
-                    raise CatalogError(
-                        f"Named volume '{volume}' has multiple declarations."
-                    )
-                if (
-                    not isinstance(description, str)
-                    or not description.strip()
-                    or len(description.splitlines()) != 1
-                ):
+                    raise CatalogError(f"Named volume '{volume}' has multiple declarations.")
+                if not description.strip() or len(description.splitlines()) != 1:
                     raise CatalogError(
                         f"Named volume '{volume}' requires a single-line storage description."
                     )
@@ -167,8 +199,7 @@ class Catalog:
             for dependency in service.requires + service.recommended:
                 if dependency not in self.services:
                     raise CatalogError(
-                        f"Service '{service.id}' references unknown service "
-                        f"'{dependency}'."
+                        f"Service '{service.id}' references unknown service '{dependency}'."
                     )
 
         preset_networks: dict[str, IPv4Network] = {}
@@ -177,9 +208,7 @@ class Catalog:
             unknown_services = set(preset.services) - self.services.keys()
             if unknown_services:
                 names = ", ".join(sorted(unknown_services))
-                raise CatalogError(
-                    f"Preset '{preset.id}' references unknown services: {names}."
-                )
+                raise CatalogError(f"Preset '{preset.id}' references unknown services: {names}.")
             unknown_libraries = set(preset.media_libraries) - {
                 "anime",
                 "movies",
@@ -189,13 +218,10 @@ class Catalog:
             if unknown_libraries:
                 names = ", ".join(sorted(unknown_libraries))
                 raise CatalogError(
-                    f"Preset '{preset.id}' references unknown media libraries: "
-                    f"{names}."
+                    f"Preset '{preset.id}' references unknown media libraries: {names}."
                 )
             if preset.host_port_offset < 0:
-                raise CatalogError(
-                    f"Preset '{preset.id}' has a negative host port offset."
-                )
+                raise CatalogError(f"Preset '{preset.id}' has a negative host port offset.")
 
             try:
                 subnet = ip_network(preset.network_subnet)
@@ -205,22 +231,12 @@ class Catalog:
                 raise CatalogError(
                     f"Preset '{preset.id}' has invalid IPv4 network settings: {error}."
                 ) from error
-            if not isinstance(subnet, IPv4Network) or not isinstance(
-                gateway, IPv4Address
-            ):
-                raise CatalogError(
-                    f"Preset '{preset.id}' must use IPv4 network settings."
-                )
-            if not isinstance(ip_range, IPv4Network) or not ip_range.subnet_of(
-                subnet
-            ):
-                raise CatalogError(
-                    f"Preset '{preset.id}' IP range must be inside its subnet."
-                )
+            if not isinstance(subnet, IPv4Network) or not isinstance(gateway, IPv4Address):
+                raise CatalogError(f"Preset '{preset.id}' must use IPv4 network settings.")
+            if not isinstance(ip_range, IPv4Network) or not ip_range.subnet_of(subnet):
+                raise CatalogError(f"Preset '{preset.id}' IP range must be inside its subnet.")
             if gateway not in ip_range:
-                raise CatalogError(
-                    f"Preset '{preset.id}' gateway must be inside its IP range."
-                )
+                raise CatalogError(f"Preset '{preset.id}' gateway must be inside its IP range.")
             for other_id, other_network in preset_networks.items():
                 if subnet.overlaps(other_network):
                     raise CatalogError(
