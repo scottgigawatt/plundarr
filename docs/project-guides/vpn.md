@@ -12,19 +12,17 @@ Deployments containing Privateerr include these controls in the generated `.env`
 
 To select Montreal, change `PIA_AUTOCONNECT` to `false`. To choose another region, also edit `PIA_PREFERRED_REGION`; Canadian alternatives include `ca_toronto` (Toronto), `ca_vancouver`, and `ca_ontario`. Set `PIA_AUTOCONNECT` back to `true` to resume automatic selection; the saved preferred region is ignored until you disable it again. Dedicated-IP deployments use `PIA_DIP_TOKEN` instead of region selection.
 
-Apply changes by recreating the complete selected stack. Replace `YOUR-PRESET` with your generated preset name:
+Recovery-enabled startup reuses valid saved files. Recreating containers loads the changed environment but does not immediately replace a healthy connection. To apply an intentional region or forwarding-selection change, stop the selected stack, generate a fresh pair with recovery and keepalive disabled for that one run, then recreate the complete stack. Replace `YOUR-PRESET` with the generated preset name:
 
 ```sh
+docker compose --project-directory dist/YOUR-PRESET stop
+docker compose --project-directory dist/YOUR-PRESET run --rm --no-deps -e PRIVATEERR_AUTO_RECOVER=false -e PRIVATEERR_KEEPALIVE=false privateerr
 make up PRESET=YOUR-PRESET
 ```
 
-For a deployment managed directly with Docker Compose, run this from its generated project directory:
+Run these commands from the Plundarr repository root. For a deployment managed directly with Compose, run `docker compose stop`, the same `docker compose run` command without `--project-directory`, and `docker compose up --detach --force-recreate` from its generated project directory. Stopping the supervisor prevents concurrent writers; recreating the full stack keeps Gluetun and its network-sharing applications together.
 
-```sh
-docker compose up --detach --force-recreate
-```
-
-In Synology Container Manager, rebuild the existing project using its updated `.env`. A container restart alone does not reload environment changes. Recreate the complete project so Gluetun and applications sharing its network are recreated together. Privateerr generates fresh WireGuard configuration and metadata before Gluetun starts; keep the generated Compose mappings in place.
+In Synology Container Manager, stop the project before the one-shot generation and rebuild it afterward using the updated `.env`. If you manage this entirely through the UI, temporarily set `PRIVATEERR_AUTO_RECOVER=false`, rebuild and verify fresh generation, then restore `true` and rebuild again. A container restart alone does not reload environment changes. Keep the generated Compose mappings in place.
 
 Check Privateerr's logs for the selected region and Gluetun's logs for successful port forwarding. PIA's advertised forwarding support does not guarantee its forwarding API is currently available. If a region's API fails, choose another forwarding-capable region in `.env` and recreate the project. No manual Compose edits are needed. Steer around the storm, captain.
 
