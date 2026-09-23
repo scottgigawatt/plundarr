@@ -26,8 +26,20 @@ RUN apk add --no-cache python3 py3-pip nodejs npm && \
 # Resolve imports against the same hash-verified dependencies as production.
 #
 COPY requirements.txt /tmp/requirements.txt
-RUN /opt/typecheck/bin/pip install --no-cache-dir --require-hashes -r /tmp/requirements.txt && \
-    npm install --global pyright@1.1.414 && npm cache clean --force
+RUN /opt/typecheck/bin/pip install --no-cache-dir --require-hashes -r /tmp/requirements.txt
+
+#
+# Install the checker from its integrity-checked lockfile and remove bootstrap npm.
+#
+COPY package.json package-lock.json /opt/tools/
+RUN npm ci --prefix /opt/tools --omit=dev --ignore-scripts && \
+    apk del npm && \
+    rm -rf /root/.npm
+
+#
+# Use the locked checker without adding Node tools to Maraudarr's runtime image.
+#
+ENV PATH="/opt/tools/node_modules/.bin:${PATH}"
 
 #
 # Prevent Python from writing .pyc files to disk, which is unnecessary in this disposable image

@@ -1,0 +1,10 @@
+{
+    "name": "@plundarr/typecheck-tools",
+    "version": "1.0.0",
+    "private": true,
+    "description": "Hash-locked strict Python checker for the disposable Maraudarr test image.",
+    "license": "Apache-2.0",
+    "dependencies": {
+        "pyright": "1.1.414"
+    }
+}

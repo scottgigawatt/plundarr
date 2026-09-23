@@ -18,13 +18,15 @@ repository_root=$(CDPATH='' cd -- "$(dirname -- "$0")/../.." && pwd)
 : "${DOCKER_BIN:=docker}"
 : "${MARAUDARR_TYPECHECK_IMAGE:=maraudarr-typecheck:test}"
 
-# Send only the checker recipe and dependency manifest to the image builder.
+# Send only the checker recipe and dependency manifests to the image builder.
 typecheck_context=$(mktemp -d)
 trap 'rm -rf "${typecheck_context}"' EXIT HUP INT TERM
 cp "${repository_root}/test/typing/Dockerfile" "${typecheck_context}/Dockerfile"
 cp "${repository_root}/docker/requirements.txt" "${typecheck_context}/requirements.txt"
+cp "${repository_root}/test/typing/package.json" "${typecheck_context}/package.json"
+cp "${repository_root}/test/typing/package-lock.json" "${typecheck_context}/package-lock.json"
 
-# Reuse cached layers while always checking the current dependency manifest.
+# Reuse cached layers while always checking the current dependency manifests.
 "${DOCKER_BIN}" build --quiet --tag "${MARAUDARR_TYPECHECK_IMAGE}" "${typecheck_context}" >/dev/null
 
 # The checker only needs source reads and disposable temporary storage.

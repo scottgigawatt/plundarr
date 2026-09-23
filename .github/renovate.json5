@@ -45,6 +45,7 @@
         "docker-compose",
         "dockerfile",
         "github-actions",
+        "npm",
         "pep621",
         "pip_requirements",
         "pre-commit"
@@ -55,18 +56,6 @@
     // Keep direct and shell-default forms separate so each pin is extracted once.
     //
     "customManagers": [
-        // Track pinned npm tools installed inside the development image.
-        {
-            "customType": "regex",
-            "managerFilePatterns": [
-                "/^test/typing/Dockerfile$/"
-            ],
-            "matchStrings": [
-                "(?<depName>pyright)@(?<currentValue>\\d+\\.\\d+\\.\\d+)"
-            ],
-            "datasourceTemplate": "npm",
-            "versioningTemplate": "npm"
-        },
         {
             "customType": "regex",
             "managerFilePatterns": [
