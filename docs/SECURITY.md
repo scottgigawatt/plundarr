@@ -59,9 +59,18 @@ Plundarr pulls published container images for the stack and keeps configuration 
 
 ## Interpret Maraudarr image scans
 
-The September 23, 2026 scan reports three alerts in the digest-pinned Compose 5.5.1 binary. Docker's [CVE-2025-15558 advisory](https://github.com/docker/cli/security/advisories/GHSA-p436-gjf2-799p) concerns Windows plugin discovery and is already fixed in the bundled version. The [OpenPGP warning](https://pkg.go.dev/vuln/GO-2026-5932) concerns a package absent from the compiled binary. The [containerd CRI issue](https://github.com/containerd/containerd/security/advisories/GHSA-7jxh-36q5-gcqv) concerns daemon code, not the client libraries used by Compose.
+The September 29, 2026 review scanned the published `edge` and `latest` image digests on `linux/amd64`, `linux/arm64`, and `linux/arm/v7` with Trivy 0.74.0 and a refreshed database. Docker Scout 1.24.0 independently checked every `edge` platform. No scanner exclusions were added.
 
-Maraudarr contains neither a Docker nor containerd daemon and generates projects without network access. These findings do not justify changing the current official Compose donor or adding scanner exclusions. They also do not assess the host's Docker daemon or the service images in a generated deployment. Recheck the exact image digest and upstream advisories when dependency versions change.
+The current `edge` images contain fixed libexpat 2.8.5-r0. The v2.1.1 stable artifacts scanned on this date contain 2.8.4-r0 and report **CVE-2026-93990**. Updating source or publishing `edge` does not refresh older release artifacts; stable users need a newer release built with libexpat 2.8.5-r0 or later.
+
+Four package-level alerts remain in the digest-pinned Compose 5.5.1 binary:
+
+- Docker's [CVE-2025-15558 advisory](https://github.com/docker/cli/security/advisories/GHSA-p436-gjf2-799p) concerns Windows plugin discovery and is already fixed in the bundled version. Scout still reports it; Trivy does not.
+- The [OpenPGP warning](https://pkg.go.dev/vuln/GO-2026-5932) concerns a package absent from the compiled binary.
+- The [containerd CRI issue](https://github.com/containerd/containerd/security/advisories/GHSA-7jxh-36q5-gcqv), CVE-2026-53495, concerns daemon code rather than Compose's client use.
+- [CVE-2026-53493](https://github.com/containerd/containerd/security/advisories/GHSA-pg57-6jwg-q645) concerns excessive resource use while traversing malicious image descriptors during a containerd image pull. Maraudarr only invokes Compose for offline configuration validation; it does not pull images or run a containerd daemon. The host's image-pulling runtime needs its own assessment.
+
+Compose 5.5.1 remains the newest official donor at this review. Retain the current donor and the visible findings until an upstream update is available. These findings do not assess the host's Docker daemon or service images in a generated deployment. Recheck immutable image digests, package versions, and upstream advisories when dependencies change.
 
 Use the [support guide](SUPPORT.md) for non-sensitive setup questions and reproducible bugs.
 
