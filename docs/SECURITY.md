@@ -59,9 +59,9 @@ Plundarr pulls published container images for the stack and keeps configuration 
 
 ## Interpret Maraudarr image scans
 
-The September 29, 2026 review scanned the published `edge` and `latest` image digests on `linux/amd64`, `linux/arm64`, and `linux/arm/v7` with Trivy 0.74.0 and a refreshed database. Docker Scout 1.24.0 independently checked every `edge` platform. No scanner exclusions were added.
+The September 30, 2026 review scanned the published `edge` and `latest` image digests on `linux/amd64`, `linux/arm64`, and `linux/arm/v7` with Trivy 0.74.0 and its current database, updated September 30. Docker Scout 1.24.0 independently checked all six image and platform combinations. No scanner exclusions were added.
 
-The current `edge` images contain fixed libexpat 2.8.5-r0. The v2.1.1 stable artifacts scanned on this date contain 2.8.4-r0 and report **CVE-2026-93990**. Updating source or publishing `edge` does not refresh older release artifacts; stable users need a newer release built with libexpat 2.8.5-r0 or later.
+Both `edge` and the [v2.1.2 stable release](https://github.com/scottgigawatt/plundarr/releases/tag/v2.1.2), currently published as `latest`, contain fixed libexpat 2.8.5-r0 on every supported platform. **CVE-2026-93990** is resolved in these images. Users still running v2.1.1 need to pull and use v2.1.2 or later; publishing a release does not update existing containers automatically.
 
 Four package-level alerts remain in the digest-pinned Compose 5.5.1 binary:
 
