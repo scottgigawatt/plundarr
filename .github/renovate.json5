@@ -133,10 +133,6 @@
     //
     "packageRules": [
         {
-            "groupName": "Python runtime",
-            "matchDepNames": ["python"]
-        },
-        {
             "matchDatasources": ["docker"],
             "pinDigests": true
         },
@@ -156,6 +152,11 @@
             "description": "Keep Python dependencies exact and hash-verified",
             "matchManagers": ["pep621", "pip_requirements"],
             "rangeStrategy": "pin"
+        },
+        // Apply this after manager groups so workflow and runtime pins stay together.
+        {
+            "groupName": "Python runtime",
+            "matchDepNames": ["python"]
         }
     ]
 }
