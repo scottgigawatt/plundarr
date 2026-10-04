@@ -59,18 +59,24 @@ Plundarr pulls published container images for the stack and keeps configuration 
 
 ## Interpret Maraudarr image scans
 
-The September 30, 2026 review scanned the published `edge` and `latest` image digests on `linux/amd64`, `linux/arm64`, and `linux/arm/v7` with Trivy 0.74.0 and its current database, updated September 30. Docker Scout 1.24.0 independently checked all six image and platform combinations. No scanner exclusions were added.
+The October 4, 2026 review scanned the immutable published `edge` and `latest` image digests on `linux/amd64`, `linux/arm64`, and `linux/arm/v7` with Trivy 0.74.0 and its October 4 database. Docker Scout 1.24.0 independently checked the published images. No scanner exclusions were added.
 
-Both `edge` and the [v2.1.2 stable release](https://github.com/scottgigawatt/plundarr/releases/tag/v2.1.2), currently published as `latest`, contain fixed libexpat 2.8.5-r0 on every supported platform. **CVE-2026-93990** is resolved in these images. Users still running v2.1.1 need to pull and use v2.1.2 or later; publishing a release does not update existing containers automatically.
+| Channel | Reviewed image index digest | Fixed findings still present |
+| --- | --- | --- |
+| `edge` | `sha256:350a959825243f830326a51a89d605b1e79dedb56c5f40c903293efddad2909c` | None in Trivy |
+| `latest` / `v2.1.2` | `sha256:d934955690f59ea436aed22c806b076a7f3f9dd56a20c923692c78d477f22352` | Seven Python advisories and two containerd advisories |
 
-Four package-level alerts remain in the digest-pinned Compose 5.5.1 binary:
+The `edge` image contains Python 3.14.8-r0 and Compose 5.6.0. The published stable image still contains Python 3.14.7-r1 and Compose 5.5.1. Trivy reports **CVE-2026-19553** and **CVE-2026-82049** as high severity, plus CVE-2026-15806, CVE-2026-17084, CVE-2026-19672, CVE-2026-15310, and CVE-2026-19445 in stable Python packages; all seven have Alpine fixes in 3.14.8-r0. A new stable release must be built and published before stable users receive these fixes. Pulling the existing `latest` tag alone does not change its contents.
 
-- Docker's [CVE-2025-15558 advisory](https://github.com/docker/cli/security/advisories/GHSA-p436-gjf2-799p) concerns Windows plugin discovery and is already fixed in the bundled version. Scout still reports it; Trivy does not.
-- The [OpenPGP warning](https://pkg.go.dev/vuln/GO-2026-5932) concerns a package absent from the compiled binary.
-- The [containerd CRI issue](https://github.com/containerd/containerd/security/advisories/GHSA-7jxh-36q5-gcqv), CVE-2026-53495, concerns daemon code rather than Compose's client use.
-- [CVE-2026-53493](https://github.com/containerd/containerd/security/advisories/GHSA-pg57-6jwg-q645) concerns excessive resource use while traversing malicious image descriptors during a containerd image pull. Maraudarr only invokes Compose for offline configuration validation; it does not pull images or run a containerd daemon. The host's image-pulling runtime needs its own assessment.
+The Compose 5.6.0 donor in `edge` also removes the [containerd image-pull finding, CVE-2026-53493](https://github.com/containerd/containerd/security/advisories/GHSA-pg57-6jwg-q645), and [CRI finding, CVE-2026-53495](https://github.com/containerd/containerd/security/advisories/GHSA-7jxh-36q5-gcqv), reported against Compose 5.5.1 in stable. Both channels retain fixed libexpat 2.8.5-r0; **CVE-2026-93990** remains resolved.
 
-Compose 5.5.1 remains the newest official donor at this review. Retain the current donor and the visible findings until an upstream update is available. These findings do not assess the host's Docker daemon or service images in a generated deployment. Recheck immutable image digests, package versions, and upstream advisories when dependencies change.
+Package-level scanner findings remain visible:
+
+- Docker's [CVE-2025-15558 advisory](https://github.com/docker/cli/security/advisories/GHSA-p436-gjf2-799p) concerns Windows plugin discovery and is already fixed in the bundled CLI module version. Scout still reports it; Trivy does not.
+- The [OpenPGP warning, GO-2026-5932](https://pkg.go.dev/vuln/GO-2026-5932), has no fixed version and concerns a package absent from the compiled Compose binary.
+- Scout reports [CVE-2026-84445](https://github.com/grpc/grpc-go/security/advisories/GHSA-2v4p-qf9q-27wj) against Compose 5.6.0's gRPC 1.84.0 dependency. The upstream advisory lists 1.84.0 as patched, and its [HTTP/2 server transport contains the fix](https://github.com/grpc/grpc-go/blob/v1.84.0/internal/transport/http2_server.go#L525). Scout's affected-version range disagrees with the current upstream advisory; retain the visible finding until scanner metadata catches up.
+
+These findings do not assess the host's Docker daemon or service images in a generated deployment. Recheck immutable image digests, package versions, and upstream advisories when dependencies change. Publishing a release does not update existing containers automatically.
 
 Use the [support guide](SUPPORT.md) for non-sensitive setup questions and reproducible bugs.
 
