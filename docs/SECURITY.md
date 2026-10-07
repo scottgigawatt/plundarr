@@ -59,22 +59,26 @@ Plundarr pulls published container images for the stack and keeps configuration 
 
 ## Interpret Maraudarr image scans
 
-The October 4, 2026 review scanned the immutable published `edge` and `latest` image digests on `linux/amd64`, `linux/arm64`, and `linux/arm/v7` with Trivy 0.74.0 and its October 4 database. Docker Scout 1.24.0 independently checked the published images. No scanner exclusions were added.
+The October 7, 2026 review scanned immutable published images on `linux/amd64`, `linux/arm64`, and `linux/arm/v7` with Trivy 0.75.0, its October 7 database, and Docker Scout 1.25.0. Every severity and findings without a published fix were included; no scanner exclusions were added.
 
-| Channel | Reviewed image index digest | Fixed findings still present |
+| Reviewed channel | Image index digest | Packages with available fixes |
 | --- | --- | --- |
-| `edge` | `sha256:350a959825243f830326a51a89d605b1e79dedb56c5f40c903293efddad2909c` | None in Trivy |
-| `latest` / `v2.1.2` | `sha256:d934955690f59ea436aed22c806b076a7f3f9dd56a20c923692c78d477f22352` | Seven Python advisories and two containerd advisories |
+| `latest` / `v2.1.3` | `sha256:f11d67b0662d6835b9298a38a6b4100743d29eef1bbc546ef516e4f938ab297a` | zlib 1.3.2-r0 and libexpat 2.8.5-r0 |
+| `edge` | `sha256:346d57aea01f200c5b8c3d25038fef749812bcd137c0f49083944b5149d65783` | zlib 1.3.2-r0 and libexpat 2.8.5-r0 |
 
-The `edge` image contains Python 3.14.8-r0 and Compose 5.6.0. The published stable image still contains Python 3.14.7-r1 and Compose 5.5.1. Trivy reports **CVE-2026-19553** and **CVE-2026-82049** as high severity, plus CVE-2026-15806, CVE-2026-17084, CVE-2026-19672, CVE-2026-15310, and CVE-2026-19445 in stable Python packages; all seven have Alpine fixes in 3.14.8-r0. A new stable release must be built and published before stable users receive these fixes. Pulling the existing `latest` tag alone does not change its contents.
+Both scanned channels contain Python 3.14.8-r0 and Compose 5.6.0 with containerd 2.4.1. Their earlier Python and containerd findings are resolved. The dated digests above identify the artifacts reviewed; a moving tag can later select a different build.
 
-The Compose 5.6.0 donor in `edge` also removes the [containerd image-pull finding, CVE-2026-53493](https://github.com/containerd/containerd/security/advisories/GHSA-pg57-6jwg-q645), and [CRI finding, CVE-2026-53495](https://github.com/containerd/containerd/security/advisories/GHSA-7jxh-36q5-gcqv), reported against Compose 5.5.1 in stable. Both channels retain fixed libexpat 2.8.5-r0; **CVE-2026-93990** remains resolved.
+The image recipe requires the following available fixes:
+
+- **CVE-2026-85091:** zlib 1.3.2-r1 fixes the heap-buffer overflow recorded in the [Alpine 3.24 security database](https://secdb.alpinelinux.org/v3.24/main.json). Trivy rates the finding medium and Scout rates it high. The fixed package comes from Alpine stable.
+- **CVE-2026-102633 and CVE-2026-77214:** [Expat 2.9.0](https://github.com/libexpat/libexpat/releases/tag/R_2_9_0) fixes the 32-bit integer overflow and buffer-length API issue. Scout reports both as high severity; the reviewed Trivy database does not yet report them. Alpine stable still supplies libexpat 2.8.5-r0, so the image requires libexpat 2.9.0-r0 through a tagged edge repository. The tag applies only to libexpat; other packages retain their stable source. Remove this narrow exception when stable supplies the fixed release on every supported platform.
+
+These minimum versions apply in both the disposable Python build stage and the published runtime. Rebuilt images must pass the generator smoke test, Python XML and compression checks, and full scans on all three platforms before publication. A new stable release delivers the fixes through `latest`; review its immutable digest and scan results before deployment.
 
 Package-level scanner findings remain visible:
 
-- Docker's [CVE-2025-15558 advisory](https://github.com/docker/cli/security/advisories/GHSA-p436-gjf2-799p) concerns Windows plugin discovery and is already fixed in the bundled CLI module version. Scout still reports it; Trivy does not.
+- Docker's [CVE-2025-15558 advisory](https://github.com/docker/cli/security/advisories/GHSA-p436-gjf2-799p) concerns Windows plugin discovery and is already fixed in the bundled CLI module version. Scout still reports it against the Linux Compose binary; Trivy does not.
 - The [OpenPGP warning, GO-2026-5932](https://pkg.go.dev/vuln/GO-2026-5932), has no fixed version and concerns a package absent from the compiled Compose binary.
-- Scout reports [CVE-2026-84445](https://github.com/grpc/grpc-go/security/advisories/GHSA-2v4p-qf9q-27wj) against Compose 5.6.0's gRPC 1.84.0 dependency. The upstream advisory lists 1.84.0 as patched, and its [HTTP/2 server transport contains the fix](https://github.com/grpc/grpc-go/blob/v1.84.0/internal/transport/http2_server.go#L525). Scout's affected-version range disagrees with the current upstream advisory; retain the visible finding until scanner metadata catches up.
 
 These findings do not assess the host's Docker daemon or service images in a generated deployment. Recheck immutable image digests, package versions, and upstream advisories when dependencies change. Publishing a release does not update existing containers automatically.
 
