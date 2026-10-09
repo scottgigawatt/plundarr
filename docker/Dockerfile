@@ -195,6 +195,7 @@ RUN apk upgrade --no-cache libcrypto3 libssl3 && \
 #
 COPY --from=docker-compose /docker-compose /usr/local/bin/docker-compose
 COPY --from=docker-compose /src/LICENSE /usr/share/licenses/docker-compose/LICENSE
+COPY --from=docker-compose /src/NOTICE /usr/share/licenses/docker-compose/NOTICE
 
 #
 # Copy the installed application and exact, hash-verified dependencies from
