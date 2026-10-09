@@ -59,21 +59,22 @@ Plundarr pulls published container images for the stack and keeps configuration 
 
 ## Interpret Maraudarr image scans
 
-The October 7, 2026 review scanned immutable published images on `linux/amd64`, `linux/arm64`, and `linux/arm/v7` with Trivy 0.75.0, its October 7 database, and Docker Scout 1.25.0. Every severity and findings without a published fix were included; no scanner exclusions were added.
+The October 9, 2026 review checked immutable published images on `linux/amd64`, `linux/arm64`, and `linux/arm/v7` with Docker Scout 1.25.0. Every severity and findings without a published fix were included; no scanner exclusions were added.
 
-| Reviewed channel | Image index digest | Packages with available fixes |
+| Reviewed channel | Image index digest | Scout vulnerability identifiers per platform |
 | --- | --- | --- |
-| `latest` / `v2.1.3` | `sha256:f11d67b0662d6835b9298a38a6b4100743d29eef1bbc546ef516e4f938ab297a` | zlib 1.3.2-r0 and libexpat 2.8.5-r0 |
-| `edge` | `sha256:346d57aea01f200c5b8c3d25038fef749812bcd137c0f49083944b5149d65783` | zlib 1.3.2-r0 and libexpat 2.8.5-r0 |
+| `latest` / `v2.1.4` | `sha256:f9c99ed52d5d834fc840c23317e223025ebc37b4a583208f9d68a8174cf7effb` | 15 |
+| `edge` | `sha256:73b00f792744cbf7d512f5cc7c3b50d825572ece0895884620e8573bc388e051` | 15 |
 
-Both scanned channels contain Python 3.14.8-r0 and Compose 5.6.0 with containerd 2.4.1. Their earlier Python and containerd findings are resolved. The dated digests above identify the artifacts reviewed; a moving tag can later select a different build.
+Both reviewed channels already contain patched zlib 1.3.2-r1 and libexpat 2.9.0-r0. Their earlier compression and XML findings are resolved. The dated digests above identify the artifacts reviewed; moving tags can later select a different build.
 
-The image recipe requires the following available fixes:
+The remaining actionable findings come from Compose 5.6.0's Go 1.26.8 standard library and golang.org/x/net 0.58.0. Fixed releases are [Go 1.26.9](https://go.dev/doc/devel/release#go1.26.9) and [golang.org/x/net 0.60.0](https://pkg.go.dev/golang.org/x/net@v0.60.0). Docker has not yet published a Compose release containing those updates.
 
-- **CVE-2026-85091:** zlib 1.3.2-r1 fixes the heap-buffer overflow recorded in the [Alpine 3.24 security database](https://secdb.alpinelinux.org/v3.24/main.json). Trivy rates the finding medium and Scout rates it high. The fixed package comes from Alpine stable.
-- **CVE-2026-102633 and CVE-2026-77214:** [Expat 2.9.0](https://github.com/libexpat/libexpat/releases/tag/R_2_9_0) fixes the 32-bit integer overflow and buffer-length API issue. Scout reports both as high severity; the reviewed Trivy database does not yet report them. Alpine stable still supplies libexpat 2.8.5-r0, so the image requires libexpat 2.9.0-r0 through a tagged edge repository. The tag applies only to libexpat; other packages retain their stable source. Remove this narrow exception when stable supplies the fixed release on every supported platform.
+The image recipe rebuilds the exact upstream Compose source with a digest-pinned patched Go compiler and a minimum network-library version. Go's checksum database authenticates the source and dependency downloads. The separate build stage keeps source code, module caches, and the compiler out of Maraudarr. Renovate tracks the compiler image, Compose source release, and network-library pin together. Remove the rebuild when Docker publishes an upstream binary with the fixes.
 
-These minimum versions apply in both the disposable Python build stage and the published runtime. Rebuilt images must pass the generator smoke test, Python XML and compression checks, and full scans on all three platforms before publication. A new stable release delivers the fixes through `latest`; review its immutable digest and scan results before deployment.
+The recipe still requires zlib 1.3.2-r1 and libexpat 2.9.0-r0 in the disposable Python build stage and published runtime. Alpine 3.24 supplies the fixed zlib, but stable libexpat remains 2.8.5-r0 on all three supported platforms. Only libexpat uses the tagged edge repository; remove that exception when stable supplies [Expat 2.9.0](https://github.com/libexpat/libexpat/releases/tag/R_2_9_0) or newer everywhere.
+
+Rebuilt images must pass the generator smoke test, Python XML and compression checks, and full scans on all three platforms before publication. A new stable release delivers the Compose fixes through `latest`; merging a fix into `main` updates `edge`. Review the new immutable digest and scan results before deployment.
 
 Package-level scanner findings remain visible:
 
