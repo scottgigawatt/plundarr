@@ -21,17 +21,15 @@ services:
       context: docker                              # Complete Maraudarr build context
       dockerfile: Dockerfile                       # Maraudarr image recipe
       args:                                        # Configurable image build arguments
-        ALPINE_TAG: ${ALPINE_TAG}                          # Base Alpine image version and digest
-        GO_TAG: ${GO_TAG}                                  # Compose compiler image version and digest
-        DOCKER_COMPOSE_VERSION: ${DOCKER_COMPOSE_VERSION}  # Upstream Compose source release
-        GO_X_NET_VERSION: ${GO_X_NET_VERSION}              # Patched Go network library release
-        MARAUDARR_BIN_HOME: ${MARAUDARR_BIN_HOME}          # Application install directory
-        MARAUDARR_UID: ${MARAUDARR_UID}                    # Default unprivileged runtime user ID
-        MARAUDARR_GID: ${MARAUDARR_GID}                    # Default unprivileged runtime group ID
-        MARAUDARR_GROUP: ${MARAUDARR_GROUP}                # Default unprivileged runtime group name
-        IMAGE_CREATED: ${IMAGE_CREATED}                    # OCI image creation timestamp
-        IMAGE_REVISION: ${IMAGE_REVISION}                  # OCI source revision
-        IMAGE_VERSION: ${MARAUDARR_TAG}                    # OCI image version
+        ALPINE_TAG: ${ALPINE_TAG}                  # Base Alpine image version and digest
+        DOCKER_COMPOSE_TAG: ${DOCKER_COMPOSE_TAG}  # Compose donor image version and digest
+        MARAUDARR_BIN_HOME: ${MARAUDARR_BIN_HOME}  # Application install directory
+        MARAUDARR_UID: ${MARAUDARR_UID}            # Default unprivileged runtime user ID
+        MARAUDARR_GID: ${MARAUDARR_GID}            # Default unprivileged runtime group ID
+        MARAUDARR_GROUP: ${MARAUDARR_GROUP}        # Default unprivileged runtime group name
+        IMAGE_CREATED: ${IMAGE_CREATED}            # OCI image creation timestamp
+        IMAGE_REVISION: ${IMAGE_REVISION}          # OCI source revision
+        IMAGE_VERSION: ${MARAUDARR_TAG}            # OCI image version
     container_name: maraudarr-${MARAUDARR_TAG}     # Container name including image tag
     hostname: maraudarr                            # Set the container hostname
     network_mode: none                             # Generation requires no network access

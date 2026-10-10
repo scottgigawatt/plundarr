@@ -70,7 +70,23 @@ Both reviewed channels already contain patched zlib 1.3.2-r1 and libexpat 2.9.0-
 
 The remaining actionable findings come from Compose 5.6.0's Go 1.26.8 standard library and golang.org/x/net 0.58.0. Fixed releases are [Go 1.26.9](https://go.dev/doc/devel/release#go1.26.9) and [golang.org/x/net 0.60.0](https://pkg.go.dev/golang.org/x/net@v0.60.0). Docker has not yet published a Compose release containing those updates.
 
-The image recipe rebuilds the exact upstream Compose source with a digest-pinned patched Go compiler and a minimum network-library version. Go's checksum database authenticates the source and dependency downloads. The separate build stage keeps source code, module caches, and the compiler out of Maraudarr. Renovate tracks the compiler image, Compose source release, and network-library pin together. Remove the rebuild when Docker publishes an upstream binary with the fixes.
+### Await the official Compose security update
+
+Maraudarr uses Docker's digest-pinned [Compose 5.6.0 binary](https://github.com/docker/compose/releases/tag/v5.6.0). Patched Go and networking-library releases are available, but Docker has not yet published a Compose release containing those updates. Rebuilding the source locally changes its dependency graph and adds compiler pins, cross-compilation logic, build time, and validation responsibilities. The project waits for the official release instead of maintaining that extra build machinery.
+
+Maraudarr invokes Compose only for `config --quiet` validation. Its supported Make and Compose launch paths disable container networking and drop all optional capabilities. The two HIGH findings that blocked CI, [CVE-2026-78667](https://pkg.go.dev/vuln/GO-2026-6609) and [CVE-2026-97031](https://pkg.go.dev/vuln/GO-2026-6607), concern HTTP file-serving and TLS-server denial of service. The supported validation path does not expose those servers. This limits exposure to those two findings; it does not establish that every Go advisory is unreachable under every possible container invocation.
+
+The CI exceptions in `.trivyignore.yaml` name only those two advisories at `usr/local/bin/docker-compose` and expire on October 23, 2026. All other fixed HIGH and CRITICAL findings still fail the workflow. A different Compose invocation or networking configuration requires another security review; these exceptions do not cover a general-purpose Compose deployment.
+
+Replace the donor image when a compatible official release contains the fixes on all three supported platforms. Verify generation, hardened smoke tests, and unfiltered artifact scans, then remove the exceptions and their workflow references together. Expiry stops CI from silently accepting the findings indefinitely. Full artifact reviews continue to include the known findings; a passing CI exception is not a clean scan.
+
+Use an explicit empty ignore file for the full Trivy review so repository CI exceptions cannot hide findings:
+
+```sh
+trivy image --ignorefile /dev/null --image-src remote --scanners vuln ghcr.io/scottgigawatt/maraudarr@sha256:IMAGE-DIGEST
+```
+
+Replace `IMAGE-DIGEST` with the immutable image digest being reviewed and repeat the review for each supported platform.
 
 The recipe still requires zlib 1.3.2-r1 and libexpat 2.9.0-r0 in the disposable Python build stage and published runtime. Alpine 3.24 supplies the fixed zlib, but stable libexpat remains 2.8.5-r0 on all three supported platforms. Only libexpat uses the tagged edge repository; remove that exception when stable supplies [Expat 2.9.0](https://github.com/libexpat/libexpat/releases/tag/R_2_9_0) or newer everywhere.
 
