@@ -30,10 +30,13 @@
     ],
 
     //
-    // Keep dependency work predictable for a single-maintainer repository.
+    // Batch routine tooling updates on the first day of each month, before 8 a.m.
     //
     "timezone": "America/New_York",
-    "schedule": ["before 8am"],
+    "schedule": ["* 0-7 1 * *"],
+    "automergeSchedule": ["* 0-7 1 * *"],
+    "updateNotScheduled": false,
+    "prConcurrentLimit": 2,
     "dependencyDashboard": true,
 
     //
@@ -42,11 +45,28 @@
     "automerge": true,
     "automergeType": "pr",
     "automergeStrategy": "squash",
-    "platformAutomerge": true,
+
+    //
+    // Use Renovate-managed merges so the maintenance window is enforced.
+    //
+    "platformAutomerge": false,
     "rebaseWhen": "behind-base-branch",
     "labels": ["dependencies"],
     "assignees": ["scottgigawatt"],
     "reviewers": ["scottgigawatt"],
+
+    //
+    // Let supported vulnerability fixes bypass routine windows for maintainer review.
+    //
+    "vulnerabilityAlerts": {
+        "enabled": true,
+        "dependencyDashboardApproval": false,
+        "groupName": null,
+        "automerge": false,
+        "schedule": ["at any time"],
+        "automergeSchedule": ["at any time"],
+        "updateNotScheduled": true
+    },
 
     //
     // Renovate owns updates that Dependabot previously duplicated.
@@ -163,6 +183,66 @@
         {
             "groupName": "Python runtime",
             "matchDepNames": ["python"]
+        },
+
+        //
+        // Combine non-major tooling updates in the monthly maintenance window.
+        //
+        {
+            "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+            "groupName": "monthly maintenance"
+        },
+
+        //
+        // Keep shared image pins together in the weekly production window.
+        //
+        {
+            "matchDatasources": ["docker"],
+            "schedule": ["* 0-7 * * 1"],
+            "automergeSchedule": ["* 0-7 * * 1"],
+            "groupName": "weekly production dependencies"
+        },
+
+        //
+        // Keep shipped generator packages and their shared pins in the weekly batch.
+        //
+        {
+            "matchPackageNames": [
+                "markdown-it-py",
+                "mdurl",
+                "prompt-toolkit",
+                "Pygments",
+                "questionary",
+                "rich",
+                "setuptools",
+                "wcwidth"
+            ],
+            "schedule": ["* 0-7 * * 1"],
+            "automergeSchedule": ["* 0-7 * * 1"],
+            "groupName": "weekly production dependencies"
+        },
+
+        //
+        // Update the current Compose source dependencies weekly until that builder is retired.
+        //
+        {
+            "matchPackageNames": [
+                "github.com/docker/compose/v5",
+                "golang.org/x/net"
+            ],
+            "schedule": ["* 0-7 * * 1"],
+            "automergeSchedule": ["* 0-7 * * 1"],
+            "groupName": "weekly production dependencies"
+        },
+
+        //
+        // Require dashboard approval for major upgrades and keep them separate.
+        //
+        {
+            "matchUpdateTypes": ["major"],
+            "dependencyDashboardApproval": true,
+            "automerge": false,
+            "groupName": null
         }
     ]
 }
