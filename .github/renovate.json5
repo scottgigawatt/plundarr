@@ -16,7 +16,9 @@
         ":enablePreCommit"
     ],
 
+    //
     // Keep dependency ignores while allowing the real test/typing/Dockerfile.
+    //
     "ignorePaths": [
         "**/node_modules/**",
         "**/bower_components/**",
@@ -34,7 +36,9 @@
     "schedule": ["before 8am"],
     "dependencyDashboard": true,
 
+    //
     // Merge dependency PRs after required checks pass; keep branches current.
+    //
     "automerge": true,
     "automergeType": "pr",
     "automergeStrategy": "squash",
@@ -59,7 +63,7 @@
     ],
 
     //
-    // Track Python, shared image pins, and the patched Compose source build.
+    // Track the docs Python version, test tools, and shared image pins.
     // Keep direct and shell-default forms separate so each pin is extracted once.
     //
     "customManagers": [
@@ -108,9 +112,9 @@
                 "/^\\.github/workflows/build-and-push\\.yml$/"
             ],
             "matchStrings": [
-                "GO_TAG[=:]\\s*(?<currentValue>[^@\\s]+)@(?<currentDigest>sha256:[a-f0-9]+)"
+                "DOCKER_COMPOSE_TAG[=:]\\s*(?<currentValue>[^@\\s]+)@(?<currentDigest>sha256:[a-f0-9]+)"
             ],
-            "depNameTemplate": "golang",
+            "depNameTemplate": "docker/compose-bin",
             "datasourceTemplate": "docker",
             "versioningTemplate": "docker"
         },
@@ -120,39 +124,11 @@
                 "/^example\\.maraudarr\\.env$/"
             ],
             "matchStrings": [
-                "GO_TAG=\"\\$\\{GO_TAG:-(?<currentValue>[^@\\s}]+)@(?<currentDigest>sha256:[a-f0-9]+)\\}\""
+                "DOCKER_COMPOSE_TAG=\"\\$\\{DOCKER_COMPOSE_TAG:-(?<currentValue>[^@\\s}]+)@(?<currentDigest>sha256:[a-f0-9]+)\\}\""
             ],
-            "depNameTemplate": "golang",
+            "depNameTemplate": "docker/compose-bin",
             "datasourceTemplate": "docker",
             "versioningTemplate": "docker"
-        },
-        {
-            "customType": "regex",
-            "managerFilePatterns": [
-                "/^docker/Dockerfile$/",
-                "/^example\\.maraudarr\\.env$/"
-            ],
-            "matchStrings": [
-                "DOCKER_COMPOSE_VERSION=(?<currentValue>v\\d+\\.\\d+\\.\\d+)",
-                "DOCKER_COMPOSE_VERSION=\"\\$\\{DOCKER_COMPOSE_VERSION:-(?<currentValue>v\\d+\\.\\d+\\.\\d+)\\}\""
-            ],
-            "depNameTemplate": "github.com/docker/compose/v5",
-            "datasourceTemplate": "go",
-            "versioningTemplate": "semver"
-        },
-        {
-            "customType": "regex",
-            "managerFilePatterns": [
-                "/^docker/Dockerfile$/",
-                "/^example\\.maraudarr\\.env$/"
-            ],
-            "matchStrings": [
-                "GO_X_NET_VERSION=(?<currentValue>v\\d+\\.\\d+\\.\\d+)",
-                "GO_X_NET_VERSION=\"\\$\\{GO_X_NET_VERSION:-(?<currentValue>v\\d+\\.\\d+\\.\\d+)\\}\""
-            ],
-            "depNameTemplate": "golang.org/x/net",
-            "datasourceTemplate": "go",
-            "versioningTemplate": "semver"
         }
     ],
 
@@ -177,15 +153,13 @@
             "matchDatasources": ["docker"]
         },
         {
-            "groupName": "Compose build",
-            "matchDepNames": ["github.com/docker/compose/v5", "golang.org/x/net", "golang"]
-        },
-        {
             "description": "Keep Python dependencies exact and hash-verified",
             "matchManagers": ["pep621", "pip_requirements"],
             "rangeStrategy": "pin"
         },
+        //
         // Apply this after manager groups so workflow and runtime pins stay together.
+        //
         {
             "groupName": "Python runtime",
             "matchDepNames": ["python"]
