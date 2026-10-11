@@ -37,6 +37,20 @@
     "prConcurrentLimit": 2,
     "dependencyDashboard": true,
 
+    // Merge dependency PRs after required checks pass; keep branches current.
+    "automerge": true,
+    "automergeType": "pr",
+    "automergeStrategy": "squash",
+
+    //
+    // Use Renovate-managed merges so the maintenance window is enforced.
+    //
+    "platformAutomerge": false,
+    "rebaseWhen": "behind-base-branch",
+    "labels": ["dependencies"],
+    "assignees": ["scottgigawatt"],
+    "reviewers": ["scottgigawatt"],
+
     //
     // Let supported vulnerability fixes bypass routine windows for maintainer review.
     //
@@ -49,18 +63,6 @@
         "automergeSchedule": ["at any time"],
         "updateNotScheduled": true
     },
-
-    //
-    // Use Renovate-managed merges so the maintenance window is enforced.
-    //
-    "automerge": true,
-    "automergeType": "pr",
-    "automergeStrategy": "squash",
-    "platformAutomerge": false,
-    "rebaseWhen": "behind-base-branch",
-    "labels": ["dependencies"],
-    "assignees": ["scottgigawatt"],
-    "reviewers": ["scottgigawatt"],
 
     //
     // Renovate owns updates that Dependabot previously duplicated.
