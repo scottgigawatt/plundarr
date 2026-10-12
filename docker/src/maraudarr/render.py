@@ -130,9 +130,9 @@ def _prepare_service(
     """Apply service-specific conditional edits to one extracted chart."""
     if service_id == "gluetun":
         block = _insert_gluetun_additions(block, selected)
-    # These applications can operate without their catalog recommendations;
-    # remove template dependencies that were intentionally left unselected.
-    if service_id in {"cleanuparr", "whisparr"}:
+
+    # Cleanuparr can operate without its optional catalog recommendations.
+    if service_id == "cleanuparr":
         block = strip_yaml_key(block, "depends_on")
     if service_id == "plex":
         library_variables = {
@@ -169,6 +169,8 @@ def _prepare_service(
             "Homepage Bazarr click target and widget": "bazarr" in selected,
             "Homepage Seerr click target and widget": "seerr" in selected,
             "Homepage Velvarr click target": "velvarr" in selected,
+            "Homepage Whisparr click target": "whisparr" in selected,
+            "Homepage Whisparr Alt click target": "whisparr-alt" in selected,
             "Homepage Prowlarr click target and widget": "prowlarr" in selected,
             "Homepage qBittorrent click target and widget": "qbittorrent" in selected,
             "Homepage SABnzbd click target and widget": "sabnzbd" in selected,
@@ -297,6 +299,8 @@ def _filter_homepage_env(
         "Homepage Bazarr click-target and widget variables": "bazarr" in selected,
         "Homepage Seerr click-target and widget variables": "seerr" in selected,
         "Homepage Velvarr click-target variables": "velvarr" in selected,
+        "Homepage Whisparr click-target variables": "whisparr" in selected,
+        "Homepage Whisparr Alt click-target variables": "whisparr-alt" in selected,
         "Homepage Prowlarr click-target and widget variables": "prowlarr" in selected,
         "Homepage qBittorrent click-target and widget variables": ("qbittorrent" in selected),
         "Homepage SABnzbd click-target and widget variables": "sabnzbd" in selected,
@@ -483,6 +487,10 @@ def render_environment(
         "HOST_SCENES_PATH": ("/volume1/plex/scenes", f"{media_root}/scenes"),
         "JELLYFIN_DATA_PATH": ("/volume1/jellyfin", media_root),
         "WHISPARR_DATA_PATH": ("/volume1/media/adult", media_root),
+        "WHISPARR_ALT_DATA_PATH": (
+            "/volume1/media/adult/movies-alt",
+            f"{media_root}/movies-alt",
+        ),
     }
     for variable, (source_default, preset_default) in preset_defaults.items():
         rendered = rendered.replace(
@@ -599,6 +607,8 @@ def render_homepage_services(catalog: Catalog, plan: StackPlan) -> str:
         ("bazarr", "Bazarr"),
         ("seerr", "Seerr"),
         ("velvarr", "Velvarr"),
+        ("whisparr", "Whisparr"),
+        ("whisparr-alt", "Whisparr Alt"),
         ("jellyfin", "Jellyfin"),
         ("calibre-web-automated", "Calibre-Web Automated"),
     ):
@@ -609,6 +619,8 @@ def render_homepage_services(catalog: Catalog, plan: StackPlan) -> str:
             "jellyfin",
             "calibre-web-automated",
             "velvarr",
+            "whisparr",
+            "whisparr-alt",
         }:
             fragment = homepage_root / "fragments" / f"{service_id}.yaml"
             media_cards.append(fragment.read_text().strip("\n"))

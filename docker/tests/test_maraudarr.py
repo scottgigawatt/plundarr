@@ -126,7 +126,8 @@ class MaraudarrTests(unittest.TestCase):
             ),
         )
         self.assertNotIn("depends_on:", extract_service(compose, "cleanuparr"))
-        self.assertNotIn("depends_on:", extract_service(compose, "whisparr"))
+        self.assertIn("depends_on:", extract_service(compose, "whisparr"))
+        self.assertIn("condition: service_healthy", extract_service(compose, "whisparr"))
         self.assertIn("  jellyfin:", compose)
         self.assertNotIn("  plex:", compose)
 

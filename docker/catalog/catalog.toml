@@ -134,6 +134,16 @@ order = 330
 requires = ["prowlarr"]
 recommended = ["qbittorrent", "velvarr"]
 
+# Whisparr Alt is an opt-in second instance with independent metadata-provider settings.
+[services.whisparr-alt]
+title = "Whisparr Alt"
+description = "Runs a second Whisparr with its own library and metadata-provider choice."
+category = "Media automation"
+url = "https://github.com/Whisparr/Whisparr"
+order = 335
+requires = ["prowlarr"]
+recommended = ["qbittorrent", "velvarr"]
+
 # Bazarr adds subtitle automation to the Radarr and Sonarr libraries.
 [services.bazarr]
 title = "Bazarr"
