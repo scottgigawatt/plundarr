@@ -1,0 +1,5 @@
+    - Whisparr Alt:
+        icon: whisparr.svg
+        href: {{HOMEPAGE_VAR_WHISPARR_ALT_HREF}}
+        description: Independent adult-media library
+        container: {{HOMEPAGE_VAR_WHISPARR_ALT_CONTAINER}}

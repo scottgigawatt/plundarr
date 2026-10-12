@@ -89,6 +89,8 @@ If your generated chart still contains the fixed image repository, regenerate it
 5. Connect Whisparr v3 at `http://whisparr:6969` with its API key. Review root folders, quality profiles, and path mappings in Velvarr. Whisparr and Jellyfin in this preset share `/data`, so corresponding library paths can match.
 6. Configure TPDB or StashDB credentials in Velvarr's metadata-provider settings, then verify discovery and request fulfillment.
 
+If you select the optional [Whisparr Alt service](https://github.com/scottgigawatt/plundarr/blob/main/docker/services/whisparr-alt/README.md) for TPDB movies, connect Velvarr to `http://whisparr-alt:6969` with that instance's API key. With the default mounts, map Alt's `/data` to Jellyfin's `/data/movies-alt`. Velvarr currently connects to one Whisparr endpoint.
+
 Check that the container becomes healthy:
 
 ```sh

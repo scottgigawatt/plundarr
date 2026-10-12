@@ -115,7 +115,7 @@ Use `make configure` for an interactive picker or pass `PRESET` to `make ship` f
 | 🗺️ Preset | 🎯 Primary purpose |
 | --- | --- |
 | 🏴‍☠️ `plundarr` | Movies, television, and ebooks with a VPN-protected torrent downloader |
-| 🔞 `boudoirr` | Whisparr automation with a VPN-protected torrent downloader and removable [Velvarr requests](docker/services/velvarr/README.md) and [Jellyfin playback](docker/services/jellyfin/README.md) |
+| 🔞 `boudoirr` | Whisparr automation with an optional [second instance](docker/services/whisparr-alt/README.md), a VPN-protected torrent downloader and removable [Velvarr requests](docker/services/velvarr/README.md) and [Jellyfin playback](docker/services/jellyfin/README.md) |
 | 🎞️ `jellyfin` | Standalone Jellyfin media server |
 | 🎬 `plex` | Standalone Plex Media Server |
 | 📚 `calibre-web-automated` | Standalone ebook library and automatic ingest service |

@@ -202,6 +202,12 @@ run_case duplex-core \
 run_case boudoirr --preset boudoirr
 
 #
+# The optional second Whisparr has independent state and conditional Homepage settings.
+#
+run_case boudoirr-whisparr-alt --preset boudoirr --add whisparr-alt,homepage
+run_case whisparr-alt --preset custom --add whisparr-alt
+
+#
 # Boudoirr supports Usenet-only and combined downloader choices.
 #
 run_case boudoirr-usenet \
@@ -257,7 +263,7 @@ run_case duplex-monitoring --preset duplex --add tracearr,tautulli,homepage
 #
 run_case everything \
     --preset plundarr \
-    --add portainer,apprise,imagemaid,jellyfin,lidarr,notifiarr,nzbget,overlay-reset,pattrmm,plex,recyclarr,sabnzbd,sonarr-anime,tautulli,velvarr,watchtower,whisparr
+    --add portainer,apprise,imagemaid,jellyfin,lidarr,notifiarr,nzbget,overlay-reset,pattrmm,plex,recyclarr,sabnzbd,sonarr-anime,tautulli,velvarr,watchtower,whisparr,whisparr-alt
 
 #
 # Report one clear success line after every Compose chart passes.

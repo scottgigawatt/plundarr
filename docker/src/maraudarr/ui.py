@@ -399,6 +399,12 @@ class UI:
             steps.append("Keep VELVARR_SECRET_KEY with backups; read VELVARR_SETUP_SECRET locally.")
             steps.append("Complete Velvarr setup with Jellyfin, then connect Whisparr v3.")
 
+        if "whisparr-alt" in selected:
+            steps.append("Keep Whisparr Alt's config and managed root folders separate.")
+            steps.append(
+                "Choose its metadata source; give Prowlarr its API key and use a distinct download category."
+            )
+
         if "recyclarr" in selected:
             steps.append("Set Recyclarr API keys and preview the sync before applying it.")
         if selected.intersection(
@@ -415,6 +421,7 @@ class UI:
                 "sonarr",
                 "sonarr-anime",
                 "whisparr",
+                "whisparr-alt",
             }
         ):
             steps.append("Check download, media, and config paths in .env.")
