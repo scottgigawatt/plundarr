@@ -130,9 +130,9 @@ def _prepare_service(
     """Apply service-specific conditional edits to one extracted chart."""
     if service_id == "gluetun":
         block = _insert_gluetun_additions(block, selected)
-    # These applications can operate without their catalog recommendations;
-    # remove template dependencies that were intentionally left unselected.
-    if service_id in {"cleanuparr", "whisparr"}:
+
+    # Cleanuparr can operate without its optional catalog recommendations.
+    if service_id == "cleanuparr":
         block = strip_yaml_key(block, "depends_on")
     if service_id == "plex":
         library_variables = {

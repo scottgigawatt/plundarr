@@ -2,7 +2,7 @@
 
 Runs an optional second Whisparr v3 instance with its own database, settings, API key, port, and managed library. It starts unchecked in Maraudarr and is absent from every preset's defaults. A little extra cargo, only when you invite it aboard.
 
-The existing `whisparr` service stays unchanged. Neither instance is tied to a metadata provider: choose **TMDB** or **TPDB** independently in each instance under **Settings → General → Movie metadata source**. This chart uses hotio's floating `v3` channel, matching the primary instance.
+The primary `whisparr` service keeps its existing name and configuration paths. Neither instance is tied to a metadata provider: choose **TMDB** or **TPDB** independently in each instance under **Settings → General → Movie metadata source**. This chart uses hotio's floating `v3` channel, matching the primary instance.
 
 ## Select the second instance
 
@@ -12,7 +12,7 @@ From the repository root, generate Boudoirr with the optional instance:
 make ship PRESET=boudoirr ADD_SERVICES=whisparr-alt
 ```
 
-Or run `make configure`, choose Boudoirr, and check **Whisparr Alt** in **Media automation**. Custom and other presets can also select it. It brings the shared Prowlarr and FlareSolverr services through catalog dependencies; it does not require the primary Whisparr.
+Or run `make configure`, choose Boudoirr, and check **Whisparr Alt** in **Media automation**. Custom and other presets can also select it. It brings the shared Prowlarr and FlareSolverr services through catalog dependencies; it does not require the primary Whisparr. Both Whisparr instances wait for Prowlarr to be healthy during Compose startup.
 
 Include your complete service selection when regenerating an existing project. Omitting `whisparr-alt` removes it from the generated chart while retaining its environment assignments and application state. Regeneration does not stop a previously running container; review Compose orphans before removing one.
 

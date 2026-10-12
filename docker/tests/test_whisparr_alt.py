@@ -53,6 +53,8 @@ class WhisparrAltTests(unittest.TestCase):
         plan = self.catalog.resolve("custom", selected={"whisparr-alt"})
         self.assertEqual(plan.service_ids, ("flaresolverr", "prowlarr", "whisparr-alt"))
         self.assertEqual(self.catalog.services["whisparr-alt"].named_volumes, {})
+        self.assertEqual(self.catalog.services["whisparr-alt"].requires, ("prowlarr",))
+        self.assertEqual(self.catalog.services["whisparr"].requires, ("prowlarr",))
 
     def test_chart_keeps_identity_mounts_and_health_independent(self) -> None:
         """Reuse arr hardening while keeping two database and port identities separate."""
@@ -74,7 +76,15 @@ class WhisparrAltTests(unittest.TestCase):
         self.assertIn("${WHISPARR_ALT_DATA_PATH}:/data:rw", alt)
         self.assertIn("${HOST_DOWNLOADS_PATH}:/downloads:rw", alt)
         self.assertIn("http://127.0.0.1:6969/ping", alt)
-        self.assertNotIn("depends_on:", alt)
+
+        # Both instances use the same required indexer and wait for its healthcheck.
+        for service_id in ("whisparr", "whisparr-alt"):
+            service = extract_service(compose, service_id)
+            self.assertIn(
+                "depends_on:\n      prowlarr:\n        condition: service_healthy",
+                service,
+            )
+
         self.assertNotIn("WHISPARR_TAG", alt)
         self.assertNotIn("WHISPARR_ALT_TAG:-", alt)
 

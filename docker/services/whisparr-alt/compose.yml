@@ -37,3 +37,8 @@ services:
         - --tries=1
         - --spider
         - http://127.0.0.1:6969/ping
+
+    # Specify container service dependencies
+    depends_on:
+      prowlarr:
+        condition: service_healthy  # Wait until Prowlarr is healthy
