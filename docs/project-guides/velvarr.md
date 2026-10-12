@@ -32,7 +32,8 @@ Edit `dist/boudoirr/.env`. Defaults follow Plundarr's existing service conventio
 
 | Setting | Boudoirr default | Purpose |
 | --- | --- | --- |
-| `VELVARR_TAG` | `latest` | Official floating stable image channel |
+| `VELVARR_IMAGE` | `ghcr.io/skare69/velvarr` | Image repository without a tag; defaults to the official image |
+| `VELVARR_TAG` | `latest` | Image channel or version; defaults to the official floating stable channel |
 | `VELVARR_WEBUI_PORT` | `16699` | Published host port; the container always listens on `6699` |
 | `VELVARR_CONFIG_PATH` | `./config/velvarr` | Persistent data mounted at `/data` |
 | `VELVARR_SECRET_KEY` | Generated | 64 hexadecimal characters used to encrypt stored credentials |
@@ -46,6 +47,33 @@ Edit `dist/boudoirr/.env`. Defaults follow Plundarr's existing service conventio
 The base host port is `6699`; Boudoirr adds its normal `10000` offset, while Custom adds `30000`. Internal service URLs never receive the host-port offset. Both `.env` and `example.env` contain these defaults, but only `.env` receives generated secrets. Existing assignments, including empty values and operator overrides, survive regeneration exactly.
 
 The application runs as `DEFAULT_PUID:DEFAULT_PGID` with `DEFAULT_GROUP`, matching other rootless service charts. Set the shared IDs from `id -u` and `id -g` for your Synology account and confirm that account can write the selected config directory. Velvarr does not need media or download mounts; it connects to Whisparr and Jellyfin over the project network. SQLite state uses this host bind mount rather than a named volume or separate database service.
+
+## Switch between stable and fork images
+
+Both freshly generated `.env` and `example.env` files default to the official stable image. The Compose chart uses `${VELVARR_IMAGE}:${VELVARR_TAG}`, so you can switch repositories and channels by editing only `dist/boudoirr/.env`. Existing deployments receive the official `VELVARR_IMAGE` default when regenerated; existing image and tag overrides are preserved. The reference `example.env` keeps the official defaults.
+
+For a fork image, replace `YOUR-GITHUB-USER` with the publisher's lowercase registry namespace and set these assignments in `.env`:
+
+```sh
+VELVARR_IMAGE="ghcr.io/YOUR-GITHUB-USER/velvarr"
+VELVARR_TAG="edge"
+```
+
+To use the official floating stable image again, set:
+
+```sh
+VELVARR_IMAGE="ghcr.io/skare69/velvarr"
+VELVARR_TAG="latest"
+```
+
+Keep the repository and tag separate; do not include `:edge` or `:latest` in `VELVARR_IMAGE`. Pull the selected image and recreate only Velvarr:
+
+```sh
+docker compose --project-directory dist/boudoirr pull velvarr
+docker compose --project-directory dist/boudoirr up -d velvarr
+```
+
+If your generated chart still contains the fixed image repository, regenerate it with your complete service selection before switching images. Changing `.env` or restarting the old container alone does not replace its image. Check that the selected image supports your host architecture and preserves compatibility with your existing application data; review its release notes before switching versions.
 
 ## Launch and complete setup
 

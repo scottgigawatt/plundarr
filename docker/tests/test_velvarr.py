@@ -108,7 +108,7 @@ class VelvarrTests(unittest.TestCase):
 
         self.assertIn("user: ${DEFAULT_PUID}:${DEFAULT_PGID}", compose)
         self.assertIn("<<: *rootless-container", service)
-        self.assertIn("ghcr.io/skare69/velvarr:${VELVARR_TAG}", service)
+        self.assertIn("image: ${VELVARR_IMAGE}:${VELVARR_TAG}", service)
         self.assertIn("${VELVARR_CONFIG_PATH}:/data:rw", service)
         self.assertIn("${VELVARR_WEBUI_PORT}:6699", service)
         self.assertNotIn("labels: *disable-watchtower-updates", service)
@@ -121,6 +121,7 @@ class VelvarrTests(unittest.TestCase):
         self.assertNotIn("depends_on:", service)
         self.assertNotIn("network_mode:", service)
         self.assertNotIn("/downloads", service)
+        self.assertNotIn("VELVARR_IMAGE:-", service)
         self.assertNotIn("VELVARR_TAG:-", service)
 
     def test_fresh_host_defaults_follow_each_presets_port_offset(self) -> None:
@@ -141,6 +142,9 @@ class VelvarrTests(unittest.TestCase):
                 self.assertIn(
                     'VELVARR_CONFIG_PATH="${VELVARR_CONFIG_PATH:-./config/velvarr}"',
                     environment,
+                )
+                self.assertIn(
+                    'VELVARR_IMAGE="${VELVARR_IMAGE:-ghcr.io/skare69/velvarr}"', environment
                 )
                 self.assertIn('VELVARR_TAG="${VELVARR_TAG:-latest}"', environment)
                 self.assertIn('VELVARR_ALLOW_HTTP="${VELVARR_ALLOW_HTTP:-1}"', environment)
@@ -175,11 +179,20 @@ class VelvarrTests(unittest.TestCase):
             for secret in secrets:
                 self.assertNotIn(secret, example)
 
+            # Fresh deployments and the reference template use the official stable image.
+            for environment in (first_environment, example):
+                self.assertIn(
+                    'VELVARR_IMAGE="${VELVARR_IMAGE:-ghcr.io/skare69/velvarr}"', environment
+                )
+                self.assertIn('VELVARR_TAG="${VELVARR_TAG:-latest}"', environment)
+
             self.assertIn('VELVARR_SECRET_KEY="${VELVARR_SECRET_KEY:-}"', example)
             self.assertIn('VELVARR_SETUP_SECRET="${VELVARR_SETUP_SECRET:-}"', example)
 
             # Use distinct operator values to catch accidental normalization or preset re-offsets.
             overrides = {
+                'VELVARR_IMAGE="${VELVARR_IMAGE:-ghcr.io/skare69/velvarr}"': 'VELVARR_IMAGE="ghcr.io/example/velvarr"',
+                'VELVARR_TAG="${VELVARR_TAG:-latest}"': 'VELVARR_TAG="edge"',
                 'VELVARR_WEBUI_PORT="${VELVARR_WEBUI_PORT:-16699}"': 'VELVARR_WEBUI_PORT="17699"',
                 'VELVARR_ORIGIN="${VELVARR_ORIGIN:-}"': 'VELVARR_ORIGIN="https://velvarr.example.com"',
                 'VELVARR_ALLOW_HTTP="${VELVARR_ALLOW_HTTP:-1}"': 'VELVARR_ALLOW_HTTP="0"',
@@ -212,10 +225,29 @@ class VelvarrTests(unittest.TestCase):
             for replacement in overrides.values():
                 self.assertIn(replacement, regenerated)
 
+            # The reference template stays official even when the deployment uses a fork.
+            regenerated_example = (output / "example.env").read_text()
+            self.assertIn(
+                'VELVARR_IMAGE="${VELVARR_IMAGE:-ghcr.io/skare69/velvarr}"', regenerated_example
+            )
+            self.assertIn('VELVARR_TAG="${VELVARR_TAG:-latest}"', regenerated_example)
+
             self.assertEqual(database.read_bytes(), b"operator-owned database fixture")
             self.assertEqual(dashboard.read_text(), "title: Operator dashboard\n")
             self.assertTrue((config_path / "velvarr/README.md").is_file())
             self.assertEqual(env_path.stat().st_mode & 0o777, 0o600)
+
+    def test_existing_tag_gains_official_repository_without_changing_channel(self) -> None:
+        """Add the image setting to an older deployment while retaining its chosen version."""
+        plan = self.catalog.resolve("boudoirr")
+
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            env_path = Path(temporary_directory) / ".env"
+            env_path.write_text('VELVARR_TAG="v0.36.0"\n')
+            environment = render_environment(self.catalog, plan, env_path, generate_secrets=False)
+
+        self.assertIn('VELVARR_IMAGE="${VELVARR_IMAGE:-ghcr.io/skare69/velvarr}"', environment)
+        self.assertIn('VELVARR_TAG="v0.36.0"', environment)
 
     def test_existing_empty_secrets_are_preserved_without_silent_rotation(self) -> None:
         """Respect existing assignments even when an operator cleared a value."""
