@@ -44,6 +44,8 @@ class VelvarrTests(unittest.TestCase):
         self.assertEqual(velvarr.requires, ())
         self.assertIn("velvarr", self.catalog.preset("boudoirr").defaults)
         self.assertNotIn("velvarr", self.catalog.preset("boudoirr").core)
+        self.assertIn("jellyfin", self.catalog.preset("boudoirr").defaults)
+        self.assertNotIn("jellyfin", self.catalog.preset("boudoirr").core)
         self.assertIn("velvarr", self.catalog.resolve("boudoirr").service_ids)
         self.assertEqual(velvarr.named_volumes, {})
 
@@ -61,6 +63,42 @@ class VelvarrTests(unittest.TestCase):
         self.assertEqual(selected.auto_added, ())
         removed = self.catalog.resolve("boudoirr", remove={"velvarr"})
         self.assertNotIn("velvarr", removed.service_ids)
+        self.assertIn("jellyfin", removed.service_ids)
+
+    def test_jellyfin_homepage_uses_internal_port_independently_of_host_offsets(self) -> None:
+        """Keep widget requests inside Docker while browser links follow published ports."""
+        for preset_id, host_port in (("boudoirr", 18096), ("jellyfin", 28096), ("custom", 38096)):
+            with self.subTest(preset=preset_id):
+                plan = self.catalog.resolve(preset_id, add={"jellyfin", "homepage"})
+                compose = render_compose(self.catalog, plan)
+                environment = render_environment(self.catalog, plan, None, generate_secrets=False)
+
+                self.assertIn(
+                    "HOMEPAGE_VAR_JELLYFIN_URL: ${HOMEPAGE_VAR_JELLYFIN_URL}:8096",
+                    compose,
+                )
+                self.assertNotIn(
+                    "${HOMEPAGE_VAR_JELLYFIN_URL}:${JELLYFIN_WEBUI_PORT}",
+                    compose,
+                )
+                self.assertIn(
+                    f'HOMEPAGE_VAR_JELLYFIN_HREF="${{HOMEPAGE_VAR_JELLYFIN_HREF:-http://host.or.ip:{host_port}}}"',
+                    environment,
+                )
+
+    def test_jellyfin_removal_keeps_requests_and_omits_local_dashboard_settings(self) -> None:
+        """Support an external Jellyfin server without leaving a stale local card."""
+        plan = self.catalog.resolve("boudoirr", add={"homepage"}, remove={"jellyfin"})
+        compose = render_compose(self.catalog, plan)
+        environment = render_environment(self.catalog, plan, None, generate_secrets=False)
+        homepage = render_homepage_services(self.catalog, plan)
+
+        self.assertIn("velvarr", plan.service_ids)
+        self.assertNotIn("jellyfin", plan.service_ids)
+        self.assertNotIn("  jellyfin:", compose)
+        self.assertNotIn("JELLYFIN_", environment)
+        self.assertNotIn("- Jellyfin:", homepage)
+        self.assertIn("- Velvarr:", homepage)
 
     def test_chart_uses_shared_identity_and_independent_internal_networking(self) -> None:
         """Keep writable data owned by the host user without assuming image tools."""
@@ -228,7 +266,7 @@ class VelvarrTests(unittest.TestCase):
 
         self.assertIn("Recommended integrations (optional): velvarr", output.getvalue())
         output = io.StringIO()
-        plan = self.catalog.resolve("boudoirr", add={"velvarr"})
+        plan = self.catalog.resolve("boudoirr", remove={"jellyfin"})
 
         with redirect_stdout(output):
             ui = UI(plain=True)
@@ -241,26 +279,29 @@ class VelvarrTests(unittest.TestCase):
         self.assertIn("Complete Velvarr setup with Jellyfin", listing)
 
     @unittest.skipUnless(RICH_AVAILABLE, "Questionary and Rich are not installed")
-    def test_interactive_checkbox_starts_checked_and_accepts_deselection(self) -> None:
+    def test_interactive_companion_checkboxes_start_checked_and_accept_deselection(self) -> None:
         """Verify the actual checkbox choice is checked but remains removable."""
         from questionary import Choice
 
         ui = UI()
         ui.plain = False
 
-        with (
-            patch("maraudarr.ui.sys.stdin.isatty", return_value=True),
-            patch("maraudarr.ui.prompts.Choice", wraps=Choice) as choice_factory,
-            patch("maraudarr.ui.prompts.checkbox") as checkbox,
-        ):
-            checkbox.return_value.ask.return_value = []
-            selected = ui.choose_services(
-                [self.catalog.services["velvarr"]],
-                set(self.catalog.preset("boudoirr").defaults),
-            )
+        for service_id in ("velvarr", "jellyfin"):
+            with (
+                self.subTest(service=service_id),
+                patch("maraudarr.ui.sys.stdin.isatty", return_value=True),
+                patch("maraudarr.ui.prompts.Choice", wraps=Choice) as choice_factory,
+                patch("maraudarr.ui.prompts.checkbox") as checkbox,
+            ):
+                checkbox.return_value.ask.return_value = []
+                service = self.catalog.services[service_id]
+                selected = ui.choose_services(
+                    [service],
+                    set(self.catalog.preset("boudoirr").defaults),
+                )
 
-        choice_factory.assert_called_once_with("Velvarr", "velvarr", checked=True)
-        self.assertEqual(selected, set())
+            choice_factory.assert_called_once_with(service.title, service_id, checked=True)
+            self.assertEqual(selected, set())
 
     @unittest.skipUnless(RICH_AVAILABLE, "Rich is not installed")
     def test_styled_ui_also_shows_optional_recommendations(self) -> None:

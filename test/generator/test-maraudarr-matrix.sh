@@ -197,7 +197,7 @@ run_case duplex-core \
     --remove pattrmm,notifiarr
 
 #
-# Default Boudoirr voyage with Velvarr and qBittorrent as the only downloader.
+# Default Boudoirr voyage with Velvarr, Jellyfin, and qBittorrent as the only downloader.
 #
 run_case boudoirr --preset boudoirr
 
@@ -213,13 +213,12 @@ run_case boudoirr-addons \
     --add sabnzbd
 
 #
-# Boudoirr can choose either media server without gaining one by default.
+# Boudoirr can remove its default Jellyfin server or replace it with Plex.
 #
-run_case boudoirr-jellyfin \
-    --preset boudoirr \
-    --add jellyfin
+run_case boudoirr-without-jellyfin --preset boudoirr --remove jellyfin
 run_case boudoirr-plex \
     --preset boudoirr \
+    --remove jellyfin \
     --add plex
 
 #
@@ -227,8 +226,9 @@ run_case boudoirr-plex \
 #
 run_case boudoirr-velvarr \
     --preset boudoirr \
-    --add jellyfin,homepage
+    --add homepage
 run_case boudoirr-without-velvarr --preset boudoirr --remove velvarr
+run_case boudoirr-without-companions --preset boudoirr --remove velvarr,jellyfin
 run_case custom-velvarr \
     --preset custom \
     --add velvarr,homepage

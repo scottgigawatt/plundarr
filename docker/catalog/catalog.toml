@@ -376,10 +376,10 @@ defaults = ["qbittorrent", "calibre-web-automated", "cleanuparr", "watchtower", 
 #
 # Boudoirr reuses the same catalog for an adult-media-focused stack.
 #
-# This preset pairs Whisparr with removable Velvarr discovery and request defaults.
+# This preset pairs Whisparr with removable Velvarr requests and Jellyfin playback.
 [presets.boudoirr]
 title = "Boudoirr"
-description = "Whisparr automation with removable Velvarr requests and a VPN-protected torrent client."
+description = "Whisparr automation with removable Velvarr requests, Jellyfin playback, and VPN downloads."
 project_name = "boudoirr"
 network_subnet = "172.21.0.0/16"
 network_ip_range = "172.21.5.0/24"
@@ -398,7 +398,7 @@ compose_summary = [
   "environment-specific settings for a seamless VPN setup.",
 ]
 core = ["privateerr", "gluetun", "flaresolverr", "prowlarr", "whisparr"]
-defaults = ["qbittorrent", "velvarr", "cleanuparr", "watchtower"]
+defaults = ["qbittorrent", "velvarr", "jellyfin", "cleanuparr", "watchtower"]
 
 #
 # Jellyfin keeps the standalone deployment deliberately small.

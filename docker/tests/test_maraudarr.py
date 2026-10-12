@@ -120,13 +120,14 @@ class MaraudarrTests(unittest.TestCase):
                 "qbittorrent",
                 "whisparr",
                 "velvarr",
+                "jellyfin",
                 "cleanuparr",
                 "watchtower",
             ),
         )
         self.assertNotIn("depends_on:", extract_service(compose, "cleanuparr"))
         self.assertNotIn("depends_on:", extract_service(compose, "whisparr"))
-        self.assertNotIn("  jellyfin:", compose)
+        self.assertIn("  jellyfin:", compose)
         self.assertNotIn("  plex:", compose)
 
     def test_whisparr_defaults_to_the_v3_release_channel(self) -> None:
@@ -858,6 +859,7 @@ class MaraudarrTests(unittest.TestCase):
         self.assertIn(18080, published_ports["boudoirr"])
         self.assertIn(21011, published_ports["boudoirr"])
         self.assertIn(16699, published_ports["boudoirr"])
+        self.assertIn(18096, published_ports["boudoirr"])
         self.assertIn(28096, published_ports["jellyfin"])
         self.assertIn(48213, published_ports["calibre-web-automated"])
         self.assertIn(8213, published_ports["plundarr"])

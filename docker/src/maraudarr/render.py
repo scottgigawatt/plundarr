@@ -190,6 +190,8 @@ def _prepare_service(
                 "      HOMEPAGE_VAR_SONARR_ANIME_CONTAINER: ${COMPOSE_PROJECT_NAME}-sonarr-anime-${SONARR_ANIME_TAG}\n"
             )
             block = block.replace(anchor, insertion + anchor, 1)
+
+        # Jellyfin widgets use the internal port independently of the preset host-port offset.
         if "jellyfin" in selected:
             anchor = "\n      # Homepage Speedtest Tracker click target and widget"
             if anchor not in block:
@@ -197,7 +199,7 @@ def _prepare_service(
             insertion = (
                 "\n      # Homepage Jellyfin click target and widget\n"
                 "      HOMEPAGE_VAR_JELLYFIN_HREF: ${HOMEPAGE_VAR_JELLYFIN_HREF}\n"
-                "      HOMEPAGE_VAR_JELLYFIN_URL: ${HOMEPAGE_VAR_JELLYFIN_URL}:${JELLYFIN_WEBUI_PORT}\n"
+                "      HOMEPAGE_VAR_JELLYFIN_URL: ${HOMEPAGE_VAR_JELLYFIN_URL}:8096\n"
                 "      HOMEPAGE_VAR_JELLYFIN_KEY: ${HOMEPAGE_VAR_JELLYFIN_KEY}\n"
             )
             block = block.replace(anchor, insertion + anchor, 1)
