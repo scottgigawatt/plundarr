@@ -115,7 +115,7 @@ Use `make configure` for an interactive picker or pass `PRESET` to `make ship` f
 | 🗺️ Preset | 🎯 Primary purpose |
 | --- | --- |
 | 🏴‍☠️ `plundarr` | Movies, television, and ebooks with a VPN-protected torrent downloader |
-| 🔞 `boudoirr` | Whisparr automation with a VPN-protected torrent downloader |
+| 🔞 `boudoirr` | Whisparr automation with a VPN-protected torrent downloader and opt-in Velvarr requests |
 | 🎞️ `jellyfin` | Standalone Jellyfin media server |
 | 🎬 `plex` | Standalone Plex Media Server |
 | 📚 `calibre-web-automated` | Standalone ebook library and automatic ingest service |
@@ -165,6 +165,16 @@ make ship ADD_SERVICES=lidarr
 `HOST_MUSIC_PATH` defaults to `/volume1/music/Music/Media/Music`; change it when the host music library lives elsewhere. Lidarr receives it read/write at `/music` and shares `/downloads` with the selected download clients. Open Lidarr after launch, use `/music` as its root folder, then connect Prowlarr and a download client. When Plex is also selected, Maraudarr adds the same library read-only at `/music`; Jellyfin reaches it as `/data/music` when its data root and the Plundarr media root point to the same host directory. The generated Homepage card requires a Lidarr API key in `HOMEPAGE_VAR_LIDARR_KEY`.
 
 The [LinuxServer Lidarr image](https://docs.linuxserver.io/images/docker-lidarr/) supports `linux/amd64` and `linux/arm64`, not `linux/arm/v7`. The [Homepage Lidarr widget guide](https://gethomepage.dev/widgets/services/lidarr/) documents the API key and supported fields used by the generated card.
+
+### Add adult-media discovery and requests
+
+Velvarr is a recommended, opt-in Whisparr companion. Add it to Boudoirr with a local Jellyfin server:
+
+```sh
+make ship PRESET=boudoirr ADD_SERVICES=velvarr,jellyfin
+```
+
+If Jellyfin already runs elsewhere, add only `velvarr` and connect that server during setup. The generated defaults use host port `16699`, `./config/velvarr`, and the shared host UID/GID settings. Maraudarr generates the setup and encryption secrets once and preserves them on regeneration. Velvarr currently supports `linux/amd64` only; Jellyfin is required for login even when Plex is selected. Read the [Velvarr setup guide](docs/project-guides/velvarr.md) for permissions, internal connection URLs, reverse proxies, and backups.
 
 ### Preview and sync Recyclarr
 

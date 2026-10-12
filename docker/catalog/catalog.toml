@@ -132,7 +132,7 @@ category = "Media automation"
 url = "https://github.com/Whisparr/Whisparr"
 order = 330
 requires = ["prowlarr"]
-recommended = ["qbittorrent"]
+recommended = ["qbittorrent", "velvarr"]
 
 # Bazarr adds subtitle automation to the Radarr and Sonarr libraries.
 [services.bazarr]
@@ -172,6 +172,15 @@ description = "Accepts and manages media requests."
 category = "Media experience"
 url = "https://github.com/seerr-team/seerr"
 order = 400
+
+# Velvarr accepts adult-media requests with local or external Jellyfin and Whisparr.
+[services.velvarr]
+title = "Velvarr"
+description = "Discovers adult media and accepts requests with Jellyfin login and Whisparr fulfillment."
+category = "Media experience"
+url = "https://github.com/Skare69/velvarr"
+order = 405
+recommended = ["whisparr", "jellyfin"]
 
 # Plex is an explicitly selected media server with separate read-only libraries.
 [services.plex]
