@@ -86,10 +86,10 @@ If your generated chart still contains the fixed image repository, regenerate it
 2. Open your host address on port `16699`, or the configured HTTPS reverse proxy. Read `VELVARR_SETUP_SECRET` locally from `dist/boudoirr/.env` and supply it during owner setup.
 3. Connect Jellyfin using your account, API key, and selected adult-media libraries. Use `http://jellyfin:8096` for a Jellyfin container in this project. For a separate server, use an address reachable from the Velvarr container.
 4. Set Jellyfin's external URL to the address users open in their browsers. An internal Docker hostname is not a browser playback address.
-5. Connect Whisparr v3 at `http://whisparr:6969` with its API key. Review root folders, quality profiles, and path mappings in Velvarr. Whisparr and Jellyfin in this preset share `/data`, so corresponding library paths can match.
+5. Connect Whisparr v3 at `http://whisparr:6969` with its API key. Review root folders, quality profiles, and path mappings in Velvarr. Whisparr mounts individual libraries beneath `/data`, while Jellyfin mounts the whole media root. With Boudoirr defaults, main Whisparr and Jellyfin movie and scene paths already match at `/data/movies` and `/data/scenes`. Review mappings when changing host paths.
 6. Configure TPDB or StashDB credentials in Velvarr's metadata-provider settings, then verify discovery and request fulfillment.
 
-If you select the optional [Whisparr Alt service](https://github.com/scottgigawatt/plundarr/blob/main/docker/services/whisparr-alt/README.md) for TPDB movies, connect Velvarr to `http://whisparr-alt:6969` with that instance's API key. With the default mounts, map Alt's `/data` to Jellyfin's `/data/movies-alt`. Velvarr currently connects to one Whisparr endpoint.
+If you select the optional [Whisparr Alt service](https://github.com/scottgigawatt/plundarr/blob/main/docker/services/whisparr-alt/README.md) for TPDB movies, connect Velvarr to `http://whisparr-alt:6969` with that instance's API key. With the default mounts, map Alt's `/data/movies` to Jellyfin's `/data/movies-alt`; review both the host-library path and chosen movie provider before using Alt for requests. Velvarr currently connects to one Whisparr endpoint.
 
 Check that the container becomes healthy:
 

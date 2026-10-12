@@ -73,9 +73,28 @@ class WhisparrAltTests(unittest.TestCase):
         self.assertIn("hostname: whisparr-alt", alt)
         self.assertIn("${WHISPARR_ALT_WEBUI_PORT}:6969", alt)
         self.assertIn("${WHISPARR_ALT_CONFIG_PATH}:/config:rw", alt)
-        self.assertIn("${WHISPARR_ALT_DATA_PATH}:/data:rw", alt)
+        self.assertNotIn("${WHISPARR_ALT_DATA_PATH}:/data:rw", alt)
+        self.assertIn("${WHISPARR_ALT_MOVIES_PATH}:/data/movies:rw", alt)
+        self.assertIn("${WHISPARR_ALT_SCENES_PATH}:/data/scenes:rw", alt)
+        self.assertIn("${WHISPARR_ALT_IMPORT_PATH}:/data/import:rw", alt)
+        self.assertIn("${WHISPARR_ALT_RECYCLE_PATH}:/data/recycle:rw", alt)
         self.assertIn("${HOST_DOWNLOADS_PATH}:/downloads:rw", alt)
         self.assertIn("http://127.0.0.1:6969/ping", alt)
+
+        # Selective mounts expose each library through stable paths without mounting the whole host root.
+        for service_id, prefix in (("whisparr", "WHISPARR"), ("whisparr-alt", "WHISPARR_ALT")):
+            service = extract_service(compose, service_id)
+            self.assertNotIn(f"${{{prefix}_DATA_PATH}}", service)
+            for kind, target in (
+                ("MOVIES", "movies"),
+                ("SCENES", "scenes"),
+                ("IMPORT", "import"),
+                ("RECYCLE", "recycle"),
+            ):
+                self.assertIn(f"${{{prefix}_{kind}_PATH}}:/data/{target}:rw", service)
+            self.assertIn(
+                "/data:rw,noexec,nosuid,size=1m,uid=${DEFAULT_PUID},gid=${DEFAULT_PGID}", service
+            )
 
         # Both instances use the same required indexer and wait for its healthcheck.
         for service_id in ("whisparr", "whisparr-alt"):
@@ -96,7 +115,7 @@ class WhisparrAltTests(unittest.TestCase):
             ("custom", 36970, "/volume1/plex"),
         ):
             with self.subTest(preset=preset_id):
-                plan = self.catalog.resolve(preset_id, add={"whisparr-alt"})
+                plan = self.catalog.resolve(preset_id, add={"whisparr", "whisparr-alt"})
                 environment = render_environment(self.catalog, plan, None, generate_secrets=False)
 
                 self.assertIn('WHISPARR_ALT_TAG="${WHISPARR_ALT_TAG:-v3}"', environment)
@@ -112,7 +131,77 @@ class WhisparrAltTests(unittest.TestCase):
                     f'WHISPARR_ALT_DATA_PATH="${{WHISPARR_ALT_DATA_PATH:-{media_root}/movies-alt}}"',
                     environment,
                 )
+                for prefix, folders in (
+                    (
+                        "WHISPARR",
+                        (
+                            ("MOVIES", "movies"),
+                            ("SCENES", "scenes"),
+                            ("IMPORT", "import"),
+                            ("RECYCLE", "recycle"),
+                        ),
+                    ),
+                    (
+                        "WHISPARR_ALT",
+                        (
+                            ("MOVIES", "movies-alt"),
+                            ("SCENES", "scenes-alt"),
+                            ("IMPORT", "import"),
+                            ("RECYCLE", "recycle-alt"),
+                        ),
+                    ),
+                ):
+                    for kind, folder in folders:
+                        self.assertIn(
+                            f'{prefix}_{kind}_PATH="${{{prefix}_{kind}_PATH:-{media_root}/{folder}}}"',
+                            environment,
+                        )
                 self.assertNotIn("METADATA_SOURCE", environment)
+
+    def test_legacy_roots_survive_upgrade_without_becoming_broad_mounts(self) -> None:
+        """Keep old assignments intact while requiring explicit review of the new paths."""
+        plan = self.catalog.resolve("boudoirr", add={"whisparr-alt"})
+        legacy = 'WHISPARR_DATA_PATH="/srv/legacy-primary"  # operator override\nWHISPARR_ALT_DATA_PATH="/srv/legacy-alt"\n'
+
+        with tempfile.TemporaryDirectory() as temporary:
+            output = Path(temporary)
+            env_path = output / ".env"
+            env_path.write_text(legacy)
+
+            with patch("maraudarr.render.validate_compose"):
+                write_stack(self.catalog, plan, output)
+
+            environment = env_path.read_text()
+            example = (output / "example.env").read_text()
+            compose = (output / "docker-compose.yml").read_text()
+
+            for assignment in legacy.splitlines():
+                self.assertIn(assignment.split("#", 1)[0].rstrip(), environment)
+
+            for variable, default in (
+                ("WHISPARR_DATA_PATH", "/volume1/jellyfin"),
+                ("WHISPARR_ALT_DATA_PATH", "/volume1/jellyfin/movies-alt"),
+            ):
+                self.assertIn(f'{variable}="${{{variable}:-{default}}}"', example)
+                self.assertNotIn(f"${{{variable}}}", compose)
+
+            for generated in (environment, example):
+                self.assertIn(
+                    'WHISPARR_MOVIES_PATH="${WHISPARR_MOVIES_PATH:-/volume1/jellyfin/movies}"',
+                    generated,
+                )
+                self.assertIn(
+                    'WHISPARR_ALT_MOVIES_PATH="${WHISPARR_ALT_MOVIES_PATH:-/volume1/jellyfin/movies-alt}"',
+                    generated,
+                )
+                self.assertIn(
+                    'WHISPARR_IMPORT_PATH="${WHISPARR_IMPORT_PATH:-/volume1/jellyfin/import}"',
+                    generated,
+                )
+                self.assertIn(
+                    'WHISPARR_ALT_IMPORT_PATH="${WHISPARR_ALT_IMPORT_PATH:-/volume1/jellyfin/import}"',
+                    generated,
+                )
 
     def test_homepage_cards_follow_each_instance_independently(self) -> None:
         """Show both selected instances without leaking variables for an absent instance."""
@@ -175,6 +264,15 @@ class WhisparrAltTests(unittest.TestCase):
                 'WHISPARR_ALT_WEBUI_PORT="17970"',
                 'WHISPARR_ALT_CONFIG_PATH="./config/alternate"',
                 'WHISPARR_ALT_DATA_PATH="/srv/library/alternate"',
+                'WHISPARR_DATA_PATH="/srv/library/legacy-primary"',
+                'WHISPARR_MOVIES_PATH="/srv/library/main-movies"',
+                'WHISPARR_SCENES_PATH="/srv/library/main-scenes"',
+                'WHISPARR_IMPORT_PATH="/srv/library/shared-import"',
+                'WHISPARR_RECYCLE_PATH="/srv/library/main-recycle"',
+                'WHISPARR_ALT_MOVIES_PATH="/srv/library/alt-movies"',
+                'WHISPARR_ALT_SCENES_PATH="/srv/library/alt-scenes"',
+                'WHISPARR_ALT_IMPORT_PATH="/srv/library/shared-import"',
+                'WHISPARR_ALT_RECYCLE_PATH="/srv/library/alt-recycle"',
                 'HOMEPAGE_VAR_WHISPARR_ALT_HREF="https://alternate.example.com"',
                 'HOMEPAGE_VAR_WHISPARR_HREF="https://primary.example.com"',
             )
@@ -237,7 +335,8 @@ class WhisparrAltTests(unittest.TestCase):
             self.assertEqual(status, 0)
             self.assertIn("  whisparr-alt:", (Path(temporary) / "docker-compose.yml").read_text())
             self.assertIn(
-                "Keep Whisparr Alt's config and managed root folders separate.", output.getvalue()
+                "Keep Whisparr Alt's config, host libraries, and recycling bin separate.",
+                output.getvalue(),
             )
             self.assertIn("distinct download category", output.getvalue())
 

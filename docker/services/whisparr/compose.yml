@@ -23,9 +23,16 @@ services:
 
     # Mount host directories into the container
     volumes:
-      - ${WHISPARR_CONFIG_PATH}:/config:rw    # Persistent Whisparr configuration
-      - ${WHISPARR_DATA_PATH}:/data:rw        # Adult media library root
-      - ${HOST_DOWNLOADS_PATH}:/downloads:rw  # Shared download tree for imports and hardlinks
+      - ${WHISPARR_CONFIG_PATH}:/config:rw         # Persistent Whisparr configuration
+      - ${WHISPARR_MOVIES_PATH}:/data/movies:rw    # Managed movie library
+      - ${WHISPARR_SCENES_PATH}:/data/scenes:rw    # Managed scene library
+      - ${WHISPARR_IMPORT_PATH}:/data/import:rw    # Shared staging directory for manual imports
+      - ${WHISPARR_RECYCLE_PATH}:/data/recycle:rw  # Private recycling bin for this instance
+      - ${HOST_DOWNLOADS_PATH}:/downloads:rw       # Shared download tree for imports and hardlinks
+
+    # Provide a writable parent for the persistent media and staging mounts
+    tmpfs:
+      - /data:rw,noexec,nosuid,size=1m,uid=${DEFAULT_PUID},gid=${DEFAULT_PGID}  # 1 MiB writable parent; child bind mounts persist
 
     # Define container healthcheck to verify Whisparr connectivity
     healthcheck:
