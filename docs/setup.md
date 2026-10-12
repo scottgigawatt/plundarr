@@ -54,13 +54,13 @@ Existing deployments must regenerate their Compose and environment files with th
 
 ## Add Velvarr to Boudoirr
 
-Velvarr is recommended beside Whisparr and remains opt-in. Select it in `make configure` or generate Boudoirr with both Velvarr and a local Jellyfin server:
+Velvarr is selected by default in Boudoirr and remains removable through `make configure` or `REMOVE_SERVICES=velvarr`. Generate Boudoirr with a local Jellyfin server:
 
 ```sh
-make ship PRESET=boudoirr ADD_SERVICES=velvarr,jellyfin
+make ship PRESET=boudoirr ADD_SERVICES=jellyfin
 ```
 
-For an existing Jellyfin server, add only `velvarr` and connect the server during owner setup. Velvarr uses host port `16699` in Boudoirr, stores data at `dist/boudoirr/config/velvarr`, and runs as the shared `DEFAULT_PUID:DEFAULT_PGID`. Its generated HTTP setting permits private-network addresses so the application can reach `http://whisparr:6969` and `http://jellyfin:8096`. Plex does not replace Velvarr's Jellyfin authentication requirement. The current official image supports `linux/amd64` only. Follow the [Velvarr guide](project-guides/velvarr.md) before launch.
+For an existing Jellyfin server, use `make ship PRESET=boudoirr` and connect that server during owner setup. Velvarr uses host port `16699` in Boudoirr, stores data at `dist/boudoirr/config/velvarr`, and runs as the shared `DEFAULT_PUID:DEFAULT_PGID`. Its generated HTTP setting permits private-network addresses so the application can reach `http://whisparr:6969` and `http://jellyfin:8096`. Plex does not replace Velvarr's Jellyfin authentication requirement. The current official image supports `linux/amd64` only. Follow the [Velvarr guide](project-guides/velvarr.md) before launch.
 
 ## Plan project networks
 

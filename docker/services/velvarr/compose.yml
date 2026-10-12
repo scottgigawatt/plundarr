@@ -19,33 +19,32 @@ services:
     init: true                                                      # Reap child processes and forward shutdown signals
     read_only: true                                                 # Keep application code immutable
 
-    # Keep database migrations under operator control
-    labels: *disable-watchtower-updates
-
-    # Restrict the application to its writable data and temporary directories
+    # Drop Linux capabilities for security hardening
     cap_drop:
-      - ALL                             # No optional Linux capabilities are required
+      - ALL  # No optional Linux capabilities are required
+
+    # Prevent the container from acquiring additional privileges
     security_opt:
-      - no-new-privileges:true          # Prevent processes from gaining privileges
-    tmpfs:
-      - /tmp:rw,noexec,nosuid,size=64m  # Temporary Node.js runtime storage
+      - no-new-privileges:true  # Prevent processes from gaining privileges
 
     # Define the container environment
     environment:
-      <<: *default-environment                       # Reuse the stack timezone
-      VELVARR_SECRET_KEY: ${VELVARR_SECRET_KEY}      # 64 hex characters encrypt stored credentials; keep for recovery
-      VELVARR_SETUP_SECRET: ${VELVARR_SETUP_SECRET}  # At least 32 characters protect the one-time owner setup
-      VELVARR_ORIGIN: ${VELVARR_ORIGIN}              # Optional browser origin, including scheme and host port
-      VELVARR_ALLOW_HTTP: ${VELVARR_ALLOW_HTTP}      # 1 permits private-network HTTP; 0 requires HTTPS outside loopback
-      VELVARR_UPDATE_CHECK: ${VELVARR_UPDATE_CHECK}  # 1 enables release notices; 0 disables them
-
-      # Optional private Discord notifications
-      VELVARR_DISCORD_WEBHOOK_URL: ${VELVARR_DISCORD_WEBHOOK_URL}  # HTTPS webhook; empty disables notifications
+      <<: *default-environment                                     # Reuse the stack timezone
+      VELVARR_SECRET_KEY: ${VELVARR_SECRET_KEY}                    # 64 hex characters encrypt stored credentials; keep for recovery
+      VELVARR_SETUP_SECRET: ${VELVARR_SETUP_SECRET}                # At least 32 characters protect the one-time owner setup
+      VELVARR_ORIGIN: ${VELVARR_ORIGIN}                            # Optional browser origin, including scheme and host port
+      VELVARR_ALLOW_HTTP: ${VELVARR_ALLOW_HTTP}                    # 1 permits private-network HTTP; 0 requires HTTPS outside loopback
+      VELVARR_UPDATE_CHECK: ${VELVARR_UPDATE_CHECK}                # 1 enables release notices; 0 disables them
+      VELVARR_DISCORD_WEBHOOK_URL: ${VELVARR_DISCORD_WEBHOOK_URL}  # Optional HTTPS webhook; empty disables notifications
       VELVARR_DISCORD_DETAIL: ${VELVARR_DISCORD_DETAIL}            # 1 includes titles; 0 sends identity-only messages
 
     # Publish the web interface independently of the internal service port
     ports:
       - ${VELVARR_WEBUI_PORT}:6699  # Host web port; the application and healthcheck always use 6699
+
+    # Provide writable ephemeral storage required by Node.js and the application
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m  # Temporary Node.js runtime storage
 
     # Persist the SQLite database, encrypted credentials, and artwork cache
     volumes:

@@ -28,24 +28,27 @@ from maraudarr.ui import RICH_AVAILABLE, UI
 
 
 class VelvarrTests(unittest.TestCase):
-    """Keep Velvarr opt-in while preserving application state and recovery keys."""
+    """Keep Velvarr removable while preserving application state and recovery keys."""
 
     def setUp(self) -> None:
         """Load the real catalog independently for each integration scenario."""
         self.catalog = Catalog(Path(__file__).resolve().parents[1])
 
-    def test_recommendations_do_not_change_default_or_custom_selections(self) -> None:
-        """Offer Velvarr beside Whisparr without forcing local integration servers."""
+    def test_boudoirr_default_is_removable_and_other_presets_remain_independent(self) -> None:
+        """Select Velvarr for Boudoirr without forcing it or local integration servers."""
         whisparr = self.catalog.services["whisparr"]
         velvarr = self.catalog.services["velvarr"]
 
         self.assertIn("velvarr", whisparr.recommended)
         self.assertEqual(velvarr.recommended, ("whisparr", "jellyfin"))
         self.assertEqual(velvarr.requires, ())
-        self.assertNotIn("velvarr", self.catalog.preset("boudoirr").services)
+        self.assertIn("velvarr", self.catalog.preset("boudoirr").defaults)
+        self.assertNotIn("velvarr", self.catalog.preset("boudoirr").core)
+        self.assertIn("velvarr", self.catalog.resolve("boudoirr").service_ids)
+        self.assertEqual(velvarr.named_volumes, {})
 
         for preset_id in self.catalog.presets:
-            if preset_id == "custom":
+            if preset_id in {"boudoirr", "custom"}:
                 continue
 
             with self.subTest(preset=preset_id):
@@ -70,7 +73,7 @@ class VelvarrTests(unittest.TestCase):
         self.assertIn("ghcr.io/skare69/velvarr:${VELVARR_TAG}", service)
         self.assertIn("${VELVARR_CONFIG_PATH}:/data:rw", service)
         self.assertIn("${VELVARR_WEBUI_PORT}:6699", service)
-        self.assertIn("labels: *disable-watchtower-updates", service)
+        self.assertNotIn("labels: *disable-watchtower-updates", service)
         self.assertIn("read_only: true", service)
         self.assertIn("- ALL", service)
         self.assertIn("no-new-privileges:true", service)
@@ -158,7 +161,9 @@ class VelvarrTests(unittest.TestCase):
 
             # Temporarily deselecting a service must not discard the key needed for its database.
             with patch("maraudarr.render.validate_compose"):
-                write_stack(self.catalog, self.catalog.resolve("boudoirr"), output)
+                write_stack(
+                    self.catalog, self.catalog.resolve("boudoirr", remove={"velvarr"}), output
+                )
                 write_stack(self.catalog, plan, output)
 
             regenerated = env_path.read_text()
@@ -219,7 +224,7 @@ class VelvarrTests(unittest.TestCase):
         output = io.StringIO()
 
         with redirect_stdout(output):
-            UI(plain=True).show_plan(self.catalog.resolve("boudoirr"))
+            UI(plain=True).show_plan(self.catalog.resolve("boudoirr", remove={"velvarr"}))
 
         self.assertIn("Recommended integrations (optional): velvarr", output.getvalue())
         output = io.StringIO()
@@ -235,6 +240,28 @@ class VelvarrTests(unittest.TestCase):
         self.assertIn("read VELVARR_SETUP_SECRET locally", listing)
         self.assertIn("Complete Velvarr setup with Jellyfin", listing)
 
+    @unittest.skipUnless(RICH_AVAILABLE, "Questionary and Rich are not installed")
+    def test_interactive_checkbox_starts_checked_and_accepts_deselection(self) -> None:
+        """Verify the actual checkbox choice is checked but remains removable."""
+        from questionary import Choice
+
+        ui = UI()
+        ui.plain = False
+
+        with (
+            patch("maraudarr.ui.sys.stdin.isatty", return_value=True),
+            patch("maraudarr.ui.prompts.Choice", wraps=Choice) as choice_factory,
+            patch("maraudarr.ui.prompts.checkbox") as checkbox,
+        ):
+            checkbox.return_value.ask.return_value = []
+            selected = ui.choose_services(
+                [self.catalog.services["velvarr"]],
+                set(self.catalog.preset("boudoirr").defaults),
+            )
+
+        choice_factory.assert_called_once_with("Velvarr", "velvarr", checked=True)
+        self.assertEqual(selected, set())
+
     @unittest.skipUnless(RICH_AVAILABLE, "Rich is not installed")
     def test_styled_ui_also_shows_optional_recommendations(self) -> None:
         """Keep optional integration guidance visible in the container's rich UI."""
@@ -243,7 +270,7 @@ class VelvarrTests(unittest.TestCase):
         output = io.StringIO()
         ui = UI()
         ui.console = Console(file=output, color_system=None, width=120)
-        ui.show_plan(self.catalog.resolve("boudoirr"))
+        ui.show_plan(self.catalog.resolve("boudoirr", remove={"velvarr"}))
 
         self.assertIn("Recommended integrations (optional): velvarr", output.getvalue())
 

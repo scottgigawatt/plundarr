@@ -1,11 +1,3 @@
-#
-# Copyright 2025-2026 Scott Gigawatt
-#
-# Licensed under the Apache License, Version 2.0.
-#
-# velvarr.yaml: Homepage link card for selected Velvarr deployments.
-#
-
     - Velvarr:
         icon: mdi-movie-search
         href: {{HOMEPAGE_VAR_VELVARR_HREF}}

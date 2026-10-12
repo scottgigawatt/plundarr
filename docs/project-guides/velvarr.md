@@ -1,6 +1,6 @@
 # Discover and request adult media with Velvarr 🔞
 
-[Velvarr](https://github.com/Skare69/velvarr) discovers adult movies and scenes, sends approved requests to Whisparr v3, and connects users to Jellyfin playback. It is recommended beside Whisparr in Maraudarr and remains opt-in. The current official image supports `linux/amd64` only.
+[Velvarr](https://github.com/Skare69/velvarr) discovers adult movies and scenes, sends approved requests to Whisparr v3, and connects users to Jellyfin playback. It is selected by default in Boudoirr and can be removed in the CLI or interactive picker. The current official image supports `linux/amd64` only.
 
 ## Select the services
 
@@ -9,13 +9,19 @@ You need a Jellyfin server, an account allowed to access the intended libraries,
 Generate Boudoirr with Velvarr and a local Jellyfin server:
 
 ```sh
-make ship PRESET=boudoirr ADD_SERVICES=velvarr,jellyfin
+make ship PRESET=boudoirr ADD_SERVICES=jellyfin
 ```
 
-If Jellyfin already runs in another project or on another host, select only Velvarr:
+If Jellyfin already runs in another project or on another host, generate Boudoirr with its defaults:
 
 ```sh
-make ship PRESET=boudoirr ADD_SERVICES=velvarr
+make ship PRESET=boudoirr
+```
+
+To omit Velvarr, clear its initially checked box in `make configure`, or use:
+
+```sh
+make ship PRESET=boudoirr REMOVE_SERVICES=velvarr
 ```
 
 Other presets can select `velvarr` through `ADD_SERVICES` or `make configure`. Whisparr and Jellyfin are recommended integrations, so Maraudarr does not force local containers for either service. Include your complete service selection when regenerating an existing project.
@@ -39,7 +45,7 @@ Edit `dist/boudoirr/.env`. Defaults follow Plundarr's existing service conventio
 
 The base host port is `6699`; Boudoirr adds its normal `10000` offset, while Custom adds `30000`. Internal service URLs never receive the host-port offset. Both `.env` and `example.env` contain these defaults, but only `.env` receives generated secrets. Existing assignments, including empty values and operator overrides, survive regeneration exactly.
 
-The application runs as `DEFAULT_PUID:DEFAULT_PGID` with `DEFAULT_GROUP`, matching other rootless service charts. Set the shared IDs from `id -u` and `id -g` for your Synology account and confirm that account can write the selected config directory. Velvarr does not need media or download mounts; it connects to Whisparr and Jellyfin over the project network.
+The application runs as `DEFAULT_PUID:DEFAULT_PGID` with `DEFAULT_GROUP`, matching other rootless service charts. Set the shared IDs from `id -u` and `id -g` for your Synology account and confirm that account can write the selected config directory. Velvarr does not need media or download mounts; it connects to Whisparr and Jellyfin over the project network. SQLite state uses this host bind mount rather than a named volume or separate database service.
 
 ## Launch and complete setup
 
@@ -61,7 +67,17 @@ Check that the container becomes healthy:
 make ps PRESET=boudoirr
 ```
 
-The public healthcheck confirms the application is responding; it does not prove owner setup or upstream integrations are complete. `localhost` in a service URL refers to the Velvarr container, not the Synology host.
+The public healthcheck comes from [upstream's Dockerfile](https://github.com/Skare69/velvarr/blob/main/Dockerfile), using Plundarr's shared interval, timeout, start period, and retries. It confirms the application is responding; it does not prove owner setup or upstream integrations are complete. Upstream's [Compose example](https://github.com/Skare69/velvarr/blob/main/compose.yaml) does not set `read_only: true`; Plundarr adds that hardening while leaving `/data` and `/tmp` writable. The chart has no `depends_on` because Velvarr starts before owner setup and can connect to external Jellyfin and Whisparr servers. `localhost` in a service URL refers to the Velvarr container, not the Synology host.
+
+`VELVARR_ORIGIN` is the exact address you open in your browser: scheme, hostname or IP address, and port when nonstandard. It has no path, query, or trailing slash. For example, use one of these values, replacing the example host with yours:
+
+```sh
+VELVARR_ORIGIN="http://192.168.1.210:16699"
+```
+
+```sh
+VELVARR_ORIGIN="https://velvarr.example.com"
+```
 
 For a Synology HTTPS reverse proxy, set `VELVARR_ORIGIN` to the exact browser origin, such as `https://velvarr.example.com`, forward to host port `16699`, and pass `X-Forwarded-Proto: https`. Keep `VELVARR_ALLOW_HTTP=1` when internal Whisparr or Jellyfin connections use private HTTP. Set it to `0` only when those non-loopback connections use HTTPS. Recreate the container with `make up PRESET=boudoirr` after changing `.env`; a restart alone does not reload its environment.
 
@@ -76,7 +92,7 @@ Maraudarr refreshes its generated `config/homepage/services.yaml` from the selec
 > [!IMPORTANT]
 > Keep an off-host copy of `VELVARR_SECRET_KEY` with every backup. The key is not stored in the database backup; losing it prevents recovery of encrypted credentials. `make backup` archives config files, not `.env`.
 
-For a consistent host config archive, stop only Velvarr while the archive is created. A live SQLite database can have pending writes in its write-ahead log, so do not copy only its main database file while it is running.
+For a file-copy backup, stop Velvarr first and copy its entire `config/velvarr` directory, including any SQLite journal or write-ahead log files. Keep the matching encryption key separately. For a consistent host config archive, stop only Velvarr while the archive is created. A live SQLite database can have pending writes in its write-ahead log, so do not copy only its main database file while it is running.
 
 ```sh
 docker compose --project-directory dist/boudoirr stop velvarr
@@ -88,6 +104,6 @@ Confirm that the archive exists under `dist/boudoirr/backups`, save the matching
 
 Restore the Velvarr config files from a stopped-container archive into a fresh data directory. Point `VELVARR_CONFIG_PATH` at that directory, restore the matching `VELVARR_SECRET_KEY`, check permissions, and recreate Velvarr. Preserve any SQLite companion files included in the archive. For an upstream online snapshot, restore it as `velvarr.sqlite` in a fresh directory with the same key; see [upstream backup and recovery](https://github.com/Skare69/velvarr#backup-and-recovery).
 
-`make down`, `make nuke`, and regeneration preserve this bind-mounted application state. `make delete-config` deletes the host config tree, including Velvarr data and any backups stored inside that tree. Keep recovery copies outside it. Watchtower updates are disabled for Velvarr; export a backup and review upstream release notes before deliberately updating its floating tag.
+`make down`, `make nuke`, and regeneration preserve this bind-mounted application state. `make delete-config` deletes the host config tree, including Velvarr data and any backups stored inside that tree. Keep recovery copies outside it. Velvarr is eligible for Watchtower updates. Keep regular backups and review upstream release notes when managing its floating image tag.
 
 Your requests deserve a lifeboat, too.
