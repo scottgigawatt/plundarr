@@ -1,0 +1,5 @@
+    - Whisparr:
+        icon: whisparr.svg
+        href: {{HOMEPAGE_VAR_WHISPARR_HREF}}
+        description: Adult-media library management
+        container: {{HOMEPAGE_VAR_WHISPARR_CONTAINER}}

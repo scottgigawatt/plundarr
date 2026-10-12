@@ -42,7 +42,7 @@ The base port is `6970`, with Boudoirr's usual `10000` offset. The library defau
 
 Velvarr currently connects to one Whisparr endpoint. If Alt manages the TPDB library, connect Velvarr to `http://whisparr-alt:6969` with Alt's API key and map Alt's `/data` to Jellyfin's `/data/movies-alt`. Adjust that mapping when you change host mounts. Velvarr cannot combine both Whisparr instances through this chart; see the [Velvarr setup guide](../../../docs/project-guides/velvarr.md).
 
-When Homepage is selected too, Maraudarr adds a **Whisparr Alt** browser link and container status card. Set `HOMEPAGE_VAR_WHISPARR_ALT_HREF` to your host or reverse-proxy URL in `.env`.
+When Homepage is selected too, Maraudarr adds a **Whisparr Alt** browser link and container status card. Set `HOMEPAGE_VAR_WHISPARR_ALT_HREF` to your host or reverse-proxy URL in `.env`. When the primary instance is selected too, Homepage shows separate **Whisparr** and **Whisparr Alt** cards, each pointing to its own port and container.
 
 Verify that both Whisparr containers are healthy with `make ps PRESET=boudoirr`, test Prowlarr's two application connections, and confirm a download lands only in its intended library.
 

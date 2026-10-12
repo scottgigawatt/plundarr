@@ -169,6 +169,7 @@ def _prepare_service(
             "Homepage Bazarr click target and widget": "bazarr" in selected,
             "Homepage Seerr click target and widget": "seerr" in selected,
             "Homepage Velvarr click target": "velvarr" in selected,
+            "Homepage Whisparr click target": "whisparr" in selected,
             "Homepage Whisparr Alt click target": "whisparr-alt" in selected,
             "Homepage Prowlarr click target and widget": "prowlarr" in selected,
             "Homepage qBittorrent click target and widget": "qbittorrent" in selected,
@@ -298,6 +299,7 @@ def _filter_homepage_env(
         "Homepage Bazarr click-target and widget variables": "bazarr" in selected,
         "Homepage Seerr click-target and widget variables": "seerr" in selected,
         "Homepage Velvarr click-target variables": "velvarr" in selected,
+        "Homepage Whisparr click-target variables": "whisparr" in selected,
         "Homepage Whisparr Alt click-target variables": "whisparr-alt" in selected,
         "Homepage Prowlarr click-target and widget variables": "prowlarr" in selected,
         "Homepage qBittorrent click-target and widget variables": ("qbittorrent" in selected),
@@ -605,6 +607,7 @@ def render_homepage_services(catalog: Catalog, plan: StackPlan) -> str:
         ("bazarr", "Bazarr"),
         ("seerr", "Seerr"),
         ("velvarr", "Velvarr"),
+        ("whisparr", "Whisparr"),
         ("whisparr-alt", "Whisparr Alt"),
         ("jellyfin", "Jellyfin"),
         ("calibre-web-automated", "Calibre-Web Automated"),
@@ -616,6 +619,7 @@ def render_homepage_services(catalog: Catalog, plan: StackPlan) -> str:
             "jellyfin",
             "calibre-web-automated",
             "velvarr",
+            "whisparr",
             "whisparr-alt",
         }:
             fragment = homepage_root / "fragments" / f"{service_id}.yaml"

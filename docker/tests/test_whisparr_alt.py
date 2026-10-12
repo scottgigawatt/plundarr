@@ -104,30 +104,41 @@ class WhisparrAltTests(unittest.TestCase):
                 )
                 self.assertNotIn("METADATA_SOURCE", environment)
 
-    def test_homepage_card_and_environment_are_conditional(self) -> None:
-        """Show Alt only when selected and use its published port for the browser link."""
-        for services in ({"homepage"}, {"whisparr-alt"}, {"homepage", "whisparr-alt"}):
+    def test_homepage_cards_follow_each_instance_independently(self) -> None:
+        """Show both selected instances without leaking variables for an absent instance."""
+        for services in (
+            {"homepage"},
+            {"whisparr", "whisparr-alt"},
+            {"homepage", "whisparr"},
+            {"homepage", "whisparr-alt"},
+            {"homepage", "whisparr", "whisparr-alt"},
+        ):
             with self.subTest(services=services):
                 plan = self.catalog.resolve("custom", selected=services)
                 compose = render_compose(self.catalog, plan)
                 environment = render_environment(self.catalog, plan, None, generate_secrets=False)
-                has_card = services == {"homepage", "whisparr-alt"}
+                homepage = (
+                    render_homepage_services(self.catalog, plan) if "homepage" in services else ""
+                )
 
-                self.assertEqual("HOMEPAGE_VAR_WHISPARR_ALT_HREF" in compose, has_card)
-                self.assertEqual("HOMEPAGE_VAR_WHISPARR_ALT_HREF" in environment, has_card)
-
-                if "homepage" in services:
-                    homepage = render_homepage_services(self.catalog, plan)
-                    self.assertEqual("- Whisparr Alt:" in homepage, has_card)
+                # Browser links and container identities must belong to the same instance.
+                for service_id, title, prefix in (
+                    ("whisparr", "Whisparr", "WHISPARR"),
+                    ("whisparr-alt", "Whisparr Alt", "WHISPARR_ALT"),
+                ):
+                    has_card = "homepage" in services and service_id in services
+                    self.assertEqual(f"HOMEPAGE_VAR_{prefix}_HREF" in compose, has_card)
+                    self.assertEqual(f"HOMEPAGE_VAR_{prefix}_HREF" in environment, has_card)
+                    self.assertEqual(homepage.count(f"- {title}:"), int(has_card))
 
                     if has_card:
-                        self.assertIn("{{HOMEPAGE_VAR_WHISPARR_ALT_CONTAINER}}", homepage)
+                        self.assertIn(f"{{{{HOMEPAGE_VAR_{prefix}_CONTAINER}}}}", homepage)
                         self.assertIn(
-                            "HOMEPAGE_VAR_WHISPARR_ALT_CONTAINER: ${COMPOSE_PROJECT_NAME}-whisparr-alt-${WHISPARR_ALT_TAG}",
+                            f"HOMEPAGE_VAR_{prefix}_CONTAINER: ${{COMPOSE_PROJECT_NAME}}-{service_id}-${{{prefix}_TAG}}",
                             compose,
                         )
                         self.assertIn(
-                            'HOMEPAGE_VAR_WHISPARR_ALT_HREF="${HOMEPAGE_VAR_WHISPARR_ALT_HREF:-http://host.or.ip:${WHISPARR_ALT_WEBUI_PORT}}"',
+                            f'HOMEPAGE_VAR_{prefix}_HREF="${{HOMEPAGE_VAR_{prefix}_HREF:-http://host.or.ip:${{{prefix}_WEBUI_PORT}}}}"',
                             environment,
                         )
 
@@ -155,6 +166,7 @@ class WhisparrAltTests(unittest.TestCase):
                 'WHISPARR_ALT_CONFIG_PATH="./config/alternate"',
                 'WHISPARR_ALT_DATA_PATH="/srv/library/alternate"',
                 'HOMEPAGE_VAR_WHISPARR_ALT_HREF="https://alternate.example.com"',
+                'HOMEPAGE_VAR_WHISPARR_HREF="https://primary.example.com"',
             )
             env_path.write_text("\n".join(overrides) + '\nWHISPARR_WEBUI_PORT="17969"\n')
             primary_database = config_path / "whisparr/whisparr.db"
@@ -168,9 +180,9 @@ class WhisparrAltTests(unittest.TestCase):
                 removed = self.catalog.resolve("boudoirr", add={"homepage"})
                 write_stack(self.catalog, removed, output)
                 self.assertNotIn("  whisparr-alt:", (output / "docker-compose.yml").read_text())
-                self.assertNotIn(
-                    "- Whisparr Alt:", (config_path / "homepage/services.yaml").read_text()
-                )
+                removed_homepage = (config_path / "homepage/services.yaml").read_text()
+                self.assertNotIn("- Whisparr Alt:", removed_homepage)
+                self.assertEqual(removed_homepage.count("- Whisparr:"), 1)
                 write_stack(self.catalog, plan, output)
 
             # Existing assignments and application-owned files survive both regeneration operations.
@@ -185,7 +197,9 @@ class WhisparrAltTests(unittest.TestCase):
                 alternate_database.read_bytes(), b"alternate operator database fixture"
             )
             self.assertIn("synthetic-fixture", alternate_config.read_text())
-            self.assertIn("- Whisparr Alt:", (config_path / "homepage/services.yaml").read_text())
+            regenerated_homepage = (config_path / "homepage/services.yaml").read_text()
+            self.assertEqual(regenerated_homepage.count("- Whisparr:"), 1)
+            self.assertEqual(regenerated_homepage.count("- Whisparr Alt:"), 1)
             self.assertIn(
                 'WHISPARR_ALT_WEBUI_PORT="${WHISPARR_ALT_WEBUI_PORT:-16970}"',
                 (output / "example.env").read_text(),

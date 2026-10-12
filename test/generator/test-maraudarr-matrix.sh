@@ -205,7 +205,7 @@ run_case boudoirr --preset boudoirr
 # The optional second Whisparr has independent state and conditional Homepage settings.
 #
 run_case boudoirr-whisparr-alt --preset boudoirr --add whisparr-alt,homepage
-run_case whisparr-alt --preset custom --add whisparr-alt
+run_case whisparr-alt --preset custom --add whisparr-alt,homepage
 
 #
 # Boudoirr supports Usenet-only and combined downloader choices.
