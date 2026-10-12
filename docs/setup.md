@@ -52,6 +52,16 @@ Before launch, set `HOMEPAGE_EXTERNAL_URL` to the URL you will open in your brow
 
 Existing deployments must regenerate their Compose and environment files with the updated Maraudarr image and run Homepage v2 or later; older custom image tags do not provide native login. Generated secrets are added when absent and remain stable across regeneration. Homepage does not rate-limit password attempts; public access also needs appropriate proxy access controls and rate limiting, or a VPN. See the generated `config/homepage/README.md` for password changes, session invalidation, and proxy details.
 
+## Add Velvarr to Boudoirr
+
+Velvarr is selected by default in Boudoirr and remains removable through `make configure` or `REMOVE_SERVICES=velvarr`. Generate Boudoirr with a local Jellyfin server:
+
+```sh
+make ship PRESET=boudoirr ADD_SERVICES=jellyfin
+```
+
+For an existing Jellyfin server, use `make ship PRESET=boudoirr` and connect that server during owner setup. Velvarr uses host port `16699` in Boudoirr, stores data at `dist/boudoirr/config/velvarr`, and runs as the shared `DEFAULT_PUID:DEFAULT_PGID`. Its generated HTTP setting permits private-network addresses so the application can reach `http://whisparr:6969` and `http://jellyfin:8096`. Plex does not replace Velvarr's Jellyfin authentication requirement. The current official image supports `linux/amd64` only. Follow the [Velvarr guide](project-guides/velvarr.md) before launch.
+
 ## Plan project networks
 
 Maraudarr gives each preset a distinct Compose project, bridge network, and default host-port range so fresh deployments can run side by side.

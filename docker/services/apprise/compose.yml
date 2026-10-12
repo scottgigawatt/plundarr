@@ -18,9 +18,11 @@ services:
     hostname: apprise                                               # Set the container hostname
     read_only: true                                                 # Keep the API container filesystem immutable
 
-    # Drop privileges that are not needed by the notification API
+    # Drop Linux capabilities for security hardening
     cap_drop:
-      - ALL  # Remove every optional Linux capability
+      - ALL  # No optional Linux capabilities are required
+
+    # Prevent the container from acquiring additional privileges
     security_opt:
       - no-new-privileges:true  # Prevent processes from gaining privileges
 

@@ -168,6 +168,7 @@ def _prepare_service(
             ),
             "Homepage Bazarr click target and widget": "bazarr" in selected,
             "Homepage Seerr click target and widget": "seerr" in selected,
+            "Homepage Velvarr click target": "velvarr" in selected,
             "Homepage Prowlarr click target and widget": "prowlarr" in selected,
             "Homepage qBittorrent click target and widget": "qbittorrent" in selected,
             "Homepage SABnzbd click target and widget": "sabnzbd" in selected,
@@ -293,6 +294,7 @@ def _filter_homepage_env(
         ),
         "Homepage Bazarr click-target and widget variables": "bazarr" in selected,
         "Homepage Seerr click-target and widget variables": "seerr" in selected,
+        "Homepage Velvarr click-target variables": "velvarr" in selected,
         "Homepage Prowlarr click-target and widget variables": "prowlarr" in selected,
         "Homepage qBittorrent click-target and widget variables": ("qbittorrent" in selected),
         "Homepage SABnzbd click-target and widget variables": "sabnzbd" in selected,
@@ -396,6 +398,8 @@ def _generate_first_run_secrets(rendered: str, existing: dict[str, str]) -> str:
         "TRACEARR_JWT_SECRET": secrets.token_hex(32),
         "TRACEARR_COOKIE_SECRET": secrets.token_hex(32),
         "TRACEARR_AUTH_SECRET": secrets.token_hex(32),
+        "VELVARR_SECRET_KEY": secrets.token_hex(32),
+        "VELVARR_SETUP_SECRET": secrets.token_urlsafe(32),
     }
     for key, value in generated.items():
         if key in existing:
@@ -592,6 +596,7 @@ def render_homepage_services(catalog: Catalog, plan: StackPlan) -> str:
         ("sonarr-anime", "Sonarr Anime"),
         ("bazarr", "Bazarr"),
         ("seerr", "Seerr"),
+        ("velvarr", "Velvarr"),
         ("jellyfin", "Jellyfin"),
         ("calibre-web-automated", "Calibre-Web Automated"),
     ):
@@ -601,6 +606,7 @@ def render_homepage_services(catalog: Catalog, plan: StackPlan) -> str:
             "sonarr-anime",
             "jellyfin",
             "calibre-web-automated",
+            "velvarr",
         }:
             fragment = homepage_root / "fragments" / f"{service_id}.yaml"
             media_cards.append(fragment.read_text().strip("\n"))

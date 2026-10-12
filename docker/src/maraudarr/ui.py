@@ -289,6 +289,15 @@ class UI:
         Args:
             plan: Fully resolved stack plan, including automatic dependencies.
         """
+        recommendations = sorted(
+            {
+                companion
+                for service in plan.services
+                for companion in service.recommended
+                if companion not in plan.service_ids
+            }
+        )
+
         if self.console:
             from rich.panel import Panel
             from rich.table import Table
@@ -303,6 +312,11 @@ class UI:
                 ", ".join(service.title for service in plan.services),
             )
             self.console.print(Panel(summary, title="⚓ Stack Manifest", border_style="#2a9d8f"))
+            if recommendations:
+                self.console.print(
+                    "Recommended integrations (optional): " + ", ".join(recommendations)
+                )
+
             if plan.auto_added:
                 self.console.print(
                     "[bold #f2c14e]Dependency check:[/] "
@@ -313,6 +327,9 @@ class UI:
 
         print(f"Preset: {plan.preset.title}")
         print("Services: " + ", ".join(service.id for service in plan.services))
+
+        if recommendations:
+            print("Recommended integrations (optional): " + ", ".join(recommendations))
 
     def confirm(self) -> bool:
         """Confirm a plan when attached to an interactive terminal.
@@ -377,6 +394,11 @@ class UI:
             steps.append("Check Kometa, Plex, and config paths in .env.")
         if "calibre-web-automated" in selected:
             steps.append("Check CWA config, ingest, and library paths in .env.")
+        if "velvarr" in selected:
+            steps.append("Check Velvarr's config permissions and browser origin in .env.")
+            steps.append("Keep VELVARR_SECRET_KEY with backups; read VELVARR_SETUP_SECRET locally.")
+            steps.append("Complete Velvarr setup with Jellyfin, then connect Whisparr v3.")
+
         if "recyclarr" in selected:
             steps.append("Set Recyclarr API keys and preview the sync before applying it.")
         if selected.intersection(

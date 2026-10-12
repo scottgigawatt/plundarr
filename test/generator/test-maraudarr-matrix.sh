@@ -197,7 +197,7 @@ run_case duplex-core \
     --remove pattrmm,notifiarr
 
 #
-# Default Boudoirr voyage with qBittorrent only.
+# Default Boudoirr voyage with Velvarr and qBittorrent as the only downloader.
 #
 run_case boudoirr --preset boudoirr
 
@@ -223,6 +223,17 @@ run_case boudoirr-plex \
     --add plex
 
 #
+# Velvarr is a removable Boudoirr default and remains selectable in custom stacks.
+#
+run_case boudoirr-velvarr \
+    --preset boudoirr \
+    --add jellyfin,homepage
+run_case boudoirr-without-velvarr --preset boudoirr --remove velvarr
+run_case custom-velvarr \
+    --preset custom \
+    --add velvarr,homepage
+
+#
 # Minimal custom voyage used to catch stale Homepage assumptions.
 #
 run_case custom-homepage \
@@ -246,7 +257,7 @@ run_case duplex-monitoring --preset duplex --add tracearr,tautulli,homepage
 #
 run_case everything \
     --preset plundarr \
-    --add portainer,apprise,imagemaid,jellyfin,lidarr,notifiarr,nzbget,overlay-reset,pattrmm,plex,recyclarr,sabnzbd,sonarr-anime,tautulli,watchtower,whisparr
+    --add portainer,apprise,imagemaid,jellyfin,lidarr,notifiarr,nzbget,overlay-reset,pattrmm,plex,recyclarr,sabnzbd,sonarr-anime,tautulli,velvarr,watchtower,whisparr
 
 #
 # Report one clear success line after every Compose chart passes.

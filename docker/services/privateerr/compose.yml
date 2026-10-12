@@ -23,7 +23,7 @@ services:
 
     # Prevent the container from acquiring additional privileges
     security_opt:
-      - no-new-privileges:true  # Prevent subprocesses from acquiring additional privileges
+      - no-new-privileges:true  # Prevent processes from gaining privileges
 
     # Let Docker disable IPv6 in this container before the PIA scripts start
     sysctls:

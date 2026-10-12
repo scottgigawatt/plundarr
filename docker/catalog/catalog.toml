@@ -132,7 +132,7 @@ category = "Media automation"
 url = "https://github.com/Whisparr/Whisparr"
 order = 330
 requires = ["prowlarr"]
-recommended = ["qbittorrent"]
+recommended = ["qbittorrent", "velvarr"]
 
 # Bazarr adds subtitle automation to the Radarr and Sonarr libraries.
 [services.bazarr]
@@ -172,6 +172,15 @@ description = "Accepts and manages media requests."
 category = "Media experience"
 url = "https://github.com/seerr-team/seerr"
 order = 400
+
+# Velvarr accepts adult-media requests with local or external Jellyfin and Whisparr.
+[services.velvarr]
+title = "Velvarr"
+description = "Discovers adult media and accepts requests with Jellyfin login and Whisparr fulfillment."
+category = "Media experience"
+url = "https://github.com/Skare69/velvarr"
+order = 405
+recommended = ["whisparr", "jellyfin"]
 
 # Plex is an explicitly selected media server with separate read-only libraries.
 [services.plex]
@@ -367,10 +376,10 @@ defaults = ["qbittorrent", "calibre-web-automated", "cleanuparr", "watchtower", 
 #
 # Boudoirr reuses the same catalog for an adult-media-focused stack.
 #
-# This preset uses Whisparr with movies and scenes beneath one media root.
+# This preset pairs Whisparr with removable Velvarr discovery and request defaults.
 [presets.boudoirr]
 title = "Boudoirr"
-description = "Whisparr-focused automation with one VPN-protected torrent client by default."
+description = "Whisparr automation with removable Velvarr requests and a VPN-protected torrent client."
 project_name = "boudoirr"
 network_subnet = "172.21.0.0/16"
 network_ip_range = "172.21.5.0/24"
@@ -389,7 +398,7 @@ compose_summary = [
   "environment-specific settings for a seamless VPN setup.",
 ]
 core = ["privateerr", "gluetun", "flaresolverr", "prowlarr", "whisparr"]
-defaults = ["qbittorrent", "cleanuparr", "watchtower"]
+defaults = ["qbittorrent", "velvarr", "cleanuparr", "watchtower"]
 
 #
 # Jellyfin keeps the standalone deployment deliberately small.

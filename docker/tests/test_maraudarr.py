@@ -119,6 +119,7 @@ class MaraudarrTests(unittest.TestCase):
                 "prowlarr",
                 "qbittorrent",
                 "whisparr",
+                "velvarr",
                 "cleanuparr",
                 "watchtower",
             ),
@@ -856,6 +857,7 @@ class MaraudarrTests(unittest.TestCase):
         self.assertIn(19696, published_ports["boudoirr"])
         self.assertIn(18080, published_ports["boudoirr"])
         self.assertIn(21011, published_ports["boudoirr"])
+        self.assertIn(16699, published_ports["boudoirr"])
         self.assertIn(28096, published_ports["jellyfin"])
         self.assertIn(48213, published_ports["calibre-web-automated"])
         self.assertIn(8213, published_ports["plundarr"])

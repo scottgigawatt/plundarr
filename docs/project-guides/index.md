@@ -10,6 +10,7 @@ Pick the chart that matches the work ahead:
 - [Configure VPN regions and recovery](vpn.md) 🧭
 - [Deploy Portainer](portainer.md) 🚢
 - [Monitor media servers](monitoring.md) 🔎
+- [Discover and request adult media with Velvarr](velvarr.md) 🔞
 - [Run Plundarr test voyages](testing.md) 🧪
 - [Use the host helper scripts](scripts.md) 🦜
 - [Contribute to the project](../CONTRIBUTING.md) 🛠️
