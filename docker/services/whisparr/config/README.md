@@ -1,6 +1,6 @@
 # Whisparr configuration 🔞
 
-Whisparr stores its database and application settings here. Its movie, scene, import, recycle, and download mounts are configured separately in the generated preset's `.env` file.
+Whisparr stores its database and application settings here. Its import, movie, scene, recycle, and download mounts are configured separately in the generated preset's `.env` file.
 
 Back up this hold before cleanup with `make backup`.
 

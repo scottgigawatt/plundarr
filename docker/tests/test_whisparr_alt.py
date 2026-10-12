@@ -74,9 +74,9 @@ class WhisparrAltTests(unittest.TestCase):
         self.assertIn("${WHISPARR_ALT_WEBUI_PORT}:6969", alt)
         self.assertIn("${WHISPARR_ALT_CONFIG_PATH}:/config:rw", alt)
         self.assertNotIn("${WHISPARR_ALT_DATA_PATH}:/data:rw", alt)
+        self.assertIn("${WHISPARR_ALT_IMPORT_PATH}:/data/import:rw", alt)
         self.assertIn("${WHISPARR_ALT_MOVIES_PATH}:/data/movies:rw", alt)
         self.assertIn("${WHISPARR_ALT_SCENES_PATH}:/data/scenes:rw", alt)
-        self.assertIn("${WHISPARR_ALT_IMPORT_PATH}:/data/import:rw", alt)
         self.assertIn("${WHISPARR_ALT_RECYCLE_PATH}:/data/recycle:rw", alt)
         self.assertIn("${HOST_DOWNLOADS_PATH}:/downloads:rw", alt)
         self.assertIn("http://127.0.0.1:6969/ping", alt)
@@ -86,9 +86,9 @@ class WhisparrAltTests(unittest.TestCase):
             service = extract_service(compose, service_id)
             self.assertNotIn(f"${{{prefix}_DATA_PATH}}", service)
             for kind, target in (
+                ("IMPORT", "import"),
                 ("MOVIES", "movies"),
                 ("SCENES", "scenes"),
-                ("IMPORT", "import"),
                 ("RECYCLE", "recycle"),
             ):
                 self.assertIn(f"${{{prefix}_{kind}_PATH}}:/data/{target}:rw", service)
@@ -128,25 +128,25 @@ class WhisparrAltTests(unittest.TestCase):
                     environment,
                 )
                 self.assertIn(
-                    f'WHISPARR_ALT_DATA_PATH="${{WHISPARR_ALT_DATA_PATH:-{media_root}/movies-alt}}"',
+                    f'WHISPARR_ALT_DATA_PATH="${{WHISPARR_ALT_DATA_PATH:-{media_root}}}"',
                     environment,
                 )
                 for prefix, folders in (
                     (
                         "WHISPARR",
                         (
+                            ("IMPORT", "import"),
                             ("MOVIES", "movies"),
                             ("SCENES", "scenes"),
-                            ("IMPORT", "import"),
                             ("RECYCLE", "recycle"),
                         ),
                     ),
                     (
                         "WHISPARR_ALT",
                         (
+                            ("IMPORT", "import"),
                             ("MOVIES", "movies-alt"),
                             ("SCENES", "scenes-alt"),
-                            ("IMPORT", "import"),
                             ("RECYCLE", "recycle-alt"),
                         ),
                     ),
@@ -158,8 +158,8 @@ class WhisparrAltTests(unittest.TestCase):
                         )
                 self.assertNotIn("METADATA_SOURCE", environment)
 
-    def test_legacy_roots_survive_upgrade_without_becoming_broad_mounts(self) -> None:
-        """Keep old assignments intact while requiring explicit review of the new paths."""
+    def test_unused_data_roots_survive_regeneration_without_becoming_mounts(self) -> None:
+        """Preserve retained data-root values without adding a broad filesystem mount."""
         plan = self.catalog.resolve("boudoirr", add={"whisparr-alt"})
         legacy = 'WHISPARR_DATA_PATH="/srv/legacy-primary"  # operator override\nWHISPARR_ALT_DATA_PATH="/srv/legacy-alt"\n'
 
@@ -180,7 +180,7 @@ class WhisparrAltTests(unittest.TestCase):
 
             for variable, default in (
                 ("WHISPARR_DATA_PATH", "/volume1/jellyfin"),
-                ("WHISPARR_ALT_DATA_PATH", "/volume1/jellyfin/movies-alt"),
+                ("WHISPARR_ALT_DATA_PATH", "/volume1/jellyfin"),
             ):
                 self.assertIn(f'{variable}="${{{variable}:-{default}}}"', example)
                 self.assertNotIn(f"${{{variable}}}", compose)
@@ -265,13 +265,13 @@ class WhisparrAltTests(unittest.TestCase):
                 'WHISPARR_ALT_CONFIG_PATH="./config/alternate"',
                 'WHISPARR_ALT_DATA_PATH="/srv/library/alternate"',
                 'WHISPARR_DATA_PATH="/srv/library/legacy-primary"',
+                'WHISPARR_IMPORT_PATH="/srv/library/shared-import"',
                 'WHISPARR_MOVIES_PATH="/srv/library/main-movies"',
                 'WHISPARR_SCENES_PATH="/srv/library/main-scenes"',
-                'WHISPARR_IMPORT_PATH="/srv/library/shared-import"',
                 'WHISPARR_RECYCLE_PATH="/srv/library/main-recycle"',
+                'WHISPARR_ALT_IMPORT_PATH="/srv/library/shared-import"',
                 'WHISPARR_ALT_MOVIES_PATH="/srv/library/alt-movies"',
                 'WHISPARR_ALT_SCENES_PATH="/srv/library/alt-scenes"',
-                'WHISPARR_ALT_IMPORT_PATH="/srv/library/shared-import"',
                 'WHISPARR_ALT_RECYCLE_PATH="/srv/library/alt-recycle"',
                 'HOMEPAGE_VAR_WHISPARR_ALT_HREF="https://alternate.example.com"',
                 'HOMEPAGE_VAR_WHISPARR_HREF="https://primary.example.com"',

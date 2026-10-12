@@ -25,17 +25,16 @@ Edit `dist/boudoirr/.env` before starting the instance. Fresh `.env` and `exampl
 | `WHISPARR_ALT_TAG` | `v3` | Supported floating Whisparr channel |
 | `WHISPARR_ALT_WEBUI_PORT` | `16970` | Host port; the container listens on `6969` |
 | `WHISPARR_ALT_CONFIG_PATH` | `./config/whisparr-alt` | Separate database and settings mounted at `/config` |
-| `WHISPARR_ALT_DATA_PATH` | `/volume1/jellyfin/movies-alt` | Preserved legacy setting; no Compose mount |
+| `WHISPARR_ALT_IMPORT_PATH` | `/volume1/jellyfin/import` | Shared staging mounted at `/data/import` |
 | `WHISPARR_ALT_MOVIES_PATH` | `/volume1/jellyfin/movies-alt` | Movie library mounted at `/data/movies` |
 | `WHISPARR_ALT_SCENES_PATH` | `/volume1/jellyfin/scenes-alt` | Separate scene library mounted at `/data/scenes` |
-| `WHISPARR_ALT_IMPORT_PATH` | `/volume1/jellyfin/import` | Shared staging mounted at `/data/import` |
 | `WHISPARR_ALT_RECYCLE_PATH` | `/volume1/jellyfin/recycle-alt` | Private recycling bin mounted at `/data/recycle` |
 
-The base port is `6970`, with Boudoirr's usual `10000` offset. Library and staging defaults follow the preset's media root. Existing assignments, including `WHISPARR_ALT_DATA_PATH`, survive regeneration. The legacy data path is kept as a reference but does not control any mount; review the new settings before recreating an existing deployment. Maraudarr does not move media or convert stored application paths. For example, an older Alt deployment with `/volume1/jellyfin/movies-alt` mounted at `/data` and the `movies/` naming prefix stores movies under `/volume1/jellyfin/movies-alt/movies`. Set `WHISPARR_ALT_MOVIES_PATH` to that existing directory to retain its stored `/data/movies/...` paths, or plan a separate media relocation.
+The base port is `6970`, with Boudoirr's usual `10000` offset. Staging and library defaults follow the preset's media root. Set the paths for your host in `.env`; operator values survive regeneration.
 
 Both instances receive only their configured child directories under `/data`. Main defaults to `movies` and `scenes`; Alt defaults to `movies-alt` and `scenes-alt`. Their recycling directories are `recycle` and `recycle-alt`. Both share the `import` directory but use separate recycling bins. Alt's scene directory is available if you choose to manage scenes there; it does not expose main's scene library. Provider selection remains independent of these host directory names.
 
-A 1 MiB temporary filesystem provides a writable `/data` parent owned by the configured user/group. All four child bind mounts persist. Use `/data` as the root folder and keep naming prefixes at `movies/` and `scenes/`. Put durable files in the mounted children; files written directly to the parent disappear when the container is recreated. See the [main Whisparr mount and import guide](../whisparr/README.md) for naming, migration, and move behavior.
+A 1 MiB temporary filesystem provides a writable `/data` parent owned by the configured user/group. All four child bind mounts persist. Use `/data` as the root folder and keep naming prefixes at `movies/` and `scenes/`. Put durable files in the mounted children; files written directly to the parent disappear when the container is recreated. See the [main Whisparr mount and import guide](../whisparr/README.md) for naming and import behavior.
 
 > [!IMPORTANT]
 > Keep config paths, managed host libraries, recycling bins, and download-client categories separate for the two instances. Set **Scene Import Folder Format** to `import` and **Recycling Bin** to `/data/recycle` in each instance. Process shared import staging through only one instance at a time.

@@ -487,23 +487,20 @@ def render_environment(
         "HOST_SCENES_PATH": ("/volume1/plex/scenes", f"{media_root}/scenes"),
         "JELLYFIN_DATA_PATH": ("/volume1/jellyfin", media_root),
         "WHISPARR_DATA_PATH": ("/volume1/media/adult", media_root),
+        "WHISPARR_IMPORT_PATH": ("/volume1/media/adult/import", f"{media_root}/import"),
         "WHISPARR_MOVIES_PATH": ("/volume1/media/adult/movies", f"{media_root}/movies"),
         "WHISPARR_SCENES_PATH": ("/volume1/media/adult/scenes", f"{media_root}/scenes"),
-        "WHISPARR_IMPORT_PATH": ("/volume1/media/adult/import", f"{media_root}/import"),
         "WHISPARR_RECYCLE_PATH": ("/volume1/media/adult/recycle", f"{media_root}/recycle"),
+        "WHISPARR_ALT_DATA_PATH": ("/volume1/media/adult", media_root),
+        "WHISPARR_ALT_IMPORT_PATH": ("/volume1/media/adult/import", f"{media_root}/import"),
         "WHISPARR_ALT_MOVIES_PATH": (
             "/volume1/media/adult/movies-alt",
             f"{media_root}/movies-alt",
         ),
         "WHISPARR_ALT_SCENES_PATH": ("/volume1/media/adult/scenes-alt", f"{media_root}/scenes-alt"),
-        "WHISPARR_ALT_IMPORT_PATH": ("/volume1/media/adult/import", f"{media_root}/import"),
         "WHISPARR_ALT_RECYCLE_PATH": (
             "/volume1/media/adult/recycle-alt",
             f"{media_root}/recycle-alt",
-        ),
-        "WHISPARR_ALT_DATA_PATH": (
-            "/volume1/media/adult/movies-alt",
-            f"{media_root}/movies-alt",
         ),
     }
     for variable, (source_default, preset_default) in preset_defaults.items():

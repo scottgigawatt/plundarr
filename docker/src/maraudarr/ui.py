@@ -400,9 +400,7 @@ class UI:
             steps.append("Complete Velvarr setup with Jellyfin, then connect Whisparr v3.")
 
         if selected.intersection({"whisparr", "whisparr-alt"}):
-            steps.append(
-                "Review Whisparr movie, scene, import, and recycle paths; legacy data paths are not mounted."
-            )
+            steps.append("Check Whisparr import, movie, scene, and recycle paths in .env.")
             steps.append(
                 "Use /data as the root, import as the import format, and /data/recycle as the recycling bin."
             )

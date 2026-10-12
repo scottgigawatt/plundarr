@@ -21,18 +21,18 @@ services:
     ports:
       - ${WHISPARR_ALT_WEBUI_PORT}:6969  # Whisparr web UI port
 
-    # Mount host directories into the container
-    volumes:
-      - ${WHISPARR_ALT_CONFIG_PATH}:/config:rw         # Persistent Whisparr configuration
-      - ${WHISPARR_ALT_MOVIES_PATH}:/data/movies:rw    # Managed movie library
-      - ${WHISPARR_ALT_SCENES_PATH}:/data/scenes:rw    # Managed scene library
-      - ${WHISPARR_ALT_IMPORT_PATH}:/data/import:rw    # Shared staging directory for manual imports
-      - ${WHISPARR_ALT_RECYCLE_PATH}:/data/recycle:rw  # Private recycling bin for this instance
-      - ${HOST_DOWNLOADS_PATH}:/downloads:rw           # Shared download tree for imports and hardlinks
-
     # Provide a writable parent for the persistent media and staging mounts
     tmpfs:
       - /data:rw,noexec,nosuid,size=1m,uid=${DEFAULT_PUID},gid=${DEFAULT_PGID}  # 1 MiB writable parent; child bind mounts persist
+
+    # Mount host directories into the container
+    volumes:
+      - ${WHISPARR_ALT_CONFIG_PATH}:/config:rw         # Persistent Whisparr configuration
+      - ${WHISPARR_ALT_IMPORT_PATH}:/data/import:rw    # Shared staging directory for manual imports
+      - ${WHISPARR_ALT_MOVIES_PATH}:/data/movies:rw    # Managed movie library
+      - ${WHISPARR_ALT_SCENES_PATH}:/data/scenes:rw    # Managed scene library
+      - ${WHISPARR_ALT_RECYCLE_PATH}:/data/recycle:rw  # Private recycling bin for this instance
+      - ${HOST_DOWNLOADS_PATH}:/downloads:rw           # Shared download tree for imports and hardlinks
 
     # Define container healthcheck to verify Whisparr connectivity
     healthcheck:
