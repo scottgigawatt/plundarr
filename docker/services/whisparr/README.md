@@ -12,9 +12,9 @@ The chart mounts manual-import staging, movies, scenes, and its recycling bin se
 | --- | --- | --- |
 | `WHISPARR_CONFIG_PATH` | `./config/whisparr` | `/config` |
 | `WHISPARR_IMPORT_PATH` | `/volume1/jellyfin/import` | `/data/import` |
-| `WHISPARR_MOVIES_PATH` | `/volume1/jellyfin/movies` | `/data/movies` |
-| `WHISPARR_SCENES_PATH` | `/volume1/jellyfin/scenes` | `/data/scenes` |
-| `WHISPARR_RECYCLE_PATH` | `/volume1/jellyfin/recycle` | `/data/recycle` |
+| `WHISPARR_MOVIES_PATH` | `/volume1/jellyfin/movies/tpdb` | `/data/movies` |
+| `WHISPARR_SCENES_PATH` | `/volume1/jellyfin/scenes/main` | `/data/scenes` |
+| `WHISPARR_RECYCLE_PATH` | `/volume1/jellyfin/recycle/main` | `/data/recycle` |
 
 Other presets use the same directory names beneath their media root. The shared arr settings supply host user/group IDs, timezone, container hardening, and `${HOST_DOWNLOADS_PATH}` mounted at `/downloads`.
 
@@ -30,11 +30,11 @@ A 1 MiB temporary filesystem supplies the writable `/data` parent with the confi
 
 Whisparr's import operation moves matched files into their generated library folders; it does not require hardlinks. Transfers across separate mounts can copy and then remove the source rather than perform an atomic rename. Allow enough destination space and verify the imported file before clearing staging. See the upstream [import operation](https://github.com/Whisparr/Whisparr-Eros/blob/v3.6.4-release.1865/src/Whisparr.Api.V3/Movies/MovieImportController.cs) and [relative import-folder resolution](https://github.com/Whisparr/Whisparr-Eros/blob/v3.6.4-release.1865/src/NzbDrone.Core/RootFolders/RootFolderService.cs).
 
-The stable container prefixes allow hyphenated host directories such as Alt's `movies-alt` without using that name in Whisparr's folder format. Whisparr 3.6.4 requires an alphanumeric first directory in its movie and scene folder formats. Test one import before resuming normal automation.
+Use the `movies/` and `scenes/` naming prefixes in both instances. The provider and instance grouping belongs to the host paths; each Whisparr still sees its own library at `/data/movies` or `/data/scenes`.
 
 ## Connect Jellyfin, Velvarr, and Homepage
 
-With Jellyfin mounted at `/volume1/jellyfin:/data`, the default main movie and scene paths match Whisparr at `/data/movies` and `/data/scenes`. Alt's `/data/movies` and `/data/scenes` instead map to Jellyfin's `/data/movies-alt` and `/data/scenes-alt`. Review Velvarr mappings whenever you change host paths. Keep the import and recycling directories out of Jellyfin's library selections.
+With Jellyfin mounted at `/volume1/jellyfin:/data`, map main Whisparr's `/data/movies` to Jellyfin's `/data/movies/tpdb` and `/data/scenes` to `/data/scenes/main`. For Alt, map `/data/movies` to `/data/movies/tmdb` and `/data/scenes` to `/data/scenes/alt`. Review Velvarr mappings whenever you change host paths. Keep the import and recycling directories out of Jellyfin's library selections.
 
 When Homepage is selected, Maraudarr adds a **Whisparr** browser link and container status card. Set `HOMEPAGE_VAR_WHISPARR_HREF` in `.env` to your host or reverse-proxy URL. Selecting both Whisparr instances adds two independent cards.
 
