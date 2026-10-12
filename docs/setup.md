@@ -142,7 +142,7 @@ The [Synology Container Manager project documentation](https://kb.synology.com/e
 | --- | --- | --- | --- |
 | Jellyfin with Plundarr or standalone | `JELLYFIN_DATA_PATH` mounts read/write at `/data` | `/data/movies`, `/data/tv` | Persistent `/config` and `/cache` |
 | Jellyfin with Plundarr and Lidarr | `JELLYFIN_DATA_PATH` mounts read/write at `/data`; `HOST_MUSIC_PATH` resolves to its `music` child | `/data/movies`, `/data/tv`, `/data/music` | Keep both paths beneath the same host media root |
-| Jellyfin with Boudoirr | The Whisparr and Jellyfin data roots share `/data` | `/data/movies`, `/data/scenes` | Set both high-level paths to the same host directory |
+| Jellyfin with Boudoirr | Jellyfin mounts its media root; Whisparr mounts individual libraries | `/data/movies`, `/data/scenes`; optionally `/data/movies-alt` | Map Whisparr’s `/data/movies` to the matching Jellyfin movie path; exclude import and recycle folders |
 | Plex with Plundarr | Separate read-only library mounts | Movies, television, anime | Persistent config and transcode mounts |
 | Plex with Plundarr and Lidarr | Separate read-only library mounts | Movies, television, anime, music at `/music` | Lidarr writes the same host music library |
 | Plex with Boudoirr | Separate read-only library mounts | Movies, scenes | Plex must be selected explicitly |

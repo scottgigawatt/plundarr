@@ -399,8 +399,14 @@ class UI:
             steps.append("Keep VELVARR_SECRET_KEY with backups; read VELVARR_SETUP_SECRET locally.")
             steps.append("Complete Velvarr setup with Jellyfin, then connect Whisparr v3.")
 
+        if selected.intersection({"whisparr", "whisparr-alt"}):
+            steps.append("Check Whisparr import, movie, scene, and recycle paths in .env.")
+            steps.append(
+                "Use /data as the root, import as the import format, and /data/recycle as the recycling bin."
+            )
+
         if "whisparr-alt" in selected:
-            steps.append("Keep Whisparr Alt's config and managed root folders separate.")
+            steps.append("Keep Whisparr Alt's config, host libraries, and recycling bin separate.")
             steps.append(
                 "Choose its metadata source; give Prowlarr its API key and use a distinct download category."
             )

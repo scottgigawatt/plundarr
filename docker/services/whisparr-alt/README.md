@@ -25,22 +25,29 @@ Edit `dist/boudoirr/.env` before starting the instance. Fresh `.env` and `exampl
 | `WHISPARR_ALT_TAG` | `v3` | Supported floating Whisparr channel |
 | `WHISPARR_ALT_WEBUI_PORT` | `16970` | Host port; the container listens on `6969` |
 | `WHISPARR_ALT_CONFIG_PATH` | `./config/whisparr-alt` | Separate database and settings mounted at `/config` |
-| `WHISPARR_ALT_DATA_PATH` | `/volume1/jellyfin/movies-alt` | Separate managed library mounted at `/data` |
+| `WHISPARR_ALT_IMPORT_PATH` | `/volume1/jellyfin/import` | Shared staging mounted at `/data/import` |
+| `WHISPARR_ALT_MOVIES_PATH` | `/volume1/jellyfin/movies-alt` | Movie library mounted at `/data/movies` |
+| `WHISPARR_ALT_SCENES_PATH` | `/volume1/jellyfin/scenes-alt` | Separate scene library mounted at `/data/scenes` |
+| `WHISPARR_ALT_RECYCLE_PATH` | `/volume1/jellyfin/recycle-alt` | Private recycling bin mounted at `/data/recycle` |
 
-The base port is `6970`, with Boudoirr's usual `10000` offset. The library default follows the preset's media root with `/movies-alt` appended. Both paths and the port can be changed through `.env`; existing values survive regeneration. The shared arr settings supply host user/group IDs, timezone, container hardening, and the download mount at `/downloads`.
+The base port is `6970`, with Boudoirr's usual `10000` offset. Staging and library defaults follow the preset's media root. Set the paths for your host in `.env`; operator values survive regeneration.
+
+Both instances receive only their configured child directories under `/data`. Main defaults to `movies` and `scenes`; Alt defaults to `movies-alt` and `scenes-alt`. Their recycling directories are `recycle` and `recycle-alt`. Both share the `import` directory but use separate recycling bins. Alt's scene directory is available if you choose to manage scenes there; it does not expose main's scene library. Provider selection remains independent of these host directory names.
+
+A 1 MiB temporary filesystem provides a writable `/data` parent owned by the configured user/group. All four child bind mounts persist. Use `/data` as the root folder and keep naming prefixes at `movies/` and `scenes/`. Put durable files in the mounted children; files written directly to the parent disappear when the container is recreated. See the [main Whisparr mount and import guide](../whisparr/README.md) for naming and import behavior.
 
 > [!IMPORTANT]
-> Keep the two instances' managed root folders separate. The primary Whisparr mounts the entire media root, so do not assign its `/data` parent as a managed root when Alt manages a child directory. Configure specific folders such as `/data/movies` and `/data/scenes` in the primary instance, and `/data` in Alt. Use separate config directories and download-client categories for each instance.
+> Keep config paths, managed host libraries, recycling bins, and download-client categories separate for the two instances. Set **Scene Import Folder Format** to `import` and **Recycling Bin** to `/data/recycle` in each instance. Process shared import staging through only one instance at a time.
 
 ## Connect the second instance
 
 1. Start the generated stack with `make up PRESET=boudoirr`, then open your host address on port `16970`.
 2. Choose the metadata source before adding or importing movies. Changing this setting does not convert existing TMDB records to TPDB; refresh follows each record's stored provider. See Whisparr's [search routing](https://github.com/Whisparr/Whisparr-Eros/blob/eros-develop/src/NzbDrone.Core/MetadataSource/SkyHook/SkyHookProxy.cs) and [refresh behavior](https://github.com/Whisparr/Whisparr-Eros/blob/eros-develop/src/NzbDrone.Core/Movies/RefreshMovieService.cs).
-3. Add `/data` as Alt's root folder, choose quality profiles, and configure the shared download client with a distinct category such as `whisparr-alt`.
+3. Add `/data` as Alt's root folder, use the `movies/` folder-format prefix, and choose quality profiles. Set the import and recycling fields as described above. Configure the shared download client with a distinct category such as `whisparr-alt`.
 4. In Prowlarr, add a separate Whisparr application using `http://whisparr-alt:6969` and Alt's own API key from **Settings → General**. Use `http://prowlarr:9696` as the Prowlarr server URL inside this project. Test and sync the connection independently of the primary instance.
-5. Add the corresponding folder to Jellyfin. With the Boudoirr defaults, Alt's `/data` corresponds to Jellyfin's `/data/movies-alt`.
+5. Add the corresponding folder to Jellyfin. With the Boudoirr defaults, Alt's `/data/movies` corresponds to Jellyfin's `/data/movies-alt`. Do not add staging or recycling directories as media libraries.
 
-Velvarr currently connects to one Whisparr endpoint. If Alt manages the TPDB library, connect Velvarr to `http://whisparr-alt:6969` with Alt's API key and map Alt's `/data` to Jellyfin's `/data/movies-alt`. Adjust that mapping when you change host mounts. Velvarr cannot combine both Whisparr instances through this chart; see the [Velvarr setup guide](../../../docs/project-guides/velvarr.md).
+Velvarr currently connects to one Whisparr endpoint. If Alt fulfills Velvarr requests, connect Velvarr to `http://whisparr-alt:6969` with Alt's API key and map Alt's `/data/movies` to Jellyfin's matching host-library view, `/data/movies-alt` with the defaults. Choose the appropriate movie provider before importing; the directory name does not select it. Adjust that mapping when you change host mounts. Velvarr cannot combine both Whisparr instances through this chart; see the [Velvarr setup guide](../../../docs/project-guides/velvarr.md).
 
 When Homepage is selected too, Maraudarr adds a **Whisparr Alt** browser link and container status card. Set `HOMEPAGE_VAR_WHISPARR_ALT_HREF` to your host or reverse-proxy URL in `.env`. When the primary instance is selected too, Homepage shows separate **Whisparr** and **Whisparr Alt** cards, each pointing to its own port and container.
 
