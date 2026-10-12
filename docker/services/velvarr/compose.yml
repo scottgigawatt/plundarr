@@ -42,11 +42,11 @@ services:
     ports:
       - ${VELVARR_WEBUI_PORT}:6699  # Host web port; the application and healthcheck always use 6699
 
-    # Provide writable ephemeral storage required by Node.js and the application
+    # Provide writable scratch space alongside the read-only root filesystem
     tmpfs:
-      - /tmp:rw,noexec,nosuid,size=64m  # Temporary Node.js runtime storage
+      - /tmp:rw,noexec,nosuid,size=64m  # 64 MiB maximum; cleared when the container stops
 
-    # Persist the SQLite database, encrypted credentials, and artwork cache
+    # Persist the SQLite database and encrypted integration credentials
     volumes:
       - ${VELVARR_CONFIG_PATH}:/data:rw  # Data directory writable by DEFAULT_PUID and DEFAULT_PGID
 

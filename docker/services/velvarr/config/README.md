@@ -1,6 +1,6 @@
 # Velvarr application data 🔞
 
-This directory is mounted at `/data` and holds Velvarr's SQLite database, encrypted integration credentials, and artwork cache. The container runs as `DEFAULT_PUID:DEFAULT_PGID` with the shared `DEFAULT_GROUP`; these settings must match a host identity that can write this directory. The default host path is `./config/velvarr`, relative to the generated deployment.
+This directory is mounted at `/data` and holds Velvarr's SQLite database and encrypted integration credentials. The container runs as `DEFAULT_PUID:DEFAULT_PGID` with the shared `DEFAULT_GROUP`; these settings must match a host identity that can write this directory. The default host path is `./config/velvarr`, relative to the generated deployment.
 
 Maraudarr creates missing seed files and refreshes this README. It preserves existing application state. The generated `.env` contains `VELVARR_SETUP_SECRET` for one-time owner setup and `VELVARR_SECRET_KEY` for decrypting stored credentials. Read the setup secret locally and keep an off-host copy of the encryption key; neither belongs in logs or source control.
 
