@@ -136,18 +136,18 @@ class WhisparrAltTests(unittest.TestCase):
                         "WHISPARR",
                         (
                             ("IMPORT", "import"),
-                            ("MOVIES", "movies"),
-                            ("SCENES", "scenes"),
-                            ("RECYCLE", "recycle"),
+                            ("MOVIES", "movies/tpdb"),
+                            ("SCENES", "scenes/main"),
+                            ("RECYCLE", "recycle/main"),
                         ),
                     ),
                     (
                         "WHISPARR_ALT",
                         (
                             ("IMPORT", "import"),
-                            ("MOVIES", "movies-alt"),
-                            ("SCENES", "scenes-alt"),
-                            ("RECYCLE", "recycle-alt"),
+                            ("MOVIES", "movies/tmdb"),
+                            ("SCENES", "scenes/alt"),
+                            ("RECYCLE", "recycle/alt"),
                         ),
                     ),
                 ):
@@ -187,11 +187,11 @@ class WhisparrAltTests(unittest.TestCase):
 
             for generated in (environment, example):
                 self.assertIn(
-                    'WHISPARR_MOVIES_PATH="${WHISPARR_MOVIES_PATH:-/volume1/jellyfin/movies}"',
+                    'WHISPARR_MOVIES_PATH="${WHISPARR_MOVIES_PATH:-/volume1/jellyfin/movies/tpdb}"',
                     generated,
                 )
                 self.assertIn(
-                    'WHISPARR_ALT_MOVIES_PATH="${WHISPARR_ALT_MOVIES_PATH:-/volume1/jellyfin/movies-alt}"',
+                    'WHISPARR_ALT_MOVIES_PATH="${WHISPARR_ALT_MOVIES_PATH:-/volume1/jellyfin/movies/tmdb}"',
                     generated,
                 )
                 self.assertIn(
