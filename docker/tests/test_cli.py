@@ -79,8 +79,10 @@ class MaraudarrCliTests(unittest.TestCase):
             )
 
     def test_boudoirr_cli_default_and_removal_reach_the_generation_plan(self) -> None:
-        """Keep deterministic builds and explicit removal consistent with the catalog."""
+        """Keep both companions selected initially and independently removable."""
         plans: list[StackPlan] = []
+        removals = ("", "velvarr", "jellyfin", "velvarr,jellyfin")
+        companions = {"velvarr", "jellyfin"}
 
         def capture_write(catalog: Catalog, plan: StackPlan, output: Path, ui: UI) -> int:
             """Record resolved selections without writing private deployment files."""
@@ -91,31 +93,34 @@ class MaraudarrCliTests(unittest.TestCase):
             patch("maraudarr.cli.Catalog", return_value=self.catalog),
             patch("maraudarr.cli._write", side_effect=capture_write),
         ):
-            self.assertEqual(main(["build", "--preset", "boudoirr", "--plain"]), 0)
-            self.assertEqual(
-                main(["build", "--preset", "boudoirr", "--remove", "velvarr", "--plain"]),
-                0,
-            )
+            for removed in removals:
+                self.assertEqual(
+                    main(["build", "--preset", "boudoirr", "--remove", removed, "--plain"]),
+                    0,
+                )
 
-        self.assertIn("velvarr", plans[0].service_ids)
-        self.assertNotIn("velvarr", plans[1].service_ids)
+        for removed, plan in zip(removals, plans, strict=True):
+            omitted = {name for name in removed.split(",") if name}
+            self.assertEqual(companions.intersection(plan.service_ids), companions - omitted)
 
     def test_boudoirr_interactive_default_can_be_unchecked(self) -> None:
-        """Pass Velvarr to the picker as checked cargo without making it a core service."""
+        """Keep Velvarr and Jellyfin checked initially without making either core."""
         ui = UI(plain=True)
         offered: list[set[str]] = []
         defaults: list[set[str]] = []
         plans: list[StackPlan] = []
+        removals = ("", "velvarr", "jellyfin", "velvarr,jellyfin")
+        companions = {"velvarr", "jellyfin"}
 
-        for omit_velvarr in (False, True):
+        for removed in removals:
 
             def choose_services(
-                services: list[Service], selected: set[str], *, omit: bool = omit_velvarr
+                services: list[Service], selected: set[str], *, omit: str = removed
             ) -> set[str]:
-                """Keep the initial selection or simulate unchecking Velvarr."""
+                """Keep defaults or simulate unchecking either or both companions."""
                 offered.append({service.id for service in services})
                 defaults.append(selected.copy())
-                return selected - {"velvarr"} if omit else selected
+                return selected - {name for name in omit.split(",") if name}
 
             # Replace terminal input while exercising the real interactive plan resolution.
             with (
@@ -126,11 +131,12 @@ class MaraudarrCliTests(unittest.TestCase):
                 plans.append(_interactive_plan(self.catalog, ui))
 
         for available, checked in zip(offered, defaults, strict=True):
-            self.assertIn("velvarr", available)
-            self.assertIn("velvarr", checked)
+            self.assertTrue(companions.issubset(available))
+            self.assertTrue(companions.issubset(checked))
 
-        self.assertIn("velvarr", plans[0].service_ids)
-        self.assertNotIn("velvarr", plans[1].service_ids)
+        for removed, plan in zip(removals, plans, strict=True):
+            omitted = {name for name in removed.split(",") if name}
+            self.assertEqual(companions.intersection(plan.service_ids), companions - omitted)
 
 
 if __name__ == "__main__":

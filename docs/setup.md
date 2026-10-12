@@ -14,7 +14,7 @@ For a repeatable non-interactive build, select a preset and optional services di
 
 ```sh
 make ship
-make ship PRESET=boudoirr ADD_SERVICES=jellyfin
+make ship PRESET=boudoirr
 make ship PRESET=jellyfin
 make ship PRESET=plex
 make ship PRESET=calibre-web-automated
@@ -54,13 +54,13 @@ Existing deployments must regenerate their Compose and environment files with th
 
 ## Add Velvarr to Boudoirr
 
-Velvarr is selected by default in Boudoirr and remains removable through `make configure` or `REMOVE_SERVICES=velvarr`. Generate Boudoirr with a local Jellyfin server:
+Velvarr and Jellyfin are selected by default in Boudoirr. Both remain independently removable through `make configure` or `REMOVE_SERVICES`. Generate the default local request and playback stack:
 
 ```sh
-make ship PRESET=boudoirr ADD_SERVICES=jellyfin
+make ship PRESET=boudoirr
 ```
 
-For an existing Jellyfin server, use `make ship PRESET=boudoirr` and connect that server during owner setup. Velvarr uses host port `16699` in Boudoirr, stores data at `dist/boudoirr/config/velvarr`, and runs as the shared `DEFAULT_PUID:DEFAULT_PGID`. Its generated HTTP setting permits private-network addresses so the application can reach `http://whisparr:6969` and `http://jellyfin:8096`. Plex does not replace Velvarr's Jellyfin authentication requirement. The current official image supports `linux/amd64` only. Follow the [Velvarr guide](project-guides/velvarr.md) before launch.
+For an existing Jellyfin server, use `make ship PRESET=boudoirr REMOVE_SERVICES=jellyfin` and connect that server during owner setup. Use `REMOVE_SERVICES=velvarr` to omit requests, or `REMOVE_SERVICES=velvarr,jellyfin` to omit both companions. Velvarr uses host port `16699` in Boudoirr, stores data at `dist/boudoirr/config/velvarr`, and runs as the shared `DEFAULT_PUID:DEFAULT_PGID`. Its generated HTTP setting permits private-network addresses so the application can reach `http://whisparr:6969` and `http://jellyfin:8096`. Plex does not replace Velvarr's Jellyfin authentication requirement. The current official image supports `linux/amd64` only. Follow the [Velvarr guide](project-guides/velvarr.md) before launch.
 
 ## Plan project networks
 

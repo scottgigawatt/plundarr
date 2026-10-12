@@ -1,6 +1,6 @@
 # Discover and request adult media with Velvarr 🔞
 
-[Velvarr](https://github.com/Skare69/velvarr) discovers adult movies and scenes, sends approved requests to Whisparr v3, and connects users to Jellyfin playback. It is selected by default in Boudoirr and can be removed in the CLI or interactive picker. The current official image supports `linux/amd64` only.
+[Velvarr](https://github.com/Skare69/velvarr) discovers adult movies and scenes, sends approved requests to Whisparr v3, and connects users to Jellyfin playback. It is selected by default in Boudoirr alongside Jellyfin; both can be removed independently in the CLI or interactive picker. The current official image supports `linux/amd64` only.
 
 ## Select the services
 
@@ -9,13 +9,13 @@ You need a Jellyfin server, an account allowed to access the intended libraries,
 Generate Boudoirr with Velvarr and a local Jellyfin server:
 
 ```sh
-make ship PRESET=boudoirr ADD_SERVICES=jellyfin
+make ship PRESET=boudoirr
 ```
 
-If Jellyfin already runs in another project or on another host, generate Boudoirr with its defaults:
+If Jellyfin already runs in another project or on another host, omit the local Jellyfin container and connect the existing server during setup:
 
 ```sh
-make ship PRESET=boudoirr
+make ship PRESET=boudoirr REMOVE_SERVICES=jellyfin
 ```
 
 To omit Velvarr, clear its initially checked box in `make configure`, or use:
@@ -24,7 +24,7 @@ To omit Velvarr, clear its initially checked box in `make configure`, or use:
 make ship PRESET=boudoirr REMOVE_SERVICES=velvarr
 ```
 
-Other presets can select `velvarr` through `ADD_SERVICES` or `make configure`. Whisparr and Jellyfin are recommended integrations, so Maraudarr does not force local containers for either service. Include your complete service selection when regenerating an existing project.
+To omit both companions, use `REMOVE_SERVICES=velvarr,jellyfin`. Other presets can select either service through `ADD_SERVICES` or `make configure`. Whisparr and Jellyfin are recommended integrations, so Maraudarr does not force local containers for either service. Include your complete service selection when regenerating an existing project.
 
 ## Review the generated defaults
 
