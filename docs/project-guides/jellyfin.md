@@ -74,13 +74,30 @@ Choose **Dark** in the client's display settings. In **Dashboard > Branding > Cu
 @import url("custom/boudoirr.css");
 ```
 
-For an individual account, use **Settings > Display > Custom CSS**. The relative asset URL stays on your Jellyfin origin and follows a server base path. Open the stylesheet from the Web client to confirm it loads. Edit `dist/YOUR-PRESET/config/jellyfin/web/custom/boudoirr.css` to change the palette, then reload with the browser cache bypassed.
+For an individual account, use **Settings > Display > Custom CSS**. When choosing a different personal theme, enable **Disable server-provided custom CSS code** to prevent the global theme from stacking with it. The relative asset URL stays on your Jellyfin origin and follows a server base path. Open the stylesheet from the Web client to confirm it loads. Edit `dist/YOUR-PRESET/config/jellyfin/web/custom/boudoirr.css` to change the palette, then reload with the browser cache bypassed.
 
 The theme targets Jellyfin 12.2's `--jf-palette-*` variables, React/MUI navigation classes, and existing Web card classes. It adds plum surfaces, pink actions, gold progress and focus outlines, and softly rounded artwork. It retains normal hit targets, playback controls, keyboard focus, and reduced-motion preferences. It imports no external fonts, images, or scripts. The JSON mount does not enable CSS by itself; Branding chooses the stylesheet separately. The Jellyfin 12 admin dashboard and native clients may keep their own appearance.
 
 Clear the CSS import to restore the normal Web appearance. Regeneration preserves theme edits, so changing the project seed will not replace a deployed theme. Verify login, library browsing, item details, playback controls, mobile layout, and keyboard focus after each Web upgrade. [Custom CSS documentation](https://jellyfin.org/docs/general/clients/css-customization/) explains global and per-user settings.
 
 [Jellyfish](https://github.com/n00bcodr/Jellyfish) is a broader alternative whose current source explicitly supports Jellyfin 12's modern layout. Choose one main theme at a time; stacking unrelated themes can produce conflicting rules. The bundled Boudoirr theme keeps its assets local and its changes smaller.
+
+## Choose from six local styles
+
+The original Boudoirr theme has five additional companions. These are original styles adapted around the tested Jellyfin Web 12.2 base, with research inspiration from the community projects below. Each option changes its palette and visual treatment, rather than merely changing the accent color. They require no external fonts, background downloads, JavaScript injection, or additional plugins.
+
+| Local style | Design direction | Community inspiration | Import in Custom CSS |
+| --- | --- | --- | --- |
+| Boudoirr | Plum, velvet pink, warm gold | Original Plundarr theme | `@import url("custom/boudoirr.css");` |
+| Oceanic | Deep navy, seafoam, coral, sharp artwork frames | [Scyfin](https://github.com/loof2736/scyfin) | `@import url("custom/oceanic.css");` |
+| Noir cinema | Near-black cinema chrome, soft red, angular posters | [Finimalism](https://github.com/tedhinklater/finimalism) | `@import url("custom/noir-cinema.css");` |
+| Aurora glass | Frosted violet/mint navigation, generous corner rounding | [Abyss](https://github.com/AumGupta/abyss-jellyfin) | `@import url("custom/aurora-glass.css");` |
+| Rose editorial | Warm rose, serif section headings, fine gold borders | [ElegantFin](https://github.com/lscambo13/ElegantFin) and its [12-modern companion](https://github.com/mihaif7/elegantfin-jf12) | `@import url("custom/rose-editorial.css");` |
+| Emerald lounge | Jewel green surfaces, gold details, rounded actions | [Jellyfish](https://github.com/n00bcodr/Jellyfish) | `@import url("custom/emerald-lounge.css");` |
+
+Select **Dark** in Display settings and use one import from the table. Replace the previous theme import rather than layering themes. Every option is served locally from the generated `web/custom/` directory and remains editable. The five companions load `theme-base.css` from the same directory; preserve that file alongside them if moving assets to an external path.
+
+The community projects have different compatibility and dependency requirements. ElegantFin's upstream documentation currently asks Jellyfin 12 users to use Legacy display mode, while its companion targets Modern mode. The local Rose editorial option uses modern Jellyfin variables and keeps the current layout. The local styles borrow design ideas rather than bundling upstream CSS, so their behavior and updates are controlled by this project. Test login, navigation, library/details, player controls, mobile layout, and keyboard focus on the specific clients you use. Compatibility checks cover Web 12.2; future floating-image releases require another review.
 
 ## Add useful menu links
 

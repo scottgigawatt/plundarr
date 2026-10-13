@@ -153,3 +153,29 @@ class JellyfinClientsTests(unittest.TestCase):
         self.assertIn("htmlVideoPlayer/plugin", privacy["plugins"])
         self.assertIn("syncPlay/plugin", privacy["plugins"])
         self.assertEqual(privacy["themes"], standard["themes"])
+
+    def test_theme_collection_is_local_and_preserved(self) -> None:
+        """New theme choices must retain their local base and survive operator edits."""
+        names = ("oceanic", "noir-cinema", "aurora-glass", "rose-editorial", "emerald-lounge")
+        with tempfile.TemporaryDirectory() as temporary, patch("maraudarr.render.validate_compose"):
+            output = Path(temporary)
+            plan = self.catalog.resolve("jellyfin")
+            write_stack(self.catalog, plan, output)
+            custom = output / "config/jellyfin/web/custom"
+
+            for name in names:
+                with self.subTest(theme=name):
+                    source = (custom / f"{name}.css").read_text()
+                    self.assertIn('@import url("theme-base.css");', source)
+                    self.assertNotIn("https://", source)
+                    self.assertNotIn("http://", source)
+                    self.assertIn("--theme-accent-channel:", source)
+
+            # The base is also operator-owned; regeneration must preserve both layers.
+            (custom / "theme-base.css").write_text("/* Private base edits */\n")
+            (custom / "aurora-glass.css").write_text("/* Private theme edits */\n")
+            write_stack(self.catalog, plan, output)
+            self.assertEqual((custom / "theme-base.css").read_text(), "/* Private base edits */\n")
+            self.assertEqual(
+                (custom / "aurora-glass.css").read_text(), "/* Private theme edits */\n"
+            )

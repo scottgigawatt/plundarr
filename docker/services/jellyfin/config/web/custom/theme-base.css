@@ -1,0 +1,128 @@
+/*
+ * Copyright 2025-2026 Scott Gigawatt
+ *
+ * Licensed under the Apache License, Version 2.0.
+ *
+ * theme-base.css: Shared local browsing styles for the Jellyfin Web 12.2 theme collection.
+ */
+
+/* Stable Jellyfin 12 palette variables keep legacy pages and React/MUI aligned. */
+:root,
+html[data-theme="dark"] {
+  --theme-background: #10121b;
+  --theme-background-channel: 16 18 27;
+  --theme-surface: #202536;
+  --theme-surface-channel: 32 37 54;
+  --theme-accent: #b5c6ff;
+  --theme-accent-channel: 181 198 255;
+  --theme-highlight: #c8f0e0;
+  --theme-highlight-channel: 200 240 224;
+  --theme-text: #f5f6fb;
+  --theme-text-channel: 245 246 251;
+  --theme-muted: #bec5d7;
+  --theme-muted-channel: 190 197 215;
+  --theme-ink: #10121b;
+  --theme-ink-channel: 16 18 27;
+  --theme-radius: 0.9rem;
+  --theme-heading-font: inherit;
+  --theme-shadow: 0 0.4rem 1.4rem rgb(0 0 0 / 0.22);
+  --jf-palette-background-default: var(--theme-background);
+  --jf-palette-background-defaultChannel: var(--theme-background-channel);
+  --jf-palette-background-paper: var(--theme-surface);
+  --jf-palette-background-paperChannel: var(--theme-surface-channel);
+  --jf-palette-primary-main: var(--theme-accent);
+  --jf-palette-primary-mainChannel: var(--theme-accent-channel);
+  --jf-palette-primary-contrastText: var(--theme-ink);
+  --jf-palette-primary-contrastTextChannel: var(--theme-ink-channel);
+  --jf-palette-secondary-main: var(--theme-highlight);
+  --jf-palette-secondary-mainChannel: var(--theme-highlight-channel);
+  --jf-palette-secondary-contrastText: var(--theme-ink);
+  --jf-palette-text-primary: var(--theme-text);
+  --jf-palette-text-primaryChannel: var(--theme-text-channel);
+  --jf-palette-text-secondary: var(--theme-muted);
+  --jf-palette-text-secondaryChannel: var(--theme-muted-channel);
+  --jf-palette-divider: rgb(var(--theme-accent-channel) / 0.2);
+  --jf-palette-AppBar-defaultBg: var(--theme-surface);
+  --jf-card-borderRadius: var(--theme-radius);
+  accent-color: var(--theme-accent);
+}
+
+/* Style browsing surfaces without changing the video overlay's positioning. */
+.backgroundContainer,
+.dialog {
+  background-color: var(--theme-background);
+}
+
+.skinHeader:not(.osdHeader),
+.mainDrawer,
+.MuiAppBar-root:not(.videoOsd-appBar),
+.MuiDrawer-paper {
+  background-color: var(--theme-surface) !important;
+  color: var(--theme-text);
+}
+
+.sectionTitle,
+.detailPagePrimaryContainer h1 {
+  font-family: var(--theme-heading-font);
+  color: var(--theme-text);
+}
+
+.cardBox,
+.cardContent,
+.cardImageContainer {
+  border-radius: var(--theme-radius);
+}
+
+.cardBox {
+  box-shadow: var(--theme-shadow);
+}
+
+.cardText-secondary {
+  color: var(--theme-muted);
+}
+
+.defaultCardBackground1,
+.defaultCardBackground2,
+.defaultCardBackground3,
+.defaultCardBackground4,
+.defaultCardBackground5 {
+  background-color: var(--theme-surface);
+}
+
+.raised,
+.button-submit,
+.button-accent {
+  background-color: var(--theme-accent) !important;
+  color: var(--theme-ink) !important;
+  border-radius: calc(var(--theme-radius) * 0.65);
+}
+
+.emby-tab-button-active,
+.navMenuOption-selected,
+.MuiListItemButton-root.Mui-selected {
+  color: var(--theme-accent) !important;
+  background-color: rgb(var(--theme-accent-channel) / 0.1);
+}
+
+.itemProgressBarForeground,
+.mdl-slider-background-lower {
+  background-color: var(--theme-highlight);
+}
+
+.emby-button:focus-visible,
+.card:focus-visible,
+.MuiButtonBase-root:focus-visible {
+  outline: 3px solid var(--theme-highlight) !important;
+  outline-offset: 3px;
+}
+
+/* Hover changes remain optional for touch devices and reduced-motion users. */
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .cardBox {
+    transition: box-shadow 160ms ease;
+  }
+
+  .card:hover .cardBox {
+    box-shadow: 0 0.6rem 1.6rem rgb(var(--theme-accent-channel) / 0.18);
+  }
+}

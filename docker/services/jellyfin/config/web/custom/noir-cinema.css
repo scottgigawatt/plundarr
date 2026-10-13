@@ -1,0 +1,49 @@
+/*
+ * Copyright 2025-2026 Scott Gigawatt
+ *
+ * Licensed under the Apache License, Version 2.0.
+ *
+ * noir-cinema.css: Finimalism-inspired black cinema surfaces, red accents, and square artwork.
+ */
+
+@import url("theme-base.css");
+
+/* Each option provides its own palette and visual treatment after the shared base. */
+:root,
+html[data-theme="dark"] {
+  --theme-background: #080808;
+  --theme-background-channel: 8 8 8;
+  --theme-surface: #181818;
+  --theme-surface-channel: 24 24 24;
+  --theme-accent: #ffb0b4;
+  --theme-accent-channel: 255 176 180;
+  --theme-highlight: #e9d6bc;
+  --theme-highlight-channel: 233 214 188;
+  --theme-text: #fafafa;
+  --theme-text-channel: 250 250 250;
+  --theme-muted: #c5c5c5;
+  --theme-muted-channel: 197 197 197;
+  --theme-ink: #080808;
+  --theme-ink-channel: 8 8 8;
+  --theme-radius: 0.25rem;
+}
+
+/* Quiet chrome and angular artwork give the library a cinema-poster wall. */
+.skinHeader:not(.osdHeader),
+.MuiAppBar-root:not(.videoOsd-appBar) {
+  border-bottom: 1px solid #453034;
+}
+
+.sectionTitle {
+  letter-spacing: 0.04em;
+  font-weight: 700;
+}
+
+.cardBox {
+  --theme-shadow: none;
+  border-bottom: 2px solid #463034;
+}
+
+.cardText {
+  text-align: left;
+}

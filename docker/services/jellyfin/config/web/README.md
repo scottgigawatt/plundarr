@@ -21,3 +21,17 @@ To enable the local theme, choose the **Dark** display theme and enter this line
 The relative URL keeps the stylesheet on the same origin and follows a configured server base path. Test it from the Web client, including the login page, library, detail page, and player. CSS does not style every native app or the Jellyfin 12 admin dashboard. Clear the import to restore the standard appearance. Edit `custom/boudoirr.css` to change the palette; no external fonts, images, JavaScript injector, or plugin is required.
 
 Custom links belong in `menuLinks` in the selected JSON file. Useful choices are **Requests** pointing to your Velvarr URL, **Jellyfin Vue** pointing to its separate frontend, and **Help** pointing to your own server guide. Use real browser-accessible URLs and keep administrative applications out of shared user menus. Menu links are navigation, not access control.
+
+## Choose another local theme
+
+Five additional original styles use the same Jellyfin Web 12.2 base. Import exactly one theme at a time in Branding or per-user Display settings. They use stable Jellyfin palette variables and component classes, local assets, visible focus states, and normal playback controls. Choose **Dark** as the display theme.
+
+| Style | Character | CSS import |
+| --- | --- | --- |
+| Oceanic | Navy, seafoam, coral highlights, crisp frames | `@import url("custom/oceanic.css");` |
+| Noir cinema | Near-black, soft red, angular poster-wall styling | `@import url("custom/noir-cinema.css");` |
+| Aurora glass | Violet/mint, frosted navigation, rounded artwork | `@import url("custom/aurora-glass.css");` |
+| Rose editorial | Warm rose, gold lines, system serif headings | `@import url("custom/rose-editorial.css");` |
+| Emerald lounge | Jewel green, gold progress, pill-shaped actions | `@import url("custom/emerald-lounge.css");` |
+
+The original Boudoirr theme remains available through `custom/boudoirr.css`. Regeneration preserves edits to every theme and the shared `theme-base.css`. Aurora glass provides solid surfaces when blur is unavailable or reduced transparency is requested. These are original Plundarr styles inspired by community designs, not copies of those themes. See the project guide for source inspiration and validation scope.
