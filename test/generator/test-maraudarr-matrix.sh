@@ -174,6 +174,8 @@ run_case plex \
 # Focused standalone media-server voyages.
 #
 run_case standalone-jellyfin --preset jellyfin
+run_case jellyfin-vue --preset jellyfin --add jellyfin-vue,homepage
+run_case external-jellyfin-vue --preset custom --add jellyfin-vue,homepage
 run_case standalone-plex --preset plex
 run_case standalone-calibre-web-automated --preset calibre-web-automated
 run_case standalone-watchtower --preset watchtower
@@ -200,6 +202,8 @@ run_case duplex-core \
 # Default Boudoirr voyage with Velvarr, Jellyfin, and qBittorrent as the only downloader.
 #
 run_case boudoirr --preset boudoirr
+run_case boudoirr-vue --preset boudoirr --add jellyfin-vue,homepage
+run_case boudoirr-external-vue --preset boudoirr --remove jellyfin --add jellyfin-vue,homepage
 
 #
 # The optional second Whisparr has independent state and conditional Homepage settings.
@@ -263,7 +267,7 @@ run_case duplex-monitoring --preset duplex --add tracearr,tautulli,homepage
 #
 run_case everything \
     --preset plundarr \
-    --add portainer,apprise,imagemaid,jellyfin,lidarr,notifiarr,nzbget,overlay-reset,pattrmm,plex,recyclarr,sabnzbd,sonarr-anime,tautulli,velvarr,watchtower,whisparr,whisparr-alt
+    --add portainer,apprise,imagemaid,jellyfin,jellyfin-vue,lidarr,notifiarr,nzbget,overlay-reset,pattrmm,plex,recyclarr,sabnzbd,sonarr-anime,tautulli,velvarr,watchtower,whisparr,whisparr-alt
 
 #
 # Report one clear success line after every Compose chart passes.

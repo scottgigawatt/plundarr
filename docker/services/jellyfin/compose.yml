@@ -31,6 +31,20 @@ services:
       - ${JELLYFIN_CACHE_PATH}:/cache:rw    # Transcoding and image cache
       - ${JELLYFIN_DATA_PATH}:/data:rw      # Media root containing library directories
 
+      # Read-only frontend mounts; missing sources must not become empty directories.
+      - type: bind
+        source: ${JELLYFIN_WEB_CONFIG_PATH}       # JSON settings for Jellyfin Web; compare with the image defaults on upgrades
+        target: /jellyfin/jellyfin-web/config.json
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${JELLYFIN_WEB_CUSTOM_PATH}       # Locally served CSS and images; Branding CSS selects the stylesheet
+        target: /jellyfin/jellyfin-web/custom
+        read_only: true
+        bind:
+          create_host_path: false
+
     # Define container healthcheck to verify Jellyfin connectivity
     healthcheck:
       <<: *default-healthcheck-settings  # Pull in default healthcheck settings

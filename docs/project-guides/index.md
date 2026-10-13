@@ -18,3 +18,5 @@ Pick the chart that matches the work ahead:
 - [Report a security concern](../SECURITY.md) 🛡️
 - [Get support](../SUPPORT.md) 🛟
 - [Review the Code of Conduct](../CODE_OF_CONDUCT.md) 🤝
+
+[Jellyfin customization](jellyfin.md) covers the optional Vue client, mounted Web settings, the local Boudoirr theme, menu links, and plugin recommendations.
