@@ -488,7 +488,7 @@ def render_environment(
         "JELLYFIN_DATA_PATH": ("/volume1/jellyfin", media_root),
         "WHISPARR_DATA_PATH": ("/volume1/media/adult", media_root),
         "WHISPARR_IMPORT_PATH": ("/volume1/media/adult/import", f"{media_root}/import"),
-        "WHISPARR_MOVIES_PATH": ("/volume1/media/adult/movies/tmdb", f"{media_root}/movies/tmdb"),
+        "WHISPARR_MOVIES_PATH": ("/volume1/media/adult/movies/main", f"{media_root}/movies/main"),
         "WHISPARR_SCENES_PATH": ("/volume1/media/adult/scenes/main", f"{media_root}/scenes/main"),
         "WHISPARR_RECYCLE_PATH": (
             "/volume1/media/adult/recycle/main",
@@ -497,8 +497,8 @@ def render_environment(
         "WHISPARR_ALT_DATA_PATH": ("/volume1/media/adult", media_root),
         "WHISPARR_ALT_IMPORT_PATH": ("/volume1/media/adult/import", f"{media_root}/import"),
         "WHISPARR_ALT_MOVIES_PATH": (
-            "/volume1/media/adult/movies/tpdb",
-            f"{media_root}/movies/tpdb",
+            "/volume1/media/adult/movies/alt",
+            f"{media_root}/movies/alt",
         ),
         "WHISPARR_ALT_SCENES_PATH": ("/volume1/media/adult/scenes/alt", f"{media_root}/scenes/alt"),
         "WHISPARR_ALT_RECYCLE_PATH": (

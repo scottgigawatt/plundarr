@@ -6,7 +6,7 @@
 # test_whisparr_alt.py: Verify an opt-in second Whisparr with independent state.
 #
 
-"""Exercise selection, TMDB-first library paths, dashboard links, and safe regeneration."""
+"""Exercise selection, independent library paths, dashboard links, and safe regeneration."""
 
 import io
 import tempfile
@@ -108,7 +108,7 @@ class WhisparrAltTests(unittest.TestCase):
         self.assertNotIn("WHISPARR_ALT_TAG:-", alt)
 
     def test_environment_follows_preset_ports_and_media_roots(self) -> None:
-        """Pair main TMDB and fallback TPDB movie paths with independent scene libraries."""
+        """Keep main and alternate movie and scene paths independent of provider choice."""
         for preset_id, port, media_root in (
             ("plundarr", 6970, "/volume1/plex"),
             ("boudoirr", 16970, "/volume1/jellyfin"),
@@ -136,7 +136,7 @@ class WhisparrAltTests(unittest.TestCase):
                         "WHISPARR",
                         (
                             ("IMPORT", "import"),
-                            ("MOVIES", "movies/tmdb"),
+                            ("MOVIES", "movies/main"),
                             ("SCENES", "scenes/main"),
                             ("RECYCLE", "recycle/main"),
                         ),
@@ -145,7 +145,7 @@ class WhisparrAltTests(unittest.TestCase):
                         "WHISPARR_ALT",
                         (
                             ("IMPORT", "import"),
-                            ("MOVIES", "movies/tpdb"),
+                            ("MOVIES", "movies/alt"),
                             ("SCENES", "scenes/alt"),
                             ("RECYCLE", "recycle/alt"),
                         ),
@@ -187,11 +187,11 @@ class WhisparrAltTests(unittest.TestCase):
 
             for generated in (environment, example):
                 self.assertIn(
-                    'WHISPARR_MOVIES_PATH="${WHISPARR_MOVIES_PATH:-/volume1/jellyfin/movies/tmdb}"',
+                    'WHISPARR_MOVIES_PATH="${WHISPARR_MOVIES_PATH:-/volume1/jellyfin/movies/main}"',
                     generated,
                 )
                 self.assertIn(
-                    'WHISPARR_ALT_MOVIES_PATH="${WHISPARR_ALT_MOVIES_PATH:-/volume1/jellyfin/movies/tpdb}"',
+                    'WHISPARR_ALT_MOVIES_PATH="${WHISPARR_ALT_MOVIES_PATH:-/volume1/jellyfin/movies/alt}"',
                     generated,
                 )
                 self.assertIn(
