@@ -62,6 +62,8 @@ make ship PRESET=boudoirr
 
 For an existing Jellyfin server, use `make ship PRESET=boudoirr REMOVE_SERVICES=jellyfin` and connect that server during owner setup. Use `REMOVE_SERVICES=velvarr` to omit requests, or `REMOVE_SERVICES=velvarr,jellyfin` to omit both companions. Velvarr uses host port `16699` in Boudoirr, stores data at `dist/boudoirr/config/velvarr`, and runs as the shared `DEFAULT_PUID:DEFAULT_PGID`. Its generated HTTP setting permits private-network addresses so the application can reach `http://whisparr:6969` and `http://jellyfin:8096`. Plex does not replace Velvarr's Jellyfin authentication requirement. The current official image supports `linux/amd64` only. Follow the [Velvarr guide](project-guides/velvarr.md) before launch.
 
+Boudoirr uses main Whisparr with its upstream **TMDB** movie default for collections, plus StashDB scene metadata. Main movies default to `/volume1/jellyfin/movies/tmdb` and scenes to `/volume1/jellyfin/scenes/main`. Add the optional [Whisparr Alt service](https://github.com/scottgigawatt/plundarr/blob/main/docker/services/whisparr-alt/README.md) with `ADD_SERVICES=whisparr-alt` for movies TMDB cannot match, then select **TPDB** in Alt before importing; its movie path defaults to `/volume1/jellyfin/movies/tpdb`. Existing `.env` paths and application settings survive regeneration.
+
 ## Plan project networks
 
 Maraudarr gives each preset a distinct Compose project, bridge network, and default host-port range so fresh deployments can run side by side.
@@ -142,7 +144,7 @@ The [Synology Container Manager project documentation](https://kb.synology.com/e
 | --- | --- | --- | --- |
 | Jellyfin with Plundarr or standalone | `JELLYFIN_DATA_PATH` mounts read/write at `/data` | `/data/movies`, `/data/tv` | Persistent `/config` and `/cache` |
 | Jellyfin with Plundarr and Lidarr | `JELLYFIN_DATA_PATH` mounts read/write at `/data`; `HOST_MUSIC_PATH` resolves to its `music` child | `/data/movies`, `/data/tv`, `/data/music` | Keep both paths beneath the same host media root |
-| Jellyfin with Boudoirr | Jellyfin mounts its media root; Whisparr mounts individual libraries | `/data/movies/tpdb`, `/data/scenes/main`; optionally `/data/movies/tmdb`, `/data/scenes/alt` | Map Whisparr’s `/data/movies` and `/data/scenes` to the matching Jellyfin subdirectories; exclude import and recycle folders |
+| Jellyfin with Boudoirr | Jellyfin mounts its media root; Whisparr mounts individual libraries | `/data/movies/tmdb`, `/data/scenes/main`; optionally `/data/movies/tpdb`, `/data/scenes/alt` | Map Whisparr’s `/data/movies` and `/data/scenes` to the matching Jellyfin subdirectories; exclude import and recycle folders |
 | Plex with Plundarr | Separate read-only library mounts | Movies, television, anime | Persistent config and transcode mounts |
 | Plex with Plundarr and Lidarr | Separate read-only library mounts | Movies, television, anime, music at `/music` | Lidarr writes the same host music library |
 | Plex with Boudoirr | Separate read-only library mounts | Movies, scenes | Plex must be selected explicitly |

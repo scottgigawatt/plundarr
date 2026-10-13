@@ -127,7 +127,7 @@ requires = ["prowlarr"]
 # Whisparr manages Boudoirr's adult-media workflow.
 [services.whisparr]
 title = "Whisparr"
-description = "Finds, tracks, and organizes an adult media library."
+description = "Organizes TMDB movies and collections alongside StashDB scenes."
 category = "Media automation"
 url = "https://github.com/Whisparr/Whisparr"
 order = 330
@@ -137,7 +137,7 @@ recommended = ["qbittorrent", "velvarr"]
 # Whisparr Alt is an opt-in second instance with independent metadata-provider settings.
 [services.whisparr-alt]
 title = "Whisparr Alt"
-description = "Runs a second Whisparr with its own library and metadata-provider choice."
+description = "Runs an independent library for optional TPDB movie fallback; select TPDB during setup."
 category = "Media automation"
 url = "https://github.com/Whisparr/Whisparr"
 order = 335
