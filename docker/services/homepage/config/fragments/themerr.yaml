@@ -1,0 +1,4 @@
+    - Themerr:
+        icon: mdi-music-note
+        href: {{HOMEPAGE_VAR_THEMERR_HREF}}
+        description: Plex and Jellyfin theme songs

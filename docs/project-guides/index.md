@@ -10,6 +10,7 @@ Pick the chart that matches the work ahead:
 - [Configure VPN regions and recovery](vpn.md) 🧭
 - [Deploy Portainer](portainer.md) 🚢
 - [Monitor media servers](monitoring.md) 🔎
+- [Manage Plex and Jellyfin theme songs](themerr.md) 🎵
 - [Discover and request adult media with Velvarr](velvarr.md) 🔞
 - [Run Plundarr test voyages](testing.md) 🧪
 - [Use the host helper scripts](scripts.md) 🦜

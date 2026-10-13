@@ -249,11 +249,16 @@ make ship PRESET=duplex
 | `PATTRMM_TIMES` | Neo generation times; defaults to `02:00,14:00`, before Kometa |
 | `KOMETA_TIMES` | Comma-separated stable-image run times in `HH:MM` format |
 | `IMAGEMAID_PLEX_PATH` | Plex application data containing `Cache`, `Metadata`, and `Plug-in Support` |
+| `THEMERR_WEBUI_PORT` | Themerr HTTPS host port; defaults to `9494` |
+| `THEMERR_CONNECTOR_PORT` | Jellyfin connector HTTP host port; defaults to `9495` |
+| `THEMERR_TOKEN_KEY_PATH` | Existing private encryption key, preserved with application backups |
 | `NOTIFIARR_WEBUI_PORT` | Notifiarr host port; defaults to `5454` |
 
 Kometa and PATTRMM share an external checkout; Maraudarr does not clone or replace it. Configure the shared file before starting, following the [Kometa service guide](https://github.com/scottgigawatt/plundarr/blob/main/docker/services/kometa/README.md). ImageMaid receives its own writable configuration directory and Plex application data at `/plex`.
 
 PATTRMM uses the `neo` image channel. Prepare its authored settings directory and writable cache/output directories before startup, following the [Neo service guide](https://github.com/scottgigawatt/plundarr/blob/main/docker/services/pattrmm/README.md). Generate the collection files before the first Kometa run.
+
+Themerr is required in Duplex and connects one instance to both Plex and Jellyfin. Review host-user permissions for its config and encryption key, then complete administrator setup and connector configuration following the [Themerr guide](project-guides/themerr.md). Fresh settings disable cleanup, theme replacement, and automatic Jellyfin restarts.
 
 Start the persistent Duplex services:
 

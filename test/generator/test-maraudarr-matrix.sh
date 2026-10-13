@@ -193,6 +193,8 @@ run_case plundarr-without-calibre-web-automated \
 # Duplex includes removable companions; its recovery tool is opt-in.
 #
 run_case duplex --preset duplex
+run_case custom-themerr --preset custom --add themerr,homepage
+run_case jellyfin-with-themerr --preset jellyfin --add themerr
 run_case duplex-with-overlay-reset --preset duplex --add overlay-reset
 run_case duplex-core \
     --preset duplex \
@@ -267,7 +269,7 @@ run_case duplex-monitoring --preset duplex --add tracearr,tautulli,homepage
 #
 run_case everything \
     --preset plundarr \
-    --add portainer,apprise,imagemaid,jellyfin,jellyfin-vue,lidarr,notifiarr,nzbget,overlay-reset,pattrmm,plex,recyclarr,sabnzbd,sonarr-anime,tautulli,velvarr,watchtower,whisparr,whisparr-alt
+    --add portainer,apprise,imagemaid,jellyfin,jellyfin-vue,lidarr,notifiarr,nzbget,overlay-reset,pattrmm,plex,recyclarr,sabnzbd,sonarr-anime,tautulli,themerr,velvarr,watchtower,whisparr,whisparr-alt
 
 #
 # Report one clear success line after every Compose chart passes.

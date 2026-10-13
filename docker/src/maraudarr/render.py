@@ -15,6 +15,7 @@ import hashlib
 import os
 import re
 import secrets
+import shlex
 import shutil
 import subprocess
 import tempfile
@@ -169,6 +170,7 @@ def _prepare_service(
             "Homepage Bazarr click target and widget": "bazarr" in selected,
             "Homepage Seerr click target and widget": "seerr" in selected,
             "Homepage Velvarr click target": "velvarr" in selected,
+            "Homepage Themerr click target": "themerr" in selected,
             "Homepage Jellyfin Vue click target": "jellyfin-vue" in selected,
             "Homepage Whisparr click target": "whisparr" in selected,
             "Homepage Whisparr Alt click target": "whisparr-alt" in selected,
@@ -300,6 +302,7 @@ def _filter_homepage_env(
         "Homepage Bazarr click-target and widget variables": "bazarr" in selected,
         "Homepage Seerr click-target and widget variables": "seerr" in selected,
         "Homepage Velvarr click-target variables": "velvarr" in selected,
+        "Homepage Themerr click-target variables": "themerr" in selected,
         "Homepage Jellyfin Vue click-target variables": "jellyfin-vue" in selected,
         "Homepage Whisparr click-target variables": "whisparr" in selected,
         "Homepage Whisparr Alt click-target variables": "whisparr-alt" in selected,
@@ -623,6 +626,7 @@ def render_homepage_services(catalog: Catalog, plan: StackPlan) -> str:
         ("bazarr", "Bazarr"),
         ("seerr", "Seerr"),
         ("velvarr", "Velvarr"),
+        ("themerr", "Themerr"),
         ("whisparr", "Whisparr"),
         ("whisparr-alt", "Whisparr Alt"),
         ("jellyfin", "Jellyfin"),
@@ -637,6 +641,7 @@ def render_homepage_services(catalog: Catalog, plan: StackPlan) -> str:
             "jellyfin-vue",
             "calibre-web-automated",
             "velvarr",
+            "themerr",
             "whisparr",
             "whisparr-alt",
         }:
@@ -824,6 +829,60 @@ def validate_compose(output_dir: Path) -> None:
         return
 
 
+def _ensure_themerr_key(plan: StackPlan, output_dir: Path, environment: str) -> None:
+    """Create one private managed key, refusing to silently rekey existing state."""
+    if "themerr" not in plan.service_ids:
+        return
+
+    # External paths are operator-owned; never interpret or populate their assignments.
+    for variable, default_path in (
+        ("THEMERR_CONFIG_PATH", "./config/themerr"),
+        ("THEMERR_TOKEN_KEY_PATH", "./config/secrets/themerr-tokens.key"),
+    ):
+        match = re.search(rf"^{variable}=(.*)$", environment, re.MULTILINE)
+        tokens = shlex.split(match.group(1), comments=True) if match else []
+        value = tokens[0] if len(tokens) == 1 else ""
+        if value not in {default_path, f"${{{variable}:-{default_path}}}"}:
+            return
+
+    key_path = output_dir / "config/secrets/themerr-tokens.key"
+    if key_path.exists() or key_path.is_symlink():
+        if not key_path.is_file():
+            raise RenderError("Themerr token key must be an existing readable file.")
+        try:
+            valid_key = len(base64.urlsafe_b64decode(key_path.read_bytes().strip())) == 32
+        except ValueError:
+            valid_key = False
+        if not valid_key:
+            raise RenderError(
+                "Themerr token key is invalid; restore the existing key instead of replacing it."
+            )
+        return
+
+    state_path = output_dir / "config/themerr"
+    if state_path.exists() and any(path.name != "README.md" for path in state_path.iterdir()):
+        raise RenderError(
+            "Themerr state exists without its managed encryption key. Restore "
+            "config/secrets/themerr-tokens.key from backup before regenerating."
+        )
+
+    # Refuse a managed destination redirected outside the output by a directory link.
+    if not key_path.parent.resolve().is_relative_to(output_dir.resolve()):
+        raise RenderError(
+            "Themerr managed key directory escapes the generated project; select an external key path."
+        )
+
+    # Exclusive creation never overwrites another generator's key or operator state.
+    key_path.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        descriptor = os.open(key_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+    except FileExistsError:
+        return
+
+    with os.fdopen(descriptor, "w") as key_file:
+        key_file.write(base64.urlsafe_b64encode(secrets.token_bytes(32)).decode("ascii") + "\n")
+
+
 def write_stack(
     catalog: Catalog,
     plan: StackPlan,
@@ -868,6 +927,7 @@ def write_stack(
         _atomic_write(staged_env, environment)
         _atomic_write(staged_example_env, example_environment)
         validate_compose(staging_dir)
+        _ensure_themerr_key(plan, output_dir, environment)
         os.replace(staged_compose, compose_path)
         os.replace(staged_env, env_path)
         os.replace(staged_example_env, example_env_path)

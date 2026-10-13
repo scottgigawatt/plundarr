@@ -53,6 +53,7 @@ nav:
       - VPN regions and recovery: project-guides/vpn.md
       - Portainer: project-guides/portainer.md
       - Media monitoring: project-guides/monitoring.md
+      - Themerr theme songs: project-guides/themerr.md
       - Velvarr requests: project-guides/velvarr.md
       - Jellyfin customization: project-guides/jellyfin.md
       - Testing: project-guides/testing.md

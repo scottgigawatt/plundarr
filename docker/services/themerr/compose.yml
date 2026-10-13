@@ -1,0 +1,44 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# compose.yml: One Themerr instance for Plex and Jellyfin theme songs.
+#
+
+services:
+  # Connect external media servers through the Themerr administration UI.
+  themerr:
+    # Docker image and container information
+    <<: *rootless-container                                         # Run directly as the configured host identity
+    image: lizardbyte/themerr:${THEMERR_TAG}                        # Follow the official stable image channel
+    container_name: ${COMPOSE_PROJECT_NAME}-themerr-${THEMERR_TAG}  # Namespace by project and tag
+    hostname: themerr                                               # Set the container hostname
+
+    # Drop privileges that the web application does not require
+    cap_drop:                                              # No Linux capabilities are needed
+      - ALL
+    security_opt:
+      - no-new-privileges:true                              # Prevent privilege escalation
+
+    # Define the container environment
+    environment:
+      <<: *default-environment
+      HOME: /tmp                                           # Keep caches writable with an overridden numeric user
+      THEMERR_TOKEN_KEY_FILE: /run/secrets/themerr_token_key  # Encrypt stored Plex and Jellyfin credentials
+
+    # Define the host and container ports
+    ports:
+      - ${THEMERR_WEBUI_PORT}:9494                          # HTTPS administration with an initial self-signed certificate
+      - ${THEMERR_CONNECTOR_PORT}:9495                      # HTTP connector files only; reachable from Jellyfin
+
+    # Mount persistent state and the separate private key
+    volumes:
+      - ${THEMERR_CONFIG_PATH}:/config:rw                   # Persistent settings, database, certificates, and logs
+      - type: bind                                         # Require an existing private encryption key
+        source: ${THEMERR_TOKEN_KEY_PATH}
+        target: /run/secrets/themerr_token_key
+        read_only: true
+        bind:
+          create_host_path: false                          # Fail if the key is missing instead of creating a directory
+    # Retain the official image's themerr --docker_healthcheck and 90-second grace period.
