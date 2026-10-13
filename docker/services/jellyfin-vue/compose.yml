@@ -7,7 +7,9 @@
 #
 
 services:
-  # Serve the alternative browser client independently of its Jellyfin server.
+  #
+  # Define the 'jellyfin-vue' service as an alternative browser client for the Jellyfin server.
+  #
   jellyfin-vue:
     # Docker image and container information
     <<: *default-container                                                    # Keep the image's nginx identity for startup config writes
@@ -15,11 +17,13 @@ services:
     container_name: ${COMPOSE_PROJECT_NAME}-jellyfin-vue-${JELLYFIN_VUE_TAG}  # Namespace by project and tag
     hostname: jellyfin-vue                                                    # Internal frontend hostname
 
-    # Restrict privileges without overriding the upstream runtime user.
+    # Drop Linux capabilities for security hardening
     cap_drop:
-      - ALL
+      - ALL  # No optional Linux capabilities are required
+
+    # Prevent the container from acquiring additional privileges
     security_opt:
-      - no-new-privileges:true
+      - no-new-privileges:true  # Prevent processes from gaining privileges
 
     # Configure browser behavior; URLs must be reachable from the user's device.
     environment:
@@ -33,8 +37,8 @@ services:
 
     # Check static asset delivery without needing a running Jellyfin server.
     healthcheck:
-      <<: *default-healthcheck-settings
-      test:
+      <<: *default-healthcheck-settings  # Reuse the stack healthcheck timing
+      test:                              # Check the Vue frontend's configuration endpoint
         - CMD
         - wget
         - -q
