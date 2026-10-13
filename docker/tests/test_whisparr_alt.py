@@ -6,7 +6,7 @@
 # test_whisparr_alt.py: Verify an opt-in second Whisparr with independent state.
 #
 
-"""Exercise selection, provider-neutral defaults, dashboard links, and safe regeneration."""
+"""Exercise selection, independent library paths, dashboard links, and safe regeneration."""
 
 import io
 import tempfile
@@ -108,7 +108,7 @@ class WhisparrAltTests(unittest.TestCase):
         self.assertNotIn("WHISPARR_ALT_TAG:-", alt)
 
     def test_environment_follows_preset_ports_and_media_roots(self) -> None:
-        """Offset the published port without changing the internal port or choosing a provider."""
+        """Keep main and alternate movie and scene paths independent of provider choice."""
         for preset_id, port, media_root in (
             ("plundarr", 6970, "/volume1/plex"),
             ("boudoirr", 16970, "/volume1/jellyfin"),
@@ -136,7 +136,7 @@ class WhisparrAltTests(unittest.TestCase):
                         "WHISPARR",
                         (
                             ("IMPORT", "import"),
-                            ("MOVIES", "movies/tpdb"),
+                            ("MOVIES", "movies/main"),
                             ("SCENES", "scenes/main"),
                             ("RECYCLE", "recycle/main"),
                         ),
@@ -145,7 +145,7 @@ class WhisparrAltTests(unittest.TestCase):
                         "WHISPARR_ALT",
                         (
                             ("IMPORT", "import"),
-                            ("MOVIES", "movies/tmdb"),
+                            ("MOVIES", "movies/alt"),
                             ("SCENES", "scenes/alt"),
                             ("RECYCLE", "recycle/alt"),
                         ),
@@ -187,11 +187,11 @@ class WhisparrAltTests(unittest.TestCase):
 
             for generated in (environment, example):
                 self.assertIn(
-                    'WHISPARR_MOVIES_PATH="${WHISPARR_MOVIES_PATH:-/volume1/jellyfin/movies/tpdb}"',
+                    'WHISPARR_MOVIES_PATH="${WHISPARR_MOVIES_PATH:-/volume1/jellyfin/movies/main}"',
                     generated,
                 )
                 self.assertIn(
-                    'WHISPARR_ALT_MOVIES_PATH="${WHISPARR_ALT_MOVIES_PATH:-/volume1/jellyfin/movies/tmdb}"',
+                    'WHISPARR_ALT_MOVIES_PATH="${WHISPARR_ALT_MOVIES_PATH:-/volume1/jellyfin/movies/alt}"',
                     generated,
                 )
                 self.assertIn(
@@ -258,7 +258,7 @@ class WhisparrAltTests(unittest.TestCase):
                 )
                 self.assertIn('WHISPARR_ALT_TAG="${WHISPARR_ALT_TAG:-v3}"', environment)
 
-            # Synthetic operator values differ from defaults to catch accidental path or port resets.
+            # Preserve previous movie defaults alongside custom operator paths and ports.
             overrides = (
                 'WHISPARR_ALT_TAG="v3-test"',
                 'WHISPARR_ALT_WEBUI_PORT="17970"',
@@ -266,11 +266,11 @@ class WhisparrAltTests(unittest.TestCase):
                 'WHISPARR_ALT_DATA_PATH="/srv/library/alternate"',
                 'WHISPARR_DATA_PATH="/srv/library/legacy-primary"',
                 'WHISPARR_IMPORT_PATH="/srv/library/shared-import"',
-                'WHISPARR_MOVIES_PATH="/srv/library/main-movies"',
+                'WHISPARR_MOVIES_PATH="/volume1/jellyfin/movies/tpdb"',
                 'WHISPARR_SCENES_PATH="/srv/library/main-scenes"',
                 'WHISPARR_RECYCLE_PATH="/srv/library/main-recycle"',
                 'WHISPARR_ALT_IMPORT_PATH="/srv/library/shared-import"',
-                'WHISPARR_ALT_MOVIES_PATH="/srv/library/alt-movies"',
+                'WHISPARR_ALT_MOVIES_PATH="/volume1/jellyfin/movies/tmdb"',
                 'WHISPARR_ALT_SCENES_PATH="/srv/library/alt-scenes"',
                 'WHISPARR_ALT_RECYCLE_PATH="/srv/library/alt-recycle"',
                 'HOMEPAGE_VAR_WHISPARR_ALT_HREF="https://alternate.example.com"',
