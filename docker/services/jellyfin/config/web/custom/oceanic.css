@@ -1,0 +1,43 @@
+/*
+ * Copyright 2025-2026 Scott Gigawatt
+ *
+ * Licensed under the Apache License, Version 2.0.
+ *
+ * oceanic.css: Scyfin-inspired deep navy, seafoam accents, and crisp artwork frames.
+ */
+
+@import url("theme-base.css");
+
+/* Each option provides its own palette and visual treatment after the shared base. */
+:root,
+html[data-theme="dark"] {
+  --theme-background: #091a24;
+  --theme-background-channel: 9 26 36;
+  --theme-surface: #173342;
+  --theme-surface-channel: 23 51 66;
+  --theme-accent: #89e1df;
+  --theme-accent-channel: 137 225 223;
+  --theme-highlight: #ffc995;
+  --theme-highlight-channel: 255 201 149;
+  --theme-text: #f0fcff;
+  --theme-text-channel: 240 252 255;
+  --theme-muted: #b4cdd8;
+  --theme-muted-channel: 180 205 216;
+  --theme-ink: #091a24;
+  --theme-ink-channel: 9 26 36;
+  --theme-radius: 0.65rem;
+}
+
+/* Maritime gradients stay behind browsing content and require no image downloads. */
+.backgroundContainer {
+  background-image: radial-gradient(ellipse at top left, #173342, #091a24 70%);
+}
+
+.skinHeader:not(.osdHeader),
+.MuiAppBar-root:not(.videoOsd-appBar) {
+  border-bottom: 2px solid var(--theme-accent);
+}
+
+.cardImageContainer {
+  box-shadow: inset 0 0 0 1px rgb(137 225 223 / 0.25);
+}

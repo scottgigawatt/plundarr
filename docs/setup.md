@@ -300,3 +300,7 @@ Watchtower controls the host Docker daemon through its socket and can inspect el
 - Use the [support guide](SUPPORT.md) when setup does not behave as documented.
 
 Fair winds, sensible subnets, and no surprise port collisions. 🏴‍☠️
+
+## Customize Jellyfin playback
+
+Boudoirr and standalone Jellyfin can add the optional Vue client with `ADD_SERVICES=jellyfin-vue`. Jellyfin Web also receives a configurable read-only settings file and local CSS directory. Read the [Jellyfin customization guide](project-guides/jellyfin.md) for client URLs, theme activation, menu links, upgrades, and plugin choices.

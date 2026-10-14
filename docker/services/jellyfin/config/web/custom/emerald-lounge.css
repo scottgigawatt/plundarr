@@ -1,0 +1,50 @@
+/*
+ * Copyright 2025-2026 Scott Gigawatt
+ *
+ * Licensed under the Apache License, Version 2.0.
+ *
+ * emerald-lounge.css: Jellyfish-inspired jewel green surfaces, gold highlights, and rounded controls.
+ */
+
+@import url("theme-base.css");
+
+/* Each option provides its own palette and visual treatment after the shared base. */
+:root,
+html[data-theme="dark"] {
+  --theme-background: #101e19;
+  --theme-background-channel: 16 30 25;
+  --theme-surface: #1d382c;
+  --theme-surface-channel: 29 56 44;
+  --theme-accent: #b0e6ba;
+  --theme-accent-channel: 176 230 186;
+  --theme-highlight: #f1d39d;
+  --theme-highlight-channel: 241 211 157;
+  --theme-text: #f2fff1;
+  --theme-text-channel: 242 255 241;
+  --theme-muted: #bcd3c1;
+  --theme-muted-channel: 188 211 193;
+  --theme-ink: #101e19;
+  --theme-ink-channel: 16 30 25;
+  --theme-radius: 1rem;
+}
+
+/* Jewel surfaces and pill-shaped actions give browsing a lounge-like finish. */
+.backgroundContainer {
+  background-image: linear-gradient(145deg, #162c22, #101e19 70%);
+}
+
+.raised,
+.button-submit,
+.button-accent {
+  border-radius: 2rem;
+}
+
+.skinHeader:not(.osdHeader),
+.MuiAppBar-root:not(.videoOsd-appBar) {
+  border-bottom: 1px solid rgb(241 211 157 / 0.25);
+}
+
+.cardBox {
+  border: 1px solid rgb(176 230 186 / 0.14);
+  --theme-shadow: 0 0.4rem 1.2rem rgb(0 0 0 / 0.3);
+}

@@ -1,0 +1,59 @@
+/*
+ * Copyright 2025-2026 Scott Gigawatt
+ *
+ * Licensed under the Apache License, Version 2.0.
+ *
+ * aurora-glass.css: Abyss-inspired frosted surfaces with violet, mint, and soft rounded artwork.
+ */
+
+@import url("theme-base.css");
+
+/* Each option provides its own palette and visual treatment after the shared base. */
+:root,
+html[data-theme="dark"] {
+  --theme-background: #111426;
+  --theme-background-channel: 17 20 38;
+  --theme-surface: #24243e;
+  --theme-surface-channel: 36 36 62;
+  --theme-accent: #c7bcff;
+  --theme-accent-channel: 199 188 255;
+  --theme-highlight: #9ee8d5;
+  --theme-highlight-channel: 158 232 213;
+  --theme-text: #f7f4ff;
+  --theme-text-channel: 247 244 255;
+  --theme-muted: #c8c3e0;
+  --theme-muted-channel: 200 195 224;
+  --theme-ink: #111426;
+  --theme-ink-channel: 17 20 38;
+  --theme-radius: 1.2rem;
+}
+
+/* Glass has an opaque fallback; blur only affects browsing navigation. */
+.backgroundContainer {
+  background-image: radial-gradient(ellipse at top left, #302847, transparent 65%),
+    radial-gradient(ellipse at bottom right, #183d3d, #111426 75%);
+}
+
+.skinHeader:not(.osdHeader),
+.MuiAppBar-root:not(.videoOsd-appBar),
+.MuiDrawer-paper {
+  border: 1px solid rgb(199 188 255 / 0.18);
+}
+
+@supports (backdrop-filter: blur(12px)) {
+  .skinHeader:not(.osdHeader),
+  .MuiAppBar-root:not(.videoOsd-appBar),
+  .MuiDrawer-paper {
+    background-color: rgb(36 36 62 / 0.86) !important;
+    backdrop-filter: blur(12px);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .skinHeader:not(.osdHeader),
+  .MuiAppBar-root:not(.videoOsd-appBar),
+  .MuiDrawer-paper {
+    background-color: #24243e !important;
+    backdrop-filter: none;
+  }
+}

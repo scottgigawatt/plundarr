@@ -1,0 +1,128 @@
+/*
+ * Copyright 2025-2026 Scott Gigawatt
+ *
+ * Licensed under the Apache License, Version 2.0.
+ *
+ * boudoirr.css: Local plum, velvet pink, and warm gold theme for Jellyfin Web 12.2.
+ */
+
+/* Jellyfin 12 uses the jf palette in both its legacy pages and React/MUI shell. */
+:root,
+[data-jf-color-scheme="dark"] {
+  --boudoirr-plum: #150e1c;
+  --boudoirr-surface: #25192f;
+  --boudoirr-pink: #f3a6c5;
+  --boudoirr-gold: #e8c17d;
+  --jf-palette-background-default: var(--boudoirr-plum);
+  --jf-palette-background-defaultChannel: 21 14 28;
+  --jf-palette-background-paper: var(--boudoirr-surface);
+  --jf-palette-background-paperChannel: 37 25 47;
+  --jf-palette-primary-main: var(--boudoirr-pink);
+  --jf-palette-primary-mainChannel: 243 166 197;
+  --jf-palette-primary-light: #ffd1e3;
+  --jf-palette-primary-dark: #c7769a;
+  --jf-palette-primary-contrastText: #251326;
+  --jf-palette-primary-contrastTextChannel: 37 19 38;
+  --jf-palette-secondary-main: var(--boudoirr-gold);
+  --jf-palette-secondary-mainChannel: 232 193 125;
+  --jf-palette-text-primary: #f8f0f5;
+  --jf-palette-text-primaryChannel: 248 240 245;
+  --jf-palette-text-secondary: #cdbbd0;
+  --jf-palette-text-secondaryChannel: 205 187 208;
+  --jf-palette-divider: rgba(243, 166, 197, 0.18);
+  --jf-palette-AppBar-defaultBg: var(--boudoirr-surface);
+}
+
+/* Keep navigation readable over artwork while retaining normal page structure. */
+.skinHeader,
+.mainDrawer,
+.MuiAppBar-root,
+.MuiDrawer-paper {
+  background: rgba(37, 25, 47, 0.96) !important;
+  color: #f8f0f5;
+}
+
+.skinHeader {
+  border-bottom: 1px solid rgba(232, 193, 125, 0.2);
+}
+
+.backgroundContainer,
+.dialog {
+  background-color: var(--boudoirr-plum);
+}
+
+/* A narrow accent and rounded artwork frame keep posters as the main attraction. */
+.sectionTitle,
+.detailPagePrimaryContainer h1 {
+  color: #f8f0f5;
+}
+
+.cardBox,
+.cardContent,
+.cardImageContainer {
+  border-radius: 0.75rem;
+}
+
+.cardBox {
+  box-shadow: 0 0.3rem 1.2rem rgba(0, 0, 0, 0.22);
+}
+
+.cardText-secondary {
+  color: #cdbbd0;
+}
+
+.defaultCardBackground1,
+.defaultCardBackground3,
+.defaultCardBackground5 {
+  background-color: #49304f;
+}
+
+.defaultCardBackground2,
+.defaultCardBackground4 {
+  background-color: #63415e;
+}
+
+/* Pink actions retain dark text contrast; gold identifies progress and selection. */
+.raised,
+.button-submit,
+.button-accent {
+  background: var(--boudoirr-pink) !important;
+  color: #251326 !important;
+  border-radius: 0.6rem;
+}
+
+.emby-tab-button-active,
+.navMenuOption-selected,
+.MuiListItemButton-root.Mui-selected {
+  color: var(--boudoirr-pink) !important;
+  background-color: rgba(243, 166, 197, 0.1);
+}
+
+.itemProgressBarForeground,
+.mdl-slider-background-lower,
+.mdl-slider::-webkit-slider-thumb {
+  background: var(--boudoirr-gold);
+}
+
+.mdl-slider::-moz-range-thumb {
+  background: var(--boudoirr-gold);
+}
+
+/* Visible focus works with keyboards and TV remotes without changing hit targets. */
+.emby-button:focus-visible,
+.card:focus-visible,
+.MuiButtonBase-root:focus-visible {
+  outline: 3px solid var(--boudoirr-gold) !important;
+  outline-offset: 3px;
+}
+
+/* Motion and hover effects stay optional and never hide playback controls. */
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .cardBox {
+    transition: box-shadow 160ms ease;
+  }
+
+  .card:hover .cardBox {
+    box-shadow: 0 0.4rem 1.6rem rgba(243, 166, 197, 0.16);
+  }
+}

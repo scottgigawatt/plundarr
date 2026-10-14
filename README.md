@@ -141,6 +141,8 @@ Generate common combinations:
 
 ```sh
 make ship PRESET=boudoirr
+make ship PRESET=boudoirr ADD_SERVICES=jellyfin-vue
+make ship PRESET=jellyfin ADD_SERVICES=jellyfin-vue
 make ship PRESET=calibre-web-automated
 make ship ADD_SERVICES=lidarr
 make ship ADD_SERVICES=recyclarr
@@ -153,6 +155,10 @@ make ship PRESET=duplex ADD_SERVICES=watchtower
 ```
 
 Regeneration preserves existing values by variable name and does not replace application state. Values for temporarily unselected services remain in a marked footer so they can return when the service is selected again.
+
+### Customize Jellyfin
+
+Add the optional [Jellyfin Vue client](docker/services/jellyfin-vue/README.md) to Boudoirr or standalone Jellyfin with `ADD_SERVICES=jellyfin-vue`. Vue can also connect to an existing external server. The built-in Jellyfin Web client receives a configurable read-only `config.json` mount, preserved local CSS, and an optional plum, velvet pink, and gold Boudoirr theme. Read the [Jellyfin customization guide](docs/project-guides/jellyfin.md) for menu links, privacy options, theme activation, and reviewed plugins for an adult-media library.
 
 ### Configure Lidarr
 

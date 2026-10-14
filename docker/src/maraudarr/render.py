@@ -169,6 +169,7 @@ def _prepare_service(
             "Homepage Bazarr click target and widget": "bazarr" in selected,
             "Homepage Seerr click target and widget": "seerr" in selected,
             "Homepage Velvarr click target": "velvarr" in selected,
+            "Homepage Jellyfin Vue click target": "jellyfin-vue" in selected,
             "Homepage Whisparr click target": "whisparr" in selected,
             "Homepage Whisparr Alt click target": "whisparr-alt" in selected,
             "Homepage Prowlarr click target and widget": "prowlarr" in selected,
@@ -299,6 +300,7 @@ def _filter_homepage_env(
         "Homepage Bazarr click-target and widget variables": "bazarr" in selected,
         "Homepage Seerr click-target and widget variables": "seerr" in selected,
         "Homepage Velvarr click-target variables": "velvarr" in selected,
+        "Homepage Jellyfin Vue click-target variables": "jellyfin-vue" in selected,
         "Homepage Whisparr click-target variables": "whisparr" in selected,
         "Homepage Whisparr Alt click-target variables": "whisparr-alt" in selected,
         "Homepage Prowlarr click-target and widget variables": "prowlarr" in selected,
@@ -624,6 +626,7 @@ def render_homepage_services(catalog: Catalog, plan: StackPlan) -> str:
         ("whisparr", "Whisparr"),
         ("whisparr-alt", "Whisparr Alt"),
         ("jellyfin", "Jellyfin"),
+        ("jellyfin-vue", "Jellyfin Vue"),
         ("calibre-web-automated", "Calibre-Web Automated"),
     ):
         if service_id not in selected:
@@ -631,6 +634,7 @@ def render_homepage_services(catalog: Catalog, plan: StackPlan) -> str:
         if service_id in {
             "sonarr-anime",
             "jellyfin",
+            "jellyfin-vue",
             "calibre-web-automated",
             "velvarr",
             "whisparr",

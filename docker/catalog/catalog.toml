@@ -208,6 +208,15 @@ category = "Media servers"
 url = "https://jellyfin.org"
 order = 420
 
+# Jellyfin Vue serves an opt-in frontend for a local or external Jellyfin server.
+[services.jellyfin-vue]
+title = "Jellyfin Vue"
+description = "Provides an experimental alternative browser client for a local or external Jellyfin server."
+category = "Media experience"
+url = "https://jellyfin.org/docs/general/clients/jellyfin-vue/"
+order = 422
+recommended = ["jellyfin"]
+
 # Calibre-Web Automated manages one Calibre ebook library and ingest directory.
 [services.calibre-web-automated]
 title = "Calibre-Web Automated"
