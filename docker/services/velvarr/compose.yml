@@ -12,20 +12,14 @@ services:
   #
   velvarr:
     # Docker image and container information
-    <<: *rootless-container                                         # Run as the configured host user and group
+    <<:                                                             # Merge shared container and security settings
+      - *rootless-container  # Run as the configured host user and group
+      - *security-hardening  # Drop capabilities and prevent privilege escalation
     image: ${VELVARR_IMAGE}:${VELVARR_TAG}                          # Image repository and tag configured in .env
     container_name: ${COMPOSE_PROJECT_NAME}-velvarr-${VELVARR_TAG}  # Namespace the container name by project and tag
     hostname: velvarr                                               # Internal service hostname
     init: true                                                      # Reap child processes and forward shutdown signals
     read_only: true                                                 # Keep application code immutable
-
-    # Drop Linux capabilities for security hardening
-    cap_drop:
-      - ALL  # No optional Linux capabilities are required
-
-    # Prevent the container from acquiring additional privileges
-    security_opt:
-      - no-new-privileges:true  # Prevent processes from gaining privileges
 
     # Define the container environment
     environment:

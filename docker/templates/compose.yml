@@ -54,6 +54,15 @@ x-rootless-container: &rootless-container  # YAML anchor for rootless containers
     - ${DEFAULT_GROUP}                     # Allow access to group-owned host files
 
 #
+# Shared security settings for services that need no Linux capabilities.
+#
+x-security-hardening: &security-hardening  # YAML anchor for existing capability and privilege restrictions
+  cap_drop:                                # Drop Linux capabilities for security hardening
+    - ALL                                  # No optional Linux capabilities are required
+  security_opt:                            # Prevent the container from acquiring additional privileges
+    - no-new-privileges:true                # Prevent processes from gaining privileges
+
+#
 # Labels for containers that should not be updated unattended by Watchtower.
 #
 # Privateerr and Gluetun coordinate VPN configuration, tunnel startup, and

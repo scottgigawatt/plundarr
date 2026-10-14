@@ -575,7 +575,7 @@ class MaraudarrTests(unittest.TestCase):
         self.assertIn("HOMEPAGE_VAR_NZBGET_USER", compose)
         self.assertIn("HOMEPAGE_VAR_SONARR_ANIME_KEY", compose)
         self.assertIn("HOMEPAGE_VAR_CWA_USER", compose)
-        self.assertEqual(3, compose.count("<<: *rootless-container"))
+        self.assertEqual(3, compose.count("*rootless-container"))
         self.assertIn("http://127.0.0.1:8000/status", compose)
 
     def test_environment_sections_follow_service_selection(self) -> None:
@@ -1375,7 +1375,7 @@ class MaraudarrTests(unittest.TestCase):
             with self.subTest(service=service.id):
                 self.assertRegex(
                     compose,
-                    r"<<: \*(?:arr-stack|default|rootless)-container",
+                    r"<<:(?: +|[^\n]*\n +- +)\*(?:arr-stack|default|rootless)-container",
                     f"Service '{service.id}' does not reuse a container anchor.",
                 )
 

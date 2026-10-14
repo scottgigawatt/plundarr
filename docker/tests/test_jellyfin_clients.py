@@ -81,14 +81,17 @@ class JellyfinClientsTests(unittest.TestCase):
     def test_vue_retains_its_image_user_and_independent_healthcheck(self) -> None:
         """The nginx-owned startup config requires its image identity and writable root."""
         plan = self.catalog.resolve("jellyfin", add={"jellyfin-vue"})
-        client = extract_service(render_compose(self.catalog, plan), "jellyfin-vue")
-        self.assertIn("<<: *default-container", client)
+        compose = render_compose(self.catalog, plan)
+        client = extract_service(compose, "jellyfin-vue")
+        self.assertIn("- *default-container", client)
         self.assertNotIn("rootless-container", client)
         self.assertNotIn("read_only:", client)
         self.assertNotIn("depends_on:", client)
         self.assertNotIn("volumes:", client)
         self.assertIn("http://127.0.0.1:80/config.json", client)
-        self.assertIn("- no-new-privileges:true", client)
+        self.assertIn("- *security-hardening", client)
+        self.assertIn("- ALL", compose)
+        self.assertIn("no-new-privileges:true", compose)
         self.assertIn("JELLYFIN_VUE_DEFAULT_SERVERS", client)
 
     def test_web_mounts_are_read_only_and_reject_missing_host_sources(self) -> None:
