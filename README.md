@@ -119,7 +119,7 @@ Use `make configure` for an interactive picker or pass `PRESET` to `make ship` f
 | 🎞️ `jellyfin` | Standalone Jellyfin media server |
 | 🎬 `plex` | Standalone Plex Media Server |
 | 📚 `calibre-web-automated` | Standalone ebook library and automatic ingest service |
-| 🎭 `duplex` | Plex metadata, artwork, and maintenance tools |
+| 🎭 `duplex` | Plex metadata, artwork, Plex/Jellyfin theme songs, and maintenance tools |
 | 🔭 `watchtower` | Standalone container image updates |
 | 🚢 `portainer` | Standalone Docker management with Portainer CE |
 | 🧩 `custom` | A stack assembled service by service |
@@ -220,6 +220,8 @@ make ship PRESET=duplex
 ```
 
 Set `KOMETA_CONFIG_PATH` to your external Kometa checkout and `IMAGEMAID_PLEX_PATH` to Plex application data. See the [Kometa service guide](docker/services/kometa/README.md) for shared configuration and scheduling.
+
+Themerr is required in Duplex and can connect the same instance to Plex and Jellyfin. Review its private encryption-key permissions and complete administrator setup before connecting servers. See the [Themerr guide](docs/project-guides/themerr.md) for connector setup and conservative cleanup defaults.
 
 Add Kometa Overlay Reset with `make ship PRESET=duplex ADD_SERVICES=overlay-reset` when needed. It remains behind the `tools` Compose profile and never starts during ordinary `make up` runs. Keep `OVERLAY_RESET_DRY_RUN=True`, inspect the dry-run output, and invoke the tool explicitly:
 

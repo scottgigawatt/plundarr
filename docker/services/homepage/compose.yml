@@ -90,6 +90,9 @@ services:
       HOMEPAGE_VAR_SEERR_KEY: ${HOMEPAGE_VAR_SEERR_KEY}
       HOMEPAGE_VAR_SEERR_CONTAINER: ${COMPOSE_PROJECT_NAME}-seerr-${SEERR_TAG}
 
+      # Homepage Themerr click target
+      HOMEPAGE_VAR_THEMERR_HREF: ${HOMEPAGE_VAR_THEMERR_HREF}
+
       # Homepage Velvarr click target
       HOMEPAGE_VAR_VELVARR_HREF: ${HOMEPAGE_VAR_VELVARR_HREF}
 

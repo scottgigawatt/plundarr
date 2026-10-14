@@ -392,6 +392,13 @@ class UI:
             }
         ):
             steps.append("Check Kometa, Plex, and config paths in .env.")
+        if "themerr" in selected:
+            steps.append(
+                "Keep the Themerr encryption key with state backups and check host-user permissions."
+            )
+            steps.append(
+                "Open Themerr's HTTPS UI, finish admin setup, and connect Plex and Jellyfin."
+            )
         if "calibre-web-automated" in selected:
             steps.append("Check CWA config, ingest, and library paths in .env.")
         if "velvarr" in selected:

@@ -10,7 +10,7 @@ Preset `core` services cannot be removed. Preset `defaults` are only preselected
 
 Preset bridge networks have distinct, sequential defaults. Operators can change the subnet, address pool, and gateway together in the generated `.env` to suit their host.
 
-Tracearr is a removable Plundarr default; its application, database, and Redis containers are one logical selection in `services/tracearr/`. Tautulli remains optional in every preset. Duplex keeps Kometa and ImageMaid in `core`. PATTRMM and Notifiarr live in `defaults`, so the generated preset includes them out of the box while the interactive picker may remove them. Overlay Reset and Watchtower are opt-in services. PATTRMM and Overlay Reset require Kometa because both consume its external configuration tree.
+Tracearr is a removable Plundarr default; its application, database, and Redis containers are one logical selection in `services/tracearr/`. Tautulli remains optional in every preset. Duplex keeps Kometa, ImageMaid, and Themerr in `core`. Themerr connects Plex and Jellyfin through one instance without requiring local media servers. PATTRMM and Notifiarr live in `defaults`, so the generated preset includes them out of the box while the interactive picker may remove them. Overlay Reset and Watchtower are opt-in services. PATTRMM and Overlay Reset require Kometa because both consume its external configuration tree.
 
 > [!IMPORTANT]
 > Keep service IDs aligned with their directory names. Maraudarr derives `services/<id>/compose.yml`, `environment.env`, and `config/` from that ID.

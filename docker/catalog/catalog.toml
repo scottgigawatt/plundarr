@@ -241,6 +241,14 @@ category = "Plex utilities"
 url = "https://kometa.wiki/en/latest/kometa/scripts/imagemaid/"
 order = 440
 
+# Themerr manages theme songs for external Plex and Jellyfin servers from one instance.
+[services.themerr]
+title = "Themerr"
+description = "Manages theme songs for Plex and Jellyfin through one web interface."
+category = "Media utilities"
+url = "https://docs.lizardbyte.dev/projects/themerr/latest/"
+order = 445
+
 # PATTRMM remains a removable Kometa helper rather than a Duplex core service.
 [services.pattrmm]
 title = "PATTRMM Neo"
@@ -498,7 +506,7 @@ defaults = []
 # PATTRMM and the operational companions remain removable preset defaults.
 [presets.duplex]
 title = "Duplex"
-description = "Plex metadata, artwork, notifications, and recovery tools."
+description = "Plex metadata, artwork, Plex/Jellyfin theme songs, and recovery tools."
 project_name = "duplex"
 network_subnet = "172.25.0.0/16"
 network_ip_range = "172.25.5.0/24"
@@ -514,7 +522,7 @@ compose_summary = [
   "Kometa uses an external configuration checkout. Optional Overlay Reset stays",
   "behind the tools profile and runs only when explicitly invoked as a one-shot job.",
 ]
-core = ["kometa", "imagemaid"]
+core = ["kometa", "imagemaid", "themerr"]
 defaults = ["pattrmm", "notifiarr"]
 
 #

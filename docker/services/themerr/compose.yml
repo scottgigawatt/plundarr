@@ -1,0 +1,47 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# compose.yml: One Themerr instance for Plex and Jellyfin theme songs.
+#
+
+services:
+  #
+  # Define the 'themerr' service for Plex and Jellyfin theme song management.
+  #
+  themerr:
+    # Docker image and container information
+    <<: *rootless-container                                         # Pull in the rootless container information
+    image: lizardbyte/themerr:${THEMERR_TAG}                        # Follow the official stable image channel
+    container_name: ${COMPOSE_PROJECT_NAME}-themerr-${THEMERR_TAG}  # Namespace by project and tag
+    hostname: themerr                                               # Set the container hostname
+
+    # Drop Linux capabilities for security hardening
+    cap_drop:
+      - ALL  # No optional Linux capabilities are required
+
+    # Prevent the container from acquiring additional privileges
+    security_opt:
+      - no-new-privileges:true  # Prevent processes from gaining privileges
+
+    # Define the container environment; connect Plex and Jellyfin through the UI
+    environment:
+      <<: *default-environment                                # Pull in the default environment information
+      HOME: /tmp                                              # Keep caches writable with an overridden numeric user
+      THEMERR_TOKEN_KEY_FILE: /run/secrets/themerr_token_key  # Encrypt stored Plex and Jellyfin credentials
+
+    # Define the host and container ports
+    ports:
+      - ${THEMERR_WEBUI_PORT}:9494      # HTTPS administration with an initial self-signed certificate
+      - ${THEMERR_CONNECTOR_PORT}:9495  # HTTP connector files only; reachable from Jellyfin
+
+    # Mount host directories and the separate private key into the container
+    volumes:
+      - ${THEMERR_CONFIG_PATH}:/config:rw       # Persistent settings, database, certificates, and logs
+      - type: bind                              # Bind the private encryption key into the container
+        source: ${THEMERR_TOKEN_KEY_PATH}       # Path to the private encryption key on the host
+        target: /run/secrets/themerr_token_key  # Mount the private encryption key into the container
+        read_only: true                         # Make the private encryption key read-only inside the container
+        bind:                                   # Use a bind mount to link the host path to the container path
+          create_host_path: false               # Fail if the key is missing instead of creating a directory

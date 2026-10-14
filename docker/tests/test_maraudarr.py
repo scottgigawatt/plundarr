@@ -297,6 +297,7 @@ class MaraudarrTests(unittest.TestCase):
             (
                 "kometa",
                 "imagemaid",
+                "themerr",
                 "pattrmm",
                 "notifiarr",
             ),
@@ -447,6 +448,7 @@ class MaraudarrTests(unittest.TestCase):
             remove={
                 "kometa",
                 "imagemaid",
+                "themerr",
                 "pattrmm",
                 "notifiarr",
                 "watchtower",
@@ -454,7 +456,7 @@ class MaraudarrTests(unittest.TestCase):
             },
         )
 
-        self.assertEqual(plan.service_ids, ("kometa", "imagemaid"))
+        self.assertEqual(plan.service_ids, ("kometa", "imagemaid", "themerr"))
 
     def test_standalone_media_server_presets_select_one_core_service(self) -> None:
         """Keep standalone media-server presets deliberately focused."""
@@ -1572,6 +1574,7 @@ class MaraudarrTests(unittest.TestCase):
 
             for service_id in (
                 "imagemaid",
+                "themerr",
                 "pattrmm",
                 "notifiarr",
             ):
