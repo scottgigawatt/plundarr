@@ -85,10 +85,22 @@ class JellyfinClientsTests(unittest.TestCase):
         client = extract_service(compose, "jellyfin-vue")
         self.assertIn("- *default-container", client)
         self.assertNotIn("rootless-container", client)
-        self.assertNotIn("read_only:", client)
+        self.assertNotIn("\n    read_only:", client)
         self.assertNotIn("depends_on:", client)
-        self.assertNotIn("volumes:", client)
-        self.assertIn("http://127.0.0.1:80/config.json", client)
+
+        # The image user must bind without capabilities on hosts that restrict ports below 1024.
+        self.assertIn("${JELLYFIN_VUE_WEBUI_PORT}:8080", client)
+        self.assertIn("http://127.0.0.1:8080/config.json", client)
+        self.assertIn("source: ${JELLYFIN_VUE_NGINX_CONFIG_PATH}", client)
+        self.assertIn("target: /etc/nginx/conf.d/default.conf", client)
+        self.assertIn("read_only: true", client)
+        self.assertIn("create_host_path: false", client)
+        self.assertNotIn("cap_add:", client)
+        self.assertNotIn("sysctls:", client)
+        listener = (self.catalog.root / "services/jellyfin-vue/config/default.conf").read_text()
+        self.assertIn("listen 8080;", listener)
+        self.assertIn("listen [::]:8080;", listener)
+        self.assertIn("try_files $uri $uri/ /index.html;", listener)
         self.assertIn("- *security-hardening", client)
         self.assertIn("- ALL", compose)
         self.assertIn("no-new-privileges:true", compose)
@@ -116,6 +128,7 @@ class JellyfinClientsTests(unittest.TestCase):
             output = Path(temporary)
             base = self.catalog.resolve("jellyfin")
             write_stack(self.catalog, base, output)
+            self.assertFalse((output / "config/jellyfin-vue").exists())
             web = output / "config/jellyfin/web"
             config = web / "config.json"
             theme = web / "custom/boudoirr.css"
@@ -138,13 +151,19 @@ class JellyfinClientsTests(unittest.TestCase):
             )
             selected = self.catalog.resolve("jellyfin", add={"jellyfin-vue"})
             write_stack(self.catalog, selected, output)
+
+            # nginx configuration is seeded only when Vue is selected and remains operator-owned.
+            nginx = output / "config/jellyfin-vue/default.conf"
+            self.assertIn("listen 8080;", nginx.read_text())
+            nginx.write_text("# Operator nginx configuration\n")
+            write_stack(self.catalog, selected, output)
             write_stack(self.catalog, base, output)
 
+            self.assertEqual(nginx.read_text(), "# Operator nginx configuration\n")
             self.assertEqual(config.read_text(), edited)
             self.assertEqual(theme.read_text(), "/* Operator theme */\n")
             self.assertEqual(database.read_bytes(), b"operator database")
             self.assertIn('JELLYFIN_WEB_CONFIG_PATH="/operator/web/config.json"', env.read_text())
-            self.assertFalse((output / "config/jellyfin-vue").exists())
 
     def test_privacy_example_only_removes_external_web_players(self) -> None:
         """Offline configuration must retain playback and navigation capabilities."""
