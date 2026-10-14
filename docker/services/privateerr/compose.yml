@@ -11,10 +11,11 @@ services:
   # Define the 'privateerr' service to generate the PIA manual WireGuard configuration file.
   #
   privateerr:
-    # Docker image and container information
-    <<:                                                                   # Merge shared container and security settings
+    <<:  # Merge shared container and security settings
       - *default-container   # Pull in default container config
       - *security-hardening  # Upstream PIA scripts require UID 0 but no Linux capabilities
+
+    # Docker image and container information
     image: ghcr.io/scottgigawatt/privateerr:${PRIVATEERR_TAG}             # Pull Privateerr from GHCR
     container_name: ${COMPOSE_PROJECT_NAME}-privateerr-${PRIVATEERR_TAG}  # Namespace the container name by project and tag
     hostname: privateerr                                                  # Set the container hostname

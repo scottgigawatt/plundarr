@@ -11,10 +11,11 @@ services:
   # Define the 'jellyfin-vue' service as an alternative browser client for the Jellyfin server.
   #
   jellyfin-vue:
-    # Docker image and container information
-    <<:                                                                       # Merge shared container and security settings
+    <<:  # Merge shared container and security settings
       - *default-container   # Keep the image's nginx identity for startup config writes
       - *security-hardening  # Drop capabilities and prevent privilege escalation
+
+    # Docker image and container information
     image: ghcr.io/jellyfin/jellyfin-vue:${JELLYFIN_VUE_TAG}                  # Upstream supports the unstable channel
     container_name: ${COMPOSE_PROJECT_NAME}-jellyfin-vue-${JELLYFIN_VUE_TAG}  # Namespace by project and tag
     hostname: jellyfin-vue                                                    # Internal frontend hostname

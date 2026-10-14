@@ -11,15 +11,16 @@ services:
   # Define the 'themerr' service for Plex and Jellyfin theme song management.
   #
   themerr:
-    # Docker image and container information
-    <<:                                                             # Merge shared container and security settings
+    <<:  # Merge shared container and security settings
       - *rootless-container  # Pull in the rootless container information
       - *security-hardening  # Drop capabilities and prevent privilege escalation
+
+    # Docker image and container information
     image: lizardbyte/themerr:${THEMERR_TAG}                        # Follow the official stable image channel
     container_name: ${COMPOSE_PROJECT_NAME}-themerr-${THEMERR_TAG}  # Namespace by project and tag
     hostname: themerr                                               # Set the container hostname
 
-    # Define the container environment; connect Plex and Jellyfin through the UI
+    # Define the container environment
     environment:
       <<: *default-environment                                # Pull in the default environment information
       HOME: /tmp                                              # Keep caches writable with an overridden numeric user
