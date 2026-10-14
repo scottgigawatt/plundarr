@@ -126,8 +126,7 @@ class MaraudarrTests(unittest.TestCase):
             ),
         )
         self.assertNotIn("depends_on:", extract_service(compose, "cleanuparr"))
-        self.assertIn("depends_on:", extract_service(compose, "whisparr"))
-        self.assertIn("condition: service_healthy", extract_service(compose, "whisparr"))
+        self.assertIn("- *prowlarr-dependency", extract_service(compose, "whisparr"))
         self.assertIn("  jellyfin:", compose)
         self.assertNotIn("  plex:", compose)
 
@@ -211,7 +210,7 @@ class MaraudarrTests(unittest.TestCase):
                 self.assertIn("${PORTAINER_EDGE_PORT}:8000", service)
                 self.assertIn("${PORTAINER_CONFIG_PATH}:/data:rw", service)
                 self.assertIn("/var/run/docker.sock:/var/run/docker.sock:rw", service)
-                self.assertNotIn("disable-watchtower-updates", service)
+                self.assertNotIn("exclude-from-watchtower-updates", service)
                 self.assertNotIn("network_mode:", service)
                 self.assertIn('PORTAINER_TAG="${PORTAINER_TAG:-lts}"', environment)
                 self.assertIn('PORTAINER_WEB_PORT="${PORTAINER_WEB_PORT:-9443}"', environment)
@@ -575,7 +574,7 @@ class MaraudarrTests(unittest.TestCase):
         self.assertIn("HOMEPAGE_VAR_NZBGET_USER", compose)
         self.assertIn("HOMEPAGE_VAR_SONARR_ANIME_KEY", compose)
         self.assertIn("HOMEPAGE_VAR_CWA_USER", compose)
-        self.assertEqual(3, compose.count("<<: *rootless-container"))
+        self.assertEqual(3, compose.count("*rootless-container"))
         self.assertIn("http://127.0.0.1:8000/status", compose)
 
     def test_environment_sections_follow_service_selection(self) -> None:
@@ -674,7 +673,7 @@ class MaraudarrTests(unittest.TestCase):
         self.assertIn("lscr.io/linuxserver/lidarr:${LIDARR_TAG}", lidarr)
         self.assertIn("${HOST_MUSIC_PATH}:/music:rw", lidarr)
         self.assertIn("http://127.0.0.1:8686/ping", lidarr)
-        self.assertIn("prowlarr:\n        condition: service_healthy", lidarr)
+        self.assertIn("- *prowlarr-dependency", lidarr)
         self.assertIn("ghcr.io/recyclarr/recyclarr:${RECYCLARR_TAG}", recyclarr)
         self.assertIn("profiles:\n      - tools", recyclarr)
         self.assertIn("${RECYCLARR_CONFIG_PATH}:/config:rw", recyclarr)
@@ -1366,6 +1365,60 @@ class MaraudarrTests(unittest.TestCase):
                 f"Inline comment spacing failed on generated line {line_number}: {line}",
             )
 
+    def _healthcheck_chart(self, service_id: str, source: str) -> str:
+        """Inspect inherited family probes as well as directly declared service probes."""
+        anchor = {
+            "sonarr": "sonarr-healthcheck",
+            "sonarr-anime": "sonarr-healthcheck",
+            "whisparr": "whisparr-healthcheck",
+            "whisparr-alt": "whisparr-healthcheck",
+        }.get(service_id)
+        if anchor is None:
+            return source
+
+        foundation = self.catalog.source_path("templates/compose.yml").read_text()
+        return foundation.split(f"x-{anchor}: &{anchor}", 1)[1].split("\n\n", 1)[0]
+
+    def test_application_anchors_follow_independent_instance_selection(self) -> None:
+        """Shared probes and scratch mounts must survive pruning without adding another instance."""
+        for service_id, family, port in (
+            ("sonarr", "sonarr", 8989),
+            ("sonarr-anime", "sonarr", 8989),
+            ("whisparr", "whisparr", 6969),
+            ("whisparr-alt", "whisparr", 6969),
+        ):
+            with self.subTest(service=service_id):
+                plan = self.catalog.resolve("custom", selected={service_id})
+                compose = render_compose(self.catalog, plan)
+                chart = extract_service(compose, service_id)
+
+                # The selected instance keeps its required indexer and only its family's shared block.
+                self.assertIn("- *prowlarr-dependency", chart)
+                self.assertIn("x-prowlarr-dependency: &prowlarr-dependency", compose)
+                dependency = compose.split("x-prowlarr-dependency: &prowlarr-dependency", 1)[1]
+                dependency = dependency.split("\n\n", 1)[0]
+                self.assertIn("condition: service_healthy", dependency)
+                self.assertIn("prowlarr", plan.service_ids)
+                self.assertIn(f"http://127.0.0.1:{port}/ping", compose)
+                self.assertIn(
+                    "x-default-healthcheck-settings: &default-healthcheck-settings", compose
+                )
+                self.assertIn("interval: ${DEFAULT_HEALTHCHECK_INTERVAL}", compose)
+                self.assertEqual(set(plan.service_ids), {"flaresolverr", "prowlarr", service_id})
+
+                if family == "sonarr":
+                    self.assertIn("- *sonarr-healthcheck", chart)
+                    self.assertNotIn("x-whisparr-healthcheck", compose)
+                    self.assertNotIn("x-whisparr-data-dir", compose)
+                else:
+                    self.assertIn("- *whisparr-healthcheck", chart)
+                    self.assertIn("- *whisparr-data-dir", chart)
+                    self.assertIn(
+                        "/data:rw,noexec,nosuid,size=1m,uid=${DEFAULT_PUID},gid=${DEFAULT_PGID}",
+                        re.sub(r"\\\n *", "", compose),
+                    )
+                    self.assertNotIn("x-sonarr-healthcheck", compose)
+
     def test_service_charts_reuse_shared_anchors(self) -> None:
         """Require service charts to inherit shared container settings."""
 
@@ -1373,16 +1426,23 @@ class MaraudarrTests(unittest.TestCase):
             compose = self.catalog.source_path(service.compose).read_text()
 
             with self.subTest(service=service.id):
+                # Duplicate merge keys can discard defaults or security settings; grouped services get one each.
+                for name in service.compose_services:
+                    chart = extract_service(compose, name)
+                    self.assertLessEqual(len(re.findall(r"(?m)^    <<:", chart)), 1)
+
                 self.assertRegex(
                     compose,
-                    r"<<: \*(?:arr-stack|default|rootless)-container",
+                    r"<<:(?: +|[^\n]*\n +- +)\*(?:arr-stack|default|rootless)-container",
                     f"Service '{service.id}' does not reuse a container anchor.",
                 )
 
-                if "healthcheck:" in compose:
+                if "healthcheck:" in compose or any(
+                    f"*{family}-healthcheck" in compose for family in ("sonarr", "whisparr")
+                ):
                     self.assertIn(
                         "<<: *default-healthcheck-settings",
-                        compose,
+                        self._healthcheck_chart(service.id, compose),
                         f"Service '{service.id}' does not reuse healthcheck settings.",
                     )
 
@@ -1394,16 +1454,19 @@ class MaraudarrTests(unittest.TestCase):
         for service in self.catalog.services.values():
             compose = self.catalog.source_path(service.compose).read_text()
 
-            if "healthcheck:" not in compose:
+            if "healthcheck:" not in compose and not any(
+                f"*{family}-healthcheck" in compose for family in ("sonarr", "whisparr")
+            ):
                 continue
 
             with self.subTest(service=service.id):
-                self.assertNotIn("|| exit 1", compose)
+                probe = self._healthcheck_chart(service.id, compose)
+                self.assertNotIn("|| exit 1", probe)
 
-                if "\n        - CMD-SHELL\n" in compose:
+                if re.search(r"(?m)^ +- CMD-SHELL(?: +#.*)?$", probe):
                     shell_healthchecks.add(service.id)
                 else:
-                    self.assertIn("\n        - CMD\n", compose)
+                    self.assertRegex(probe, r"(?m)^ +- CMD(?: +#.*)?$")
 
                 if service.id == "privateerr":
                     self.assertIn("\n        - privateerr-healthcheck\n", compose)
@@ -1438,7 +1501,7 @@ class MaraudarrTests(unittest.TestCase):
         self.assertIn("${CWA_CONFIG_PATH}:/config:rw", service)
         self.assertIn("${CWA_INGEST_PATH}:/cwa-book-ingest:rw", service)
         self.assertIn("${CWA_LIBRARY_PATH}:/calibre-library:rw", service)
-        self.assertIn("labels: *disable-watchtower-updates", service)
+        self.assertIn("*exclude-from-watchtower-updates", service)
         self.assertNotIn("\n    user:", service)
 
     def test_media_servers_are_independent_choices(self) -> None:

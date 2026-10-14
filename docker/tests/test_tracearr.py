@@ -93,9 +93,9 @@ class TracearrTests(unittest.TestCase):
             service = extract_service(compose, service_id)
 
             if service_id == "tracearr":
-                self.assertNotIn("disable-watchtower-updates", service)
+                self.assertNotIn("exclude-from-watchtower-updates", service)
             else:
-                self.assertIn("labels: *disable-watchtower-updates", service)
+                self.assertIn("*exclude-from-watchtower-updates", service)
 
             if service_id != "tracearr":
                 self.assertNotIn("    ports:", service)

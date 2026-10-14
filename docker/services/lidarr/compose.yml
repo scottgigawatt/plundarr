@@ -11,8 +11,11 @@ services:
   # Define the 'lidarr' service for managing music.
   #
   lidarr:
+    <<:                       # Merge shared and service-specific container settings
+      - *arr-stack-container  # Pull in arr-stack container settings
+      - *prowlarr-dependency  # Wait until Prowlarr indexer manager is healthy
+
     # Docker image and container information
-    <<: *arr-stack-container                                      # Pull in arr-stack container config
     image: lscr.io/linuxserver/lidarr:${LIDARR_TAG}               # Run using the specified tag
     container_name: ${COMPOSE_PROJECT_NAME}-lidarr-${LIDARR_TAG}  # Namespace the container name by project and tag
     hostname: lidarr                                              # Set the container hostname
@@ -37,8 +40,3 @@ services:
         - --tries=1
         - --spider
         - http://127.0.0.1:8686/ping
-
-    # Specify container service dependencies
-    depends_on:
-      prowlarr:
-        condition: service_healthy  # Wait until Prowlarr is healthy

@@ -11,20 +11,15 @@ services:
   # Define the 'apprise' service for delivering notifications.
   #
   apprise:
+    <<:                      # Merge shared container and security settings
+      - *rootless-container  # Pull in the rootless container information
+      - *security-hardening  # Drop capabilities and prevent privilege escalation
+
     # Docker image and container information
-    <<: *rootless-container                                         # Pull in the rootless container information
     image: caronc/apprise:${APPRISE_TAG}                            # Run using the specified tag
     container_name: ${COMPOSE_PROJECT_NAME}-apprise-${APPRISE_TAG}  # Namespace the container name by project and tag
     hostname: apprise                                               # Set the container hostname
     read_only: true                                                 # Keep the API container filesystem immutable
-
-    # Drop Linux capabilities for security hardening
-    cap_drop:
-      - ALL  # No optional Linux capabilities are required
-
-    # Prevent the container from acquiring additional privileges
-    security_opt:
-      - no-new-privileges:true  # Prevent processes from gaining privileges
 
     # Define the container environment
     environment:

@@ -9,6 +9,7 @@
 """Exercise selection, independent library paths, dashboard links, and safe regeneration."""
 
 import io
+import re
 import tempfile
 import unittest
 from contextlib import redirect_stdout
@@ -67,7 +68,8 @@ class WhisparrAltTests(unittest.TestCase):
             extract_service(compose, "whisparr"),
             extract_service(render_compose(self.catalog, default), "whisparr"),
         )
-        self.assertIn("<<: *arr-stack-container", alt)
+        self.assertIn("- *arr-stack-container", alt)
+        self.assertIn("- *whisparr-healthcheck", alt)
         self.assertIn("image: ghcr.io/hotio/whisparr:${WHISPARR_ALT_TAG}", alt)
         self.assertIn("${COMPOSE_PROJECT_NAME}-whisparr-alt-${WHISPARR_ALT_TAG}", alt)
         self.assertIn("hostname: whisparr-alt", alt)
@@ -79,7 +81,7 @@ class WhisparrAltTests(unittest.TestCase):
         self.assertIn("${WHISPARR_ALT_SCENES_PATH}:/data/scenes:rw", alt)
         self.assertIn("${WHISPARR_ALT_RECYCLE_PATH}:/data/recycle:rw", alt)
         self.assertIn("${HOST_DOWNLOADS_PATH}:/downloads:rw", alt)
-        self.assertIn("http://127.0.0.1:6969/ping", alt)
+        self.assertIn("http://127.0.0.1:6969/ping", compose)
 
         # Selective mounts expose each library through stable paths without mounting the whole host root.
         for service_id, prefix in (("whisparr", "WHISPARR"), ("whisparr-alt", "WHISPARR_ALT")):
@@ -93,14 +95,15 @@ class WhisparrAltTests(unittest.TestCase):
             ):
                 self.assertIn(f"${{{prefix}_{kind}_PATH}}:/data/{target}:rw", service)
             self.assertIn(
-                "/data:rw,noexec,nosuid,size=1m,uid=${DEFAULT_PUID},gid=${DEFAULT_PGID}", service
+                "/data:rw,noexec,nosuid,size=1m,uid=${DEFAULT_PUID},gid=${DEFAULT_PGID}",
+                re.sub(r"\\\n *", "", compose),
             )
 
         # Both instances use the same required indexer and wait for its healthcheck.
         for service_id in ("whisparr", "whisparr-alt"):
             service = extract_service(compose, service_id)
             self.assertIn(
-                "depends_on:\n      prowlarr:\n        condition: service_healthy",
+                "- *prowlarr-dependency",
                 service,
             )
 

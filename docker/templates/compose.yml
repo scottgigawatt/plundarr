@@ -54,6 +54,15 @@ x-rootless-container: &rootless-container  # YAML anchor for rootless containers
     - ${DEFAULT_GROUP}                     # Allow access to group-owned host files
 
 #
+# Shared security settings for services that need no Linux capabilities.
+#
+x-security-hardening: &security-hardening  # YAML anchor for existing capability and privilege restrictions
+  cap_drop:                                # Drop Linux capabilities for security hardening
+    - ALL                                  # No optional Linux capabilities are required
+  security_opt:                            # Prevent the container from acquiring additional privileges
+    - no-new-privileges:true               # Prevent processes from gaining privileges
+
+#
 # Labels for containers that should not be updated unattended by Watchtower.
 #
 # Privateerr and Gluetun coordinate VPN configuration, tunnel startup, and
@@ -61,8 +70,9 @@ x-rootless-container: &rootless-container  # YAML anchor for rootless containers
 # during upgrades. Tracearr's database and Redis also require intentional
 # updates. Check release notes before changing these stateful services.
 #
-x-disable-watchtower-updates: &disable-watchtower-updates  # Disable unattended Watchtower updates
-  - "com.centurylinklabs.watchtower.enable=false"          # Require intentional updates for this container
+x-exclude-from-watchtower-updates: &exclude-from-watchtower-updates  # Exclude from Watchtower
+  labels:                                                            # Add container labels
+    - "com.centurylinklabs.watchtower.enable=false"                  # Require intentional updates
 
 #
 # Setup default healthcheck timing settings for all or most containers.
@@ -72,6 +82,50 @@ x-default-healthcheck-settings: &default-healthcheck-settings  # YAML anchor for
   timeout: ${DEFAULT_HEALTHCHECK_TIMEOUT}                      # Fail if it exceeds this duration
   start_period: ${DEFAULT_HEALTHCHECK_START_PERIOD}            # Grace period before checks start
   retries: ${DEFAULT_HEALTHCHECK_RETRIES}                      # Mark as unhealthy after this many failures
+
+#
+# Shared healthy Prowlarr indexer manager dependency for arr applications.
+#
+x-prowlarr-dependency: &prowlarr-dependency  # YAML anchor for required Prowlarr service dependency
+  depends_on:                                # Specify container service dependencies
+    prowlarr:                                # Prowlarr service dependency
+      condition: service_healthy             # Wait for Prowlarr service to report healthy
+
+#
+# Shared connectivity probe for Sonarr instances.
+#
+x-sonarr-healthcheck: &sonarr-healthcheck  # YAML anchor for Sonarr healthcheck
+  healthcheck:                             # Define the healthcheck
+    <<: *default-healthcheck-settings      # Reuse the stack healthcheck timing
+    test:                                  # Ping the fixed internal port independently of host mappings
+      - CMD
+      - wget
+      - --no-verbose
+      - --tries=1
+      - --spider
+      - http://127.0.0.1:8989/ping
+
+#
+# Shared connectivity probe for Whisparr instances.
+#
+x-whisparr-healthcheck: &whisparr-healthcheck  # YAML anchor for Whisparr healthcheck
+  healthcheck:                                 # Define the healthcheck
+    <<: *default-healthcheck-settings          # Reuse the stack healthcheck timing
+    test:                                      # Ping the fixed internal port independently of host mappings
+      - CMD
+      - wget
+      - --no-verbose
+      - --tries=1
+      - --spider
+      - http://127.0.0.1:6969/ping
+
+#
+# Shared writable media parent for persistent bind mounts used by Whisparr.
+#
+x-whisparr-data-dir: &whisparr-data-dir  # YAML anchor for Whisparr data directories
+  tmpfs:                                 # Writable parent directory for persistent media mounts
+    - "/data:rw,noexec,nosuid,size=1m,\
+      uid=${DEFAULT_PUID},gid=${DEFAULT_PGID}"
 
 #
 # Define the services section.

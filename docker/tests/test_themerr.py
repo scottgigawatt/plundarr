@@ -61,7 +61,8 @@ class ThemerrTests(unittest.TestCase):
     def test_runtime_boundary(self) -> None:
         """Use direct host identity and read-only key without privileged integration mounts."""
         compose = render_compose(self.catalog, self.catalog.resolve("custom", selected={"themerr"}))
-        self.assertIn("<<: *rootless-container", compose)
+        self.assertIn("- *rootless-container", compose)
+        self.assertIn("- *security-hardening", compose)
         self.assertIn("HOME: /tmp", compose)
         self.assertIn("THEMERR_TOKEN_KEY_FILE: /run/secrets/themerr_token_key", compose)
         self.assertIn("source: ${THEMERR_TOKEN_KEY_PATH}", compose)

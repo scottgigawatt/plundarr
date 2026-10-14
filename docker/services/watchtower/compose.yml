@@ -11,14 +11,14 @@ services:
   # Define the 'watchtower' service for host-wide image updates.
   #
   watchtower:
+    <<:                                   # Merge shared and service-specific container settings
+      - *default-container                # Pull in default container settings
+      - *exclude-from-watchtower-updates  # Prevent Watchtower from updating its running container
+
     # Docker image and container information
-    <<: *default-container                                                # Pull in the default container information
     image: nickfedor/watchtower:${WATCHTOWER_TAG}                         # Run using the specified floating tag
     container_name: ${COMPOSE_PROJECT_NAME}-watchtower-${WATCHTOWER_TAG}  # Namespace the container name by project and tag
     hostname: watchtower                                                  # Set the container hostname
-
-    # Do not let Watchtower update its own running container
-    labels: *disable-watchtower-updates
 
     # Define the container environment
     environment:

@@ -11,27 +11,20 @@ services:
   # Define the 'privateerr' service to generate the PIA manual WireGuard configuration file.
   #
   privateerr:
+    <<:                                   # Merge shared and service-specific container settings
+      - *default-container                # Pull in default container settings
+      - *security-hardening               # Upstream PIA scripts require UID 0 but no Linux capabilities
+      - *exclude-from-watchtower-updates  # Update the VPN bootstrap component intentionally
+
     # Docker image and container information
-    <<: *default-container                                                # Pull in default container config
     image: ghcr.io/scottgigawatt/privateerr:${PRIVATEERR_TAG}             # Pull Privateerr from GHCR
     container_name: ${COMPOSE_PROJECT_NAME}-privateerr-${PRIVATEERR_TAG}  # Namespace the container name by project and tag
     hostname: privateerr                                                  # Set the container hostname
-
-    # Drop Linux capabilities for security hardening
-    cap_drop:
-      - ALL  # Upstream PIA scripts require UID 0 but do not need Linux capabilities
-
-    # Prevent the container from acquiring additional privileges
-    security_opt:
-      - no-new-privileges:true  # Prevent processes from gaining privileges
 
     # Let Docker disable IPv6 in this container before the PIA scripts start
     sysctls:
       net.ipv6.conf.all.disable_ipv6: ${PRIVATEERR_IPV6_DISABLED}      # Existing interfaces: 1 disables IPv6; 0 enables IPv6
       net.ipv6.conf.default.disable_ipv6: ${PRIVATEERR_IPV6_DISABLED}  # New interfaces: 1 disables IPv6; 0 enables IPv6
-
-    # Add container labels
-    labels: *disable-watchtower-updates  # VPN bootstrap component; update intentionally
 
     # Define the container environment
     environment:

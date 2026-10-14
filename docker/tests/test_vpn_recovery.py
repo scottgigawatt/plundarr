@@ -67,8 +67,9 @@ class VpnRecoveryTests(unittest.TestCase):
                     # Check privilege removal and Docker-owned IPv6 policy independently of recovery mode.
                     privateerr = extract_service(compose, "privateerr")
                     self.assertNotIn("privileged:", privateerr)
-                    self.assertIn("cap_drop:\n      - ALL", privateerr)
-                    self.assertIn("no-new-privileges:true", privateerr)
+                    self.assertIn("- *security-hardening", privateerr)
+                    self.assertRegex(compose, r"(?m)^  cap_drop:.*\n    - ALL(?: +#.*)?$")
+                    self.assertIn("no-new-privileges:true", compose)
 
                     for setting in ("all", "default"):
                         self.assertIn(

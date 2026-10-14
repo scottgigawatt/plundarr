@@ -11,8 +11,13 @@ services:
   # Define the 'whisparr-alt' service for a separate adult media library.
   #
   whisparr-alt:
+    <<:                        # Merge shared and application-specific runtime settings
+      - *arr-stack-container   # Pull in arr-stack container settings
+      - *whisparr-healthcheck  # Share the internal port ping probe
+      - *whisparr-data-dir     # Share the writable media parent for persistent bind mounts
+      - *prowlarr-dependency   # Wait until Prowlarr indexer manager is healthy
+
     # Docker image and container information
-    <<: *arr-stack-container                                                  # Pull in arr-stack container config
     image: ghcr.io/hotio/whisparr:${WHISPARR_ALT_TAG}                         # Run the floating v3 release channel
     container_name: ${COMPOSE_PROJECT_NAME}-whisparr-alt-${WHISPARR_ALT_TAG}  # Namespace the container name by project and tag
     hostname: whisparr-alt                                                    # Set the container hostname
@@ -20,10 +25,6 @@ services:
     # Define the host and container ports
     ports:
       - ${WHISPARR_ALT_WEBUI_PORT}:6969  # Whisparr web UI port
-
-    # Provide a writable parent for the persistent media and staging mounts
-    tmpfs:
-      - /data:rw,noexec,nosuid,size=1m,uid=${DEFAULT_PUID},gid=${DEFAULT_PGID}  # 1 MiB writable parent; child bind mounts persist
 
     # Mount host directories into the container
     volumes:
@@ -33,19 +34,3 @@ services:
       - ${WHISPARR_ALT_SCENES_PATH}:/data/scenes:rw    # Managed scene library
       - ${WHISPARR_ALT_RECYCLE_PATH}:/data/recycle:rw  # Private recycling bin for this instance
       - ${HOST_DOWNLOADS_PATH}:/downloads:rw           # Shared download tree for imports and hardlinks
-
-    # Define container healthcheck to verify Whisparr connectivity
-    healthcheck:
-      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
-      test:                              # Check Whisparr ping endpoint
-        - CMD
-        - wget
-        - --no-verbose
-        - --tries=1
-        - --spider
-        - http://127.0.0.1:6969/ping
-
-    # Specify container service dependencies
-    depends_on:
-      prowlarr:
-        condition: service_healthy  # Wait until Prowlarr is healthy
