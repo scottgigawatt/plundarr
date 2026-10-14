@@ -28,7 +28,16 @@ services:
 
     # Publish only the frontend; browsers contact Jellyfin directly for playback.
     ports:
-      - ${JELLYFIN_VUE_WEBUI_PORT}:80  # Vue web UI port; separate from Jellyfin's 8096
+      - ${JELLYFIN_VUE_WEBUI_PORT}:8080  # Vue web UI port; separate from Jellyfin's 8096
+
+    # Keep nginx on an unprivileged port even when the host restricts low ports.
+    volumes:
+      - type: bind                                 # Mount the generated nginx listener configuration
+        source: ${JELLYFIN_VUE_NGINX_CONFIG_PATH}  # Seeded file; retain listen 8080 to match the port and probe
+        target: /etc/nginx/conf.d/default.conf     # Override the upstream port 80 listener
+        read_only: true                            # Keep the configuration under operator control
+        bind:                                      # Reject a missing file instead of creating a directory
+          create_host_path: false
 
     # Check static asset delivery without needing a running Jellyfin server.
     healthcheck:
@@ -39,4 +48,4 @@ services:
         - -q
         - -O
         - /dev/null
-        - http://127.0.0.1:80/config.json
+        - http://127.0.0.1:8080/config.json
