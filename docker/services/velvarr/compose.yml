@@ -53,7 +53,7 @@ services:
     # Check the public health endpoint without requiring owner setup
     healthcheck:
       <<: *default-healthcheck-settings  # Reuse the stack healthcheck timing
-      test:
+      test:                              # Check the public health endpoint without requiring owner setup
         - CMD
         - node
         - -e
