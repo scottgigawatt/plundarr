@@ -17,8 +17,11 @@ Application-specific anchors follow `default-healthcheck-settings`, immediately 
 
 | Anchor | Selected services | Shared settings |
 | --- | --- | --- |
-| `wait-for-prowlarr` | Radarr, Lidarr, Sonarr, Sonarr Anime, Whisparr, Whisparr Alt | Required healthy Prowlarr dependency |
+| `prowlarr-dependency` | Radarr, Lidarr, Sonarr, Sonarr Anime, Whisparr, Whisparr Alt | Required healthy Prowlarr dependency |
 | `sonarr-healthcheck` | Sonarr and Sonarr Anime | Direct `wget` ping probe at internal port `8989`, with default timing |
-| `whisparr-runtime` | Whisparr and Whisparr Alt | A 1 MiB writable `/data` parent and direct `wget` ping probe at internal port `6969`, with default timing |
+| `whisparr-healthcheck` | Whisparr and Whisparr Alt | Direct `wget` ping probe at internal port `6969`, with default timing |
+| `whisparr-data-dir` | Whisparr and Whisparr Alt | A 1 MiB writable `/data` parent with the configured host UID/GID |
 
 Instance-specific ports, persistent mounts, image tags, and environment values stay in each service chart. Maintenance profiles and restart policies remain explicit in the tool charts. Keep each foundation anchor in one contiguous block so comment-preserving pruning retains its entire definition and indirect dependencies.
+
+The application and Watchtower exclusion anchors contain complete service mappings. Combine them with container defaults in one `<<:` merge list per service; repeating `<<:` at the same level can reject the chart or replace inherited settings. `exclude-from-watchtower-updates` supplies the opt-out label for services that require intentional updates. The quoted continuation in `whisparr-data-dir` preserves the original mount options without inserting whitespace.

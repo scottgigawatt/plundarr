@@ -111,7 +111,7 @@ class VelvarrTests(unittest.TestCase):
         self.assertIn("image: ${VELVARR_IMAGE}:${VELVARR_TAG}", service)
         self.assertIn("${VELVARR_CONFIG_PATH}:/data:rw", service)
         self.assertIn("${VELVARR_WEBUI_PORT}:6699", service)
-        self.assertNotIn("labels: *disable-watchtower-updates", service)
+        self.assertNotIn("*exclude-from-watchtower-updates", service)
         self.assertIn("read_only: true", service)
         self.assertIn("- *security-hardening", service)
         self.assertIn("- ALL", compose)

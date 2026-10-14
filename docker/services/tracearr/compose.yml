@@ -11,14 +11,14 @@ services:
   # Define the 'tracearr-db' service.
   #
   tracearr-db:
+    <<:                                   # Merge shared and service-specific container settings
+      - *default-container                # Pull in default container settings
+      - *exclude-from-watchtower-updates  # Keep database upgrades under operator control
+
     # Docker image and container information
-    <<: *default-container                                                  # Pull in the default container information
     image: timescale/timescaledb-ha:${TRACEARR_DB_TAG}                      # Upstream recommended PostgreSQL 18 baseline
     container_name: ${COMPOSE_PROJECT_NAME}-tracearr-db-${TRACEARR_DB_TAG}  # Namespace by project and tag
     hostname: tracearr-db                                                   # Private database hostname
-
-    # Keep database upgrades under operator control
-    labels: *disable-watchtower-updates
 
     # Match upstream shared-memory and TimescaleDB import requirements
     shm_size: ${TRACEARR_DB_SHM_SIZE}     # Shared memory available to PostgreSQL
@@ -66,14 +66,14 @@ services:
   # Define the 'tracearr-redis' service.
   #
   tracearr-redis:
+    <<:                                   # Merge shared and service-specific container settings
+      - *default-container                # Pull in default container settings
+      - *exclude-from-watchtower-updates  # Keep Redis upgrades under operator control
+
     # Docker image and container information
-    <<: *default-container                                                        # Pull in the default container information
     image: redis:${TRACEARR_REDIS_TAG}                                            # Supported Redis major
     container_name: ${COMPOSE_PROJECT_NAME}-tracearr-redis-${TRACEARR_REDIS_TAG}  # Namespace by project and tag
     hostname: tracearr-redis                                                      # Private queue and cache hostname
-
-    # Keep Redis upgrades under operator control
-    labels: *disable-watchtower-updates
 
     # Persist queued jobs between container restarts
     command:

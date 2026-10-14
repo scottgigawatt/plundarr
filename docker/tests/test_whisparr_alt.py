@@ -9,6 +9,7 @@
 """Exercise selection, independent library paths, dashboard links, and safe regeneration."""
 
 import io
+import re
 import tempfile
 import unittest
 from contextlib import redirect_stdout
@@ -68,7 +69,7 @@ class WhisparrAltTests(unittest.TestCase):
             extract_service(render_compose(self.catalog, default), "whisparr"),
         )
         self.assertIn("- *arr-stack-container", alt)
-        self.assertIn("- *whisparr-runtime", alt)
+        self.assertIn("- *whisparr-healthcheck", alt)
         self.assertIn("image: ghcr.io/hotio/whisparr:${WHISPARR_ALT_TAG}", alt)
         self.assertIn("${COMPOSE_PROJECT_NAME}-whisparr-alt-${WHISPARR_ALT_TAG}", alt)
         self.assertIn("hostname: whisparr-alt", alt)
@@ -94,14 +95,15 @@ class WhisparrAltTests(unittest.TestCase):
             ):
                 self.assertIn(f"${{{prefix}_{kind}_PATH}}:/data/{target}:rw", service)
             self.assertIn(
-                "/data:rw,noexec,nosuid,size=1m,uid=${DEFAULT_PUID},gid=${DEFAULT_PGID}", compose
+                "/data:rw,noexec,nosuid,size=1m,uid=${DEFAULT_PUID},gid=${DEFAULT_PGID}",
+                re.sub(r"\\\n *", "", compose),
             )
 
         # Both instances use the same required indexer and wait for its healthcheck.
         for service_id in ("whisparr", "whisparr-alt"):
             service = extract_service(compose, service_id)
             self.assertIn(
-                "depends_on: *wait-for-prowlarr",
+                "- *prowlarr-dependency",
                 service,
             )
 

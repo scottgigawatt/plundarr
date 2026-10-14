@@ -11,7 +11,7 @@ services:
   # Define the 'apprise' service for delivering notifications.
   #
   apprise:
-    <<:  # Merge shared container and security settings
+    <<:                      # Merge shared container and security settings
       - *rootless-container  # Pull in the rootless container information
       - *security-hardening  # Drop capabilities and prevent privilege escalation
 

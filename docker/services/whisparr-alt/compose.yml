@@ -11,9 +11,11 @@ services:
   # Define the 'whisparr-alt' service for a separate adult media library.
   #
   whisparr-alt:
-    <<:  # Merge shared identity and application-specific runtime settings
-      - *arr-stack-container  # Pull in arr-stack container config
-      - *whisparr-runtime     # Share the writable media parent and ping probe
+    <<:                        # Merge shared and application-specific runtime settings
+      - *arr-stack-container   # Pull in arr-stack container settings
+      - *whisparr-healthcheck  # Share the internal port ping probe
+      - *whisparr-data-dir     # Share the writable media parent for persistent bind mounts
+      - *prowlarr-dependency   # Wait until Prowlarr indexer manager is healthy
 
     # Docker image and container information
     image: ghcr.io/hotio/whisparr:${WHISPARR_ALT_TAG}                         # Run the floating v3 release channel
@@ -32,6 +34,3 @@ services:
       - ${WHISPARR_ALT_SCENES_PATH}:/data/scenes:rw    # Managed scene library
       - ${WHISPARR_ALT_RECYCLE_PATH}:/data/recycle:rw  # Private recycling bin for this instance
       - ${HOST_DOWNLOADS_PATH}:/downloads:rw           # Shared download tree for imports and hardlinks
-
-    # Specify container service dependencies
-    depends_on: *wait-for-prowlarr  # Wait until the required indexer is healthy

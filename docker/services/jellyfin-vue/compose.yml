@@ -11,7 +11,7 @@ services:
   # Define the 'jellyfin-vue' service as an alternative browser client for the Jellyfin server.
   #
   jellyfin-vue:
-    <<:  # Merge shared container and security settings
+    <<:                      # Merge shared container and security settings
       - *default-container   # Keep the image's nginx identity for startup config writes
       - *security-hardening  # Drop capabilities and prevent privilege escalation
 

@@ -70,8 +70,9 @@ x-security-hardening: &security-hardening  # YAML anchor for existing capability
 # during upgrades. Tracearr's database and Redis also require intentional
 # updates. Check release notes before changing these stateful services.
 #
-x-disable-watchtower-updates: &disable-watchtower-updates  # Disable unattended Watchtower updates
-  - "com.centurylinklabs.watchtower.enable=false"          # Require intentional updates for this container
+x-exclude-from-watchtower-updates: &exclude-from-watchtower-updates  # Exclude from Watchtower
+  labels:                                                            # Add container labels
+    - "com.centurylinklabs.watchtower.enable=false"                  # Require intentional updates
 
 #
 # Setup default healthcheck timing settings for all or most containers.
@@ -83,40 +84,48 @@ x-default-healthcheck-settings: &default-healthcheck-settings  # YAML anchor for
   retries: ${DEFAULT_HEALTHCHECK_RETRIES}                      # Mark as unhealthy after this many failures
 
 #
-# Required healthy indexer dependency shared by the arr applications.
+# Shared healthy Prowlarr indexer manager dependency for arr applications.
 #
-x-wait-for-prowlarr: &wait-for-prowlarr  # YAML anchor for required Prowlarr readiness
-  prowlarr:
-    condition: service_healthy          # Wait until Prowlarr is healthy
+x-prowlarr-dependency: &prowlarr-dependency  # YAML anchor for required Prowlarr service dependency
+  depends_on:                                # Specify container service dependencies
+    prowlarr:                                # Prowlarr service dependency
+      condition: service_healthy             # Wait for Prowlarr service to report healthy
 
 #
-# Shared connectivity probe for the standard and anime Sonarr instances.
+# Shared connectivity probe for Sonarr instances.
 #
-x-sonarr-healthcheck: &sonarr-healthcheck  # YAML anchor for Sonarr's internal ping endpoint
-  <<: *default-healthcheck-settings        # Reuse the stack healthcheck timing
-  test:                                   # Check the fixed internal port independently of host mappings
-    - CMD
-    - wget
-    - --no-verbose
-    - --tries=1
-    - --spider
-    - http://127.0.0.1:8989/ping
+x-sonarr-healthcheck: &sonarr-healthcheck  # YAML anchor for Sonarr healthcheck
+  healthcheck:                             # Define the healthcheck
+    <<: *default-healthcheck-settings      # Reuse the stack healthcheck timing
+    test:                                  # Ping the fixed internal port independently of host mappings
+      - CMD
+      - wget
+      - --no-verbose
+      - --tries=1
+      - --spider
+      - http://127.0.0.1:8989/ping
 
 #
-# Shared ephemeral parent and connectivity probe for both Whisparr instances.
+# Shared connectivity probe for Whisparr instances.
 #
-x-whisparr-runtime: &whisparr-runtime  # YAML anchor for Whisparr's common runtime settings
-  tmpfs:                              # Provide a writable parent for persistent media and staging mounts
-    - /data:rw,noexec,nosuid,size=1m,uid=${DEFAULT_PUID},gid=${DEFAULT_PGID}  # 1 MiB parent; child bind mounts persist
-  healthcheck:                        # Check the fixed internal port independently of host mappings
-    <<: *default-healthcheck-settings  # Reuse the stack healthcheck timing
-    test:
+x-whisparr-healthcheck: &whisparr-healthcheck  # YAML anchor for Whisparr healthcheck
+  healthcheck:                                 # Define the healthcheck
+    <<: *default-healthcheck-settings          # Reuse the stack healthcheck timing
+    test:                                      # Ping the fixed internal port independently of host mappings
       - CMD
       - wget
       - --no-verbose
       - --tries=1
       - --spider
       - http://127.0.0.1:6969/ping
+
+#
+# Shared writable media parent for persistent bind mounts used by Whisparr.
+#
+x-whisparr-data-dir: &whisparr-data-dir  # YAML anchor for Whisparr data directories
+  tmpfs:                                 # Writable parent directory for persistent media mounts
+    - "/data:rw,noexec,nosuid,size=1m,\
+      uid=${DEFAULT_PUID},gid=${DEFAULT_PGID}"
 
 #
 # Define the services section.

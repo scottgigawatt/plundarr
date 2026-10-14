@@ -11,8 +11,12 @@ services:
   # Define the 'sonarr' service for managing television shows.
   #
   sonarr:
+    <<:                       # Merge shared and application-specific runtime settings
+      - *arr-stack-container  # Pull in arr-stack container settings
+      - *sonarr-healthcheck   # Share the internal port ping probe
+      - *prowlarr-dependency  # Wait until Prowlarr indexer manager is healthy
+
     # Docker image and container information
-    <<: *arr-stack-container                                      # Pull in arr-stack container config
     image: lscr.io/linuxserver/sonarr:${SONARR_TAG}               # Run using the specified tag
     container_name: ${COMPOSE_PROJECT_NAME}-sonarr-${SONARR_TAG}  # Namespace the container name by project and tag
     hostname: sonarr                                              # Set the container hostname
@@ -26,9 +30,3 @@ services:
       - ${SONARR_CONFIG_PATH}:/config:rw      # Database and Sonarr configs
       - ${HOST_DOWNLOADS_PATH}:/downloads:rw  # Location of download managers output directory
       - ${HOST_TV_PATH}:/tv:rw                # Location of TV library on disk
-
-    # Define container healthcheck to verify Sonarr connectivity
-    healthcheck: *sonarr-healthcheck  # Reuse the shared Sonarr ping probe and timing
-
-    # Specify container service dependencies
-    depends_on: *wait-for-prowlarr  # Wait until the required indexer is healthy
