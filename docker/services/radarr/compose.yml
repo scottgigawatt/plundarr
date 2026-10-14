@@ -39,6 +39,4 @@ services:
         - http://127.0.0.1:7878/ping
 
     # Specify container service dependencies
-    depends_on:
-      prowlarr:
-        condition: service_healthy  # Wait until Prowlarr is healthy
+    depends_on: *wait-for-prowlarr  # Wait until the required indexer is healthy

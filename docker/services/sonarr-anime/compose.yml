@@ -28,17 +28,7 @@ services:
       - ${HOST_ANIME_TV_PATH}:/tv:rw            # Location of anime TV library on disk
 
     # Define container healthcheck to verify Sonarr Anime connectivity
-    healthcheck:
-      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
-      test:                              # Check Sonarr Anime ping endpoint
-        - CMD
-        - wget
-        - --no-verbose
-        - --tries=1
-        - --spider
-        - http://127.0.0.1:8989/ping
+    healthcheck: *sonarr-healthcheck  # Reuse the shared Sonarr ping probe and timing
 
     # Specify container service dependencies
-    depends_on:
-      prowlarr:
-        condition: service_healthy  # Wait until Prowlarr is healthy
+    depends_on: *wait-for-prowlarr  # Wait until the required indexer is healthy
