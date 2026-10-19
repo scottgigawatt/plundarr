@@ -178,6 +178,15 @@
             "rangeStrategy": "pin"
         },
         //
+        // Preserve Python compatibility ranges instead of pinning them to one interpreter.
+        //
+        {
+            "description": "Keep supported Python versions as a compatibility range",
+            "matchManagers": ["pep621"],
+            "matchDepTypes": ["requires-python"],
+            "rangeStrategy": "replace"
+        },
+        //
         // Apply this after manager groups so workflow and runtime pins stay together.
         //
         {
