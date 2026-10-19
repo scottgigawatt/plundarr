@@ -16,11 +16,10 @@ ARG DOCKER_COMPOSE_TAG=v5.6.0@sha256:db34ebea4a1acd4b130e9abc305cdb51b3fe53b9116
 ARG MARAUDARR_BIN_HOME=/maraudarr
 
 #
-# Require patched compression and XML libraries; keep Expat's edge exception scoped.
+# Require patched compression and XML libraries from Alpine stable.
 #
 ARG ZLIB_APK_MIN_VERSION=1.3.2-r1
 ARG LIBEXPAT_APK_MIN_VERSION=2.9.0-r0
-ARG EDGE_APK_REPOSITORY=https://dl-cdn.alpinelinux.org/alpine/edge/main
 
 #
 # Stage 1 of 3: Copy the official Compose binary for the selected target platform.
@@ -41,7 +40,6 @@ FROM alpine:${ALPINE_TAG} AS build
 ARG MARAUDARR_BIN_HOME
 ARG ZLIB_APK_MIN_VERSION
 ARG LIBEXPAT_APK_MIN_VERSION
-ARG EDGE_APK_REPOSITORY
 
 #
 # Put the isolated environment first so every Python command uses it.
@@ -50,14 +48,12 @@ ENV PATH=${MARAUDARR_BIN_HOME}/venv/bin:${PATH}
 
 #
 # Install Python with patched compression and XML libraries before creating the environment.
-# Keep the tagged repository available for later APK operations.
 #
 RUN apk add --no-cache \
         py3-pip \
         python3 \
+        "libexpat>=${LIBEXPAT_APK_MIN_VERSION}" \
         "zlib>=${ZLIB_APK_MIN_VERSION}" && \
-    printf '%s\n' "@edge ${EDGE_APK_REPOSITORY}" >> /etc/apk/repositories && \
-    apk add --no-cache "libexpat@edge>=${LIBEXPAT_APK_MIN_VERSION}" && \
     python3 -m venv "${MARAUDARR_BIN_HOME}/venv"
 
 #
@@ -117,7 +113,6 @@ ARG IMAGE_REVISION=unknown
 ARG IMAGE_VERSION=latest
 ARG ZLIB_APK_MIN_VERSION
 ARG LIBEXPAT_APK_MIN_VERSION
-ARG EDGE_APK_REPOSITORY
 
 #
 # Set application locations and predictable Python runtime behavior.
@@ -147,16 +142,13 @@ LABEL org.opencontainers.image.title="Maraudarr" \
 
 #
 # Upgrade OpenSSL and install the fixed Python compression and XML runtime libraries.
-# Keep the Expat edge exception scoped until Alpine stable carries version 2.9.0.
-# Retain its package tag so APK can resolve the installed world during maintenance.
 # Python package-management tools remain in the build stage.
 #
 RUN apk upgrade --no-cache libcrypto3 libssl3 && \
     apk add --no-cache \
         python3 \
-        "zlib>=${ZLIB_APK_MIN_VERSION}" && \
-    printf '%s\n' "@edge ${EDGE_APK_REPOSITORY}" >> /etc/apk/repositories && \
-    apk add --no-cache "libexpat@edge>=${LIBEXPAT_APK_MIN_VERSION}"
+        "libexpat>=${LIBEXPAT_APK_MIN_VERSION}" \
+        "zlib>=${ZLIB_APK_MIN_VERSION}"
 
 #
 # Copy the standalone Compose binary from its official image.
