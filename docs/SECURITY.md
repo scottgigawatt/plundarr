@@ -59,14 +59,14 @@ Plundarr pulls published container images for the stack and keeps configuration 
 
 ## Interpret Maraudarr image scans
 
-The October 9, 2026 review checked immutable published images on `linux/amd64`, `linux/arm64`, and `linux/arm/v7` with Docker Scout 1.25.0. Every severity and findings without a published fix were included; no scanner exclusions were added.
+The October 19, 2026 review checked immutable published images on `linux/amd64`, `linux/arm64`, and `linux/arm/v7` with Trivy 0.75.0 and its vulnerability database updated at 13:35 UTC that day. Every severity and findings without a published fix were included, with comprehensive package detection and an explicit empty ignore file. The table records Trivy results; a passing CI exception is not a clean artifact scan.
 
-| Reviewed channel | Image index digest | Scout vulnerability identifiers per platform |
+| Reviewed channel | Image index digest | Trivy vulnerability identifiers per platform |
 | --- | --- | --- |
-| `latest` / `v2.1.4` | `sha256:f9c99ed52d5d834fc840c23317e223025ebc37b4a583208f9d68a8174cf7effb` | 15 |
-| `edge` | `sha256:73b00f792744cbf7d512f5cc7c3b50d825572ece0895884620e8573bc388e051` | 15 |
+| `latest` / `v2.1.5` | `sha256:083ff05274a4f37838841785c564afa3918875df1bf4a6e1e5933b3c5e3d0a2c` | 14 |
+| `edge` | `sha256:f2745747e88846fccf0adcc4b4dcec6c5310490a0e13fa901ce1c7db9126973e` | 14 |
 
-Both reviewed channels already contain patched zlib 1.3.2-r1 and libexpat 2.9.0-r0. Their earlier compression and XML findings are resolved. The dated digests above identify the artifacts reviewed; moving tags can later select a different build.
+Each platform reports 19 finding instances, all in the official Compose binary. The Alpine and installed Python package inventories have no reported findings. Both reviewed channels contain patched zlib 1.3.2-r1 and libexpat 2.9.0-r0; their earlier compression and XML findings remain resolved. The dated digests above identify the artifacts reviewed; moving tags can later select a different build.
 
 The remaining actionable findings come from Compose 5.6.0's Go 1.26.8 standard library and golang.org/x/net 0.58.0. Fixed releases are [Go 1.26.9](https://go.dev/doc/devel/release#go1.26.9) and [golang.org/x/net 0.60.0](https://pkg.go.dev/golang.org/x/net@v0.60.0). Docker has not yet published a Compose release containing those updates.
 
@@ -83,18 +83,18 @@ Replace the donor image when a compatible official release contains the fixes on
 Use an explicit empty ignore file for the full Trivy review so repository CI exceptions cannot hide findings:
 
 ```sh
-trivy image --ignorefile /dev/null --image-src remote --scanners vuln ghcr.io/scottgigawatt/maraudarr@sha256:IMAGE-DIGEST
+trivy image --ignorefile /dev/null --image-src remote --detection-priority comprehensive --scanners vuln ghcr.io/scottgigawatt/maraudarr@sha256:IMAGE-DIGEST
 ```
 
 Replace `IMAGE-DIGEST` with the immutable image digest being reviewed and repeat the review for each supported platform.
 
-The recipe still requires zlib 1.3.2-r1 and libexpat 2.9.0-r0 in the disposable Python build stage and published runtime. Alpine 3.24 supplies the fixed zlib, but stable libexpat remains 2.8.5-r0 on all three supported platforms. Only libexpat uses the tagged edge repository; remove that exception when stable supplies [Expat 2.9.0](https://github.com/libexpat/libexpat/releases/tag/R_2_9_0) or newer everywhere.
+The recipe requires zlib 1.3.2-r1 and libexpat 2.9.0-r0 in both the disposable Python build stage and the published runtime. Alpine 3.24 stable now supplies those versions on all three supported platforms. Both stages install these packages from stable with their minimum security versions retained; the former Expat edge-repository exception has been removed.
 
 Rebuilt images must pass the generator smoke test, Python XML and compression checks, and full scans on all three platforms before publication. A new stable release delivers the Compose fixes through `latest`; merging a fix into `main` updates `edge`. Review the new immutable digest and scan results before deployment.
 
 Package-level scanner findings remain visible:
 
-- Docker's [CVE-2025-15558 advisory](https://github.com/docker/cli/security/advisories/GHSA-p436-gjf2-799p) concerns Windows plugin discovery and is already fixed in the bundled CLI module version. Scout still reports it against the Linux Compose binary; Trivy does not.
+- The October 9 Docker Scout review also reported [CVE-2025-15558](https://github.com/docker/cli/security/advisories/GHSA-p436-gjf2-799p), a Windows plugin-discovery advisory already fixed in the bundled CLI module version. The current Trivy review does not report it against this Linux binary; the historical Scout result is not a current unresolved Linux finding.
 - The [OpenPGP warning, GO-2026-5932](https://pkg.go.dev/vuln/GO-2026-5932), has no fixed version and concerns a package absent from the compiled Compose binary.
 
 These findings do not assess the host's Docker daemon or service images in a generated deployment. Recheck immutable image digests, package versions, and upstream advisories when dependencies change. Publishing a release does not update existing containers automatically.
