@@ -4,7 +4,9 @@ This guide generates a Plundarr deployment, reviews the host-specific settings, 
 
 ## Generate a deployment
 
-Run the interactive Maraudarr Docker Compose project generator from the repository:
+Install the prerequisites in the [repository README](https://github.com/scottgigawatt/plundarr#readme) and run commands from the cloned repository root. These instructions describe the checkout's catalog; the generator runs from `MARAUDARR_IMAGE`, which may be a cached stable image. Follow [generator revision selection](development/maraudarr/index.md#choose-the-generator-revision) when testing unreleased changes or regenerating with this source revision.
+
+Run the interactive Maraudarr Docker Compose project generator:
 
 ```sh
 make configure
@@ -20,6 +22,7 @@ make ship PRESET=plex
 make ship PRESET=calibre-web-automated
 make ship PRESET=duplex
 make ship PRESET=watchtower
+make ship PRESET=portainer
 make ship ADD_SERVICES=lidarr
 make ship ADD_SERVICES=recyclarr
 make ship ADD_SERVICES=sonarr-anime
@@ -43,6 +46,10 @@ dist/<preset>/
 
 > [!IMPORTANT]
 > Review the generated `.env` before launch. Confirm user and group IDs, host storage paths, timezone, project network values, and published ports. Presets containing Privateerr and Gluetun also require real `PIA_USER` and `PIA_PASS` values; startup rejects missing or generated example credentials.
+
+When regenerating, repeat your complete intended `ADD_SERVICES` and `REMOVE_SERVICES` selection. Each run resolves the requested preset again; preserved environment values and inactive footer assignments do not restore earlier service choices. Generation preserves application state and does not stop running containers omitted from the new chart; review orphaned containers separately.
+
+`.env` selects Compose values and paths; application-specific configuration may also need editing. Jellyfin Web settings and CSS, Recyclarr YAML, and the external Kometa/PATTRMM settings are operator-owned exceptions. Regeneration seeds missing managed files and preserves existing application edits; it does not configure the applications for you.
 
 ## Configure Homepage password login
 
@@ -75,12 +82,12 @@ Maraudarr gives each preset a distinct Compose project, bridge network, and defa
 | Jellyfin | `jellyfin` | `172.22.0.0/16` | Jellyfin `28096` |
 | Plex | `plex` | `172.23.0.0/16` | Plex host networking |
 | Calibre-Web Automated | `calibre-web-automated` | `172.24.0.0/16` | CWA `48213` |
-| Duplex | `duplex` | `172.25.0.0/16` | Notifiarr `5454` |
-| Paperless reservation | External project | `172.26.0.0/16` | Reserved outside the Maraudarr catalog |
-| Watchtower | `watchtower` | `172.27.0.0/16` | No published ports |
+| Duplex | `duplex` | `172.25.0.0/16` | Themerr HTTPS `9494`, connector HTTP `9495`; Notifiarr `5454` |
+| Watchtower | `watchtower` | `172.26.0.0/16` | No published ports |
+| Portainer | `portainer` | `172.27.0.0/16` | HTTPS `9443`, Edge `8888` |
 | Custom | `custom` | `172.28.0.0/16` | Selected ports offset by `30000` |
 
-Every bridge-network preset uses `.5.0/24` as its container address pool and `.5.254` as its gateway inside the listed `/16`. The `172.26.0.0/16` reservation keeps the separately deployed Paperless project in sequence without pretending it is a Maraudarr preset. Container names include the project, service, and image tag, such as `plundarr-bazarr-latest`.
+Every bridge-network preset uses `.5.0/24` as its container address pool and `.5.254` as its gateway inside the listed `/16`. These are catalog defaults, not reservations for separately deployed applications; check every existing host network before generating another project. Container names include the project, service, and image tag, such as `plundarr-bazarr-latest`.
 
 Change the generated network only when it overlaps another Docker network, virtual private network (VPN), local-area network route, or host service. Update `COMPOSE_NETWORK_SUBNET`, `COMPOSE_NETWORK_IP_RANGE`, and `COMPOSE_NETWORK_GATEWAY` together. The [Docker Compose IPAM reference](https://docs.docker.com/compose/compose-file/06-networks/#ipam) explains custom address planning.
 
@@ -88,17 +95,17 @@ Plex uses host networking. Only one Plex server can claim its standard host port
 
 ## Launch with Docker Compose
 
-Start the selected preset through Make:
+Replace `YOUR-PRESET` with the selected preset ID, such as `boudoirr`, in commands and paths below. Start that generated project through Make:
 
 ```sh
-make up PRESET=<preset>
+make up PRESET=YOUR-PRESET
 ```
 
-Omit `PRESET` for the default `plundarr` deployment. Inspect the resolved Compose model and service status with:
+Omit `PRESET` for the default `plundarr` deployment. Validate the Compose model without printing interpolated credentials, then inspect service status:
 
 ```sh
-make config PRESET=<preset>
-make ps PRESET=<preset>
+docker compose --env-file dist/YOUR-PRESET/.env -f dist/YOUR-PRESET/docker-compose.yml config --quiet
+make ps PRESET=YOUR-PRESET
 ```
 
 ## Configure the Synology firewall
@@ -143,7 +150,7 @@ The [Synology Container Manager project documentation](https://kb.synology.com/e
 | Server | Host mount behavior | Libraries to add | Notes |
 | --- | --- | --- | --- |
 | Jellyfin with Plundarr or standalone | `JELLYFIN_DATA_PATH` mounts read/write at `/data` | `/data/movies`, `/data/tv` | Persistent `/config` and `/cache` |
-| Jellyfin with Plundarr and Lidarr | `JELLYFIN_DATA_PATH` mounts read/write at `/data`; `HOST_MUSIC_PATH` resolves to its `music` child | `/data/movies`, `/data/tv`, `/data/music` | Keep both paths beneath the same host media root |
+| Jellyfin with Plundarr and Lidarr | Jellyfin mounts `JELLYFIN_DATA_PATH` at `/data`; Lidarr independently mounts `HOST_MUSIC_PATH` at `/music` | `/data/movies`, `/data/tv`; music only when its host directory is visible beneath `/data` | The default `/volume1/music/Music/Media/Music` is not automatically mounted into Jellyfin; align paths deliberately |
 | Jellyfin with Boudoirr | Jellyfin mounts its media root; Whisparr mounts individual libraries | `/data/movies/main`, `/data/scenes/main`; optionally `/data/movies/alt`, `/data/scenes/alt` | Map Whisparr’s `/data/movies` and `/data/scenes` to the matching Jellyfin subdirectories; exclude import and recycle folders |
 | Plex with Plundarr | Separate read-only library mounts | Movies, television, anime | Persistent config and transcode mounts |
 | Plex with Plundarr and Lidarr | Separate read-only library mounts | Movies, television, anime, music at `/music` | Lidarr writes the same host music library |
@@ -152,6 +159,10 @@ The [Synology Container Manager project documentation](https://kb.synology.com/e
 | Calibre-Web Automated with Plundarr or standalone | `CWA_LIBRARY_PATH` mounts read/write at `/calibre-library` | Calibre library containing `metadata.db` | Config and ingest use separate mounts |
 
 Media-server libraries are configured in Jellyfin, Plex, or Calibre-Web Automated after the containers start. Maraudarr prepares consistent mounts but does not create library records. Configure Lidarr's `/music` root folder separately in Lidarr.
+
+## Customize Jellyfin playback
+
+Boudoirr and standalone Jellyfin can add the optional Vue client with `ADD_SERVICES=jellyfin-vue`. Jellyfin Web also receives a configurable read-only settings file and local CSS directory. Read the [Jellyfin customization guide](project-guides/jellyfin.md) for client URLs, theme activation, menu links, upgrades, and plugin choices.
 
 ## Configure Lidarr
 
@@ -305,7 +316,3 @@ Watchtower controls the host Docker daemon through its socket and can inspect el
 - Use the [support guide](SUPPORT.md) when setup does not behave as documented.
 
 Fair winds, sensible subnets, and no surprise port collisions. 🏴‍☠️
-
-## Customize Jellyfin playback
-
-Boudoirr and standalone Jellyfin can add the optional Vue client with `ADD_SERVICES=jellyfin-vue`. Jellyfin Web also receives a configurable read-only settings file and local CSS directory. Read the [Jellyfin customization guide](project-guides/jellyfin.md) for client URLs, theme activation, menu links, upgrades, and plugin choices.

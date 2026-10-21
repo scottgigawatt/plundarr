@@ -30,7 +30,7 @@ dist/<preset>/
 
 ## Take the quick passage 🧭
 
-Run these commands from the repository root. Make keeps the Docker wiring out of sight and prints only the useful status and Maraudarr output.
+Run these commands from the repository root. Replace `YOUR-PRESET` in examples with a selected preset ID, such as `boudoirr`. Make keeps the Docker wiring out of sight and prints only the useful status and Maraudarr output.
 
 | Command | What it does |
 | --- | --- |
@@ -49,19 +49,18 @@ Run these commands from the repository root. Make keeps the Docker wiring out of
 | `make test` | Runs unit, helper, policy, and real Compose matrix tests |
 | `make build-platforms` | Verifies all published CPU architectures |
 
-Maraudarr uses a matching local image first. When none exists, Make tries GHCR and automatically builds from this checkout if the published image is not yet available. No pull-skip variable is needed.
+## Choose the generator revision
 
-Refresh or rebuild Maraudarr explicitly when ye want a different image:
+Make reuses the configured local `MARAUDARR_IMAGE` first, then tries to pull it, and builds from this checkout only when that pull fails. The mounted checkout receives output; its source files do not replace the generator's packaged catalog or templates. The default `latest` stable image can lag behind `main`.
 
-```sh
-make pull-image
-make build
-```
+Follow [generator revision selection](../docs/development/maraudarr/index.md#choose-the-generator-revision) to build this checkout under a distinct local reference, reuse that reference for every generator command, or select a verified published version. Rebuild after source changes; `make pull-image` refreshes the configured published reference instead.
+
+## Select services
 
 Add optional cargo without opening the interactive prompts:
 
 ```sh
-make ship PRESET=boudoirr ADD_SERVICES=jellyfin
+make ship PRESET=boudoirr ADD_SERVICES=whisparr-alt
 make ship PRESET=jellyfin
 make ship PRESET=plex
 make ship PRESET=calibre-web-automated
@@ -74,7 +73,7 @@ make ship ADD_SERVICES=sonarr-anime
 
 `ADD_SERVICES` and `REMOVE_SERVICES` accept comma-separated service IDs. Plundarr and Boudoirr preselect qBittorrent as their only downloader and include Watchtower as a removable default. Plundarr also includes Calibre-Web Automated as a removable default, while the `calibre-web-automated` preset generates the focused ebook service by itself. SABnzbd and NZBGet remain ordinary opt-in choices:
 
-The first command selects Usenet only. The second keeps torrents, adds Usenet, and opts into update checks:
+The first command selects Usenet only. The second keeps torrents and adds Usenet to Boudoirr; Watchtower is already a removable default:
 
 ```sh
 make ship REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=sabnzbd
@@ -122,7 +121,7 @@ The published image and Make targets use a deliberately narrow runtime:
 | 🧾 Atomic output | Compose and environment files replace their targets only after validation |
 | 🗃️ State preservation | Existing application config files are never deleted during regeneration |
 
-Maraudarr validates every generated pair with its bundled standalone `docker-compose config --quiet` command before replacing a preset's output. The explicit `make delete-config PRESET=<preset>` target is the only normal path that removes a complete config hold.
+Maraudarr validates every generated pair with its bundled standalone `docker-compose config --quiet` command before replacing a preset's output. The explicit `make delete-config PRESET=YOUR-PRESET` target is the only normal path that removes a complete config hold.
 
 ## Choose a registry tag 🗂️
 

@@ -2,8 +2,7 @@
 
 Maraudarr copies this README into every generated `dist/<preset>/config/` directory. That hold keeps persistent configuration for the services selected in the voyage, including PIA WireGuard and port-forwarding files.
 
-> [!IMPORTANT]
-> Every selected service has its own subfolder in `config/`. The root repository `config/` directory is not used by normal generated deployments.
+Services with managed seed files receive subfolders in `config/`. External operator-owned paths and named Docker volumes have separate storage boundaries. The root repository `config/` directory is not used by normal generated deployments.
 
 ## Find service configuration 🗺️
 
@@ -36,13 +35,18 @@ Each folder follows the same general format: configuration files go in and persi
 
 ## Back up or reset the hold 🧽
 
-To archive the selected config hold before a reset, run:
+From the repository root, replace `YOUR-PRESET` with the selected preset ID, such as `boudoirr`, and archive its config before a reset:
 
 ```sh
-make backup PRESET=<preset>
+make backup PRESET=YOUR-PRESET
 ```
 
-To deliberately remove that generated config tree, run `make delete-config PRESET=<preset>`. The next `make ship PRESET=<preset>` voyage recreates only the directories and seed files needed by its selected services.
+The archive does not include the deployment's `.env`, external Kometa checkout, or named-volume databases. Export application backups as needed, retain matching encryption keys and private settings separately, and verify an off-host recovery copy.
+
+> [!CAUTION]
+> `make delete-config` irreversibly deletes the selected host config tree and any backups stored inside it. Stop affected services and verify a recoverable backup before proceeding. Named-volume data requires separate management.
+
+Only after reviewing that risk, use `make delete-config PRESET=YOUR-PRESET`. The next `make ship PRESET=YOUR-PRESET` voyage recreates missing seed files for the complete selection you specify; it does not restore databases, secrets, external state, or operator edits.
 
 > [!CAUTION]
 > Do not commit API keys, passwords, VPN credentials, generated WireGuard configuration, or other private application state.

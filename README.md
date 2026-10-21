@@ -52,6 +52,8 @@ Plundarr is a generated, ready-to-run Docker Compose media stack built from the 
 
 Each generated Compose project works with Docker Compose and Synology Container Manager. Routine configuration stays in the deployment's `.env`; you do not need to assemble Compose fragments by hand.
 
+This page tracks the checked-out source, including changes that may not yet be released. `MARAUDARR_IMAGE` defaults to the stable `latest` image, so use [the current-source build instructions](docs/development/maraudarr/index.md#choose-the-generator-revision) for the catalog and seeds described here. For a released image, consult documentation from its matching source tag rather than assuming `main` describes that release.
+
 ## Understand Plundarr and Maraudarr
 
 The repository has two deliberately separate parts:
@@ -61,7 +63,7 @@ The repository has two deliberately separate parts:
 
 VPN-enabled presets use [Privateerr](https://github.com/scottgigawatt/privateerr) to generate PIA WireGuard configuration and [Gluetun](https://github.com/qdm12/gluetun) to establish and maintain the actual VPN tunnel.
 
-Maraudarr images are published to [GitHub Container Registry](https://github.com/scottgigawatt/plundarr/pkgs/container/maraudarr) and [Docker Hub](https://hub.docker.com/r/scottgigawatt/maraudarr). `make ship` runs that Compose project generator from the published image when available and can build it from the checkout as a fallback.
+Maraudarr images are published to [GitHub Container Registry](https://github.com/scottgigawatt/plundarr/pkgs/container/maraudarr) and [Docker Hub](https://hub.docker.com/r/scottgigawatt/maraudarr). `make ship` uses `MARAUDARR_IMAGE`, which defaults to `ghcr.io/scottgigawatt/maraudarr:latest`. It reuses a matching local image first; otherwise it pulls that reference and builds from this checkout only if the pull fails. Updating source files does not rebuild an existing generator image. These guides describe the checked-out source; features on `main` may be newer than the latest stable image. Follow [the generator revision guide](docs/development/maraudarr/index.md#choose-the-generator-revision) to build and select this checkout explicitly.
 
 ## Generate the default stack ⚡
 
@@ -139,6 +141,8 @@ The catalog includes VPN foundations, torrent and Usenet clients, movie, televis
 
 `ADD_SERVICES` and `REMOVE_SERVICES` accept comma-separated service IDs. Preset core services cannot be removed; removable defaults and optional services can be changed interactively or on the command line.
 
+Every non-interactive regeneration resolves the requested preset and additions/removals again. Repeat the complete intended selection; preserved `.env` assignments do not reselect previously added services or remember removed defaults. Regeneration preserves data but does not stop previously running containers omitted from the new chart; review Compose orphans separately.
+
 Generate common combinations:
 
 ```sh
@@ -157,6 +161,18 @@ make ship PRESET=duplex ADD_SERVICES=watchtower
 ```
 
 Regeneration preserves existing values by variable name and does not replace application state. Values for temporarily unselected services remain in a marked footer so they can return when the service is selected again.
+
+### Configure Boudoirr
+
+Boudoirr preselects Velvarr requests and Jellyfin playback, but either can be removed independently. Use `REMOVE_SERVICES=jellyfin` for an external Jellyfin server, `REMOVE_SERVICES=velvarr` to omit requests, or `REMOVE_SERVICES=velvarr,jellyfin` to omit both. The [Velvarr guide](docs/project-guides/velvarr.md) covers owner setup, internal service URLs, and browser playback URLs.
+
+Add the optional second Whisparr instance with:
+
+```sh
+make ship PRESET=boudoirr ADD_SERVICES=whisparr-alt
+```
+
+Keep its config, API key, download-client category, and managed movie/scene libraries separate from the primary instance. Follow the [Whisparr Alt guide](docker/services/whisparr-alt/README.md) before importing media; directory names do not choose the metadata provider. Include your complete service selection whenever regenerating an existing deployment.
 
 ### Customize Jellyfin
 
@@ -223,6 +239,8 @@ make ship PRESET=duplex
 
 Set `KOMETA_CONFIG_PATH` to your external Kometa checkout and `IMAGEMAID_PLEX_PATH` to Plex application data. See the [Kometa service guide](docker/services/kometa/README.md) for shared configuration and scheduling.
 
+PATTRMM Neo is a removable default. Prepare its external settings and rootless cache/output permissions, and finish collection generation before Kometa reads the results; see the [Neo service guide](docker/services/pattrmm/README.md) for schedules and manual verification.
+
 Themerr is required in Duplex and can connect the same instance to Plex and Jellyfin. Review its private encryption-key permissions and complete administrator setup before connecting servers. See the [Themerr guide](docs/project-guides/themerr.md) for connector setup and conservative cleanup defaults.
 
 Add Kometa Overlay Reset with `make ship PRESET=duplex ADD_SERVICES=overlay-reset` when needed. It remains behind the `tools` Compose profile and never starts during ordinary `make up` runs. Keep `OVERLAY_RESET_DRY_RUN=True`, inspect the dry-run output, and invoke the tool explicitly:
@@ -254,7 +272,7 @@ Run only one persistent Watchtower daemon per Docker host and stop it before a o
 
 ## Configure the important values ⚙️
 
-Maraudarr writes only variables used by the selected services. Start with these groups in `dist/<preset>/.env`:
+The active environment sections contain variables used by the selected services. Existing assignments for temporarily inactive services remain in the marked footer so operator values can be reused later; that footer does not enable those services. Start with these groups in `dist/<preset>/.env`:
 
 - **Credentials:** `PIA_USER` and `PIA_PASS` for VPN-enabled presets.
 - **Host identity:** `DEFAULT_PUID`, `DEFAULT_PGID`, and service-specific user or group IDs.
@@ -262,7 +280,7 @@ Maraudarr writes only variables used by the selected services. Start with these 
 - **Networking:** Project subnet, gateway, address range, and `*_WEBUI_PORT` values when defaults collide.
 - **Time:** `TZ` and service schedules.
 
-Configuration remains under `dist/<preset>/config/` unless you deliberately change a generated path. Read the [Docker and Synology setup guide](docs/setup.md) for network planning, firewall rules, side-by-side presets, and media-library mounts.
+Configuration remains under `dist/<preset>/config/` unless you deliberately change a generated path. `.env` controls Compose values, but it is not the only operator configuration: Jellyfin Web JSON/CSS and Recyclarr YAML may need edits, Kometa/PATTRMM use an external checkout and private runtime settings, and applications still need their own setup. Follow each selected service guide before launch. Read the [Docker and Synology setup guide](docs/setup.md) for network planning, firewall rules, side-by-side presets, and media-library mounts.
 
 ## Deploy with Synology Container Manager 📦
 
@@ -280,16 +298,17 @@ The same generated files work with ordinary Docker Compose; Synology does not re
 Use `make help` for the complete command reference. Common checks include:
 
 ```sh
-make config
-make env
+docker compose --env-file dist/plundarr/.env -f dist/plundarr/docker-compose.yml config --quiet
 make ps
 make test
 ```
 
-`make clean` removes disposable repository artifacts only. `make down PRESET=<preset>` stops the selected project while preserving volumes, images, `.env`, config, backups, and generated credentials.
+`make config` and `make env` print resolved values, which can include credentials; use them only in a private terminal and never attach their raw output to an issue. In the commands below, replace `YOUR-PRESET` with the selected preset, such as `boudoirr`.
+
+`make clean` removes disposable repository artifacts only. `make down PRESET=YOUR-PRESET` stops the selected project while preserving volumes, images, `.env`, config, backups, and generated credentials.
 
 > [!CAUTION]
-> `make nuke PRESET=<preset>` stops the selected deployment and removes its containers, networks, eligible images, and the separate Maraudarr project and scoped build cache. It preserves application volumes, including Tracearr history and internal backups, deployment files, and bind-mounted config. Restarting may require image downloads. `make delete-config PRESET=<preset>` deletes the host config tree, including exported backups stored there.
+> `make nuke PRESET=YOUR-PRESET` stops the selected deployment and removes its containers, networks, eligible images, and the separate Maraudarr project and scoped build cache. It preserves application volumes, including Tracearr history and internal backups, deployment files, and bind-mounted config. Restarting may require image downloads. `make delete-config PRESET=YOUR-PRESET` deletes the host config tree, including exported backups stored there.
 
 VPN and full-stack tests can use real PIA credentials and launch containers. Read the [testing guide](test/README.md) before running `make test-vpn`, `make test-e2e`, or `make test-stack`.
 

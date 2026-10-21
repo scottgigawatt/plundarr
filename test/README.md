@@ -96,6 +96,9 @@ This checks the existing Privateerr and Gluetun containers, then verifies genera
 
 ### Test Privateerr, Gluetun, and download clients end to end
 
+> [!CAUTION]
+> Use a disposable deployment and explicit `PRESET` for live tests. Both `make test-e2e` and `make test-stack` overwrite the selected generated WireGuard and forwarding metadata with example files before and after validation, and they can interrupt VPN/download services. Back up the selected deployment and keep real credentials private. An interrupted command may leave services or sensitive state behind; inspect them before any deliberate recovery or cleanup rather than running these targets against production.
+
 Use this when ye want `Make` to launch only the VPN pair plus download clients, validate it, then clean up:
 
 ```sh
@@ -128,6 +131,8 @@ make test-e2e
 Keep qBittorrent and add either Usenet client when ye want both downloader types tested together, for example `make ship ADD_SERVICES=sabnzbd`.
 
 ### Test the full stack
+
+The same disposable-deployment and config-reset warning above applies. This target leaves services running on success; it is not a read-only health check.
 
 Use this when ye want Make to launch every service, wait for health, and validate the full port-forwarding chain:
 

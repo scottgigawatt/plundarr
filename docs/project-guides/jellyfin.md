@@ -33,13 +33,16 @@ Open Vue at its host port and enter the Jellyfin URL, including scheme and serve
 
 Vue retains its image's nginx user and writable startup configuration. It needs no media mounts, API keys, persistent database, or server startup dependency. Its healthcheck tests the static frontend. Its supported image channel is `unstable`; existing Watchtower policy controls unattended updates. Read the [Vue chart](https://github.com/scottgigawatt/plundarr/blob/main/docker/services/jellyfin-vue/README.md) for the container boundary.
 
+Vue uses its own environment-generated frontend `config.json`; it does not read Jellyfin Web's JSON or Branding CSS. Maraudarr also seeds `config/jellyfin-vue/default.conf` for nginx, mounted read-only through `JELLYFIN_VUE_NGINX_CONFIG_PATH`. For older deployments, regenerate with your complete selection and the [intended generator revision](../development/maraudarr/index.md#choose-the-generator-revision) before recreating Vue. Preserve operator edits and keep the nginx listener on internal port `8080`, matching the chart and healthcheck. This server-side listener does not change the host ports or the browser-reachable Jellyfin URL.
+
 ## Select your Web configuration
 
 When Jellyfin is selected, Maraudarr seeds these files beneath `dist/YOUR-PRESET/config/jellyfin/web/`:
 
 - `config.json`: Jellyfin Web 12.2 settings retaining the normal player and theme defaults.
 - `privacy-config.json`: The same settings without the Chromecast and YouTube players.
-- `custom/boudoirr.css`: A local plum, velvet pink, and warm gold stylesheet.
+- `custom/boudoirr.css`: The original plum, velvet pink, and warm gold stylesheet.
+- `custom/theme-base.css` and the five companion styles listed below: The shared base and local alternative themes.
 
 Replace `YOUR-PRESET` with `boudoirr` or `jellyfin`. Regeneration creates missing seeds and preserves existing JSON, CSS, environment values, and server state. The mounts are read-only inside Jellyfin; edit their host files. `JELLYFIN_WEB_CONFIG_PATH` selects the existing JSON file, while `JELLYFIN_WEB_CUSTOM_PATH` selects the local CSS/image directory. The generator does not create files at operator-selected external paths.
 
