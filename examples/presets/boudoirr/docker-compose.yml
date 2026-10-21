@@ -471,7 +471,7 @@ services:
 
       # Mount the Jellyfin Web configuration JSON file for custom settings
       - type: bind                                  # Mount the Jellyfin Web configuration JSON file
-        source: ${JELLYFIN_WEB_CONFIG_PATH}         # JSON settings for Jellyfin Web; compare with the image defaults on upgrades
+        source: ${JELLYFIN_WEB_CONFIG_PATH}         # JSON settings for Jellyfin Web; validate against the selected image defaults
         target: /jellyfin/jellyfin-web/config.json  # Mount the configuration file into the container
         read_only: true                             # Do not allow the container to modify the configuration file
         bind:                                       # Configure the bind mount
