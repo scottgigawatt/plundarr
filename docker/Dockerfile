@@ -12,7 +12,7 @@
 # Build arguments can override each value.
 #
 ARG ALPINE_TAG=3.24@sha256:294b683cb724975bec92580e1e685676bd4b50bda910ddb8c51d4cabeaec77e6
-ARG DOCKER_COMPOSE_TAG=v5.6.0@sha256:db34ebea4a1acd4b130e9abc305cdb51b3fe53b9116a6c2ac268a451eb308bed
+ARG DOCKER_COMPOSE_TAG=v5.6.1@sha256:2aeaeedd4f2d8e2dcb399b2b9723bfaeb6714140cb0657897f5865960f1624ae
 ARG MARAUDARR_BIN_HOME=/maraudarr
 
 #
