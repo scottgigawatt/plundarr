@@ -163,4 +163,4 @@ make build-platforms
 pre-commit run --all-files
 ```
 
-New services belong under `services/<name>/`. Do not revive aggregate "extras" or "addons" charts; one service directory is one maintainable unit.
+New services belong under `services/<name>/`. Keep one service directory as one maintainable unit.
