@@ -1,0 +1,64 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# docker-compose.yml: Docker Compose configuration for running Portainer
+#                     Community Edition with persistent local data.
+#
+# Portainer uses the Docker socket to manage containers on this host.
+#
+# Services included:
+#   - portainer:  https://www.portainer.io/
+#
+
+#
+# Setup default properties for all or most containers.
+#
+x-default-container: &default-container  # YAML anchor for default container
+  pull_policy: always                    # Ensure that the image is always pulled
+  restart: unless-stopped                # Restart the container unless explicitly stopped
+  logging:                               # Configure container logging options
+    driver: "json-file"                  # Use JSON file logging driver
+    options:                             # Logging options for the JSON file driver
+      max-size: ${LOG_MAX_SIZE}          # Maximum file size for logs files
+      max-file: ${LOG_MAX_FILE}          # Maximum number of log files to retain
+
+#
+# Define the services section.
+#
+services:
+  #
+  # Define the 'portainer' service for Docker management.
+  #
+  portainer:
+    # Docker image and container information
+    <<: *default-container                                              # Pull in the default container information
+    image: portainer/portainer-ce:${PORTAINER_TAG}                      # Run the selected Portainer channel
+    container_name: ${COMPOSE_PROJECT_NAME}-portainer-${PORTAINER_TAG}  # Namespace the container name by project and tag
+    hostname: portainer                                                 # Set the container hostname
+
+    # Publish HTTPS and Edge agent tunnel ports
+    ports:
+      - ${PORTAINER_WEB_PORT}:9443   # HTTPS management interface
+      - ${PORTAINER_EDGE_PORT}:8000  # Edge agent tunnel
+
+    # Persist Portainer data and connect to the host Docker API
+    volumes:
+      - ${PORTAINER_CONFIG_PATH}:/data:rw             # Portainer database and configuration
+      - /var/run/docker.sock:/var/run/docker.sock:rw  # Manage the local Docker environment
+      - /etc/localtime:/etc/localtime:ro              # Use the host timezone data
+
+#
+# Define the networks section.
+#
+networks:
+  # Configure the default network
+  default:
+    name: ${COMPOSE_PROJECT_NAME}  # Use the name of the Compose project
+    ipam:                          # IP Address Management
+      driver: default              # Use the default driver
+      config:
+        - subnet: ${COMPOSE_NETWORK_SUBNET}      # Subnet in CIDR format that represents a network segment
+          ip_range: ${COMPOSE_NETWORK_IP_RANGE}  # Range from which container IP addresses are allocated
+          gateway: ${COMPOSE_NETWORK_GATEWAY}    # Gateway for the default network

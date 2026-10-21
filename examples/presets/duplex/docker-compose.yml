@@ -1,0 +1,217 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# docker-compose.yml: Docker Compose configuration for running Duplex's
+#                     Plex metadata, artwork, notification,
+#                     and recovery utilities.
+#
+# Kometa uses an external configuration checkout. Optional Overlay Reset stays
+# behind the tools profile and runs only when explicitly invoked as a one-shot job.
+#
+# Services included:
+#   - kometa:     https://kometa.wiki
+#   - imagemaid:  https://kometa.wiki/en/latest/kometa/scripts/imagemaid/
+#   - themerr:    https://docs.lizardbyte.dev/projects/themerr/latest/
+#   - pattrmm:    https://github.com/InsertDisc/pattrmm/tree/neo
+#   - notifiarr:  https://notifiarr.wiki/pages/client/install/
+#
+
+#
+# Setup default properties for all or most containers.
+#
+x-default-container: &default-container  # YAML anchor for default container
+  pull_policy: always                    # Ensure that the image is always pulled
+  restart: unless-stopped                # Restart the container unless explicitly stopped
+  logging:                               # Configure container logging options
+    driver: "json-file"                  # Use JSON file logging driver
+    options:                             # Logging options for the JSON file driver
+      max-size: ${LOG_MAX_SIZE}          # Maximum file size for logs files
+      max-file: ${LOG_MAX_FILE}          # Maximum number of log files to retain
+
+#
+# Setup default variables for all or most containers.
+#
+x-default-environment: &default-environment  # YAML anchor for default environment
+  TZ: ${TZ}                                  # Set the appropriate timezone
+
+#
+# Containers running directly as the configured unprivileged host identity.
+#
+x-rootless-container: &rootless-container  # YAML anchor for rootless containers
+  <<: *default-container                   # Pull in the default container information
+  user: ${DEFAULT_PUID}:${DEFAULT_PGID}    # Run as the configured host user and primary group
+  group_add:                               # Add the shared media-management group
+    - ${DEFAULT_GROUP}                     # Allow access to group-owned host files
+
+#
+# Shared security settings for services that need no Linux capabilities.
+#
+x-security-hardening: &security-hardening  # YAML anchor for existing capability and privilege restrictions
+  cap_drop:                                # Drop Linux capabilities for security hardening
+    - ALL                                  # No optional Linux capabilities are required
+  security_opt:                            # Prevent the container from acquiring additional privileges
+    - no-new-privileges:true               # Prevent processes from gaining privileges
+
+#
+# Define the services section.
+#
+services:
+  #
+  # Define the 'kometa' service for scheduled Plex metadata management.
+  #
+  kometa:
+    # Docker image and container information
+    <<: *default-container                                        # Pull in the default container information
+    image: kometateam/kometa:${KOMETA_TAG}                        # Run the official Kometa image
+    container_name: ${COMPOSE_PROJECT_NAME}-kometa-${KOMETA_TAG}  # Namespace the container name by project and tag
+    hostname: kometa                                              # Set the container hostname
+
+    # Define the container environment
+    environment:
+      <<: *default-environment       # Pull in the default environment
+      KOMETA_DEBUG: ${KOMETA_DEBUG}  # Toggle extra debug logging
+      KOMETA_TIMES: ${KOMETA_TIMES}  # Schedule one or more daily runs
+
+    # Mount the independently managed Kometa configuration checkout
+    volumes:                                   # Mount application state and shared configuration
+      - ${KOMETA_CONFIG_PATH}:/config:rw       # Kometa config, assets, metadata, and logs
+
+      # Mount the live runtime configuration file from Kometa
+      - type: bind                             # Bind the existing runtime configuration file
+        source: ${KOMETA_RUNTIME_CONFIG_PATH}  # Live config shared by Kometa and PATTRMM
+        target: /config/config.yml             # Expose the live config at its expected path
+        bind:                                  # Configure bind mount behavior
+          create_host_path: false              # Fail if the source path does not exist
+
+  #
+  # Define the 'imagemaid' service for Plex artwork maintenance.
+  #
+  imagemaid:
+    # Docker image and container information
+    <<: *default-container                                               # Pull in the default container information
+    image: kometateam/imagemaid:${IMAGE_MAID_TAG}                        # Run the official ImageMaid image
+    container_name: ${COMPOSE_PROJECT_NAME}-imagemaid-${IMAGE_MAID_TAG}  # Namespace the container name by project and tag
+    hostname: imagemaid                                                  # Set the container hostname
+
+    # Define the container environment
+    environment:
+      <<: *default-environment  # Pull in the default environment
+
+    # Mount ImageMaid state and the Plex application-data directory
+    volumes:
+      - ${IMAGEMAID_CONFIG_PATH}:/config:rw  # ImageMaid options, cache, database, and logs
+      - ${IMAGEMAID_PLEX_PATH}:/plex:rw      # Plex Cache, Metadata, and Plug-in Support directories
+
+  #
+  # Define the 'themerr' service for Plex and Jellyfin theme song management.
+  #
+  themerr:
+    <<:                      # Merge shared container and security settings
+      - *rootless-container  # Pull in the rootless container information
+      - *security-hardening  # Drop capabilities and prevent privilege escalation
+
+    # Docker image and container information
+    image: lizardbyte/themerr:${THEMERR_TAG}                        # Follow the official stable image channel
+    container_name: ${COMPOSE_PROJECT_NAME}-themerr-${THEMERR_TAG}  # Namespace by project and tag
+    hostname: themerr                                               # Set the container hostname
+
+    # Define the container environment
+    environment:
+      <<: *default-environment                                # Pull in the default environment information
+      HOME: /tmp                                              # Keep caches writable with an overridden numeric user
+      THEMERR_TOKEN_KEY_FILE: /run/secrets/themerr_token_key  # Encrypt stored Plex and Jellyfin credentials
+
+    # Define the host and container ports
+    ports:
+      - ${THEMERR_WEBUI_PORT}:9494      # HTTPS administration with an initial self-signed certificate
+      - ${THEMERR_CONNECTOR_PORT}:9495  # HTTP connector files only; reachable from Jellyfin
+
+    # Mount host directories and the separate private key into the container
+    volumes:
+      - ${THEMERR_CONFIG_PATH}:/config:rw       # Persistent settings, database, certificates, and logs
+
+      # Bind the private encryption key into the container for secure credential storage
+      - type: bind                              # Bind the private encryption key into the container
+        source: ${THEMERR_TOKEN_KEY_PATH}       # Path to the private encryption key on the host
+        target: /run/secrets/themerr_token_key  # Mount the private encryption key into the container
+        read_only: true                         # Make the private encryption key read-only inside the container
+        bind:                                   # Use a bind mount to link the host path to the container path
+          create_host_path: false               # Fail if the key is missing instead of creating a directory
+
+  #
+  # Generate local collection lists with the PATTRMM Neo cores.
+  #
+  pattrmm:
+    # Docker image and container information
+    <<: *rootless-container                                         # Inherit the shared host identity and media group
+    image: ghcr.io/insertdisc/pattrmm:${PATTRMM_TAG}                # Follow the Neo image channel
+    container_name: ${COMPOSE_PROJECT_NAME}-pattrmm-${PATTRMM_TAG}  # Namespace the container name by project and tag
+    hostname: pattrmm                                               # Set the container hostname
+
+    # Define the container environment
+    environment:
+      <<: *default-environment               # Pull in the default environment
+      PATTRMM_TIMES: ${PATTRMM_TIMES}        # Schedule one or more daily runs
+      PATTRMM_SETTINGS: ${PATTRMM_SETTINGS}  # Select named YAML files under /settings
+
+    # Mount PATTRMM state and the independently managed Kometa configuration
+    volumes:                                   # Mount application state and shared configuration
+      - ${PATTRMM_CONFIG_PATH}/data:/data:rw   # Neo cache and working data
+      - ${KOMETA_CONFIG_PATH}:/config:rw       # Kometa config and generated YAML files
+
+      # Mount the authored settings directory into the container
+      - type: bind                             # Require the operator's authored Neo settings
+        source: ${PATTRMM_SETTINGS_PATH}       # Settings directory, normally in the Kometa checkout
+        target: /settings                      # Neo reads selected YAML files from this directory
+        read_only: true                        # Keep authored settings separate from runtime writes
+        bind:                                  # Configure bind mount behavior
+          create_host_path: false              # Fail if the settings directory does not exist
+
+      # Mount the live runtime configuration file from Kometa
+      - type: bind                             # Bind the existing runtime configuration file
+        source: ${KOMETA_RUNTIME_CONFIG_PATH}  # Live config shared by Kometa and PATTRMM
+        target: /config/config.yml             # Expose the live config at its expected path
+        read_only: true                        # Neo only reads the private connection values
+        bind:                                  # Configure bind mount behavior
+          create_host_path: false              # Fail if the source path does not exist
+
+  #
+  # Define the 'notifiarr' service for host and application notifications.
+  #
+  notifiarr:
+    # Docker image and container information
+    <<: *default-container                                              # Pull in the default container information
+    image: golift/notifiarr:${NOTIFIARR_TAG}                            # Run the official Notifiarr image
+    container_name: ${COMPOSE_PROJECT_NAME}-notifiarr-${NOTIFIARR_TAG}  # Namespace the container name by project and tag
+    hostname: notifiarr                                                 # Keep the client identity stable across recreations
+
+    # Define the container environment
+    environment:
+      <<: *default-environment  # Pull in the default environment
+
+    # Define the host and container ports
+    ports:
+      - ${NOTIFIARR_WEBUI_PORT}:5454  # Notifiarr web UI port
+
+    # Mount host directories into the container
+    volumes:
+      - ${NOTIFIARR_CONFIG_PATH}:/config:rw  # Persistent Notifiarr configuration
+      - /var/run/utmp:/var/run/utmp:ro       # Count logged-in host users
+      - /etc/machine-id:/etc/machine-id:ro   # Keep the host identity stable
+      - /etc/localtime:/etc/localtime:ro     # Use the host timezone data
+
+#
+# Define the networks section.
+#
+networks:
+  # Configure the default network
+  default:
+    name: ${COMPOSE_PROJECT_NAME}  # Use the name of the Compose project
+    ipam:                          # IP Address Management
+      driver: default              # Use the default driver
+      config:
+        - subnet: ${COMPOSE_NETWORK_SUBNET}      # Subnet in CIDR format that represents a network segment
+          ip_range: ${COMPOSE_NETWORK_IP_RANGE}  # Range from which container IP addresses are allocated
+          gateway: ${COMPOSE_NETWORK_GATEWAY}    # Gateway for the default network

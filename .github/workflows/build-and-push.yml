@@ -28,6 +28,7 @@ on:
       - "test/helpers/**"
       - "test/stubs/**"
       - "scripts/compose/**"
+      - "examples/presets/**"
       - "ruff.toml"
       - "pyrightconfig.json"
       - "test/typing/**"
@@ -116,6 +117,14 @@ jobs:
           ignore-unfixed: true
           trivyignores: .trivyignore.yaml
           exit-code: 1
+
+      #
+      # Reproduce the reviewed examples before publication without modifying main.
+      #
+      - name: "Verify the Reviewed Preset References 🗺️"
+        run: >-
+          make test-examples
+          MARAUDARR_IMAGE=ghcr.io/${{ github.repository_owner }}/maraudarr:scan
 
   #
   # Publish only after validation succeeds. This job owns registry credentials,

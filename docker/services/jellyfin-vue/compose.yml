@@ -20,17 +20,17 @@ services:
     container_name: ${COMPOSE_PROJECT_NAME}-jellyfin-vue-${JELLYFIN_VUE_TAG}  # Namespace by project and tag
     hostname: jellyfin-vue                                                    # Internal frontend hostname
 
-    # Configure browser behavior; URLs must be reachable from the user's device.
+    # Configure browser behavior; URLs must be reachable from the user's device
     environment:
       DEFAULT_SERVERS: ${JELLYFIN_VUE_DEFAULT_SERVERS}                    # Comma-separated browser-accessible Jellyfin URLs; empty prompts the user
       DISABLE_SERVER_SELECTION: ${JELLYFIN_VUE_DISABLE_SERVER_SELECTION}  # 1 hides server selection; requires a reachable default server; 0 allows selection
       HISTORY_ROUTER_MODE: ${JELLYFIN_VUE_HISTORY_ROUTER_MODE}            # 1 uses history routing; 0 uses hash routing
 
-    # Publish only the frontend; browsers contact Jellyfin directly for playback.
+    # Publish only the frontend; browsers contact Jellyfin directly for playback
     ports:
       - ${JELLYFIN_VUE_WEBUI_PORT}:8080  # Vue web UI port; separate from Jellyfin's 8096
 
-    # Keep nginx on an unprivileged port even when the host restricts low ports.
+    # Keep nginx on an unprivileged port even when the host restricts low ports
     volumes:
       - type: bind                                 # Mount the generated nginx listener configuration
         source: ${JELLYFIN_VUE_NGINX_CONFIG_PATH}  # Seeded file; retain listen 8080 to match the port and probe
@@ -39,7 +39,7 @@ services:
         bind:                                      # Reject a missing file instead of creating a directory
           create_host_path: false
 
-    # Check static asset delivery without needing a running Jellyfin server.
+    # Check static asset delivery without needing a running Jellyfin server
     healthcheck:
       <<: *default-healthcheck-settings  # Reuse the stack healthcheck timing
       test:                              # Check the Vue frontend's configuration endpoint

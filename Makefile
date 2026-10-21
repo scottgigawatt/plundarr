@@ -32,6 +32,8 @@ BUILD_PLATFORMS=build-platforms
 TEST=test
 TEST_MAKE_HELPERS=test-make-helpers
 TEST_WORKFLOWS=test-workflows
+EXAMPLES=examples
+TEST_EXAMPLES=test-examples
 TEST_E2E=test-e2e
 BACKUP=backup
 RESTORE_TEST_CONFIG=restore-test-config
@@ -111,6 +113,8 @@ PROJECT_TARGETS= \
 	$(AVAILABLE_SERVICES) \
 	$(COMPOSE_SERVICES) \
 	$(OPEN) \
+	$(EXAMPLES) \
+	$(TEST_EXAMPLES) \
 	$(TEST_IMAGE) \
 	$(TEST_UNIT) \
 	$(TEST_TYPES) \
@@ -214,6 +218,7 @@ MARAUDARR_TEST_FILE            ?= config/README.md
 CONFIG_PATH                    ?= $(DEPLOYMENT_PATH)/config
 CONFIG_BACKUP_PATH             ?= $(DEPLOYMENT_PATH)/backups
 PYTHON_BIN                     ?= python3
+PRESET_EXAMPLES_PATH           ?= examples/presets
 MARAUDARR_TYPECHECK_CMD        ?= scripts/compose/typecheck.sh
 
 #
@@ -819,6 +824,7 @@ $(TEST_WORKFLOWS):
 	$(BUILD_PIN_POLICY_TEST_CMD)
 	$(IMAGE_TAG_POLICY_TEST_CMD)
 	$(POLICY_HELPERS_TEST_CMD)
+	PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=.:.github/scripts $(PYTHON_BIN) -m unittest discover -s test/helpers -p 'test_preset_examples.py' -v
 
 #
 # $(TEST_E2E): Starts core VPN/download services, validates VPN state, then removes them.
@@ -957,6 +963,8 @@ $(HELP):
 	$(call help_line,$(TEST),Run all generator and automation-helper tests.)
 	$(call help_line,$(TEST_MAKE_HELPERS),Test reusable Make and Compose helpers.)
 	$(call help_line,$(TEST_WORKFLOWS),Test workflow helpers and shared publishing policies.)
+	$(call help_line,$(EXAMPLES),Refresh public preset examples with a locally built image.)
+	$(call help_line,$(TEST_EXAMPLES),Compare public preset examples with fresh container output.)
 	$(call help_line,$(TEST_E2E),Run the focused VPN end-to-end test.)
 	$(call help_heading,🧹 Maintenance)
 	$(call help_line,$(BACKUP),Archive the selected preset config safely.)
@@ -1113,6 +1121,26 @@ $(OPEN): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 			$(call localhost_url, \
 				$(word 1,$(subst :, ,$(mapping))), \
 				$(word 2,$(subst :, ,$(mapping)))))
+
+#
+# $(EXAMPLES): Refreshes public preset references using a locally built image.
+#
+# Dependencies:
+#   $(BUILD_DEPENDS) - Require real Docker and Compose validation.
+#
+$(EXAMPLES): $(BUILD_DEPENDS)
+	$(PYTHON_BIN) scripts/compose/preset_examples.py \
+		--image "$(MARAUDARR_IMAGE)" --output-root "$(PRESET_EXAMPLES_PATH)"
+
+#
+# $(TEST_EXAMPLES): Checks every public preset against fresh container output.
+#
+# Dependencies:
+#   $(BUILD_DEPENDS) - Require real Docker and Compose validation.
+#
+$(TEST_EXAMPLES): $(BUILD_DEPENDS)
+	$(PYTHON_BIN) scripts/compose/preset_examples.py \
+		--image "$(MARAUDARR_IMAGE)" --output-root "$(PRESET_EXAMPLES_PATH)" --check
 
 #
 # $(TEST_IMAGE): Runs runtime-dependent UI tests inside one hardened image, then

@@ -1,0 +1,992 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# docker-compose.yml: Docker Compose configuration for running Plundarr's
+#                     media service stack with Privateerr-generated PIA
+#                     WireGuard config, PIA port forwarding, Gluetun VPN
+#                     routing, and the 'arr' applications.
+#
+# This configuration sets up default properties for all containers, integrates
+# PIA with native WireGuard connections and port forwarding, and provides
+# environment-specific settings for a seamless VPN setup.
+#
+# Services included:
+#   - privateerr:             https://github.com/scottgigawatt/privateerr
+#   - gluetun:                https://github.com/qdm12/gluetun
+#   - flaresolverr:           https://github.com/FlareSolverr/FlareSolverr
+#   - prowlarr:               https://github.com/Prowlarr/Prowlarr
+#   - qbittorrent:            https://github.com/qbittorrent/qBittorrent
+#   - radarr:                 https://github.com/Radarr/Radarr
+#   - sonarr:                 https://github.com/Sonarr/Sonarr
+#   - bazarr:                 https://github.com/morpheus65535/bazarr
+#   - seerr:                  https://github.com/seerr-team/seerr
+#   - calibre-web-automated:  https://github.com/crocodilestick/Calibre-Web-Automated
+#   - cleanuparr:             https://github.com/Cleanuparr/Cleanuparr
+#   - speedtest-tracker:      https://docs.speedtest-tracker.dev
+#   - apprise:                https://github.com/caronc/apprise-api
+#   - tracearr:               https://tracearr.com
+#   - duplicati:              https://www.duplicati.com
+#   - homepage:               https://gethomepage.dev/latest
+#   - watchtower:             https://github.com/nicholas-fedor/watchtower
+#
+
+#
+# Setup default properties for all or most containers.
+#
+x-default-container: &default-container  # YAML anchor for default container
+  pull_policy: always                    # Ensure that the image is always pulled
+  restart: unless-stopped                # Restart the container unless explicitly stopped
+  logging:                               # Configure container logging options
+    driver: "json-file"                  # Use JSON file logging driver
+    options:                             # Logging options for the JSON file driver
+      max-size: ${LOG_MAX_SIZE}          # Maximum file size for logs files
+      max-file: ${LOG_MAX_FILE}          # Maximum number of log files to retain
+
+#
+# Setup default variables for all or most containers.
+#
+x-default-environment: &default-environment  # YAML anchor for default environment
+  TZ: ${TZ}                                  # Set the appropriate timezone
+
+#
+# Setup default variables for arr-stack containers.
+#
+x-arr-stack-environment: &arr-stack-environment  # YAML anchor for arr-stack environment
+  <<: *default-environment                       # Pull in the default environment information
+  PUID: ${DEFAULT_PUID}                          # Default user ID mapping for containers
+  PGID: ${DEFAULT_PGID}                          # Default group ID mapping for containers
+  UMASK: ${DEFAULT_UMASK}                        # Default file creation mask for containers
+
+#
+# Containers using common arr-stack settings.
+#
+x-arr-stack-container: &arr-stack-container  # YAML anchor for arr-stack container
+  <<: *default-container                     # Pull in the default container information
+  group_add:                                 # Add additional user groups
+    - ${DEFAULT_GROUP}                       # Default group used to manage write permissions
+  environment:                               # Define common arr-stack container variables
+    <<: *arr-stack-environment               # Pull in the arr-stack environment information
+
+#
+# Containers running directly as the configured unprivileged host identity.
+#
+x-rootless-container: &rootless-container  # YAML anchor for rootless containers
+  <<: *default-container                   # Pull in the default container information
+  user: ${DEFAULT_PUID}:${DEFAULT_PGID}    # Run as the configured host user and primary group
+  group_add:                               # Add the shared media-management group
+    - ${DEFAULT_GROUP}                     # Allow access to group-owned host files
+
+#
+# Shared security settings for services that need no Linux capabilities.
+#
+x-security-hardening: &security-hardening  # YAML anchor for existing capability and privilege restrictions
+  cap_drop:                                # Drop Linux capabilities for security hardening
+    - ALL                                  # No optional Linux capabilities are required
+  security_opt:                            # Prevent the container from acquiring additional privileges
+    - no-new-privileges:true               # Prevent processes from gaining privileges
+
+#
+# Labels for containers that should not be updated unattended by Watchtower.
+#
+# Privateerr and Gluetun coordinate VPN configuration, tunnel startup, and
+# port-forwarding behavior. Calibre-Web Automated can migrate persistent databases
+# during upgrades. Tracearr's database and Redis also require intentional
+# updates. Check release notes before changing these stateful services.
+#
+x-exclude-from-watchtower-updates: &exclude-from-watchtower-updates  # Exclude from Watchtower
+  labels:                                                            # Add container labels
+    - "com.centurylinklabs.watchtower.enable=false"                  # Require intentional updates
+
+#
+# Setup default healthcheck timing settings for all or most containers.
+#
+x-default-healthcheck-settings: &default-healthcheck-settings  # YAML anchor for healthcheck settings
+  interval: ${DEFAULT_HEALTHCHECK_INTERVAL}                    # Run the check at this interval
+  timeout: ${DEFAULT_HEALTHCHECK_TIMEOUT}                      # Fail if it exceeds this duration
+  start_period: ${DEFAULT_HEALTHCHECK_START_PERIOD}            # Grace period before checks start
+  retries: ${DEFAULT_HEALTHCHECK_RETRIES}                      # Mark as unhealthy after this many failures
+
+#
+# Shared healthy Prowlarr indexer manager dependency for arr applications.
+#
+x-prowlarr-dependency: &prowlarr-dependency  # YAML anchor for required Prowlarr service dependency
+  depends_on:                                # Specify container service dependencies
+    prowlarr:                                # Prowlarr service dependency
+      condition: service_healthy             # Wait for Prowlarr service to report healthy
+
+#
+# Shared connectivity probe for Sonarr instances.
+#
+x-sonarr-healthcheck: &sonarr-healthcheck  # YAML anchor for Sonarr healthcheck
+  healthcheck:                             # Define the healthcheck
+    <<: *default-healthcheck-settings      # Reuse the stack healthcheck timing
+    test:                                  # Ping the fixed internal port independently of host mappings
+      - CMD
+      - wget
+      - --no-verbose
+      - --tries=1
+      - --spider
+      - http://127.0.0.1:8989/ping
+
+#
+# Define the services section.
+#
+services:
+  #
+  # Define the 'privateerr' service to generate the PIA manual WireGuard configuration file.
+  #
+  privateerr:
+    <<:                                   # Merge shared and service-specific container settings
+      - *default-container                # Pull in default container settings
+      - *security-hardening               # Upstream PIA scripts require UID 0 but no Linux capabilities
+      - *exclude-from-watchtower-updates  # Update the VPN bootstrap component intentionally
+
+    # Docker image and container information
+    image: ghcr.io/scottgigawatt/privateerr:${PRIVATEERR_TAG}             # Pull Privateerr from GHCR
+    container_name: ${COMPOSE_PROJECT_NAME}-privateerr-${PRIVATEERR_TAG}  # Namespace the container name by project and tag
+    hostname: privateerr                                                  # Set the container hostname
+
+    # Let Docker disable IPv6 in this container before the PIA scripts start
+    sysctls:
+      net.ipv6.conf.all.disable_ipv6: ${PRIVATEERR_IPV6_DISABLED}      # Existing interfaces: 1 disables IPv6; 0 enables IPv6
+      net.ipv6.conf.default.disable_ipv6: ${PRIVATEERR_IPV6_DISABLED}  # New interfaces: 1 disables IPv6; 0 enables IPv6
+
+    # Define the container environment
+    environment:
+      # PIA manual connection environment variables
+      VPN_PROTOCOL: ${PIA_VPN_PROTOCOL}          # VPN configuration, WireGuard or openvpn
+      DISABLE_IPV6: ${PIA_DISABLE_IPV6}          # yes requests upstream IPv6 disabling; no skips it
+      DIP_TOKEN: ${PIA_DIP_TOKEN}                # Optional PIA dedicated IP token, token or no
+      AUTOCONNECT: ${PIA_AUTOCONNECT}            # true selects the lowest-latency server; false uses PREFERRED_REGION
+      PREFERRED_REGION: ${PIA_PREFERRED_REGION}  # PIA region ID used when AUTOCONNECT=false
+      PIA_CONF_PATH: ${PIA_CONF_PATH}            # Path of WireGuard config file to be written
+      PIA_CONNECT: ${PIA_CONNECT}                # false generates files only; required for Gluetun recovery
+      PIA_PF: ${PIA_PF}                          # true selects a port-forwarding-capable region
+      PIA_DNS: ${PIA_DNS}                        # true includes PIA DNS settings in wg0.conf
+      PIA_WG_SERVER_NAME: ${PIA_WG_SERVER_NAME}  # Optional WireGuard server name fallback
+      PIA_USER: ${PIA_USER}                      # Set PIA username
+      PIA_PASS: ${PIA_PASS}                      # Set PIA password
+
+      # Privateerr environment variables
+      PRIVATEERR_METADATA_PATH: ${PRIVATEERR_METADATA_PATH}                            # Path where Gluetun metadata will be generated
+      PRIVATEERR_HEALTHCHECK_MARKER: ${PRIVATEERR_HEALTHCHECK_MARKER}                  # File written after successful generation
+      PRIVATEERR_KEEPALIVE: ${PRIVATEERR_KEEPALIVE}                                    # true keeps Privateerr running after generation; required for recovery
+      PRIVATEERR_LOG_PATH: ${PRIVATEERR_LOG_PATH}                                      # Privateerr log file path
+      PRIVATEERR_AUTO_RECOVER: ${PRIVATEERR_AUTO_RECOVER}                              # true enables API-based recovery; requires a shared API key
+      PRIVATEERR_GLUETUN_API_KEY: ${PRIVATEERR_GLUETUN_API_KEY}                        # Shared control API key: 20-128 alphanumeric characters; keep private
+      PRIVATEERR_GLUETUN_URL: ${PRIVATEERR_GLUETUN_URL}                                # Internal authenticated Gluetun control API
+      PRIVATEERR_GLUETUN_HEALTH_URL: ${PRIVATEERR_GLUETUN_HEALTH_URL}                  # Internal Gluetun tunnel health endpoint
+      PRIVATEERR_RECOVERY_INTERVAL_SECONDS: ${PRIVATEERR_RECOVERY_INTERVAL_SECONDS}    # Seconds between health probes
+      PRIVATEERR_RECOVERY_FAILURE_SECONDS: ${PRIVATEERR_RECOVERY_FAILURE_SECONDS}      # Startup grace and continuous failure threshold in seconds
+      PRIVATEERR_RECOVERY_COOLDOWN_SECONDS: ${PRIVATEERR_RECOVERY_COOLDOWN_SECONDS}    # Initial retry delay in seconds; doubles up to one hour
+      PRIVATEERR_GENERATION_TIMEOUT_SECONDS: ${PRIVATEERR_GENERATION_TIMEOUT_SECONDS}  # Maximum seconds for one PIA generation
+
+    # Mount host directories into the container
+    volumes:
+      - ${PRIVATEERR_GLUETUN_CONFIG_PATH}:/gluetun:rw    # Gluetun config output consumed by Gluetun
+      - ${PRIVATEERR_CONFIG_PATH}:/privateerr-config:rw  # Privateerr service config directory
+
+    # Define container healthcheck to verify Privateerr has completed setup
+    healthcheck:
+      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
+      test:                              # Healthy when healthcheck marker file exists
+        - CMD
+        - privateerr-healthcheck
+
+  #
+  # Define the 'gluetun' service to route traffic through a WireGuard VPN connection.
+  #
+  gluetun:
+    <<:                                   # Merge shared and service-specific container settings
+      - *default-container                # Pull in default container settings
+      - *exclude-from-watchtower-updates  # Update the VPN tunnel intentionally
+
+    # Docker image and container information
+    image: qmcgaw/gluetun:${GLUETUN_TAG}                            # Run using the specified tag
+    container_name: ${COMPOSE_PROJECT_NAME}-gluetun-${GLUETUN_TAG}  # Namespace the container name by project and tag
+    hostname: gluetun                                               # Set the container hostname
+
+    # Override entrypoint to run wrapper script that loads Privateerr metadata before starting Gluetun
+    entrypoint: ["/bin/sh", "${GLUETUN_ENTRYPOINT_WRAPPER}"]
+
+    # Add additional linux capabilities
+    cap_add:
+      - NET_ADMIN  # Grant network admin capability for VPN and network interface configuration
+
+    # Pass host devices into the container for direct hardware access
+    devices:
+      - /dev/net/tun:/dev/net/tun  # Allow container to handle encrypted VPN traffic directly
+
+    # Define the container environment
+    environment:
+      <<: *default-environment                                               # Pull in the default environment information
+      VPN_SERVICE_PROVIDER: ${GLUETUN_VPN_SERVICE_PROVIDER}                  # The VPN service provider, e.g. custom
+      VPN_TYPE: ${GLUETUN_VPN_TYPE}                                          # The VPN type, e.g. wireguard
+      VPN_PORT_FORWARDING: ${GLUETUN_VPN_PORT_FORWARDING}                    # Enable VPN-side port forwarding
+      VPN_PORT_FORWARDING_PROVIDER: ${GLUETUN_VPN_PORT_FORWARDING_PROVIDER}  # PIA port-forwarding helper
+      VPN_PORT_FORWARDING_USERNAME: ${PIA_USER}                              # PIA username for Gluetun port forwarding
+      VPN_PORT_FORWARDING_PASSWORD: ${PIA_PASS}                              # PIA password for Gluetun port forwarding
+      HEALTH_TARGET_ADDRESSES: ${GLUETUN_HEALTH_TARGET_ADDRESSES}            # TCP/TLS targets Gluetun checks for VPN health
+      HEALTH_ICMP_TARGET_IPS: ${GLUETUN_HEALTH_ICMP_TARGET_IPS}              # ICMP targets Gluetun checks for VPN health
+      HEALTH_SERVER_ADDRESS: ${GLUETUN_HEALTH_SERVER_ADDRESS}                # Internal Gluetun health server address
+      HEALTH_RESTART_VPN: ${GLUETUN_HEALTH_RESTART_VPN}                      # Let Gluetun restart VPN when health checks fail
+      GLUETUN_DEFAULT_ENTRYPOINT: ${GLUETUN_DEFAULT_ENTRYPOINT}              # Original Gluetun entrypoint
+
+      # Define Privateerr metadata environment variables for Gluetun
+      PRIVATEERR_METADATA_PATH: ${PRIVATEERR_METADATA_PATH}                                  # Generated PIA server metadata
+      PRIVATEERR_GLUETUN_METADATA_WAIT_SECONDS: ${PRIVATEERR_GLUETUN_METADATA_WAIT_SECONDS}  # Maximum seconds to wait for metadata
+      PRIVATEERR_AUTO_RECOVER: ${PRIVATEERR_AUTO_RECOVER}                                    # Enable internal recovery access and disable competing restarts
+      PRIVATEERR_GLUETUN_API_KEY: ${PRIVATEERR_GLUETUN_API_KEY}                              # Same control API key used by Privateerr
+
+      # Define downloader port-forwarding commands for Gluetun
+      VPN_PORT_FORWARDING_UP_COMMAND: /bin/sh -c "${GLUETUN_QBITTORRENT_PORT_FORWARDING_SCRIPT} up {{PORT}} {{VPN_INTERFACE}}"  # Update qBittorrent when PIA assigns a forwarded port
+      VPN_PORT_FORWARDING_DOWN_COMMAND: /bin/sh -c "${GLUETUN_QBITTORRENT_PORT_FORWARDING_SCRIPT} down"                         # Clear qBittorrent's forwarded port during shutdown
+
+    # Define downloader host and container ports
+    ports:
+      - ${QBITTORRENT_TCP_PORT}:6881      # qBittorrent TCP connection port
+      - ${QBITTORRENT_UDP_PORT}:6881/udp  # qBittorrent UDP connection port
+      - ${QBITTORRENT_WEBUI_PORT}:8080    # qBittorrent web UI port
+
+    # Mount host directories into the container
+    volumes:
+      - ${GLUETUN_CONFIG_PATH}:/gluetun:rw                               # Gluetun config directory
+      - ${GLUETUN_CONFIG_PATH}:/tmp/gluetun:rw                           # Gluetun runtime state directory
+      - ${GLUETUN_WRAPPER_SCRIPT_PATH}:${GLUETUN_ENTRYPOINT_WRAPPER}:ro  # Gluetun entrypoint wrapper script
+
+    # Define container healthcheck to verify VPN connectivity
+    healthcheck:
+      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
+      test:                              # Check Gluetun's internal health server
+        - CMD
+        - wget
+        - -q
+        - -O
+        - /dev/null
+        - http://127.0.0.1:9999
+
+    # Specify container service dependencies
+    depends_on:
+      privateerr:
+        condition: service_healthy  # Wait for Privateerr to generate the WireGuard config and report healthy
+
+  #
+  # Define the 'flaresolverr' service to handle supported anti-bot challenges.
+  #
+  flaresolverr:
+    # Docker image and container information
+    <<: *default-container                                                    # Pull in default container config
+    image: ghcr.io/flaresolverr/flaresolverr:${FLARESOLVERR_TAG}              # Run using the specified tag
+    container_name: ${COMPOSE_PROJECT_NAME}-flaresolverr-${FLARESOLVERR_TAG}  # Namespace the container name by project and tag
+    hostname: flaresolverr                                                    # Set the container hostname
+
+    # Define the host and container ports
+    ports:
+      - ${FLARESOLVERR_PORT}:8191  # Port to listen for requests
+
+    # Define the container environment
+    environment:
+      <<: *default-environment                        # Pull in the default environment information
+      LOG_LEVEL: ${FLARESOLVERR_LOG_LEVEL}            # Container log level
+      LOG_HTML: ${FLARESOLVERR_LOG_HTML}              # Toggle HTML logging
+      CAPTCHA_SOLVER: ${FLARESOLVERR_CAPTCHA_SOLVER}  # Specify captcha solver
+
+    # Define container healthcheck to verify FlareSolverr connectivity
+    healthcheck:
+      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
+      test:                              # Check FlareSolverr health endpoint
+        - CMD
+        - curl
+        - -fsS
+        - -o
+        - /dev/null
+        - http://127.0.0.1:8191/health
+
+  #
+  # Define the 'prowlarr' service for managing indexers.
+  #
+  prowlarr:
+    # Docker image and container information
+    <<: *arr-stack-container                                          # Pull in arr-stack container config
+    image: lscr.io/linuxserver/prowlarr:${PROWLARR_TAG}               # Run using the specified tag
+    container_name: ${COMPOSE_PROJECT_NAME}-prowlarr-${PROWLARR_TAG}  # Namespace the container name by project and tag
+    hostname: prowlarr                                                # Set the container hostname
+
+    # Define the host and container ports
+    ports:
+      - ${PROWLARR_WEBUI_PORT}:9696  # Prowlarr web UI port
+
+    # Mount host directories into the container
+    volumes:
+      - ${PROWLARR_CONFIG_PATH}:/config:rw  # Database and Prowlarr configs
+
+    # Define container healthcheck to verify Prowlarr connectivity
+    healthcheck:
+      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
+      test:                              # Check Prowlarr ping endpoint
+        - CMD
+        - wget
+        - --no-verbose
+        - --tries=1
+        - --spider
+        - http://127.0.0.1:9696/ping
+
+    # Specify container service dependencies
+    depends_on:
+      flaresolverr:
+        condition: service_healthy  # Wait until FlareSolverr is healthy
+
+  #
+  # Define the 'qbittorrent' service for managing torrents.
+  #
+  qbittorrent:
+    # Docker image and container information
+    <<: *arr-stack-container                                                # Pull in arr-stack container config
+    image: lscr.io/linuxserver/qbittorrent:${QBITTORRENT_TAG}               # Run using the specified tag
+    container_name: ${COMPOSE_PROJECT_NAME}-qbittorrent-${QBITTORRENT_TAG}  # Namespace the container name by project and tag
+    network_mode: service:gluetun                                           # Route network traffic through gluetun
+
+    # Mount host directories into the container
+    volumes:
+      - ${QBITTORRENT_CONFIG_PATH}:/config:rw                   # Configuration files
+      - ${HOST_TORRENTS_DOWNLOADS_PATH}:/downloads/torrents:rw  # Torrent downloads only
+
+    # Define container healthcheck to verify qBittorrent connectivity
+    healthcheck:
+      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
+      test:                              # Check qBittorrent web server
+        - CMD
+        - wget
+        - --no-verbose
+        - --tries=1
+        - --spider
+        - http://127.0.0.1:8080/
+
+    # Specify container service dependencies
+    depends_on:
+      gluetun:
+        condition: service_healthy  # Wait until Gluetun reports healthy VPN connection
+        restart: true               # Follow explicit Compose-managed Gluetun updates
+
+  #
+  # Define the 'radarr' service for managing movies.
+  #
+  radarr:
+    <<:                       # Merge shared and service-specific container settings
+      - *arr-stack-container  # Pull in arr-stack container settings
+      - *prowlarr-dependency  # Wait until Prowlarr indexer manager is healthy
+
+    # Docker image and container information
+    image: lscr.io/linuxserver/radarr:${RADARR_TAG}               # Run using the specified tag
+    container_name: ${COMPOSE_PROJECT_NAME}-radarr-${RADARR_TAG}  # Namespace the container name by project and tag
+    hostname: radarr                                              # Set the container hostname
+
+    # Define the host and container ports
+    ports:
+      - ${RADARR_WEBUI_PORT}:7878  # Radarr web UI port
+
+    # Mount host directories into the container
+    volumes:
+      - ${RADARR_CONFIG_PATH}:/config:rw      # Database and Radarr configs
+      - ${HOST_DOWNLOADS_PATH}:/downloads:rw  # Location of download managers output directory
+      - ${HOST_MOVIES_PATH}:/movies:rw        # Location of movie library on disk
+
+    # Define container healthcheck to verify Radarr connectivity
+    healthcheck:
+      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
+      test:                              # Check Radarr ping endpoint
+        - CMD
+        - wget
+        - --no-verbose
+        - --tries=1
+        - --spider
+        - http://127.0.0.1:7878/ping
+
+  #
+  # Define the 'sonarr' service for managing television shows.
+  #
+  sonarr:
+    <<:                       # Merge shared and application-specific runtime settings
+      - *arr-stack-container  # Pull in arr-stack container settings
+      - *sonarr-healthcheck   # Share the internal port ping probe
+      - *prowlarr-dependency  # Wait until Prowlarr indexer manager is healthy
+
+    # Docker image and container information
+    image: lscr.io/linuxserver/sonarr:${SONARR_TAG}               # Run using the specified tag
+    container_name: ${COMPOSE_PROJECT_NAME}-sonarr-${SONARR_TAG}  # Namespace the container name by project and tag
+    hostname: sonarr                                              # Set the container hostname
+
+    # Define the host and container ports
+    ports:
+      - ${SONARR_WEBUI_PORT}:8989  # Sonarr web UI port
+
+    # Mount host directories into the container
+    volumes:
+      - ${SONARR_CONFIG_PATH}:/config:rw      # Database and Sonarr configs
+      - ${HOST_DOWNLOADS_PATH}:/downloads:rw  # Location of download managers output directory
+      - ${HOST_TV_PATH}:/tv:rw                # Location of TV library on disk
+
+  #
+  # Define the 'bazarr' service for managing subtitles.
+  #
+  bazarr:
+    # Docker image and container information
+    <<: *arr-stack-container                                      # Pull in arr-stack container config
+    image: lscr.io/linuxserver/bazarr:${BAZARR_TAG}               # Run using the specified tag
+    container_name: ${COMPOSE_PROJECT_NAME}-bazarr-${BAZARR_TAG}  # Namespace the container name by project and tag
+    hostname: bazarr                                              # Set the container hostname
+
+    # Define the host and container ports
+    ports:
+      - ${BAZARR_WEBUI_PORT}:6767  # Bazarr web UI port
+
+    # Mount host directories into the container
+    volumes:
+      - ${BAZARR_CONFIG_PATH}:/config:rw  # Persistent config files
+      - ${HOST_MOVIES_PATH}:/movies:rw    # Location of movies library on disk
+      - ${HOST_TV_PATH}:/tv:rw            # Location of TV library on disk
+
+    # Define container healthcheck to verify Bazarr connectivity
+    healthcheck:
+      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
+      test:                              # Check Bazarr web server
+        - CMD
+        - wget
+        - --no-verbose
+        - --tries=1
+        - --spider
+        - http://127.0.0.1:6767/
+
+    # Specify container service dependencies
+    depends_on:
+      sonarr:
+        condition: service_healthy  # Wait until Sonarr is healthy
+      radarr:
+        condition: service_healthy  # Wait until Radarr is healthy
+
+  #
+  # Define the 'seerr' service for managing media library requests.
+  #
+  seerr:
+    # Docker image and container information
+    <<: *rootless-container                                     # Pull in the rootless container information
+    image: ghcr.io/seerr-team/seerr:${SEERR_TAG}                # Run using the specified tag
+    container_name: ${COMPOSE_PROJECT_NAME}-seerr-${SEERR_TAG}  # Namespace the container name by project and tag
+    hostname: seerr                                             # Set the container hostname
+    init: true                                                  # Use an init process to handle signals and zombie processes
+
+    # Define the container environment
+    environment:
+      <<: *default-environment       # Pull in the default environment information
+      LOG_LEVEL: ${SEERR_LOG_LEVEL}  # Container log level
+
+    # Define the host and container ports
+    ports:
+      - ${SEERR_WEBUI_PORT}:5055  # Seerr web UI port
+
+    # Mount host directories into the container
+    volumes:
+      - ${SEERR_CONFIG_PATH}:/app/config:rw  # Persistent config files
+
+    # Define container healthcheck to verify Seerr connectivity
+    healthcheck:
+      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
+      test:                              # Check Seerr public settings endpoint
+        - CMD
+        - wget
+        - --no-verbose
+        - --tries=1
+        - --spider
+        - http://127.0.0.1:5055/api/v1/settings/public
+
+  #
+  # Define the 'calibre-web-automated' service for managing an ebook library.
+  #
+  calibre-web-automated:
+    <<:                                   # Merge shared and service-specific container settings
+      - *arr-stack-container              # Pull in arr-stack container settings
+      - *exclude-from-watchtower-updates  # Keep database migrations under operator control
+
+    # Docker image and container information
+    image: crocodilestick/calibre-web-automated:${CWA_TAG}                    # Run using the specified tag
+    container_name: ${COMPOSE_PROJECT_NAME}-calibre-web-automated-${CWA_TAG}  # Namespace the container name by project and tag
+    hostname: calibre-web-automated                                           # Set the container hostname
+
+    # Define the container environment
+    environment:
+      <<: *arr-stack-environment                     # Pull in the arr-stack environment
+      CWA_PORT_OVERRIDE: "8083"                      # Keep the internal web server on the charted port
+      NETWORK_SHARE_MODE: ${CWA_NETWORK_SHARE_MODE}  # Select local-disk or network-share database behavior
+
+    # Define the host and container ports
+    ports:
+      - ${CWA_WEBUI_PORT}:8083  # Calibre-Web Automated web UI port
+
+    # Mount host directories into the container
+    volumes:
+      - ${CWA_CONFIG_PATH}:/config:rw            # Persistent application configuration and databases
+      - ${CWA_INGEST_PATH}:/cwa-book-ingest:rw   # Destructive automatic-import staging directory
+      - ${CWA_LIBRARY_PATH}:/calibre-library:rw  # Calibre database and managed ebook library
+
+    # Define container healthcheck to verify Calibre-Web Automated connectivity
+    healthcheck:
+      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
+      test:                              # Check the internal web server port
+        - CMD
+        - nc
+        - -z
+        - 127.0.0.1
+        - "8083"
+
+  #
+  # Define the 'cleanuparr' service for Sonarr, Radarr, and qBittorrent file cleanup.
+  #
+  cleanuparr:
+    # Docker image and container information
+    <<: *arr-stack-container                                              # Pull in arr-stack container config
+    image: ghcr.io/cleanuparr/cleanuparr:${CLEANUPARR_TAG}                # Run using the specified tag
+    container_name: ${COMPOSE_PROJECT_NAME}-cleanuparr-${CLEANUPARR_TAG}  # Namespace the container name by project and tag
+    hostname: cleanuparr                                                  # Set the container hostname
+
+    # Define the container environment
+    environment:
+      <<: *arr-stack-environment          # Pull in the arr-stack environment
+      BASE_PATH: ${CLEANUPARR_BASE_PATH}  # Base path for reverse proxy setups
+
+    # Define the host and container ports
+    ports:
+      - ${CLEANUPARR_WEBUI_PORT}:11011  # Cleanuparr web UI port
+
+    # Mount host directories into the container
+    volumes:
+      - ${CLEANUPARR_CONFIG_PATH}:/config  # Persistent config files
+
+    # Define container healthcheck to verify Cleanuparr connectivity
+    healthcheck:
+      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
+      test:                              # Check Cleanuparr health endpoint
+        - CMD
+        - curl
+        - -fsS
+        - -o
+        - /dev/null
+        - http://127.0.0.1:11011/health
+
+  #
+  # Define the 'speedtest-tracker' service for tracking internet speeds.
+  #
+  speedtest-tracker:
+    # Docker image and container information
+    <<: *default-container                                                              # Pull in the default container information
+    image: lscr.io/linuxserver/speedtest-tracker:${SPEEDTEST_TRACKER_TAG}               # Run using the specified tag
+    container_name: ${COMPOSE_PROJECT_NAME}-speedtest-tracker-${SPEEDTEST_TRACKER_TAG}  # Namespace the container name by project and tag
+    hostname: speedtest-tracker                                                         # Set the container hostname
+
+    # Define the container environment
+    environment:
+      <<: *arr-stack-environment                            # Pull in the arr-stack environment
+      APP_KEY: ${SPEEDTEST_TRACKER_APP_KEY}                 # Application encryption key
+      DB_CONNECTION: ${SPEEDTEST_TRACKER_DB_CONNECTION}     # Database type, e.g. sqlite, pgsql, or mysql
+      SPEEDTEST_SCHEDULE: ${SPEEDTEST_TRACKER_SCHEDULE}     # Test schedule in cron format
+      SPEEDTEST_SERVERS: ${SPEEDTEST_TRACKER_SERVERS}       # Comma-separated server IDs
+      DISPLAY_TIMEZONE: ${TZ}                               # Timezone for the UI
+      PRUNE_RESULTS_OLDER_THAN: ${SPEEDTEST_TRACKER_PRUNE}  # Days of results to retain
+
+    # Define the host and container ports
+    ports:
+      - ${SPEEDTEST_TRACKER_WEBUI_PORT}:80  # Speedtest Tracker web UI port
+
+    # Mount host directories into the container
+    volumes:
+      - ${SPEEDTEST_TRACKER_CONFIG_PATH}:/config:rw  # Persistent configuration and database
+
+    # Define container healthcheck to verify Speedtest Tracker connectivity
+    healthcheck:
+      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
+      test:                              # Check Speedtest Tracker web server
+        - CMD
+        - wget
+        - --no-verbose
+        - --tries=1
+        - --spider
+        - http://127.0.0.1:80/
+
+  #
+  # Define the 'apprise' service for delivering notifications.
+  #
+  apprise:
+    <<:                      # Merge shared container and security settings
+      - *rootless-container  # Pull in the rootless container information
+      - *security-hardening  # Drop capabilities and prevent privilege escalation
+
+    # Docker image and container information
+    image: caronc/apprise:${APPRISE_TAG}                            # Run using the specified tag
+    container_name: ${COMPOSE_PROJECT_NAME}-apprise-${APPRISE_TAG}  # Namespace the container name by project and tag
+    hostname: apprise                                               # Set the container hostname
+    read_only: true                                                 # Keep the API container filesystem immutable
+
+    # Define the container environment
+    environment:
+      <<: *default-environment                         # Pull in the default environment
+      APPRISE_API_ONLY: ${APPRISE_API_ONLY}            # Disable the web configuration interface
+      APPRISE_STATEFUL_MODE: ${APPRISE_STATEFUL_MODE}  # Keep notification configuration external
+      APPRISE_WORKER_COUNT: ${APPRISE_WORKER_COUNT}    # Run only the workers needed for this stack
+      APPRISE_ATTACH_SIZE: ${APPRISE_ATTACH_SIZE}      # Disable notification attachments
+
+    # Provide writable ephemeral storage required by Nginx and API workers
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=32m  # Store temporary API runtime data in memory
+
+    # Define container healthcheck to verify Apprise API connectivity
+    healthcheck:
+      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
+      test:                              # Check the Apprise API status endpoint
+        - CMD
+        - curl
+        - -fsS
+        - -o
+        - /dev/null
+        - http://127.0.0.1:8000/status
+
+  #
+  # Define the 'tracearr-db' service.
+  #
+  tracearr-db:
+    <<:                                   # Merge shared and service-specific container settings
+      - *default-container                # Pull in default container settings
+      - *exclude-from-watchtower-updates  # Keep database upgrades under operator control
+
+    # Docker image and container information
+    image: timescale/timescaledb-ha:${TRACEARR_DB_TAG}                      # Upstream recommended PostgreSQL 18 baseline
+    container_name: ${COMPOSE_PROJECT_NAME}-tracearr-db-${TRACEARR_DB_TAG}  # Namespace by project and tag
+    hostname: tracearr-db                                                   # Private database hostname
+
+    # Match upstream shared-memory and TimescaleDB import requirements
+    shm_size: ${TRACEARR_DB_SHM_SIZE}     # Shared memory available to PostgreSQL
+    ulimits:                              # Container process resource limits
+      nofile:                             # Open file descriptors per process
+        soft: ${TRACEARR_DB_NOFILE_SOFT}  # Initial open-file limit
+        hard: ${TRACEARR_DB_NOFILE_HARD}  # Maximum open-file limit
+
+    # Apply the database settings required by Tracearr
+    command:
+      - postgres
+      - -c
+      - timescaledb.license=timescale
+      - -c
+      - timescaledb.max_tuples_decompressed_per_dml_transaction=100000
+      - -c
+      - max_locks_per_transaction=4096
+      - -c
+      - timescaledb.telemetry_level=off
+      - -c
+      - max_connections=150
+
+    # Define the container environment
+    environment:
+      POSTGRES_USER: ${TRACEARR_DB_USER}          # PostgreSQL account used by Tracearr
+      POSTGRES_DB: ${TRACEARR_DB_NAME}            # Database containing Tracearr state
+      POSTGRES_PASSWORD: ${TRACEARR_DB_PASSWORD}  # Password for the PostgreSQL account
+
+    # Mount persistent volumes into the container
+    volumes:
+      - tracearr-db-data:/home/postgres/pgdata/data:rw  # PostgreSQL data owned by the database user
+
+    # Define container healthcheck to verify PostgreSQL connectivity
+    healthcheck:
+      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
+      test:                              # Check whether PostgreSQL accepts connections
+        - CMD
+        - pg_isready
+        - -U
+        - ${TRACEARR_DB_USER}
+        - -d
+        - ${TRACEARR_DB_NAME}
+
+  #
+  # Define the 'tracearr-redis' service.
+  #
+  tracearr-redis:
+    <<:                                   # Merge shared and service-specific container settings
+      - *default-container                # Pull in default container settings
+      - *exclude-from-watchtower-updates  # Keep Redis upgrades under operator control
+
+    # Docker image and container information
+    image: redis:${TRACEARR_REDIS_TAG}                                            # Supported Redis major
+    container_name: ${COMPOSE_PROJECT_NAME}-tracearr-redis-${TRACEARR_REDIS_TAG}  # Namespace by project and tag
+    hostname: tracearr-redis                                                      # Private queue and cache hostname
+
+    # Persist queued jobs between container restarts
+    command:
+      - redis-server
+      - --appendonly
+      - "yes"
+
+    # Mount persistent volumes into the container
+    volumes:
+      - tracearr-redis-data:/data:rw  # Persistent Redis queue and cache data
+
+    # Define container healthcheck to verify Redis connectivity
+    healthcheck:
+      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
+      test:                              # Check Redis responds to a ping
+        - CMD
+        - redis-cli
+        - ping
+
+  #
+  # Define the 'tracearr' service.
+  #
+  tracearr:
+    # Docker image and container information
+    <<: *default-container                                            # Pull in the default container information
+    image: ghcr.io/connorgallopo/tracearr:${TRACEARR_TAG}             # Official stable channel
+    container_name: ${COMPOSE_PROJECT_NAME}-tracearr-${TRACEARR_TAG}  # Namespace by project and tag
+    hostname: tracearr                                                # Project-local service hostname
+
+    # Define the container environment
+    environment:
+      <<: *default-environment                     # Pull in the default environment
+      NODE_ENV: ${TRACEARR_NODE_ENV}               # Node.js runtime mode
+      HOST: ${TRACEARR_HOST}                       # Address on which the application listens
+      PORT: ${TRACEARR_PORT}                       # Container web UI and API port
+      DATABASE_URL: ${TRACEARR_DATABASE_URL}       # PostgreSQL connection URI
+      REDIS_URL: ${TRACEARR_REDIS_URL}             # Redis queue and cache connection URI
+      JWT_SECRET: ${TRACEARR_JWT_SECRET}           # Sign application authentication tokens
+      COOKIE_SECRET: ${TRACEARR_COOKIE_SECRET}     # Encrypt session cookies
+      BETTER_AUTH_SECRET: ${TRACEARR_AUTH_SECRET}  # Sign and encrypt login sessions
+      LOG_LEVEL: ${TRACEARR_LOG_LEVEL}             # Application logging verbosity
+      TRUST_PROXY: ${TRACEARR_TRUST_PROXY}         # Trust headers from a configured reverse proxy
+
+    # Define the host and container ports
+    ports:
+      - ${TRACEARR_WEBUI_PORT}:${TRACEARR_PORT}  # Tracearr web UI and API port
+
+    # Mount persistent volumes into the container
+    volumes:
+      - tracearr-backups:/data/backup:rw  # Backup workspace owned by the application user
+
+    # Define container healthcheck to verify Tracearr connectivity
+    healthcheck:
+      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
+      test:                              # Check Tracearr readiness endpoint
+        - CMD
+        - wget
+        - -q
+        - --spider
+        - http://127.0.0.1:${TRACEARR_PORT}/health
+
+    # Specify container service dependencies
+    depends_on:
+      tracearr-db:
+        condition: service_healthy  # Wait until PostgreSQL is healthy
+      tracearr-redis:
+        condition: service_healthy  # Wait until Redis is healthy
+
+  #
+  # Define the 'duplicati' service for managing backups.
+  #
+  duplicati:
+    # Docker image and container information
+    <<: *arr-stack-container                                            # Pull in arr-stack container config
+    image: lscr.io/linuxserver/duplicati:${DUPLICATI_TAG}               # Run using the specified tag
+    container_name: ${COMPOSE_PROJECT_NAME}-duplicati-${DUPLICATI_TAG}  # Namespace the container name by project and tag
+    hostname: duplicati                                                 # Set the container hostname
+
+    # Define the container environment
+    environment:
+      <<: *arr-stack-environment                                        # Pull in the arr-stack environment
+      SETTINGS_ENCRYPTION_KEY: ${DUPLICATI_SETTINGS_ENCRYPTION_KEY}     # Required settings database encryption key
+      DUPLICATI__WEBSERVICE_PASSWORD: ${DUPLICATI_WEBSERVICE_PASSWORD}  # Web UI password
+
+    # Define the host and container ports
+    ports:
+      - ${DUPLICATI_WEBUI_PORT}:8200  # Duplicati web UI port
+
+    # Mount host directories into the container
+    volumes:
+      - ${DUPLICATI_CONFIG_PATH}:/config:rw    # Contains all relevant configuration files
+      - ${DUPLICATI_BACKUPS_PATH}:/backups:rw  # Path to store local backups
+      - ${DUPLICATI_SOURCE_PATH}:/source:rw    # Path to source files for backup
+
+    # Define container healthcheck to verify Duplicati connectivity
+    healthcheck:
+      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
+      test:                              # Check Duplicati web server
+        - CMD
+        - wget
+        - --no-verbose
+        - --tries=1
+        - --spider
+        - http://127.0.0.1:8200/
+
+  #
+  # Define the 'homepage' service for a customizable application dashboard.
+  #
+  homepage:
+    # Docker image and container information
+    <<: *default-container                                            # Pull in the default container information
+    image: ghcr.io/gethomepage/homepage:${HOMEPAGE_TAG}               # Run using the specified tag
+    container_name: ${COMPOSE_PROJECT_NAME}-homepage-${HOMEPAGE_TAG}  # Namespace the container name by project and tag
+    hostname: homepage                                                # Set the container hostname
+
+    # Define the container environment
+    environment:
+      <<: *default-environment  # Pull in the default environment
+
+      # Homepage container and dashboard basics
+      HOMEPAGE_LOG_LEVEL: ${HOMEPAGE_LOG_LEVEL}
+      HOMEPAGE_ALLOWED_HOSTS: ${HOMEPAGE_ALLOWED_HOSTS}
+      HOMEPAGE_VAR_TITLE: ${HOMEPAGE_VAR_TITLE}
+      HOMEPAGE_VAR_SEARCH_PROVIDER: ${HOMEPAGE_VAR_SEARCH_PROVIDER}
+
+      # Homepage native password authentication
+      HOMEPAGE_AUTH_ENABLED: ${HOMEPAGE_AUTH_ENABLED}
+      HOMEPAGE_AUTH_SECRET: ${HOMEPAGE_AUTH_SECRET}
+      HOMEPAGE_AUTH_PASSWORD: ${HOMEPAGE_AUTH_PASSWORD}
+      HOMEPAGE_EXTERNAL_URL: ${HOMEPAGE_EXTERNAL_URL}
+
+      # Homepage weather widget
+      HOMEPAGE_VAR_WEATHER_CITY: ${HOMEPAGE_VAR_WEATHER_CITY}
+      HOMEPAGE_VAR_WEATHER_LAT: ${HOMEPAGE_VAR_WEATHER_LAT}
+      HOMEPAGE_VAR_WEATHER_LONG: ${HOMEPAGE_VAR_WEATHER_LONG}
+      HOMEPAGE_VAR_WEATHER_TZ: ${HOMEPAGE_VAR_WEATHER_TZ}
+      HOMEPAGE_VAR_WEATHER_UNIT: ${HOMEPAGE_VAR_WEATHER_UNIT}
+
+      # Homepage bookmark click targets
+      HOMEPAGE_VAR_DSM_HREF: ${HOMEPAGE_VAR_DSM_HREF}
+      HOMEPAGE_VAR_DSM2_HREF: ${HOMEPAGE_VAR_DSM2_HREF}
+      HOMEPAGE_VAR_WIKI_HREF: ${HOMEPAGE_VAR_WIKI_HREF}
+
+      # Homepage Plex click target and widget
+      HOMEPAGE_VAR_PLEX_HREF: ${HOMEPAGE_VAR_PLEX_HREF}
+      HOMEPAGE_VAR_PLEX_URL: ${HOMEPAGE_VAR_PLEX_URL}:${PLEX_WEBUI_PORT}
+      HOMEPAGE_VAR_PLEX_TOKEN: ${HOMEPAGE_VAR_PLEX_TOKEN}
+
+      # Homepage Tracearr click target and widget
+      HOMEPAGE_VAR_TRACEARR_HREF: ${HOMEPAGE_VAR_TRACEARR_HREF}
+      HOMEPAGE_VAR_TRACEARR_URL: ${HOMEPAGE_VAR_TRACEARR_URL}
+      HOMEPAGE_VAR_TRACEARR_KEY: ${HOMEPAGE_VAR_TRACEARR_KEY}
+
+      # Homepage Radarr click target and widget
+      HOMEPAGE_VAR_RADARR_HREF: ${HOMEPAGE_VAR_RADARR_HREF}
+      HOMEPAGE_VAR_RADARR_URL: ${HOMEPAGE_VAR_RADARR_URL}:${RADARR_WEBUI_PORT}
+      HOMEPAGE_VAR_RADARR_KEY: ${HOMEPAGE_VAR_RADARR_KEY}
+      HOMEPAGE_VAR_RADARR_CONTAINER: ${COMPOSE_PROJECT_NAME}-radarr-${RADARR_TAG}
+
+      # Homepage Sonarr click target and widget
+      HOMEPAGE_VAR_SONARR_HREF: ${HOMEPAGE_VAR_SONARR_HREF}
+      HOMEPAGE_VAR_SONARR_URL: ${HOMEPAGE_VAR_SONARR_URL}:${SONARR_WEBUI_PORT}
+      HOMEPAGE_VAR_SONARR_KEY: ${HOMEPAGE_VAR_SONARR_KEY}
+      HOMEPAGE_VAR_SONARR_CONTAINER: ${COMPOSE_PROJECT_NAME}-sonarr-${SONARR_TAG}
+
+      # Homepage Bazarr click target and widget
+      HOMEPAGE_VAR_BAZARR_HREF: ${HOMEPAGE_VAR_BAZARR_HREF}
+      HOMEPAGE_VAR_BAZARR_URL: ${HOMEPAGE_VAR_BAZARR_URL}:${BAZARR_WEBUI_PORT}
+      HOMEPAGE_VAR_BAZARR_KEY: ${HOMEPAGE_VAR_BAZARR_KEY}
+      HOMEPAGE_VAR_BAZARR_CONTAINER: ${COMPOSE_PROJECT_NAME}-bazarr-${BAZARR_TAG}
+
+      # Homepage Seerr click target and widget
+      HOMEPAGE_VAR_SEERR_HREF: ${HOMEPAGE_VAR_SEERR_HREF}
+      HOMEPAGE_VAR_SEERR_URL: ${HOMEPAGE_VAR_SEERR_URL}:${SEERR_WEBUI_PORT}
+      HOMEPAGE_VAR_SEERR_KEY: ${HOMEPAGE_VAR_SEERR_KEY}
+      HOMEPAGE_VAR_SEERR_CONTAINER: ${COMPOSE_PROJECT_NAME}-seerr-${SEERR_TAG}
+
+      # Homepage Prowlarr click target and widget
+      HOMEPAGE_VAR_PROWLARR_HREF: ${HOMEPAGE_VAR_PROWLARR_HREF}
+      HOMEPAGE_VAR_PROWLARR_URL: ${HOMEPAGE_VAR_PROWLARR_URL}:${PROWLARR_WEBUI_PORT}
+      HOMEPAGE_VAR_PROWLARR_KEY: ${HOMEPAGE_VAR_PROWLARR_KEY}
+      HOMEPAGE_VAR_PROWLARR_CONTAINER: ${COMPOSE_PROJECT_NAME}-prowlarr-${PROWLARR_TAG}
+
+      # Homepage qBittorrent click target and widget
+      HOMEPAGE_VAR_QBITTORRENT_HREF: ${HOMEPAGE_VAR_QBITTORRENT_HREF}
+      HOMEPAGE_VAR_QBITTORRENT_URL: ${HOMEPAGE_VAR_QBITTORRENT_URL}:${QBITTORRENT_WEBUI_PORT}
+      HOMEPAGE_VAR_QBITTORRENT_USER: ${HOMEPAGE_VAR_QBITTORRENT_USER}
+      HOMEPAGE_VAR_QBITTORRENT_PASS: ${HOMEPAGE_VAR_QBITTORRENT_PASS}
+      HOMEPAGE_VAR_QBITTORRENT_CONTAINER: ${COMPOSE_PROJECT_NAME}-qbittorrent-${QBITTORRENT_TAG}
+
+      # Homepage Calibre-Web Automated click target and widget
+      HOMEPAGE_VAR_CWA_HREF: ${HOMEPAGE_VAR_CWA_HREF}
+      HOMEPAGE_VAR_CWA_URL: ${HOMEPAGE_VAR_CWA_URL}
+      HOMEPAGE_VAR_CWA_USER: ${HOMEPAGE_VAR_CWA_USER}
+      HOMEPAGE_VAR_CWA_PASS: ${HOMEPAGE_VAR_CWA_PASS}
+      HOMEPAGE_VAR_CWA_CONTAINER: ${COMPOSE_PROJECT_NAME}-calibre-web-automated-${CWA_TAG}
+
+      # Homepage Speedtest Tracker click target and widget
+      HOMEPAGE_VAR_SPEEDTEST_HREF: ${HOMEPAGE_VAR_SPEEDTEST_HREF}
+      HOMEPAGE_VAR_SPEEDTEST_URL: ${HOMEPAGE_VAR_SPEEDTEST_URL}:${SPEEDTEST_TRACKER_WEBUI_PORT}
+      HOMEPAGE_VAR_SPEEDTEST_CONTAINER: ${COMPOSE_PROJECT_NAME}-speedtest-tracker-${SPEEDTEST_TRACKER_TAG}
+
+    # Define the host and container ports
+    ports:
+      - ${HOMEPAGE_WEBUI_PORT}:3000  # Homepage web UI port
+
+    # Mount host directories into the container
+    volumes:
+      - ${HOMEPAGE_CONFIG_PATH}:/app/config:rw         # Local config files directory
+      - ${HOMEPAGE_IMAGES_PATH}:/app/public/images:rw  # Local public files directory
+      - ${HOMEPAGE_DATA_ROOT_PATH}:/data:rw            # Local directory to monitor disk space
+      - /var/run/docker.sock:/var/run/docker.sock:rw   # Allow container to talk to host Docker API
+
+    # Define container healthcheck to verify Homepage connectivity
+    healthcheck:
+      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
+      test:                              # Check Homepage web server
+        - CMD
+        - wget
+        - --no-verbose
+        - --tries=1
+        - --spider
+        - http://127.0.0.1:3000/api/healthcheck
+
+  #
+  # Define the 'watchtower' service for host-wide image updates.
+  #
+  watchtower:
+    <<:                                   # Merge shared and service-specific container settings
+      - *default-container                # Pull in default container settings
+      - *exclude-from-watchtower-updates  # Prevent Watchtower from updating its running container
+
+    # Docker image and container information
+    image: nickfedor/watchtower:${WATCHTOWER_TAG}                         # Run using the specified floating tag
+    container_name: ${COMPOSE_PROJECT_NAME}-watchtower-${WATCHTOWER_TAG}  # Namespace the container name by project and tag
+    hostname: watchtower                                                  # Set the container hostname
+
+    # Define the container environment
+    environment:
+      <<: *default-environment                                     # Pull in the default environment
+      WATCHTOWER_POLL_INTERVAL: ${WATCHTOWER_POLL_INTERVAL}        # Seconds between update checks
+      WATCHTOWER_CLEANUP: ${WATCHTOWER_CLEANUP}                    # Clean old images after updates
+      WATCHTOWER_INCLUDE_STOPPED: ${WATCHTOWER_INCLUDE_STOPPED}    # Include stopped containers when enabled
+      WATCHTOWER_REVIVE_STOPPED: ${WATCHTOWER_REVIVE_STOPPED}      # Start updated stopped containers when enabled
+      WATCHTOWER_NOTIFICATIONS: ${WATCHTOWER_NOTIFICATIONS}        # Notification backend
+      WATCHTOWER_NOTIFICATION_URL: ${WATCHTOWER_NOTIFICATION_URL}  # Optional notification destination
+
+    # Mount host directories into the container
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:rw  # Allow access to the host Docker API
+      - /etc/localtime:/etc/localtime:ro              # Use the host timezone data
+
+#
+# Define the networks section.
+#
+networks:
+  # Configure the default network
+  default:
+    name: ${COMPOSE_PROJECT_NAME}  # Use the name of the Compose project
+    ipam:                          # IP Address Management
+      driver: default              # Use the default driver
+      config:
+        - subnet: ${COMPOSE_NETWORK_SUBNET}      # Subnet in CIDR format that represents a network segment
+          ip_range: ${COMPOSE_NETWORK_IP_RANGE}  # Range from which container IP addresses are allocated
+          gateway: ${COMPOSE_NETWORK_GATEWAY}    # Gateway for the default network
+
+#
+# Define the volumes section.
+#
+volumes:
+  tracearr-db-data: {}     # Tracearr PostgreSQL database containing application state and viewing history
+  tracearr-redis-data: {}  # Tracearr Redis queue and cache data, persisted between container restarts
+  tracearr-backups: {}     # Tracearr backup workspace mounted at /data/backup

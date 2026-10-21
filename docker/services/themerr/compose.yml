@@ -34,6 +34,8 @@ services:
     # Mount host directories and the separate private key into the container
     volumes:
       - ${THEMERR_CONFIG_PATH}:/config:rw       # Persistent settings, database, certificates, and logs
+
+      # Bind the private encryption key into the container for secure credential storage
       - type: bind                              # Bind the private encryption key into the container
         source: ${THEMERR_TOKEN_KEY_PATH}       # Path to the private encryption key on the host
         target: /run/secrets/themerr_token_key  # Mount the private encryption key into the container

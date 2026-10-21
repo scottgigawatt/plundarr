@@ -1,0 +1,130 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# docker-compose.yml: Docker Compose configuration for running a standalone
+#                     Calibre-Web Automated ebook library on Plundarr's
+#                     shared foundation.
+#
+# CWA receives separate application, destructive ingest, and Calibre library
+# mounts while image updates remain under operator control.
+#
+# Services included:
+#   - calibre-web-automated:  https://github.com/crocodilestick/Calibre-Web-Automated
+#
+
+#
+# Setup default properties for all or most containers.
+#
+x-default-container: &default-container  # YAML anchor for default container
+  pull_policy: always                    # Ensure that the image is always pulled
+  restart: unless-stopped                # Restart the container unless explicitly stopped
+  logging:                               # Configure container logging options
+    driver: "json-file"                  # Use JSON file logging driver
+    options:                             # Logging options for the JSON file driver
+      max-size: ${LOG_MAX_SIZE}          # Maximum file size for logs files
+      max-file: ${LOG_MAX_FILE}          # Maximum number of log files to retain
+
+#
+# Setup default variables for all or most containers.
+#
+x-default-environment: &default-environment  # YAML anchor for default environment
+  TZ: ${TZ}                                  # Set the appropriate timezone
+
+#
+# Setup default variables for arr-stack containers.
+#
+x-arr-stack-environment: &arr-stack-environment  # YAML anchor for arr-stack environment
+  <<: *default-environment                       # Pull in the default environment information
+  PUID: ${DEFAULT_PUID}                          # Default user ID mapping for containers
+  PGID: ${DEFAULT_PGID}                          # Default group ID mapping for containers
+  UMASK: ${DEFAULT_UMASK}                        # Default file creation mask for containers
+
+#
+# Containers using common arr-stack settings.
+#
+x-arr-stack-container: &arr-stack-container  # YAML anchor for arr-stack container
+  <<: *default-container                     # Pull in the default container information
+  group_add:                                 # Add additional user groups
+    - ${DEFAULT_GROUP}                       # Default group used to manage write permissions
+  environment:                               # Define common arr-stack container variables
+    <<: *arr-stack-environment               # Pull in the arr-stack environment information
+
+#
+# Labels for containers that should not be updated unattended by Watchtower.
+#
+# Privateerr and Gluetun coordinate VPN configuration, tunnel startup, and
+# port-forwarding behavior. Calibre-Web Automated can migrate persistent databases
+# during upgrades. Tracearr's database and Redis also require intentional
+# updates. Check release notes before changing these stateful services.
+#
+x-exclude-from-watchtower-updates: &exclude-from-watchtower-updates  # Exclude from Watchtower
+  labels:                                                            # Add container labels
+    - "com.centurylinklabs.watchtower.enable=false"                  # Require intentional updates
+
+#
+# Setup default healthcheck timing settings for all or most containers.
+#
+x-default-healthcheck-settings: &default-healthcheck-settings  # YAML anchor for healthcheck settings
+  interval: ${DEFAULT_HEALTHCHECK_INTERVAL}                    # Run the check at this interval
+  timeout: ${DEFAULT_HEALTHCHECK_TIMEOUT}                      # Fail if it exceeds this duration
+  start_period: ${DEFAULT_HEALTHCHECK_START_PERIOD}            # Grace period before checks start
+  retries: ${DEFAULT_HEALTHCHECK_RETRIES}                      # Mark as unhealthy after this many failures
+
+#
+# Define the services section.
+#
+services:
+  #
+  # Define the 'calibre-web-automated' service for managing an ebook library.
+  #
+  calibre-web-automated:
+    <<:                                   # Merge shared and service-specific container settings
+      - *arr-stack-container              # Pull in arr-stack container settings
+      - *exclude-from-watchtower-updates  # Keep database migrations under operator control
+
+    # Docker image and container information
+    image: crocodilestick/calibre-web-automated:${CWA_TAG}                    # Run using the specified tag
+    container_name: ${COMPOSE_PROJECT_NAME}-calibre-web-automated-${CWA_TAG}  # Namespace the container name by project and tag
+    hostname: calibre-web-automated                                           # Set the container hostname
+
+    # Define the container environment
+    environment:
+      <<: *arr-stack-environment                     # Pull in the arr-stack environment
+      CWA_PORT_OVERRIDE: "8083"                      # Keep the internal web server on the charted port
+      NETWORK_SHARE_MODE: ${CWA_NETWORK_SHARE_MODE}  # Select local-disk or network-share database behavior
+
+    # Define the host and container ports
+    ports:
+      - ${CWA_WEBUI_PORT}:8083  # Calibre-Web Automated web UI port
+
+    # Mount host directories into the container
+    volumes:
+      - ${CWA_CONFIG_PATH}:/config:rw            # Persistent application configuration and databases
+      - ${CWA_INGEST_PATH}:/cwa-book-ingest:rw   # Destructive automatic-import staging directory
+      - ${CWA_LIBRARY_PATH}:/calibre-library:rw  # Calibre database and managed ebook library
+
+    # Define container healthcheck to verify Calibre-Web Automated connectivity
+    healthcheck:
+      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
+      test:                              # Check the internal web server port
+        - CMD
+        - nc
+        - -z
+        - 127.0.0.1
+        - "8083"
+
+#
+# Define the networks section.
+#
+networks:
+  # Configure the default network
+  default:
+    name: ${COMPOSE_PROJECT_NAME}  # Use the name of the Compose project
+    ipam:                          # IP Address Management
+      driver: default              # Use the default driver
+      config:
+        - subnet: ${COMPOSE_NETWORK_SUBNET}      # Subnet in CIDR format that represents a network segment
+          ip_range: ${COMPOSE_NETWORK_IP_RANGE}  # Range from which container IP addresses are allocated
+          gateway: ${COMPOSE_NETWORK_GATEWAY}    # Gateway for the default network
