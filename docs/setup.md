@@ -118,13 +118,13 @@ For the default Plundarr network:
 2. Select **Edit Rules**, then **Create**.
 3. Configure the rule:
 
-   | Setting | Value |
-   | --- | --- |
-   | Ports | `All` |
-   | Source IP | `Specific IP` → `Subnet` |
-   | IP address | `172.20.0.0` |
-   | Subnet mask | `255.255.0.0` |
-   | Action | `Allow` |
+    | Setting | Value |
+    | --- | --- |
+    | Ports | `All` |
+    | Source IP | `Specific IP` → `Subnet` |
+    | IP address | `172.20.0.0` |
+    | Subnet mask | `255.255.0.0` |
+    | Action | `Allow` |
 
 4. Select **OK**.
 5. Repeat the process for every additional generated bridge subnet.
