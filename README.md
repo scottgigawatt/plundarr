@@ -124,6 +124,8 @@ Use `make configure` for an interactive picker or pass `PRESET` to `make ship` f
 | 🚢 `portainer` | Standalone Docker management with Portainer CE |
 | 🧩 `custom` | A stack assembled service by service |
 
+Browse the [validated preset examples](examples/presets/README.md) to inspect each complete Compose file and example environment without running Maraudarr.
+
 Inspect the current catalog before generating:
 
 ```sh

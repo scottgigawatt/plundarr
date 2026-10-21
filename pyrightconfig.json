@@ -10,19 +10,24 @@
     "include": [
         "docker/src",
         "docker/tests",
-        "test/typing"
+        "test/typing",
+        "scripts/compose/preset_examples.py",
+        ".github/scripts/update_preset_examples.py",
+        "test/helpers/test_preset_examples.py"
     ],
     "exclude": [
         "**/node_modules",
         "**/__pycache__",
-        "**/.*"
+        "**/.venv*",
+        "**/.git"
     ],
     "typeCheckingMode": "strict",
     "reportUnnecessaryTypeIgnoreComment": "error",
     "pythonVersion": "3.14",
     "pythonPlatform": "Linux",
     "extraPaths": [
-        "docker/src"
+        "docker/src",
+        ".github/scripts"
     ],
     "stubPath": "test/typing"
 }

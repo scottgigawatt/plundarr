@@ -1,0 +1,117 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# docker-compose.yml: Docker Compose configuration for running a standalone
+#                     Jellyfin media server on Plundarr's shared foundation.
+#
+# Jellyfin receives one writable /data mount containing the media libraries
+# and separate persistent configuration and cache directories.
+#
+# Services included:
+#   - jellyfin:  https://jellyfin.org
+#
+
+#
+# Setup default properties for all or most containers.
+#
+x-default-container: &default-container  # YAML anchor for default container
+  pull_policy: always                    # Ensure that the image is always pulled
+  restart: unless-stopped                # Restart the container unless explicitly stopped
+  logging:                               # Configure container logging options
+    driver: "json-file"                  # Use JSON file logging driver
+    options:                             # Logging options for the JSON file driver
+      max-size: ${LOG_MAX_SIZE}          # Maximum file size for logs files
+      max-file: ${LOG_MAX_FILE}          # Maximum number of log files to retain
+
+#
+# Setup default variables for all or most containers.
+#
+x-default-environment: &default-environment  # YAML anchor for default environment
+  TZ: ${TZ}                                  # Set the appropriate timezone
+
+#
+# Containers running directly as the configured unprivileged host identity.
+#
+x-rootless-container: &rootless-container  # YAML anchor for rootless containers
+  <<: *default-container                   # Pull in the default container information
+  user: ${DEFAULT_PUID}:${DEFAULT_PGID}    # Run as the configured host user and primary group
+  group_add:                               # Add the shared media-management group
+    - ${DEFAULT_GROUP}                     # Allow access to group-owned host files
+
+#
+# Setup default healthcheck timing settings for all or most containers.
+#
+x-default-healthcheck-settings: &default-healthcheck-settings  # YAML anchor for healthcheck settings
+  interval: ${DEFAULT_HEALTHCHECK_INTERVAL}                    # Run the check at this interval
+  timeout: ${DEFAULT_HEALTHCHECK_TIMEOUT}                      # Fail if it exceeds this duration
+  start_period: ${DEFAULT_HEALTHCHECK_START_PERIOD}            # Grace period before checks start
+  retries: ${DEFAULT_HEALTHCHECK_RETRIES}                      # Mark as unhealthy after this many failures
+
+#
+# Define the services section.
+#
+services:
+  #
+  # Define the 'jellyfin' service for streaming media libraries.
+  #
+  jellyfin:
+    # Docker image and container information
+    <<: *rootless-container                                           # Pull in rootless container config
+    image: jellyfin/jellyfin:${JELLYFIN_TAG}                          # Run the official Jellyfin image
+    container_name: ${COMPOSE_PROJECT_NAME}-jellyfin-${JELLYFIN_TAG}  # Namespace the container name by project and tag
+    hostname: jellyfin                                                # Set the container hostname
+
+    # Define the container environment
+    environment:
+      <<: *default-environment  # Pull in the default environment information
+
+    # Define the host and container ports
+    ports:
+      - ${JELLYFIN_WEBUI_PORT}:8096  # Jellyfin web UI port
+
+    # Mount host directories into the container
+    volumes:
+      - ${JELLYFIN_CONFIG_PATH}:/config:rw  # Persistent Jellyfin configuration
+      - ${JELLYFIN_CACHE_PATH}:/cache:rw    # Transcoding and image cache
+      - ${JELLYFIN_DATA_PATH}:/data:rw      # Media root containing library directories
+
+      # Read-only frontend mounts that prevent Docker from mapping missing sources as directories instead of files
+      - type: bind                                  # Mount the Jellyfin Web configuration JSON file
+        source: ${JELLYFIN_WEB_CONFIG_PATH}         # JSON settings for Jellyfin Web; compare with the image defaults on upgrades
+        target: /jellyfin/jellyfin-web/config.json  # Mount the configuration file into the container
+        read_only: true                             # Do not allow the container to modify the configuration file
+        bind:                                       # Configure the bind mount
+          create_host_path: false                   # Do not create the host path if it does not exist; fail instead
+      - type: bind                                  # Mount the Jellyfin Web custom directory for branding and static assets
+        source: ${JELLYFIN_WEB_CUSTOM_PATH}         # Locally served CSS and images; Branding CSS selects the stylesheet
+        target: /jellyfin/jellyfin-web/custom       # Mount the custom directory into the container
+        read_only: true                             # Do not allow the container to modify the custom directory
+        bind:                                       # Configure the bind mount
+          create_host_path: false                   # Do not create the host path if it does not exist; fail instead
+
+    # Define container healthcheck to verify Jellyfin connectivity
+    healthcheck:
+      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
+      test:                              # Check Jellyfin's public system endpoint
+        - CMD
+        - curl
+        - -fsS
+        - -o
+        - /dev/null
+        - http://127.0.0.1:8096/System/Info/Public
+
+#
+# Define the networks section.
+#
+networks:
+  # Configure the default network
+  default:
+    name: ${COMPOSE_PROJECT_NAME}  # Use the name of the Compose project
+    ipam:                          # IP Address Management
+      driver: default              # Use the default driver
+      config:
+        - subnet: ${COMPOSE_NETWORK_SUBNET}      # Subnet in CIDR format that represents a network segment
+          ip_range: ${COMPOSE_NETWORK_IP_RANGE}  # Range from which container IP addresses are allocated
+          gateway: ${COMPOSE_NETWORK_GATEWAY}    # Gateway for the default network

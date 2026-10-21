@@ -1,0 +1,570 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# docker-compose.yml: Docker Compose configuration for running Boudoirr's
+#                     adult-media service stack with Privateerr-generated PIA
+#                     WireGuard config, PIA port forwarding, Gluetun VPN
+#                     routing, and the supporting applications.
+#
+# This configuration sets up default properties for all containers, integrates
+# PIA with native WireGuard connections and port forwarding, and provides
+# environment-specific settings for a seamless VPN setup.
+#
+# Services included:
+#   - privateerr:    https://github.com/scottgigawatt/privateerr
+#   - gluetun:       https://github.com/qdm12/gluetun
+#   - flaresolverr:  https://github.com/FlareSolverr/FlareSolverr
+#   - prowlarr:      https://github.com/Prowlarr/Prowlarr
+#   - qbittorrent:   https://github.com/qbittorrent/qBittorrent
+#   - whisparr:      https://github.com/Whisparr/Whisparr
+#   - velvarr:       https://github.com/Skare69/velvarr
+#   - jellyfin:      https://jellyfin.org
+#   - cleanuparr:    https://github.com/Cleanuparr/Cleanuparr
+#   - watchtower:    https://github.com/nicholas-fedor/watchtower
+#
+
+#
+# Setup default properties for all or most containers.
+#
+x-default-container: &default-container  # YAML anchor for default container
+  pull_policy: always                    # Ensure that the image is always pulled
+  restart: unless-stopped                # Restart the container unless explicitly stopped
+  logging:                               # Configure container logging options
+    driver: "json-file"                  # Use JSON file logging driver
+    options:                             # Logging options for the JSON file driver
+      max-size: ${LOG_MAX_SIZE}          # Maximum file size for logs files
+      max-file: ${LOG_MAX_FILE}          # Maximum number of log files to retain
+
+#
+# Setup default variables for all or most containers.
+#
+x-default-environment: &default-environment  # YAML anchor for default environment
+  TZ: ${TZ}                                  # Set the appropriate timezone
+
+#
+# Setup default variables for arr-stack containers.
+#
+x-arr-stack-environment: &arr-stack-environment  # YAML anchor for arr-stack environment
+  <<: *default-environment                       # Pull in the default environment information
+  PUID: ${DEFAULT_PUID}                          # Default user ID mapping for containers
+  PGID: ${DEFAULT_PGID}                          # Default group ID mapping for containers
+  UMASK: ${DEFAULT_UMASK}                        # Default file creation mask for containers
+
+#
+# Containers using common arr-stack settings.
+#
+x-arr-stack-container: &arr-stack-container  # YAML anchor for arr-stack container
+  <<: *default-container                     # Pull in the default container information
+  group_add:                                 # Add additional user groups
+    - ${DEFAULT_GROUP}                       # Default group used to manage write permissions
+  environment:                               # Define common arr-stack container variables
+    <<: *arr-stack-environment               # Pull in the arr-stack environment information
+
+#
+# Containers running directly as the configured unprivileged host identity.
+#
+x-rootless-container: &rootless-container  # YAML anchor for rootless containers
+  <<: *default-container                   # Pull in the default container information
+  user: ${DEFAULT_PUID}:${DEFAULT_PGID}    # Run as the configured host user and primary group
+  group_add:                               # Add the shared media-management group
+    - ${DEFAULT_GROUP}                     # Allow access to group-owned host files
+
+#
+# Shared security settings for services that need no Linux capabilities.
+#
+x-security-hardening: &security-hardening  # YAML anchor for existing capability and privilege restrictions
+  cap_drop:                                # Drop Linux capabilities for security hardening
+    - ALL                                  # No optional Linux capabilities are required
+  security_opt:                            # Prevent the container from acquiring additional privileges
+    - no-new-privileges:true               # Prevent processes from gaining privileges
+
+#
+# Labels for containers that should not be updated unattended by Watchtower.
+#
+# Privateerr and Gluetun coordinate VPN configuration, tunnel startup, and
+# port-forwarding behavior. Calibre-Web Automated can migrate persistent databases
+# during upgrades. Tracearr's database and Redis also require intentional
+# updates. Check release notes before changing these stateful services.
+#
+x-exclude-from-watchtower-updates: &exclude-from-watchtower-updates  # Exclude from Watchtower
+  labels:                                                            # Add container labels
+    - "com.centurylinklabs.watchtower.enable=false"                  # Require intentional updates
+
+#
+# Setup default healthcheck timing settings for all or most containers.
+#
+x-default-healthcheck-settings: &default-healthcheck-settings  # YAML anchor for healthcheck settings
+  interval: ${DEFAULT_HEALTHCHECK_INTERVAL}                    # Run the check at this interval
+  timeout: ${DEFAULT_HEALTHCHECK_TIMEOUT}                      # Fail if it exceeds this duration
+  start_period: ${DEFAULT_HEALTHCHECK_START_PERIOD}            # Grace period before checks start
+  retries: ${DEFAULT_HEALTHCHECK_RETRIES}                      # Mark as unhealthy after this many failures
+
+#
+# Shared healthy Prowlarr indexer manager dependency for arr applications.
+#
+x-prowlarr-dependency: &prowlarr-dependency  # YAML anchor for required Prowlarr service dependency
+  depends_on:                                # Specify container service dependencies
+    prowlarr:                                # Prowlarr service dependency
+      condition: service_healthy             # Wait for Prowlarr service to report healthy
+
+#
+# Shared connectivity probe for Whisparr instances.
+#
+x-whisparr-healthcheck: &whisparr-healthcheck  # YAML anchor for Whisparr healthcheck
+  healthcheck:                                 # Define the healthcheck
+    <<: *default-healthcheck-settings          # Reuse the stack healthcheck timing
+    test:                                      # Ping the fixed internal port independently of host mappings
+      - CMD
+      - wget
+      - --no-verbose
+      - --tries=1
+      - --spider
+      - http://127.0.0.1:6969/ping
+
+#
+# Shared writable media parent for persistent bind mounts used by Whisparr.
+#
+x-whisparr-data-dir: &whisparr-data-dir  # YAML anchor for Whisparr data directories
+  tmpfs:                                 # Writable parent directory for persistent media mounts
+    - "/data:rw,noexec,nosuid,size=1m,\
+      uid=${DEFAULT_PUID},gid=${DEFAULT_PGID}"
+
+#
+# Define the services section.
+#
+services:
+  #
+  # Define the 'privateerr' service to generate the PIA manual WireGuard configuration file.
+  #
+  privateerr:
+    <<:                                   # Merge shared and service-specific container settings
+      - *default-container                # Pull in default container settings
+      - *security-hardening               # Upstream PIA scripts require UID 0 but no Linux capabilities
+      - *exclude-from-watchtower-updates  # Update the VPN bootstrap component intentionally
+
+    # Docker image and container information
+    image: ghcr.io/scottgigawatt/privateerr:${PRIVATEERR_TAG}             # Pull Privateerr from GHCR
+    container_name: ${COMPOSE_PROJECT_NAME}-privateerr-${PRIVATEERR_TAG}  # Namespace the container name by project and tag
+    hostname: privateerr                                                  # Set the container hostname
+
+    # Let Docker disable IPv6 in this container before the PIA scripts start
+    sysctls:
+      net.ipv6.conf.all.disable_ipv6: ${PRIVATEERR_IPV6_DISABLED}      # Existing interfaces: 1 disables IPv6; 0 enables IPv6
+      net.ipv6.conf.default.disable_ipv6: ${PRIVATEERR_IPV6_DISABLED}  # New interfaces: 1 disables IPv6; 0 enables IPv6
+
+    # Define the container environment
+    environment:
+      # PIA manual connection environment variables
+      VPN_PROTOCOL: ${PIA_VPN_PROTOCOL}          # VPN configuration, WireGuard or openvpn
+      DISABLE_IPV6: ${PIA_DISABLE_IPV6}          # yes requests upstream IPv6 disabling; no skips it
+      DIP_TOKEN: ${PIA_DIP_TOKEN}                # Optional PIA dedicated IP token, token or no
+      AUTOCONNECT: ${PIA_AUTOCONNECT}            # true selects the lowest-latency server; false uses PREFERRED_REGION
+      PREFERRED_REGION: ${PIA_PREFERRED_REGION}  # PIA region ID used when AUTOCONNECT=false
+      PIA_CONF_PATH: ${PIA_CONF_PATH}            # Path of WireGuard config file to be written
+      PIA_CONNECT: ${PIA_CONNECT}                # false generates files only; required for Gluetun recovery
+      PIA_PF: ${PIA_PF}                          # true selects a port-forwarding-capable region
+      PIA_DNS: ${PIA_DNS}                        # true includes PIA DNS settings in wg0.conf
+      PIA_WG_SERVER_NAME: ${PIA_WG_SERVER_NAME}  # Optional WireGuard server name fallback
+      PIA_USER: ${PIA_USER}                      # Set PIA username
+      PIA_PASS: ${PIA_PASS}                      # Set PIA password
+
+      # Privateerr environment variables
+      PRIVATEERR_METADATA_PATH: ${PRIVATEERR_METADATA_PATH}                            # Path where Gluetun metadata will be generated
+      PRIVATEERR_HEALTHCHECK_MARKER: ${PRIVATEERR_HEALTHCHECK_MARKER}                  # File written after successful generation
+      PRIVATEERR_KEEPALIVE: ${PRIVATEERR_KEEPALIVE}                                    # true keeps Privateerr running after generation; required for recovery
+      PRIVATEERR_LOG_PATH: ${PRIVATEERR_LOG_PATH}                                      # Privateerr log file path
+      PRIVATEERR_AUTO_RECOVER: ${PRIVATEERR_AUTO_RECOVER}                              # true enables API-based recovery; requires a shared API key
+      PRIVATEERR_GLUETUN_API_KEY: ${PRIVATEERR_GLUETUN_API_KEY}                        # Shared control API key: 20-128 alphanumeric characters; keep private
+      PRIVATEERR_GLUETUN_URL: ${PRIVATEERR_GLUETUN_URL}                                # Internal authenticated Gluetun control API
+      PRIVATEERR_GLUETUN_HEALTH_URL: ${PRIVATEERR_GLUETUN_HEALTH_URL}                  # Internal Gluetun tunnel health endpoint
+      PRIVATEERR_RECOVERY_INTERVAL_SECONDS: ${PRIVATEERR_RECOVERY_INTERVAL_SECONDS}    # Seconds between health probes
+      PRIVATEERR_RECOVERY_FAILURE_SECONDS: ${PRIVATEERR_RECOVERY_FAILURE_SECONDS}      # Startup grace and continuous failure threshold in seconds
+      PRIVATEERR_RECOVERY_COOLDOWN_SECONDS: ${PRIVATEERR_RECOVERY_COOLDOWN_SECONDS}    # Initial retry delay in seconds; doubles up to one hour
+      PRIVATEERR_GENERATION_TIMEOUT_SECONDS: ${PRIVATEERR_GENERATION_TIMEOUT_SECONDS}  # Maximum seconds for one PIA generation
+
+    # Mount host directories into the container
+    volumes:
+      - ${PRIVATEERR_GLUETUN_CONFIG_PATH}:/gluetun:rw    # Gluetun config output consumed by Gluetun
+      - ${PRIVATEERR_CONFIG_PATH}:/privateerr-config:rw  # Privateerr service config directory
+
+    # Define container healthcheck to verify Privateerr has completed setup
+    healthcheck:
+      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
+      test:                              # Healthy when healthcheck marker file exists
+        - CMD
+        - privateerr-healthcheck
+
+  #
+  # Define the 'gluetun' service to route traffic through a WireGuard VPN connection.
+  #
+  gluetun:
+    <<:                                   # Merge shared and service-specific container settings
+      - *default-container                # Pull in default container settings
+      - *exclude-from-watchtower-updates  # Update the VPN tunnel intentionally
+
+    # Docker image and container information
+    image: qmcgaw/gluetun:${GLUETUN_TAG}                            # Run using the specified tag
+    container_name: ${COMPOSE_PROJECT_NAME}-gluetun-${GLUETUN_TAG}  # Namespace the container name by project and tag
+    hostname: gluetun                                               # Set the container hostname
+    entrypoint: ["/bin/sh", "${GLUETUN_ENTRYPOINT_WRAPPER}"]        # Load Privateerr metadata before Gluetun starts
+
+    # Add additional linux capabilities
+    cap_add:
+      - NET_ADMIN  # Grant network admin capability for VPN and network interface configuration
+
+    # Pass host devices into the container for direct hardware access
+    devices:
+      - /dev/net/tun:/dev/net/tun  # Allow container to handle encrypted VPN traffic directly
+
+    # Define the container environment
+    environment:
+      <<: *default-environment                                               # Pull in the default environment information
+      VPN_SERVICE_PROVIDER: ${GLUETUN_VPN_SERVICE_PROVIDER}                  # The VPN service provider, e.g. custom
+      VPN_TYPE: ${GLUETUN_VPN_TYPE}                                          # The VPN type, e.g. wireguard
+      VPN_PORT_FORWARDING: ${GLUETUN_VPN_PORT_FORWARDING}                    # Enable VPN-side port forwarding
+      VPN_PORT_FORWARDING_PROVIDER: ${GLUETUN_VPN_PORT_FORWARDING_PROVIDER}  # PIA port-forwarding helper
+      VPN_PORT_FORWARDING_USERNAME: ${PIA_USER}                              # PIA username for Gluetun port forwarding
+      VPN_PORT_FORWARDING_PASSWORD: ${PIA_PASS}                              # PIA password for Gluetun port forwarding
+      HEALTH_TARGET_ADDRESSES: ${GLUETUN_HEALTH_TARGET_ADDRESSES}            # TCP/TLS targets Gluetun checks for VPN health
+      HEALTH_ICMP_TARGET_IPS: ${GLUETUN_HEALTH_ICMP_TARGET_IPS}              # ICMP targets Gluetun checks for VPN health
+      HEALTH_SERVER_ADDRESS: ${GLUETUN_HEALTH_SERVER_ADDRESS}                # Internal Gluetun health server address
+      HEALTH_RESTART_VPN: ${GLUETUN_HEALTH_RESTART_VPN}                      # Let Gluetun restart VPN when health checks fail
+      GLUETUN_DEFAULT_ENTRYPOINT: ${GLUETUN_DEFAULT_ENTRYPOINT}              # Original Gluetun entrypoint
+
+      # Define Privateerr metadata environment variables for Gluetun
+      PRIVATEERR_METADATA_PATH: ${PRIVATEERR_METADATA_PATH}                                  # Generated PIA server metadata
+      PRIVATEERR_GLUETUN_METADATA_WAIT_SECONDS: ${PRIVATEERR_GLUETUN_METADATA_WAIT_SECONDS}  # Maximum seconds to wait for metadata
+      PRIVATEERR_AUTO_RECOVER: ${PRIVATEERR_AUTO_RECOVER}                                    # Enable internal recovery access and disable competing restarts
+      PRIVATEERR_GLUETUN_API_KEY: ${PRIVATEERR_GLUETUN_API_KEY}                              # Same control API key used by Privateerr
+
+      # Define downloader port-forwarding commands for Gluetun
+      VPN_PORT_FORWARDING_UP_COMMAND: /bin/sh -c "${GLUETUN_QBITTORRENT_PORT_FORWARDING_SCRIPT} up {{PORT}} {{VPN_INTERFACE}}"  # Update qBittorrent when PIA assigns a forwarded port
+      VPN_PORT_FORWARDING_DOWN_COMMAND: /bin/sh -c "${GLUETUN_QBITTORRENT_PORT_FORWARDING_SCRIPT} down"                         # Clear qBittorrent's forwarded port during shutdown
+
+    # Define downloader host and container ports
+    ports:
+      - ${QBITTORRENT_TCP_PORT}:6881      # qBittorrent TCP connection port
+      - ${QBITTORRENT_UDP_PORT}:6881/udp  # qBittorrent UDP connection port
+      - ${QBITTORRENT_WEBUI_PORT}:8080    # qBittorrent web UI port
+
+    # Mount host directories into the container
+    volumes:
+      - ${GLUETUN_CONFIG_PATH}:/gluetun:rw                               # Gluetun config directory
+      - ${GLUETUN_CONFIG_PATH}:/tmp/gluetun:rw                           # Gluetun runtime state directory
+      - ${GLUETUN_WRAPPER_SCRIPT_PATH}:${GLUETUN_ENTRYPOINT_WRAPPER}:ro  # Gluetun entrypoint wrapper script
+
+    # Define container healthcheck to verify VPN connectivity
+    healthcheck:
+      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
+      test:                              # Check Gluetun's internal health server
+        - CMD
+        - wget
+        - -q
+        - -O
+        - /dev/null
+        - http://127.0.0.1:9999
+
+    # Specify container service dependencies
+    depends_on:
+      privateerr:
+        condition: service_healthy  # Wait for Privateerr to generate the WireGuard config and report healthy
+
+  #
+  # Define the 'flaresolverr' service to handle supported anti-bot challenges.
+  #
+  flaresolverr:
+    # Docker image and container information
+    <<: *default-container                                                    # Pull in default container config
+    image: ghcr.io/flaresolverr/flaresolverr:${FLARESOLVERR_TAG}              # Run using the specified tag
+    container_name: ${COMPOSE_PROJECT_NAME}-flaresolverr-${FLARESOLVERR_TAG}  # Namespace the container name by project and tag
+    hostname: flaresolverr                                                    # Set the container hostname
+
+    # Define the host and container ports
+    ports:
+      - ${FLARESOLVERR_PORT}:8191  # Port to listen for requests
+
+    # Define the container environment
+    environment:
+      <<: *default-environment                        # Pull in the default environment information
+      LOG_LEVEL: ${FLARESOLVERR_LOG_LEVEL}            # Container log level
+      LOG_HTML: ${FLARESOLVERR_LOG_HTML}              # Toggle HTML logging
+      CAPTCHA_SOLVER: ${FLARESOLVERR_CAPTCHA_SOLVER}  # Specify captcha solver
+
+    # Define container healthcheck to verify FlareSolverr connectivity
+    healthcheck:
+      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
+      test:                              # Check FlareSolverr health endpoint
+        - CMD
+        - curl
+        - -fsS
+        - -o
+        - /dev/null
+        - http://127.0.0.1:8191/health
+
+  #
+  # Define the 'prowlarr' service for managing indexers.
+  #
+  prowlarr:
+    # Docker image and container information
+    <<: *arr-stack-container                                          # Pull in arr-stack container config
+    image: lscr.io/linuxserver/prowlarr:${PROWLARR_TAG}               # Run using the specified tag
+    container_name: ${COMPOSE_PROJECT_NAME}-prowlarr-${PROWLARR_TAG}  # Namespace the container name by project and tag
+    hostname: prowlarr                                                # Set the container hostname
+
+    # Define the host and container ports
+    ports:
+      - ${PROWLARR_WEBUI_PORT}:9696  # Prowlarr web UI port
+
+    # Mount host directories into the container
+    volumes:
+      - ${PROWLARR_CONFIG_PATH}:/config:rw  # Database and Prowlarr configs
+
+    # Define container healthcheck to verify Prowlarr connectivity
+    healthcheck:
+      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
+      test:                              # Check Prowlarr ping endpoint
+        - CMD
+        - wget
+        - --no-verbose
+        - --tries=1
+        - --spider
+        - http://127.0.0.1:9696/ping
+
+    # Specify container service dependencies
+    depends_on:
+      flaresolverr:
+        condition: service_healthy  # Wait until FlareSolverr is healthy
+
+  #
+  # Define the 'qbittorrent' service for managing torrents.
+  #
+  qbittorrent:
+    # Docker image and container information
+    <<: *arr-stack-container                                                # Pull in arr-stack container config
+    image: lscr.io/linuxserver/qbittorrent:${QBITTORRENT_TAG}               # Run using the specified tag
+    container_name: ${COMPOSE_PROJECT_NAME}-qbittorrent-${QBITTORRENT_TAG}  # Namespace the container name by project and tag
+    network_mode: service:gluetun                                           # Route network traffic through gluetun
+
+    # Mount host directories into the container
+    volumes:
+      - ${QBITTORRENT_CONFIG_PATH}:/config:rw                   # Configuration files
+      - ${HOST_TORRENTS_DOWNLOADS_PATH}:/downloads/torrents:rw  # Torrent downloads only
+
+    # Define container healthcheck to verify qBittorrent connectivity
+    healthcheck:
+      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
+      test:                              # Check qBittorrent web server
+        - CMD
+        - wget
+        - --no-verbose
+        - --tries=1
+        - --spider
+        - http://127.0.0.1:8080/
+
+    # Specify container service dependencies
+    depends_on:
+      gluetun:
+        condition: service_healthy  # Wait until Gluetun reports healthy VPN connection
+        restart: true               # Follow explicit Compose-managed Gluetun updates
+
+  #
+  # Define the 'whisparr' service for managing adult media.
+  #
+  whisparr:
+    <<:                        # Merge shared and application-specific runtime settings
+      - *arr-stack-container   # Pull in arr-stack container settings
+      - *whisparr-healthcheck  # Share the internal port ping probe
+      - *whisparr-data-dir     # Share the writable media parent for persistent bind mounts
+      - *prowlarr-dependency   # Wait until Prowlarr indexer manager is healthy
+
+    # Docker image and container information
+    image: ghcr.io/hotio/whisparr:${WHISPARR_TAG}                     # Run the floating v3 release channel
+    container_name: ${COMPOSE_PROJECT_NAME}-whisparr-${WHISPARR_TAG}  # Namespace the container name by project and tag
+    hostname: whisparr                                                # Set the container hostname
+
+    # Define the host and container ports
+    ports:
+      - ${WHISPARR_WEBUI_PORT}:6969  # Whisparr web UI port
+
+    # Mount host directories into the container
+    volumes:
+      - ${WHISPARR_CONFIG_PATH}:/config:rw         # Persistent Whisparr configuration
+      - ${WHISPARR_IMPORT_PATH}:/data/import:rw    # Shared staging directory for manual imports
+      - ${WHISPARR_MOVIES_PATH}:/data/movies:rw    # Managed movie library
+      - ${WHISPARR_SCENES_PATH}:/data/scenes:rw    # Managed scene library
+      - ${WHISPARR_RECYCLE_PATH}:/data/recycle:rw  # Private recycling bin for this instance
+      - ${HOST_DOWNLOADS_PATH}:/downloads:rw       # Shared download tree for imports and hardlinks
+
+  #
+  # Define the 'velvarr' service for adult-media discovery and requests.
+  #
+  velvarr:
+    <<:                      # Merge shared container and security settings
+      - *rootless-container  # Run as the configured host user and group
+      - *security-hardening  # Drop capabilities and prevent privilege escalation
+
+    # Docker image and container information
+    image: ${VELVARR_IMAGE}:${VELVARR_TAG}                          # Image repository and tag configured in .env
+    container_name: ${COMPOSE_PROJECT_NAME}-velvarr-${VELVARR_TAG}  # Namespace the container name by project and tag
+    hostname: velvarr                                               # Internal service hostname
+    init: true                                                      # Reap child processes and forward shutdown signals
+    read_only: true                                                 # Keep application code immutable
+
+    # Define the container environment
+    environment:
+      <<: *default-environment                                     # Reuse the stack timezone
+      VELVARR_SECRET_KEY: ${VELVARR_SECRET_KEY}                    # 64 hex characters encrypt stored credentials; keep for recovery
+      VELVARR_SETUP_SECRET: ${VELVARR_SETUP_SECRET}                # At least 32 characters protect the one-time owner setup
+      VELVARR_ORIGIN: ${VELVARR_ORIGIN}                            # Optional browser origin, including scheme and host port
+      VELVARR_ALLOW_HTTP: ${VELVARR_ALLOW_HTTP}                    # 1 permits private-network HTTP; 0 requires HTTPS outside loopback
+      VELVARR_UPDATE_CHECK: ${VELVARR_UPDATE_CHECK}                # 1 enables release notices; 0 disables them
+      VELVARR_DISCORD_WEBHOOK_URL: ${VELVARR_DISCORD_WEBHOOK_URL}  # Optional HTTPS webhook; empty disables notifications
+      VELVARR_DISCORD_DETAIL: ${VELVARR_DISCORD_DETAIL}            # 1 includes titles; 0 sends identity-only messages
+
+    # Publish the web interface independently of the internal service port
+    ports:
+      - ${VELVARR_WEBUI_PORT}:6699  # Host web port; the application and healthcheck always use 6699
+
+    # Provide writable scratch space alongside the read-only root filesystem
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m  # 64 MiB maximum; cleared when the container stops
+
+    # Persist the SQLite database and encrypted integration credentials
+    volumes:
+      - ${VELVARR_CONFIG_PATH}:/data:rw  # Data directory writable by DEFAULT_PUID and DEFAULT_PGID
+
+    # Check the public health endpoint without requiring owner setup
+    healthcheck:
+      <<: *default-healthcheck-settings  # Reuse the stack healthcheck timing
+      test:                              # Check the public health endpoint without requiring owner setup
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:6699/api/health').then(response=>process.exit(response.ok?0:1)).catch(()=>process.exit(1))"
+
+  #
+  # Define the 'jellyfin' service for streaming media libraries.
+  #
+  jellyfin:
+    # Docker image and container information
+    <<: *rootless-container                                           # Pull in rootless container config
+    image: jellyfin/jellyfin:${JELLYFIN_TAG}                          # Run the official Jellyfin image
+    container_name: ${COMPOSE_PROJECT_NAME}-jellyfin-${JELLYFIN_TAG}  # Namespace the container name by project and tag
+    hostname: jellyfin                                                # Set the container hostname
+
+    # Define the container environment
+    environment:
+      <<: *default-environment  # Pull in the default environment information
+
+    # Define the host and container ports
+    ports:
+      - ${JELLYFIN_WEBUI_PORT}:8096  # Jellyfin web UI port
+
+    # Mount host directories into the container
+    volumes:
+      - ${JELLYFIN_CONFIG_PATH}:/config:rw  # Persistent Jellyfin configuration
+      - ${JELLYFIN_CACHE_PATH}:/cache:rw    # Transcoding and image cache
+      - ${JELLYFIN_DATA_PATH}:/data:rw      # Media root containing library directories
+
+      # Read-only frontend mounts that prevent Docker from mapping missing sources as directories instead of files
+      - type: bind                                  # Mount the Jellyfin Web configuration JSON file
+        source: ${JELLYFIN_WEB_CONFIG_PATH}         # JSON settings for Jellyfin Web; compare with the image defaults on upgrades
+        target: /jellyfin/jellyfin-web/config.json  # Mount the configuration file into the container
+        read_only: true                             # Do not allow the container to modify the configuration file
+        bind:                                       # Configure the bind mount
+          create_host_path: false                   # Do not create the host path if it does not exist; fail instead
+      - type: bind                                  # Mount the Jellyfin Web custom directory for branding and static assets
+        source: ${JELLYFIN_WEB_CUSTOM_PATH}         # Locally served CSS and images; Branding CSS selects the stylesheet
+        target: /jellyfin/jellyfin-web/custom       # Mount the custom directory into the container
+        read_only: true                             # Do not allow the container to modify the custom directory
+        bind:                                       # Configure the bind mount
+          create_host_path: false                   # Do not create the host path if it does not exist; fail instead
+
+    # Define container healthcheck to verify Jellyfin connectivity
+    healthcheck:
+      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
+      test:                              # Check Jellyfin's public system endpoint
+        - CMD
+        - curl
+        - -fsS
+        - -o
+        - /dev/null
+        - http://127.0.0.1:8096/System/Info/Public
+
+  #
+  # Define the 'cleanuparr' service for Sonarr, Radarr, and qBittorrent file cleanup.
+  #
+  cleanuparr:
+    # Docker image and container information
+    <<: *arr-stack-container                                              # Pull in arr-stack container config
+    image: ghcr.io/cleanuparr/cleanuparr:${CLEANUPARR_TAG}                # Run using the specified tag
+    container_name: ${COMPOSE_PROJECT_NAME}-cleanuparr-${CLEANUPARR_TAG}  # Namespace the container name by project and tag
+    hostname: cleanuparr                                                  # Set the container hostname
+
+    # Define the container environment
+    environment:
+      <<: *arr-stack-environment          # Pull in the arr-stack environment
+      BASE_PATH: ${CLEANUPARR_BASE_PATH}  # Base path for reverse proxy setups
+
+    # Define the host and container ports
+    ports:
+      - ${CLEANUPARR_WEBUI_PORT}:11011  # Cleanuparr web UI port
+
+    # Mount host directories into the container
+    volumes:
+      - ${CLEANUPARR_CONFIG_PATH}:/config  # Persistent config files
+
+    # Define container healthcheck to verify Cleanuparr connectivity
+    healthcheck:
+      <<: *default-healthcheck-settings  # Pull in default healthcheck settings
+      test:                              # Check Cleanuparr health endpoint
+        - CMD
+        - curl
+        - -fsS
+        - -o
+        - /dev/null
+        - http://127.0.0.1:11011/health
+
+  #
+  # Define the 'watchtower' service for host-wide image updates.
+  #
+  watchtower:
+    <<:                                   # Merge shared and service-specific container settings
+      - *default-container                # Pull in default container settings
+      - *exclude-from-watchtower-updates  # Prevent Watchtower from updating its running container
+
+    # Docker image and container information
+    image: nickfedor/watchtower:${WATCHTOWER_TAG}                         # Run using the specified floating tag
+    container_name: ${COMPOSE_PROJECT_NAME}-watchtower-${WATCHTOWER_TAG}  # Namespace the container name by project and tag
+    hostname: watchtower                                                  # Set the container hostname
+
+    # Define the container environment
+    environment:
+      <<: *default-environment                                     # Pull in the default environment
+      WATCHTOWER_POLL_INTERVAL: ${WATCHTOWER_POLL_INTERVAL}        # Seconds between update checks
+      WATCHTOWER_CLEANUP: ${WATCHTOWER_CLEANUP}                    # Clean old images after updates
+      WATCHTOWER_INCLUDE_STOPPED: ${WATCHTOWER_INCLUDE_STOPPED}    # Include stopped containers when enabled
+      WATCHTOWER_REVIVE_STOPPED: ${WATCHTOWER_REVIVE_STOPPED}      # Start updated stopped containers when enabled
+      WATCHTOWER_NOTIFICATIONS: ${WATCHTOWER_NOTIFICATIONS}        # Notification backend
+      WATCHTOWER_NOTIFICATION_URL: ${WATCHTOWER_NOTIFICATION_URL}  # Optional notification destination
+
+    # Mount host directories into the container
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:rw  # Allow access to the host Docker API
+      - /etc/localtime:/etc/localtime:ro              # Use the host timezone data
+
+#
+# Define the networks section.
+#
+networks:
+  # Configure the default network
+  default:
+    name: ${COMPOSE_PROJECT_NAME}  # Use the name of the Compose project
+    ipam:                          # IP Address Management
+      driver: default              # Use the default driver
+      config:
+        - subnet: ${COMPOSE_NETWORK_SUBNET}      # Subnet in CIDR format that represents a network segment
+          ip_range: ${COMPOSE_NETWORK_IP_RANGE}  # Range from which container IP addresses are allocated
+          gateway: ${COMPOSE_NETWORK_GATEWAY}    # Gateway for the default network

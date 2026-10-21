@@ -1,0 +1,90 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# docker-compose.yml: Docker Compose configuration for running Watchtower
+#                     persistently or as one host-wide update pass.
+#
+# Watchtower uses the Docker socket to update eligible host containers.
+# Containers with an explicit disable label remain outside its control.
+#
+# Services included:
+#   - watchtower:  https://github.com/nicholas-fedor/watchtower
+#
+
+#
+# Setup default properties for all or most containers.
+#
+x-default-container: &default-container  # YAML anchor for default container
+  pull_policy: always                    # Ensure that the image is always pulled
+  restart: unless-stopped                # Restart the container unless explicitly stopped
+  logging:                               # Configure container logging options
+    driver: "json-file"                  # Use JSON file logging driver
+    options:                             # Logging options for the JSON file driver
+      max-size: ${LOG_MAX_SIZE}          # Maximum file size for logs files
+      max-file: ${LOG_MAX_FILE}          # Maximum number of log files to retain
+
+#
+# Setup default variables for all or most containers.
+#
+x-default-environment: &default-environment  # YAML anchor for default environment
+  TZ: ${TZ}                                  # Set the appropriate timezone
+
+#
+# Labels for containers that should not be updated unattended by Watchtower.
+#
+# Privateerr and Gluetun coordinate VPN configuration, tunnel startup, and
+# port-forwarding behavior. Calibre-Web Automated can migrate persistent databases
+# during upgrades. Tracearr's database and Redis also require intentional
+# updates. Check release notes before changing these stateful services.
+#
+x-exclude-from-watchtower-updates: &exclude-from-watchtower-updates  # Exclude from Watchtower
+  labels:                                                            # Add container labels
+    - "com.centurylinklabs.watchtower.enable=false"                  # Require intentional updates
+
+#
+# Define the services section.
+#
+services:
+  #
+  # Define the 'watchtower' service for host-wide image updates.
+  #
+  watchtower:
+    <<:                                   # Merge shared and service-specific container settings
+      - *default-container                # Pull in default container settings
+      - *exclude-from-watchtower-updates  # Prevent Watchtower from updating its running container
+
+    # Docker image and container information
+    image: nickfedor/watchtower:${WATCHTOWER_TAG}                         # Run using the specified floating tag
+    container_name: ${COMPOSE_PROJECT_NAME}-watchtower-${WATCHTOWER_TAG}  # Namespace the container name by project and tag
+    hostname: watchtower                                                  # Set the container hostname
+
+    # Define the container environment
+    environment:
+      <<: *default-environment                                     # Pull in the default environment
+      WATCHTOWER_POLL_INTERVAL: ${WATCHTOWER_POLL_INTERVAL}        # Seconds between update checks
+      WATCHTOWER_CLEANUP: ${WATCHTOWER_CLEANUP}                    # Clean old images after updates
+      WATCHTOWER_INCLUDE_STOPPED: ${WATCHTOWER_INCLUDE_STOPPED}    # Include stopped containers when enabled
+      WATCHTOWER_REVIVE_STOPPED: ${WATCHTOWER_REVIVE_STOPPED}      # Start updated stopped containers when enabled
+      WATCHTOWER_NOTIFICATIONS: ${WATCHTOWER_NOTIFICATIONS}        # Notification backend
+      WATCHTOWER_NOTIFICATION_URL: ${WATCHTOWER_NOTIFICATION_URL}  # Optional notification destination
+
+    # Mount host directories into the container
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:rw  # Allow access to the host Docker API
+      - /etc/localtime:/etc/localtime:ro              # Use the host timezone data
+
+#
+# Define the networks section.
+#
+networks:
+  # Configure the default network
+  default:
+    name: ${COMPOSE_PROJECT_NAME}  # Use the name of the Compose project
+    ipam:                          # IP Address Management
+      driver: default              # Use the default driver
+      config:
+        - subnet: ${COMPOSE_NETWORK_SUBNET}      # Subnet in CIDR format that represents a network segment
+          ip_range: ${COMPOSE_NETWORK_IP_RANGE}  # Range from which container IP addresses are allocated
+          gateway: ${COMPOSE_NETWORK_GATEWAY}    # Gateway for the default network
