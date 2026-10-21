@@ -51,9 +51,9 @@ Run these commands from the repository root. Replace `YOUR-PRESET` in examples w
 
 ## Choose the generator revision
 
-Make reuses the configured local `MARAUDARR_IMAGE` first, then tries to pull it, and builds from this checkout only when that pull fails. The mounted checkout receives output; its source files do not replace the generator's packaged catalog or templates. The default `latest` stable image can lag behind `main`.
+`MARAUDARR_IMAGE` selects the generator's packaged catalog and templates. Make uses the local reference when available, otherwise pulls it and builds from this checkout if the pull fails. The mounted checkout is the output destination. The Make default `latest` channel identifies a stable published image.
 
-Follow [generator revision selection](../docs/development/maraudarr/index.md#choose-the-generator-revision) to build this checkout under a distinct local reference, reuse that reference for every generator command, or select a verified published version. Rebuild after source changes; `make pull-image` refreshes the configured published reference instead.
+Follow [generator revision selection](../docs/development/maraudarr/index.md#choose-the-generator-revision) to build and select this checkout under a distinct local reference for the commands below, or choose a verified published version with matching documentation. `make build` packages the source; `make pull-image` pulls the configured published reference.
 
 ## Select services
 
@@ -84,7 +84,7 @@ The default Plundarr voyage includes one Sonarr instance. `sonarr-anime` is an o
 
 Lidarr and Recyclarr are opt-in Plundarr additions. Lidarr adds Prowlarr automatically, shares the download root, and writes the music library selected by `HOST_MUSIC_PATH`; its LinuxServer image supports `linux/amd64` and `linux/arm64`, not `linux/arm/v7`. Recyclarr remains behind the `tools` profile and runs only through `make recyclarr-preview` or the deliberate `make recyclarr-sync` target. Its starter configuration is seeded once and preserved during regeneration.
 
-Calibre-Web Automated keeps its configuration, destructive ingest directory, and Calibre library on three separate mounts. Its image supports `linux/amd64` and `linux/arm64`; Watchtower does not update it automatically because application releases may migrate persistent databases.
+Calibre-Web Automated keeps its configuration, destructive ingest directory, and Calibre library on three separate mounts. Its image supports `linux/amd64` and `linux/arm64`; Watchtower does not update it automatically so application image changes remain operator-controlled; keep application-consistent database backups.
 
 The `portainer` preset runs only Portainer Community Edition on its official `lts` channel, with persistent data and configurable HTTPS and Edge ports. See the [Portainer deployment guide](../docs/project-guides/portainer.md).
 

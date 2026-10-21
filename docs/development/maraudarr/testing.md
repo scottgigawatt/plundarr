@@ -20,7 +20,7 @@ This includes unit tests, packaged-image fallback checks, all product presets, B
 
 ## Verify public preset references
 
-The [preset reference guide](https://github.com/scottgigawatt/plundarr/blob/main/examples/presets/README.md) explains how to rebuild the production generator from the source under review, refresh the public pairs, and compare them with fresh container output. Use the same explicit local image reference for both commands; a cached `latest` image is not proof that the checkout's output matches.
+The [preset reference guide](https://github.com/scottgigawatt/plundarr/blob/main/examples/presets/README.md) describes building the production generator from the source under review, generating public pairs, and comparing them with container output. Use the same explicit source-built image reference for both commands.
 
 Reference generation validates both the generated `.env` and public `example.env` with real Docker Compose, without starting application services. It generates each preset twice and requires byte-identical public files. Only `docker-compose.yml` and secret-free `example.env` are published; deployment credentials and config seeds remain outside the reference tree. The curated custom example deliberately adds services to the otherwise empty custom preset.
 

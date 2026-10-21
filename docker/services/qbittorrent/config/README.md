@@ -59,7 +59,7 @@ The seeded `qBittorrent.conf` stays data-only. qBittorrent stores settings with 
 | `[AutoRun]` | `enabled`, `program` | Disables arbitrary program execution after torrent events. |
 | `[BitTorrent]` | save path, temporary path, listen port, queueing, share action | Keeps completed and incomplete torrents under `/downloads/torrents`. |
 | `[LegalNotice]` | `Accepted` | Records the initial notice acknowledgement so the service can start unattended. |
-| `[Meta]` | `MigrationVersion` | Lets qBittorrent apply its own compatible settings migrations. |
+| `[Meta]` | `MigrationVersion` | Tracks qBittorrent's internal configuration version. |
 | `[Network]` | cookies, proxy profiles, port forwarding | Leaves VPN routing to Gluetun and prevents application-level port forwarding. |
 | `[Preferences]` | Web UI access, download paths, UPnP, port range | Permits localhost-only automation while the Gluetun hook updates the listening port safely. |
 

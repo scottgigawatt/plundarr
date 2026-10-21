@@ -1,6 +1,6 @@
 # Deploy Portainer 🚢
 
-Generate a standalone Portainer Community Edition server to manage your Docker host:
+Run generation examples from the repository root with the [source-built generator](../development/maraudarr/index.md#choose-the-generator-revision) selected through `MARAUDARR_IMAGE`. Generate a standalone Portainer Community Edition server to manage your Docker host:
 
 ```sh
 make ship PRESET=portainer
@@ -15,7 +15,7 @@ Review `dist/portainer/.env` before starting it:
 | `PORTAINER_WEB_PORT` | `9443` | Host port for the HTTPS interface. |
 | `PORTAINER_EDGE_PORT` | `8888` | Host port mapped to the Edge agent tunnel on container port `8000`. |
 
-Set `PORTAINER_CONFIG_PATH` to an existing Portainer data directory if you intend to reuse it. Stop any other Portainer server using that directory before launching this project, and back up the data before changing versions. The generator does not copy existing data into the new project.
+`PORTAINER_CONFIG_PATH` selects the persistent database and settings directory. Exactly one Portainer server may use that directory at a time. Prepare an application-consistent backup before changing its contents or selected image; the generator does not copy external state.
 
 ```sh
 make up PRESET=portainer

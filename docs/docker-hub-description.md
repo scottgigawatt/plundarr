@@ -5,7 +5,7 @@ Maraudarr is the short-lived Docker Compose project generator image for [Plundar
 > [!IMPORTANT]
 > Plundarr is the generated media stack. Maraudarr creates that stack and exits; it is not a long-running media service.
 
-This source description tracks the current checkout. The default `MARAUDARR_IMAGE` uses the stable `latest` image, which may not include features added on `main`. Follow [generator revision selection](https://github.com/scottgigawatt/plundarr/blob/main/docs/development/maraudarr/index.md#choose-the-generator-revision) to build and select the checkout explicitly, or consult documentation matching the published version you choose.
+This description documents the source at its selected repository revision. `MARAUDARR_IMAGE` chooses the generator and defaults to the stable `latest` image. Follow [generator revision selection](https://github.com/scottgigawatt/plundarr/blob/main/docs/development/maraudarr/index.md#choose-the-generator-revision) to build and select this checkout, or use documentation matching the published version or digest you select.
 
 ## Generate a stack quickly
 
@@ -14,6 +14,8 @@ The repository Makefile supplies the hardened Docker invocation. Run commands fr
 ```sh
 git clone https://github.com/scottgigawatt/plundarr.git
 cd plundarr
+export MARAUDARR_IMAGE=maraudarr:dev
+make build
 make ship
 ```
 

@@ -25,17 +25,18 @@ Maraudarr does **not** start the generated stack, manage long-running service st
 
 `make ship`, `make configure`, `make presets`, and `make services` run the configured `MARAUDARR_IMAGE`, which defaults to `ghcr.io/scottgigawatt/maraudarr:latest`. Make first reuses that exact local reference. If it is absent, Make pulls the configured reference; a failed pull triggers a local build from this checkout. The mounted repository is the output destination, not a live source-code mount into the generator.
 
-A source checkout and a cached or published image can therefore describe different catalogs and seeds. The `latest` channel tracks stable releases, while `edge` tracks successful `main` builds. Features documented on `main` may not be in the latest stable image yet. A mutable channel also may have moved since a cached image was pulled; do not use it as evidence that output matches a particular checkout.
+The `latest` channel identifies a stable release, `edge` identifies a successful `main` build, and a release/revision reference identifies the selected published source. Use documentation matching that source. A checkout build packages the catalog and seeds from its `docker/` directory.
 
-For source development or an unreleased feature, build a distinct local image from the checkout and pass that same reference to every generator command:
+To run the generator described by this checkout, export one local image reference, build it, and use it for all generation commands in that shell:
 
 ```sh
-make build MARAUDARR_IMAGE=maraudarr:dev
-make presets MARAUDARR_IMAGE=maraudarr:dev
-make configure MARAUDARR_IMAGE=maraudarr:dev
+export MARAUDARR_IMAGE=maraudarr:dev
+make build
+make presets
+make configure
 ```
 
-For non-interactive generation, replace the final command with `make ship MARAUDARR_IMAGE=maraudarr:dev PRESET=boudoirr`, including any intended additions and removals. Rebuild after source changes. To use a published version instead, select a verified release or revision reference through `MARAUDARR_IMAGE`; `make pull-image` refreshes the configured reference without rebuilding this checkout.
+For non-interactive generation, use `make ship PRESET=boudoirr` with the exported image reference and the complete intended additions/removals. `make build` packages the checkout into the configured local image. To select a published generator, set `MARAUDARR_IMAGE` to a verified version or digest and use its matching documentation; `make pull-image` pulls that configured reference.
 
 ## Explore the source map
 

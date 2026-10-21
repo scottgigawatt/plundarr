@@ -2,6 +2,8 @@
 
 Add an alternative browser client, keep Web settings on the host, and give your library a little velvet. Plundarr deploys the stack; Maraudarr generates its Compose chart, environment, and safe configuration seeds. These instructions target the official Jellyfin image and Jellyfin Server/Web 12.2, while retaining the floating `latest` image default.
 
+Run generation examples from the repository root with `MARAUDARR_IMAGE` set to the [source-built generator](../development/maraudarr/index.md#choose-the-generator-revision) for this checkout.
+
 ## Choose the client
 
 Jellyfin Web is bundled with the server and supports `config.json`, custom menu links, and Branding CSS. [Jellyfin Vue](https://jellyfin.org/docs/general/clients/jellyfin-vue/) is an experimental separate browser client with its own configuration. Neither Web settings nor the Boudoirr CSS theme customize Vue or every native client.
@@ -33,7 +35,7 @@ Open Vue at its host port and enter the Jellyfin URL, including scheme and serve
 
 Vue retains its image's nginx user and writable startup configuration. It needs no media mounts, API keys, persistent database, or server startup dependency. Its healthcheck tests the static frontend. Its supported image channel is `unstable`; existing Watchtower policy controls unattended updates. Read the [Vue chart](https://github.com/scottgigawatt/plundarr/blob/main/docker/services/jellyfin-vue/README.md) for the container boundary.
 
-Vue uses its own environment-generated frontend `config.json`; it does not read Jellyfin Web's JSON or Branding CSS. Maraudarr also seeds `config/jellyfin-vue/default.conf` for nginx, mounted read-only through `JELLYFIN_VUE_NGINX_CONFIG_PATH`. For older deployments, regenerate with your complete selection and the [intended generator revision](../development/maraudarr/index.md#choose-the-generator-revision) before recreating Vue. Preserve operator edits and keep the nginx listener on internal port `8080`, matching the chart and healthcheck. This server-side listener does not change the host ports or the browser-reachable Jellyfin URL.
+Vue uses its own environment-generated frontend `config.json`; it does not read Jellyfin Web's JSON or Branding CSS. Maraudarr seeds `config/jellyfin-vue/default.conf` for nginx, mounted read-only through `JELLYFIN_VUE_NGINX_CONFIG_PATH`. Operator edits are preserved; external overrides must name an existing readable file. Keep the nginx listener on internal port `8080`, matching the chart and healthcheck. The host port and browser-reachable Jellyfin URL are separate settings.
 
 ## Select your Web configuration
 
@@ -52,7 +54,7 @@ To choose the privacy example, set this assignment in the deployment's `.env`:
 JELLYFIN_WEB_CONFIG_PATH="./config/jellyfin/web/privacy-config.json"
 ```
 
-This removes the two external player integrations described in [Jellyfin's privacy guidance](https://jellyfin.org/docs/general/clients/web-config/#privacy-focused-changes). It does not disable server metadata providers or remove remote images from library metadata. Jellyfin 12.2 uses player names such as `chromecastPlayer/plugin` in its JSON list; edit the actual list rather than copying older examples containing a `plugins/` prefix.
+This removes the two external player integrations described in [Jellyfin's privacy guidance](https://jellyfin.org/docs/general/clients/web-config/#privacy-focused-changes). It does not disable server metadata providers or remove remote images from library metadata. Jellyfin 12.2 uses player names such as `chromecastPlayer/plugin` in its JSON list; use those exact names in the selected JSON file.
 
 Validate your selected file, then recreate Jellyfin. This Boudoirr example assumes the default file path; change the JSON path when selecting another file:
 
@@ -67,7 +69,7 @@ Compose applies changed mount paths when recreating the container. If the path i
 docker compose --env-file dist/boudoirr/.env -f dist/boudoirr/docker-compose.yml up -d --force-recreate jellyfin
 ```
 
-Missing bind sources fail startup rather than becoming directories that hide the image's `config.json`. For older generated deployments, regenerate before launch to create the new seeds. A mounted config also hides newer image defaults: compare your file with the bundled `config.json` whenever `latest` moves to a new release, then merge desired changes manually. Your menu links and edits always remain authoritative. [Upstream Web configuration](https://jellyfin.org/docs/general/clients/web-config/) explains the mount target.
+Missing bind sources fail startup rather than becoming directories that hide the image's `config.json`. Maraudarr creates missing managed seeds during generation. External configuration and asset paths must already exist. The mounted JSON is the complete Web configuration; validate it against the selected Jellyfin Web version and preserve your menu links and settings. [Upstream Web configuration](https://jellyfin.org/docs/general/clients/web-config/) explains the mount target.
 
 ## Enable the Boudoirr theme
 
@@ -81,7 +83,7 @@ For an individual account, use **Settings > Display > Custom CSS**. When choosin
 
 The theme targets Jellyfin 12.2's `--jf-palette-*` variables, React/MUI navigation classes, and existing Web card classes. It adds plum surfaces, pink actions, gold progress and focus outlines, and softly rounded artwork. It retains normal hit targets, playback controls, keyboard focus, and reduced-motion preferences. It imports no external fonts, images, or scripts. The JSON mount does not enable CSS by itself; Branding chooses the stylesheet separately. The Jellyfin 12 admin dashboard and native clients may keep their own appearance.
 
-Clear the CSS import to restore the normal Web appearance. Regeneration preserves theme edits, so changing the project seed will not replace a deployed theme. Verify login, library browsing, item details, playback controls, mobile layout, and keyboard focus after each Web upgrade. [Custom CSS documentation](https://jellyfin.org/docs/general/clients/css-customization/) explains global and per-user settings.
+Clear the CSS import to restore the normal Web appearance. Regeneration preserves theme edits, so changing the project seed will not replace a deployed theme. Verify login, library browsing, item details, playback controls, mobile layout, and keyboard focus with the selected Web version. [Custom CSS documentation](https://jellyfin.org/docs/general/clients/css-customization/) explains global and per-user settings.
 
 [Jellyfish](https://github.com/n00bcodr/Jellyfish) is a broader alternative whose current source explicitly supports Jellyfin 12's modern layout. Choose one main theme at a time; stacking unrelated themes can produce conflicting rules. The bundled Boudoirr theme keeps its assets local and its changes smaller.
 

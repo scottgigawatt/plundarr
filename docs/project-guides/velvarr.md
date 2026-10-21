@@ -2,6 +2,8 @@
 
 [Velvarr](https://github.com/Skare69/velvarr) discovers adult movies and scenes, sends approved requests to Whisparr v3, and connects users to Jellyfin playback. It is selected by default in Boudoirr alongside Jellyfin; both can be removed independently in the CLI or interactive picker. The current official image supports `linux/amd64` only.
 
+Run generation examples from the repository root with `MARAUDARR_IMAGE` set to the [source-built generator](../development/maraudarr/index.md#choose-the-generator-revision) for this checkout.
+
 ## Select the services
 
 You need a Jellyfin server, an account allowed to access the intended libraries, and a Jellyfin API key. Jellyfin is required for owner setup and user authentication; Plex alone cannot provide that login. To fulfill requests, also configure Whisparr v3 and its API key. Metadata provider credentials are entered in Velvarr's interface.
@@ -48,9 +50,9 @@ The base host port is `6699`; Boudoirr adds its normal `10000` offset, while Cus
 
 The application runs as `DEFAULT_PUID:DEFAULT_PGID` with `DEFAULT_GROUP`, matching other rootless service charts. Set the shared IDs from `id -u` and `id -g` for your Synology account and confirm that account can write the selected config directory. Velvarr does not need media or download mounts; it connects to Whisparr and Jellyfin over the project network. SQLite state uses this host bind mount rather than a named volume or separate database service.
 
-## Switch between stable and fork images
+## Select the image
 
-Both freshly generated `.env` and `example.env` files default to the official stable image. The Compose chart uses `${VELVARR_IMAGE}:${VELVARR_TAG}`, so you can switch repositories and channels by editing only `dist/boudoirr/.env`. Existing deployments receive the official `VELVARR_IMAGE` default when regenerated; existing image and tag overrides are preserved. The reference `example.env` keeps the official defaults.
+The generated `.env` and `example.env` default to the official stable image. The Compose chart uses `${VELVARR_IMAGE}:${VELVARR_TAG}`; set the repository and channel in `dist/boudoirr/.env`. Regeneration preserves those assignments, while `example.env` records the source defaults.
 
 For a fork image, replace `YOUR-GITHUB-USER` with the publisher's lowercase registry namespace and set these assignments in `.env`:
 
@@ -59,12 +61,14 @@ VELVARR_IMAGE="ghcr.io/YOUR-GITHUB-USER/velvarr"
 VELVARR_TAG="edge"
 ```
 
-To use the official floating stable image again, set:
+For the official floating stable image, set:
 
 ```sh
 VELVARR_IMAGE="ghcr.io/skare69/velvarr"
 VELVARR_TAG="latest"
 ```
+
+Choose an image supporting the host architecture and the application's data format. Back up the application config and review the selected image's requirements before changing the repository or channel.
 
 Keep the repository and tag separate; do not include `:edge` or `:latest` in `VELVARR_IMAGE`. Pull the selected image and recreate only Velvarr:
 
@@ -72,8 +76,6 @@ Keep the repository and tag separate; do not include `:edge` or `:latest` in `VE
 docker compose --project-directory dist/boudoirr pull velvarr
 docker compose --project-directory dist/boudoirr up -d velvarr
 ```
-
-If your generated chart still contains the fixed image repository, regenerate it with your complete service selection before switching images. Changing `.env` or restarting the old container alone does not replace its image. Check that the selected image supports your host architecture and preserves compatibility with your existing application data; review its release notes before switching versions.
 
 ## Launch and complete setup
 

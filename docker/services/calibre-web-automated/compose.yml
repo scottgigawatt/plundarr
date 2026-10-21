@@ -13,7 +13,7 @@ services:
   calibre-web-automated:
     <<:                                   # Merge shared and service-specific container settings
       - *arr-stack-container              # Pull in arr-stack container settings
-      - *exclude-from-watchtower-updates  # Keep database migrations under operator control
+      - *exclude-from-watchtower-updates  # Keep application image changes under operator control
 
     # Docker image and container information
     image: crocodilestick/calibre-web-automated:${CWA_TAG}                    # Run using the specified tag

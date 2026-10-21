@@ -66,9 +66,9 @@ x-security-hardening: &security-hardening  # YAML anchor for existing capability
 # Labels for containers that should not be updated unattended by Watchtower.
 #
 # Privateerr and Gluetun coordinate VPN configuration, tunnel startup, and
-# port-forwarding behavior. Calibre-Web Automated can migrate persistent databases
-# during upgrades. Tracearr's database and Redis also require intentional
-# updates. Check release notes before changing these stateful services.
+# port-forwarding behavior. Calibre-Web Automated, Tracearr's database, and Redis
+# require deliberate image selection and application-consistent backups.
+# Review the selected image requirements before operating these stateful services.
 #
 x-exclude-from-watchtower-updates: &exclude-from-watchtower-updates  # Exclude from Watchtower
   labels:                                                            # Add container labels

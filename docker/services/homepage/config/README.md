@@ -4,7 +4,7 @@ Homepage reads its dashboard settings and generated service cards from this dire
 
 ## Configure password login
 
-Homepage native password login is enabled by default and requires Homepage v2 or later. Maraudarr generates a unique `HOMEPAGE_AUTH_PASSWORD` and `HOMEPAGE_AUTH_SECRET` in the deployment's `.env` when those settings are first added, including when regenerating an older deployment. Read the password locally from `.env`; the login form does not need a username. `example.env` intentionally leaves both secrets empty and is not a ready-to-use login configuration.
+Homepage native password login is enabled by default and requires Homepage v2 or later. Maraudarr creates `HOMEPAGE_AUTH_PASSWORD` and `HOMEPAGE_AUTH_SECRET` in the deployment's `.env` when absent, and preserves their values during regeneration. Read the password locally; the login form does not need a username. `example.env` intentionally leaves both secrets empty and is not a ready-to-use login configuration.
 
 Set `HOMEPAGE_EXTERNAL_URL` to the exact browser URL, including its scheme and any nonstandard port. Set `HOMEPAGE_ALLOWED_HOSTS` to the matching hostname and port without the scheme. For example, use `https://homepage.example.com` and `homepage.example.com` behind an HTTPS reverse proxy. Keep `HOMEPAGE_AUTH_ENABLED=true`.
 

@@ -4,7 +4,7 @@ This guide generates a Plundarr deployment, reviews the host-specific settings, 
 
 ## Generate a deployment
 
-Install the prerequisites in the [repository README](https://github.com/scottgigawatt/plundarr#readme) and run commands from the cloned repository root. These instructions describe the checkout's catalog; the generator runs from `MARAUDARR_IMAGE`, which may be a cached stable image. Follow [generator revision selection](development/maraudarr/index.md#choose-the-generator-revision) when testing unreleased changes or regenerating with this source revision.
+Install the prerequisites in the [repository README](https://github.com/scottgigawatt/plundarr#readme) and run commands from the cloned repository root. These instructions target the checkout's catalog and seeds. Build and select its generator through [generator revision selection](development/maraudarr/index.md#choose-the-generator-revision); keep `MARAUDARR_IMAGE` set to that reference for the generation commands on this page.
 
 Run the interactive Maraudarr Docker Compose project generator:
 
@@ -57,7 +57,7 @@ Presets containing Homepage enable its native password login. Maraudarr generate
 
 Before launch, set `HOMEPAGE_EXTERNAL_URL` to the URL you will open in your browser and `HOMEPAGE_ALLOWED_HOSTS` to its hostname, including a nonstandard port but omitting the scheme. For a Synology HTTPS reverse proxy, use values such as `https://homepage.example.com` and `homepage.example.com`, configure the certificate and proxy separately, and forward to `HOMEPAGE_WEBUI_PORT`. Recreate Homepage after changing `.env`.
 
-Existing deployments must regenerate their Compose and environment files with the updated Maraudarr image and run Homepage v2 or later; older custom image tags do not provide native login. Generated secrets are added when absent and remain stable across regeneration. Homepage does not rate-limit password attempts; public access also needs appropriate proxy access controls and rate limiting, or a VPN. See the generated `config/homepage/README.md` for password changes, session invalidation, and proxy details.
+Homepage requires v2 or later for native login. Generated secrets are created when absent and remain stable across regeneration. Homepage does not rate-limit password attempts; public access also needs appropriate proxy access controls and rate limiting, or a VPN. See the generated `config/homepage/README.md` for password changes, session invalidation, and proxy details.
 
 ## Add Velvarr to Boudoirr
 
@@ -162,7 +162,7 @@ Media-server libraries are configured in Jellyfin, Plex, or Calibre-Web Automate
 
 ## Customize Jellyfin playback
 
-Boudoirr and standalone Jellyfin can add the optional Vue client with `ADD_SERVICES=jellyfin-vue`. Jellyfin Web also receives a configurable read-only settings file and local CSS directory. Read the [Jellyfin customization guide](project-guides/jellyfin.md) for client URLs, theme activation, menu links, upgrades, and plugin choices.
+Boudoirr and standalone Jellyfin can add the optional Vue client with `ADD_SERVICES=jellyfin-vue`. Jellyfin Web also receives a configurable read-only settings file and local CSS directory. Read the [Jellyfin customization guide](project-guides/jellyfin.md) for client URLs, theme activation, menu links, image compatibility, and plugin choices.
 
 ## Configure Lidarr
 
@@ -181,7 +181,7 @@ Review these values in `dist/plundarr/.env`:
 | `LIDARR_CONFIG_PATH` | Persistent Lidarr database and application settings |
 | `HOMEPAGE_VAR_LIDARR_KEY` | Lidarr API key used by the optional Homepage widget |
 
-Lidarr automatically adds Prowlarr and its indexing dependency. Configure `/music` as the Lidarr root folder and connect a selected downloader after launch. Plex receives the same host path read-only at `/music` whenever Plex and Lidarr are selected together. Jellyfin can expose it as `/data/music` when `JELLYFIN_DATA_PATH` points to the parent media root.
+Lidarr automatically adds Prowlarr and its indexing dependency. Configure `/music` as the Lidarr root folder and connect a selected downloader after launch. Plex receives the same host path read-only at `/music` whenever Plex and Lidarr are selected together. Jellyfin exposes `/data/music` from the `music` directory beneath `JELLYFIN_DATA_PATH`. It sees the same music library only when that is the host directory selected by `HOST_MUSIC_PATH`; the generator does not add a separate music bind to Jellyfin.
 
 The [LinuxServer Lidarr image](https://docs.linuxserver.io/images/docker-lidarr/) supports `linux/amd64` and `linux/arm64`, not `linux/arm/v7`. The [Homepage Lidarr widget guide](https://gethomepage.dev/widgets/services/lidarr/) documents the API key and supported fields used by the generated card.
 
@@ -201,7 +201,7 @@ make ship ADD_SERVICES=recyclarr
 | `RECYCLARR_SONARR_API_KEY` | Sonarr API key required before synchronization |
 | `RECYCLARR_CONFIG_PATH` | Regeneration-safe Recyclarr configuration and cache directory |
 
-Maraudarr seeds `config/recyclarr/recyclarr.yml` once. The starter syncs upstream quality-size definitions only, does not delete old custom formats, and can be extended with the templates and profiles appropriate for the library.
+Maraudarr seeds `config/recyclarr/recyclarr.yml` once. The starter syncs upstream quality-size definitions only, preserves existing custom formats, and can be extended with the templates and profiles appropriate for the library.
 
 Preview and apply Recyclarr through separate profile-aware targets:
 
@@ -239,7 +239,7 @@ Review these values in the selected preset's `.env`:
 
 The default Plundarr Homepage card uses CWA's native widget. Replace `HOMEPAGE_VAR_CWA_USER` and `HOMEPAGE_VAR_CWA_PASS` with a CWA account in the generated `.env` to enable book, author, and series counts.
 
-CWA is excluded from unattended Watchtower updates so database migrations remain a deliberate operator action. Its published image supports `linux/amd64` and `linux/arm64`, not `linux/arm/v7`.
+CWA is excluded from unattended Watchtower updates so application image changes remain a deliberate operator action. Its published image supports `linux/amd64` and `linux/arm64`, not `linux/arm/v7`.
 
 See the [Calibre-Web Automated project](https://github.com/crocodilestick/Calibre-Web-Automated) for application-level setup and the [Homepage Calibre-Web widget guide](https://gethomepage.dev/widgets/services/calibre-web/) for dashboard integration details.
 

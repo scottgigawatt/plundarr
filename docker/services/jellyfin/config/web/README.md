@@ -10,7 +10,7 @@ To choose the privacy variant, set this value in the deployment's `.env` and rec
 JELLYFIN_WEB_CONFIG_PATH="./config/jellyfin/web/privacy-config.json"
 ```
 
-Keep the floating `JELLYFIN_TAG=latest` channel if desired, but compare your mounted JSON with the new image's bundled defaults on upgrades. Existing files never refresh automatically, because they may contain operator menu links and settings. A file bind can retain the old inode after an editor replaces the file; recreate the Jellyfin container after changing the JSON or its selected path.
+`JELLYFIN_TAG` selects the server image. Validate the mounted JSON against that image's bundled Web settings; operator menu links and configuration remain authoritative. File binds are established when the container is created, so recreate Jellyfin after editing the JSON or selecting another file path.
 
 To enable the local theme, choose the **Dark** display theme and enter this line in **Dashboard > Branding > Custom CSS**, then save and reload. Individual users can apply it through **Settings > Display > Custom CSS** instead:
 
@@ -34,4 +34,4 @@ Five additional original styles use the same Jellyfin Web 12.2 base. Import exac
 | Rose editorial | Warm rose, gold lines, system serif headings | `@import url("custom/rose-editorial.css");` |
 | Emerald lounge | Jewel green, gold progress, pill-shaped actions | `@import url("custom/emerald-lounge.css");` |
 
-The original Boudoirr theme remains available through `custom/boudoirr.css`. Regeneration preserves edits to every theme and the shared `theme-base.css`. Aurora glass provides solid surfaces when blur is unavailable or reduced transparency is requested. These are original Plundarr styles inspired by community designs, not copies of those themes. See the project guide for source inspiration and validation scope.
+The Boudoirr theme is available through `custom/boudoirr.css`. Regeneration preserves edits to every theme and the shared `theme-base.css`. Aurora glass provides solid surfaces when blur is unavailable or reduced transparency is requested. These are original Plundarr styles inspired by community designs, not copies of those themes. See the project guide for source inspiration and validation scope.

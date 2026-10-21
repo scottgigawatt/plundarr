@@ -48,29 +48,19 @@ To disable recovery, set `PRIVATEERR_AUTO_RECOVER=false` in the generated `.env`
 
 Recovery respects `PIA_AUTOCONNECT`, `PIA_PREFERRED_REGION`, and `PIA_PF`. A selected region stays pinned during recovery. See [Privateerr's recovery guide](https://github.com/scottgigawatt/privateerr/blob/main/docs/automatic-recovery.md) for the full sequence, authentication routes, and limits.
 
-### Update an existing deployment
+### Configure the recovery wrapper
 
-Use a Privateerr release that includes automatic Gluetun recovery before applying these settings. A saved `PRIVATEERR_TAG` pin remains unchanged during regeneration. Pull the updated Maraudarr generator and regenerate your selected preset:
+`GLUETUN_WRAPPER_SCRIPT_PATH` selects the [bundled startup wrapper](https://github.com/scottgigawatt/plundarr/blob/main/docker/services/gluetun/config/scripts/gluetun-entrypoint-wrapper.sh). The selected Privateerr image must support the recovery API and Docker-applied IPv6 settings. Maraudarr preserves WireGuard state, application data, existing keys, explicit recovery choices, and operator-owned scripts.
 
-```sh
-make pull-image
-make ship PRESET=YOUR-PRESET
-```
-
-Regeneration adds missing recovery settings and generates the shared key. It upgrades the unchanged previous bundled Gluetun wrapper, while preserving WireGuard state, application data, existing keys, and an explicit recovery opt-out.
-
-> [!IMPORTANT]
-> Customized, symlinked, or older unrecognized wrappers remain untouched. Before recreating such a deployment, update the script selected by `GLUETUN_WRAPPER_SCRIPT_PATH` using the [current wrapper](https://github.com/scottgigawatt/plundarr/blob/main/docker/services/gluetun/config/scripts/gluetun-entrypoint-wrapper.sh), or set `PRIVATEERR_AUTO_RECOVER=false`. If you maintain `/gluetun/auth/config.toml` yourself, add Privateerr's recovery role with the same shared key; the wrapper preserves that file.
-
-Then recreate the complete stack with `make up PRESET=YOUR-PRESET`. In Synology Container Manager, rebuild the project using its regenerated Compose file and updated `.env`. Check Privateerr's logs for automatic recovery being enabled and Gluetun's logs for the tunnel becoming healthy. Keep the API key and VPN configuration out of support reports.
+Customized or symlinked wrappers must implement the configured health-listener and authenticated control-role behavior. An operator-managed `/gluetun/auth/config.toml` must provide Privateerr's recovery role with the shared key; the wrapper preserves that file. Set `PRIVATEERR_AUTO_RECOVER=false` when the selected wrapper or authentication configuration does not support recovery. Keep the API key and VPN configuration out of support reports.
 
 ## Run Privateerr without privileged mode
 
 Generated Privateerr services drop all Linux capabilities and enable `no-new-privileges`. The unmodified PIA scripts still run as UID 0, but Privateerr does not receive VPN device or network-administration privileges. Gluetun retains the privileges required to run its tunnel.
 
-The generated `.env` sets `PRIVATEERR_IPV6_DISABLED=1`, which Docker applies to Privateerr's own network namespace before startup. Keep `PIA_DISABLE_IPV6=yes`; the updated Privateerr wrapper recognizes the existing IPv6 settings and avoids redundant sysctl writes without hiding warnings. Regeneration preserves an existing PIA setting and adds the namespace setting. Keep Privateerr's mounted configuration directories writable by UID 0.
+The generated `.env` sets `PRIVATEERR_IPV6_DISABLED=1`, which Docker applies to Privateerr's network namespace before startup. Keep `PIA_DISABLE_IPV6=yes`; Privateerr honors those settings without redundant sysctl writes. Its mounted configuration directories must remain writable by UID 0.
 
-Use a Privateerr release containing both recovery and the IPv6 wrapper update before recreating a generated deployment. An image-only Watchtower update retains existing container options, so older deployments remain privileged until their Compose configuration is updated and the container is recreated. Missing recovery settings continue to mean recovery is disabled. The bundled VPN services disable unattended Watchtower updates through their container labels.
+The selected Privateerr image must support automatic recovery and Docker-applied IPv6 settings. Missing recovery settings mean recovery is disabled. The bundled VPN services disable unattended Watchtower updates through their container labels.
 
 ## Coordinate qBittorrent maintenance
 

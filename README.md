@@ -52,7 +52,7 @@ Plundarr is a generated, ready-to-run Docker Compose media stack built from the 
 
 Each generated Compose project works with Docker Compose and Synology Container Manager. Routine configuration stays in the deployment's `.env`; you do not need to assemble Compose fragments by hand.
 
-This page tracks the checked-out source, including changes that may not yet be released. `MARAUDARR_IMAGE` defaults to the stable `latest` image, so use [the current-source build instructions](docs/development/maraudarr/index.md#choose-the-generator-revision) for the catalog and seeds described here. For a released image, consult documentation from its matching source tag rather than assuming `main` describes that release.
+These instructions describe the catalog and configuration seeds in this checkout. Build and select its generator using the [source build instructions](docs/development/maraudarr/index.md#choose-the-generator-revision). For a published image, use documentation from its matching source tag.
 
 ## Understand Plundarr and Maraudarr
 
@@ -63,7 +63,7 @@ The repository has two deliberately separate parts:
 
 VPN-enabled presets use [Privateerr](https://github.com/scottgigawatt/privateerr) to generate PIA WireGuard configuration and [Gluetun](https://github.com/qdm12/gluetun) to establish and maintain the actual VPN tunnel.
 
-Maraudarr images are published to [GitHub Container Registry](https://github.com/scottgigawatt/plundarr/pkgs/container/maraudarr) and [Docker Hub](https://hub.docker.com/r/scottgigawatt/maraudarr). `make ship` uses `MARAUDARR_IMAGE`, which defaults to `ghcr.io/scottgigawatt/maraudarr:latest`. It reuses a matching local image first; otherwise it pulls that reference and builds from this checkout only if the pull fails. Updating source files does not rebuild an existing generator image. These guides describe the checked-out source; features on `main` may be newer than the latest stable image. Follow [the generator revision guide](docs/development/maraudarr/index.md#choose-the-generator-revision) to build and select this checkout explicitly.
+Maraudarr images are published to [GitHub Container Registry](https://github.com/scottgigawatt/plundarr/pkgs/container/maraudarr) and [Docker Hub](https://hub.docker.com/r/scottgigawatt/maraudarr). `MARAUDARR_IMAGE` selects the generator and its packaged catalog; the Make default is `ghcr.io/scottgigawatt/maraudarr:latest`. Make uses that local reference when available, otherwise pulls it and builds from this checkout if the pull fails. The commands below explicitly select a local source build.
 
 ## Generate the default stack ⚡
 
@@ -72,10 +72,12 @@ Before you begin, install Git, Docker with Docker Compose, and Make. The default
 ```sh
 git clone https://github.com/scottgigawatt/plundarr.git
 cd plundarr
+export MARAUDARR_IMAGE=maraudarr:dev
+make build
 make ship
 ```
 
-Maraudarr writes:
+The exported `MARAUDARR_IMAGE` selects this checkout's generator for the commands below. Keep that selection in the shell where you generate projects. Maraudarr writes:
 
 ```text
 dist/
@@ -186,7 +188,7 @@ Add Lidarr to Plundarr for music automation:
 make ship ADD_SERVICES=lidarr
 ```
 
-`HOST_MUSIC_PATH` defaults to `/volume1/music/Music/Media/Music`; change it when the host music library lives elsewhere. Lidarr receives it read/write at `/music` and shares `/downloads` with the selected download clients. Open Lidarr after launch, use `/music` as its root folder, then connect Prowlarr and a download client. When Plex is also selected, Maraudarr adds the same library read-only at `/music`; Jellyfin reaches it as `/data/music` when its data root and the Plundarr media root point to the same host directory. The generated Homepage card requires a Lidarr API key in `HOMEPAGE_VAR_LIDARR_KEY`.
+`HOST_MUSIC_PATH` defaults to `/volume1/music/Music/Media/Music`; change it when the host music library lives elsewhere. Lidarr receives it read/write at `/music` and shares `/downloads` with the selected download clients. Open Lidarr after launch, use `/music` as its root folder, then connect Prowlarr and a download client. When Plex is also selected, Maraudarr adds the same library read-only at `/music`; Jellyfin's `/data/music` refers to the `music` directory beneath `JELLYFIN_DATA_PATH`; it sees the same library only when that is the host directory selected by `HOST_MUSIC_PATH`. Maraudarr does not add a separate music bind to Jellyfin. The generated Homepage card requires a Lidarr API key in `HOMEPAGE_VAR_LIDARR_KEY`.
 
 The [LinuxServer Lidarr image](https://docs.linuxserver.io/images/docker-lidarr/) supports `linux/amd64` and `linux/arm64`, not `linux/arm/v7`. The [Homepage Lidarr widget guide](https://gethomepage.dev/widgets/services/lidarr/) documents the API key and supported fields used by the generated card.
 
@@ -198,7 +200,7 @@ Add the profile-gated Recyclarr tool. Its catalog dependencies ensure Radarr and
 make ship ADD_SERVICES=recyclarr
 ```
 
-Set the selected service URLs and API keys in `dist/plundarr/.env`, then review the regeneration-safe starter file at `dist/plundarr/config/recyclarr/recyclarr.yml`. The starter syncs only upstream quality-size definitions and leaves old custom formats intact.
+Set the selected service URLs and API keys in `dist/plundarr/.env`, then review the regeneration-safe starter file at `dist/plundarr/config/recyclarr/recyclarr.yml`. The starter syncs only upstream quality-size definitions and preserves custom formats.
 
 Preview first, then deliberately apply the same configuration:
 
@@ -223,7 +225,7 @@ make up PRESET=calibre-web-automated
 
 Set `CWA_CONFIG_PATH`, `CWA_INGEST_PATH`, and `CWA_LIBRARY_PATH` to three separate host directories. The ingest directory is destructive: CWA removes books after processing them, so finish downloads elsewhere and move only completed files into it. Preserve the complete config directory and the Calibre library containing `metadata.db` in backups. Set `CWA_NETWORK_SHARE_MODE=true` only for NFS or SMB storage.
 
-CWA image updates remain excluded from Watchtower so database migrations stay under operator control. The published CWA image supports `linux/amd64` and `linux/arm64`, not `linux/arm/v7`.
+CWA image updates remain excluded from Watchtower so application image changes stay under operator control. The published CWA image supports `linux/amd64` and `linux/arm64`, not `linux/arm/v7`.
 
 ### Monitor media servers
 

@@ -4,6 +4,8 @@ icon: material/book-open-page-variant
 
 # Project guides 📖
 
+These guides describe this checkout's service catalog and configuration seeds. For generation commands, select the [source-built generator](../development/maraudarr/index.md#choose-the-generator-revision) through `MARAUDARR_IMAGE`; published images use their matching source documentation.
+
 Pick the chart that matches the work ahead:
 
 - [Set up Plundarr on Synology](../setup.md) ⚓
