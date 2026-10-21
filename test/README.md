@@ -86,7 +86,7 @@ It creates random `plundarr-test-` projects and unrelated sentinels on the real 
 
 Test teardown records volumes created by that run and calls `runtime/remove-test-volume.sh` for each exact name. The helper requires a matching test-name prefix, Compose project label, and test-run label before removal; names alone never authorize deletion. Missing volumes are harmless, and failed ownership checks or Docker failures prevent that volume from being removed. If cleanup fails, the test retains its resource ledger and exits with an error. `helpers/test-test-volume-cleanup.sh` checks rejection paths with a Docker stub.
 
-All live Make examples below name their preset explicitly. Replace `YOUR-PRESET` with the catalog preset generated for the test, such as `boudoirr`, and use the same value for generation, validation, and cleanup. Run mutating tests in a disposable checkout and deployment, never a checkout containing an operator stack.
+All live Make examples below name their preset explicitly. Replace `YOUR-PRESET` with the catalog preset generated for the test, such as `boudoirr`, and use the same value for generation, validation, and cleanup. Run mutating tests in a disposable checkout and deployment on an isolated Docker test daemon without operator stacks. A separate checkout alone does not isolate the preset's Compose project name from another deployment on the same daemon.
 
 Use this when the selected test stack is already running:
 
@@ -99,7 +99,7 @@ This checks the existing Privateerr and Gluetun containers, then verifies genera
 ### Test Privateerr, Gluetun, and download clients end to end
 
 > [!CAUTION]
-> Use a disposable deployment and explicit `PRESET` for live tests. Both `make test-e2e` and `make test-stack` overwrite the selected generated WireGuard and forwarding metadata with example files before and after validation, and they can interrupt VPN/download services. Back up the selected deployment and keep real credentials private. An interrupted command may leave services or sensitive state behind; inspect them before any deliberate recovery or cleanup rather than running these targets against production.
+> Use a disposable deployment on an isolated Docker test daemon and explicit `PRESET` for live tests. Both `make test-e2e` and `make test-stack` overwrite the selected generated WireGuard and forwarding metadata with example files before and after validation, and they can interrupt VPN/download services. Back up the selected deployment and keep real credentials private. An interrupted command may leave services or sensitive state behind; inspect them before any deliberate recovery or cleanup rather than running these targets against production.
 
 Use this when ye want `Make` to launch only the VPN pair plus download clients, validate it, then clean up:
 

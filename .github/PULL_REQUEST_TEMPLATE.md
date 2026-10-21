@@ -10,7 +10,7 @@
 
 ## Test voyage 🧪
 
-Replace `YOUR-PRESET` with the selected catalog preset ID, such as `boudoirr`. Use a disposable checkout/deployment for live tests and reset commands; keep interpolated output from `make config` and `make env` private because it may contain credentials.
+Replace `YOUR-PRESET` with the selected catalog preset ID, such as `boudoirr`. Use a disposable checkout/deployment on an isolated Docker test daemon for live tests and reset commands; keep interpolated output from `make config` and `make env` private because it may contain credentials.
 
 - [ ] `make help`
 - [ ] `make test`
