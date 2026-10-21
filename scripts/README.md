@@ -2,6 +2,8 @@
 
 These documented AWK programs and host helpers support generated Compose projects, Linux hosts, and Synology DiskStations. Pick the smallest tool for the job and review its header before running it with elevated privileges.
 
+Run Make examples from the repository root and replace `YOUR-PRESET` with the selected catalog preset ID, such as `boudoirr`.
+
 ## Find a script 🧭
 
 | Hold       | Script                                                                                                                                         | Purpose                                                            |
@@ -37,7 +39,7 @@ Formats tab-separated `docker compose ps` data into aligned terminal columns, co
 
 ### `awk/order-environment.awk`
 
-Records resolved Docker Compose environment assignments, then prints only variables present in the selected preset `.env` file and preserves that file's order. `make env PRESET=<preset>` supplies both inputs through the centralized AWK command and option variables in the Makefile.
+Records resolved Docker Compose environment assignments, then prints only variables present in the selected preset `.env` file and preserves that file's order. `make env PRESET=YOUR-PRESET` supplies both inputs through the centralized AWK command and option variables in the Makefile. Its output can contain credentials; inspect it only in a private terminal and redact support logs.
 
 ### `awk/strip-comments.awk`
 
@@ -47,7 +49,7 @@ Removes comments, trailing whitespace, and empty lines from configuration output
 
 ### `compose/backup.sh`
 
-Archives one generated preset's complete config directory with a timestamped name. An incrementing suffix prevents a same-second backup from replacing an existing archive. `make backup PRESET=<preset>` is the normal entry point. This archives host config files only; export [Tracearr backups](https://github.com/scottgigawatt/plundarr/blob/main/docs/project-guides/monitoring.md#back-up-and-update) first so named-volume database state is included.
+Archives one generated preset's complete config directory with a timestamped name. An incrementing suffix prevents a same-second backup from replacing an existing archive. Before a file-copy archive, stop affected applications cleanly and prepare application-consistent exports; the helper does not pause writers or snapshot databases. Then use `make backup PRESET=YOUR-PRESET`. This archives host config files only, excluding the deployment `.env`, external configuration trees, and named-volume databases. Keep [Tracearr exports](https://github.com/scottgigawatt/plundarr/blob/main/docs/project-guides/monitoring.md#back-up-and-update), external state, and matching encryption keys in the recovery set and verify an off-host copy.
 
 ### `compose/check-pia-credentials.sh`
 
@@ -61,7 +63,7 @@ Repeated `--dockerfile` and `--additional-image` arguments avoid shell command e
 
 ### `compose/ps.sh`
 
-Resolves the selected Compose project and prints only its containers in a terminal-friendly status table. Equivalent IPv4 and IPv6 wildcard bindings are collapsed, and each distinct published port receives an aligned continuation line. `make ps PRESET=<preset>` is the normal entry point.
+Resolves the selected Compose project and prints only its containers in a terminal-friendly status table. Equivalent IPv4 and IPv6 wildcard bindings are collapsed, and each distinct published port receives an aligned continuation line. `make ps PRESET=YOUR-PRESET` is the normal entry point.
 
 ### `compose/restart.sh`
 

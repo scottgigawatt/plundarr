@@ -35,13 +35,15 @@ Each folder follows the same general format: configuration files go in and persi
 
 ## Back up or reset the hold 🧽
 
-From the repository root, replace `YOUR-PRESET` with the selected preset ID, such as `boudoirr`, and archive its config before a reset:
+From the repository root, replace `YOUR-PRESET` with the selected preset ID, such as `boudoirr`. Before creating a file-copy archive, make application-consistent backup exports and stop affected services cleanly so databases, journal files, and other configuration are no longer changing. Copying a database that is still being written is not an application-consistent backup. Stopping services interrupts their applications and may interrupt VPN/download activity; plan the maintenance window first.
+
+The host config archive does not include the deployment's `.env`, external Kometa checkout, or named-volume databases. Export named-volume application data separately and retain matching encryption keys, private settings, and external state with the recovery set. Keep affected services stopped while the archive is created:
 
 ```sh
 make backup PRESET=YOUR-PRESET
 ```
 
-The archive does not include the deployment's `.env`, external Kometa checkout, or named-volume databases. Export application backups as needed, retain matching encryption keys and private settings separately, and verify an off-host recovery copy.
+Verify the archive and a recoverable off-host copy before resetting anything. If this was only a backup, restart the services deliberately after verification. For a reset or restore, leave affected services stopped until the replacement state and permissions are ready.
 
 > [!CAUTION]
 > `make delete-config` irreversibly deletes the selected host config tree and any backups stored inside it. Stop affected services and verify a recoverable backup before proceeding. Named-volume data requires separate management.

@@ -5,9 +5,11 @@ Maraudarr is the short-lived Docker Compose project generator image for [Plundar
 > [!IMPORTANT]
 > Plundarr is the generated media stack. Maraudarr creates that stack and exits; it is not a long-running media service.
 
+This source description tracks the current checkout. The default `MARAUDARR_IMAGE` uses the stable `latest` image, which may not include features added on `main`. Follow [generator revision selection](https://github.com/scottgigawatt/plundarr/blob/main/docs/development/maraudarr/index.md#choose-the-generator-revision) to build and select the checkout explicitly, or consult documentation matching the published version you choose.
+
 ## Generate a stack quickly
 
-The repository Makefile supplies the hardened Docker invocation:
+The repository Makefile supplies the hardened Docker invocation. Run commands from the repository root and replace `YOUR-PRESET` with the selected preset ID, such as `boudoirr`:
 
 ```sh
 git clone https://github.com/scottgigawatt/plundarr.git
@@ -39,9 +41,9 @@ make ship ADD_SERVICES=lidarr,recyclarr
 make ship ADD_SERVICES=sonarr-anime
 ```
 
-Plundarr and Boudoirr use qBittorrent as their only default downloader and include Watchtower as a removable default. Plundarr also includes Calibre-Web Automated as a removable default, and `PRESET=calibre-web-automated` generates the ebook library and ingest service by itself. SABnzbd and NZBGet remain optional selections through `make configure` or `ADD_SERVICES`. Plundarr includes one Sonarr instance; `sonarr-anime` adds the optional second instance. Lidarr provides opt-in music automation, while profile-gated Recyclarr runs only through `make recyclarr-preview` or `make recyclarr-sync`. Review `dist/<preset>/.env`, then start the generated stack with `make up PRESET=<preset>`. The standalone Watchtower project may instead run one update pass with `make watchtower-run-once PRESET=watchtower`.
+Plundarr and Boudoirr use qBittorrent as their only default downloader and include Watchtower as a removable default. Plundarr also includes Calibre-Web Automated as a removable default, and `PRESET=calibre-web-automated` generates the ebook library and ingest service by itself. SABnzbd and NZBGet remain optional selections through `make configure` or `ADD_SERVICES`. Plundarr includes one Sonarr instance; `sonarr-anime` adds the optional second instance. Lidarr provides opt-in music automation, while profile-gated Recyclarr runs only through `make recyclarr-preview` or `make recyclarr-sync`. Review `dist/<preset>/.env`, then start the generated stack with `make up PRESET=YOUR-PRESET`. The standalone Watchtower project may instead run one update pass with `make watchtower-run-once PRESET=watchtower`.
 
-Velvarr and Jellyfin are removable Boudoirr defaults for adult-media discovery, Whisparr requests, and playback. Use `REMOVE_SERVICES=velvarr` or `REMOVE_SERVICES=jellyfin` to omit either companion; other presets can add them explicitly. It requires a local or external Jellyfin server for setup and login, uses Boudoirr host port `16699`, and receives persistent config and generated secrets from Maraudarr. The current official Velvarr image supports `linux/amd64` only. Read the repository's [Velvarr guide](https://github.com/scottgigawatt/plundarr/blob/main/docs/project-guides/velvarr.md) for setup and recovery.
+Velvarr and Jellyfin are removable Boudoirr defaults for adult-media discovery, Whisparr requests, and playback. Use `REMOVE_SERVICES=velvarr` or `REMOVE_SERVICES=jellyfin` to omit either companion; other presets can add them explicitly. Velvarr requires a local or external Jellyfin server for setup and login, uses Boudoirr host port `16699`, and receives persistent config and generated secrets from Maraudarr. The current official Velvarr image supports `linux/amd64` only. Read the repository's [Velvarr guide](https://github.com/scottgigawatt/plundarr/blob/main/docs/project-guides/velvarr.md) for setup and recovery.
 
 The Duplex preset keeps Kometa's configuration in an independent host checkout selected by `KOMETA_CONFIG_PATH`. Its PATTRMM and Notifiarr defaults are removable; Overlay Reset and Watchtower may be added explicitly. Kometa Overlay Reset is excluded from normal startup by its Compose profile and runs explicitly with `make kometa-overlay-reset PRESET=duplex`; its generated default is dry-run.
 
