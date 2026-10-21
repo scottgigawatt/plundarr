@@ -128,8 +128,7 @@ x-whisparr-healthcheck: &whisparr-healthcheck  # YAML anchor for Whisparr health
 #
 x-whisparr-data-dir: &whisparr-data-dir  # YAML anchor for Whisparr data directories
   tmpfs:                                 # Writable parent directory for persistent media mounts
-    - "/data:rw,noexec,nosuid,size=1m,\
-      uid=${DEFAULT_PUID},gid=${DEFAULT_PGID}"
+    - /data:rw,noexec,nosuid,size=1m,uid=${DEFAULT_PUID},gid=${DEFAULT_PGID}
 
 #
 # Define the services section.
@@ -208,7 +207,9 @@ services:
     image: qmcgaw/gluetun:${GLUETUN_TAG}                            # Run using the specified tag
     container_name: ${COMPOSE_PROJECT_NAME}-gluetun-${GLUETUN_TAG}  # Namespace the container name by project and tag
     hostname: gluetun                                               # Set the container hostname
-    entrypoint: ["/bin/sh", "${GLUETUN_ENTRYPOINT_WRAPPER}"]        # Load Privateerr metadata before Gluetun starts
+
+    # Override entrypoint to run wrapper script that loads Privateerr metadata before starting Gluetun
+    entrypoint: ["/bin/sh", "${GLUETUN_ENTRYPOINT_WRAPPER}"]
 
     # Add additional linux capabilities
     cap_add:
@@ -468,13 +469,15 @@ services:
       - ${JELLYFIN_CACHE_PATH}:/cache:rw    # Transcoding and image cache
       - ${JELLYFIN_DATA_PATH}:/data:rw      # Media root containing library directories
 
-      # Read-only frontend mounts that prevent Docker from mapping missing sources as directories instead of files
+      # Mount the Jellyfin Web configuration JSON file for custom settings
       - type: bind                                  # Mount the Jellyfin Web configuration JSON file
         source: ${JELLYFIN_WEB_CONFIG_PATH}         # JSON settings for Jellyfin Web; compare with the image defaults on upgrades
         target: /jellyfin/jellyfin-web/config.json  # Mount the configuration file into the container
         read_only: true                             # Do not allow the container to modify the configuration file
         bind:                                       # Configure the bind mount
           create_host_path: false                   # Do not create the host path if it does not exist; fail instead
+
+      # Mount the Jellyfin Web custom directory for branding and static assets
       - type: bind                                  # Mount the Jellyfin Web custom directory for branding and static assets
         source: ${JELLYFIN_WEB_CUSTOM_PATH}         # Locally served CSS and images; Branding CSS selects the stylesheet
         target: /jellyfin/jellyfin-web/custom       # Mount the custom directory into the container

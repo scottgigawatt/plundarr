@@ -23,6 +23,8 @@ class FakeGitHub(updater.GitHub):
     """Record API requests and simulate a PR advancing during preparation."""
 
     def __init__(self, *, fork: bool = False, stale: bool = False, unchanged: bool = False) -> None:
+        """Select controlled API conditions without using credentials or live PR state."""
+
         super().__init__("owner/plundarr")
         self.calls: list[tuple[str, object, str]] = []
         self.fork = fork
@@ -31,9 +33,12 @@ class FakeGitHub(updater.GitHub):
         self.pr_reads = 0
 
     def request(self, endpoint: str, data: object = None, method: str = "GET") -> object:
+        """Record requests and return only the fixture data needed by the update flow."""
+
         self.calls.append((endpoint, data, method))
 
         if endpoint == "pulls/42":
+            # A later response models a contributor pushing while Git objects are prepared.
             self.pr_reads += 1
             return {
                 "state": "open",
@@ -73,6 +78,7 @@ class PresetReferenceTests(unittest.TestCase):
 
     def test_publish_preserves_unmanaged_files_and_removes_retired_pairs(self) -> None:
         """Only the managed pair is replaced or removed, including for retired presets."""
+
         with tempfile.TemporaryDirectory() as temporary:
             directory = Path(temporary)
             generator.publish(
@@ -91,6 +97,7 @@ class PresetReferenceTests(unittest.TestCase):
 
     def test_generation_failure_does_not_replace_existing_references(self) -> None:
         """A failing container leaves the last validated reference unchanged."""
+
         with tempfile.TemporaryDirectory() as temporary:
             directory = Path(temporary)
             original = {"custom/docker-compose.yml": b"original", "custom/example.env": b"original"}
@@ -110,9 +117,12 @@ class PresetReferenceTests(unittest.TestCase):
 
     def test_custom_selection_and_determinism(self) -> None:
         """The custom example stays minimal and differing fresh output is rejected."""
+
         calls: list[list[str]] = []
 
         def container(image: str, arguments: list[str], output: Path | None = None) -> str:
+            """Emit differing public environments to exercise the reproducibility guard."""
+
             del image
 
             if output is None:
@@ -121,6 +131,7 @@ class PresetReferenceTests(unittest.TestCase):
             calls.append(arguments)
             project = output / "custom"
             project.mkdir()
+            (project / ".env").write_text("EXAMPLE=true\n")
             (project / "docker-compose.yml").write_text("services: {}\n")
             (project / "example.env").write_text(f"CHANGED={len(calls)}\n")
             return ""
@@ -150,6 +161,7 @@ class PresetReferenceTests(unittest.TestCase):
 
     def test_publish_rejects_symlinked_destination(self) -> None:
         """A reference directory cannot redirect publication into a deployment."""
+
         with tempfile.TemporaryDirectory() as temporary:
             directory = Path(temporary)
             (directory / "custom").symlink_to(directory, target_is_directory=True)
@@ -157,11 +169,64 @@ class PresetReferenceTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "symlinks"):
                 generator.publish(directory, {"custom/example.env": b"safe"})
 
+    def test_failed_replacement_cleans_up_temporary_file(self) -> None:
+        """A failed atomic replacement preserves its old file and removes staging residue."""
+
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = Path(temporary)
+            original = {"custom/docker-compose.yml": b"original", "custom/example.env": b"safe"}
+            generator.publish(directory, original)
+
+            # Simulate failure at the replace boundary, after the staging file exists.
+            with (
+                patch.object(Path, "replace", side_effect=OSError("replace failed")),
+                self.assertRaisesRegex(OSError, "replace failed"),
+            ):
+                generator.publish(directory, {"custom/docker-compose.yml": b"replacement"})
+
+            self.assertEqual(generator.read_references(directory), original)
+            self.assertEqual(
+                {path.name for path in (directory / "custom").iterdir()}, set(generator.FILENAMES)
+            )
+
+    def test_generated_input_symlinks_are_rejected_before_compose(self) -> None:
+        """Container-created links cannot redirect host validation into unrelated files."""
+
+        for target in ("directory", ".env", *generator.FILENAMES):
+            with self.subTest(target=target), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                output = root / "output"
+                output.mkdir()
+                private = root / "private"
+                private.mkdir()
+                (private / "file").write_text("private fixture")
+                project = output / "custom"
+
+                if target == "directory":
+                    project.symlink_to(private, target_is_directory=True)
+                else:
+                    project.mkdir()
+
+                    for filename in (".env", *generator.FILENAMES):
+                        path = project / filename
+
+                        if filename == target:
+                            path.symlink_to(private / "file")
+                        else:
+                            path.write_text("safe fixture")
+
+                with patch.object(generator, "run") as run, self.assertRaises(ValueError):
+                    generator.validate_project(project)
+
+                run.assert_not_called()
+
 
 class ReferenceUpdaterTests(unittest.TestCase):
     """Restrict bot commits to public pairs on the unchanged PR branch."""
 
     def setUp(self) -> None:
+        """Create public fixture pairs in an automatically cleaned temporary directory."""
+
         self.temporary = tempfile.TemporaryDirectory()
         self.addCleanup(self.temporary.cleanup)
         self.directory = Path(self.temporary.name)
@@ -175,20 +240,63 @@ class ReferenceUpdaterTests(unittest.TestCase):
 
     def test_rejects_private_files_and_incomplete_pairs(self) -> None:
         """Artifacts cannot smuggle deployment state or partial reference sets into Git."""
+
         private = self.directory / "custom/.env"
         private.write_text("private")
 
         with self.assertRaisesRegex(ValueError, "unexpected"):
             updater.references(self.directory)
 
+        # Once private data is removed, an incomplete public pair must still be rejected.
         private.unlink()
         (self.directory / "custom/example.env").unlink()
 
         with self.assertRaisesRegex(ValueError, "incomplete"):
             updater.references(self.directory)
 
+    def test_artifact_root_and_file_symlinks_are_rejected(self) -> None:
+        """Artifact links must be rejected before their target content can enter a commit."""
+
+        root_link = self.directory / "linked-root"
+        root_link.symlink_to(self.directory, target_is_directory=True)
+
+        with self.assertRaisesRegex(ValueError, "symlink"):
+            updater.references(root_link)
+
+        root_link.unlink()
+        example = self.directory / "custom/example.env"
+        example.unlink()
+        example.symlink_to(self.directory / "custom/docker-compose.yml")
+
+        with self.assertRaisesRegex(ValueError, "symlink"):
+            updater.references(self.directory)
+
+    def test_malformed_api_values_are_rejected_before_writes(self) -> None:
+        """An invalid Git tree SHA must fail validation instead of being coerced to text."""
+
+        api = FakeGitHub()
+        original_request = api.request
+
+        def request(endpoint: str, data: object = None, method: str = "GET") -> object:
+            if endpoint == "git/commits/original":
+                return {"tree": {"sha": 42}}
+
+            return original_request(endpoint, data, method)
+
+        with (
+            patch.object(api, "request", side_effect=request),
+            self.assertRaisesRegex(ValueError, "API string"),
+        ):
+            updater.update(api, 42, "original", self.directory)
+
+        self.assertTrue(all(method == "GET" for _, _, method in api.calls))
+
+        with self.assertRaisesRegex(ValueError, "string keys"):
+            updater.fields({42: "invalid field"})
+
     def test_update_restricts_paths_and_dispatches_both_required_workflows(self) -> None:
         """One non-forced commit updates the exact head and receives both validation suites."""
+
         api = FakeGitHub()
         updater.update(api, 42, "original", self.directory)
         tree_request = next(data for endpoint, data, _ in api.calls if endpoint == "git/trees")
@@ -225,6 +333,7 @@ class ReferenceUpdaterTests(unittest.TestCase):
 
     def test_fork_and_concurrent_changes_never_update_branch(self) -> None:
         """Forked or superseded PRs must not receive a bot branch update."""
+
         for api in (FakeGitHub(fork=True), FakeGitHub(stale=True)):
             with self.subTest(fork=api.fork, stale=api.stale):
                 updater.update(api, 42, "original", self.directory)
@@ -233,6 +342,7 @@ class ReferenceUpdaterTests(unittest.TestCase):
 
     def test_identical_tree_never_commits_or_dispatches(self) -> None:
         """A no-op refresh cannot create a recursive commit loop."""
+
         api = FakeGitHub(unchanged=True)
         updater.update(api, 42, "original", self.directory)
         self.assertFalse(any(endpoint == "git/commits" for endpoint, _, _ in api.calls))

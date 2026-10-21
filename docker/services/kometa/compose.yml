@@ -26,6 +26,8 @@ services:
     # Mount the independently managed Kometa configuration checkout
     volumes:                                   # Mount application state and shared configuration
       - ${KOMETA_CONFIG_PATH}:/config:rw       # Kometa config, assets, metadata, and logs
+
+      # Mount the live runtime configuration file from Kometa
       - type: bind                             # Bind the existing runtime configuration file
         source: ${KOMETA_RUNTIME_CONFIG_PATH}  # Live config shared by Kometa and PATTRMM
         target: /config/config.yml             # Expose the live config at its expected path

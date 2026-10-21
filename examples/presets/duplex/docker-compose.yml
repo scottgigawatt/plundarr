@@ -77,6 +77,8 @@ services:
     # Mount the independently managed Kometa configuration checkout
     volumes:                                   # Mount application state and shared configuration
       - ${KOMETA_CONFIG_PATH}:/config:rw       # Kometa config, assets, metadata, and logs
+
+      # Mount the live runtime configuration file from Kometa
       - type: bind                             # Bind the existing runtime configuration file
         source: ${KOMETA_RUNTIME_CONFIG_PATH}  # Live config shared by Kometa and PATTRMM
         target: /config/config.yml             # Expose the live config at its expected path
@@ -129,6 +131,8 @@ services:
     # Mount host directories and the separate private key into the container
     volumes:
       - ${THEMERR_CONFIG_PATH}:/config:rw       # Persistent settings, database, certificates, and logs
+
+      # Bind the private encryption key into the container for secure credential storage
       - type: bind                              # Bind the private encryption key into the container
         source: ${THEMERR_TOKEN_KEY_PATH}       # Path to the private encryption key on the host
         target: /run/secrets/themerr_token_key  # Mount the private encryption key into the container
@@ -156,12 +160,16 @@ services:
     volumes:                                   # Mount application state and shared configuration
       - ${PATTRMM_CONFIG_PATH}/data:/data:rw   # Neo cache and working data
       - ${KOMETA_CONFIG_PATH}:/config:rw       # Kometa config and generated YAML files
+
+      # Mount the authored settings directory into the container
       - type: bind                             # Require the operator's authored Neo settings
         source: ${PATTRMM_SETTINGS_PATH}       # Settings directory, normally in the Kometa checkout
         target: /settings                      # Neo reads selected YAML files from this directory
         read_only: true                        # Keep authored settings separate from runtime writes
         bind:                                  # Configure bind mount behavior
           create_host_path: false              # Fail if the settings directory does not exist
+
+      # Mount the live runtime configuration file from Kometa
       - type: bind                             # Bind the existing runtime configuration file
         source: ${KOMETA_RUNTIME_CONFIG_PATH}  # Live config shared by Kometa and PATTRMM
         target: /config/config.yml             # Expose the live config at its expected path

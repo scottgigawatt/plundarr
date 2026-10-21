@@ -124,8 +124,7 @@ x-whisparr-healthcheck: &whisparr-healthcheck  # YAML anchor for Whisparr health
 #
 x-whisparr-data-dir: &whisparr-data-dir  # YAML anchor for Whisparr data directories
   tmpfs:                                 # Writable parent directory for persistent media mounts
-    - "/data:rw,noexec,nosuid,size=1m,\
-      uid=${DEFAULT_PUID},gid=${DEFAULT_PGID}"
+    - /data:rw,noexec,nosuid,size=1m,uid=${DEFAULT_PUID},gid=${DEFAULT_PGID}
 
 #
 # Define the services section.

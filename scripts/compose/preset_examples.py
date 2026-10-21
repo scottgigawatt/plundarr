@@ -24,6 +24,7 @@ PRESET_ID = re.compile(r"[a-z][a-z0-9-]*")
 
 def run(arguments: list[str], *, capture: bool = False) -> str:
     """Run Docker without inheriting operator-specific Compose overrides."""
+
     environment = {
         key: value
         for key, value in os.environ.items()
@@ -40,6 +41,7 @@ def run(arguments: list[str], *, capture: bool = False) -> str:
             "SSH_AUTH_SOCK",
         }
     }
+
     try:
         result = subprocess.run(
             arguments, check=True, text=True, capture_output=capture, env=environment
@@ -47,6 +49,7 @@ def run(arguments: list[str], *, capture: bool = False) -> str:
     except subprocess.CalledProcessError as error:
         if capture and error.stderr:
             print(error.stderr)
+
         raise
 
     return result.stdout if capture else ""
@@ -54,6 +57,7 @@ def run(arguments: list[str], *, capture: bool = False) -> str:
 
 def container(image: str, arguments: list[str], output: Path | None = None) -> str:
     """Use the same isolated, unprivileged runtime contract as normal generation."""
+
     command = [
         "docker",
         "run",
@@ -79,8 +83,52 @@ def container(image: str, arguments: list[str], output: Path | None = None) -> s
     return run(command, capture=True)
 
 
+def validate_project(project: Path) -> None:
+    """Inspect a real generated project without following container-created symlinks."""
+
+    if project.is_symlink() or not project.is_dir():
+        raise ValueError("Generated preset directories must be real directories.")
+
+    # The container can create links whose targets become host paths after it exits.
+    for filename in (".env", *FILENAMES):
+        path = project / filename
+
+        if path.is_symlink() or not path.is_file():
+            raise ValueError("Generated preset inputs must be regular files, not symlinks.")
+
+    # Inspect both the deployment environment and the exact public example.
+    for environment_file in (".env", "example.env"):
+        run(
+            [
+                "docker",
+                "compose",
+                "--env-file",
+                str(project / environment_file),
+                "--file",
+                str(project / "docker-compose.yml"),
+                "--profile",
+                "*",
+                "config",
+                "--quiet",
+            ]
+        )
+
+
 def generate(image: str, temporary: Path) -> dict[str, bytes]:
-    """Validate every preset and prove public output is reproducible across fresh runs."""
+    """Validate every preset and require reproducible public output.
+
+    Args:
+        image: Production Maraudarr image built from the source under review.
+        temporary: Empty disposable directory for both independent generation runs.
+
+    Returns:
+        Public reference bytes keyed by preset-relative filename.
+
+    Raises:
+        ValueError: If preset IDs, generated files, or reproducibility checks fail.
+        subprocess.CalledProcessError: If generation or Docker Compose validation fails.
+    """
+
     listing = container(
         image,
         ["-c", "from maraudarr.catalog import Catalog; print(*Catalog().presets, sep=chr(10))"],
@@ -118,22 +166,7 @@ def generate(image: str, temporary: Path) -> dict[str, bytes]:
             container(image, arguments, output)
             project = output / preset
 
-            # Inspect both the deployment environment and the exact public example.
-            for environment_file in (".env", "example.env"):
-                run(
-                    [
-                        "docker",
-                        "compose",
-                        "--env-file",
-                        str(project / environment_file),
-                        "--file",
-                        str(project / "docker-compose.yml"),
-                        "--profile",
-                        "*",
-                        "config",
-                        "--quiet",
-                    ]
-                )
+            validate_project(project)
 
             for filename in FILENAMES:
                 relative = f"{preset}/{filename}"
@@ -152,6 +185,7 @@ def generate(image: str, temporary: Path) -> dict[str, bytes]:
 
 def read_references(directory: Path) -> dict[str, bytes]:
     """Read only public reference pairs and reject symlinks before any replacement."""
+
     if directory.is_symlink():
         raise ValueError("The preset reference root must not be a symlink.")
 
@@ -177,19 +211,30 @@ def read_references(directory: Path) -> dict[str, bytes]:
 
 
 def publish(directory: Path, snapshots: dict[str, bytes]) -> None:
-    """Replace public references only after the entire generation and validation succeeds."""
+    """Publish validated public references without changing unmanaged files.
+
+    Each file is replaced atomically after all generation checks pass. Filesystem
+    errors propagate to the caller; an incomplete replacement leaves no temporary file.
+
+    Args:
+        directory: Reference root, kept separate from private deployment output.
+        snapshots: Complete public pairs returned by successful generation.
+    """
+
     existing = read_references(directory)
 
     for relative, content in snapshots.items():
         path = directory / relative
         path.parent.mkdir(parents=True, exist_ok=True)
 
-        with tempfile.NamedTemporaryFile(dir=path.parent, delete=False) as pending:
-            pending.write(content)
-            pending_path = Path(pending.name)
-
-        pending_path.chmod(0o644)
-        pending_path.replace(path)
+        # Keep replacement on the same filesystem and clean up even if writing fails.
+        with tempfile.TemporaryDirectory(
+            prefix=".maraudarr-reference-", dir=path.parent
+        ) as temporary:
+            pending_path = Path(temporary) / path.name
+            pending_path.write_bytes(content)
+            pending_path.chmod(0o644)
+            pending_path.replace(path)
 
     # A removed preset loses only its managed pair; other files are never deleted.
     for relative in existing.keys() - snapshots.keys():
@@ -198,6 +243,7 @@ def publish(directory: Path, snapshots: dict[str, bytes]) -> None:
 
 def main() -> int:
     """Refresh references or fail when freshly generated output differs."""
+
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--image", required=True)
     parser.add_argument("--output-root", type=Path, required=True)
