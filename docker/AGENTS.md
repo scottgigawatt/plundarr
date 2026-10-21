@@ -57,7 +57,11 @@ Profile-gated utilities remain selectable services but must not appear in ordina
 
 ## Python practices
 
-Follow the root code, shell, Python, and documentation practices without duplicating their rules here. Root `ruff.toml` and `pyrightconfig.json` are authoritative for source and tests. Formatting must preserve generated comments, literal interpolation placeholders, and operator environment values. Keep lint, test, type-checker, and documentation dependencies out of the production image.
+Follow the root code, shell, Python, and documentation practices; the explicit requirements below apply throughout this build context. Root `ruff.toml` and `pyrightconfig.json` are authoritative for source and tests. Formatting must preserve generated comments, literal interpolation placeholders, and operator environment values. Keep lint, test, type-checker, and documentation dependencies out of the production image.
+
+Use four-space indentation, type hints, small focused functions, and standard library facilities where practical. Each project-owned module and test file starts with the repository copyright block followed by a concise module docstring. Public classes and non-obvious helpers need useful docstrings.
+
+Separate a standalone explanatory comment from the preceding statement with a blank line. Prefer one concise comment line over hard-wrapping one sentence into multiple comment lines.
 
 Keep imports rooted at `maraudarr`. Tests must exercise generated comments, environment preservation, selected config folders, Plex, Jellyfin, and Calibre-Web Automated choices, and real Docker Compose validation in the matrix script.
 

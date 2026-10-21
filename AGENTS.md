@@ -110,7 +110,7 @@ Inline Compose comments use two spaces before `#`. Align the `#` characters for 
 
 VS Code workspace JSON files use JSON with Comments so settings and extension choices can carry the same copyright, license, filename summary, and section comments as other project configuration.
 
-Treat `.editorconfig` as the portable source of truth for UTF-8, LF, final newlines, trailing whitespace, and indentation. Workspace settings must agree. Use four spaces in shell, Python, JSON, and JSON with Comments; two spaces in Markdown, YAML, TOML, AWK, jq, CSS, and JavaScript; and literal tabs in Make recipes. Preserve syntax-required whitespace. Put blank lines around logical control-flow blocks where they aid readability, and explain intent or a non-obvious boundary instead of narrating the code.
+Treat `.editorconfig` as the portable source of truth for UTF-8, LF, final newlines, trailing whitespace, and indentation. Workspace settings may repeat language indentation to disable VS Code auto-detection and may add schemas or extension-specific validation that EditorConfig cannot express. Keep those overlapping values identical. Use four spaces in shell, Python, JSON, and JSON with Comments; two spaces in Markdown, YAML, TOML, AWK, jq, CSS, and JavaScript; and literal tabs in Make recipes. Preserve syntax-required whitespace. Put a blank line before and after logical control-flow blocks, and place a concise explanatory comment above non-obvious checks, loops, and operations. Do not add comments that merely repeat the code.
 
 ## Shell and Make practices
 
@@ -131,13 +131,13 @@ Every project-owned shell script begins with its interpreter, copyright block, f
 
 Use targeted ShellCheck suppressions only when a documented runtime constraint prevents a correct code fix; never disable a diagnostic across the repository to hide individual findings. `.shellcheckrc` supplies shared source resolution for editors and checks.
 
-Keep host helpers grouped under `scripts/compose/`, `scripts/linux/`, `scripts/synology/`, or the established `scripts/docs/` toolchain directory. Keep shell tests under `test/generator/`, `test/helpers/`, `test/runtime/`, or `test/stubs/`; update in-scope callers, workflows, documentation, and usage headers when moving scripts.
+Keep host helpers grouped under `scripts/compose/`, `scripts/linux/`, `scripts/synology/`, or the established `scripts/docs/` toolchain directory. Keep shell tests under `test/generator/`, `test/helpers/`, `test/runtime/`, or `test/stubs/`; update all affected Make targets, workflow callers, documentation, and usage headers whenever a script moves.
 
 Keep Makefile variables centralized near the top. User-facing targets may use light pirate humor, but errors must identify the problem and corrective action. Every target needs the established framed comment and dependency notes; preserve `.PHONY` declarations for non-file targets and literal recipe tabs. Keep normal/default targets non-destructive, quote paths and user input, guard destructive paths, and avoid parse-time side effects. Do not promise blanket dry-run safety: recursive Make recipes and expansion-time commands may execute under `make -n`. Inspect recipes and their prerequisites before invoking or recommending them. Keep `requirements-docs.txt` exact and SHA-256 hash-verified, and require pip's hash-checking mode whenever Make installs documentation tools.
 
 ## Python practices
 
-Python modules and tests start with the copyright, Apache-2.0, and filename summary block, followed by a useful module docstring. Prefer small functions, explicit types at application boundaries, standard-library facilities, and concise docstrings for public classes and non-obvious helpers. `ruff.toml` owns lint and formatting rules, including import order, four-space indentation, and Unix line endings. Run both Ruff lint and format checks during pull-request validation; editors and pre-commit must use the same configuration. Keep lint and test dependencies out of published production images.
+Python modules and tests start with the copyright, Apache-2.0, and filename summary block, followed by a useful, concise module docstring. Prefer small functions, explicit types at application boundaries, standard-library facilities, and concise docstrings for public classes and non-obvious helpers. `ruff.toml` owns lint and formatting rules, including import order, four-space indentation, and Unix line endings. Run both Ruff lint and format checks during pull-request validation; editors and pre-commit must use the same configuration. Keep lint and test dependencies out of published production images.
 
 Explain the scenario and intent of Python tests with concise docstrings and comments around controlled fixtures, injected failures, cleanup, and meaningful assertion groups. Use blank lines to separate setup, actions, and verification where it improves readability. Explain why a boundary matters rather than narrating obvious assignments or adding repetitive step labels.
 
@@ -165,6 +165,13 @@ Maraudarr must remain:
 - published with OCI labels, SBOM, provenance, and vulnerability scanning
 
 ## Automation and dependencies
+
+Keep the established local workflow filenames and responsibilities:
+
+- `.github/workflows/build-and-push.yml`: Validate, publish, attest, mirror, and announce Maraudarr images.
+- `.github/workflows/codeql-actions.yml`: Analyze Maraudarr Python and GitHub Actions source.
+- `.github/workflows/scorecard.yml`: Measure and publish the repository's supply-chain security posture.
+- `.github/workflows/validate-pr.yml`: Validate pull requests, including generator/image checks, repository linting, and developer documentation.
 
 Use this repository's workflows and policy tests as the authority for CI and publishing behavior. Pin external GitHub Actions to full immutable commit SHAs with readable version comments, and build dependencies to synchronized digests or exact versions and hashes as appropriate. Give jobs the minimum required permissions, prefer `contents: read`, avoid persistent checkout credentials, and isolate any justified write permission to the job that needs it. Keep untrusted PR execution separate from privileged writes; never expose secrets to it.
 
