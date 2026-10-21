@@ -10,7 +10,7 @@
 # Build the Maraudarr wheel with the exact setuptools release used by the image.
 #
 [build-system]
-requires = ["setuptools==84.2.0"]
+requires = ["setuptools==84.2.1"]
 build-backend = "setuptools.build_meta"
 
 #
