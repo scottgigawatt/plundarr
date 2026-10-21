@@ -8,32 +8,6 @@
 
 vulnerabilities:
   #
-  # Compose validates generated files without exposing an HTTP file server.
-  # Review the official binary and remove this exception before its expiry.
-  #
-  - id: CVE-2026-78667
-    paths:
-      - usr/local/bin/docker-compose
-    expired_at: 2026-10-23
-    statement: >-
-      The supported generator invokes only config --quiet with networking disabled.
-      It does not expose the HTTP file-serving path affected by this advisory.
-      Retain unfiltered artifact scans while awaiting the official Compose fix.
-
-  #
-  # Compose validation does not expose a TLS server for crafted ECH requests.
-  # Review the official binary and remove this exception before its expiry.
-  #
-  - id: CVE-2026-97031
-    paths:
-      - usr/local/bin/docker-compose
-    expired_at: 2026-10-23
-    statement: >-
-      The supported generator invokes only config --quiet with networking disabled.
-      It does not expose the TLS-server handshake affected by this advisory.
-      Retain unfiltered artifact scans while awaiting the official Compose fix.
-
-  #
   # Network-isolated Compose validation cannot receive HTTP/2 peer traffic.
   # Review the official binary and remove this exception before its expiry.
   #
