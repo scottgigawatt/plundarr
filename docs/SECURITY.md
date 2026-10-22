@@ -69,6 +69,8 @@ The sole CI exception in `.trivyignore.yaml` names CVE-2026-78669 at `usr/local/
 
 The recipe requires zlib 1.3.2-r1 and libexpat 2.9.0-r0 in both the disposable Python build stage and runtime. Both stages use Alpine 3.24 stable packages with those minimum security versions retained.
 
+Both stages also require musl and musl-utils 1.2.6-r3 or later. Alpine 3.24 [backports CVE-2026-107891 in r3](https://github.com/alpinelinux/aports/blob/3.24-stable/main/musl/APKBUILD). The [upstream advisory](https://www.openwall.com/lists/oss-security/2026/10/21/18) concerns untrusted regex patterns compiled by the C library; matching text against a fixed pattern does not trigger it. Maraudarr uses Python's separate regex engine; that limits the identified exposure but does not replace the installed-package requirement. Image smoke checks verify both package floors.
+
 Publication requires generator smoke tests, Python XML/compression checks, and artifact scans. Successful main builds publish `edge` and revision tags; semantic-version releases publish their matching stable aliases. Verify the selected immutable digest, all supported platforms, and unfiltered scan results before using an image. CI's exception does not establish a vulnerability-free artifact.
 
 ### Scan an immutable artifact

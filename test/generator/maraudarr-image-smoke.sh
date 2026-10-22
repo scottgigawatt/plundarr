@@ -191,6 +191,19 @@ smoke_output=$(mktemp -d)
 trap cleanup 0 1 2 15
 
 #
+# Require the stable musl security backport in the installed runtime packages.
+#
+if ! run_hardened_image \
+    --entrypoint /sbin/apk \
+    "${image}" \
+    info --installed \
+    "musl>=1.2.6-r3" \
+    "musl-utils>=1.2.6-r3"; then
+    printf '%s\n' "Maraudarr needs musl and musl-utils >=1.2.6-r3; rebuild the image." >&2
+    exit 1
+fi
+
+#
 # Run the terminal UI tests inside the exact image so optional runtime
 # dependencies, including Rich, exercise their host-skipped presentation checks.
 #
