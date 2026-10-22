@@ -86,20 +86,25 @@ It creates random `plundarr-test-` projects and unrelated sentinels on the real 
 
 Test teardown records volumes created by that run and calls `runtime/remove-test-volume.sh` for each exact name. The helper requires a matching test-name prefix, Compose project label, and test-run label before removal; names alone never authorize deletion. Missing volumes are harmless, and failed ownership checks or Docker failures prevent that volume from being removed. If cleanup fails, the test retains its resource ledger and exits with an error. `helpers/test-test-volume-cleanup.sh` checks rejection paths with a Docker stub.
 
-Use this when the full Plundarr stack is already running:
+All live Make examples below name their preset explicitly. Replace `YOUR-PRESET` with the catalog preset generated for the test, such as `boudoirr`, and use the same value for generation, validation, and cleanup. Run mutating tests in a disposable checkout and deployment on an isolated Docker test daemon, preferably on a disposable test host or VM. Every bind-mounted configuration, media, and download directory must be disposable, with no access to operator data such as production `/volume1` paths. The test must not expose the operator Docker socket: Watchtower and Portainer bind `/var/run/docker.sock`, which must belong only to the disposable test environment. Different preset, checkout, daemon, or context names alone do not isolate host data or Docker sockets.
+
+Use this when the selected test stack is already running:
 
 ```sh
-make test-vpn
+make test-vpn PRESET=YOUR-PRESET
 ```
 
 This checks the existing Privateerr and Gluetun containers, then verifies generated files and port forwarding.
 
 ### Test Privateerr, Gluetun, and download clients end to end
 
+> [!CAUTION]
+> Use a disposable deployment with disposable bind-mounted data, a test-only Docker socket, an isolated Docker test daemon, and explicit `PRESET` for live tests. A disposable test host or VM is preferred; names alone do not isolate operator data. Both `make test-e2e` and `make test-stack` overwrite the selected generated WireGuard and forwarding metadata with example files before and after validation, and they can interrupt VPN/download services. Back up the selected deployment and keep real credentials private. An interrupted command may leave services or sensitive state behind; inspect them before any deliberate recovery or cleanup rather than running these targets against production.
+
 Use this when ye want `Make` to launch only the VPN pair plus download clients, validate it, then clean up:
 
 ```sh
-make test-e2e
+make test-e2e PRESET=YOUR-PRESET
 ```
 
 This target:
@@ -114,25 +119,27 @@ This target:
 Generate the downloader mode before the test voyage. Plundarr and Boudoirr use qBittorrent by default; switch to SABnzbd-only with:
 
 ```sh
-make ship REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=sabnzbd
-make test-e2e
+make ship PRESET=YOUR-PRESET REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=sabnzbd
+make test-e2e PRESET=YOUR-PRESET
 ```
 
 Chart the same E2E voyage with NZBGet instead:
 
 ```sh
-make ship REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=nzbget
-make test-e2e
+make ship PRESET=YOUR-PRESET REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=nzbget
+make test-e2e PRESET=YOUR-PRESET
 ```
 
-Keep qBittorrent and add either Usenet client when ye want both downloader types tested together, for example `make ship ADD_SERVICES=sabnzbd`.
+Keep qBittorrent and add either Usenet client when ye want both downloader types tested together, for example `make ship PRESET=YOUR-PRESET ADD_SERVICES=sabnzbd`.
 
 ### Test the full stack
+
+The same disposable-deployment and config-reset warning above applies. This target leaves services running on success; it is not a read-only health check.
 
 Use this when ye want Make to launch every service, wait for health, and validate the full port-forwarding chain:
 
 ```sh
-make test-stack
+make test-stack PRESET=YOUR-PRESET
 ```
 
 This target:
@@ -162,11 +169,11 @@ These files match the Privateerr examples exactly. Cleanup targets copy them bac
 Useful cleanup commands:
 
 > [!CAUTION]
-> `make nuke` stops services and removes containers, networks, eligible images, and scoped build cache. Application volumes, `.env`, host backups, and persistent application config remain intact. Restarting may require image downloads.
+> `make clean-test` stops the selected stack and replaces its VPN files with examples. `make restore-test-config` replaces those files even if services are still running, which can break VPN operation. Use both only for the disposable test deployment named by `PRESET`. `make nuke` also stops services and removes containers, networks, eligible images, and scoped build cache; it preserves application volumes, `.env`, host backups, and persistent application config. Restarting may require image downloads.
 
 ```sh
-make clean-test
-make restore-test-config
+make clean-test PRESET=YOUR-PRESET
+make restore-test-config PRESET=YOUR-PRESET
 make clean
 ```
 

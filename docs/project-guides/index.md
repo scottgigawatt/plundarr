@@ -4,6 +4,8 @@ icon: material/book-open-page-variant
 
 # Project guides 📖
 
+These guides describe this checkout's service catalog and configuration seeds. For generation commands, select the [source-built generator](../development/maraudarr/index.md#choose-the-generator-revision) through `MARAUDARR_IMAGE`; published images use their matching source documentation.
+
 Pick the chart that matches the work ahead:
 
 - [Set up Plundarr on Synology](../setup.md) ⚓
@@ -12,6 +14,7 @@ Pick the chart that matches the work ahead:
 - [Monitor media servers](monitoring.md) 🔎
 - [Manage Plex and Jellyfin theme songs](themerr.md) 🎵
 - [Discover and request adult media with Velvarr](velvarr.md) 🔞
+- [Customize Jellyfin Web and Vue](jellyfin.md) 🎞️
 - [Run Plundarr test voyages](testing.md) 🧪
 - [Use the host helper scripts](scripts.md) 🦜
 - [Contribute to the project](../CONTRIBUTING.md) 🛠️
@@ -19,5 +22,3 @@ Pick the chart that matches the work ahead:
 - [Report a security concern](../SECURITY.md) 🛡️
 - [Get support](../SUPPORT.md) 🛟
 - [Review the Code of Conduct](../CODE_OF_CONDUCT.md) 🤝
-
-[Jellyfin customization](jellyfin.md) covers the optional Vue client, mounted Web settings, the local Boudoirr theme, menu links, and plugin recommendations.

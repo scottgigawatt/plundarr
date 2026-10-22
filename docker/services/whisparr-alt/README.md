@@ -2,7 +2,9 @@
 
 Runs an optional second Whisparr v3 instance with its own database, settings, API key, port, and managed library. It starts unchecked in Maraudarr and is absent from every preset's defaults. A little extra cargo, only when you invite it aboard.
 
-The primary `whisparr` service keeps its existing name and configuration paths. Both instances organize movies and scenes, and each has an independent **TMDB** or **TPDB** movie-provider choice under **Settings → General → Movie metadata source**. Fresh instances default to TMDB; choose a different provider in one instance when you want to use both. Either provider can belong to either instance, regardless of the host directory names. Scene lookups use StashDB in both instances. This chart uses hotio's floating `v3` channel, matching the primary instance.
+The primary service ID is `whisparr`; each instance has independent configuration. Both organize movies and scenes, and each has a **TMDB** or **TPDB** movie-provider choice under **Settings → General → Movie metadata source**. The default is TMDB; choose a different provider in one instance to use both. Host directory names do not select the provider. Scene lookups use StashDB in both instances. This chart uses hotio's floating `v3` channel.
+
+For generation commands, select this checkout's [source-built Maraudarr image](../../../docs/development/maraudarr/index.md#choose-the-generator-revision) through `MARAUDARR_IMAGE`.
 
 ## Select the second instance
 

@@ -29,15 +29,25 @@ Questionable cargo includes:
 
 ## Set up a development checkout 🛠️
 
+Install Git, Make, Docker with Compose, and pre-commit. Host-side Python tests need a version supported by `docker/pyproject.toml`; documentation builds require the exact interpreter described in the [developer testing guide](development/maraudarr/testing.md).
+
 ```sh
 git clone git@github.com:scottgigawatt/plundarr.git
 cd plundarr
-make ship
 ```
 
-Edit `dist/plundarr/.env` with yer own values. Keep that file private.
+Documentation and offline helper checks do not require a generated deployment or PIA credentials. When testing generator changes, build this checkout under a distinct local image reference before generating a disposable test project:
 
-Useful commands:
+```sh
+make build MARAUDARR_IMAGE=maraudarr:dev
+make ship MARAUDARR_IMAGE=maraudarr:dev PRESET=boudoirr
+```
+
+Repeat the image override with `make configure`, `make presets`, and `make services`, and rebuild after source edits. Make otherwise reuses its configured local or published image; changing Python, catalog, or seed files in the checkout alone does not change that image. See [generator revision selection](development/maraudarr/index.md#choose-the-generator-revision).
+
+Generation writes files but does not start application containers. Review `dist/boudoirr/.env` before a deliberate runtime test and keep it private. Use isolated output and project names rather than an operator deployment.
+
+Choose validation for the changed boundary:
 
 ```sh
 make help
@@ -50,9 +60,9 @@ make build-platforms
 pre-commit run --all-files
 ```
 
-Generated-stack checks such as `make config`, `make env`, `make up`, `make test-vpn`, `make test-e2e`, and `make test-stack` accept `PRESET=<preset>` when the change is preset-specific.
+Replace `YOUR-PRESET` with the selected preset ID, such as `boudoirr`. Generated-stack checks such as `make config`, `make env`, `make up`, `make test-vpn`, `make test-e2e`, and `make test-stack` accept `PRESET=YOUR-PRESET` when the change is preset-specific.
 
-`make down PRESET=<preset>` preserves volumes and images. `make clean` is repository-only and never touches `dist/` or Docker. `make nuke` removes the selected project's Docker resources plus the separate `maraudarr` Compose project that runs Maraudarr and its scoped Buildx cache, but preserves deployment files, bind-mounted config, and all application volumes, including Tracearr history and internal backups. Restarting may require image downloads. `make delete-config` deletes the host config tree.
+`make down PRESET=YOUR-PRESET` preserves volumes and images. `make clean` is repository-only and never touches `dist/` or Docker. `make nuke` removes the selected project's Docker resources plus the separate `maraudarr` Compose project that runs Maraudarr and its scoped Buildx cache, but preserves deployment files, bind-mounted config, and all application volumes, including Tracearr history and internal backups. Restarting may require image downloads. `make delete-config` deletes the host config tree.
 
 > [!IMPORTANT]
 > 🧪 VPN and port-forwarding testing uses real PIA credentials from the selected preset's `.env`. That voyage should happen locally, not with secrets flung into public waters.
@@ -80,7 +90,7 @@ Workspace format-on-save is deliberately disabled. Prettier is available only fo
 
 ## Check Python style
 
-`ruff.toml` shares correctness, import-order, and formatting rules with Privateerr. The recommended Ruff editor extension reads this file. The existing pull-request pre-commit step enforces both lint and formatting checks, including Python tests; Ruff stays out of the Maraudarr runtime image.
+`ruff.toml` owns this repository's correctness, import-order, and formatting rules. The recommended Ruff editor extension reads this file. The existing pull-request pre-commit step enforces both lint and formatting checks, including Python tests; Ruff stays out of the Maraudarr runtime image.
 
 ```sh
 pre-commit run ruff-check --all-files
@@ -97,7 +107,9 @@ Before opening a pull request:
 
 - Run relevant `make` targets.
 - Run `make test-workflows` for workflow, release, build-pin, or image-tag changes.
-- Run `make config`.
+- Run real Compose validation for generated-chart changes using a disposable preset and its matching environment; do not print operator credentials through `make config` or `make env`.
+- Run `make docs` for site content and inspect the rendered result and changed links.
+- Refresh and verify [public preset references](https://github.com/scottgigawatt/plundarr/blob/main/examples/presets/README.md) when generator output changes, using an image built from the source under review.
 - Run `pre-commit run --all-files` if hooks are installed.
 - Confirm no secrets, live VPN configs, or logs slipped into the hold.
 - Explain what changed and why.

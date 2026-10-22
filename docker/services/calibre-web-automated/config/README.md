@@ -1,6 +1,6 @@
 # Calibre-Web Automated configuration 📚
 
-Calibre-Web Automated stores users, settings, migration state, logs, plugins, processed-book backups, and application databases beneath `config/`. Preserve the complete directory, including hidden files, when moving an existing deployment.
+Calibre-Web Automated stores users, settings, internal version metadata, logs, plugins, processed-book backups, and application databases beneath `config/`. Preserve the complete directory, including hidden files, in application-consistent backups.
 
 The `ingest/` directory is temporary incoming cargo. CWA removes files after processing them, so never point another application's active download directory here or place incomplete downloads inside it. Finish each download elsewhere and move the completed book into this directory.
 

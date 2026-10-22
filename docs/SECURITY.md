@@ -59,6 +59,32 @@ Plundarr pulls published container images for the stack and keeps configuration 
 
 ## Interpret Maraudarr image scans
 
+### Current source and runtime
+
+The source pins Docker's official [Compose 5.6.1 binary](https://github.com/docker/compose/releases/tag/v5.6.1), built with Go 1.26.10 on all three generator platforms. The binary contains golang.org/x/net 0.58.0. Use the source-built generator described by the [generator revision guide](development/maraudarr/index.md#choose-the-generator-revision) for this checkout's catalog and dependency pins; a published image is identified by its own version or immutable digest.
+
+Maraudarr invokes Compose only for `config --quiet` validation. Its supported Make and Compose launch paths disable container networking and drop all optional capabilities. The retained [CVE-2026-78669](https://pkg.go.dev/vuln/GO-2026-6611) finding causes HTTP/2 denial of service in clients or servers when a malicious peer sends excessive SETTINGS frames. Network-isolated validation cannot receive that peer traffic. These constraints limit exposure to this finding; they do not establish that every Go advisory is unreachable under every possible container invocation.
+
+The sole CI exception in `.trivyignore.yaml` names CVE-2026-78669 at `usr/local/bin/docker-compose` and expires at midnight UTC on October 23, 2026. All other fixed HIGH and CRITICAL findings still fail the workflow. A different Compose invocation or networking configuration requires another security review; this exception does not cover a general-purpose Compose deployment.
+
+The recipe requires zlib 1.3.2-r1 and libexpat 2.9.0-r0 in both the disposable Python build stage and runtime. Both stages use Alpine 3.24 stable packages with those minimum security versions retained.
+
+Publication requires generator smoke tests, Python XML/compression checks, and artifact scans. Successful main builds publish `edge` and revision tags; semantic-version releases publish their matching stable aliases. Verify the selected immutable digest, all supported platforms, and unfiltered scan results before using an image. CI's exception does not establish a vulnerability-free artifact.
+
+### Scan an immutable artifact
+
+Use an explicit empty ignore file so CI exceptions cannot hide findings. Replace `IMAGE-DIGEST` with the image's immutable index digest and repeat with `--platform linux/arm64` and `--platform linux/arm/v7` to cover all generator architectures:
+
+```sh
+trivy image --ignorefile /dev/null --image-src remote --platform linux/amd64 --detection-priority comprehensive --scanners vuln ghcr.io/scottgigawatt/maraudarr@sha256:IMAGE-DIGEST
+```
+
+### Dated artifact audit evidence
+
+The following audit records identify specific reviewed artifacts and scanner databases. They are retained evidence, not a statement about the current contents of moving tags.
+
+#### Published artifacts: October 19, 2026
+
 The October 19, 2026 review checked immutable published images on `linux/amd64`, `linux/arm64`, and `linux/arm/v7` with Trivy 0.75.0 and its vulnerability database updated at 13:35 UTC that day. Every severity and findings without a published fix were included, with comprehensive package detection and an explicit empty ignore file. The table records Trivy results; a passing CI exception is not a clean artifact scan.
 
 | Reviewed channel | Image index digest | Trivy vulnerability identifiers per platform |
@@ -68,29 +94,13 @@ The October 19, 2026 review checked immutable published images on `linux/amd64`,
 
 Each platform reports 19 finding instances, all in the official Compose binary. The Alpine and installed Python package inventories have no reported findings. Both reviewed channels contain patched zlib 1.3.2-r1 and libexpat 2.9.0-r0; their earlier compression and XML findings remain resolved. The dated digests above identify the artifacts reviewed; moving tags can later select a different build.
 
-The remaining actionable findings come from Compose 5.6.0's Go 1.26.8 standard library and golang.org/x/net 0.58.0. Fixed releases are [Go 1.26.9](https://go.dev/doc/devel/release#go1.26.9) and [golang.org/x/net 0.60.0](https://pkg.go.dev/golang.org/x/net@v0.60.0). Docker has not yet published a Compose release containing those updates.
+At that review, the actionable findings came from Compose 5.6.0's Go 1.26.8 standard library and golang.org/x/net 0.58.0. Fixed releases were [Go 1.26.9](https://go.dev/doc/devel/release#go1.26.9) and [golang.org/x/net 0.60.0](https://pkg.go.dev/golang.org/x/net@v0.60.0). Docker had not yet published a Compose release containing those updates.
 
-### Await the official Compose security update
+#### Candidate artifacts: October 21, 2026
 
-Maraudarr uses Docker's digest-pinned [Compose 5.6.0 binary](https://github.com/docker/compose/releases/tag/v5.6.0). Patched Go and networking-library releases are available, but Docker has not yet published a Compose release containing those updates. Rebuilding the source locally changes its dependency graph and adds compiler pins, cross-compilation logic, build time, and validation responsibilities. The project waits for the official release instead of maintaining that extra build machinery.
+The October 21, 2026 candidate review scanned the updated runtime artifacts on all three supported platforms with Trivy 0.75.0 and its database updated at 01:19 UTC that day, including every severity and unfixed findings with no ignore file. Each platform retained six findings: one HIGH, four MEDIUM, and one UNKNOWN. These candidate results do not replace the dated published-image evidence above. CVE-2026-111943 was absent from both old and updated scans with that database; the official Compose release notes and verified Go 1.26.10 binaries provide the evidence for that fix.
 
-Maraudarr invokes Compose only for `config --quiet` validation. Its supported Make and Compose launch paths disable container networking and drop all optional capabilities. The original two HIGH findings that blocked CI, [CVE-2026-78667](https://pkg.go.dev/vuln/GO-2026-6609) and [CVE-2026-97031](https://pkg.go.dev/vuln/GO-2026-6607), concern HTTP file-serving and TLS-server denial of service. The supported validation path does not expose those servers. [CVE-2026-78669](https://pkg.go.dev/vuln/GO-2026-6611) also causes HTTP/2 denial of service in clients or servers when a malicious peer sends excessive SETTINGS frames. Network-isolated validation cannot receive that peer traffic. These constraints limit exposure to the three findings; they do not establish that every Go advisory is unreachable under every possible container invocation.
-
-The CI exceptions in `.trivyignore.yaml` name only those three advisories at `usr/local/bin/docker-compose` and expire at midnight UTC on October 23, 2026. All other fixed HIGH and CRITICAL findings still fail the workflow. A different Compose invocation or networking configuration requires another security review; these exceptions do not cover a general-purpose Compose deployment.
-
-Replace the donor image when a compatible official release contains the fixes on all three supported platforms. Verify generation, hardened smoke tests, and unfiltered artifact scans, then remove the exceptions and their workflow references together. Expiry stops CI from silently accepting the findings indefinitely. Full artifact reviews continue to include the known findings; a passing CI exception is not a clean scan.
-
-Use an explicit empty ignore file for the full Trivy review so repository CI exceptions cannot hide findings:
-
-```sh
-trivy image --ignorefile /dev/null --image-src remote --detection-priority comprehensive --scanners vuln ghcr.io/scottgigawatt/maraudarr@sha256:IMAGE-DIGEST
-```
-
-Replace `IMAGE-DIGEST` with the immutable image digest being reviewed and repeat the review for each supported platform.
-
-The recipe requires zlib 1.3.2-r1 and libexpat 2.9.0-r0 in both the disposable Python build stage and the published runtime. Alpine 3.24 stable now supplies those versions on all three supported platforms. Both stages install these packages from stable with their minimum security versions retained; the former Expat edge-repository exception has been removed.
-
-Rebuilt images must pass the generator smoke test, Python XML and compression checks, and full scans on all three platforms before publication. A new stable release delivers the Compose fixes through `latest`; merging a fix into `main` updates `edge`. Review the new immutable digest and scan results before deployment.
+### Scope and reporting limits
 
 Package-level scanner findings remain visible:
 

@@ -21,6 +21,23 @@ Maraudarr owns:
 
 Maraudarr does **not** start the generated stack, manage long-running service state, resolve Compose variables into the generated chart, or delete existing configuration.
 
+## Choose the generator revision
+
+`make ship`, `make configure`, `make presets`, and `make services` run the configured `MARAUDARR_IMAGE`, which defaults to `ghcr.io/scottgigawatt/maraudarr:latest`. Make first reuses that exact local reference. If it is absent, Make pulls the configured reference; a failed pull triggers a local build from this checkout. The mounted repository is the output destination, not a live source-code mount into the generator.
+
+The `latest` channel identifies a stable release, `edge` identifies a successful `main` build, and a release/revision reference identifies the selected published source. Use documentation matching that source. A checkout build packages the catalog and seeds from its `docker/` directory.
+
+To run the generator described by this checkout, export one local image reference, build it, and use it for all generation commands in that shell:
+
+```sh
+export MARAUDARR_IMAGE=maraudarr:dev
+make build
+make presets
+make configure
+```
+
+For non-interactive generation, use `make ship PRESET=boudoirr` with the exported image reference and the complete intended additions/removals. `make build` packages the checkout into the configured local image. To select a published generator, set `MARAUDARR_IMAGE` to a verified version or digest and use its matching documentation; `make pull-image` pulls that configured reference.
+
 ## Explore the source map
 
 | Module       | Responsibility                                    |
