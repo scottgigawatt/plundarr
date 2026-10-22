@@ -65,7 +65,7 @@ The source pins Docker's official [Compose 5.6.1 binary](https://github.com/dock
 
 Maraudarr invokes Compose only for `config --quiet` validation. Its supported Make and Compose launch paths disable container networking and drop all optional capabilities. The retained [CVE-2026-78669](https://pkg.go.dev/vuln/GO-2026-6611) finding causes HTTP/2 denial of service in clients or servers when a malicious peer sends excessive SETTINGS frames. Network-isolated validation cannot receive that peer traffic. These constraints limit exposure to this finding; they do not establish that every Go advisory is unreachable under every possible container invocation.
 
-The sole CI exception in `.trivyignore.yaml` names CVE-2026-78669 at `usr/local/bin/docker-compose` and expires at midnight UTC on October 23, 2026. All other fixed HIGH and CRITICAL findings still fail the workflow. A different Compose invocation or networking configuration requires another security review; this exception does not cover a general-purpose Compose deployment.
+The sole CI exception in `.trivyignore.yaml` names CVE-2026-78669 at `usr/local/bin/docker-compose` and expires at midnight UTC on November 6, 2026. All other fixed HIGH and CRITICAL findings still fail the workflow. A different Compose invocation or networking configuration requires another security review; this exception does not cover a general-purpose Compose deployment.
 
 The recipe requires zlib 1.3.2-r1 and libexpat 2.9.0-r0 in both the disposable Python build stage and runtime. Both stages use Alpine 3.24 stable packages with those minimum security versions retained.
 

@@ -14,7 +14,7 @@ vulnerabilities:
   - id: CVE-2026-78669
     paths:
       - usr/local/bin/docker-compose
-    expired_at: 2026-10-23
+    expired_at: 2026-11-06
     statement: >-
       The supported generator invokes only config --quiet with networking disabled.
       It cannot receive the malicious HTTP/2 peer traffic affecting clients or servers.
