@@ -16,8 +16,9 @@ ARG DOCKER_COMPOSE_TAG=v5.6.1@sha256:2aeaeedd4f2d8e2dcb399b2b9723bfaeb6714140cb0
 ARG MARAUDARR_BIN_HOME=/maraudarr
 
 #
-# Require patched compression and XML libraries from Alpine stable.
+# Require patched C, compression, and XML libraries from Alpine stable.
 #
+ARG MUSL_APK_MIN_VERSION=1.2.6-r3
 ARG ZLIB_APK_MIN_VERSION=1.3.2-r1
 ARG LIBEXPAT_APK_MIN_VERSION=2.9.0-r0
 
@@ -38,6 +39,7 @@ FROM alpine:${ALPINE_TAG} AS build
 # Re-declare the Maraudarr installation root inside the build stage.
 #
 ARG MARAUDARR_BIN_HOME
+ARG MUSL_APK_MIN_VERSION
 ARG ZLIB_APK_MIN_VERSION
 ARG LIBEXPAT_APK_MIN_VERSION
 
@@ -47,11 +49,13 @@ ARG LIBEXPAT_APK_MIN_VERSION
 ENV PATH=${MARAUDARR_BIN_HOME}/venv/bin:${PATH}
 
 #
-# Install Python with patched compression and XML libraries before creating the environment.
+# Install Python with patched C, compression, and XML libraries before creating the environment.
 #
 RUN apk add --no-cache \
         py3-pip \
         python3 \
+        "musl>=${MUSL_APK_MIN_VERSION}" \
+        "musl-utils>=${MUSL_APK_MIN_VERSION}" \
         "libexpat>=${LIBEXPAT_APK_MIN_VERSION}" \
         "zlib>=${ZLIB_APK_MIN_VERSION}" && \
     python3 -m venv "${MARAUDARR_BIN_HOME}/venv"
@@ -111,6 +115,7 @@ ARG MARAUDARR_GROUP=maraudarr
 ARG IMAGE_CREATED=unknown
 ARG IMAGE_REVISION=unknown
 ARG IMAGE_VERSION=latest
+ARG MUSL_APK_MIN_VERSION
 ARG ZLIB_APK_MIN_VERSION
 ARG LIBEXPAT_APK_MIN_VERSION
 
@@ -141,12 +146,14 @@ LABEL org.opencontainers.image.title="Maraudarr" \
         org.opencontainers.image.base.name="docker.io/library/alpine:${ALPINE_TAG}"
 
 #
-# Upgrade OpenSSL and install the fixed Python compression and XML runtime libraries.
+# Upgrade OpenSSL and install Python with patched C, compression, and XML libraries.
 # Python package-management tools remain in the build stage.
 #
 RUN apk upgrade --no-cache libcrypto3 libssl3 && \
     apk add --no-cache \
         python3 \
+        "musl>=${MUSL_APK_MIN_VERSION}" \
+        "musl-utils>=${MUSL_APK_MIN_VERSION}" \
         "libexpat>=${LIBEXPAT_APK_MIN_VERSION}" \
         "zlib>=${ZLIB_APK_MIN_VERSION}"
 
