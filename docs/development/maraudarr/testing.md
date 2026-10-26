@@ -53,7 +53,7 @@ make docs
 make docs-serve
 ```
 
-Both targets create `.venv-docs/` and install the pinned tools from `requirements-docs.txt` when needed. No separate MkDocs setup step is required. The documentation toolchain requires Python 3.15.0 and selects `python3.15` by default, as declared by `DOCS_PYTHON_VERSION` and `DOCS_PYTHON_BIN` in the root Makefile. Set `DOCS_PYTHON_BIN` to the exact interpreter path when it uses a different executable name. A virtual environment created by another Python release is disposable and is recreated automatically before dependency install. The generated `site/` directory is disposable and ignored by Git. CI performs the same strict build and publishes a fresh artifact from `main`.
+Both targets create `.venv-docs/` and install the pinned tools from `requirements-docs.txt` when needed. No separate MkDocs setup step is required. The documentation toolchain requires Python 3.15.2 and selects `python3.15` by default, as declared by `DOCS_PYTHON_VERSION` and `DOCS_PYTHON_BIN` in the root Makefile. Set `DOCS_PYTHON_BIN` to the exact interpreter path when it uses a different executable name. A virtual environment created by another Python release is disposable and is recreated automatically before dependency install. The generated `site/` directory is disposable and ignored by Git. CI performs the same strict build and publishes a fresh artifact from `main`.
 
 ## Check repository policy
 
