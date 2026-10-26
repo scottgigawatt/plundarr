@@ -8,11 +8,13 @@
 #
 
 #
-# Default Alpine and Compose image tags plus the Maraudarr installation root.
+# Default build images, Compose source, and the Maraudarr installation root.
 # Build arguments can override each value.
 #
 ARG ALPINE_TAG=3.24@sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3c0371ea2c9a
-ARG DOCKER_COMPOSE_TAG=v5.6.1@sha256:2aeaeedd4f2d8e2dcb399b2b9723bfaeb6714140cb0657897f5865960f1624ae
+ARG GO_TAG=1.26.10-alpine3.24@sha256:27f2d3b83cfc5803c8078f8e730af0f7c431bf067afaec8f60a36fb763187cba
+ARG DOCKER_COMPOSE_VERSION=v5.6.1
+ARG GO_X_NET_VERSION=v0.60.0
 ARG MARAUDARR_BIN_HOME=/maraudarr
 
 #
@@ -23,10 +25,46 @@ ARG ZLIB_APK_MIN_VERSION=1.3.2-r1
 ARG LIBEXPAT_APK_MIN_VERSION=2.9.0-r0
 
 #
-# Stage 1 of 3: Copy the official Compose binary for the selected target platform.
-# Docker maintains this build separately from Alpine's packaged client.
+# Stage 1 of 3: Rebuild verified Compose source with the patched network module.
+# Keep the compiler and downloaded source outside the published runtime.
 #
-FROM docker/compose-bin:${DOCKER_COMPOSE_TAG} AS docker-compose
+FROM --platform=$BUILDPLATFORM golang:${GO_TAG} AS docker-compose
+
+#
+# Pin the upstream source and security floor; prohibit implicit toolchain downloads.
+#
+ARG DOCKER_COMPOSE_VERSION
+ARG GO_X_NET_VERSION
+ARG TARGETOS
+ARG TARGETARCH
+ARG TARGETVARIANT
+ENV CGO_ENABLED=0 \
+    GOTOOLCHAIN=local \
+    GOPROXY=https://proxy.golang.org \
+    GOSUMDB=sum.golang.org
+WORKDIR /src
+
+#
+# Authenticate source and dependencies, preserving any newer upstream module.
+#
+RUN go mod download "github.com/docker/compose/v5@${DOCKER_COMPOSE_VERSION}" && \
+    cp -a "$(go env GOMODCACHE)/github.com/docker/compose/v5@${DOCKER_COMPOSE_VERSION}/." /src/ && \
+    chmod -R u+w /src && \
+    current_net_version="$(go list -m -f '{{.Version}}' golang.org/x/net)" && \
+    newest_net_version="$(printf '%s\n' "${current_net_version}" "${GO_X_NET_VERSION}" | sort -V | tail -n 1)" && \
+    if [ "${current_net_version}" != "${newest_net_version}" ]; then \
+        go get "golang.org/x/net@${GO_X_NET_VERSION}"; \
+    fi && \
+    go mod verify
+
+#
+# Match upstream's standalone build flags and cross-compile every supported target.
+#
+RUN if [ "${TARGETARCH}" = arm ]; then export GOARM="${TARGETVARIANT#v}"; fi && \
+    GOOS="${TARGETOS}" GOARCH="${TARGETARCH}" \
+    go build -mod=readonly -trimpath -tags=e2e \
+        -ldflags "-w -X github.com/docker/compose/v5/internal.Version=${DOCKER_COMPOSE_VERSION}" \
+        -o /docker-compose ./cmd
 
 #
 # Stage 2 of 3: Build the isolated Python environment separately so package-
@@ -158,9 +196,11 @@ RUN apk upgrade --no-cache libcrypto3 libssl3 && \
         "zlib>=${ZLIB_APK_MIN_VERSION}"
 
 #
-# Copy the standalone Compose binary from its official image.
+# Copy the rebuilt Compose binary with its upstream license and notice.
 #
 COPY --from=docker-compose /docker-compose /usr/local/bin/docker-compose
+COPY --from=docker-compose /src/LICENSE /usr/share/licenses/docker-compose/LICENSE
+COPY --from=docker-compose /src/NOTICE /usr/share/licenses/docker-compose/NOTICE
 
 #
 # Copy the installed application and exact, hash-verified dependencies from

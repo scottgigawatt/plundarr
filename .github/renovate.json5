@@ -132,9 +132,9 @@
                 "/^\\.github/workflows/build-and-push\\.yml$/"
             ],
             "matchStrings": [
-                "DOCKER_COMPOSE_TAG[=:]\\s*(?<currentValue>[^@\\s]+)@(?<currentDigest>sha256:[a-f0-9]+)"
+                "GO_TAG[=:]\\s*(?<currentValue>[^@\\s]+)@(?<currentDigest>sha256:[a-f0-9]+)"
             ],
-            "depNameTemplate": "docker/compose-bin",
+            "depNameTemplate": "golang",
             "datasourceTemplate": "docker",
             "versioningTemplate": "docker"
         },
@@ -144,11 +144,41 @@
                 "/^example\\.maraudarr\\.env$/"
             ],
             "matchStrings": [
-                "DOCKER_COMPOSE_TAG=\"\\$\\{DOCKER_COMPOSE_TAG:-(?<currentValue>[^@\\s}]+)@(?<currentDigest>sha256:[a-f0-9]+)\\}\""
+                "GO_TAG=\"\\$\\{GO_TAG:-(?<currentValue>[^@\\s}]+)@(?<currentDigest>sha256:[a-f0-9]+)\\}\""
             ],
-            "depNameTemplate": "docker/compose-bin",
+            "depNameTemplate": "golang",
             "datasourceTemplate": "docker",
             "versioningTemplate": "docker"
+        },
+        {
+            "customType": "regex",
+            "managerFilePatterns": [
+                "/^docker/Dockerfile$/",
+                "/^\\.github/workflows/build-and-push\\.yml$/",
+                "/^example\\.maraudarr\\.env$/"
+            ],
+            "matchStrings": [
+                "DOCKER_COMPOSE_VERSION=(?<currentValue>v\\d+\\.\\d+\\.\\d+)",
+                "DOCKER_COMPOSE_VERSION=\"\\$\\{DOCKER_COMPOSE_VERSION:-(?<currentValue>v\\d+\\.\\d+\\.\\d+)\\}\""
+            ],
+            "depNameTemplate": "github.com/docker/compose/v5",
+            "datasourceTemplate": "go",
+            "versioningTemplate": "semver"
+        },
+        {
+            "customType": "regex",
+            "managerFilePatterns": [
+                "/^docker/Dockerfile$/",
+                "/^\\.github/workflows/build-and-push\\.yml$/",
+                "/^example\\.maraudarr\\.env$/"
+            ],
+            "matchStrings": [
+                "GO_X_NET_VERSION=(?<currentValue>v\\d+\\.\\d+\\.\\d+)",
+                "GO_X_NET_VERSION=\"\\$\\{GO_X_NET_VERSION:-(?<currentValue>v\\d+\\.\\d+\\.\\d+)\\}\""
+            ],
+            "depNameTemplate": "golang.org/x/net",
+            "datasourceTemplate": "go",
+            "versioningTemplate": "semver"
         }
     ],
 
