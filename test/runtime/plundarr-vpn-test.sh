@@ -46,7 +46,7 @@ fi
 : "${PLUNDARR_CONFIG_PATH:=config/gluetun/wireguard}"
 : "${PLUNDARR_GLUETUN_PATH:=config/gluetun}"
 : "${PLUNDARR_HEALTH_URL:=http://127.0.0.1:9999}"
-: "${PLUNDARR_QBITTORRENT_URL:=http://127.0.0.1:8080}"
+: "${PLUNDARR_QBITTORRENT_URL:=}"
 : "${PLUNDARR_REQUIRE_PORT_FORWARD:=true}"
 : "${PLUNDARR_WAIT_SECONDS:=0}"
 : "${PLUNDARR_LOG_PATH:=test/logs/plundarr-vpn-test.log}"
@@ -343,7 +343,7 @@ if [[ -n "${PLUNDARR_QBITTORRENT_SERVICE}" ]]; then
         docker exec \
             --env PLUNDARR_QBITTORRENT_URL="${PLUNDARR_QBITTORRENT_URL}" \
             "${gluetun_container_id}" \
-            sh -ec 'wget -qO- "${PLUNDARR_QBITTORRENT_URL}/api/v2/app/preferences"'
+            sh -ec 'api_url="${PLUNDARR_QBITTORRENT_URL:-${QBITTORRENT_API_URL}}"; wget -qO- "${api_url}/api/v2/app/preferences"'
     )"
 
     # Extract the relevant preferences from the JSON payload.

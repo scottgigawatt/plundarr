@@ -64,6 +64,6 @@ services:
     # Define container healthcheck to verify Privateerr has completed setup
     healthcheck:
       <<: *default-healthcheck-settings  # Pull in default healthcheck settings
-      test:                              # Healthy when healthcheck marker file exists
+      test:                              # Ready after integration scripts and valid VPN files exist
         - CMD
         - privateerr-healthcheck

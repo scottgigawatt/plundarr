@@ -17,14 +17,18 @@ ARG ALPINE_TAG=3.24@sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3
 FROM alpine:${ALPINE_TAG}
 
 #
-# Require the fixed HTTP library from Alpine stable.
+# Use the production interpreter while stable awaits its Python security release.
 #
-ARG NGHTTP2_APK_MIN_VERSION=1.70.0-r0
+ARG EDGE_APK_REPOSITORY=https://dl-cdn.alpinelinux.org/alpine/edge/main
+ARG PYTHON_APK_MIN_VERSION=3.14.10-r0
 
 #
 # Install validation tools only in this disposable development image.
 #
-RUN apk add --no-cache python3 py3-pip nodejs npm && \
+RUN apk upgrade --no-cache && \
+    apk add --no-cache python3 py3-pip nodejs npm && \
+    printf '%s\n' "@pythonfix ${EDGE_APK_REPOSITORY}" >> /etc/apk/repositories && \
+    apk add --no-cache "python3@pythonfix>=${PYTHON_APK_MIN_VERSION}" && \
     python3 -m venv /opt/typecheck
 
 #
@@ -40,8 +44,6 @@ RUN /opt/typecheck/bin/pip install --no-cache-dir --require-hashes -r /tmp/requi
 COPY package.json package-lock.json /opt/tools/
 RUN npm ci --prefix /opt/tools --omit=dev --ignore-scripts && \
     apk del npm py3-pip && \
-    apk add --no-cache \
-        "nghttp2-libs>=${NGHTTP2_APK_MIN_VERSION}" && \
     rm -rf /root/.npm
 
 #

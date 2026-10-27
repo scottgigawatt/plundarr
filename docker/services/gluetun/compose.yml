@@ -56,7 +56,6 @@ services:
     volumes:
       - ${GLUETUN_CONFIG_PATH}:/gluetun:rw                               # Gluetun config directory
       - ${GLUETUN_CONFIG_PATH}:/tmp/gluetun:rw                           # Gluetun runtime state directory
-      - ${GLUETUN_WRAPPER_SCRIPT_PATH}:${GLUETUN_ENTRYPOINT_WRAPPER}:ro  # Gluetun entrypoint wrapper script
 
     # Define container healthcheck to verify VPN connectivity
     healthcheck:
@@ -72,4 +71,4 @@ services:
     # Specify container service dependencies
     depends_on:
       privateerr:
-        condition: service_healthy  # Wait for Privateerr to generate the WireGuard config and report healthy
+        condition: service_healthy  # Wait for Privateerr to install scripts and prepare VPN files
