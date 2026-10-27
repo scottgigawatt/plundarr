@@ -520,6 +520,35 @@ missing_dependency_comments=$(awk '
 test -z "${missing_dependency_comments}"
 
 #
+# Resolve browser URLs with qBittorrent's actual listener, including preset and operator ports.
+# Dry-run the recipe so the test cannot open a real browser or contact Docker.
+#
+for webui_port in 8080 18080 38080 48080; do
+    COMPOSE_TEST_LOG="${test_output}/open-compose.log" \
+    COMPOSE_TEST_WEBUI_PORT="${webui_port}" \
+        make --no-print-directory --dry-run open \
+            BUILD_DEPENDS= CHECK_ENV= CHECK_RENDERED= \
+            SELECTED_COMPOSE_SERVICES=qbittorrent DIRECT_WEB_PORTS= \
+            PLUNDARR_COMPOSE="sh test/stubs/compose-docker-stub.sh compose" \
+            >"${test_output}/open.actual"
+    grep -F "port gluetun ${webui_port}" "${test_output}/open.actual" >/dev/null
+
+    if grep -F 'IGNORED_LABEL' "${test_output}/open.actual" >/dev/null; then
+        echo "Browser helper leaked unrelated Compose environment output." >&2
+        exit 1
+    fi
+done
+
+# Check the other download clients against their generated container listeners.
+for downloader in sabnzbd:8085 nzbget:6789; do
+    make --no-print-directory --dry-run open \
+        BUILD_DEPENDS= CHECK_ENV= CHECK_RENDERED= \
+        SELECTED_COMPOSE_SERVICES="${downloader%:*}" DIRECT_WEB_PORTS= \
+        >"${test_output}/open.actual"
+    grep -F "port gluetun ${downloader#*:}" "${test_output}/open.actual" >/dev/null
+done
+
+#
 # Report success.
 #
 echo "Make helper tests passed."

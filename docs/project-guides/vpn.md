@@ -24,7 +24,7 @@ Run these commands from the Plundarr repository root. For a deployment managed d
 
 In Synology Container Manager, stop the project before the one-shot generation and rebuild it afterward using the updated `.env`. If you manage this entirely through the UI, temporarily set `PRIVATEERR_AUTO_RECOVER=false`, rebuild and verify fresh generation, then restore `true` and rebuild again. A container restart alone does not reload environment changes. Keep the generated Compose mappings in place.
 
-Check Privateerr's logs for the selected region and Gluetun's logs for successful port forwarding. PIA's advertised forwarding support does not guarantee its forwarding API is currently available. If a region's API fails, choose another forwarding-capable region in `.env` and recreate the project. No manual Compose edits are needed. Steer around the storm, captain.
+Check Privateerr's logs for the selected region and Gluetun's logs for successful port forwarding. PIA's advertised forwarding support does not guarantee its forwarding API is currently available. If a region's API fails, choose another forwarding-capable region in `.env` and apply it with the one-shot generation procedure above before recreating the project. No manual Compose edits are needed. Steer around the storm, captain.
 
 ## Recover stale connections automatically 🛟
 
@@ -52,7 +52,7 @@ Recovery respects `PIA_AUTOCONNECT`, `PIA_PREFERRED_REGION`, and `PIA_PF`. A sel
 
 Privateerr installs its packaged startup wrapper and qBittorrent forwarding hook into `/gluetun/scripts` on every startup before reporting healthy. Gluetun runs `GLUETUN_ENTRYPOINT_WRAPPER=/gluetun/scripts/gluetun-entrypoint-wrapper.sh` through the existing configuration mount. No external script download or individual script mount is required.
 
-Privateerr owns `gluetun-entrypoint-wrapper.sh` and `qbittorrent-port-forwarding.sh` in that directory and replaces them from the selected image. Keep operator scripts under separate names; an explicitly selected custom wrapper must implement the configured health listener and authenticated control role. Maraudarr preserves WireGuard state, application data, existing keys, and explicit recovery choices. An operator-managed `/gluetun/auth/config.toml` must provide Privateerr's recovery role with the shared key; the wrapper preserves that file. Set `PRIVATEERR_AUTO_RECOVER=false` when the selected wrapper or authentication configuration does not support recovery. Keep the API key and VPN configuration out of support reports.
+Privateerr owns `gluetun-entrypoint-wrapper.sh` and `qbittorrent-port-forwarding.sh` in that directory and replaces them from the selected image. Keep operator scripts under separate names. `GLUETUN_ENTRYPOINT_WRAPPER` must name an existing file inside Gluetun; the generated chart mounts the shared configuration directory and does not install custom wrappers. Maraudarr preserves explicitly saved path values. A custom wrapper must implement the configured health listener and authenticated control role. Maraudarr preserves WireGuard state, application data, existing keys, and explicit recovery choices. An operator-managed `/gluetun/auth/config.toml` must provide Privateerr's recovery role with the shared key; the wrapper preserves that file. Set `PRIVATEERR_AUTO_RECOVER=false` when the selected wrapper or authentication configuration does not support recovery. Keep the API key and VPN configuration out of support reports.
 
 ## Run Privateerr without privileged mode
 

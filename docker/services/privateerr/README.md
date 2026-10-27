@@ -6,7 +6,7 @@ Installs its packaged Gluetun integration scripts and prepares PIA WireGuard con
 
 The generated `.env` includes `PIA_AUTOCONNECT=true`, `PIA_PREFERRED_REGION=ca`, and `PIA_PF=true`. Automatic selection ignores the preferred region. Set `PIA_AUTOCONNECT=false` to select Montreal, or change `PIA_PREFERRED_REGION` to another PIA region ID. Port-forwarding support is advertised by PIA; it is not a live API availability check.
 
-Recreate the complete stack after editing `.env`; a plain restart does not reload its settings. Privateerr generates the configuration and metadata before Gluetun starts. See the [VPN region setup guide](../../../docs/project-guides/vpn.md) for deployment commands and Synology guidance.
+Recreating the complete stack loads changed environment values, but recovery-enabled startup reuses valid saved VPN files. To apply a region or forwarding-selection change immediately, use the one-shot generation procedure in the [VPN region setup guide](../../../docs/project-guides/vpn.md#choose-a-vpn-region), including its Synology guidance. A plain restart does not reload environment settings.
 
 ## Automatic Gluetun recovery 🛟
 

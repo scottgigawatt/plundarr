@@ -163,6 +163,7 @@ class VpnRecoveryTests(unittest.TestCase):
             "PRIVATEERR_RECOVERY_COOLDOWN_SECONDS": 'PRIVATEERR_RECOVERY_COOLDOWN_SECONDS="600"',
             "PRIVATEERR_GENERATION_TIMEOUT_SECONDS": 'PRIVATEERR_GENERATION_TIMEOUT_SECONDS="240"',
             "PRIVATEERR_TAG": 'PRIVATEERR_TAG="operator-pinned"',
+            "GLUETUN_ENTRYPOINT_WRAPPER": 'GLUETUN_ENTRYPOINT_WRAPPER="/gluetun/scripts/operator-wrapper.sh"',
         }
         existing.update(overrides)
 

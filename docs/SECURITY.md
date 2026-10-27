@@ -59,7 +59,7 @@ Plundarr pulls published container images for the stack and keeps configuration 
 
 ## Interpret Maraudarr image scans
 
-Maraudarr uses Docker's official digest-pinned [Compose 5.6.1 binary](https://github.com/docker/compose/releases/tag/v5.6.1), built with Go 1.26.10 and `golang.org/x/net v0.58.0`. Python package managers and development tools stay out of the published runtime. Use the [generator revision guide](development/maraudarr/index.md#choose-the-generator-revision) to select the source-built generator for this checkout's catalog and dependencies.
+Maraudarr uses Docker's official digest-pinned [Compose 5.6.1 binary](https://github.com/docker/compose/releases/tag/v5.6.1), built with Go 1.26.10 and `golang.org/x/net v0.58.0`. Development checkers and installed pip/setuptools stay out of the application virtual environment. Alpine Python retains its standard-library `ensurepip` bootstrap wheel. Use the [generator revision guide](development/maraudarr/index.md#choose-the-generator-revision) to select the source-built generator for this checkout's catalog and dependencies.
 
 ### Current dependency choices
 
@@ -68,6 +68,8 @@ The image refreshes Alpine 3.24 stable packages before installing dependencies. 
 Stable Python remains `3.14.8-r0`. Both Maraudarr stages and the disposable type-check image use a tagged `@pythonfix` repository to install `python3>=3.14.10-r0`, addressing [CVE-2026-12345, CVE-2026-114583, and CVE-2026-115557](https://discuss.python.org/t/python-3-15-2-3-14-10-3-13-18-3-12-16-and-3-11-18-are-out/109678). Installed package inventories on every generator platform confirm that only `python3`, `python3-pyc`, `python3-pycache-pyc0`, and `pyc` come from outside stable; the C library and OpenSSL stay stable. Remove this tagged repository and Python floor when stable supplies the fixed interpreter on all three platforms.
 
 Runtime and documentation requirements remain exact and hash-verified. The October 27 PyPI review found the direct requirements current after updating Ruff to 0.17.3; the pre-commit hook uses the same version. The disposable checker retains its locked Pyright version and removes npm and system pip after installation. Its historical nghttp2 floor is redundant with the current stable package refresh. No custom Go rebuild or modified upstream binary is maintained.
+
+The standard-library `ensurepip` seed is pip 26.2.2 and retains its upstream vendored components, including msgpack 1.1.2, urllib3 2.7.0, and pkg_resources from setuptools 70.3.0. It is not installed in the application environment or used by generation; the normal image scan totals below do not establish coverage of nested bootstrap-wheel contents.
 
 ### Retained Compose exception
 
@@ -87,7 +89,7 @@ Counts are identical on `linux/amd64`, `linux/arm64`, and `linux/arm/v7`. Each s
 | Published `edge` | 6 | 11 |
 | Local updated candidate | 8 | 8 |
 
-The reviewed published indexes are `sha256:d51e6ebe973ce7b842125bb29a9807f974300cc4e3c1896b7af6950492cbed96` for `latest` and `sha256:275ab9561cd61299e625dd0186afa008221447889410a427ef9fcbc7f4019c26` for `edge`. The local candidate OCI index is `sha256:9aa075f320a709a61b03cb17a1faae18f69e0b17968a8eba305e6df9c0fa0638`; it has not been published.
+The reviewed published indexes are `sha256:d51e6ebe973ce7b842125bb29a9807f974300cc4e3c1896b7af6950492cbed96` for `latest` and `sha256:275ab9561cd61299e625dd0186afa008221447889410a427ef9fcbc7f4019c26` for `edge`. The local candidate OCI index is `sha256:bfc8e3da5ac9555bbed496b1f6002a572dbe6995620a05fad0eb8ee309ea0791`; it has not been published.
 
 Scout no longer reports the three Python advisories in any candidate architecture. Trivy does not report those Python advisories in either baseline or candidate, so its totals alone do not show that improvement. A passing CI exception is not a clean artifact scan.
 
@@ -98,7 +100,7 @@ The remaining reports have these boundaries:
 - **OpenPGP:** [GO-2026-5932](https://pkg.go.dev/vuln/GO-2026-5932) has no fixed version and concerns a package absent from the compiled Compose binary. Comprehensive package detection retains the module-level report.
 - **Windows CLI:** Scout also reports [CVE-2025-15558](https://github.com/docker/cli/security/advisories/GHSA-p436-gjf2-799p), a Windows plugin-discovery issue. The generator runs on Linux; no blanket suppression is applied.
 
-The native disposable type-check image is development tooling, not a published runtime. Trivy reports the two musl findings. Scout reports four findings, including the same three Python advisories against an older `3.14.8-r0` inventory. Direct execution reports Python 3.14.10, and both APK databases in the selected arm64 archive record `3.14.10-r0`; even a standard archive preserving the exact configuration and layers retains the Scout discrepancy. That report remains unresolved as scanner inventory evidence, rather than being suppressed or treated as proof that the old interpreter still runs.
+The native disposable type-check image is development tooling, not a published runtime. The earlier Scout report traced to a retained zero-byte `pyc 3.14.8-r0` metapackage whose source package is Python. The interpreter and its other bytecode packages were already 3.14.10. Installing tagged Python before stable bootstrap tools keeps all four Python-family packages at 3.14.10 and removes that stale inventory without a scanner suppression. The rebuilt checker reports two Trivy package findings and one Scout advisory, all for the documented stable musl backport.
 
 ### Scan an immutable artifact
 

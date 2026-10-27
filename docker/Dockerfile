@@ -28,9 +28,9 @@ ARG PYTHON_APK_MIN_VERSION=3.14.10-r0
 FROM docker/compose-bin:${DOCKER_COMPOSE_TAG} AS docker-compose
 
 #
-# Stage 2 of 3: Build the isolated Python environment separately so package-
-# management tools and their transitive dependencies never enter the published
-# runtime image.
+# Stage 2 of 3: Build the application environment separately so bootstrap tools
+# are removed before the environment is copied into the runtime image.
+# Alpine's Python standard-library bootstrap wheel remains in the runtime.
 #
 FROM alpine:${ALPINE_TAG} AS build
 
@@ -51,9 +51,9 @@ ENV PATH=${MARAUDARR_BIN_HOME}/venv/bin:${PATH}
 # The repository tag keeps unrelated edge packages out of this build.
 #
 RUN apk upgrade --no-cache && \
-    apk add --no-cache py3-pip python3 && \
     printf '%s\n' "@pythonfix ${EDGE_APK_REPOSITORY}" >> /etc/apk/repositories && \
     apk add --no-cache "python3@pythonfix>=${PYTHON_APK_MIN_VERSION}" && \
+    apk add --no-cache py3-pip && \
     python3 -m venv "${MARAUDARR_BIN_HOME}/venv"
 
 #
@@ -142,7 +142,7 @@ LABEL org.opencontainers.image.title="Maraudarr" \
 
 #
 # Refresh stable runtime libraries and install the same patched Python as the build stage.
-# Python package-management tools remain in the build stage.
+# System pip stays in the build stage; Python retains its standard-library bootstrap wheel.
 #
 RUN apk upgrade --no-cache && \
     printf '%s\n' "@pythonfix ${EDGE_APK_REPOSITORY}" >> /etc/apk/repositories && \

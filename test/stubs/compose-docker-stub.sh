@@ -33,6 +33,15 @@ fi
 # Record the invocation and return stable tab-separated Compose status rows.
 #
 printf '%s\n' "$*" >"${COMPOSE_TEST_LOG}"
+
+# Return only fixture environment values for Make's selected listener lookup.
+case " $* " in
+    *" config --environment "*)
+        printf 'QBITTORRENT_WEBUI_PORT=%s\nIGNORED_LABEL=fixture\n' "${COMPOSE_TEST_WEBUI_PORT:-8080}"
+        exit 0
+        ;;
+esac
+
 printf '%s\t%s\t%s\t%s\n' \
     "test-idle-latest" \
     "idle" \

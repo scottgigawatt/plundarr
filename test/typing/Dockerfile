@@ -23,12 +23,12 @@ ARG EDGE_APK_REPOSITORY=https://dl-cdn.alpinelinux.org/alpine/edge/main
 ARG PYTHON_APK_MIN_VERSION=3.14.10-r0
 
 #
-# Install validation tools only in this disposable development image.
+# Install Python first so stable tools retain its matching bytecode metapackage.
 #
 RUN apk upgrade --no-cache && \
-    apk add --no-cache python3 py3-pip nodejs npm && \
     printf '%s\n' "@pythonfix ${EDGE_APK_REPOSITORY}" >> /etc/apk/repositories && \
     apk add --no-cache "python3@pythonfix>=${PYTHON_APK_MIN_VERSION}" && \
+    apk add --no-cache py3-pip nodejs npm && \
     python3 -m venv /opt/typecheck
 
 #
