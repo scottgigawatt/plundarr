@@ -17,18 +17,10 @@ ARG ALPINE_TAG=3.24@sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3
 FROM alpine:${ALPINE_TAG}
 
 #
-# Use the production interpreter while stable awaits its Python security release.
-#
-ARG EDGE_APK_REPOSITORY=https://dl-cdn.alpinelinux.org/alpine/edge/main
-ARG PYTHON_APK_MIN_VERSION=3.14.10-r0
-
-#
-# Install Python first so stable tools retain its matching bytecode metapackage.
+# Refresh stable libraries and install the same patched interpreter as production.
 #
 RUN apk upgrade --no-cache && \
-    printf '%s\n' "@pythonfix ${EDGE_APK_REPOSITORY}" >> /etc/apk/repositories && \
-    apk add --no-cache "python3@pythonfix>=${PYTHON_APK_MIN_VERSION}" && \
-    apk add --no-cache py3-pip nodejs npm && \
+    apk add --no-cache python3 py3-pip nodejs npm && \
     python3 -m venv /opt/typecheck
 
 #
