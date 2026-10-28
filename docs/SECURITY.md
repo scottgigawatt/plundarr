@@ -87,7 +87,7 @@ The local candidate OCI index is `sha256:f2943d215a7ed832884e6f5b09ae651b71806d1
 | --- | --- | --- |
 | Stable-only candidate: amd64, arm64, ARMv7 | 8 | 10 |
 
-Each Trivy report contains one HIGH, four MEDIUM, and three UNKNOWN Compose module findings. Scout retains those eight reports plus the stable musl backport and Windows CLI reports described below. Counts are identical across all three platforms, but each scanner counts findings differently; compare within its column. The Python security advisories are absent. A passing CI exception is not a clean artifact scan, and these totals do not establish coverage of nested bootstrap-wheel contents.
+Each Trivy report contains one HIGH, four MEDIUM, and three UNKNOWN Compose module findings. Scout retains those eight reports plus the stable musl backport and Windows CLI reports described below. Counts are identical across all three platforms, but each scanner counts findings differently; compare within its column. The three patched Python interpreter advisories are absent from the image reports. A passing CI exception is not a clean artifact scan, and these totals do not establish coverage of nested bootstrap-wheel contents.
 
 The remaining reports have these boundaries:
 
