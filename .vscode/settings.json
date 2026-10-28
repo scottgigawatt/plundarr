@@ -12,6 +12,10 @@
     // Accept project names, dependencies, and intentional pirate vocabulary.
     //
     "cSpell.words": [
+        "ensurepip",
+        "metapackage",
+        "pythonfix",
+        "tzdata",
         "getuid",
         "getgid",
         "Themerr",

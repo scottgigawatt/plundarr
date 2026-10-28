@@ -14,4 +14,4 @@ The repository-level matrix in `test/generator/test-maraudarr-matrix.sh` complem
 
 Coverage-guided harnesses live in `fuzz/`. ClusterFuzzLite packages them with Atheris and exercises relevant parser changes during pull-request validation.
 
-The VPN recovery cases cover paired-service defaults, generated API keys, preserved operator settings, forwarding hooks, and wrapper fingerprint checks. `fixtures/gluetun-legacy/gluetun-entrypoint-wrapper.sh` is the immutable project fixture from commit `5a5dc2f`; retain its exact bytes so the fingerprint checks remain reproducible.
+The VPN recovery cases cover paired-service defaults, generated API keys, preserved operator settings, forwarding hooks, consistent qBittorrent Web UI ports, and the image-owned script handoff. Maraudarr seeds no Gluetun scripts and preserves existing runtime files; Privateerr installs its packaged scripts before reporting startup readiness.

@@ -16,11 +16,10 @@ ARG DOCKER_COMPOSE_TAG=v5.6.1@sha256:2aeaeedd4f2d8e2dcb399b2b9723bfaeb6714140cb0
 ARG MARAUDARR_BIN_HOME=/maraudarr
 
 #
-# Require patched C, compression, and XML libraries from Alpine stable.
+# Use only Python from the tagged repository until stable includes its security release.
 #
-ARG MUSL_APK_MIN_VERSION=1.2.6-r3
-ARG ZLIB_APK_MIN_VERSION=1.3.2-r1
-ARG LIBEXPAT_APK_MIN_VERSION=2.9.0-r0
+ARG EDGE_APK_REPOSITORY=https://dl-cdn.alpinelinux.org/alpine/edge/main
+ARG PYTHON_APK_MIN_VERSION=3.14.10-r0
 
 #
 # Stage 1 of 3: Copy the official Compose binary for the selected target platform.
@@ -29,9 +28,9 @@ ARG LIBEXPAT_APK_MIN_VERSION=2.9.0-r0
 FROM docker/compose-bin:${DOCKER_COMPOSE_TAG} AS docker-compose
 
 #
-# Stage 2 of 3: Build the isolated Python environment separately so package-
-# management tools and their transitive dependencies never enter the published
-# runtime image.
+# Stage 2 of 3: Build the application environment separately so bootstrap tools
+# are removed before the environment is copied into the runtime image.
+# Alpine's Python standard-library bootstrap wheel remains in the runtime.
 #
 FROM alpine:${ALPINE_TAG} AS build
 
@@ -39,9 +38,8 @@ FROM alpine:${ALPINE_TAG} AS build
 # Re-declare the Maraudarr installation root inside the build stage.
 #
 ARG MARAUDARR_BIN_HOME
-ARG MUSL_APK_MIN_VERSION
-ARG ZLIB_APK_MIN_VERSION
-ARG LIBEXPAT_APK_MIN_VERSION
+ARG EDGE_APK_REPOSITORY
+ARG PYTHON_APK_MIN_VERSION
 
 #
 # Put the isolated environment first so every Python command uses it.
@@ -49,15 +47,13 @@ ARG LIBEXPAT_APK_MIN_VERSION
 ENV PATH=${MARAUDARR_BIN_HOME}/venv/bin:${PATH}
 
 #
-# Install Python with patched C, compression, and XML libraries before creating the environment.
+# Refresh stable libraries and install the patched interpreter before creating the environment.
+# The repository tag keeps unrelated edge packages out of this build.
 #
-RUN apk add --no-cache \
-        py3-pip \
-        python3 \
-        "musl>=${MUSL_APK_MIN_VERSION}" \
-        "musl-utils>=${MUSL_APK_MIN_VERSION}" \
-        "libexpat>=${LIBEXPAT_APK_MIN_VERSION}" \
-        "zlib>=${ZLIB_APK_MIN_VERSION}" && \
+RUN apk upgrade --no-cache && \
+    printf '%s\n' "@pythonfix ${EDGE_APK_REPOSITORY}" >> /etc/apk/repositories && \
+    apk add --no-cache "python3@pythonfix>=${PYTHON_APK_MIN_VERSION}" && \
+    apk add --no-cache py3-pip && \
     python3 -m venv "${MARAUDARR_BIN_HOME}/venv"
 
 #
@@ -115,9 +111,8 @@ ARG MARAUDARR_GROUP=maraudarr
 ARG IMAGE_CREATED=unknown
 ARG IMAGE_REVISION=unknown
 ARG IMAGE_VERSION=latest
-ARG MUSL_APK_MIN_VERSION
-ARG ZLIB_APK_MIN_VERSION
-ARG LIBEXPAT_APK_MIN_VERSION
+ARG EDGE_APK_REPOSITORY
+ARG PYTHON_APK_MIN_VERSION
 
 #
 # Set application locations and predictable Python runtime behavior.
@@ -146,16 +141,12 @@ LABEL org.opencontainers.image.title="Maraudarr" \
         org.opencontainers.image.base.name="docker.io/library/alpine:${ALPINE_TAG}"
 
 #
-# Upgrade OpenSSL and install Python with patched C, compression, and XML libraries.
-# Python package-management tools remain in the build stage.
+# Refresh stable runtime libraries and install the same patched Python as the build stage.
+# System pip stays in the build stage; Python retains its standard-library bootstrap wheel.
 #
-RUN apk upgrade --no-cache libcrypto3 libssl3 && \
-    apk add --no-cache \
-        python3 \
-        "musl>=${MUSL_APK_MIN_VERSION}" \
-        "musl-utils>=${MUSL_APK_MIN_VERSION}" \
-        "libexpat>=${LIBEXPAT_APK_MIN_VERSION}" \
-        "zlib>=${ZLIB_APK_MIN_VERSION}"
+RUN apk upgrade --no-cache && \
+    printf '%s\n' "@pythonfix ${EDGE_APK_REPOSITORY}" >> /etc/apk/repositories && \
+    apk add --no-cache "python3@pythonfix>=${PYTHON_APK_MIN_VERSION}"
 
 #
 # Copy the standalone Compose binary from its official image.

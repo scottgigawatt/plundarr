@@ -17,6 +17,11 @@ services:
     container_name: ${COMPOSE_PROJECT_NAME}-qbittorrent-${QBITTORRENT_TAG}  # Namespace the container name by project and tag
     network_mode: service:gluetun                                           # Route network traffic through gluetun
 
+    # Define the container environment
+    environment:
+      <<: *default-environment               # Pull in the default environment
+      WEBUI_PORT: ${QBITTORRENT_WEBUI_PORT}  # Match the host port for qBittorrent CSRF checks
+
     # Mount host directories into the container
     volumes:
       - ${QBITTORRENT_CONFIG_PATH}:/config:rw                   # Configuration files
@@ -31,7 +36,7 @@ services:
         - --no-verbose
         - --tries=1
         - --spider
-        - http://127.0.0.1:8080/
+        - http://127.0.0.1:${QBITTORRENT_WEBUI_PORT}/
 
     # Specify container service dependencies
     depends_on:

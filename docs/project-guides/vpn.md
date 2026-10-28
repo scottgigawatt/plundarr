@@ -24,7 +24,7 @@ Run these commands from the Plundarr repository root. For a deployment managed d
 
 In Synology Container Manager, stop the project before the one-shot generation and rebuild it afterward using the updated `.env`. If you manage this entirely through the UI, temporarily set `PRIVATEERR_AUTO_RECOVER=false`, rebuild and verify fresh generation, then restore `true` and rebuild again. A container restart alone does not reload environment changes. Keep the generated Compose mappings in place.
 
-Check Privateerr's logs for the selected region and Gluetun's logs for successful port forwarding. PIA's advertised forwarding support does not guarantee its forwarding API is currently available. If a region's API fails, choose another forwarding-capable region in `.env` and recreate the project. No manual Compose edits are needed. Steer around the storm, captain.
+Check Privateerr's logs for the selected region and Gluetun's logs for successful port forwarding. PIA's advertised forwarding support does not guarantee its forwarding API is currently available. If a region's API fails, choose another forwarding-capable region in `.env` and apply it with the one-shot generation procedure above before recreating the project. No manual Compose edits are needed. Steer around the storm, captain.
 
 ## Recover stale connections automatically 🛟
 
@@ -34,7 +34,7 @@ Maraudarr generates one random `PRIVATEERR_GLUETUN_API_KEY` in the deployment's 
 
 After a sustained tunnel outage, Privateerr registers fresh PIA WireGuard settings and applies them through Gluetun's authenticated control API. Gluetun restarts its internal tunnel while its container and shared network namespace stay in place. Privateerr saves the replacement files only after the settings match and the tunnel is healthy. No extra service or Docker socket is required.
 
-The bundled wrapper lets Privateerr reach Gluetun's health listener over the shared Docker network and creates a temporary authentication role with only the recovery routes. Neither the health port nor the control API is published to the host. While recovery is enabled, the wrapper disables Gluetun's competing health-triggered restarts. Gluetun still owns the tunnel, firewall, and port forwarding, including qBittorrent's port-update hooks.
+The wrapper installed by Privateerr lets Privateerr reach Gluetun's health listener over the shared Docker network and creates a temporary authentication role with only the recovery routes. Neither the health port nor the control API is published to the host. While recovery is enabled, the wrapper disables Gluetun's competing health-triggered restarts. Gluetun still owns the tunnel, firewall, and port forwarding, including qBittorrent's port-update hooks.
 
 | Setting | Default | Purpose |
 | --- | --- | --- |
@@ -50,9 +50,9 @@ Recovery respects `PIA_AUTOCONNECT`, `PIA_PREFERRED_REGION`, and `PIA_PF`. A sel
 
 ### Configure the recovery wrapper
 
-`GLUETUN_WRAPPER_SCRIPT_PATH` selects the [bundled startup wrapper](https://github.com/scottgigawatt/plundarr/blob/main/docker/services/gluetun/config/scripts/gluetun-entrypoint-wrapper.sh). The selected Privateerr image must support the recovery API and Docker-applied IPv6 settings. Maraudarr preserves WireGuard state, application data, existing keys, explicit recovery choices, and operator-owned scripts.
+Privateerr installs its packaged startup wrapper and qBittorrent forwarding hook into `/gluetun/scripts` on every startup before reporting healthy. Gluetun runs `GLUETUN_ENTRYPOINT_WRAPPER=/gluetun/scripts/gluetun-entrypoint-wrapper.sh` through the existing configuration mount. No external script download or individual script mount is required.
 
-Customized or symlinked wrappers must implement the configured health-listener and authenticated control-role behavior. An operator-managed `/gluetun/auth/config.toml` must provide Privateerr's recovery role with the shared key; the wrapper preserves that file. Set `PRIVATEERR_AUTO_RECOVER=false` when the selected wrapper or authentication configuration does not support recovery. Keep the API key and VPN configuration out of support reports.
+Privateerr owns `gluetun-entrypoint-wrapper.sh` and `qbittorrent-port-forwarding.sh` in that directory and replaces them from the selected image. Keep operator scripts under separate names. `GLUETUN_ENTRYPOINT_WRAPPER` must name an existing file inside Gluetun; the generated chart mounts the shared configuration directory and does not install custom wrappers. Maraudarr preserves explicitly saved path values. A custom wrapper must implement the configured health listener and authenticated control role. Maraudarr preserves WireGuard state, application data, existing keys, and explicit recovery choices. An operator-managed `/gluetun/auth/config.toml` must provide Privateerr's recovery role with the shared key; the wrapper preserves that file. Set `PRIVATEERR_AUTO_RECOVER=false` when the selected wrapper or authentication configuration does not support recovery. Keep the API key and VPN configuration out of support reports.
 
 ## Run Privateerr without privileged mode
 
@@ -60,8 +60,12 @@ Generated Privateerr services drop all Linux capabilities and enable `no-new-pri
 
 The generated `.env` sets `PRIVATEERR_IPV6_DISABLED=1`, which Docker applies to Privateerr's network namespace before startup. Keep `PIA_DISABLE_IPV6=yes`; Privateerr honors those settings without redundant sysctl writes. Its mounted configuration directories must remain writable by UID 0.
 
-The selected Privateerr image must support automatic recovery and Docker-applied IPv6 settings. Missing recovery settings mean recovery is disabled. The bundled VPN services disable unattended Watchtower updates through their container labels.
+Privateerr runs its Python supervisor directly, invokes the unmodified PIA scripts, and reports readiness after integration scripts and valid VPN files exist. Its health status describes startup readiness; it does not certify current tunnel health or future recovery writes. Review operation-specific storage and API diagnostics in its logs. Missing recovery settings mean recovery is disabled. The bundled VPN services disable unattended Watchtower updates through their container labels.
 
 ## Coordinate qBittorrent maintenance
 
 Every generated deployment containing qBittorrent uses `depends_on.gluetun.restart: true`. An explicit Compose restart or update of Gluetun also restarts qBittorrent so the application follows planned VPN-container maintenance. This setting does not react to health failures, Docker's automatic restart policy, or Watchtower replacements. Privateerr's API recovery keeps both containers running and does not trigger this dependency restart. Recreate the complete stack when changing the network namespace outside Compose.
+
+The `QBITTORRENT_WEBUI_PORT` value controls the host port, internal Web UI listener, healthcheck, and default forwarding-hook API address together, including presets using a different port. Gluetun receives `QBITTORRENT_PORT_SYNC=true` and a bounded `QBITTORRENT_API_WAIT_SECONDS=300` wait. Privateerr supplies the hook; it binds the application to the assigned peer port and VPN interface without publishing peer ports on the host.
+
+The seeded qBittorrent API allows unauthenticated access from loopback in the shared VPN namespace. Remote Web UI clients still authenticate. Other containers sharing that namespace also share its loopback trust boundary. An existing qBittorrent configuration must permit the local hook to use its API.

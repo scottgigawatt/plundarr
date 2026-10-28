@@ -3,7 +3,7 @@
 #
 # Licensed under the Apache License, Version 2.0.
 #
-# test_vpn_recovery.py: Test generated VPN recovery settings and safe wrapper upgrades.
+# test_vpn_recovery.py: Test generated VPN recovery settings and image-owned script handoff.
 #
 
 """Verify recovery defaults, shared authentication, and existing deployment preservation."""
@@ -23,17 +23,10 @@ class VpnRecoveryTests(unittest.TestCase):
     """Cover paired VPN selection without starting a tunnel or using PIA credentials."""
 
     def setUp(self) -> None:
-        """Load the service catalog and bundled wrapper paths."""
+        """Load the service catalog for generated VPN deployments."""
 
         self.root = Path(__file__).resolve().parents[1]
         self.catalog = Catalog(self.root)
-        self.wrapper_path = Path("gluetun/scripts/gluetun-entrypoint-wrapper.sh")
-        self.current_wrapper = (
-            self.root / "services/gluetun/config/scripts/gluetun-entrypoint-wrapper.sh"
-        )
-        self.previous_wrapper = (
-            self.root / "tests/fixtures/gluetun-legacy/gluetun-entrypoint-wrapper.sh"
-        )
 
     def test_defaults_follow_resolved_services_for_every_preset(self) -> None:
         """Enable paired recovery, including dependencies, but leave standalone generation off."""
@@ -98,6 +91,12 @@ class VpnRecoveryTests(unittest.TestCase):
                         "PRIVATEERR_GLUETUN_API_KEY: ${PRIVATEERR_GLUETUN_API_KEY}", gluetun
                     )
                     self.assertIn("condition: service_healthy", gluetun)
+                    self.assertIn(
+                        'GLUETUN_ENTRYPOINT_WRAPPER="${GLUETUN_ENTRYPOINT_WRAPPER:-/gluetun/scripts/gluetun-entrypoint-wrapper.sh}"',
+                        environment,
+                    )
+                    self.assertNotIn("GLUETUN_WRAPPER_SCRIPT_PATH", compose)
+                    self.assertNotIn("GLUETUN_WRAPPER_SCRIPT_PATH", environment)
                     self.assertNotRegex(
                         gluetun, re.compile(r"^ {6}-[^\n]*:(8000|9999)(?:\s|$)", re.MULTILINE)
                     )
@@ -111,6 +110,23 @@ class VpnRecoveryTests(unittest.TestCase):
                         )
                         self.assertIn("VPN_PORT_FORWARDING_UP_COMMAND:", gluetun)
                         self.assertIn("VPN_PORT_FORWARDING_DOWN_COMMAND:", gluetun)
+
+                        # The listener, mapping, healthcheck, and API must follow a changed Web UI port.
+                        self.assertIn("WEBUI_PORT: ${QBITTORRENT_WEBUI_PORT}", application)
+                        self.assertIn("http://127.0.0.1:${QBITTORRENT_WEBUI_PORT}/", application)
+                        self.assertIn(
+                            "${QBITTORRENT_WEBUI_PORT}:${QBITTORRENT_WEBUI_PORT}", gluetun
+                        )
+                        self.assertIn("QBITTORRENT_API_URL: ${QBITTORRENT_API_URL}", gluetun)
+                        self.assertIn("QBITTORRENT_PORT_SYNC: ${QBITTORRENT_PORT_SYNC}", gluetun)
+                        self.assertIn(
+                            "QBITTORRENT_API_WAIT_SECONDS: ${QBITTORRENT_API_WAIT_SECONDS}", gluetun
+                        )
+                        self.assertNotIn("QBITTORRENT_TCP_PORT", environment)
+                        self.assertNotIn("QBITTORRENT_UDP_PORT", environment)
+                    else:
+                        self.assertNotIn("QBITTORRENT_API_URL", gluetun)
+                        self.assertNotIn("QBITTORRENT_PORT_SYNC", gluetun)
 
     def test_key_is_generated_once_and_not_written_to_examples(self) -> None:
         """Give deployments distinct API keys without rotating a saved key or opt-out."""
@@ -147,6 +163,7 @@ class VpnRecoveryTests(unittest.TestCase):
             "PRIVATEERR_RECOVERY_COOLDOWN_SECONDS": 'PRIVATEERR_RECOVERY_COOLDOWN_SECONDS="600"',
             "PRIVATEERR_GENERATION_TIMEOUT_SECONDS": 'PRIVATEERR_GENERATION_TIMEOUT_SECONDS="240"',
             "PRIVATEERR_TAG": 'PRIVATEERR_TAG="operator-pinned"',
+            "GLUETUN_ENTRYPOINT_WRAPPER": 'GLUETUN_ENTRYPOINT_WRAPPER="/gluetun/scripts/operator-wrapper.sh"',
         }
         existing.update(overrides)
 
@@ -175,59 +192,52 @@ class VpnRecoveryTests(unittest.TestCase):
         self.assertIn('PRIVATEERR_AUTO_RECOVER="${PRIVATEERR_AUTO_RECOVER:-true}"', environment)
         self.assertRegex(environment, r'(?m)^PRIVATEERR_GLUETUN_API_KEY="[a-f0-9]{64}"$')
 
-    def test_wrapper_upgrade_preserves_customizations_and_runtime_state(self) -> None:
-        """Upgrade the exact legacy seed and leave custom wrappers, auth, and VPN state alone."""
-
-        plan = self.catalog.resolve("custom", add={"gluetun"})
-
-        for customized in (False, True):
-            with self.subTest(customized=customized), tempfile.TemporaryDirectory() as temporary:
-                output = Path(temporary)
-                wrapper = output / "config" / self.wrapper_path
-                wrapper.parent.mkdir(parents=True)
-                previous = self.previous_wrapper.read_text()
-
-                # Only an exact legacy seed is eligible for replacement; even one operator edit opts out.
-                if customized:
-                    previous += "\n# Operator customization.\n"
-
-                wrapper.write_text(previous)
-
-                # Authentication and live WireGuard files belong to the operator, not the seed upgrader.
-                auth = output / "config/gluetun/auth/config.toml"
-                auth.parent.mkdir()
-                auth.write_text("# Operator-managed authentication.\n")
-                state = output / "config/gluetun/wireguard/wg0.conf"
-                state.parent.mkdir()
-                state.write_text("# Operator-managed WireGuard state.\n")
-
-                write_config(self.catalog, plan, output)
-                expected = previous if customized else self.current_wrapper.read_text()
-                self.assertEqual(wrapper.read_text(), expected)
-                self.assertEqual(auth.read_text(), "# Operator-managed authentication.\n")
-                self.assertEqual(state.read_text(), "# Operator-managed WireGuard state.\n")
-
-                # A second generation must leave the selected wrapper unchanged.
-                write_config(self.catalog, plan, output)
-                self.assertEqual(wrapper.read_text(), expected)
-
-    def test_fresh_wrapper_is_seeded_and_symlink_is_preserved(self) -> None:
-        """Install the new wrapper on first generation without replacing linked operator files."""
+    def test_config_generation_leaves_runtime_scripts_and_state_untouched(self) -> None:
+        """Privateerr owns script publication; Maraudarr must preserve mounted runtime files."""
 
         plan = self.catalog.resolve("custom", add={"gluetun"})
 
         with tempfile.TemporaryDirectory() as temporary:
             output = Path(temporary)
             write_config(self.catalog, plan, output)
-            wrapper = output / "config" / self.wrapper_path
-            self.assertEqual(wrapper.read_text(), self.current_wrapper.read_text())
-            self.assertTrue(wrapper.stat().st_mode & 0o100)
+            config = output / "config/gluetun"
 
-            # Replace the fresh seed with an operator symlink and verify generation preserves its target.
-            wrapper.unlink()
-            external = output / "operator-wrapper.sh"
-            external.write_text(self.previous_wrapper.read_text())
-            wrapper.symlink_to(external)
+            # A fresh project must wait for the selected Privateerr image to install its scripts.
+            self.assertFalse((config / "scripts").exists())
+            files = (
+                "scripts/gluetun-entrypoint-wrapper.sh",
+                "scripts/qbittorrent-port-forwarding.sh",
+                "auth/config.toml",
+                "wireguard/wg0.conf",
+                "wireguard/.privateerr-pending/metadata",
+                "wireguard/.privateerr-commit/metadata",
+            )
+
+            for name in files:
+                path = config / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text("# Existing runtime state.\n")
+
             write_config(self.catalog, plan, output)
+
+            for name in files:
+                self.assertEqual((config / name).read_text(), "# Existing runtime state.\n")
+
+    def test_config_generation_preserves_linked_operator_files(self) -> None:
+        """Seeding must not follow an existing script symlink and overwrite its target."""
+
+        plan = self.catalog.resolve("custom", add={"gluetun"})
+
+        with tempfile.TemporaryDirectory() as temporary:
+            output = Path(temporary)
+            scripts = output / "config/gluetun/scripts"
+            scripts.mkdir(parents=True)
+            external = output / "operator-wrapper.sh"
+            external.write_text("# Operator-owned script.\n")
+            wrapper = scripts / "gluetun-entrypoint-wrapper.sh"
+            wrapper.symlink_to(external)
+
+            write_config(self.catalog, plan, output)
+
             self.assertTrue(wrapper.is_symlink())
-            self.assertEqual(external.read_text(), self.previous_wrapper.read_text())
+            self.assertEqual(external.read_text(), "# Operator-owned script.\n")

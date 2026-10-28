@@ -11,7 +11,6 @@
 from __future__ import annotations
 
 import base64
-import hashlib
 import os
 import re
 import secrets
@@ -76,6 +75,18 @@ def _insert_gluetun_additions(block: str, selected: set[str]) -> str:
         environment_entries.extend(
             [
                 (
+                    "QBITTORRENT_PORT_SYNC: ${QBITTORRENT_PORT_SYNC}",
+                    "true synchronizes qBittorrent with the VPN lease; false skips updates",
+                ),
+                (
+                    "QBITTORRENT_API_URL: ${QBITTORRENT_API_URL}",
+                    "qBittorrent Web API inside Gluetun's shared network namespace",
+                ),
+                (
+                    "QBITTORRENT_API_WAIT_SECONDS: ${QBITTORRENT_API_WAIT_SECONDS}",
+                    "Maximum seconds to wait for the Web API",
+                ),
+                (
                     'VPN_PORT_FORWARDING_UP_COMMAND: /bin/sh -c "${GLUETUN_QBITTORRENT_PORT_FORWARDING_SCRIPT} up {{PORT}} {{VPN_INTERFACE}}"',
                     "Update qBittorrent when PIA assigns a forwarded port",
                 ),
@@ -87,9 +98,10 @@ def _insert_gluetun_additions(block: str, selected: set[str]) -> str:
         )
         port_entries.extend(
             [
-                ("- ${QBITTORRENT_TCP_PORT}:6881", "qBittorrent TCP connection port"),
-                ("- ${QBITTORRENT_UDP_PORT}:6881/udp", "qBittorrent UDP connection port"),
-                ("- ${QBITTORRENT_WEBUI_PORT}:8080", "qBittorrent web UI port"),
+                (
+                    "- ${QBITTORRENT_WEBUI_PORT}:${QBITTORRENT_WEBUI_PORT}",
+                    "Match host and application ports for qBittorrent CSRF checks",
+                ),
             ]
         )
     if "sabnzbd" in selected:
@@ -766,20 +778,6 @@ def write_config(catalog: Catalog, plan: StackPlan, output_dir: Path) -> Path:
             catalog.config_path(service),
             config_path / service.service,
         )
-
-    # Upgrade only the unchanged wrapper shipped before automatic recovery (5a5dc2f).
-    # Customized scripts, symlinks, and all application state remain operator-owned.
-    if "gluetun" in plan.service_ids:
-        wrapper = config_path / "gluetun/scripts/gluetun-entrypoint-wrapper.sh"
-        previous_digest = "1aa664f06e67e2b7e944ae773a33b82b7fb52af8b27b14600f273f9f91e98eee"  # pragma: allowlist secret
-        if (
-            not wrapper.is_symlink()
-            and hashlib.sha256(wrapper.read_bytes()).hexdigest() == previous_digest
-        ):
-            source = catalog.source_path(
-                "services/gluetun/config/scripts/gluetun-entrypoint-wrapper.sh"
-            )
-            _atomic_write(wrapper, source.read_text(), source.stat().st_mode & 0o777)
 
     if "homepage" in plan.service_ids:
         _atomic_write(
