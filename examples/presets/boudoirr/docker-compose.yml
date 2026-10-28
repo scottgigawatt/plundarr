@@ -253,8 +253,8 @@ services:
 
     # Mount host directories into the container
     volumes:
-      - ${GLUETUN_CONFIG_PATH}:/gluetun:rw                               # Gluetun config directory
-      - ${GLUETUN_CONFIG_PATH}:/tmp/gluetun:rw                           # Gluetun runtime state directory
+      - ${GLUETUN_CONFIG_PATH}:/gluetun:rw      # Gluetun config directory
+      - ${GLUETUN_CONFIG_PATH}:/tmp/gluetun:rw  # Gluetun runtime state directory
 
     # Define container healthcheck to verify VPN connectivity
     healthcheck:
@@ -348,9 +348,9 @@ services:
     container_name: ${COMPOSE_PROJECT_NAME}-qbittorrent-${QBITTORRENT_TAG}  # Namespace the container name by project and tag
     network_mode: service:gluetun                                           # Route network traffic through gluetun
 
-    # Match the Web UI listener to the published port and forwarding hook.
+    # Define the container environment
     environment:
-      <<: *default-environment
+      <<: *default-environment               # Pull in the default environment
       WEBUI_PORT: ${QBITTORRENT_WEBUI_PORT}  # Match the host port for qBittorrent CSRF checks
 
     # Mount host directories into the container
