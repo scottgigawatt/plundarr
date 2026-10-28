@@ -16,12 +16,6 @@ ARG DOCKER_COMPOSE_TAG=v5.6.1@sha256:2aeaeedd4f2d8e2dcb399b2b9723bfaeb6714140cb0
 ARG MARAUDARR_BIN_HOME=/maraudarr
 
 #
-# Use only Python from the tagged repository until stable includes its security release.
-#
-ARG EDGE_APK_REPOSITORY=https://dl-cdn.alpinelinux.org/alpine/edge/main
-ARG PYTHON_APK_MIN_VERSION=3.14.10-r0
-
-#
 # Stage 1 of 3: Copy the official Compose binary for the selected target platform.
 # Docker maintains this build separately from Alpine's packaged client.
 #
@@ -38,8 +32,6 @@ FROM alpine:${ALPINE_TAG} AS build
 # Re-declare the Maraudarr installation root inside the build stage.
 #
 ARG MARAUDARR_BIN_HOME
-ARG EDGE_APK_REPOSITORY
-ARG PYTHON_APK_MIN_VERSION
 
 #
 # Put the isolated environment first so every Python command uses it.
@@ -47,13 +39,10 @@ ARG PYTHON_APK_MIN_VERSION
 ENV PATH=${MARAUDARR_BIN_HOME}/venv/bin:${PATH}
 
 #
-# Refresh stable libraries and install the patched interpreter before creating the environment.
-# The repository tag keeps unrelated edge packages out of this build.
+# Refresh stable libraries and install the patched stable interpreter and bootstrap tools.
 #
 RUN apk upgrade --no-cache && \
-    printf '%s\n' "@pythonfix ${EDGE_APK_REPOSITORY}" >> /etc/apk/repositories && \
-    apk add --no-cache "python3@pythonfix>=${PYTHON_APK_MIN_VERSION}" && \
-    apk add --no-cache py3-pip && \
+    apk add --no-cache python3 py3-pip && \
     python3 -m venv "${MARAUDARR_BIN_HOME}/venv"
 
 #
@@ -111,8 +100,6 @@ ARG MARAUDARR_GROUP=maraudarr
 ARG IMAGE_CREATED=unknown
 ARG IMAGE_REVISION=unknown
 ARG IMAGE_VERSION=latest
-ARG EDGE_APK_REPOSITORY
-ARG PYTHON_APK_MIN_VERSION
 
 #
 # Set application locations and predictable Python runtime behavior.
@@ -145,8 +132,7 @@ LABEL org.opencontainers.image.title="Maraudarr" \
 # System pip stays in the build stage; Python retains its standard-library bootstrap wheel.
 #
 RUN apk upgrade --no-cache && \
-    printf '%s\n' "@pythonfix ${EDGE_APK_REPOSITORY}" >> /etc/apk/repositories && \
-    apk add --no-cache "python3@pythonfix>=${PYTHON_APK_MIN_VERSION}"
+    apk add --no-cache python3
 
 #
 # Copy the standalone Compose binary from its official image.
