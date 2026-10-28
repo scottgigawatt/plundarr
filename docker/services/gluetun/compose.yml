@@ -54,8 +54,8 @@ services:
 
     # Mount host directories into the container
     volumes:
-      - ${GLUETUN_CONFIG_PATH}:/gluetun:rw                               # Gluetun config directory
-      - ${GLUETUN_CONFIG_PATH}:/tmp/gluetun:rw                           # Gluetun runtime state directory
+      - ${GLUETUN_CONFIG_PATH}:/gluetun:rw      # Gluetun config directory
+      - ${GLUETUN_CONFIG_PATH}:/tmp/gluetun:rw  # Gluetun runtime state directory
 
     # Define container healthcheck to verify VPN connectivity
     healthcheck:

@@ -284,12 +284,12 @@ CLEAN_ARTIFACT_FIND_MATCH := -type d -name '__pycache__' -o -type f \( -name '*.
 #
 # Resolve selected services and the qBittorrent listener from the generated environment.
 #
-SELECTED_COMPOSE_SERVICES  = $(strip $(shell $(PLUNDARR_COMPOSE) config --services 2>/dev/null))
-PROFILED_COMPOSE_SERVICES  = $(strip $(shell $(PLUNDARR_COMPOSE) --profile "*" config --services 2>/dev/null))
-VPN_QBITTORRENT_SERVICE   ?= $(filter $(QBITTORRENT_SERVICE),$(SELECTED_COMPOSE_SERVICES))
-E2E_DOWNLOAD_SERVICES     ?= $(filter $(QBITTORRENT_SERVICE) $(SABNZBD_SERVICE) $(NZBGET_SERVICE),$(SELECTED_COMPOSE_SERVICES))
+SELECTED_COMPOSE_SERVICES       = $(strip $(shell $(PLUNDARR_COMPOSE) config --services 2>/dev/null))
+PROFILED_COMPOSE_SERVICES       = $(strip $(shell $(PLUNDARR_COMPOSE) --profile "*" config --services 2>/dev/null))
+VPN_QBITTORRENT_SERVICE        ?= $(filter $(QBITTORRENT_SERVICE),$(SELECTED_COMPOSE_SERVICES))
+E2E_DOWNLOAD_SERVICES          ?= $(filter $(QBITTORRENT_SERVICE) $(SABNZBD_SERVICE) $(NZBGET_SERVICE),$(SELECTED_COMPOSE_SERVICES))
 QBITTORRENT_CONTAINER_WEB_PORT ?= $(strip $(shell $(PLUNDARR_COMPOSE) config --environment 2>/dev/null | $(AWK_BIN) -F= '$$1 == "QBITTORRENT_WEBUI_PORT" { print $$2 }'))
-GLUETUN_DOWNLOADER_PORTS  ?= $(if $(filter $(QBITTORRENT_SERVICE),$(SELECTED_COMPOSE_SERVICES)),$(QBITTORRENT_CONTAINER_WEB_PORT),) \
+GLUETUN_DOWNLOADER_PORTS       ?= $(if $(filter $(QBITTORRENT_SERVICE),$(SELECTED_COMPOSE_SERVICES)),$(QBITTORRENT_CONTAINER_WEB_PORT),) \
 	$(if $(filter $(SABNZBD_SERVICE),$(SELECTED_COMPOSE_SERVICES)),8085,) \
 	$(if $(filter $(NZBGET_SERVICE),$(SELECTED_COMPOSE_SERVICES)),6789,)
 
