@@ -40,7 +40,7 @@ Plundarr is a generated Docker Compose media stack for Docker Compose and Synolo
 
 <p align="center">
   <em>☠️ Compose in dependency hell? Bribe the ferryman and enter</em>
-  <a href="https://discord.gg/BpEGzWwGYf"><img src="https://img.shields.io/discord/1403601106315116626?label=%F0%9F%94%A5HADES%F0%9F%94%A5&logo=discord&logoColor=white&color=5865F2" alt="HADES Discord community" /></a>
+  <a href="https://discord.gg/BpEGzWwGYf"><img src="https://img.shields.io/discord/1403601106315116626?label=%F0%9F%94%A5HADES%F0%9F%94%A5&logo=discord&logoColor=white&color=5865F2" alt="HADES Discord community" align="absmiddle" /></a>
 </p>
 <!-- markdownlint-enable MD033 -->
 
