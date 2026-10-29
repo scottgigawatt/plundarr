@@ -126,13 +126,13 @@ Use the [setup guide](docs/setup.md) for network planning, storage, media librar
 
 Use `make help` for commands. Replace `YOUR-PRESET` with the selected ID; omit it for default Plundarr:
 
+Before a config archive, follow the [backup procedure](docker/config/README.md#back-up-or-reset-the-hold-): export application databases, stop affected writers, and retain `.env`, encryption keys, external state, and named-volume exports separately. `make backup` archives host config only. Verify an off-host recovery copy. `make down` preserves volumes and images; `make clean` removes disposable repository artifacts only.
+
 ```sh
 make ps PRESET=YOUR-PRESET
 make backup PRESET=YOUR-PRESET
 make down PRESET=YOUR-PRESET
 ```
-
-Before a config archive, follow the [backup procedure](docker/config/README.md#back-up-or-reset-the-hold-): export application databases, stop affected writers, and retain `.env`, encryption keys, external state, and named-volume exports separately. `make backup` archives host config only. Verify an off-host recovery copy. `make down` preserves volumes and images; `make clean` removes disposable repository artifacts only.
 
 > [!CAUTION]
 > `make nuke` stops the selected deployment and removes containers, networks, eligible images, the separate Maraudarr project, and scoped build cache; it preserves application volumes, deployment files, config, and host backups. Restarting may need image downloads. `make delete-config` deletes host config and exports stored there. Review backups and the selected preset before either operation.
