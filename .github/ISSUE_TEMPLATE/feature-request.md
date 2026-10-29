@@ -1,7 +1,7 @@
 ---
 name: "Feature request for this fine ship 🏴‍☠️"
 about: Share an idea to help Plundarr grow stronger ⚓
-title: "[FEATURE] A new treasure request"
+title: ""
 labels: enhancement
 assignees: scottgigawatt
 
@@ -16,13 +16,7 @@ Describe the feature or change you want added to Plundarr.
 **🧪 How ye would prove it works**
 List any commands, checks, or workflows that should cover this change.
 
-```sh
-make config
-make test-vpn
-make test-e2e
-make test-stack
-make restore-test-config
-```
+Describe only the command relevant to your report. Do not run live tests or reset commands solely to complete this template. Resolved `make config` and `make env` output may contain credentials; share only sanitized excerpts.
 
 **🗺️ Other routes you thought about**
 List any other ideas or approaches you considered.

@@ -1,10 +1,6 @@
 # Sonarr Anime configuration 📺
 
-Avast, matey! This hold stores the configuration scrolls fer the optional **Sonarr Anime** service. It runs as a second Sonarr instance with its own database, settings, port, and anime TV root.
-
-## Understand the service 🌊
-
-Sonarr Anime keeps animated TV cargo separate from the main Sonarr library so quality profiles, release profiles, naming rules, and root folders can sail their own course.
+This independent Sonarr instance keeps its own database, settings, port, and anime library. Keep its managed root separate from the primary instance.
 
 ## Configure downloads and anime imports 📦
 
@@ -29,5 +25,3 @@ Render the service into the final chart:
 ```sh
 make ship ADD_SERVICES=sonarr-anime
 ```
-
-For more details, set yer sights on the generated `dist/<preset>/docker-compose.yml` and `.env` files.

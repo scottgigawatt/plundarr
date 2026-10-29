@@ -142,35 +142,8 @@ Start with the built-in features before adding plugins:
 
 ## Choose plugins deliberately
 
-The following review checked upstream repositories and published compatibility manifests on **October 13, 2026**. A declared target ABI is evidence of intended server compatibility, not proof that every feature works with your library. Jellyfin's [official plugin catalog](https://jellyfin.org/docs/general/server/plugins/) and third-party repositories are separate sources. Nothing in this deployment installs plugins or changes existing plugin settings automatically.
+Plugins are optional; the generated stack installs none automatically. Use Jellyfin's [official catalog](https://jellyfin.org/docs/general/server/plugins/) and the selected third-party project's manifest to confirm support for your exact server version. A declared ABI is compatibility intent, not proof that every feature works with your library.
 
-| Plugin | Source | Published target | Recommendation for Boudoirr |
-| --- | --- | --- | --- |
-| [Reports](https://github.com/jellyfin/jellyfin-plugin-reports) | Official | `12.0.0.0` | Useful first install for auditing library metadata and organization. |
-| [Webhook](https://github.com/jellyfin/jellyfin-plugin-webhook) | Official | `12.0.0.0` | Useful for intentional server notifications. Keep adult titles and playback events out of broad public channels. |
-| [Subtitle Extract](https://github.com/jellyfin/jellyfin-plugin-subtitleextract) | Official | `12.0.0.0` | Optional if embedded subtitles cause playback delays. |
-| [Local Intros](https://github.com/jellyfin/jellyfin-plugin-local-intros) | Official | `12.0.0.0` | Fun optional local pre-roll; it adds an intro before playback. |
-| [Playback Reporting](https://github.com/jellyfin/jellyfin-plugin-playbackreporting) | Official | `12.0.0.0` | Optional detailed viewing statistics. Consider whether you want extra watch-history retention alongside Tracearr. |
-| [SmartLists](https://github.com/jyourstone/jellyfin-smartlists-plugin) | Third party | `12.0.0.0` | Strong fit for dynamic performer, studio, genre, and tag collections/playlists. |
-| [Media Preview](https://github.com/spkesDE/jellyfin-media-preview-plugin) | Third party | `12.1.0.0` | Strong fit for Web hover previews using native Trickplay or local trailers. Start with local previews and verify its injection-helper setup. |
-| [Jellyfin Enhanced](https://github.com/n00bcodr/Jellyfin-Enhanced) | Third party | `12.0.0.0` | Optional Web shortcuts and usability improvements. Enable only useful modules; its Seerr integration does not replace Velvarr's adult requests. |
-| [ThePornDB](https://github.com/ThePornDatabase/Jellyfin.Plugin.ThePornDB) | Third party | Latest listed build targets `10.11.0.0` | Hold for 12.2. No published 12-target build was found in its manifest. Useful adult metadata provider once compatibility is established, especially for unmanaged items. |
-| [Stash](https://github.com/DirtyRacer1337/Jellyfin.Plugin.Stash) | Third party | Latest listed build targets `10.11.0.0` | Hold for 12.2 and consider only if you actually run a Stash server. |
-| [PhoenixAdult](https://github.com/DirtyRacer1337/Jellyfin.Plugin.PhoenixAdult) | Third party | Older release line | Skip for this deployment; the upstream repository has not been updated since 2024 and no 12.2 support was established. |
-| [Skin Manager](https://github.com/danieladov/jellyfin-plugin-skin-manager) | Third party | Not validated for this review | Unnecessary for the bundled local theme; direct CSS keeps the setup simpler. |
+Back up server config, install one compatible plugin through **Dashboard > Plugins**, restart Jellyfin, and test the intended behavior on a small library subset. Keep Whisparr-owned NFOs authoritative for managed media. Web-injection plugins may not affect Vue or native apps. Restrict notification destinations and watch-history sharing deliberately.
 
-Trakt scrobbling, Discord rich presence, generic trailer downloads, anime metadata providers, and TV integrations are low-priority choices for this server. They either serve a different library type or add external sharing/integrations without improving adult-media organization. Keep them optional.
-
-## Install a reviewed plugin
-
-Use **Dashboard > Plugins > Catalog** for official plugins. For a selected third-party plugin, use **Dashboard > Plugins > Repositories**, add its documented manifest URL, then return to the catalog. These are the reviewed optional repositories:
-
-| Repository | Manifest URL |
-| --- | --- |
-| SmartLists | `https://raw.githubusercontent.com/jyourstone/jellyfin-plugin-manifest/main/manifest.json` |
-| Media Preview | `https://raw.githubusercontent.com/spkesDE/jellyfin-media-preview-plugin/main/manifest.json` |
-| Jellyfin Enhanced | `https://raw.githubusercontent.com/n00bcodr/jellyfin-plugins/main/manifest.json` |
-
-Back up Jellyfin's config first, install one compatible plugin, and restart Jellyfin before testing it. Confirm its version targets the current server and that it appears active. For Web enhancements, test the built-in Web client; do not assume Vue or a native app consumes injected Web scripts. For metadata providers, test a small unmanaged subset and keep valid Whisparr NFOs authoritative.
-
-An initial trial of **Reports**, then **SmartLists**, provides the most useful organization improvements. Add native Trickplay next, followed by **Media Preview** if you want hover previews. Keep **Jellyfin Enhanced** as an optional usability layer and revisit ThePornDB/Stash when their published manifests include a compatible 12 build. Your server can stay fabulous without loading every plugin in the harbor.
+Reports can help audit metadata; collection, subtitle, and preview plugins should solve a specific need. Native Trickplay already provides thumbnails. Keep the local CSS theme independent of plugins and avoid installing several overlapping enhancements at once. Your server does not need every plugin in the harbor.

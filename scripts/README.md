@@ -29,21 +29,7 @@ Run Make examples from the repository root and replace `YOUR-PRESET` with the se
 
 ## AWK programs 🧮
 
-### `awk/collect-dockerfile-base-images.awk`
-
-Records global Dockerfile `ARG` defaults, resolves `${NAME}` and `$NAME` in `FROM`, ignores internal stages and `scratch`, and resets state between input files. Unresolved references are skipped. The nuke helper uses the output for best-effort cleanup without force-removing shared or in-use base images.
-
-### `awk/format-compose-status.awk`
-
-Formats tab-separated `docker compose ps` data into aligned terminal columns, collapses equivalent IPv4 and IPv6 wildcard bindings, and places each distinct published port on its own continuation row. `scripts/compose/ps.sh` resolves and invokes this program automatically.
-
-### `awk/order-environment.awk`
-
-Records resolved Docker Compose environment assignments, then prints only variables present in the selected preset `.env` file and preserves that file's order. `make env PRESET=YOUR-PRESET` supplies both inputs through the centralized AWK command and option variables in the Makefile. Its output can contain credentials; inspect it only in a private terminal and redact support logs.
-
-### `awk/strip-comments.awk`
-
-Removes comments, trailing whitespace, and empty lines from configuration output. `make print-config` and `make print-env` share this program so both raw views follow one filtering contract.
+Make invokes these helpers automatically. Review each script header for its interface. Resolved environment/configuration commands can print credentials; inspect them privately and share only sanitized excerpts. Base-image collection supports best-effort cleanup of unused owned resources without force-removing shared or in-use images.
 
 ## Compose helpers 🐳
 

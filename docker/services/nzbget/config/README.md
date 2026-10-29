@@ -1,12 +1,6 @@
 # NZBGet configuration 📰
 
-Ahoy, matey! This be the config hold for **NZBGet**, Plundarr's lean Usenet download runner. NZBGet grabs NZBs, repairs and extracts the cargo, then leaves completed files where Radarr and Sonarr can import them.
-
-## Understand the service 🌊
-
-NZBGet provides another selectable Usenet path alongside SABnzbd. Its traffic routes through Gluetun, and Maraudarr generates a strong first-run control password in `.env` instead of sailing with NZBGet's upstream default.
-
-Maraudarr creates this directory and refreshes this README, but it does not seed or replace `nzbget.conf`. NZBGet owns that application state after its first launch.
+NZBGet is an optional Usenet downloader behind Gluetun. Maraudarr generates its initial control password in `.env` and refreshes this README; NZBGet owns `nzbget.conf` after first launch.
 
 ## Add a Usenet provider 🔐
 
@@ -62,5 +56,3 @@ Use the `NZBGET_USER` and `NZBGET_PASS` values from `.env` for authentication. `
 ## Preserve path parity 🗺️
 
 Radarr and Sonarr mount the broader host download root at `/downloads`, so NZBGet's completed cargo appears to them under `/downloads/usenet/complete`. Because every service sees the same host path through the same internal path, remote path mappings are unnecessary.
-
-Fer more details, set yer spyglass on the generated `dist/<preset>/docker-compose.yml` and `.env` files. May yer Usenet cargo arrive repaired, unpacked, and ready for the library hold! ⚓

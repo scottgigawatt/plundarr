@@ -1,7 +1,7 @@
 ---
 name: "Documentation enhancement for the ship's logs 🏴‍☠️"
 about: Request improvements to Plundarr’s documentation ⚓
-title: "[DOC] Help chart clearer documentation waters"
+title: ""
 labels: documentation
 assignees: scottgigawatt
 
@@ -16,11 +16,7 @@ Describe the change or addition that would make the docs better.
 **🧪 Commands or examples involved**
 List any commands, files, or examples that should be checked.
 
-```sh
-make help
-make env
-make config
-```
+Describe only the command relevant to your report. Do not run live tests or reset commands solely to complete this template. Resolved `make config` and `make env` output may contain credentials; share only sanitized excerpts.
 
 **🗺️ Other ideas you have**
 List any other approaches or notes you think might help.

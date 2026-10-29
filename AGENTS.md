@@ -66,39 +66,17 @@ Do not remove or overwrite existing application state while regenerating a stack
 
 ## Documentation standards
 
-Public Markdown should be funny, lightly pirate-themed, readable, and useful. Put the operational meaning first and use pirate language mainly in short introductions, transitions, and sign-offs. Commands, paths, user-interface labels, warnings, security guidance, destructive actions, and troubleshooting instructions stay literal.
+Apply [GitHub Docs writing guidance](https://docs.github.com/en/contributing/writing-for-github-docs/best-practices-for-github-docs), its [style guide](https://docs.github.com/en/contributing/style-guide-and-content-model/style-guide), and [ISO 24495-1:2023](https://www.iso.org/standard/78907.html) to project-owned documentation. The required reader outcomes are relevant, findable, understandable, and usable information. Follow the local [documentation style guide](docs/documentation-style.md) for practical formatting and review rules.
 
-Follow [the documentation style guide](docs/documentation-style.md) for audience, structure, sentence-case headings, filenames, links, code blocks, alerts, advanced Markdown, and rendered review. Use searchable words before decorative emoji in headings. Emoji must not carry meaning by itself.
+Before adding or revising content, identify its reader and task. Keep required information, remove obsolete or non-actionable material, and consolidate repeated explanations under one authoritative owner. Plundarr owns generator/service contracts; Privateerr owns its VPN implementation; Kometa-config owns collection/configuration behavior; Plundarrpedia owns integrated platform walkthroughs. Keep enough local context to complete each quickstart without excessive page hopping.
 
-Reserve GitHub alerts for information readers must notice while scanning:
+Public prose may use light pirate humor; commands, paths, UI labels, risks, security reporting, and troubleshooting stay literal. Put the project heading and purpose before badge/community blocks. Preserve those blocks and each repository's distinct theme. Use searchable sentence-case headings, one H1 per ordinary page, numbered procedures, descriptive links, and tables only for useful comparisons. Keep ordinary prose paragraphs on one physical line with visual wrapping. Preserve established community filenames; ordinary article filenames use lowercase kebab-case.
 
-- `[!NOTE]`
-- `[!TIP]`
-- `[!IMPORTANT]`
-- `[!WARNING]`
-- `[!CAUTION]`
+Use GitHub-flavored Markdown for shared/repository pages and supported Material features only for site-specific content. Native GitHub alerts use `NOTE`, `TIP`, `IMPORTANT`, `WARNING`, or `CAUTION`; MkDocs converts them through `pymdownx.quotes`. Most pages need at most one or two alerts. Do not wrap routine commands in alerts or stack alerts. Put prose immediately after the marker; retain an empty quoted line only where a list or fence requires it, or to separate meaningful blocks. Never hide primary steps or risks in collapsible content.
 
-MkDocs converts this native GitHub syntax through `pymdownx.quotes`; do not maintain a second `!!!` admonition form for the published site.
+Put prerequisites, permissions, supported versions, required values, and backup/recovery requirements before procedures. Copyable commands use labelled `sh` fences without prompts or prose comments; use `console` for transcripts and `text` for output. Keep examples secret-free and setup-neutral. Preserve actionable compatibility/migration instructions, data-loss warnings, backup coverage, storage boundaries, licenses, and attribution when shortening text. A host config archive is not a database or named-volume backup.
 
-Most pages should need no more than one or two alerts. Do not wrap routine commands in alerts or place alerts back to back. Keep prose-first alert source compact: put the first quoted content line immediately after `> [!TYPE]` without an empty `>` line between them. When an alert begins with a fenced code block or list, retain one empty quoted line because Markdown requires it to delimit that block. Use later blank quoted lines only to separate meaningful paragraphs or blocks inside one alert.
-
-Write each ordinary Markdown prose paragraph on one physical source line and let editors apply visual word wrapping. Preserve semantic blank lines, lists, tables, code fences, deliberate hard breaks, and other structures that require their own lines. Configure Markdown editors to wrap visually rather than hard-wrapping prose at a fixed column.
-
-Put routine copyable commands in ordinary `sh` fences. Use `[!IMPORTANT]` when information is required for success and `[!CAUTION]` when a command carries meaningful risk. Keep explanations outside the code fence and do not add prompt characters or prose comments inside those examples. Use `console` for terminal transcripts and `text` for non-executable output.
-
-Keep `README.md`, `AGENTS.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`, and `SUPPORT.md` in their established form. Name ordinary documentation pages with lowercase kebab-case.
-
-Use one descriptive H1 for each ordinary page, sentence-case subheadings in order without skipped levels, and a short introduction before subsections. Use numbered steps for procedures, bullets for choices, blank lines around lists and fenced blocks, and readable tables only for genuine comparisons.
-
-Use descriptive relative links for repository-owned files, resolve paths from the referring page, and verify heading anchors after heading changes. Update inbound links, MkDocs navigation, and affected published routes when moving pages. Give informative images meaningful alt text; decorative images must not carry essential instructions. Keep diagrams accompanied by an equivalent explanation.
-
-Shared repository and site pages use GitHub-flavored Markdown and native GitHub alerts, supported on the Material site by the configured `pymdownx.quotes` extension. Material-only constructs such as content tabs and attribute lists belong only on site pages that need them and must render under `mkdocs.yml`; never assume they work in GitHub README files or templates. Do not replace shared alerts with Material `!!!` admonitions.
-
-State prerequisites, supported versions, working directory, permissions, and required values before procedures. Use language-labelled fenced blocks (`sh`, `bash` only for Bash-specific syntax, `console`, `text`, `yaml`, or the actual language). Commands must be copyable, omit prompts, use safe example values, and explain placeholders outside the fence. Place a literal destructive-operation warning and backup/recovery prerequisites before commands that can lose data or interrupt service. Never include real secrets, tokens, private logs, or operator-specific values in examples or screenshots.
-
-Check claims against current source and the supported stable release. Label unreleased behavior explicitly rather than implying that `main` is already published. Explain migrations, compatibility constraints, architecture boundaries, persistent storage, backup coverage, and restore limitations where they affect an operator's decision; configuration archives alone may not capture databases or named-volume data. Keep command, environment, catalog, and API documentation consistent with the implementation.
-
-Run Markdown/pre-commit checks and `make docs` for documentation changes, inspect the rendered GitHub result and Material pages as applicable, and verify links, anchors, tables, alerts, code blocks, images, diagrams, and narrow-screen readability. A strict MkDocs build is a real site check, not proof that every external URL or GitHub-only file renders correctly. Report unavailable render or link checks instead of claiming them.
+Verify claims against source and the supported release; label unreleased behavior. Keep API reference derived from source. Update inbound links, anchors, navigation, and published routes when consolidating pages. For changed reader journeys, check that a reader can locate the instruction, understand it, perform the task, and recognize success or recovery. Run Markdown/pre-commit, spelling, and `make docs` checks; inspect GitHub/Material rendering, links, tables, alerts, diagrams, and narrow layouts. Report actual checks and unavailable evaluation honestly: lint and a strict site build do not establish reader usability or certified ISO conformity. Summarize removals/merges and retained operational coverage in the handoff.
 
 ## Code quality and comments
 

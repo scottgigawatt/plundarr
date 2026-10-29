@@ -1,123 +1,37 @@
 # Contributing to Plundarr 🏴‍☠️
 
-Ahoy, improbable contributor. Plundarr is a Docker Compose fleet for media services, PIA WireGuard, PIA port forwarding, Privateerr, and Gluetun, so changes should arrive shipshape and easy to sail on Synology.
+Bring focused fixes, clear documentation, or better tests. Keep Docker Compose and Synology Container Manager compatibility, protect operator state, and discuss large design changes before starting.
 
 ## Before you start ⚓
 
-- Read the [repository README](https://github.com/scottgigawatt/plundarr#readme).
-- Read the [security policy](SECURITY.md) before sharing logs or generated config.
-- Read the [documentation style](documentation-style.md) before changing public Markdown.
-- Keep to the [Code](CODE_OF_CONDUCT.md).
-- Check existing issues before opening a duplicate treasure map.
-
-## What belongs here 🧭
-
-Good contributions include:
-
-- Clear bug fixes.
-- Docker Compose improvements that keep Synology DSM Container Manager, PIA WireGuard, and port forwarding in mind.
-- Documentation that helps real humans avoid setup mistakes.
-- Test and workflow improvements for the Plundarr stack.
-- Security hardening that stays free, open, and maintainable.
-
-Questionable cargo includes:
-
-- Huge rewrites without an issue first.
-- Paid-only services, subscription gates, or magic hosted scanners.
-- Vendoring upstream PIA manual connection scripts into this repo.
-- Anything that requires committing secrets, live `wg0.conf`, real `privateerr.env` data, or private logs.
+Read the [README](https://github.com/scottgigawatt/plundarr/blob/main/README.md), [security policy](SECURITY.md), [Code of Conduct](CODE_OF_CONDUCT.md), and applicable [agent/contributor guidance](https://github.com/scottgigawatt/plundarr/blob/main/AGENTS.md). Check existing issues. Privateerr owns the PIA scripts; do not vendor them here. Never include credentials, generated VPN files, application state, or private logs in a contribution.
 
 ## Set up a development checkout 🛠️
 
-Install Git, Make, Docker with Compose, and pre-commit. Host-side Python tests need a version supported by `docker/pyproject.toml`; documentation builds require the exact interpreter described in the [developer testing guide](development/maraudarr/testing.md).
+Install Git, Make, Docker with Compose, and pre-commit. Host tests require Python supported by `docker/pyproject.toml`; documentation uses the exact interpreter in the [testing guide](development/maraudarr/testing.md#validate-documentation).
 
 ```sh
-git clone git@github.com:scottgigawatt/plundarr.git
+git clone https://github.com/scottgigawatt/plundarr.git
 cd plundarr
 ```
 
-Documentation and offline helper checks do not require a generated deployment or PIA credentials. When testing generator changes, build this checkout under a distinct local image reference before generating a disposable test project:
-
-```sh
-make build MARAUDARR_IMAGE=maraudarr:dev
-make ship MARAUDARR_IMAGE=maraudarr:dev PRESET=boudoirr
-```
-
-Repeat the image override with `make configure`, `make presets`, and `make services`, and rebuild after source edits. Make otherwise reuses its configured local or published image; changing Python, catalog, or seed files in the checkout alone does not change that image. See [generator revision selection](development/maraudarr/index.md#choose-the-generator-revision).
-
-Generation writes files but does not start application containers. Review `dist/boudoirr/.env` before a deliberate runtime test and keep it private. Use isolated output and project names rather than an operator deployment.
-
-Choose validation for the changed boundary:
-
-```sh
-make help
-make test
-make test-workflows
-make docs
-make build
-make test-image
-make build-platforms
-pre-commit run --all-files
-```
-
-Replace `YOUR-PRESET` with the selected preset ID, such as `boudoirr`. Generated-stack checks such as `make config`, `make env`, `make up`, `make test-vpn`, `make test-e2e`, and `make test-stack` accept `PRESET=YOUR-PRESET` when the change is preset-specific.
-
-`make down PRESET=YOUR-PRESET` preserves volumes and images. `make clean` is repository-only and never touches `dist/` or Docker. `make nuke` removes the selected project's Docker resources plus the separate `maraudarr` Compose project that runs Maraudarr and its scoped Buildx cache, but preserves deployment files, bind-mounted config, and all application volumes, including Tracearr history and internal backups. Restarting may require image downloads. `make delete-config` deletes the host config tree.
-
-> [!IMPORTANT]
-> 🧪 VPN and port-forwarding testing uses real PIA credentials from the selected preset's `.env`. That voyage should happen locally, not with secrets flung into public waters.
+For generator changes, [build and select this checkout's image](development/maraudarr/index.md#choose-the-generator-revision). A changed source file does not change an already-built image. Generate only into disposable test output; do not use operator deployments. Documentation/helper checks need no PIA credentials.
 
 ## Follow the project style 📜
 
-- Public Markdown and user-facing command output may use light pirate flavor after the operational meaning is clear.
-- Documentation follows [`documentation-style.md`](documentation-style.md), including sentence-case headings and alert limits.
-- Code comments should use plain English.
-- Shell scripts written for host use should use `#!/bin/sh` where possible.
-- Shell scripts should use four spaces for indentation.
-- Shell functions document their purpose, parameters, and return behavior.
-- Copyable Markdown commands use `sh` fences without a shell prompt.
-- Routine commands use ordinary `sh` fences. Required information uses `[!IMPORTANT]`, while risky commands use `[!CAUTION]`. Keep explanatory comments outside the code fence.
-- YAML, TOML, AWK, and jq use two-space indentation; Python, shell, JSON, and JSON-with-comments use four.
-- Docker Compose values should come from the selected preset's `.env` instead of inline fallback soup.
-- Keep service config directories aligned with service names.
-- Let Privateerr own the upstream PIA manual connection scripts.
+Apply [GitHub/ISO documentation requirements](documentation-style.md): identify the reader/task, consolidate repeated explanations, and verify the rendered task path. Keep necessary backup, security, and compatibility guidance. Public prose may have light pirate flavor; technical comments and warnings use plain English.
+
+`.editorconfig`, `ruff.toml`, and `pyrightconfig.json` own whitespace, Python style, and strict types. Follow the detailed [code and shell conventions](https://github.com/scottgigawatt/plundarr/blob/main/AGENTS.md#code-quality-and-comments). Compose defaults belong in environment fragments; source charts preserve comments and `${VARIABLES}`.
 
 ### Configure editor tooling 🧰
 
-`.editorconfig` is the portable source of truth for indentation, line endings, final newlines, and trailing whitespace. Install the recommendations from `.vscode/extensions.json` when using VS Code; each entry carries an aligned comment explaining whether it formats, validates, or only highlights a file type.
-
-Workspace format-on-save is deliberately disabled. Prettier is available only for explicit formatting of supported CSS, JavaScript, JSON, and Markdown files, using the checked-in `.prettierrc.json5`. It does not parse jq, and the repository excludes jq, YAML, TOML, and aligned workspace JSONC from Prettier so their specialized validators and formatters cannot undo project-owned spacing. In particular, keep two spaces before pinned-action comments in workflow YAML.
-
-## Check Python style
-
-`ruff.toml` owns this repository's correctness, import-order, and formatting rules. The recommended Ruff editor extension reads this file. The existing pull-request pre-commit step enforces both lint and formatting checks, including Python tests; Ruff stays out of the Maraudarr runtime image.
-
-```sh
-pre-commit run ruff-check --all-files
-pre-commit run ruff-format --all-files
-```
-
-## Strict Python checks
-
-Run `make test-types` to check application code and tests with the pinned Pyright version in a disposable test container. Docker is the only host prerequisite. The root `pyrightconfig.json` is shared with VS Code/Pylance; select an interpreter with the project's dependencies installed for accurate editor import resolution. `make test` and pre-commit enforce the same check during pull requests and main/release validation. Ruff continues to own lint and formatting.
+Use the recommended `.vscode/extensions.json` extensions. Format-on-save is disabled; Prettier is for explicit formatting of supported files. Keep specialized YAML, TOML, jq, and aligned JSONC spacing under their existing validators. Ruff handles Python lint/format; Pylance uses strict Pyright settings. Keep checker packages out of runtime images.
 
 ## Prepare a pull request 🪝
 
-Before opening a pull request:
+1. Choose checks from [developer testing](development/maraudarr/testing.md) for the changed boundary. Live tests require separate isolated deployment preparation; read the [live testing guide](https://github.com/scottgigawatt/plundarr/blob/main/test/README.md) first.
+2. For generated-chart changes, run real Compose validation without printing secrets and [verify preset examples](https://github.com/scottgigawatt/plundarr/blob/main/examples/presets/README.md) from the source under review.
+3. For documentation, run `make docs`, spelling and Markdown/pre-commit checks; inspect rendering, changed links/anchors, and representative reader tasks.
+4. Review the complete diff and run `git diff --check`. Report commands actually run, failures/skips, and remaining limits alongside the problem and resulting behavior.
 
-- Run relevant `make` targets.
-- Run `make test-workflows` for workflow, release, build-pin, or image-tag changes.
-- Run real Compose validation for generated-chart changes using a disposable preset and its matching environment; do not print operator credentials through `make config` or `make env`.
-- Run `make docs` for site content and inspect the rendered result and changed links.
-- Refresh and verify [public preset references](https://github.com/scottgigawatt/plundarr/blob/main/examples/presets/README.md) when generator output changes, using an image built from the source under review.
-- Run `pre-commit run --all-files` if hooks are installed.
-- Confirm no secrets, live VPN configs, or logs slipped into the hold.
-- Explain what changed and why.
-
-Tiny pull requests be easier to review than a kraken-sized rewrite with six unrelated tentacles.
-
-## Report security concerns 🛡️
-
-Do not report security problems in public issues, pull requests, or Discord. Use the [security policy](SECURITY.md) and GitHub private vulnerability reporting. Use the [support guide](SUPPORT.md) for non-sensitive questions.
-
-Fair winds, clean diffs, and may yer YAML indent on the first try. ☠️
+Use [support](SUPPORT.md) for non-sensitive questions and the [security policy](SECURITY.md) for private vulnerability reporting. Small, coherent pull requests make fewer tentacles for the reviewer. 🐙

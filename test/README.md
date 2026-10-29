@@ -1,184 +1,73 @@
-# Plundarr test hold 🧪🏴‍☠️
+# Test Plundarr deployments 🧪🏴‍☠️
 
-Welcome to the test hold, where Plundarr checks that Privateerr and Gluetun left the PIA WireGuard and port-forwarding voyage in a usable state.
+Use the [developer testing guide](https://github.com/scottgigawatt/plundarr/blob/main/docs/development/maraudarr/testing.md) for unit, strict type, helper, workflow, image, generation-matrix, and documentation checks. This page covers optional live deployment tests and their recovery boundaries.
 
-## Find a test script 🗺️
+## Find a test
 
-| Hold | Script | Purpose |
-| --- | --- | --- |
-| 🧭 Compose generation | [`generator/maraudarr-image-smoke.sh`](https://github.com/scottgigawatt/plundarr/blob/main/test/generator/maraudarr-image-smoke.sh) | Test image UI and validate one disposable deployment |
-| 🧭 Compose generation | [`generator/test-maraudarr-image.sh`](https://github.com/scottgigawatt/plundarr/blob/main/test/generator/test-maraudarr-image.sh) | Verify local, pulled, built, and unavailable image resolution paths |
-| 🧭 Compose generation | [`generator/test-maraudarr-matrix.sh`](https://github.com/scottgigawatt/plundarr/blob/main/test/generator/test-maraudarr-matrix.sh) | Generate and validate representative preset and add-on combinations |
-| 🧰 Helpers | [`helpers/test-make-helpers.sh`](https://github.com/scottgigawatt/plundarr/blob/main/test/helpers/test-make-helpers.sh) | Test Make's AWK, backup, PIA preflight, and Compose status helpers |
-| 🧰 Helpers | [`helpers/test-policy-checks.sh`](https://github.com/scottgigawatt/plundarr/blob/main/test/helpers/test-policy-checks.sh) | Test valid and invalid publishing-policy fixtures offline |
-| 🧰 Helpers | [`helpers/test-workflow-helpers.sh`](https://github.com/scottgigawatt/plundarr/blob/main/test/helpers/test-workflow-helpers.sh) | Test release, Discord, and registry helper behavior offline |
-| 🛡️ Policy | [`policy/check-build-pin-policy.sh`](https://github.com/scottgigawatt/plundarr/blob/main/test/policy/check-build-pin-policy.sh) | Keep digest-pinned build dependency tags synchronized |
-| 🛡️ Policy | [`policy/check-image-tag-policy.sh`](https://github.com/scottgigawatt/plundarr/blob/main/test/policy/check-image-tag-policy.sh) | Enforce canonical image tags in every metadata-action block |
-| 🧮 Policy | [`policy/awk/check-image-tags.awk`](https://github.com/scottgigawatt/plundarr/blob/main/test/policy/awk/check-image-tags.awk) | Parse and validate workflow image-tag metadata blocks |
-| 🧮 Policy | [`policy/awk/collect-build-pins.awk`](https://github.com/scottgigawatt/plundarr/blob/main/test/policy/awk/collect-build-pins.awk) | Extract and validate digest-pinned build dependency values |
-| 🌊 Runtime | [`runtime/test-compose-cleanup-live.sh`](https://github.com/scottgigawatt/plundarr/blob/main/test/runtime/test-compose-cleanup-live.sh) | Verify isolated `down` and `nuke` ownership on a real Docker daemon |
-| 🌊 Runtime | [`runtime/plundarr-stack-wait.sh`](https://github.com/scottgigawatt/plundarr/blob/main/test/runtime/plundarr-stack-wait.sh) | Wait for a generated stack to become healthy |
-| 🌊 Runtime | [`runtime/plundarr-vpn-test.sh`](https://github.com/scottgigawatt/plundarr/blob/main/test/runtime/plundarr-vpn-test.sh) | Validate Privateerr, Gluetun, and selected downloader state |
-| 🎭 Stubs | [`stubs/compose-docker-stub.sh`](https://github.com/scottgigawatt/plundarr/blob/main/test/stubs/compose-docker-stub.sh) | Supply deterministic Docker output to Compose helper tests |
-| 🎭 Stubs | [`stubs/maraudarr-image-docker-stub.sh`](https://github.com/scottgigawatt/plundarr/blob/main/test/stubs/maraudarr-image-docker-stub.sh) | Simulate Maraudarr image discovery and retrieval outcomes |
-| 🎭 Stubs | [`stubs/workflow-skopeo-stub.sh`](https://github.com/scottgigawatt/plundarr/blob/main/test/stubs/workflow-skopeo-stub.sh) | Simulate registry inspection without network access |
+| Directory | Responsibility |
+| --- | --- |
+| `generator/` | Image resolution, hardened generator smoke checks, and real Compose syntax matrix |
+| `helpers/` | Offline Make/workflow/policy and cleanup-ownership fixtures |
+| `policy/` | Build-pin synchronization and image-channel rules |
+| `runtime/` | Live stack health, VPN/port forwarding, and isolated cleanup acceptance |
+| `stubs/` | Deterministic command substitutes used only by offline tests |
+| `examples/` | Secret-free WireGuard/forwarding fixtures used by disposable live tests |
 
-The subfolders separate Compose-generation contracts, reusable helper tests, publishing policy checks, live-stack runtime checks, and deterministic command stubs. Make targets remain the public interface; invoke individual scripts only while diagnosing a focused failure.
+Make targets are the normal interface; individual scripts are for focused diagnosis. Stub results do not prove real container health.
 
-## Understand what gets tested 🦜
+## Prepare an isolated live test
 
-The VPN test script does not use a throwaway test image. It validates the actual Privateerr, Gluetun, and qBittorrent Compose containers:
+Replace `YOUR-PRESET` with one catalog ID and use it consistently. Run mutating tests only with disposable bind-mounted config, media, and downloads on an isolated Docker test daemon, preferably a disposable host or VM. Watchtower and Portainer may access the Docker socket; it must belong to the test environment. Different checkout, project, preset, or Docker context names alone do not isolate host data or sockets.
 
-- Privateerr generated PIA WireGuard `wg0.conf`.
-- Privateerr generated PIA port-forwarding metadata in `privateerr.env`.
-- Privateerr and Gluetun containers are running and healthy.
-- Gluetun is reachable through its unauthenticated health endpoint from inside the Gluetun container.
-- PIA port-forwarding produced a usable forwarded port when required.
-- qBittorrent listens on Gluetun's forwarded port when qBittorrent validation is enabled.
+> [!CAUTION]
+> `make test-e2e` and `make test-stack` replace selected WireGuard and forwarding files with examples before and after validation and can interrupt services. Back up disposable test state and protect credentials. Interrupted commands can leave services or sensitive state behind; inspect before recovery. Never use these targets to diagnose an operator deployment.
 
-## Run test voyages 🧭
+The [generator revision guide](https://github.com/scottgigawatt/plundarr/blob/main/docs/development/maraudarr/index.md#choose-the-generator-revision) explains selecting the source-built image. Generate the full desired selection before live tests. Supply test credentials privately; never publish `.env`, `wg0.conf`, `privateerr.env`, application databases, or raw private logs.
 
-### Check Maraudarr generation
-
-Use the complete Maraudarr test target while changing image resolution, presets, service charts, or generated config seeds:
-
-```sh
-make test
-```
-
-These checks simulate local-image discovery, a successful GHCR pull, a local fallback build, and a complete retrieval failure without contacting a registry. They also run the Python unit suite; exercise the offline release, Discord, and registry helpers; enforce synchronized build pins and canonical image tags; verify the compact Compose status and secret-safe PIA preflight helpers; and generate representative Compose charts.
-
-Use the focused Make-helper target while changing AWK programs, config backup, the PIA credential preflight, or Compose status formatting:
-
-```sh
-make test-make-helpers
-```
-
-After building an image, run its terminal UI tests with exact runtime dependencies, then exercise its hardened contract and validate one disposable deployment:
-
-```sh
-make test-image
-```
-
-This makes the Rich terminal regression checks mandatory for the built image, even when Rich is unavailable to host-side tests. CI can select another voyage with `MARAUDARR_TEST_PRESET`, `MARAUDARR_TEST_ADD`, `MARAUDARR_TEST_REMOVE`, and `MARAUDARR_TEST_FILE` without duplicating a raw `docker run` block.
-
-### Check workflows and publishing policy
-
-Use the offline automation target while changing workflows, workflow helpers, Docker build inputs, release behavior, or published image tags:
-
-```sh
-make test-workflows
-```
-
-The workflow-helper suite validates release-tag inputs, Discord payloads, registry mirroring, and digest comparison without contacting those services. The policy checks require every build dependency tag to carry one synchronized SHA-256 digest across Dockerfiles, the root example environment, and the build workflow. They also require each Docker metadata block to publish the shared `latest`, `edge`, `sha-...`, exact SemVer, minor, and stable-major channels. Major version zero and prerelease safeguards are enforced by the same policy.
-
-`helpers/test-policy-checks.sh` copies the policy programs into a disposable repository and proves that valid input passes while mismatched pins, missing aliases, and noncanonical tag rules fail with useful diagnostics.
-
-### Check a running stack
-
-Run the isolated cleanup acceptance after changing Compose lifecycle or nuke behavior:
-
-```sh
-test/runtime/test-compose-cleanup-live.sh
-```
-
-It creates random `plundarr-test-` projects and unrelated sentinels on the real Docker daemon. The test proves `down` preserves volumes and images, then proves `nuke` removes containers, networks, eligible images, and its named builder while retaining application volumes. It restarts the stack and verifies stored contents. It never uses `dist/`, a repository `.env`, or PIA credentials.
-
-Test teardown records volumes created by that run and calls `runtime/remove-test-volume.sh` for each exact name. The helper requires a matching test-name prefix, Compose project label, and test-run label before removal; names alone never authorize deletion. Missing volumes are harmless, and failed ownership checks or Docker failures prevent that volume from being removed. If cleanup fails, the test retains its resource ledger and exits with an error. `helpers/test-test-volume-cleanup.sh` checks rejection paths with a Docker stub.
-
-All live Make examples below name their preset explicitly. Replace `YOUR-PRESET` with the catalog preset generated for the test, such as `boudoirr`, and use the same value for generation, validation, and cleanup. Run mutating tests in a disposable checkout and deployment on an isolated Docker test daemon, preferably on a disposable test host or VM. Every bind-mounted configuration, media, and download directory must be disposable, with no access to operator data such as production `/volume1` paths. The test must not expose the operator Docker socket: Watchtower and Portainer bind `/var/run/docker.sock`, which must belong only to the disposable test environment. Different preset, checkout, daemon, or context names alone do not isolate host data or Docker sockets.
-
-Use this when the selected test stack is already running:
+## Check an already-running test stack
 
 ```sh
 make test-vpn PRESET=YOUR-PRESET
 ```
 
-This checks the existing Privateerr and Gluetun containers, then verifies generated files and port forwarding.
+This inspects actual Privateerr/Gluetun containers, generated files, tunnel health, and PIA forwarding. When qBittorrent validation is enabled it also checks that its listening port matches the forwarded port. Syntax validation alone proves none of these runtime properties.
 
-### Test Privateerr, Gluetun, and download clients end to end
-
-> [!CAUTION]
-> Use a disposable deployment with disposable bind-mounted data, a test-only Docker socket, an isolated Docker test daemon, and explicit `PRESET` for live tests. A disposable test host or VM is preferred; names alone do not isolate operator data. Both `make test-e2e` and `make test-stack` overwrite the selected generated WireGuard and forwarding metadata with example files before and after validation, and they can interrupt VPN/download services. Back up the selected deployment and keep real credentials private. An interrupted command may leave services or sensitive state behind; inspect them before any deliberate recovery or cleanup rather than running these targets against production.
-
-Use this when ye want `Make` to launch only the VPN pair plus download clients, validate it, then clean up:
+## Start and test VPN/download services
 
 ```sh
 make test-e2e PRESET=YOUR-PRESET
 ```
 
-This target:
+This restores fixtures, starts the VPN pair and selected download clients, waits for health, validates the forwarding chain, brings the stack down, and restores fixtures again. Generate the intended downloader selection first; for example, Usenet-only uses `REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=sabnzbd`. Use `nzbget` instead for NZBGet, or add either without removal to test combined modes.
 
-1. Restores example config.
-2. Starts only `privateerr`, `gluetun`, and selected download services with Docker Compose.
-3. Waits for those services to report healthy.
-4. Runs `test/runtime/plundarr-vpn-test.sh`.
-5. Brings the Compose stack down.
-6. Restores example config again.
-
-Generate the downloader mode before the test voyage. Plundarr and Boudoirr use qBittorrent by default; switch to SABnzbd-only with:
-
-```sh
-make ship PRESET=YOUR-PRESET REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=sabnzbd
-make test-e2e PRESET=YOUR-PRESET
-```
-
-Chart the same E2E voyage with NZBGet instead:
-
-```sh
-make ship PRESET=YOUR-PRESET REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=nzbget
-make test-e2e PRESET=YOUR-PRESET
-```
-
-Keep qBittorrent and add either Usenet client when ye want both downloader types tested together, for example `make ship PRESET=YOUR-PRESET ADD_SERVICES=sabnzbd`.
-
-### Test the full stack
-
-The same disposable-deployment and config-reset warning above applies. This target leaves services running on success; it is not a read-only health check.
-
-Use this when ye want Make to launch every service, wait for health, and validate the full port-forwarding chain:
+## Start and test the full stack
 
 ```sh
 make test-stack PRESET=YOUR-PRESET
 ```
 
-This target:
+This restores fixtures, starts all services, waits for configured healthchecks, and validates VPN/forwarding state. It leaves the stack running on success, prints status/recent logs on failure, and restores fixtures after validation. It is a mutating development test, not a routine health check.
 
-1. Restores example config.
-2. Starts every Compose service.
-3. Waits for healthcheck-enabled containers to report healthy.
-4. Verifies Privateerr output, Gluetun health, Gluetun forwarded port, and qBittorrent port sync.
-5. Leaves the stack running on success.
-6. Prints Compose status and recent logs on failure.
-7. Restores example config after validation.
+## Validate lifecycle cleanup ownership
 
-> [!WARNING]
-> 🧨 VPN tests can involve real PIA credentials in `.env`. 🧨
->
-> Do not commit live credentials, generated WireGuard VPN configs, forwarded ports, or logs from yer secret treasure chest. 🪎
+After lifecycle-helper changes, use the explicitly isolated acceptance test:
+
+```sh
+test/runtime/test-compose-cleanup-live.sh
+```
+
+It creates uniquely named projects and unrelated sentinels, proves `down` retains images/volumes, then checks scoped `nuke` cleanup and restarts to verify retained data. It uses no `dist/`, repository `.env`, or PIA credentials. Test teardown deletes only volumes recorded as created by that run, with matching project/run labels; rejected ownership or cleanup failure retains the ledger and fails the test. Never use global pruning.
 
 ## Restore example files 📜
 
-The [examples](https://github.com/scottgigawatt/plundarr/tree/main/test/examples) directory stores example files used to reset the repo after a live run:
-
-- [examples/example-wg0.conf](https://github.com/scottgigawatt/plundarr/blob/main/test/examples/example-wg0.conf)
-- [examples/example-privateerr.env](https://github.com/scottgigawatt/plundarr/blob/main/test/examples/example-privateerr.env)
-
-These files match the Privateerr examples exactly. Cleanup targets copy them back into `dist/<preset>/config/gluetun/wireguard/` so live secrets do not accidentally sneak into Git.
-
-Useful cleanup commands:
+The following commands stop or reset only the explicitly selected disposable test deployment:
 
 > [!CAUTION]
-> `make clean-test` stops the selected stack and replaces its VPN files with examples. `make restore-test-config` replaces those files even if services are still running, which can break VPN operation. Use both only for the disposable test deployment named by `PRESET`. `make nuke` also stops services and removes containers, networks, eligible images, and scoped build cache; it preserves application volumes, `.env`, host backups, and persistent application config. Restarting may require image downloads.
+> `make clean-test` stops the selected stack and replaces its VPN files with examples. `make restore-test-config` replaces those files even while services run, potentially breaking VPN operation. Confirm the preset and isolation before running either.
 
 ```sh
 make clean-test PRESET=YOUR-PRESET
 make restore-test-config PRESET=YOUR-PRESET
-make clean
 ```
 
-`make delete-config` is deliberately absent from that routine cleanup example: it deletes the selected deployment's host configuration and exported backups. Named-volume data remains intact.
-
-`clean-test` uses the volume-preserving `down` path. `nuke` removes Docker resources for the selected generated project and the separate `maraudarr` Compose project that runs Maraudarr, then clears disposable runtime state and restores examples. It never invokes `delete-config`, and it preserves application volumes, `.env`, backups, and persistent application config.
-
-Run cleanup before committing after any real VPN voyage. Future ye will thank past ye. 🏴‍☠️
+`clean-test` uses volume-preserving `down`. `make clean` removes disposable repository artifacts only. `make nuke` also stops services and removes scoped containers, networks, eligible images, the separate Maraudarr project, and repository-owned build cache; it preserves application volumes, deployment `.env`, persistent config, and backups. `make delete-config` is a separate destructive host-config deletion and is not part of routine cleanup. Keep exported backups off-host; named-volume application backups need their own export procedure.

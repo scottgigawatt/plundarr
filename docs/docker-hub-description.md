@@ -1,67 +1,19 @@
 # Maraudarr 🏴‍☠️⚒️
 
-Maraudarr is the short-lived Docker Compose project generator image for [Plundarr](https://github.com/scottgigawatt/plundarr). It turns presets and selectable service charts into one commented Docker Compose file, one matching environment file, and the selected service config directories.
+Maraudarr is the short-lived Docker Compose project generator for [Plundarr](https://github.com/scottgigawatt/plundarr). It turns selected presets/services into a complete commented Compose file, matching environment files, and configuration seeds, then exits. It does not run the media services.
 
-> [!IMPORTANT]
-> Plundarr is the generated media stack. Maraudarr creates that stack and exits; it is not a long-running media service.
+## Generate and launch
 
-This description documents the source at its selected repository revision. `MARAUDARR_IMAGE` chooses the generator and defaults to the stable `latest` image. Follow [generator revision selection](https://github.com/scottgigawatt/plundarr/blob/main/docs/development/maraudarr/index.md#choose-the-generator-revision) to build and select this checkout, or use documentation matching the published version or digest you select.
+Follow the [repository quickstart](https://github.com/scottgigawatt/plundarr#generate-the-default-stack-) for prerequisites and one complete setup path. Make supplies the non-root, read-only, networkless generation invocation; configure credentials, host paths, and ports before starting the generated deployment.
 
-## Generate a stack quickly
+`MARAUDARR_IMAGE` selects the packaged catalog. Its default is the stable GHCR image; [generator revision selection](https://github.com/scottgigawatt/plundarr/blob/main/docs/development/maraudarr/index.md#choose-the-generator-revision) explains source builds and version-matched documentation. Use `make configure` for interactive selection or `make ship PRESET=YOUR-PRESET` for a named preset.
 
-The repository Makefile supplies the hardened Docker invocation. Run commands from the repository root and replace `YOUR-PRESET` with the selected preset ID, such as `boudoirr`:
+## Image channels and platforms
 
-```sh
-git clone https://github.com/scottgigawatt/plundarr.git
-cd plundarr
-export MARAUDARR_IMAGE=maraudarr:dev
-make build
-make ship
-```
+- Registries: `ghcr.io/scottgigawatt/maraudarr` and `docker.io/scottgigawatt/maraudarr`.
+- Platforms: `linux/amd64`, `linux/arm64`, and `linux/arm/v7`; third-party services may support fewer.
+- `latest`: stable release; `edge`: successful `main` build; `sha-...`: source revision.
+- Stable releases publish exact, minor, and major aliases; major zero has no `0` alias. Prereleases publish exact and revision tags only.
+- Builds include OCI metadata, an SBOM, provenance, and vulnerability scanning.
 
-Generated cargo lands in its preset directory:
-
-```text
-dist/plundarr/
-├── docker-compose.yml
-├── example.env
-├── .env
-└── config/
-```
-
-Run `make configure` for the interactive preset and service picker, or choose a preset directly:
-
-```sh
-make ship PRESET=jellyfin
-make ship PRESET=plex
-make ship PRESET=calibre-web-automated
-make ship PRESET=duplex
-make ship PRESET=watchtower
-make ship PRESET=portainer
-make ship PRESET=boudoirr
-make ship ADD_SERVICES=lidarr,recyclarr
-make ship ADD_SERVICES=sonarr-anime
-```
-
-Plundarr and Boudoirr use qBittorrent as their only default downloader and include Watchtower as a removable default. Plundarr also includes Calibre-Web Automated as a removable default, and `PRESET=calibre-web-automated` generates the ebook library and ingest service by itself. SABnzbd and NZBGet remain optional selections through `make configure` or `ADD_SERVICES`. Plundarr includes one Sonarr instance; `sonarr-anime` adds the optional second instance. Lidarr provides opt-in music automation, while profile-gated Recyclarr runs only through `make recyclarr-preview` or `make recyclarr-sync`. Review `dist/<preset>/.env`, then start the generated stack with `make up PRESET=YOUR-PRESET`. The standalone Watchtower project may instead run one update pass with `make watchtower-run-once PRESET=watchtower`.
-
-Velvarr and Jellyfin are removable Boudoirr defaults for adult-media discovery, Whisparr requests, and playback. Use `REMOVE_SERVICES=velvarr` or `REMOVE_SERVICES=jellyfin` to omit either companion; other presets can add them explicitly. Velvarr requires a local or external Jellyfin server for setup and login, uses Boudoirr host port `16699`, and receives persistent config and generated secrets from Maraudarr. The current official Velvarr image supports `linux/amd64` only. Read the repository's [Velvarr guide](https://github.com/scottgigawatt/plundarr/blob/main/docs/project-guides/velvarr.md) for setup and recovery.
-
-The Duplex preset keeps Kometa's configuration in an independent host checkout selected by `KOMETA_CONFIG_PATH`. Its PATTRMM and Notifiarr defaults are removable; Overlay Reset and Watchtower may be added explicitly. Kometa Overlay Reset is excluded from normal startup by its Compose profile and runs explicitly with `make kometa-overlay-reset PRESET=duplex`; its generated default is dry-run.
-
-The `portainer` preset generates a standalone Portainer Community Edition server using the official `lts` channel. Configure its data directory and published ports in the generated `.env`.
-
-## Inspect image details
-
-- Registries: `ghcr.io/scottgigawatt/maraudarr` and `scottgigawatt/maraudarr`
-- Platforms: `linux/amd64`, `linux/arm64`, and `linux/arm/v7`
-- Stable tag: `latest`
-- Main branch tag: `edge`
-- Stable release aliases: exact, minor, and major versions such as `1.2.3`, `1.2`, and `1`
-- Immutable revision tag: `sha-...`
-- Security: non-root, read-only, no-network generation with dropped capabilities
-- Supply chain: Trivy scanning, SBOM, provenance, and OCI metadata
-
-Major version zero omits the broad `0` alias. Prereleases publish only their exact version and immutable revision tag, never moving stable aliases. Release publication accepts only `v`-prefixed annotated SemVer tags whose commits already belong to `main`.
-
-Full commands, tag policy, architecture, and maintenance notes live in the [Maraudarr README](https://github.com/scottgigawatt/plundarr/tree/main/docker#readme).
+See the [Maraudarr README](https://github.com/scottgigawatt/plundarr/tree/main/docker#readme) for runtime guardrails and the [setup guide](https://github.com/scottgigawatt/plundarr/blob/main/docs/setup.md) for deployment. Keep generated `.env`, VPN files, and application state private.

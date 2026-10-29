@@ -1,17 +1,17 @@
 ---
 name: "Bug report for this here vessel 🏴‍☠️"
 about: Share a problem so we can patch the hull and keep Plundarr sailing steady ⚓
-title: "[BUG] A cursed leak in the hull"
+title: ""
 labels: bug
 assignees: scottgigawatt
 
 ---
 
-## ☠️ What went wrong
+## What went wrong
 
 Tell me what broke in Plundarr. Keep it short and clear.
 
-## 🪝 How to trigger the problem
+## How to trigger the problem
 
 List the steps so I can reproduce it.
 
@@ -19,27 +19,19 @@ List the steps so I can reproduce it.
 2.
 3.
 
-## 🌊 What you expected
+## What you expected
 
 Tell me what should have happened instead.
 
-## 📜 Logs or output
+## Logs or output
 
 Share safe logs, error messages, or screenshots if you have them.
 
-Useful commands:
+For diagnostics:
 
-```sh
-make check-env
-make config
-make test-vpn
-make test-e2e
-make test-stack
-make restore-test-config
-pre-commit run --all-files
-```
+Describe only the command relevant to your report. Do not run live tests or reset commands solely to complete this template. Resolved `make config` and `make env` output may contain credentials; share only sanitized excerpts.
 
-## 🧩 Your setup
+## Your setup
 
 - Plundarr branch or commit:
 - OS and version:
@@ -47,11 +39,11 @@ pre-commit run --all-files
 - Privateerr image tag:
 - Gluetun image tag:
 
-## 🧭 Extra details
+## Extra details
 
 Anything else that might help track down the bug.
 
-## 🛡️ Secrets check
+## Secrets check
 
 - [ ] No real PIA username or password.
 - [ ] No live `wg0.conf`.

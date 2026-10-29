@@ -16,7 +16,9 @@ The Python suite checks catalog resolution, comment preservation, environment st
 make test
 ```
 
-This includes unit tests, packaged-image fallback checks, all product presets, Boudoirr's optional media-server combinations, torrent-only, Usenet-only, and combined downloader modes, the opt-in Lidarr and Recyclarr pair, the Duplex core/default split, optional Themerr combinations, private key preservation and recovery, Calibre-Web Automated both standalone and removed from Plundarr, plus default, opt-in, and standalone Watchtower placements, and standalone or optional Portainer deployments. It also tests the compact Compose status, one-shot Watchtower, Overlay Reset, and Recyclarr commands, and secret-safe PIA preflight helpers. The matrix generates all nine presets beneath one `dist/` root. Every generated Compose/environment pair is inspected by Docker Compose without starting application containers. Unit coverage also keeps preset project names, Docker networks, project/service/tag container names, published ports, conditional Homepage integrations, and regeneration-safe configuration seeds correct.
+This runs unit tests, strict types, offline Make/workflow helpers, image-resolution fixtures, and a real Compose generation matrix. The matrix covers presets, optional services, downloader modes, environment preservation, config seeds, secrets, and maintenance profiles without starting application containers. Docker and image/tool preparation may need network access.
+
+Use `make test-types` for focused strict Python checks or `make test-make-helpers` for host helper changes. The root Makefile and tests define the exact case inventory.
 
 ## Verify public preset references
 

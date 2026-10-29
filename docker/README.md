@@ -1,3 +1,7 @@
+# Maraudarr ⚒️
+
+Maraudarr generates Plundarr Compose deployments and exits. It resolves selected services, preserves Compose comments and existing operator state, and validates the files before publishing them under `dist/<preset>/`.
+
 <!-- markdownlint-disable MD033 -->
 <!-- markdownlint-disable MD041 -->
 <p align="center">
@@ -13,84 +17,11 @@
 </p>
 <!-- markdownlint-enable MD033 -->
 
-# Maraudarr ⚒️
+## Generate a deployment
 
-Maraudarr is the short-lived Docker Compose project generator image inside the Plundarr repository. It loads a preset, resolves required services, preserves the handwritten Compose comments, and writes a deployable Plundarr project into the mounted repository:
+Use the [repository quickstart](../README.md#generate-the-default-stack-) for prerequisites, image selection, generation, and startup. Run Make commands from the repository root. `MARAUDARR_IMAGE` chooses the packaged source/catalog; mounting a checkout does not make that image use live Python source.
 
-```text
-dist/<preset>/
-├── docker-compose.yml
-├── example.env
-├── .env
-└── config/
-```
-
-> [!IMPORTANT]
-> **Plundarr** is the generated media stack. **Maraudarr** is only the tool that builds it. The image does not run the selected media services.
-
-## Take the quick passage 🧭
-
-Run these commands from the repository root. Replace `YOUR-PRESET` in examples with a selected preset ID, such as `boudoirr`. Make keeps the Docker wiring out of sight and prints only the useful status and Maraudarr output.
-
-| Command | What it does |
-| --- | --- |
-| `make ship` | Prepares Maraudarr and generates the default Plundarr stack |
-| `make configure` | Opens the interactive preset and service picker |
-| `make presets` | Lists every preset and its exact defaults |
-| `make services` | Lists every selectable service |
-| `make watchtower-run-once PRESET=watchtower` | Runs one host update pass and exits |
-| `make kometa-overlay-reset PRESET=duplex` | Runs profile-gated Kometa Overlay Reset once and exits |
-| `make recyclarr-preview PRESET=plundarr` | Previews profile-gated Recyclarr changes |
-| `make recyclarr-sync PRESET=plundarr` | Applies the reviewed Recyclarr configuration |
-| `make pull-image` | Pulls the latest published Maraudarr image from GHCR |
-| `make build` | Builds the Maraudarr image locally from this directory |
-| `make test-unit` | Runs Maraudarr's Python unit tests |
-| `make test-workflows` | Checks workflow helpers and shared publishing policy |
-| `make test` | Runs unit, helper, policy, and real Compose matrix tests |
-| `make build-platforms` | Verifies all published CPU architectures |
-
-## Choose the generator revision
-
-`MARAUDARR_IMAGE` selects the generator's packaged catalog and templates. Make uses the local reference when available, otherwise pulls it and builds from this checkout if the pull fails. The mounted checkout is the output destination. The Make default `latest` channel identifies a stable published image.
-
-Follow [generator revision selection](../docs/development/maraudarr/index.md#choose-the-generator-revision) to build and select this checkout under a distinct local reference for the commands below, or choose a verified published version with matching documentation. `make build` packages the source; `make pull-image` pulls the configured published reference.
-
-## Select services
-
-Add optional cargo without opening the interactive prompts:
-
-```sh
-make ship PRESET=boudoirr ADD_SERVICES=whisparr-alt
-make ship PRESET=jellyfin
-make ship PRESET=plex
-make ship PRESET=calibre-web-automated
-make ship PRESET=duplex
-make ship PRESET=watchtower
-make ship PRESET=portainer
-make ship ADD_SERVICES=lidarr,recyclarr
-make ship ADD_SERVICES=sonarr-anime
-```
-
-`ADD_SERVICES` and `REMOVE_SERVICES` accept comma-separated service IDs. Plundarr and Boudoirr preselect qBittorrent as their only downloader and include Watchtower as a removable default. Plundarr also includes Calibre-Web Automated as a removable default, while the `calibre-web-automated` preset generates the focused ebook service by itself. SABnzbd and NZBGet remain ordinary opt-in choices:
-
-The first command selects Usenet only. The second keeps torrents and adds Usenet to Boudoirr; Watchtower is already a removable default:
-
-```sh
-make ship REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=sabnzbd
-make ship PRESET=boudoirr ADD_SERVICES=sabnzbd
-```
-
-The default Plundarr voyage includes one Sonarr instance. `sonarr-anime` is an opt-in second instance with its own configuration and library path.
-
-Lidarr and Recyclarr are opt-in Plundarr additions. Lidarr adds Prowlarr automatically, shares the download root, and writes the music library selected by `HOST_MUSIC_PATH`; its LinuxServer image supports `linux/amd64` and `linux/arm64`, not `linux/arm/v7`. Recyclarr remains behind the `tools` profile and runs only through `make recyclarr-preview` or the deliberate `make recyclarr-sync` target. Its starter configuration is seeded once and preserved during regeneration.
-
-Calibre-Web Automated keeps its configuration, destructive ingest directory, and Calibre library on three separate mounts. Its image supports `linux/amd64` and `linux/arm64`; Watchtower does not update it automatically so application image changes remain operator-controlled; keep application-consistent database backups.
-
-The `portainer` preset runs only Portainer Community Edition on its official `lts` channel, with persistent data and configurable HTTPS and Edge ports. See the [Portainer deployment guide](../docs/project-guides/portainer.md).
-
-The `watchtower` preset runs the maintained `nickfedor/watchtower:latest` image persistently. Use `make watchtower-run-once PRESET=watchtower` instead for one host-wide update pass that exits when complete. Run only one persistent Watchtower daemon per Docker host.
-
-The `duplex` preset uses required Kometa, ImageMaid, and Themerr plus PATTRMM and Notifiarr defaults. Kometa's config is an external checkout selected with `KOMETA_CONFIG_PATH`; Maraudarr does not create a submodule or manage that repository. PATTRMM and Notifiarr are removable defaults, while Overlay Reset, Tracearr, Tautulli, and Watchtower remain available as explicit additions. The Kometa Overlay Reset service is profile-gated and defaults to a dry run when invoked with `make kometa-overlay-reset PRESET=duplex`.
+The [setup guide](../docs/setup.md) covers Docker/Synology deployment and service preparation. `make help` lists operations; the [testing guide](../docs/development/maraudarr/testing.md) explains validation by changed boundary.
 
 ## Explore the image contents 📦
 
@@ -148,19 +79,4 @@ Published platforms are `linux/amd64`, `linux/arm64`, and `linux/arm/v7`. Builds
 
 ## Maintain Maraudarr 🛠️
 
-Run host-side tests while editing Python or service charts:
-
-```sh
-make test-unit
-```
-
-Then fire the complete checks:
-
-```sh
-make test
-make build
-make build-platforms
-pre-commit run --all-files
-```
-
-New services belong under `services/<name>/`. Keep one service directory as one maintainable unit.
+Each selectable service is one catalog unit under `services/<name>/`. Follow [adding a service](../docs/development/maraudarr/adding-a-service.md), the scoped [agent guidance](AGENTS.md), and the [developer overview](../docs/development/maraudarr/index.md). Keep runtime dependencies and the complete image build context here; keep developer tools out of production.
