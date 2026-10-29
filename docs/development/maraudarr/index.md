@@ -30,7 +30,7 @@ The `latest` channel identifies a stable release, `edge` identifies a successful
 To run the generator described by this checkout, export one local image reference, build it, and use it for all generation commands in that shell:
 
 ```sh
-export MARAUDARR_IMAGE=maraudarr:dev
+export MARAUDARR_IMAGE=maraudarr:latest
 make build
 make presets
 make configure
