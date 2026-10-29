@@ -89,17 +89,17 @@ You can inspect or replay the [recording source](./docs/demo/record-maraudarr-de
 
 Use `make configure` for the interactive picker, or `make ship PRESET=YOUR-PRESET` with an ID below. Standalone media-server and utility presets do not require PIA.
 
-| Preset | Purpose |
-| --- | --- |
-| 🏴‍☠️ `plundarr` | Movies, television, and ebooks with VPN-protected torrent downloads |
-| 🔞 `boudoirr` | Whisparr automation, VPN downloads, and removable Velvarr/Jellyfin companions |
-| 🎞️ `jellyfin` | Standalone Jellyfin media server |
-| 🎬 `plex` | Standalone Plex Media Server |
-| 📚 `calibre-web-automated` | Standalone ebook library and ingest |
-| 🎭 `duplex` | Plex metadata/artwork, theme songs, and maintenance |
-| 🔭 `watchtower` | Container image updates |
-| 🚢 `portainer` | Docker management with Portainer CE |
-| 🧩 `custom` | Services selected individually |
+| Preset                          | Purpose                                                                       |
+| ------------------------------- | ----------------------------------------------------------------------------- |
+| 🏴‍☠️&nbsp;`plundarr`              | Movies, television, and ebooks with VPN-protected torrent downloads           |
+| 🔞&nbsp;`boudoirr`              | Whisparr automation, VPN downloads, and removable Velvarr/Jellyfin companions |
+| 🎞️&nbsp;`jellyfin`              | Standalone Jellyfin media server                                              |
+| 🎬&nbsp;`plex`                  | Standalone Plex Media Server                                                  |
+| 📚&nbsp;`calibre-web-automated` | Standalone ebook library and ingest                                           |
+| 🎭&nbsp;`duplex`                | Plex metadata/artwork, theme songs, and maintenance                           |
+| 🔭&nbsp;`watchtower`            | Container image updates                                                       |
+| 🚢&nbsp;`portainer`             | Docker management with Portainer CE                                           |
+| 🧩&nbsp;`custom`                | Services selected individually                                                |
 
 Browse [complete preset examples](examples/presets/README.md), or inspect the selected generator's current catalog with `make presets` and `make services`.
 
