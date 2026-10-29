@@ -160,15 +160,20 @@ make ship ADD_SERVICES=recyclarr
 
 Maraudarr seeds `config/recyclarr/recyclarr.yml` once. The starter syncs upstream quality-size definitions only, preserves existing custom formats, and can be extended with the templates and profiles appropriate for the library.
 
-Preview and apply Recyclarr through separate profile-aware targets:
+Preview the requested Recyclarr changes first:
 
 ```sh
 make recyclarr-preview PRESET=plundarr
-make recyclarr-sync PRESET=plundarr
 ```
 
 > [!CAUTION]
-> The sync target changes the configured Radarr and Sonarr instances. Confirm the URLs, API keys, configuration, and preview output before running it. Ordinary `make up` does not start Recyclarr.
+> Sync changes the configured Radarr and Sonarr instances. Back up the affected applications and confirm the URLs, API keys, configuration, and preview output before applying changes. Ordinary `make up` does not start Recyclarr.
+
+Apply only after reviewing the preview and confirming the intended targets:
+
+```sh
+make recyclarr-sync PRESET=plundarr
+```
 
 See the official [Recyclarr feature reference](https://recyclarr.dev/guide/features/) and [`sync` command reference](https://recyclarr.dev/cli/sync/) before adding custom formats, quality profiles, naming rules, or additional instances.
 
@@ -178,7 +183,6 @@ Plundarr includes Calibre-Web Automated as a removable default. Generate it alon
 
 ```sh
 make ship PRESET=calibre-web-automated
-make up PRESET=calibre-web-automated
 ```
 
 Review these values in the selected preset's `.env`:
@@ -193,6 +197,12 @@ Review these values in the selected preset's `.env`:
 
 > [!CAUTION]
 > Keep the config, ingest, and library paths as three separate directories. Never use an active download directory as the ingest path, and never place incomplete downloads there. Back up the complete config directory and Calibre library before updating CWA or changing its storage.
+
+After preparing the storage paths and reviewing the generated settings, start the standalone project:
+
+```sh
+make up PRESET=calibre-web-automated
+```
 
 The default Plundarr Homepage card uses CWA's native widget. Replace `HOMEPAGE_VAR_CWA_USER` and `HOMEPAGE_VAR_CWA_PASS` with a CWA account in the generated `.env` to enable book, author, and series counts.
 
