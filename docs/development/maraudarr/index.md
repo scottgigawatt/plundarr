@@ -27,10 +27,10 @@ Maraudarr does **not** start the generated stack, manage long-running service st
 
 The `latest` channel identifies a stable release, `edge` identifies a successful `main` build, and a release/revision reference identifies the selected published source. Use documentation matching that source. A checkout build packages the catalog and seeds from its `docker/` directory.
 
-To run the generator described by this checkout, export one local image reference, build it, and use it for all generation commands in that shell:
+Use `maraudarr:local` to keep checkout builds separate from published images. Export it, build the checkout, and use it for all generation commands in that shell:
 
 ```sh
-export MARAUDARR_IMAGE=maraudarr:latest
+export MARAUDARR_IMAGE=maraudarr:local
 make build
 make presets
 make configure

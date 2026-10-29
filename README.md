@@ -54,7 +54,7 @@ Install Git, Make, Docker with Compose, and an active PIA subscription for the d
 ```sh
 git clone https://github.com/scottgigawatt/plundarr.git
 cd plundarr
-export MARAUDARR_IMAGE=maraudarr:latest
+export MARAUDARR_IMAGE=maraudarr:local
 make build
 make ship
 ```
