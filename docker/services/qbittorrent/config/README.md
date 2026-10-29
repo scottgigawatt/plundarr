@@ -1,10 +1,6 @@
 # qBittorrent configuration ⚓
 
-Avast, me hearties! This be the treasure trove holdin' the configuration files fer the **qBittorrent** service. These files will be mounted into the qBittorrent container as the service config directory, guidin' yer downloads to port.
-
-## Understand the service 🌊
-
-qBittorrent be yer steadfast mate, helpin' ye manage and organize yer downloads with ease, plunderin' the digital depths for all yer desired treasures.
+qBittorrent keeps its database and settings here; preserve them during regeneration and include them in consistent backups.
 
 ## Configure torrent download paths 📦
 
@@ -33,9 +29,9 @@ Then set the qBittorrent download client category in Radarr to `radarr` and in S
 
 ## Preserve seeding and imports ⚓
 
-If ye seed torrents, qBittorrent needs the original downloaded payload to remain under `/downloads/torrents`. Radarr and Sonarr can import media into `/movies` or `/tv` while qBittorrent keeps seeding from `/downloads/torrents`.
+If you seed torrents, qBittorrent needs the original downloaded payload to remain under `/downloads/torrents`. Radarr and Sonarr can import media into `/movies` or `/tv` while qBittorrent keeps seeding from `/downloads/torrents`.
 
-If ye do not plan to seed, configure qBittorrent, Radarr, and Sonarr cleanup behavior intentionally so completed torrents do not pile up in the download hold after import.
+If you do not plan to seed, configure qBittorrent, Radarr, and Sonarr cleanup behavior intentionally so completed torrents do not pile up in the download hold after import.
 
 ## Enable port forwarding 🧭
 
@@ -47,8 +43,6 @@ When the port-forwarding script runs, it sets qBittorrent to:
 - Bind to Gluetun's VPN interface.
 - Disable random ports.
 - Disable UPnP port mapping.
-
-Fer more details, inspect yer generated `dist/<preset>/docker-compose.yml` and `.env` files.
 
 ## Understand the seeded configuration 🗺️
 
@@ -62,5 +56,3 @@ The seeded `qBittorrent.conf` stays data-only. qBittorrent stores settings with 
 | `[Meta]` | `MigrationVersion` | Tracks qBittorrent's internal configuration version. |
 | `[Network]` | cookies, proxy profiles, port forwarding | Leaves VPN routing to Gluetun and prevents application-level port forwarding. |
 | `[Preferences]` | Web UI access, download paths, UPnP, port range | Permits localhost-only automation while the Gluetun hook updates the listening port safely. |
-
-May yer sails be full and yer seas calm as ye plunder the digital depths! ⚔️🌊

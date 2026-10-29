@@ -1,88 +1,62 @@
 # Documentation style ✍️
 
-Plundarr documentation should help readers complete a task or understand a boundary without making them decode the theme first. Keep the operational meaning plain and let the pirate voice add a little character around it.
+Write documentation that helps the intended reader complete a task. Apply GitHub's writing and Markdown guidance together with ISO 24495-1:2023. Keep a little pirate character around clear operational instructions.
 
 ## Start with the reader
 
-Before writing, identify the audience and the one or two outcomes the page must deliver. Put prerequisites before procedures, order steps as readers perform them, and move optional detail after the main path.
+Every page needs an identifiable audience and purpose. Review it against four required outcomes:
 
-Use these content shapes:
+| Outcome | Review question |
+| --- | --- |
+| Relevant | Does the reader need this information for the task or a useful reference? |
+| Findable | Can the reader locate the page and the next action from its navigation and headings? |
+| Understandable | Are terms, sentences, examples, and visual structure clear to that reader? |
+| Usable | Can the reader act with the supplied prerequisites and recognize success or recover from failure? |
 
-- **Concept:** Explain what something is, why it exists, and when it matters.
-- **Quickstart:** Give the shortest safe route to a useful result.
-- **How-to:** State the outcome, list prerequisites, provide numbered steps, verify the result, and cover likely failures.
-- **Reference:** Present facts for lookup with consistent headings, lists, or genuinely comparative tables.
-- **Troubleshooting:** Name the symptom, explain the cause when known, and give a verifiable recovery path.
+Choose a useful shape: a short concept explanation, a quickstart, a numbered how-to, a lookup reference, or symptom-based troubleshooting. Put prerequisites and required values before steps; optional detail follows the main path.
 
-## Write plainly first
+## Keep one explanation per topic
 
-- Use active voice and address the reader as **you** in procedures.
-- Put one main idea in each sentence and paragraph.
-- Lead with the conclusion or required action, then explain why.
-- Use the exact names shown in commands, files, services, and user interfaces.
-- Spell out an unfamiliar abbreviation on first use.
-- Keep ordinary prose paragraphs on one physical source line and use visual editor wrapping.
+Plundarr owns generator and service contracts. Privateerr owns its file/API/recovery implementation, Kometa-config owns collection and configuration behavior, and Plundarrpedia owns integrated platform walkthroughs. Link to precise authoritative detail while retaining enough context for a usable local quickstart.
 
-Pirate language belongs in short introductions, transitions, and sign-offs. Commands, paths, warnings, security guidance, destructive actions, and troubleshooting instructions stay literal. A joke should never carry operational meaning.
+Remove repeated introductions, exhaustive command inventories already covered by `make help`, obsolete history, speculative advice, and implementation narration that does not help the intended reader. Keep currently needed migration/compatibility instructions, security findings, backup coverage, data-loss warnings, licenses, and attribution. Moving text elsewhere is not a reduction in total content.
 
-## Make headings searchable
+## Write and format plainly
 
-Use sentence case and put the useful keyword first. Emoji may follow a heading as decoration, but it must not replace a word or warning.
+- Use active voice, direct verbs, familiar words, and one main idea per sentence or paragraph. Explain unfamiliar abbreviations.
+- Use exact command, file, service, and UI names. Pirate humor must not carry operational meaning.
+- Put the project H1 and purpose before existing badges/community links; preserve their distinct project identity and complete blocks.
+- Use searchable sentence-case headings in order. Emoji are decoration after useful words.
+- Use numbered lists for procedures, bullets for choices, and tables for genuine comparisons.
+- Keep ordinary paragraphs on one physical source line and wrap visually in the editor.
+- Use descriptive relative links for repository content and specific upstream links for external detail.
+- Keep established community filenames; name ordinary articles with lowercase kebab-case. Update inbound links, anchors, navigation, and route compatibility when consolidating pages.
 
-- Prefer `## Choose a preset 🗺️` over `## Treasure Map 🗺️`.
-- Prefer `## Test the generated stack 🧪` over `## Spyglass Check 🔎`.
-- Do not skip heading levels.
-- Introduce a section before adding a subsection.
+Commands belong in labelled `sh` fences without prompts or explanatory comments. Use `bash` only for Bash-specific syntax, `console` for transcripts, and `text` for output. Explain placeholders outside fences and use safe example values. Put permissions, service interruptions, destructive risks, and backup prerequisites before the affected command.
 
-## Format for the task
+## Use Markdown features deliberately
 
-- Use numbered lists for procedures and bullets for unordered choices.
-- Use tables only when readers need to compare multiple attributes.
-- Keep commands in `sh` fences without prompt characters or comments.
-- Put terminal transcripts in `console` fences and non-executable output in `text` fences.
-- Use uppercase kebab-case placeholders such as `YOUR-PRESET` and explain what replaces them.
-- Use descriptive link text and relative links for repository-owned pages.
-- Link to the most specific useful upstream page instead of a generic home page.
+Shared pages use GitHub-flavored Markdown. Material-only tabs and attributes belong only in site-specific pages supported by `mkdocs.yml`. Use native GitHub alerts; `pymdownx.quotes` renders them on the site:
 
-## Reserve alerts for critical information
+- `NOTE`: context a reader must notice.
+- `TIP`: a particularly useful shortcut.
+- `IMPORTANT`: a requirement for success.
+- `WARNING`: an immediate concern.
+- `CAUTION`: a destructive or otherwise risky outcome.
 
-GitHub alerts are for information readers must notice while scanning. Most pages should need no more than one or two.
+Most pages need no more than one or two alerts. Keep routine commands outside them and avoid adjacent alerts. Put quoted prose directly after the marker; an opening list or fence needs one empty quoted line. Never hide prerequisites, risks, or primary steps in `<details>`. Footnotes are for tangential context. Diagrams need equivalent adjacent prose; informative images need meaningful alt text.
 
-- `[!NOTE]` adds useful context.
-- `[!TIP]` makes a task easier.
-- `[!IMPORTANT]` states information required for success.
-- `[!WARNING]` calls for immediate attention.
-- `[!CAUTION]` describes a risk or destructive outcome.
+## Review the reader's route
 
-Do not wrap routine commands in alerts. Do not place alerts back to back. Keep required actions and risk descriptions in the alert itself.
+1. Check commands, paths, defaults, supported versions, and backup boundaries against source and the supported release. Label unreleased behavior.
+2. Start from the relevant entry page and follow a representative task without assuming undocumented knowledge. Check the expected result and recovery path.
+3. Run `pre-commit run --all-files`, spelling checks using the repository vocabulary, `make docs`, and `git diff --check`.
+4. Inspect changed GitHub and Material pages, links/anchors, images, alerts, tables, diagrams, and narrow-screen layouts.
+5. Report actual checks, remaining usability assumptions, and removed/merged content. Automated checks do not prove reader usability or certified ISO conformity.
 
-## Use advanced Markdown deliberately
+## Source guidance
 
-- Use `<details>` only for optional sample output or lengthy diagnostics. Never hide prerequisites, primary steps, or risks.
-- Use footnotes only for tangential provenance or context. Essential information stays inline.
-- Use Mermaid when a relationship or sequence is materially clearer as a diagram. Provide adjacent prose that communicates the same information.
-- Keep task lists in issue and pull request templates. Static procedures use numbered steps.
-
-## Name files consistently
-
-Keep GitHub and project convention files in their established form, including `README.md`, `AGENTS.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`, and `SUPPORT.md`. Name ordinary articles with lowercase kebab-case, such as `adding-a-service.md`.
-
-When renaming a page, update inbound Markdown links, MkDocs navigation, workflow paths, scripts, and published-site routes in the same change.
-
-## Review the rendered result
-
-Before publishing documentation:
-
-1. Check commands, paths, defaults, and examples against the current source.
-2. Read the page in rendered GitHub Markdown.
-3. Build the MkDocs site with `make docs` when site content or navigation changes.
-4. Verify diagrams, tables, alerts, anchors, and narrow-screen readability.
-5. Run `pre-commit run --all-files` and inspect `git diff --check`.
-6. Confirm no credentials, generated state, private logs, or deployment-specific values entered the change.
-
-## Read the source guidance
-
-- [GitHub's basic writing and formatting syntax](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax)
-- [GitHub's advanced formatting guide](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting)
-- [GitHub's README guidance](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-readmes)
-- [GitHub's contributor-guideline guidance](https://docs.github.com/en/communities/setting-up-your-project-for-healthy-contributions/setting-guidelines-for-repository-contributors)
+- [GitHub Docs writing best practices](https://docs.github.com/en/contributing/writing-for-github-docs/best-practices-for-github-docs)
+- [GitHub Docs style guide](https://docs.github.com/en/contributing/style-guide-and-content-model/style-guide)
+- [GitHub Markdown syntax](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax)
+- [ISO 24495-1:2023: Plain language principles and guidelines](https://www.iso.org/standard/78907.html)

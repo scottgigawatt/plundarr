@@ -43,21 +43,9 @@ Good private-helper documentation explains matters such as:
 
 Avoid comments that merely translate the following expression into English.
 
-## Use Markdown alerts sparingly
+## Format accompanying Markdown
 
-Write alerts once using GitHub's supported blockquote syntax:
-
-```text
-> [!IMPORTANT]
-> Explain the required action here.
-```
-
-GitHub renders that syntax natively. MkDocs enables `pymdownx.quotes` with callout processing, which converts the same source into Material admonitions. The project stylesheet supplies Material treatments for GitHub's `important` and `caution` types. Do not duplicate alerts with MkDocs-only `!!!` syntax.
-
-Reserve alerts for information whose meaning would materially change if the reader skipped it. Most pages should need no more than one or two. Put routine commands in ordinary `sh` fences, then put the first quoted prose line immediately below any alert marker without an empty `>` separator. Retain one empty quoted line when the alert begins with a fenced code block or list because Markdown requires it to delimit that block. Keep later empty quoted lines only where they intentionally separate paragraphs or blocks inside the alert. Write ordinary Markdown prose paragraphs on one physical source line and rely on visual editor wrapping.
-
-> [!CAUTION]
-> GitHub recognizes only `NOTE`, `TIP`, `IMPORTANT`, `WARNING`, and `CAUTION`. Other labels fall back to an ordinary blockquote instead of an alert.
+Follow the [documentation style guide](../../documentation-style.md) for GitHub/ISO reader outcomes, alerts, source paragraphs, and rendered review. Keep docstrings focused on contracts and intent rather than duplicating that guidance.
 
 ## Preserve the generated reference boundary
 

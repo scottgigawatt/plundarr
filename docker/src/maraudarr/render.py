@@ -755,7 +755,10 @@ def _seed_config_tree(source_root: Path, destination_root: Path) -> None:
 
 
 def write_config(catalog: Catalog, plan: StackPlan, output_dir: Path) -> Path:
-    """Create selected config directories without replacing application state.
+    """Seed selected config directories and refresh generated Homepage cards.
+
+    Existing application files are preserved; README seeds may be refreshed.
+    Homepage ``services.yaml`` is always rendered from selected source fragments.
 
     Args:
         catalog: Validated catalog containing shared and service config seeds.

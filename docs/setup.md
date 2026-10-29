@@ -12,23 +12,7 @@ Run the interactive Maraudarr Docker Compose project generator:
 make configure
 ```
 
-For a repeatable non-interactive build, select a preset and optional services directly:
-
-```sh
-make ship
-make ship PRESET=boudoirr
-make ship PRESET=jellyfin
-make ship PRESET=plex
-make ship PRESET=calibre-web-automated
-make ship PRESET=duplex
-make ship PRESET=watchtower
-make ship PRESET=portainer
-make ship ADD_SERVICES=lidarr
-make ship ADD_SERVICES=recyclarr
-make ship ADD_SERVICES=sonarr-anime
-```
-
-For a Usenet-only Plundarr deployment, remove the default torrent client and its cleanup companion:
+For non-interactive generation, use `make ship PRESET=YOUR-PRESET`, replacing `YOUR-PRESET` with an ID from `make presets`. Add or remove comma-separated service IDs with `ADD_SERVICES` or `REMOVE_SERVICES`. For example, a Usenet-only deployment uses:
 
 ```sh
 make ship REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=sabnzbd
@@ -61,15 +45,9 @@ Homepage requires v2 or later for native login. Generated secrets are created wh
 
 ## Add Velvarr to Boudoirr
 
-Velvarr and Jellyfin are selected by default in Boudoirr. Both remain independently removable through `make configure` or `REMOVE_SERVICES`. Generate the default local request and playback stack:
+Boudoirr selects removable Velvarr and Jellyfin companions. Use `REMOVE_SERVICES=jellyfin` for an existing Jellyfin server, `REMOVE_SERVICES=velvarr` to omit requests, or both IDs to omit both. Jellyfin provides Velvarr login; Plex cannot replace it. Follow the [Velvarr setup guide](project-guides/velvarr.md) for architecture support, owner setup, paths, and recovery.
 
-```sh
-make ship PRESET=boudoirr
-```
-
-For an existing Jellyfin server, use `make ship PRESET=boudoirr REMOVE_SERVICES=jellyfin` and connect that server during owner setup. Use `REMOVE_SERVICES=velvarr` to omit requests, or `REMOVE_SERVICES=velvarr,jellyfin` to omit both companions. Velvarr uses host port `16699` in Boudoirr, stores data at `dist/boudoirr/config/velvarr`, and runs as the shared `DEFAULT_PUID:DEFAULT_PGID`. Its generated HTTP setting permits private-network addresses so the application can reach `http://whisparr:6969` and `http://jellyfin:8096`. Plex does not replace Velvarr's Jellyfin authentication requirement. The current official image supports `linux/amd64` only. Follow the [Velvarr guide](project-guides/velvarr.md) before launch.
-
-Boudoirr includes Whisparr for movies and scenes. Fresh instances default to **TMDB** for movies; you can choose **TMDB** or **TPDB** in Whisparr, while scenes use StashDB. To use both movie providers, add the optional [Whisparr Alt service](https://github.com/scottgigawatt/plundarr/blob/main/docker/services/whisparr-alt/README.md) with `ADD_SERVICES=whisparr-alt` and choose a different provider in each instance, in whichever order suits your library. The generated movie paths are `/volume1/jellyfin/movies/main` and `/volume1/jellyfin/movies/alt`, matching the `scenes/main` and `scenes/alt` layout. Path names identify instances, not providers. Existing `.env` paths and application settings survive regeneration.
+The optional [Whisparr Alt guide](https://github.com/scottgigawatt/plundarr/blob/main/docker/services/whisparr-alt/README.md) covers a second instance. Keep its database, libraries, categories, and API key separate. Movie providers are selected in Whisparr; directory names do not select them.
 
 ## Plan project networks
 
@@ -147,18 +125,14 @@ The [Synology Container Manager project documentation](https://kb.synology.com/e
 
 ## Configure media libraries
 
-| Server | Host mount behavior | Libraries to add | Notes |
-| --- | --- | --- | --- |
-| Jellyfin with Plundarr or standalone | `JELLYFIN_DATA_PATH` mounts read/write at `/data` | `/data/movies`, `/data/tv` | Persistent `/config` and `/cache` |
-| Jellyfin with Plundarr and Lidarr | Jellyfin mounts `JELLYFIN_DATA_PATH` at `/data`; Lidarr independently mounts `HOST_MUSIC_PATH` at `/music` | `/data/movies`, `/data/tv`; music only when its host directory is visible beneath `/data` | The default `/volume1/music/Music/Media/Music` is not automatically mounted into Jellyfin; align paths deliberately |
-| Jellyfin with Boudoirr | Jellyfin mounts its media root; Whisparr mounts individual libraries | `/data/movies/main`, `/data/scenes/main`; optionally `/data/movies/alt`, `/data/scenes/alt` | Map Whisparr’s `/data/movies` and `/data/scenes` to the matching Jellyfin subdirectories; exclude import and recycle folders |
-| Plex with Plundarr | Separate read-only library mounts | Movies, television, anime | Persistent config and transcode mounts |
-| Plex with Plundarr and Lidarr | Separate read-only library mounts | Movies, television, anime, music at `/music` | Lidarr writes the same host music library |
-| Plex with Boudoirr | Separate read-only library mounts | Movies, scenes | Plex must be selected explicitly |
-| Plex standalone | Separate read-only library mounts | Movies, television | Uses host networking |
-| Calibre-Web Automated with Plundarr or standalone | `CWA_LIBRARY_PATH` mounts read/write at `/calibre-library` | Calibre library containing `metadata.db` | Config and ingest use separate mounts |
+Configure libraries in each application after startup; Maraudarr prepares mounts but does not create library records.
 
-Media-server libraries are configured in Jellyfin, Plex, or Calibre-Web Automated after the containers start. Maraudarr prepares consistent mounts but does not create library records. Configure Lidarr's `/music` root folder separately in Lidarr.
+- **Jellyfin:** `JELLYFIN_DATA_PATH` mounts read/write at `/data`. Plundarr and standalone libraries normally use `/data/movies` and `/data/tv`; config and cache persist separately.
+- **Boudoirr:** Main Whisparr's `/data/movies` and `/data/scenes` correspond to Jellyfin's `/data/movies/main` and `/data/scenes/main`. Alt uses the matching `/alt` directories. Keep import/recycle directories out of media libraries and review mappings after host-path changes.
+- **Plex:** Media mounts are read-only. Plundarr exposes movies, television, and anime; Boudoirr exposes movies and scenes; standalone Plex exposes movies and television. Config and transcode paths persist separately, and Plex uses host networking.
+- **Calibre-Web Automated:** `CWA_LIBRARY_PATH` mounts at `/calibre-library` and must contain `metadata.db`. Configuration, destructive ingest, and the library use separate host paths; follow the preparation below.
+
+When Lidarr is selected, its `HOST_MUSIC_PATH` mounts read/write at `/music`; use that root in Lidarr. Plex receives the same library read-only at `/music`. Jellyfin gets no additional music bind: it can see that library only if its host directory is beneath `JELLYFIN_DATA_PATH`. Align those paths deliberately.
 
 ## Customize Jellyfin playback
 
@@ -166,24 +140,7 @@ Boudoirr and standalone Jellyfin can add the optional Vue client with `ADD_SERVI
 
 ## Configure Lidarr
 
-Generate Plundarr with the music automation service:
-
-```sh
-make ship ADD_SERVICES=lidarr
-```
-
-Review these values in `dist/plundarr/.env`:
-
-| Setting | Purpose |
-| --- | --- |
-| `HOST_MUSIC_PATH` | Host music library mounted read/write at `/music` in Lidarr; defaults to `/volume1/music/Music/Media/Music` |
-| `LIDARR_WEBUI_PORT` | Host port for Lidarr; defaults to `8686` |
-| `LIDARR_CONFIG_PATH` | Persistent Lidarr database and application settings |
-| `HOMEPAGE_VAR_LIDARR_KEY` | Lidarr API key used by the optional Homepage widget |
-
-Lidarr automatically adds Prowlarr and its indexing dependency. Configure `/music` as the Lidarr root folder and connect a selected downloader after launch. Plex receives the same host path read-only at `/music` whenever Plex and Lidarr are selected together. Jellyfin exposes `/data/music` from the `music` directory beneath `JELLYFIN_DATA_PATH`. It sees the same music library only when that is the host directory selected by `HOST_MUSIC_PATH`; the generator does not add a separate music bind to Jellyfin.
-
-The [LinuxServer Lidarr image](https://docs.linuxserver.io/images/docker-lidarr/) supports `linux/amd64` and `linux/arm64`, not `linux/arm/v7`. The [Homepage Lidarr widget guide](https://gethomepage.dev/widgets/services/lidarr/) documents the API key and supported fields used by the generated card.
+Select `ADD_SERVICES=lidarr`, set `HOST_MUSIC_PATH` to the host library, and configure `/music` as Lidarr's root folder after launch. Connect Prowlarr and a downloader; set `HOMEPAGE_VAR_LIDARR_KEY` if using the widget. Plex receives the same host library read-only when selected; Jellyfin sees it only when it is beneath `JELLYFIN_DATA_PATH`, as described above. The [Lidarr chart](https://github.com/scottgigawatt/plundarr/blob/main/docker/services/lidarr/README.md) records image/architecture limits.
 
 ## Preview and sync Recyclarr
 
@@ -251,62 +208,26 @@ Generate Duplex and review `dist/duplex/.env`:
 make ship PRESET=duplex
 ```
 
-| Setting | Purpose |
-| --- | --- |
-| `KOMETA_CONFIG_PATH` | Independent Kometa checkout containing `config.yml`, assets, and metadata |
-| `KOMETA_RUNTIME_CONFIG_PATH` | Existing live YAML file shared by Kometa and PATTRMM; defaults to `${KOMETA_CONFIG_PATH}/config.yml` |
-| `PATTRMM_SETTINGS_PATH` | Existing Neo settings directory; defaults to `${KOMETA_CONFIG_PATH}/pattrmm` |
-| `PATTRMM_SETTINGS` | Selected Neo settings filenames; defaults to `settings.yml` |
-| `PATTRMM_TIMES` | Neo generation times; defaults to `02:00,14:00`, before Kometa |
-| `KOMETA_TIMES` | Comma-separated stable-image run times in `HH:MM` format |
-| `IMAGEMAID_PLEX_PATH` | Plex application data containing `Cache`, `Metadata`, and `Plug-in Support` |
-| `THEMERR_WEBUI_PORT` | Themerr HTTPS host port; defaults to `9494` |
-| `THEMERR_CONNECTOR_PORT` | Jellyfin connector HTTP host port; defaults to `9495` |
-| `THEMERR_TOKEN_KEY_PATH` | Existing private encryption key, preserved with application backups |
-| `NOTIFIARR_WEBUI_PORT` | Notifiarr host port; defaults to `5454` |
+Prepare the external Kometa checkout selected by `KOMETA_CONFIG_PATH`; Maraudarr does not clone or replace it. Kometa and PATTRMM share its private runtime YAML. Follow the [Kometa chart](https://github.com/scottgigawatt/plundarr/blob/main/docker/services/kometa/README.md) for overrides and [PATTRMM Neo chart](https://github.com/scottgigawatt/plundarr/blob/main/docker/services/pattrmm/README.md) for settings, rootless cache/output permissions, and scheduling. Neo must finish generating collections before Kometa reads them; the [companion configuration](https://github.com/scottgigawatt/kometa-config) owns collection behavior.
 
-Kometa and PATTRMM share an external checkout; Maraudarr does not clone or replace it. Configure the shared file before starting, following the [Kometa service guide](https://github.com/scottgigawatt/plundarr/blob/main/docker/services/kometa/README.md). ImageMaid receives its own writable configuration directory and Plex application data at `/plex`.
+Set `IMAGEMAID_PLEX_PATH` to Plex application data containing `Cache`, `Metadata`, and `Plug-in Support`. Begin ImageMaid in report mode. Prepare Themerr's separate encryption key and writable state, then complete [administrator and connector setup](project-guides/themerr.md). Keep the key with application backups; fresh settings disable cleanup and automatic Jellyfin restarts.
 
-PATTRMM uses the `neo` image channel. Prepare its authored settings directory and writable cache/output directories before startup, following the [Neo service guide](https://github.com/scottgigawatt/plundarr/blob/main/docker/services/pattrmm/README.md). Generate the collection files before the first Kometa run.
-
-Themerr is required in Duplex and connects one instance to both Plex and Jellyfin. Review host-user permissions for its config and encryption key, then complete administrator setup and connector configuration following the [Themerr guide](project-guides/themerr.md). Fresh settings disable cleanup, theme replacement, and automatic Jellyfin restarts.
-
-Start the persistent Duplex services:
-
-```sh
-make up PRESET=duplex
-```
-
-Overlay Reset is opt-in. Add it with `make ship PRESET=duplex ADD_SERVICES=overlay-reset`; it stays outside normal startup behind the `tools` profile.
+After preparing required paths, start persistent services with `make up PRESET=duplex`. Overlay Reset is an opt-in service selected with `ADD_SERVICES=overlay-reset`; its `tools` profile keeps it out of normal startup.
 
 > [!CAUTION]
-> Kometa Overlay Reset is destructive and has no undo. Confirm the Plex URL, token, and library, keep `OVERLAY_RESET_DRY_RUN=True`, and inspect the output before deliberately setting it to `False`.
+> Overlay Reset is destructive and has no undo. Back up posters, confirm the Plex URL, token, and library, keep `OVERLAY_RESET_DRY_RUN=True`, and inspect output before deliberately setting it to `False`.
 
-Run the profile-gated tool explicitly:
+Invoke it explicitly:
 
 ```sh
 make kometa-overlay-reset PRESET=duplex
 ```
 
-See the [Kometa Docker guide](https://kometa.wiki/en/latest/kometa/install/docker/), [Kometa environment reference](https://kometa.wiki/en/latest/kometa/environmental/), [ImageMaid guide](https://kometa.wiki/en/latest/kometa/scripts/imagemaid/), and [Overlay Reset guide](https://kometa.wiki/en/latest/kometa/scripts/overlay-reset/) for application-level configuration.
-
 ## Configure Watchtower
 
-Plundarr and Boudoirr include Watchtower as a removable persistent default. Duplex does not. Any compatible preset may add it explicitly, or it can run as a standalone project:
+Use the standalone `watchtower` preset or add `watchtower` to another preset. Plundarr and Boudoirr include it as a removable default; Duplex does not. The [Watchtower chart](https://github.com/scottgigawatt/plundarr/blob/main/docker/services/watchtower/README.md) covers persistent startup and one-shot updates.
 
-```sh
-make ship PRESET=duplex ADD_SERVICES=watchtower
-make ship PRESET=watchtower
-make up PRESET=watchtower
-```
-
-Run one update pass against the standalone project with:
-
-```sh
-make watchtower-run-once PRESET=watchtower
-```
-
-Watchtower controls the host Docker daemon through its socket and can inspect eligible containers outside its own Compose project. Run one persistent daemon per host, stop it before a one-shot pass, and use `com.centurylinklabs.watchtower.enable=false` to exclude containers deliberately.
+Watchtower controls the host Docker daemon and may update eligible containers outside its own Compose project. Run only one persistent daemon per host and stop it before a one-shot pass. Containers labelled `com.centurylinklabs.watchtower.enable=false` stay excluded.
 
 ## Continue the voyage
 

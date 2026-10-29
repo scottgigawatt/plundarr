@@ -62,7 +62,7 @@ After changing `.env`, run `make up PRESET=plundarr` again to recreate affected 
 
 When Homepage and Tracearr are selected together, Maraudarr seeds a native Tracearr widget. Set `HOMEPAGE_VAR_TRACEARR_HREF` to the browser-accessible URL and `HOMEPAGE_VAR_TRACEARR_KEY` to an API key created in Tracearr. The internal `HOMEPAGE_VAR_TRACEARR_URL` defaults to `http://tracearr:3000`, deriving its port from `TRACEARR_PORT` independently of the published host port. Recreate Homepage after editing `.env`.
 
-Existing operator-edited Homepage files are preserved. Add the [Tracearr widget](https://gethomepage.dev/widgets/services/tracearr/) to an existing `config/homepage/services.yaml` if it does not already contain the generated card. Tautulli's card remains available when Tautulli is selected.
+Regeneration refreshes Homepage `services.yaml` from the selected source fragments; customize those fragments rather than editing generated cards. Other existing application files and `.env` assignments are preserved. Tautulli's card remains available when Tautulli is selected. See the [Homepage configuration notes](https://github.com/scottgigawatt/plundarr/blob/main/docker/services/homepage/config/README.md#understand-generated-files).
 
 ## Back up and update
 

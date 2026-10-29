@@ -1,10 +1,6 @@
 # SABnzbd configuration 📰
 
-Ahoy, matey! This be the config hold for **SABnzbd**, Plundarr's Usenet download runner. SABnzbd grabs NZBs, repairs the cargo, extracts the haul, and drops completed files where Radarr and Sonarr can find them.
-
-## Understand the service 🌊
-
-SABnzbd gives the stack a Usenet path alongside qBittorrent's torrent path. The SABnzbd service routes it through Gluetun and writes only under `/downloads/usenet`, while Radarr and Sonarr mount the broader `/downloads` path for imports.
+SABnzbd routes through Gluetun and writes beneath `/downloads/usenet`. Its settings and provider credentials are private application state.
 
 ## Configure download folders 📦
 
@@ -40,12 +36,8 @@ That makes completed jobs land in `/downloads/usenet/movies` and `/downloads/use
 
 qBittorrent uses internal port `8080` inside Gluetun's network namespace. SABnzbd uses internal port `8085`, so both download clients can share Gluetun cleanly.
 
-Use `SABNZBD_WEBUI_PORT` in the generated preset's `.env` to choose the host-side port. Plundarr defaults the host port to `8081` and maps it to SABnzbd's fixed internal `8085`. Leave the internal port alone unless ye also update the Compose healthcheck and Gluetun port mapping.
+Use `SABNZBD_WEBUI_PORT` in the generated preset's `.env` to choose the host-side port. Plundarr defaults the host port to `8081` and maps it to SABnzbd's fixed internal `8085`. Leave the internal port alone unless you also update the Compose healthcheck and Gluetun port mapping.
 
 ## Configure the Homepage widget 🗺️
 
-After SABnzbd starts, copy its API key into `HOMEPAGE_VAR_SABNZBD_KEY` in the generated preset's `.env` if ye want Homepage to show the widget status.
-
-Fer more details, inspect yer generated `dist/<preset>/docker-compose.yml` and `.env` files.
-
-May yer Usenet cargo arrive repaired, extracted, and ready for the library hold! ⚓
+After SABnzbd starts, copy its API key into `HOMEPAGE_VAR_SABNZBD_KEY` in the generated preset's `.env` if you want Homepage to show the widget status.
