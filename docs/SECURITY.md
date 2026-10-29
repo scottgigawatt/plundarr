@@ -1,10 +1,10 @@
 # Security policy 🛡️🏴‍☠️
 
-Ahoy, security-minded sailor. If ye spot a cursed leak, a leaky hull, or a suspicious barnacle clingin' to Plundarr, this be the proper chart for reportin' it.
+Report vulnerabilities privately using the process below. Keep credentials and sensitive deployment details out of public reports.
 
 ## Supported versions ⚓
 
-Plundarr sails mostly by the `main` branch. Since this project be a small vessel, security fixes target the newest chart instead of older treasure maps.
+Security fixes target the current `main` branch. Older local copies and modified PIA scripts are not maintained here.
 
 | Version                        | Supported |
 | ------------------------------ | --------- |
@@ -13,11 +13,11 @@ Plundarr sails mostly by the `main` branch. Since this project be a small vessel
 | Forked or modified PIA scripts | ❌        |
 
 > [!IMPORTANT]
-> 🧭 Plundarr consumes the published Privateerr image for PIA WireGuard config and port-forwarding metadata. Privateerr uses upstream PIA manual connection scripts, and issues in those scripts should also be reported to the PIA project.
+> Plundarr consumes the published Privateerr image for PIA WireGuard config and port-forwarding metadata. Privateerr uses upstream PIA manual connection scripts, and issues in those scripts should also be reported to the PIA project.
 
 ## Report a vulnerability 🦜
 
-Please do not open a public GitHub issue for secrets, credential leaks, auth bypasses, or anything that could help another scallywag attack a user.
+Please do not open a public GitHub issue for secrets, credential leaks, auth bypasses, or details that could expose users to attacks.
 
 Report vulnerabilities using [GitHub's private vulnerability reporting form](https://github.com/scottgigawatt/plundarr/security/advisories/new). To find it from the repository:
 
@@ -33,25 +33,25 @@ If private vulnerability reporting is unavailable, open a GitHub issue containin
 
 Helpful reports include:
 
-- What ye found.
+- What you found.
 - How to reproduce it.
 - What branch, image tag, or commit ye tested.
 - Whether it affects Plundarr Compose wiring, PIA WireGuard, port forwarding, Privateerr integration, Gluetun integration, or another service.
 - Any safe logs with secrets removed.
 
 > [!WARNING]
-> 💣 Never include real usernames, passwords, WireGuard private keys, generated `wg0.conf` files, forwarded ports, or live `privateerr.env` metadata in a public report.
+> Never include real usernames, passwords, WireGuard private keys, generated `wg0.conf` files, forwarded ports, or live `privateerr.env` metadata in a public report.
 
 ## Understand response expectations 🕰️
 
-This be a small maintainer ship, not a giant navy. I will do my best to:
+Maintenance is best effort. I aim to:
 
 - Acknowledge valid private reports within 7 days.
 - Triage severity and scope as soon as possible.
 - Patch accepted issues in `main`.
 - Credit reporters when requested and safe to do so.
 
-If a report is declined, I will try to explain why without leakin' dangerous details into open waters.
+If a report is declined, I will explain the reason privately where practical.
 
 ## Understand stack security 🔎
 
@@ -63,4 +63,4 @@ The [container scan review](container-scan-review.md) retains dated artifact ide
 
 Use the [support guide](SUPPORT.md) for non-sensitive setup questions and reproducible bugs.
 
-Fair winds, sharp eyes, and may yer secrets stay below deck. ☠️
+Keep sensitive information private throughout reporting and recovery.
