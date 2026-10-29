@@ -130,7 +130,6 @@ Before a config archive, follow the [backup procedure](docker/config/README.md#b
 
 ```sh
 make ps PRESET=YOUR-PRESET
-make backup PRESET=YOUR-PRESET
 make down PRESET=YOUR-PRESET
 ```
 
