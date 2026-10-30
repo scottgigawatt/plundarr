@@ -329,7 +329,7 @@ services:
 
     # Define the container environment
     environment:
-      <<: *default-environment               # Pull in the default environment
+      <<: *arr-stack-environment             # Pull in the arr-stack environment
       WEBUI_PORT: ${QBITTORRENT_WEBUI_PORT}  # Match the host port for qBittorrent CSRF checks
 
     # Mount host directories into the container
