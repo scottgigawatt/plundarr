@@ -119,6 +119,25 @@ run_distribution_case custom --add homepage
 run_case plundarr --preset plundarr
 
 #
+# Resolve nondefault identities through real Compose merges so a service-level
+# environment block cannot silently drop the inherited user, group, or umask.
+#
+DEFAULT_PUID=12345 DEFAULT_PGID=23456 DEFAULT_UMASK=027 QBITTORRENT_WEBUI_PORT=18080 \
+    docker compose \
+    --env-file "${TEST_ROOT}/plundarr/.env" \
+    --file "${TEST_ROOT}/plundarr/docker-compose.yml" \
+    config --format json | "${PYTHON_BIN}" -c '
+import json
+import sys
+
+configuration = json.load(sys.stdin)
+environment = configuration["services"]["qbittorrent"]["environment"]
+expected = {"PUID": "12345", "PGID": "23456", "UMASK": "027", "WEBUI_PORT": "18080"}
+actual = {key: environment.get(key) for key in expected}
+assert actual == expected, f"qBittorrent environment lost configured settings: {actual}"
+'
+
+#
 # Compose environment inspection must accept valid .env values that are not
 # valid shell syntax. This catches accidental attempts to source the file.
 #
