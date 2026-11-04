@@ -22,13 +22,23 @@ The donor index is now `sha256:a4de4851b16f18634f74de66f126d5de65f7c5cb5a9502d67
 
 Trivy 0.76.1 compared this index with the previous 5.6.1 index on all three platforms using comprehensive detection, every severity, unfixed findings, and an explicit empty ignore file. The same database, updated at `2026-11-03 19:16:30 UTC`, was held constant for all six scans. Reported image architectures matched the requested platforms. Findings fell from eight to three on each platform: CVE-2026-78669, CVE-2026-78659, CVE-2026-78660, CVE-2026-78663, and CVE-2026-97032 are absent from 5.7.0. GO-2026-5932, CVE-2026-78661, and CVE-2026-97045 remain visible at UNKNOWN severity.
 
-These donor-image results are not rebuilt Maraudarr or published-release totals. The October 28 candidate identities and counts below remain historical evidence. The existing exception and its expiry are unchanged pending separate maintainer review; removing the obsolete exception is recommended after reviewing the fix.
+These donor-image results are separate from the published-image recheck below. The October 28 candidate identities and counts remain historical evidence.
 
-### Retained Compose exception
+### Removed Compose exception
 
-Maraudarr invokes Compose only for `config --quiet` validation. Its supported Make and Compose launch paths disable container networking and drop all optional capabilities. [CVE-2026-78669](https://pkg.go.dev/vuln/GO-2026-6611) affects HTTP/2 clients and servers receiving excessive SETTINGS frames. The supported validation path cannot receive that peer traffic; this constraint does not establish safety for arbitrary Compose invocations.
+The exact-path exception for [CVE-2026-78669](https://pkg.go.dev/vuln/GO-2026-6611) is removed, together with the unused ignore file and workflow references. Official Compose 5.7.0 contains the [fix from x/net 0.60.0](https://pkg.go.dev/golang.org/x/net@v0.60.0) on every generator platform. Fixed HIGH and CRITICAL findings still fail CI. No exception is added, broadened, or extended.
 
-The sole `.trivyignore.yaml` exception remains limited to this advisory at `usr/local/bin/docker-compose`, expiring at midnight UTC on November 6, 2026. The official Compose 5.7.0 donor contains the [fix from x/net 0.60.0](https://pkg.go.dev/golang.org/x/net@v0.60.0) on all generator platforms. The exception and workflow references remain unchanged pending separate maintainer review. All other fixed HIGH and CRITICAL findings still fail CI. No exception is added or broadened.
+On November 4, Trivy 0.76.1 scanned all three runtime manifests from published Maraudarr index `sha256:63e384c6cf571c6a3620af149c4c3c7f4f3283cd6e58ca649c77b3d5ceb73dcf`, built from source `d48316584966eb8b0f291bcf1d57dc6fa2d0ceb9`. The database updated at `2026-11-04 13:16:53 UTC` was held constant. Comprehensive detection included every severity and unfixed findings with an explicit empty ignore file. Each reported architecture matched the selected manifest.
+
+| Platform | Published runtime manifest digest |
+| --- | --- |
+| `linux/amd64` | `sha256:fcce76074fd94f9e8c2870beb384e1264b2e88fff82095c85dca1cc262558766` |
+| `linux/arm64` | `sha256:1450445c746b9e035d7b7d1421ae556e407d07dcafe8bd0b14211494b48586fb` |
+| `linux/arm/v7` | `sha256:1f6941631d215bd20e40890873c0b9f59ed44886c772c8bc1a066be93ae4cb04` |
+
+CVE-2026-78669 is absent from every report. Each platform retains three UNKNOWN Compose findings: GO-2026-5932, CVE-2026-78661, and CVE-2026-97045. There are no HIGH or CRITICAL findings in these reports. This result does not establish coverage of nested archives or claim vulnerability-free images. The current database now identifies an upstream fix for GO-2026-5932; Compose 5.7.0 still contains the older module. The historical counts below describe different artifacts and an older database.
+
+Maraudarr's supported launch paths still disable container networking and drop all optional capabilities. Removing the exception does not change those runtime boundaries or update previously released images.
 
 ### October 28, 2026 artifact review
 
