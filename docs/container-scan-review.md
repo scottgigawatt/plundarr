@@ -4,7 +4,7 @@ This dated assessment records candidate-specific evidence and unresolved finding
 
 ## Artifact and assessment scope
 
-Maraudarr uses Docker's official digest-pinned [Compose 5.6.1 binary](https://github.com/docker/compose/releases/tag/v5.6.1), built with Go 1.26.10 and `golang.org/x/net v0.58.0`. Development checkers and installed pip/setuptools stay out of the application virtual environment. Alpine Python retains its standard-library `ensurepip` bootstrap wheel. Use the [generator revision guide](development/maraudarr/index.md#choose-the-generator-revision) to select the source-built generator for this checkout's catalog and dependencies.
+Maraudarr uses Docker's official digest-pinned [Compose 5.7.0 binary](https://github.com/docker/compose/releases/tag/v5.7.0), built with Go 1.26.10 and `golang.org/x/net v0.60.0`. Development checkers and installed pip/setuptools stay out of the application virtual environment. Alpine Python retains its standard-library `ensurepip` bootstrap wheel. Use the [generator revision guide](development/maraudarr/index.md#choose-the-generator-revision) to select the source-built generator for this checkout's catalog and dependencies.
 
 ### Current dependency choices
 
@@ -16,11 +16,19 @@ Runtime and documentation requirements remain exact and hash-verified. The Octob
 
 The standard-library `ensurepip` seed is pip 26.2.2 and retains its upstream vendored components, including msgpack 1.1.2, urllib3 2.7.0, and pkg_resources from setuptools 70.3.0. It is not installed in the application environment or used by generation; the normal image scan totals below do not establish coverage of nested bootstrap-wheel contents.
 
+### November 4, 2026 official Compose update
+
+The donor index is now `sha256:a4de4851b16f18634f74de66f126d5de65f7c5cb5a9502d67ab83e9a96041a70`. Its official binaries include the x/net 0.60.0 fix on `linux/amd64`, `linux/arm64`, and `linux/arm/v7`. Dockerfile, example environment, and publication build arguments use the same immutable pin. No custom Go build is introduced.
+
+Trivy 0.76.1 compared this index with the previous 5.6.1 index on all three platforms using comprehensive detection, every severity, unfixed findings, and an explicit empty ignore file. The same database, updated at `2026-11-03 19:16:30 UTC`, was held constant for all six scans. Reported image architectures matched the requested platforms. Findings fell from eight to three on each platform: CVE-2026-78669, CVE-2026-78659, CVE-2026-78660, CVE-2026-78663, and CVE-2026-97032 are absent from 5.7.0. GO-2026-5932, CVE-2026-78661, and CVE-2026-97045 remain visible at UNKNOWN severity.
+
+These donor-image results are not rebuilt Maraudarr or published-release totals. The October 28 candidate identities and counts below remain historical evidence. The existing exception and its expiry are unchanged pending separate maintainer review; removing the obsolete exception is recommended after reviewing the fix.
+
 ### Retained Compose exception
 
 Maraudarr invokes Compose only for `config --quiet` validation. Its supported Make and Compose launch paths disable container networking and drop all optional capabilities. [CVE-2026-78669](https://pkg.go.dev/vuln/GO-2026-6611) affects HTTP/2 clients and servers receiving excessive SETTINGS frames. The supported validation path cannot receive that peer traffic; this constraint does not establish safety for arbitrary Compose invocations.
 
-The sole `.trivyignore.yaml` exception remains limited to this advisory at `usr/local/bin/docker-compose`, expiring at midnight UTC on November 6, 2026. The latest official Compose release still contains the affected x/net version; the [fix is in x/net 0.60.0](https://pkg.go.dev/golang.org/x/net@v0.60.0). Replace the donor image and remove the exception and workflow references when an official release contains that fix on all generator platforms. All other fixed HIGH and CRITICAL findings still fail CI. No exception is added or broadened.
+The sole `.trivyignore.yaml` exception remains limited to this advisory at `usr/local/bin/docker-compose`, expiring at midnight UTC on November 6, 2026. The official Compose 5.7.0 donor contains the [fix from x/net 0.60.0](https://pkg.go.dev/golang.org/x/net@v0.60.0) on all generator platforms. The exception and workflow references remain unchanged pending separate maintainer review. All other fixed HIGH and CRITICAL findings still fail CI. No exception is added or broadened.
 
 ### October 28, 2026 artifact review
 
