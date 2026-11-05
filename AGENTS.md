@@ -80,7 +80,7 @@ Verify claims against source and the supported release; label unreleased behavio
 
 ## Code quality and comments
 
-Code comments use concise plain English rather than pirate language. Project-owned scripts, Dockerfiles, Compose files, environment files, and configuration files should begin with the established copyright, `SPDX-License-Identifier: Apache-2.0`, and filename summary block. Preserve the blank lines and comment-only separator lines around each header field.
+Code comments use concise plain English rather than pirate language. Project-owned scripts, Dockerfiles, Compose files, environment files, and configuration files must begin with the established copyright, `SPDX-License-Identifier: Apache-2.0`, and filename summary block. Preserve the blank lines and comment-only separator lines around each header field.
 
 Put a blank line before a standalone explanatory comment that introduces the next logical code block. Keep a short explanatory sentence on one comment line; split comments only when their structure or length genuinely requires it.
 
@@ -115,7 +115,7 @@ Keep Makefile variables centralized near the top. User-facing targets may use li
 
 ## Python practices
 
-Python modules and tests start with the copyright, Apache-2.0, and filename summary block, followed by a useful, concise module docstring. Prefer small functions, explicit types at application boundaries, standard-library facilities, and concise docstrings for public classes and non-obvious helpers. `ruff.toml` owns lint and formatting rules, including import order, four-space indentation, and Unix line endings. Run both Ruff lint and format checks during pull-request validation; editors and pre-commit must use the same configuration. Keep lint and test dependencies out of published production images.
+Python modules and tests start with the copyright, `SPDX-License-Identifier: Apache-2.0`, and filename summary block, followed by a useful, concise module docstring. Prefer small functions, explicit types at application boundaries, standard-library facilities, and concise docstrings for public classes and non-obvious helpers. `ruff.toml` owns lint and formatting rules, including import order, four-space indentation, and Unix line endings. Run both Ruff lint and format checks during pull-request validation; editors and pre-commit must use the same configuration. Keep lint and test dependencies out of published production images.
 
 Explain the scenario and intent of Python tests with concise docstrings and comments around controlled fixtures, injected failures, cleanup, and meaningful assertion groups. Use blank lines to separate setup, actions, and verification where it improves readability. Explain why a boundary matters rather than narrating obvious assignments or adding repetitive step labels.
 
