@@ -1,5 +1,5 @@
 {
-    "$comment": "Copyright 2025-2026 Scott Gigawatt. Licensed under the Apache License, Version 2.0. privacy-config.json: Optional Jellyfin Web v12.2 settings without Chromecast and YouTube players.",
+    "$comment": "Copyright 2025-2026 Scott Gigawatt. SPDX-License-Identifier: Apache-2.0 privacy-config.json: Optional Jellyfin Web v12.2 settings without Chromecast and YouTube players.",
     "includeCorsCredentials": false,
     "multiserver": false,
     "themes": [

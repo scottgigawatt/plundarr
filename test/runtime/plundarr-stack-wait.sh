@@ -3,7 +3,7 @@
 #
 # Copyright 2025-2026 Scott Gigawatt
 #
-# Licensed under the Apache License, Version 2.0.
+# SPDX-License-Identifier: Apache-2.0
 #
 # plundarr-stack-wait.sh: This script waits for all Docker Compose services
 #                         with healthchecks to report healthy.

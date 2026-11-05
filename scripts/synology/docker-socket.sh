@@ -3,7 +3,7 @@
 #
 # Copyright 2025-2026 Scott Gigawatt
 #
-# Licensed under the Apache License, Version 2.0.
+# SPDX-License-Identifier: Apache-2.0
 #
 # docker-socket.sh: This script is intended to run directly on Synology NAS to
 #                   grant the docker group access to the Docker daemon socket
