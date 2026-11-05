@@ -6,6 +6,11 @@
 # compose.yml: Maraudarr service chart for an optional second Whisparr.
 #
 
+#
+# Define the project name for this stack.
+#
+name: ${COMPOSE_PROJECT_NAME}
+
 services:
   #
   # Define the 'whisparr-alt' service for a separate adult media library.

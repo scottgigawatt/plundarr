@@ -6,6 +6,11 @@
 # compose.yml: Maraudarr service chart for Cleanuparr.
 #
 
+#
+# Define the project name for this stack.
+#
+name: ${COMPOSE_PROJECT_NAME}
+
 services:
   #
   # Define the 'cleanuparr' service for Sonarr, Radarr, and qBittorrent file cleanup.

@@ -6,6 +6,11 @@
 # compose.yml: Maraudarr service chart for PATTRMM Neo.
 #
 
+#
+# Define the project name for this stack.
+#
+name: ${COMPOSE_PROJECT_NAME}
+
 services:
   #
   # Generate local collection lists with the PATTRMM Neo cores.

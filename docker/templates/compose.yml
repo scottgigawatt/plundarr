@@ -127,6 +127,11 @@ x-whisparr-data-dir: &whisparr-data-dir  # YAML anchor for Whisparr data directo
     - /data:rw,noexec,nosuid,size=1m,uid=${DEFAULT_PUID},gid=${DEFAULT_PGID}
 
 #
+# Define the project name for this stack.
+#
+name: ${COMPOSE_PROJECT_NAME}
+
+#
 # Define the services section.
 #
 services:

@@ -113,6 +113,30 @@ run_distribution_case watchtower
 run_distribution_case portainer
 run_distribution_case custom --add homepage
 
+# Resolve the declared project name from preset defaults and operator overrides without starting services.
+for preset in plundarr boudoirr jellyfin plex calibre-web-automated duplex watchtower portainer custom; do
+    docker compose \
+        --env-file "${TEST_ROOT}/dist/${preset}/.env" \
+        --file "${TEST_ROOT}/dist/${preset}/docker-compose.yml" \
+        config --format json | "${PYTHON_BIN}" -c '
+import json
+import sys
+
+assert json.load(sys.stdin)["name"] == sys.argv[1], "Compose lost the preset project name"
+' "${preset}"
+done
+
+COMPOSE_PROJECT_NAME=operator-project-name \
+    docker compose \
+    --env-file "${TEST_ROOT}/dist/boudoirr/.env" \
+    --file "${TEST_ROOT}/dist/boudoirr/docker-compose.yml" \
+    config --format json | "${PYTHON_BIN}" -c '
+import json
+import sys
+
+assert json.load(sys.stdin)["name"] == "operator-project-name", "Compose ignored the operator project name"
+'
+
 #
 # Default Plundarr voyage with qBittorrent.
 #

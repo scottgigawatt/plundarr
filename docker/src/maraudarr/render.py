@@ -366,11 +366,7 @@ def _preserve_values(rendered: str, existing: dict[str, str]) -> str:
     lines: list[str] = []
     for line in rendered.splitlines():
         match = assignment.match(line)
-        if (
-            match
-            and match.group("key") != "COMPOSE_PROJECT_NAME"
-            and match.group("key") in existing
-        ):
+        if match and match.group("key") in existing:
             lines.append(existing[match.group("key")])
         else:
             lines.append(line)

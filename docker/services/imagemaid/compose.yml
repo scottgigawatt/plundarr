@@ -6,6 +6,11 @@
 # compose.yml: Maraudarr service chart for ImageMaid.
 #
 
+#
+# Define the project name for this stack.
+#
+name: ${COMPOSE_PROJECT_NAME}
+
 services:
   #
   # Define the 'imagemaid' service for Plex artwork maintenance.

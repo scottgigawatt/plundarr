@@ -6,6 +6,11 @@
 # compose.yml: Maraudarr one-shot service chart for Kometa Overlay Reset.
 #
 
+#
+# Define the project name for this stack.
+#
+name: ${COMPOSE_PROJECT_NAME}
+
 services:
   #
   # Define the 'overlay-reset' recovery tool without joining normal stack startup.

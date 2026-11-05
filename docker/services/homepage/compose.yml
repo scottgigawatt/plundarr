@@ -6,6 +6,11 @@
 # compose.yml: Maraudarr service chart for Homepage.
 #
 
+#
+# Define the project name for this stack.
+#
+name: ${COMPOSE_PROJECT_NAME}
+
 services:
   #
   # Define the 'homepage' service for a customizable application dashboard.

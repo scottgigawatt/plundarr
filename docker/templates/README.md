@@ -4,10 +4,12 @@ These files contain the common pieces wrapped around every generated Plundarr st
 
 | Scroll            | Purpose                                                                |
 | :---------------- | :--------------------------------------------------------------------- |
-| `compose.yml`     | Shared YAML anchors, the `services:` opening, and network footer       |
+| `compose.yml`     | Shared YAML anchors, project name, `services:` opening, and network footer       |
 | `environment.env` | Project, path, permission, healthcheck, logging, and timezone defaults |
 
 Selectable service definitions belong under [`../services/`](../services/), not in these shared foundations.
+
+Every Compose source declares `name: ${COMPOSE_PROJECT_NAME}` immediately before its services section. Generated deployments keep the placeholder unresolved and read the preset default or operator override from `.env`. Maraudarr takes the generated declaration from this template, so the combined deployment contains one project name.
 
 `security-hardening` contains the shared `cap_drop: [ALL]` and `no-new-privileges:true` settings. Apprise, Jellyfin Vue, Privateerr, Themerr, and Cruisarr merge it alongside their existing container defaults. The block merge list preserves both anchors without duplicate YAML merge keys. It does not change the image user, filesystem access, healthchecks, or startup settings. Other services keep their existing capability policies. Jellyfin Vue mounts a generated nginx configuration to listen on unprivileged internal port `8080`, allowing its image user to bind without granting capabilities or relying on host low-port settings.
 

@@ -6,6 +6,11 @@
 # compose.yml: Maraudarr service chart for the optional Jellyfin Vue client.
 #
 
+#
+# Define the project name for this stack.
+#
+name: ${COMPOSE_PROJECT_NAME}
+
 services:
   #
   # Define the 'jellyfin-vue' service as an alternative browser client for the Jellyfin server.

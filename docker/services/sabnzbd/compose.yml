@@ -6,6 +6,11 @@
 # compose.yml: Maraudarr service chart for SABnzbd.
 #
 
+#
+# Define the project name for this stack.
+#
+name: ${COMPOSE_PROJECT_NAME}
+
 services:
   #
   # Define the 'sabnzbd' service for managing Usenet downloads.

@@ -6,6 +6,11 @@
 # compose.yml: Maraudarr service chart for Plex Media Server.
 #
 
+#
+# Define the project name for this stack.
+#
+name: ${COMPOSE_PROJECT_NAME}
+
 services:
   #
   # Define the 'plex' service for streaming media libraries.

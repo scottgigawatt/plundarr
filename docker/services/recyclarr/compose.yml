@@ -6,6 +6,11 @@
 # compose.yml: Maraudarr profile-gated service chart for Recyclarr.
 #
 
+#
+# Define the project name for this stack.
+#
+name: ${COMPOSE_PROJECT_NAME}
+
 services:
   #
   # Define the 'recyclarr' synchronization tool without joining normal startup.
