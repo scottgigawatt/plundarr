@@ -252,7 +252,9 @@ def extract_env_sections(source: str) -> dict[str, str]:
         title = match.group("title")
         # Header frames share the same visual syntax as setting groups but are
         # file metadata, not selectable environment content.
-        if title.startswith(("Copyright ", "Licensed under ", ".env file:")):
+        if title.startswith(
+            ("Copyright ", "Licensed under ", "SPDX-License-Identifier:", ".env file:")
+        ):
             continue
         end = matches[position + 1].start() if position + 1 < len(matches) else len(source)
         sections[title] = source[match.start() : end].strip("\n") + "\n"

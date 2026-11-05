@@ -15,6 +15,7 @@ import unittest
 from maraudarr.text import (
     align_env_comments,
     aligned_yaml_lines,
+    extract_env_sections,
     extract_service,
     prune_unused_anchors,
 )
@@ -22,6 +23,29 @@ from maraudarr.text import (
 
 class TextTests(unittest.TestCase):
     """Verify comment-preserving text operations."""
+
+    def test_environment_sections_exclude_license_metadata(self) -> None:
+        """Keep both current and legacy license frames out of setting groups."""
+
+        # Existing deployments may retain the earlier license sentence.
+        for license_line in (
+            "SPDX-License-Identifier: Apache-2.0",
+            "Licensed under the Apache License, Version 2.0.",
+        ):
+            with self.subTest(license_line=license_line):
+                source = (
+                    "#\n# Copyright 2025-2026 Scott Gigawatt\n#\n"
+                    f"# {license_line}\n#\n"
+                    "# .env file: Settings for the stack.\n#\n\n"
+                    "#\n# Host settings\n#\nHOST_PATH=/example\n"
+                )
+
+                sections = extract_env_sections(source)
+
+                self.assertEqual(
+                    sections,
+                    {"Host settings": "#\n# Host settings\n#\nHOST_PATH=/example\n"},
+                )
 
     #
     # Service-block extraction behavior.
