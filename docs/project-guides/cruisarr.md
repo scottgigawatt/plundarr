@@ -77,11 +77,11 @@ docker login ghcr.io
 
 Synology Container Manager must also have authenticated access to `ghcr.io` when it pulls the project. A login on your workstation does not authenticate the NAS. See [Cruisarr's private-image guide](https://github.com/scottgigawatt/cruisarr/blob/main/docs/operations/private-images.md) for package requirements.
 
-The Compose chart uses `${CRUISARR_IMAGE}:${CRUISARR_TAG}`. Keep the repository and tag separate in `dist/boudoirr/.env`; do not put a tag or digest in `CRUISARR_IMAGE`. Publication provides `latest` and commit-specific `sha-` tags. A GitHub release version does not imply a matching container tag. For example, these assignments select a published source revision:
+The Compose chart uses `${CRUISARR_IMAGE}:${CRUISARR_TAG}`. Keep the repository and tag separate in `dist/boudoirr/.env`; do not put a tag or digest in `CRUISARR_IMAGE`. Publication provides `latest` and commit-specific `sha-` tags. The [Cruisarr v0.39.4 release](https://github.com/scottgigawatt/cruisarr/releases/tag/v0.39.4) also has a verified `v0.39.4` image tag. For example, these assignments select its published source revision:
 
 ```sh
 CRUISARR_IMAGE="ghcr.io/scottgigawatt/cruisarr"
-CRUISARR_TAG="sha-5802d86a077a33932a1a2b858545fc5979ac854c"
+CRUISARR_TAG="sha-c01d10b30c35d8e73720ff6e9dc254048a4e92de"
 ```
 
 Regeneration preserves your image assignments. To update an existing installation, follow [Update Cruisarr](#update-cruisarr) after creating a backup.
