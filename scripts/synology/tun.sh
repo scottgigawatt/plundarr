@@ -3,7 +3,7 @@
 #
 # Copyright 2025-2026 Scott Gigawatt
 #
-# Licensed under the Apache License, Version 2.0.
+# SPDX-License-Identifier: Apache-2.0
 #
 # tun.sh: This script is intended to run directly on Synology NAS to ensure
 #         the /dev/net/tun device exists for VPN applications like Gluetun.

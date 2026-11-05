@@ -1,7 +1,7 @@
 #
 # Copyright 2025-2026 Scott Gigawatt
 #
-# Licensed under the Apache License, Version 2.0.
+# SPDX-License-Identifier: Apache-2.0
 #
 # test_maraudarr.py: Test Maraudarr catalog resolution and generated artifacts.
 #
@@ -556,7 +556,12 @@ class MaraudarrTests(unittest.TestCase):
         compose = render_compose(self.catalog, plan)
         jellyfin = extract_service(compose, "jellyfin")
 
-        self.assertTrue(compose.startswith("#\n# Copyright 2025-2026 Scott Gigawatt"))
+        self.assertTrue(
+            compose.startswith(
+                "#\n# Copyright 2025-2026 Scott Gigawatt\n#\n"
+                "# SPDX-License-Identifier: Apache-2.0\n#\n"
+            )
+        )
         self.assertIn("# Services included:", compose)
         self.assertIn("# Define the 'apprise' service", compose)
         self.assertIn("# Define the 'jellyfin' service", compose)
