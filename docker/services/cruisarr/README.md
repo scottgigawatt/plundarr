@@ -16,11 +16,15 @@ Cruisarr is excluded from Watchtower updates. Use an authenticated manual pull a
 
 ## Runtime and storage
 
-The container runs as `DEFAULT_PUID:DEFAULT_PGID` with `DEFAULT_GROUP`. Ensure that this host identity can write the `/data` bind mount. The persistent database is `cruisarr.sqlite` under `/data`. Cruisarr connects to media services over the network and needs no media mounts, named volumes, or separate database containers.
+The published image defaults to non-root numeric UID/GID `10001:10001`, application code under `/app`, and data under `/data`. Plundarr overrides the runtime identity with `DEFAULT_PUID:DEFAULT_PGID` through Compose `user:` and adds `DEFAULT_GROUP`. Image build arguments such as `CRUISARR_UID` and `CRUISARR_GID` select the image account; setting them as runtime environment variables does not remap the running process.
+
+Prepare the host data directory so the configured runtime identity can write it before launch. Cruisarr does not automatically change existing bind-mount ownership. Application code remains root-owned and readable by the non-root process. The persistent database is `cruisarr.sqlite` under `/data`; no media mounts, named volumes, or separate database containers are required.
 
 Plundarr adds a read-only root filesystem, dropped capabilities, and `no-new-privileges`. The memory-backed `/tmp` filesystem allows up to 64 MiB of disposable scratch space. This limit is a Plundarr allowance, not an upstream memory-sizing recommendation.
 
-The Node.js `/api/status` healthcheck follows [Cruisarr's Dockerfile](https://github.com/scottgigawatt/cruisarr/blob/main/Dockerfile) with shared Plundarr timing. It checks storage readiness without requiring completed owner setup. Health does not prove that sign-in or provider connections work. No `depends_on` entries are needed because integrations are configured after startup and can run externally.
+The chart checks `/api/status` at the fixed internal port `6699`, using shared Plundarr timing. The current [Cruisarr source Dockerfile](https://github.com/scottgigawatt/cruisarr/blob/main/docker/Dockerfile) builds its image probe from `PORT`; the standard listener remains `6699`. `CRUISARR_WEBUI_PORT` changes only the host port. A custom image build with a different internal listener or data directory requires matching chart ports, probe, and mount targets.
+
+The probe checks storage readiness without requiring completed owner setup. Health does not prove that sign-in or provider connections work. No `depends_on` entries are needed because integrations are configured after startup and can run externally.
 
 ## Generated configuration
 

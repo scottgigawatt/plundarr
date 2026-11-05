@@ -61,7 +61,9 @@ Edit `dist/boudoirr/.env`. Defaults follow Plundarr's existing service conventio
 
 The base host port is `6699`. Boudoirr adds `10000`, and Custom adds `30000`. Internal service URLs always use the container port. Only `.env` receives generated secrets; `example.env` remains a secret-free reference. Regeneration preserves existing `.env` assignments, including empty values and operator overrides.
 
-The application runs as `DEFAULT_PUID:DEFAULT_PGID` with `DEFAULT_GROUP`, matching other rootless service charts. Set the shared user and group IDs from `id -u` and `id -g` for your host account. Confirm that account can write the selected config directory before launch. Cruisarr does not need media or download mounts; it connects to Whisparr and Jellyfin over the project network. SQLite state uses this host bind mount rather than a named volume or separate database service.
+The application runs as `DEFAULT_PUID:DEFAULT_PGID` with `DEFAULT_GROUP`, matching other rootless service charts. Set the shared user and group IDs from `id -u` and `id -g` for your host account. Confirm that account can write the selected config directory before launch; startup does not change existing host ownership. The image defaults to UID/GID `10001:10001`, but Plundarr selects the process identity through Compose `user:`. `CRUISARR_UID` and `CRUISARR_GID` are image build arguments, so adding them to the runtime environment does not remap that identity.
+
+Cruisarr does not need media or download mounts; it connects to Whisparr and Jellyfin over the project network. SQLite state uses this host bind mount rather than a named volume or separate database service.
 
 ## Authenticate and select the image
 

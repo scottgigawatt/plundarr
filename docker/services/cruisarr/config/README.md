@@ -4,7 +4,7 @@ This directory holds the Cruisarr SQLite database and encrypted integration cred
 
 ## Before launch
 
-- Confirm that the host identity set by `DEFAULT_PUID`, `DEFAULT_PGID`, and `DEFAULT_GROUP` can write this directory.
+- Confirm that the host identity set by `DEFAULT_PUID`, `DEFAULT_PGID`, and `DEFAULT_GROUP` can write this directory. Startup does not repair bind-mount ownership. Cruisarr image build arguments such as `CRUISARR_UID` and `CRUISARR_GID` are not runtime user-remapping settings; Plundarr selects the process identity through Compose `user:`.
 - Read `CRUISARR_SETUP_SECRET` locally from the generated `.env` for one-time owner setup. Keep an off-host copy of `CRUISARR_SECRET_KEY` for decrypting stored credentials. Keep both values out of logs and source control.
 - Prepare an existing Jellyfin server or select the local Jellyfin service. For services in this project, use `http://jellyfin:8096` and `http://whisparr:6969` in Cruisarr. Browser playback URLs must use the host address or reverse proxy.
 
