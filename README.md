@@ -92,7 +92,7 @@ Use `make configure` for the interactive picker, or `make ship PRESET=YOUR-PRESE
 | Preset                          | Purpose                                                                       |
 | ------------------------------- | ----------------------------------------------------------------------------- |
 | 🏴‍☠️&nbsp;`plundarr`              | Movies, television, and ebooks with VPN-protected torrent downloads           |
-| 🔞&nbsp;`boudoirr`              | Whisparr automation, VPN downloads, and removable Velvarr/Jellyfin companions |
+| 🔞&nbsp;`boudoirr`              | Whisparr automation, VPN downloads, and removable Cruisarr/Jellyfin companions |
 | 🎞️&nbsp;`jellyfin`              | Standalone Jellyfin media server                                              |
 | 🎬&nbsp;`plex`                  | Standalone Plex Media Server                                                  |
 | 📚&nbsp;`calibre-web-automated` | Standalone ebook library and ingest                                           |
@@ -115,7 +115,7 @@ make ship PRESET=boudoirr ADD_SERVICES=whisparr-alt
 
 Repeat your complete intended selection on every regeneration. Existing `.env` values and application data survive, but saved values do not reselect services. Omitted running containers are not stopped automatically; review Compose orphans separately.
 
-Use the [setup guide](docs/setup.md) for network planning, storage, media libraries, and optional services. Focused guides cover [VPN regions and recovery](docs/project-guides/vpn.md), [Velvarr](docs/project-guides/velvarr.md), [Jellyfin customization](docs/project-guides/jellyfin.md), [monitoring](docs/project-guides/monitoring.md), [Themerr](docs/project-guides/themerr.md), and [Portainer](docs/project-guides/portainer.md).
+Use the [setup guide](docs/setup.md) for network planning, storage, media libraries, and optional services. Focused guides cover [VPN regions and recovery](docs/project-guides/vpn.md), [Cruisarr](docs/project-guides/cruisarr.md), [Jellyfin customization](docs/project-guides/jellyfin.md), [monitoring](docs/project-guides/monitoring.md), [Themerr](docs/project-guides/themerr.md), and [Portainer](docs/project-guides/portainer.md).
 
 `.env` supplies Compose settings; applications still need their own setup. Jellyfin Web JSON/CSS, Recyclarr YAML, and external Kometa/PATTRMM settings may also need editing. Prepare those paths before launch. Recyclarr and Overlay Reset are profile-gated tools with deliberate invocation and dry-run/preview requirements in the setup guide.
 

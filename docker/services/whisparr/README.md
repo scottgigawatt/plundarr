@@ -34,9 +34,9 @@ Whisparr's import operation moves matched files into their generated library fol
 
 Use the `movies/` and `scenes/` naming prefixes in both instances. Host directory names group libraries by instance without assigning a metadata provider; each Whisparr still sees its own library at `/data/movies` or `/data/scenes`.
 
-## Connect Jellyfin, Velvarr, and Homepage
+## Connect Jellyfin, Cruisarr, and Homepage
 
-With Jellyfin mounted at `/volume1/jellyfin:/data`, map main Whisparr's `/data/movies` to Jellyfin's `/data/movies/main` and `/data/scenes` to `/data/scenes/main`. For Alt, map `/data/movies` to `/data/movies/alt` and `/data/scenes` to `/data/scenes/alt`. Review Velvarr mappings whenever you change host paths. Keep the import and recycling directories out of Jellyfin's library selections.
+With Jellyfin mounted at `/volume1/jellyfin:/data`, map main Whisparr's `/data/movies` to Jellyfin's `/data/movies/main` and `/data/scenes` to `/data/scenes/main`. For Alt, map `/data/movies` to `/data/movies/alt` and `/data/scenes` to `/data/scenes/alt`. Review Cruisarr mappings whenever you change host paths. Keep the import and recycling directories out of Jellyfin's library selections.
 
 When Homepage is selected, Maraudarr adds a **Whisparr** browser link and container status card. Set `HOMEPAGE_VAR_WHISPARR_HREF` in `.env` to your host or reverse-proxy URL. Selecting both Whisparr instances adds two independent cards.
 

@@ -401,10 +401,15 @@ class UI:
             )
         if "calibre-web-automated" in selected:
             steps.append("Check CWA config, ingest, and library paths in .env.")
-        if "velvarr" in selected:
-            steps.append("Check Velvarr's config permissions and browser origin in .env.")
-            steps.append("Keep VELVARR_SECRET_KEY with backups; read VELVARR_SETUP_SECRET locally.")
-            steps.append("Complete Velvarr setup with Jellyfin, then connect Whisparr v3.")
+        if "cruisarr" in selected:
+            steps.append(
+                "Authenticate the deployment host to ghcr.io before pulling private Cruisarr images."
+            )
+            steps.append("Check Cruisarr's config permissions and browser origin in .env.")
+            steps.append(
+                "Keep CRUISARR_SECRET_KEY with backups; read CRUISARR_SETUP_SECRET locally."
+            )
+            steps.append("Complete Cruisarr setup with Jellyfin, then connect Whisparr v3.")
 
         if selected.intersection({"whisparr", "whisparr-alt"}):
             steps.append("Check Whisparr import, movie, scene, and recycle paths in .env.")

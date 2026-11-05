@@ -20,7 +20,7 @@ To enable the local theme, choose the **Dark** display theme and enter this line
 
 The relative URL keeps the stylesheet on the same origin and follows a configured server base path. Test it from the Web client, including the login page, library, detail page, and player. CSS does not style every native app or the Jellyfin 12 admin dashboard. Clear the import to restore the standard appearance. Edit `custom/boudoirr.css` to change the palette; no external fonts, images, JavaScript injector, or plugin is required.
 
-Custom links belong in `menuLinks` in the selected JSON file. Useful choices are **Requests** pointing to your Velvarr URL, **Jellyfin Vue** pointing to its separate frontend, and **Help** pointing to your own server guide. Use real browser-accessible URLs and keep administrative applications out of shared user menus. Menu links are navigation, not access control.
+Custom links belong in `menuLinks` in the selected JSON file. Useful choices are **Requests** pointing to your Cruisarr URL, **Jellyfin Vue** pointing to its separate frontend, and **Help** pointing to your own server guide. Use real browser-accessible URLs and keep administrative applications out of shared user menus. Menu links are navigation, not access control.
 
 ## Choose another local theme
 

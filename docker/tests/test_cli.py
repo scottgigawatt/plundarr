@@ -81,8 +81,8 @@ class MaraudarrCliTests(unittest.TestCase):
     def test_boudoirr_cli_default_and_removal_reach_the_generation_plan(self) -> None:
         """Keep both companions selected initially and independently removable."""
         plans: list[StackPlan] = []
-        removals = ("", "velvarr", "jellyfin", "velvarr,jellyfin")
-        companions = {"velvarr", "jellyfin"}
+        removals = ("", "cruisarr", "jellyfin", "cruisarr,jellyfin")
+        companions = {"cruisarr", "jellyfin"}
 
         def capture_write(catalog: Catalog, plan: StackPlan, output: Path, ui: UI) -> int:
             """Record resolved selections without writing private deployment files."""
@@ -104,13 +104,13 @@ class MaraudarrCliTests(unittest.TestCase):
             self.assertEqual(companions.intersection(plan.service_ids), companions - omitted)
 
     def test_boudoirr_interactive_default_can_be_unchecked(self) -> None:
-        """Keep Velvarr and Jellyfin checked initially without making either core."""
+        """Keep Cruisarr and Jellyfin checked initially without making either core."""
         ui = UI(plain=True)
         offered: list[set[str]] = []
         defaults: list[set[str]] = []
         plans: list[StackPlan] = []
-        removals = ("", "velvarr", "jellyfin", "velvarr,jellyfin")
-        companions = {"velvarr", "jellyfin"}
+        removals = ("", "cruisarr", "jellyfin", "cruisarr,jellyfin")
+        companions = {"cruisarr", "jellyfin"}
 
         for removed in removals:
 

@@ -132,7 +132,7 @@ category = "Media automation"
 url = "https://github.com/Whisparr/Whisparr"
 order = 330
 requires = ["prowlarr"]
-recommended = ["qbittorrent", "velvarr"]
+recommended = ["qbittorrent", "cruisarr"]
 
 # Whisparr Alt is an opt-in second instance with independent metadata-provider settings.
 [services.whisparr-alt]
@@ -142,7 +142,7 @@ category = "Media automation"
 url = "https://github.com/Whisparr/Whisparr"
 order = 335
 requires = ["prowlarr"]
-recommended = ["qbittorrent", "velvarr"]
+recommended = ["qbittorrent", "cruisarr"]
 
 # Bazarr adds subtitle automation to the Radarr and Sonarr libraries.
 [services.bazarr]
@@ -183,12 +183,12 @@ category = "Media experience"
 url = "https://github.com/seerr-team/seerr"
 order = 400
 
-# Velvarr accepts adult-media requests with local or external Jellyfin and Whisparr.
-[services.velvarr]
-title = "Velvarr"
+# Cruisarr accepts adult-media requests with local or external Jellyfin and Whisparr.
+[services.cruisarr]
+title = "Cruisarr"
 description = "Discovers adult media and accepts requests with Jellyfin login and Whisparr fulfillment."
 category = "Media experience"
-url = "https://github.com/Skare69/velvarr"
+url = "https://github.com/scottgigawatt/cruisarr"
 order = 405
 recommended = ["whisparr", "jellyfin"]
 
@@ -403,10 +403,10 @@ defaults = ["qbittorrent", "calibre-web-automated", "cleanuparr", "watchtower", 
 #
 # Boudoirr reuses the same catalog for an adult-media-focused stack.
 #
-# This preset pairs Whisparr with removable Velvarr requests and Jellyfin playback.
+# This preset pairs Whisparr with removable Cruisarr requests and Jellyfin playback.
 [presets.boudoirr]
 title = "Boudoirr"
-description = "Whisparr automation with removable Velvarr requests, Jellyfin playback, and VPN downloads."
+description = "Whisparr automation with removable Cruisarr requests, Jellyfin playback, and VPN downloads."
 project_name = "boudoirr"
 network_subnet = "172.21.0.0/16"
 network_ip_range = "172.21.5.0/24"
@@ -425,7 +425,7 @@ compose_summary = [
   "environment-specific settings for a seamless VPN setup.",
 ]
 core = ["privateerr", "gluetun", "flaresolverr", "prowlarr", "whisparr"]
-defaults = ["qbittorrent", "velvarr", "jellyfin", "cleanuparr", "watchtower"]
+defaults = ["qbittorrent", "cruisarr", "jellyfin", "cleanuparr", "watchtower"]
 
 #
 # Jellyfin keeps the standalone deployment deliberately small.

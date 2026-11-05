@@ -43,9 +43,9 @@ Before launch, set `HOMEPAGE_EXTERNAL_URL` to the URL you will open in your brow
 
 Homepage requires v2 or later for native login. Generated secrets are created when absent and remain stable across regeneration. Homepage does not rate-limit password attempts; public access also needs appropriate proxy access controls and rate limiting, or a VPN. See the generated `config/homepage/README.md` for password changes, session invalidation, and proxy details.
 
-## Add Velvarr to Boudoirr
+## Add Cruisarr to Boudoirr
 
-Boudoirr selects removable Velvarr and Jellyfin companions. Use `REMOVE_SERVICES=jellyfin` for an existing Jellyfin server, `REMOVE_SERVICES=velvarr` to omit requests, or both IDs to omit both. Jellyfin provides Velvarr login; Plex cannot replace it. Follow the [Velvarr setup guide](project-guides/velvarr.md) for architecture support, owner setup, paths, and recovery.
+Boudoirr selects removable Cruisarr and Jellyfin companions. Use `REMOVE_SERVICES=jellyfin` for an existing Jellyfin server, `REMOVE_SERVICES=cruisarr` to omit requests, or both IDs to omit both. Jellyfin provides Cruisarr login; Plex cannot replace it. Follow the [Cruisarr setup guide](project-guides/cruisarr.md) for private GHCR authentication, architecture support, owner setup, paths, and recovery.
 
 The optional [Whisparr Alt guide](https://github.com/scottgigawatt/plundarr/blob/main/docker/services/whisparr-alt/README.md) covers a second instance. Keep its database, libraries, categories, and API key separate. Movie providers are selected in Whisparr; directory names do not select them.
 
