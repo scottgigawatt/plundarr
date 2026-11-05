@@ -25,6 +25,11 @@ x-default-container: &default-container  # YAML anchor for default container
       max-file: ${LOG_MAX_FILE}          # Maximum number of log files to retain
 
 #
+# Define the project name for this stack.
+#
+name: ${COMPOSE_PROJECT_NAME}
+
+#
 # Define the services section.
 #
 services:

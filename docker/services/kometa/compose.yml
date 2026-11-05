@@ -6,6 +6,11 @@
 # compose.yml: Maraudarr service chart for Kometa.
 #
 
+#
+# Define the project name for this stack.
+#
+name: ${COMPOSE_PROJECT_NAME}
+
 services:
   #
   # Define the 'kometa' service for scheduled Plex metadata management.

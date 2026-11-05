@@ -6,6 +6,11 @@
 # compose.yml: Maraudarr service chart for Calibre-Web Automated.
 #
 
+#
+# Define the project name for this stack.
+#
+name: ${COMPOSE_PROJECT_NAME}
+
 services:
   #
   # Define the 'calibre-web-automated' service for managing an ebook library.

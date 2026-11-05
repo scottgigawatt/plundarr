@@ -6,6 +6,11 @@
 # compose.yml: One Themerr instance for Plex and Jellyfin theme songs.
 #
 
+#
+# Define the project name for this stack.
+#
+name: ${COMPOSE_PROJECT_NAME}
+
 services:
   #
   # Define the 'themerr' service for Plex and Jellyfin theme song management.

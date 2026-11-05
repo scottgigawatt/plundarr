@@ -6,6 +6,11 @@
 # compose.yml: Maraudarr service chart for Homepage.
 #
 
+#
+# Define the project name for this stack.
+#
+name: ${COMPOSE_PROJECT_NAME}
+
 services:
   #
   # Define the 'homepage' service for a customizable application dashboard.
@@ -93,8 +98,8 @@ services:
       # Homepage Themerr click target
       HOMEPAGE_VAR_THEMERR_HREF: ${HOMEPAGE_VAR_THEMERR_HREF}
 
-      # Homepage Velvarr click target
-      HOMEPAGE_VAR_VELVARR_HREF: ${HOMEPAGE_VAR_VELVARR_HREF}
+      # Homepage Cruisarr click target
+      HOMEPAGE_VAR_CRUISARR_HREF: ${HOMEPAGE_VAR_CRUISARR_HREF}
 
       # Homepage Jellyfin Vue click target
       HOMEPAGE_VAR_JELLYFIN_VUE_HREF: ${HOMEPAGE_VAR_JELLYFIN_VUE_HREF}

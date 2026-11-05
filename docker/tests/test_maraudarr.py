@@ -119,7 +119,7 @@ class MaraudarrTests(unittest.TestCase):
                 "prowlarr",
                 "qbittorrent",
                 "whisparr",
-                "velvarr",
+                "cruisarr",
                 "jellyfin",
                 "cleanuparr",
                 "watchtower",

@@ -1,4 +1,4 @@
-    - Velvarr:
+    - Cruisarr:
         icon: mdi-movie-search
-        href: {{HOMEPAGE_VAR_VELVARR_HREF}}
+        href: {{HOMEPAGE_VAR_CRUISARR_HREF}}
         description: Adult-media discovery and requests

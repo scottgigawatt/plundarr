@@ -44,6 +44,11 @@ x-exclude-from-watchtower-updates: &exclude-from-watchtower-updates  # Exclude f
     - "com.centurylinklabs.watchtower.enable=false"                  # Require intentional updates
 
 #
+# Define the project name for this stack.
+#
+name: ${COMPOSE_PROJECT_NAME}
+
+#
 # Define the services section.
 #
 services:

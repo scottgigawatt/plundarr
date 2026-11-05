@@ -113,6 +113,30 @@ run_distribution_case watchtower
 run_distribution_case portainer
 run_distribution_case custom --add homepage
 
+# Resolve the declared project name from preset defaults and operator overrides without starting services.
+for preset in plundarr boudoirr jellyfin plex calibre-web-automated duplex watchtower portainer custom; do
+    docker compose \
+        --env-file "${TEST_ROOT}/dist/${preset}/.env" \
+        --file "${TEST_ROOT}/dist/${preset}/docker-compose.yml" \
+        config --format json | "${PYTHON_BIN}" -c '
+import json
+import sys
+
+assert json.load(sys.stdin)["name"] == sys.argv[1], "Compose lost the preset project name"
+' "${preset}"
+done
+
+COMPOSE_PROJECT_NAME=operator-project-name \
+    docker compose \
+    --env-file "${TEST_ROOT}/dist/boudoirr/.env" \
+    --file "${TEST_ROOT}/dist/boudoirr/docker-compose.yml" \
+    config --format json | "${PYTHON_BIN}" -c '
+import json
+import sys
+
+assert json.load(sys.stdin)["name"] == "operator-project-name", "Compose ignored the operator project name"
+'
+
 #
 # Default Plundarr voyage with qBittorrent.
 #
@@ -220,7 +244,7 @@ run_case duplex-core \
     --remove pattrmm,notifiarr
 
 #
-# Default Boudoirr voyage with Velvarr, Jellyfin, and qBittorrent as the only downloader.
+# Default Boudoirr voyage with Cruisarr, Jellyfin, and qBittorrent as the only downloader.
 #
 run_case boudoirr --preset boudoirr
 run_case boudoirr-vue --preset boudoirr --add jellyfin-vue,homepage
@@ -253,16 +277,41 @@ run_case boudoirr-plex \
     --add plex
 
 #
-# Velvarr is a removable Boudoirr default and remains selectable in custom stacks.
+# Cruisarr is a removable Boudoirr default and remains selectable in custom stacks.
 #
-run_case boudoirr-velvarr \
+run_case boudoirr-cruisarr \
     --preset boudoirr \
     --add homepage
-run_case boudoirr-without-velvarr --preset boudoirr --remove velvarr
-run_case boudoirr-without-companions --preset boudoirr --remove velvarr,jellyfin
-run_case custom-velvarr \
+run_case boudoirr-without-cruisarr --preset boudoirr --remove cruisarr
+run_case boudoirr-without-companions --preset boudoirr --remove cruisarr,jellyfin
+run_case custom-cruisarr \
     --preset custom \
-    --add velvarr,homepage
+    --add cruisarr,homepage
+
+# Resolve security merges and application settings through real Compose without starting services.
+DEFAULT_PUID=12345 DEFAULT_PGID=23456 CRUISARR_WHISPARR_LIBRARY_LIMIT_MIB=128 \
+    docker compose \
+    --env-file "${TEST_ROOT}/custom-cruisarr/.env" \
+    --file "${TEST_ROOT}/custom-cruisarr/docker-compose.yml" \
+    config --format json | "${PYTHON_BIN}" -c '
+import json
+import sys
+
+service = json.load(sys.stdin)["services"]["cruisarr"]
+assert service["user"] == "12345:23456", "Cruisarr must use the configured host identity"
+assert service["read_only"] is True
+assert service["cap_drop"] == ["ALL"]
+assert "no-new-privileges:true" in service["security_opt"]
+assert service["labels"]["com.centurylinklabs.watchtower.enable"] == "false"
+assert service["image"] == "ghcr.io/scottgigawatt/cruisarr:latest"
+assert service["environment"]["CRUISARR_DATA_DIR"] == "/data"
+assert service["environment"]["CRUISARR_WHISPARR_LIBRARY_LIMIT_MIB"] == "128"
+assert service["environment"]["CRUISARR_UPDATE_CHECK"] == "0"
+assert "/api/status" in service["healthcheck"]["test"][-1]
+assert service["ports"][0]["target"] == 6699
+assert service["ports"][0]["published"] == "36699"
+assert service["volumes"][0]["target"] == "/data"
+'
 
 #
 # Minimal custom voyage used to catch stale Homepage assumptions.
@@ -288,7 +337,7 @@ run_case duplex-monitoring --preset duplex --add tracearr,tautulli,homepage
 #
 run_case everything \
     --preset plundarr \
-    --add portainer,apprise,imagemaid,jellyfin,jellyfin-vue,lidarr,notifiarr,nzbget,overlay-reset,pattrmm,plex,recyclarr,sabnzbd,sonarr-anime,tautulli,themerr,velvarr,watchtower,whisparr,whisparr-alt
+    --add portainer,apprise,imagemaid,jellyfin,jellyfin-vue,lidarr,notifiarr,nzbget,overlay-reset,pattrmm,plex,recyclarr,sabnzbd,sonarr-anime,tautulli,themerr,cruisarr,watchtower,whisparr,whisparr-alt
 
 #
 # Report one clear success line after every Compose chart passes.

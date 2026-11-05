@@ -181,7 +181,7 @@ def _prepare_service(
             ),
             "Homepage Bazarr click target and widget": "bazarr" in selected,
             "Homepage Seerr click target and widget": "seerr" in selected,
-            "Homepage Velvarr click target": "velvarr" in selected,
+            "Homepage Cruisarr click target": "cruisarr" in selected,
             "Homepage Themerr click target": "themerr" in selected,
             "Homepage Jellyfin Vue click target": "jellyfin-vue" in selected,
             "Homepage Whisparr click target": "whisparr" in selected,
@@ -313,7 +313,7 @@ def _filter_homepage_env(
         ),
         "Homepage Bazarr click-target and widget variables": "bazarr" in selected,
         "Homepage Seerr click-target and widget variables": "seerr" in selected,
-        "Homepage Velvarr click-target variables": "velvarr" in selected,
+        "Homepage Cruisarr click-target variables": "cruisarr" in selected,
         "Homepage Themerr click-target variables": "themerr" in selected,
         "Homepage Jellyfin Vue click-target variables": "jellyfin-vue" in selected,
         "Homepage Whisparr click-target variables": "whisparr" in selected,
@@ -366,11 +366,7 @@ def _preserve_values(rendered: str, existing: dict[str, str]) -> str:
     lines: list[str] = []
     for line in rendered.splitlines():
         match = assignment.match(line)
-        if (
-            match
-            and match.group("key") != "COMPOSE_PROJECT_NAME"
-            and match.group("key") in existing
-        ):
+        if match and match.group("key") in existing:
             lines.append(existing[match.group("key")])
         else:
             lines.append(line)
@@ -421,8 +417,8 @@ def _generate_first_run_secrets(rendered: str, existing: dict[str, str]) -> str:
         "TRACEARR_JWT_SECRET": secrets.token_hex(32),
         "TRACEARR_COOKIE_SECRET": secrets.token_hex(32),
         "TRACEARR_AUTH_SECRET": secrets.token_hex(32),
-        "VELVARR_SECRET_KEY": secrets.token_hex(32),
-        "VELVARR_SETUP_SECRET": secrets.token_urlsafe(32),
+        "CRUISARR_SECRET_KEY": secrets.token_hex(32),
+        "CRUISARR_SETUP_SECRET": secrets.token_urlsafe(32),
     }
     for key, value in generated.items():
         if key in existing:
@@ -637,7 +633,7 @@ def render_homepage_services(catalog: Catalog, plan: StackPlan) -> str:
         ("sonarr-anime", "Sonarr Anime"),
         ("bazarr", "Bazarr"),
         ("seerr", "Seerr"),
-        ("velvarr", "Velvarr"),
+        ("cruisarr", "Cruisarr"),
         ("themerr", "Themerr"),
         ("whisparr", "Whisparr"),
         ("whisparr-alt", "Whisparr Alt"),
@@ -652,7 +648,7 @@ def render_homepage_services(catalog: Catalog, plan: StackPlan) -> str:
             "jellyfin",
             "jellyfin-vue",
             "calibre-web-automated",
-            "velvarr",
+            "cruisarr",
             "themerr",
             "whisparr",
             "whisparr-alt",

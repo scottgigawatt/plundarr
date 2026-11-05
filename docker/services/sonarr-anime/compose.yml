@@ -6,6 +6,11 @@
 # compose.yml: Maraudarr service chart for a second anime-focused Sonarr.
 #
 
+#
+# Define the project name for this stack.
+#
+name: ${COMPOSE_PROJECT_NAME}
+
 services:
   #
   # Define the 'sonarr-anime' service for managing anime TV shows.

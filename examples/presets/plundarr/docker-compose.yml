@@ -131,6 +131,11 @@ x-sonarr-healthcheck: &sonarr-healthcheck  # YAML anchor for Sonarr healthcheck
       - http://127.0.0.1:8989/ping
 
 #
+# Define the project name for this stack.
+#
+name: ${COMPOSE_PROJECT_NAME}
+
+#
 # Define the services section.
 #
 services:

@@ -55,6 +55,11 @@ x-security-hardening: &security-hardening  # YAML anchor for existing capability
     - no-new-privileges:true               # Prevent processes from gaining privileges
 
 #
+# Define the project name for this stack.
+#
+name: ${COMPOSE_PROJECT_NAME}
+
+#
 # Define the services section.
 #
 services:

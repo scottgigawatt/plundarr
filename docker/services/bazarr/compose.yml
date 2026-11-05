@@ -6,6 +6,11 @@
 # compose.yml: Maraudarr service chart for Bazarr.
 #
 
+#
+# Define the project name for this stack.
+#
+name: ${COMPOSE_PROJECT_NAME}
+
 services:
   #
   # Define the 'bazarr' service for managing subtitles.

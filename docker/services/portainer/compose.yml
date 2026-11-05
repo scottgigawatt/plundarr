@@ -6,6 +6,11 @@
 # compose.yml: Maraudarr service chart for Portainer Community Edition.
 #
 
+#
+# Define the project name for this stack.
+#
+name: ${COMPOSE_PROJECT_NAME}
+
 services:
   #
   # Define the 'portainer' service for Docker management.

@@ -1,0 +1,63 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# compose.yml: Maraudarr service chart for Cruisarr.
+#
+
+#
+# Define the project name for this stack.
+#
+name: ${COMPOSE_PROJECT_NAME}
+
+services:
+  #
+  # Define the 'cruisarr' service for adult-media discovery and requests.
+  #
+  cruisarr:
+    <<:                                   # Merge shared container and security settings
+      - *rootless-container               # Run as the configured host user and group
+      - *security-hardening               # Drop capabilities and prevent privilege escalation
+      - *exclude-from-watchtower-updates  # Private image updates require an authenticated pull
+
+    # Docker image and container information
+    image: ${CRUISARR_IMAGE}:${CRUISARR_TAG}                          # Image repository and tag configured in .env
+    container_name: ${COMPOSE_PROJECT_NAME}-cruisarr-${CRUISARR_TAG}  # Namespace the container name by project and tag
+    hostname: cruisarr                                                # Internal service hostname
+    init: true                                                        # Reap child processes and forward shutdown signals
+    read_only: true                                                   # Keep application code immutable
+
+    # Define the container environment
+    environment:
+      <<: *default-environment                                                     # Reuse the stack timezone
+      CRUISARR_DATA_DIR: /data                                                     # Persistent SQLite database and encrypted settings
+      CRUISARR_SECRET_KEY: ${CRUISARR_SECRET_KEY}                                  # 64 hex characters encrypt stored credentials; keep for recovery
+      CRUISARR_SETUP_SECRET: ${CRUISARR_SETUP_SECRET}                              # At least 32 characters protect the one-time owner setup
+      CRUISARR_ORIGIN: ${CRUISARR_ORIGIN}                                          # Optional browser origin, including scheme and host port
+      CRUISARR_ALLOW_HTTP: ${CRUISARR_ALLOW_HTTP}                                  # 1 permits private-network HTTP; 0 requires HTTPS outside loopback
+      CRUISARR_WHISPARR_LIBRARY_LIMIT_MIB: ${CRUISARR_WHISPARR_LIBRARY_LIMIT_MIB}  # Decoded library response limit in MiB; whole numbers from 2 to 256
+      CRUISARR_UPDATE_CHECK: ${CRUISARR_UPDATE_CHECK}                              # 1 enables private-repository release checks; 0 disables them
+      CRUISARR_DISCORD_WEBHOOK_URL: ${CRUISARR_DISCORD_WEBHOOK_URL}                # Optional HTTPS webhook; empty disables notifications
+      CRUISARR_DISCORD_DETAIL: ${CRUISARR_DISCORD_DETAIL}                          # 1 includes titles; 0 sends identity-only messages
+
+    # Publish the web interface independently of the internal service port
+    ports:
+      - ${CRUISARR_WEBUI_PORT}:6699  # Host web port; the application and healthcheck always use 6699
+
+    # Provide writable scratch space alongside the read-only root filesystem
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m  # 64 MiB maximum; cleared when the container stops
+
+    # Persist the SQLite database and encrypted integration credentials
+    volumes:
+      - ${CRUISARR_CONFIG_PATH}:/data:rw  # Data directory writable by DEFAULT_PUID and DEFAULT_PGID
+
+    # Check storage readiness without requiring owner setup
+    healthcheck:
+      <<: *default-healthcheck-settings  # Reuse the stack healthcheck timing
+      test:                              # Check storage readiness without requiring owner setup
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:6699/api/status').then(response=>process.exit(response.ok?0:1)).catch(()=>process.exit(1))"

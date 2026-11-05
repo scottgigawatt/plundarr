@@ -106,7 +106,7 @@ The community projects have different compatibility and dependency requirements.
 
 ## Add useful menu links
 
-Edit `menuLinks` in the selected `config.json`. Good shared-user choices are **Requests** for Velvarr, **Jellyfin Vue** for the alternative client, and **Help** for your own server instructions. Replace the example URLs with addresses your users can reach:
+Edit `menuLinks` in the selected `config.json`. Good shared-user choices are **Requests** for Cruisarr, **Jellyfin Vue** for the alternative client, and **Help** for your own server instructions. Replace the example URLs with addresses your users can reach:
 
 ```json
 "menuLinks": [
