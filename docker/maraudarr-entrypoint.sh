@@ -3,7 +3,7 @@
 #
 # Copyright 2025-2026 Scott Gigawatt
 #
-# Licensed under the Apache License, Version 2.0.
+# SPDX-License-Identifier: Apache-2.0
 #
 # maraudarr-entrypoint.sh: Launch Maraudarr as PID 1 and forward every command
 #                          argument supplied by Docker or Docker Compose.

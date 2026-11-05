@@ -3,7 +3,7 @@
 #
 # Copyright 2025-2026 Scott Gigawatt
 #
-# Licensed under the Apache License, Version 2.0.
+# SPDX-License-Identifier: Apache-2.0
 #
 # test-maraudarr-image.sh: Validate Maraudarr's local, pull, and build image
 #                          resolution order without contacting a registry.

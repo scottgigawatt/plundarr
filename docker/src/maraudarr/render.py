@@ -1,7 +1,7 @@
 #
 # Copyright 2025-2026 Scott Gigawatt
 #
-# Licensed under the Apache License, Version 2.0.
+# SPDX-License-Identifier: Apache-2.0
 #
 # render.py: Generate Plundarr Compose, environment, and config artifacts.
 #
@@ -57,7 +57,7 @@ def render_header(plan: StackPlan) -> str:
         "#\n"
         "# Copyright 2025-2026 Scott Gigawatt\n"
         "#\n"
-        "# Licensed under the Apache License, Version 2.0.\n"
+        "# SPDX-License-Identifier: Apache-2.0\n"
         "#\n"
         f"{summary}\n"
         "#\n"

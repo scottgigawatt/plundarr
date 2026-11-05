@@ -1,7 +1,7 @@
 #
 # Copyright 2025-2026 Scott Gigawatt
 #
-# Licensed under the Apache License, Version 2.0.
+# SPDX-License-Identifier: Apache-2.0
 #
 # update_preset_examples.py: Refresh only validated preset files on a PR branch.
 #

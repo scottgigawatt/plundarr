@@ -1,7 +1,7 @@
 #
 # Copyright 2025-2026 Scott Gigawatt
 #
-# Licensed under the Apache License, Version 2.0.
+# SPDX-License-Identifier: Apache-2.0
 #
 # docker-compose.demo.yml: Docker Compose override for recording Maraudarr's
 #                          README animation without real PIA credentials or a

@@ -1,5 +1,5 @@
 {
-    "$comment": "Copyright 2025-2026 Scott Gigawatt. Licensed under the Apache License, Version 2.0. config.json: Jellyfin Web settings based on the v12.2 defaults; preserve operator edits.",
+    "$comment": "Copyright 2025-2026 Scott Gigawatt. SPDX-License-Identifier: Apache-2.0 config.json: Jellyfin Web settings based on the v12.2 defaults; preserve operator edits.",
     "includeCorsCredentials": false,
     "multiserver": false,
     "themes": [

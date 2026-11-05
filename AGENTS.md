@@ -1,7 +1,7 @@
 <!--
   Copyright 2025-2026 Scott Gigawatt
 
-  Licensed under the Apache License, Version 2.0.
+  SPDX-License-Identifier: Apache-2.0
 
   AGENTS.md: Contributor and AI-agent operating instructions for Plundarr.
   -->
@@ -80,7 +80,7 @@ Verify claims against source and the supported release; label unreleased behavio
 
 ## Code quality and comments
 
-Code comments use concise plain English rather than pirate language. Project-owned scripts, Dockerfiles, Compose files, environment files, and configuration files should begin with the established copyright, Apache-2.0, and filename summary block.
+Code comments use concise plain English rather than pirate language. Project-owned scripts, Dockerfiles, Compose files, environment files, and configuration files should begin with the established copyright, `SPDX-License-Identifier: Apache-2.0`, and filename summary block. Preserve the blank lines and comment-only separator lines around each header field.
 
 Put a blank line before a standalone explanatory comment that introduces the next logical code block. Keep a short explanatory sentence on one comment line; split comments only when their structure or length genuinely requires it.
 

@@ -3,7 +3,7 @@
 #
 # Copyright 2025-2026 Scott Gigawatt
 #
-# Licensed under the Apache License, Version 2.0.
+# SPDX-License-Identifier: Apache-2.0
 #
 # set-inotify-limits.sh: This script is intended to run directly on a Linux
 #                        host to raise inotify limits for large Plex media
