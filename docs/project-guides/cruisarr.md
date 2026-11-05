@@ -1,12 +1,24 @@
 # Discover and request adult media with Cruisarr 🔞
 
-[Cruisarr](https://github.com/scottgigawatt/cruisarr) discovers adult movies and scenes, sends approved requests to Whisparr v3, and connects users to Jellyfin playback. It is selected by default in Boudoirr alongside Jellyfin; both can be removed independently in the CLI or interactive picker. The private image supports `linux/amd64` and `linux/arm64`; ARMv7 is not supported. You need access to the private repository and GHCR package before launch.
+[Cruisarr](https://github.com/scottgigawatt/cruisarr) discovers adult movies and scenes, sends approved requests to Whisparr v3, and connects users to Jellyfin playback. Boudoirr selects Cruisarr and Jellyfin by default; you can remove either service in the CLI or interactive picker.
 
-Run generation examples from the repository root with `MARAUDARR_IMAGE` set to the [source-built generator](../development/maraudarr/index.md#choose-the-generator-revision) for this checkout.
+Use this guide to generate Boudoirr, complete Cruisarr setup, and maintain its application data.
+
+## Before you start
+
+You need:
+
+- An AMD64 or ARM64 host. The Cruisarr image does not support ARMv7.
+- Access to the private Cruisarr repository and its GitHub Container Registry (GHCR) package. The [authentication procedure](#authenticate-and-select-the-image) uses an account with package access and a personal access token (classic) with `read:packages`.
+- A Jellyfin server, its API key, and an account that can access the intended libraries. Jellyfin provides owner setup and user authentication; Plex alone cannot provide that login.
+- Whisparr v3 and its API key to fulfill requests. Whisparr and Jellyfin can run in this project or on another reachable host.
+- Credentials for the metadata providers you select in Cruisarr. TMDB movie discovery requires a TMDB API read access token; scenes use StashDB.
+
+The examples use Boudoirr. For another preset, replace `boudoirr` in commands and paths with your preset ID.
+
+Run commands from the Plundarr repository root. Set `MARAUDARR_IMAGE` to the [source-built generator](../development/maraudarr/index.md#choose-the-generator-revision) for this checkout before generating a project.
 
 ## Select the services
-
-You need a Jellyfin server, an account allowed to access the intended libraries, and a Jellyfin API key. Jellyfin is required for owner setup and user authentication; Plex alone cannot provide that login. To fulfill requests, also configure Whisparr v3 and its API key. Metadata provider credentials are entered in Cruisarr's interface.
 
 Generate Boudoirr with Cruisarr and a local Jellyfin server:
 
@@ -26,7 +38,7 @@ To omit Cruisarr, clear its initially checked box in `make configure`, or use:
 make ship PRESET=boudoirr REMOVE_SERVICES=cruisarr
 ```
 
-To omit both companions, use `REMOVE_SERVICES=cruisarr,jellyfin`. Other presets can select either service through `ADD_SERVICES` or `make configure`. Whisparr and Jellyfin are recommended integrations, so Maraudarr does not force local containers for either service. Include your complete service selection when regenerating an existing project.
+To omit both companions, use `REMOVE_SERVICES=cruisarr,jellyfin`. Other presets can select either service through `ADD_SERVICES` or `make configure`. Include your complete service selection whenever you regenerate a project.
 
 ## Review the generated defaults
 
@@ -47,13 +59,15 @@ Edit `dist/boudoirr/.env`. Defaults follow Plundarr's existing service conventio
 | `CRUISARR_DISCORD_WEBHOOK_URL` | Empty | Optional private HTTPS Discord webhook |
 | `CRUISARR_DISCORD_DETAIL` | `0` | Send identity-only notifications; `1` also includes titles |
 
-The base host port is `6699`; Boudoirr adds its normal `10000` offset, while Custom adds `30000`. Internal service URLs never receive the host-port offset. Both `.env` and `example.env` contain these defaults, but only `.env` receives generated secrets. Existing assignments, including empty values and operator overrides, survive regeneration exactly.
+The base host port is `6699`. Boudoirr adds `10000`, and Custom adds `30000`. Internal service URLs always use the container port. Only `.env` receives generated secrets; `example.env` remains a secret-free reference. Regeneration preserves existing `.env` assignments, including empty values and operator overrides.
 
-The application runs as `DEFAULT_PUID:DEFAULT_PGID` with `DEFAULT_GROUP`, matching other rootless service charts. Set the shared IDs from `id -u` and `id -g` for your Synology account and confirm that account can write the selected config directory. Cruisarr does not need media or download mounts; it connects to Whisparr and Jellyfin over the project network. SQLite state uses this host bind mount rather than a named volume or separate database service.
+The application runs as `DEFAULT_PUID:DEFAULT_PGID` with `DEFAULT_GROUP`, matching other rootless service charts. Set the shared user and group IDs from `id -u` and `id -g` for your host account. Confirm that account can write the selected config directory before launch. Cruisarr does not need media or download mounts; it connects to Whisparr and Jellyfin over the project network. SQLite state uses this host bind mount rather than a named volume or separate database service.
 
 ## Authenticate and select the image
 
-The generated `.env` and `example.env` default to `ghcr.io/scottgigawatt/cruisarr:latest`. This is a private package: anonymous pulls fail. On the deployment host, authenticate with a GitHub account granted package access and a personal access token (classic) with `read:packages`. Enter the token at the password prompt; keep it out of `.env`, Compose files, shell history, and logs.
+The default image is `ghcr.io/scottgigawatt/cruisarr:latest`. Anonymous pulls fail because the package is private. Keep the registry token out of `.env`, Compose files, shell history, and logs.
+
+On the deployment host, run the following command. Enter your GitHub username and use the personal access token as the password. A successful login reports `Login Succeeded`.
 
 ```sh
 docker login ghcr.io
@@ -61,21 +75,28 @@ docker login ghcr.io
 
 Synology Container Manager must also have authenticated access to `ghcr.io` when it pulls the project. A login on your workstation does not authenticate the NAS. See [Cruisarr's private-image guide](https://github.com/scottgigawatt/cruisarr/blob/main/docs/operations/private-images.md) for package requirements.
 
-The Compose chart uses `${CRUISARR_IMAGE}:${CRUISARR_TAG}`. Keep the repository and tag separate in `dist/boudoirr/.env`; do not put a tag or digest in `CRUISARR_IMAGE`. Publication provides `latest` and `sha-<full-commit>` tags. A GitHub release version does not imply a matching container tag. To select an immutable published revision, use:
+The Compose chart uses `${CRUISARR_IMAGE}:${CRUISARR_TAG}`. Keep the repository and tag separate in `dist/boudoirr/.env`; do not put a tag or digest in `CRUISARR_IMAGE`. Publication provides `latest` and commit-specific `sha-` tags. A GitHub release version does not imply a matching container tag. For example, these assignments select a published source revision:
 
 ```sh
 CRUISARR_IMAGE="ghcr.io/scottgigawatt/cruisarr"
 CRUISARR_TAG="sha-5802d86a077a33932a1a2b858545fc5979ac854c"
 ```
 
-Regeneration preserves these assignments. Cruisarr is excluded from Watchtower updates because the shared Watchtower service has no private-registry credentials. Back up the config and encryption key before an intentional update, review the selected image's requirements, then pull and recreate Cruisarr from the authenticated deployment account:
+Regeneration preserves your image assignments. To update an existing installation, follow [Update Cruisarr](#update-cruisarr) after creating a backup.
+
+## Configure browser access
+
+Set `CRUISARR_ORIGIN` in `.env` when using a reverse proxy. It accepts one exact browser origin: the scheme, hostname or IP address, and a nonstandard port if needed. Omit paths, queries, and trailing slashes. Replace the example address with the one you open:
 
 ```sh
-docker compose --project-directory dist/boudoirr pull cruisarr
-docker compose --project-directory dist/boudoirr up -d cruisarr
+CRUISARR_ORIGIN="https://cruisarr.example.com"
 ```
 
-If pulling reports `unauthorized` or `denied`, check package access and registry authentication on the deployment host. If no matching manifest exists, check the host architecture and selected tag. After recreating, check health, sign-in, saved connections, and request fulfillment.
+For direct private-network HTTP, an example origin is `http://192.168.1.210:16699`. For a Synology HTTPS reverse proxy, forward to host port `16699` and pass `X-Forwarded-Proto: https`.
+
+Keep `CRUISARR_ALLOW_HTTP=1` when Whisparr or Jellyfin connections use private HTTP. Set it to `0` only when those non-loopback connections use HTTPS. The saved **Allow private HTTP** choice in Cruisarr overrides this environment fallback for outgoing connections.
+
+After changing `.env` for a running container, recreate it with `docker compose --project-directory dist/boudoirr up -d cruisarr`. A restart alone does not reload its environment.
 
 ## Launch and complete setup
 
@@ -88,32 +109,40 @@ If pulling reports `unauthorized` or `denied`, check package access and registry
 2. Open your host address on port `16699`, or the configured HTTPS reverse proxy. Read `CRUISARR_SETUP_SECRET` locally from `dist/boudoirr/.env` and supply it during owner setup.
 3. Connect Jellyfin using your account, API key, and selected adult-media libraries. Use `http://jellyfin:8096` for a Jellyfin container in this project. For a separate server, use an address reachable from the Cruisarr container.
 4. Set Jellyfin's external URL to the address users open in their browsers. An internal Docker hostname is not a browser playback address.
-5. Connect Whisparr v3 at `http://whisparr:6969` with its API key. Match Cruisarr's movie provider to the provider chosen in that Whisparr instance, and review root folders, quality profiles, and path mappings. Scenes use StashDB. Whisparr mounts individual libraries beneath `/data`, while Jellyfin mounts the whole media root. With Boudoirr defaults, map main Whisparr's `/data/movies` to Jellyfin's `/data/movies/main` and `/data/scenes` to `/data/scenes/main`. Review mappings when changing host paths.
-6. Configure credentials for each supported provider in Cruisarr's metadata-provider settings. TMDB movie discovery requires a TMDB API read access token. Verify movie and scene request fulfillment independently.
+5. Connect Whisparr v3 at `http://whisparr:6969` with its API key. Select the movie provider configured in that Whisparr instance.
+6. Configure credentials for each selected metadata provider in Cruisarr settings.
 
-Cruisarr supports TPDB and TMDB movies, StashDB scenes, and multiple Whisparr connections. If you select the optional [Whisparr Alt service](https://github.com/scottgigawatt/plundarr/blob/main/docker/services/whisparr-alt/README.md), connect it at `http://whisparr-alt:6969` with its own API key. Assign a movie provider matching each instance's Whisparr configuration and choose the default instance for scenes. Either instance can handle either movie provider. With the default mounts, map Alt's `/data/movies` to Jellyfin's `/data/movies/alt` and `/data/scenes` to `/data/scenes/alt`. Host paths do not select provider identities.
+### Configure Whisparr libraries
 
-Choose root folders, quality profiles, and path mappings independently for movies and scenes on each connection. With this chart, the Whisparr root is `/data` and folder-format prefixes are `movies/` and `scenes/`. Follow [Cruisarr's connection setup](https://github.com/scottgigawatt/cruisarr/blob/main/docs/operations/setup-and-configuration.md#tmdb-movies-and-multiple-whisparr-connections). Admit the intended Jellyfin users in Cruisarr before testing their sign-in.
+Cruisarr supports TPDB and TMDB movies, StashDB scenes, and multiple Whisparr connections. If you select the optional [Whisparr Alt service](https://github.com/scottgigawatt/plundarr/blob/main/docker/services/whisparr-alt/README.md), connect it at `http://whisparr-alt:6969` with its own API key. Either instance can handle either movie provider.
 
-Check that the container becomes healthy:
+Assign each connection the movie provider configured in its Whisparr instance. Choose a default instance for scenes, then set root folders, quality profiles, and path mappings separately for movies and scenes. With this chart, the Whisparr root is `/data` and folder-format prefixes are `movies/` and `scenes/`.
 
-```sh
-make ps PRESET=boudoirr
-```
+Whisparr mounts individual libraries beneath `/data`; Jellyfin mounts the whole media root. Use these mappings with the default host mounts, and review them whenever you change host paths:
 
-The storage-aware `/api/status` healthcheck comes from [upstream's Dockerfile](https://github.com/scottgigawatt/cruisarr/blob/main/Dockerfile), using Plundarr's shared interval, timeout, start period, and retries. It checks that the application can read its data directory; it does not prove owner setup or upstream integrations are complete. Upstream's [Compose example](https://github.com/scottgigawatt/cruisarr/blob/main/compose.yaml) does not set `read_only: true`; Plundarr adds that hardening while leaving `/data` and `/tmp` writable. The chart has no `depends_on` because Cruisarr starts before owner setup and can connect to external Jellyfin and Whisparr servers. `localhost` in a service URL refers to the Cruisarr container, not the Synology host.
+| Library | Whisparr path | Jellyfin path |
+| --- | --- | --- |
+| Main movies | `/data/movies` | `/data/movies/main` |
+| Main scenes | `/data/scenes` | `/data/scenes/main` |
+| Alt movies | `/data/movies` | `/data/movies/alt` |
+| Alt scenes | `/data/scenes` | `/data/scenes/alt` |
 
-`CRUISARR_ORIGIN` is the exact address you open in your browser: scheme, hostname or IP address, and port when nonstandard. It has no path, query, or trailing slash. For example, use one of these values, replacing the example host with yours:
+Host directory names do not select metadata providers. See [Cruisarr connection setup](https://github.com/scottgigawatt/cruisarr/blob/main/docs/operations/setup-and-configuration.md#tmdb-movies-and-multiple-whisparr-connections) for the application settings.
 
-```sh
-CRUISARR_ORIGIN="http://192.168.1.210:16699"
-```
+### Verify setup
 
-```sh
-CRUISARR_ORIGIN="https://cruisarr.example.com"
-```
+1. Check that Cruisarr reports `healthy`:
 
-For a Synology HTTPS reverse proxy, set `CRUISARR_ORIGIN` to the exact browser origin, such as `https://cruisarr.example.com`, forward to host port `16699`, and pass `X-Forwarded-Proto: https`. Keep `CRUISARR_ALLOW_HTTP=1` when internal Whisparr or Jellyfin connections use private HTTP. Set it to `0` only when those non-loopback connections use HTTPS. The saved **Allow private HTTP** choice in Cruisarr overrides this environment fallback for outgoing connections. Recreate the container with `make up PRESET=boudoirr` after changing `.env`; a restart alone does not reload its environment.
+    ```sh
+    make ps PRESET=boudoirr
+    ```
+
+2. Admit the intended Jellyfin users in Cruisarr and test their sign-in.
+3. Check saved provider connections and submit representative movie and scene requests. Confirm that each request reaches the intended Whisparr instance and appears in the expected Jellyfin library after fulfillment.
+
+The `/api/status` healthcheck confirms application storage access. It does not verify owner setup, sign-in, or provider connections. If Cruisarr stays unhealthy, check that the configured host identity can write `CRUISARR_CONFIG_PATH` and inspect the container logs locally. Redact secrets and private details before sharing logs.
+
+If pulling reports `unauthorized` or `denied`, check package access and registry authentication on the deployment host. If no matching manifest exists, check the host architecture and selected tag. An origin error during setup requires `CRUISARR_ORIGIN` to match the browser address. `localhost` in a service connection refers to the Cruisarr container, not your host.
 
 ## Connect Homepage
 
@@ -121,23 +150,68 @@ When Homepage and Cruisarr are selected together, Maraudarr seeds a link card. `
 
 Maraudarr refreshes its generated `config/homepage/services.yaml` from the selected service charts during regeneration. Existing Homepage settings and environment values are preserved; edit the source fragment if you customize generated cards. This card is a link; it does not require an API key or assume compatibility with Seerr's widget.
 
+## Update Cruisarr
+
+Cruisarr is excluded from Watchtower updates because the shared Watchtower service has no private-registry credentials. Use an authenticated deployment account for intentional updates.
+
+1. [Back up the configured data directory](#back-up-and-recover) and retain its encryption key. Review the selected image's release notes and storage requirements.
+2. If selecting another image tag, update `CRUISARR_IMAGE` and `CRUISARR_TAG` in `dist/boudoirr/.env`.
+3. Pull and recreate only Cruisarr:
+
+    ```sh
+    docker compose --project-directory dist/boudoirr pull cruisarr
+    docker compose --project-directory dist/boudoirr up -d cruisarr
+    ```
+
+4. Repeat [setup verification](#verify-setup), including sign-in, saved connections, and request fulfillment.
+
 ## Back up and recover
 
 > [!IMPORTANT]
-> Keep an off-host copy of `CRUISARR_SECRET_KEY` with every backup. The key is not stored in the database backup; losing it prevents recovery of encrypted credentials. `make backup` archives config files, not `.env`.
+> Keep an off-host copy of `CRUISARR_SECRET_KEY` with every backup. Losing the matching key prevents recovery of encrypted credentials.
 
-For a file-copy backup, stop Cruisarr first and copy its entire `config/cruisarr` directory, including any SQLite journal or write-ahead log files. Keep the matching encryption key separately. For a consistent host config archive, stop only Cruisarr while the archive is created. A live SQLite database can have pending writes in its write-ahead log, so do not copy only its main database file while it is running.
+`make backup PRESET=boudoirr` archives `dist/boudoirr/config` by default. It excludes `.env` and any data outside that tree. If `CRUISARR_CONFIG_PATH` points elsewhere, archive that host directory separately. Other applications and named volumes need their own consistent backup methods.
 
-```sh
-docker compose --project-directory dist/boudoirr stop cruisarr
-make backup PRESET=boudoirr
-docker compose --project-directory dist/boudoirr start cruisarr
-```
+### Create a stopped-container backup
 
-Confirm that the archive exists under `dist/boudoirr/backups`, save the matching encryption key separately, and keep a verified off-host copy. If backup fails, start Cruisarr again after investigating the failure.
+Stopping Cruisarr makes its database files safe to copy. It does not make the other applications in a host config archive consistent. Include the complete Cruisarr data directory, including any SQLite journal or write-ahead log files.
 
-Restore the Cruisarr config files from a stopped-container archive into a fresh data directory. Point `CRUISARR_CONFIG_PATH` at that directory, restore the matching `CRUISARR_SECRET_KEY`, check permissions, and recreate Cruisarr. Preserve any SQLite companion files included in the archive. For an upstream online snapshot, restore it as `cruisarr.sqlite` in a fresh directory with the same key; see [Cruisarr backup and recovery](https://github.com/scottgigawatt/cruisarr/blob/main/docs/operations/setup-and-configuration.md#backup-and-recovery).
+1. Stop Cruisarr:
 
-`make down`, `make nuke`, and regeneration preserve this bind-mounted application state. `make delete-config` deletes the host config tree, including Cruisarr data and any backups stored inside that tree. Keep recovery copies outside it. Cruisarr requires intentional authenticated updates. Keep regular backups and review release notes before updating its image.
+    ```sh
+    docker compose --project-directory dist/boudoirr stop cruisarr
+    ```
 
-Your requests deserve a lifeboat, too.
+2. For data inside the default config tree, create the archive:
+
+    ```sh
+    make backup PRESET=boudoirr
+    ```
+
+    For an external data directory, replace `/PATH/TO/CRUISARR-DATA` with the host directory configured by `CRUISARR_CONFIG_PATH`:
+
+    ```sh
+    make backup PRESET=boudoirr CONFIG_PATH="/PATH/TO/CRUISARR-DATA"
+    ```
+
+3. Start Cruisarr again, including after an unsuccessful backup attempt:
+
+    ```sh
+    docker compose --project-directory dist/boudoirr start cruisarr
+    ```
+
+4. Confirm that the backup command succeeded and the reported archive under `dist/boudoirr/backups` contains the Cruisarr data directory and database. Retain an off-host copy with the matching encryption key. If the backup failed, investigate the error and repeat this procedure before treating the archive as a recovery copy.
+
+### Restore into fresh storage
+
+Keep the current data directory and its encryption key until you have verified recovery. Do not extract a backup over a running database or overwrite existing application state.
+
+1. Stop the target Cruisarr container.
+2. Extract the backed-up Cruisarr data into a fresh directory, preserving any SQLite companion files from the stopped-container archive.
+3. In `.env`, point `CRUISARR_CONFIG_PATH` at that directory and restore the matching `CRUISARR_SECRET_KEY`. Give the configured host user and group write access to the directory.
+4. Recreate Cruisarr with `docker compose --project-directory dist/boudoirr up -d cruisarr`.
+5. Verify health, sign-in, saved connections, and requests before returning the service to users.
+
+For an online SQLite snapshot, follow [Cruisarr backup and recovery](https://github.com/scottgigawatt/cruisarr/blob/main/docs/operations/setup-and-configuration.md#backup-and-recovery). Restore that snapshot as `cruisarr.sqlite` in fresh storage with its matching key.
+
+`make down`, `make nuke`, and regeneration preserve bind-mounted application state. `make delete-config` deletes the selected host config tree, including Cruisarr data and backups stored inside it. A `CRUISARR_CONFIG_PATH` outside that tree is not deleted by this target. Keep recovery copies outside the config tree and off the deployment host.
