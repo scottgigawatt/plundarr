@@ -2,9 +2,6 @@
 
 Use Stash to identify, catalog, and play shared adult media.
 
-> [!NOTE]
-> This addition is unreleased. Use a Maraudarr image built from this checkout through [generator revision selection](../development/maraudarr/index.md#choose-the-generator-revision). Keep `MARAUDARR_IMAGE` set to that reference for generation commands on this page.
-
 ## Before you start
 
 Use Docker Compose or DSM 7.4 with Synology Container Manager, following the [main setup guide](../setup.md). Have the media available on the deployment host, sufficient space for previews and cache, and a host user/group with the required media and application-state permissions. Back up existing application settings before changing integrations. StashDB identification needs an account and API key; Stash can scan and play files before that connection is configured.
