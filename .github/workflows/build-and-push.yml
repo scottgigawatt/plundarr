@@ -38,6 +38,7 @@ on:
       - "docs/docker-hub-description.md"
       - ".github/discord/**"
       - ".github/scripts/discord-notifier.sh"
+      - ".github/scripts/notification-tags.sh"
       - ".github/scripts/registry-mirror.sh"
       - ".github/scripts/validate-release-tag.sh"
       - ".github/workflows/build-and-push.yml"
@@ -204,7 +205,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       maraudarr-publication: ${{ steps.publish.outcome }}
-      maraudarr-tags: ${{ steps.metadata.outputs.tags }}
+      maraudarr-tags: ${{ steps.notification-tags.outputs.maraudarr-tags }}
       maraudarr-digest: ${{ steps.publish.outputs.digest }}
       maraudarr-result: ${{ steps.publish.outcome == 'success' && steps.attest.outcome == 'success' && steps.verify-mirror.outcome == 'success' && steps.overview.outcome == 'success' && 'success' || '' }}
       maraudarr-stage: >-
@@ -399,6 +400,24 @@ jobs:
           repository: ${{ github.repository_owner }}/maraudarr
           short-description: "Generate polished Plundarr Docker Compose stacks from presets and selectable services."
           readme-filepath: ./docs/docker-hub-description.md
+
+      #
+      # Export only validated short tags for notifications. Full references remain
+      # local to the build and mirror steps; notification metadata cannot gate publication.
+      #
+      - name: "Prepare the Notification Tag Labels 🏷️"
+        id: notification-tags
+        if: always()
+        continue-on-error: true
+        env:
+          PUBLISHED_TAGS: ${{ steps.metadata.outputs.tags }}
+        run: |
+          notification_tags=$(sh .github/scripts/notification-tags.sh \
+              --image "${GHCR_IMAGE}" --tags "${PUBLISHED_TAGS}")
+
+          # The delimiter contains colons, which cannot occur in a validated short tag.
+          printf 'maraudarr-tags<<:notification-tags:\n%s\n:notification-tags:\n' \
+              "${notification_tags}" >> "${GITHUB_OUTPUT}"
 
   #
   # Report image evidence even when validation fails or publication is skipped.

@@ -7,6 +7,7 @@ These helpers keep reusable release, notification, registry, and preset referenc
 | Helper                    | Purpose                                                            |
 | ------------------------- | ------------------------------------------------------------------ |
 | `discord-notifier.sh`     | Validate inputs, render a selected jq payload, and notify Discord  |
+| `notification-tags.sh`    | Validate short tags and remove only the expected image prefix |
 | `registry-mirror.sh`      | Copy published container tags from GHCR to Docker Hub              |
 | `validate-release-tag.sh` | Require annotated SemVer release tags whose commits belong to main |
 | `update_preset_examples.py` | Commit validated public reference pairs to the current PR branch |
@@ -15,7 +16,7 @@ These helpers keep reusable release, notification, registry, and preset referenc
 
 ## Workflow consumers 🧵
 
-`build-and-push.yml` uses the release-tag, registry-mirror, and notification helpers for guarded multi-registry image publication. The notifier reports image and GitHub Pages starts and results; its documentation profile sends only to Asteres. `validate-pr.yml` uses the separate preset-reference updater described below. Keep helper interfaces explicit so each workflow can be reviewed locally.
+`build-and-push.yml` uses the release, registry, tag, and notification helpers for guarded multi-registry image publication. The notifier reports image and GitHub Pages starts and results; its documentation profile sends only to Asteres. `validate-pr.yml` uses the separate preset-reference updater described below. Keep helper interfaces explicit so each workflow can be reviewed locally.
 
 ## Offline validation 🧪
 
@@ -25,7 +26,7 @@ Run the complete helper and publishing-policy suite without contacting Discord o
 make test-workflows
 ```
 
-The suite uses temporary Git repositories, deterministic payload selection, and a local Skopeo stub. It covers short and long options, release-tag rejection, fixed colors, all notification states and joke variants, metadata limits, publication evidence, isolated delivery failures, registry mirroring, digest comparison, synchronized build pins, and canonical image-tag channels.
+The suite uses temporary Git repositories, deterministic payload selection, and a local Skopeo stub. It covers short and long options, release-tag rejection, fixed colors, all notification states and joke variants, metadata limits, publication evidence, short-tag boundaries, atomic rejection, sanitized HTTP/curl status reporting, registry mirroring, digest comparison, synchronized build pins, and canonical image-tag channels.
 
 ## Preset reference updates
 
