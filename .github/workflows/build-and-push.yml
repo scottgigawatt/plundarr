@@ -49,6 +49,70 @@ permissions:
 
 jobs:
   #
+  # Announce eligible image pipelines independently of validation and registry credentials.
+  # Delivery failures never change publication results or stop another destination.
+  #
+  notify-start:
+    name: "Open the Image Wardrobe 📣 (${{ matrix.image-name }}, ${{ matrix.profile }})"
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: maraudarr
+            image-name: Maraudarr
+            profile: image-primary
+            webhook: DISCORD_WEBHOOK_URL
+            dockerhub: true
+          - image: maraudarr
+            image-name: Maraudarr
+            profile: image-secondary
+            webhook: DISCORD_HADES_HOOK_URL
+            dockerhub: true
+
+    steps:
+      #
+      # Read notification assets without retaining repository credentials.
+      #
+      - name: "Unpack the Notification Wardrobe 🧰"
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      #
+      # Pass metadata as arguments and keep each webhook out of logs.
+      #
+      - name: "Notify Discord: image pipeline started 📣"
+        continue-on-error: true
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets[matrix.webhook] }}
+          IMAGE_NAME: ${{ matrix.image-name }}
+          PROFILE: ${{ matrix.profile }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          REPOSITORY: ${{ github.repository }}
+          REF_NAME: ${{ github.ref_name }}
+          WORKFLOW_NAME: ${{ github.workflow }}
+          ACTOR: ${{ github.actor }}
+          GHCR_IMAGE: ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}
+          DOCKERHUB_IMAGE: ${{ matrix.dockerhub && format('docker.io/{0}/{1}', github.repository_owner, matrix.image) || '' }}
+        run: |
+          sh .github/scripts/discord-notifier.sh \
+              --type "image-start" \
+              --profile "${PROFILE}" \
+              --image-name "${IMAGE_NAME}" \
+              --run-url "${RUN_URL}" \
+              --repository "${REPOSITORY}" \
+              --ref-name "${REF_NAME}" \
+              --workflow-name "${WORKFLOW_NAME}" \
+              --actor "${ACTOR}" \
+              --ghcr-image "${GHCR_IMAGE}" \
+              --dockerhub-image "${DOCKERHUB_IMAGE}" \
+              --platforms "linux/amd64,linux/arm64,linux/arm/v7"
+
+  #
   # Prove that the generator, image, hardened runtime, and dependency scan all
   # pass before any registry receives a new manifest.
   #
@@ -133,6 +197,20 @@ jobs:
     if: github.event_name != 'pull_request'
     needs: test-image
     runs-on: ubuntu-latest
+    outputs:
+      maraudarr-publication: ${{ steps.publish.outcome }}
+      maraudarr-tags: ${{ steps.metadata.outputs.tags }}
+      maraudarr-digest: ${{ steps.publish.outputs.digest }}
+      maraudarr-result: ${{ steps.publish.outcome == 'success' && steps.attest.outcome == 'success' && steps.verify-mirror.outcome == 'success' && steps.overview.outcome == 'success' && 'success' || '' }}
+      maraudarr-stage: >-
+        ${{ steps.release-check.outcome == 'failure' && 'Release tag validation'
+            || steps.publish.outcome == 'failure' && 'Build or GHCR publication'
+            || steps.attest.outcome == 'failure' && 'GHCR provenance attestation'
+            || steps.mirror.outcome == 'failure' && 'Docker Hub mirror'
+            || steps.verify-mirror.outcome == 'failure' && 'Registry digest verification'
+            || steps.overview.outcome == 'failure' && 'Docker Hub description update'
+            || 'Publication or required verification' }}
+      maraudarr-mirror: ${{ steps.mirror.outcome }}
     permissions:
       attestations: write
       contents: read
@@ -159,67 +237,12 @@ jobs:
       # belong to main before any release image can be published.
       #
       - name: "Inspect the Release Chart 🧭"
+        id: release-check
         if: startsWith(github.ref, 'refs/tags/')
         run: |
           .github/scripts/validate-release-tag.sh \
             --release-tag "${{ github.ref_name }}" \
             --release-sha "${{ github.sha }}"
-
-      #
-      # Announce the start independently to each configured Discord destination.
-      # Missing optional webhooks deliberately skip without failing publication.
-      #
-      - name: "Notify Primary Discord: build opened 📣"
-        env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          WORKFLOW_NAME: ${{ github.workflow }}
-          REF_NAME: ${{ github.ref_name }}
-          ACTOR: ${{ github.actor }}
-          REPOSITORY: ${{ github.repository }}
-          GHCR_IMAGE: ${{ env.GHCR_IMAGE }}
-          DOCKERHUB_IMAGE: ${{ env.DOCKERHUB_IMAGE }}
-          IMAGE_PLATFORMS: ${{ env.IMAGE_PLATFORMS }}
-        run: |
-          sh .github/scripts/discord-notifier.sh \
-              --type            image-start \
-              --profile         image-primary \
-              --run-url         "${RUN_URL}" \
-              --repository      "${REPOSITORY}" \
-              --ref-name        "${REF_NAME}" \
-              --workflow-name   "${WORKFLOW_NAME}" \
-              --actor           "${ACTOR}" \
-              --platforms       "${IMAGE_PLATFORMS}" \
-              --ghcr-image      "${GHCR_IMAGE}" \
-              --dockerhub-image "${DOCKERHUB_IMAGE}"
-
-      #
-      # Send the same opening state through the secondary destination profile
-      # so future presentation changes remain isolated from workflow logic.
-      #
-      - name: "Notify Secondary Discord: build opened 📣"
-        env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_HADES_HOOK_URL }}
-          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          WORKFLOW_NAME: ${{ github.workflow }}
-          REF_NAME: ${{ github.ref_name }}
-          ACTOR: ${{ github.actor }}
-          REPOSITORY: ${{ github.repository }}
-          GHCR_IMAGE: ${{ env.GHCR_IMAGE }}
-          DOCKERHUB_IMAGE: ${{ env.DOCKERHUB_IMAGE }}
-          IMAGE_PLATFORMS: ${{ env.IMAGE_PLATFORMS }}
-        run: |
-          sh .github/scripts/discord-notifier.sh \
-              --type            image-start \
-              --profile         image-secondary \
-              --run-url         "${RUN_URL}" \
-              --repository      "${REPOSITORY}" \
-              --ref-name        "${REF_NAME}" \
-              --workflow-name   "${WORKFLOW_NAME}" \
-              --actor           "${ACTOR}" \
-              --platforms       "${IMAGE_PLATFORMS}" \
-              --ghcr-image      "${GHCR_IMAGE}" \
-              --dockerhub-image "${DOCKERHUB_IMAGE}"
 
       #
       # Register QEMU emulation so Buildx can assemble every supported target
@@ -302,6 +325,7 @@ jobs:
       # Attach GitHub-verified provenance to the exact GHCR digest just pushed.
       #
       - name: "Stamp the Provenance Scroll 🧾"
+        id: attest
         uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8  # v4
         with:
           subject-name: ${{ env.GHCR_IMAGE }}
@@ -321,6 +345,7 @@ jobs:
       # Copy every published GHCR tag to Docker Hub without rebuilding the image.
       #
       - name: "Mirror Every Tag to Docker Hub 🐳"
+        id: mirror
         env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -340,6 +365,7 @@ jobs:
       # Compare mirrored manifest digests before updating public documentation.
       #
       - name: "Verify the Registry Mirrors 🔎"
+        id: verify-mirror
         env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -360,6 +386,7 @@ jobs:
       # image documentation after the registry contents have been verified.
       #
       - name: "Update the Docker Hub Chart 📘"
+        id: overview
         uses: peter-evans/dockerhub-description@1b9a80c056b620d92cedb9d9b5a223409c68ddfa  # v5.0.0
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -368,64 +395,81 @@ jobs:
           short-description: "Generate polished Plundarr Docker Compose stacks from presets and selectable services."
           readme-filepath: ./docs/docker-hub-description.md
 
+  #
+  # Report image evidence even when validation fails or publication is skipped.
+  # Delivery failures never change publication results or stop another destination.
+  #
+  notify-result:
+    name: "Read the Image Receipts 📣 (${{ matrix.image-name }}, ${{ matrix.profile }})"
+    if: always() && github.event_name != 'pull_request'
+    needs: [notify-start, test-image, publish-image]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: maraudarr
+            image-name: Maraudarr
+            profile: image-primary
+            webhook: DISCORD_WEBHOOK_URL
+            dockerhub: true
+          - image: maraudarr
+            image-name: Maraudarr
+            profile: image-secondary
+            webhook: DISCORD_HADES_HOOK_URL
+            dockerhub: true
+
+    steps:
       #
-      # Report the final job state to both optional Discord destinations. These
-      # steps run on success or failure so a broken voyage never disappears.
+      # Read notification assets without retaining repository credentials.
       #
-      - name: "Notify Primary Discord: build verdict 📣"
-        if: always()
-        env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          JOB_STATUS: ${{ job.status }}
-          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          REPOSITORY: ${{ github.repository }}
-          REF_NAME: ${{ github.ref_name }}
-          GHCR_IMAGE: ${{ env.GHCR_IMAGE }}
-          GHCR_PACKAGE_URL: ${{ github.server_url }}/${{ github.repository }}/pkgs/container/maraudarr
-          DOCKERHUB_URL: https://hub.docker.com/r/${{ github.repository_owner }}/maraudarr
-          PUBLISHED_TAGS: ${{ steps.metadata.outputs.tags }}
-          PUBLISHED_DIGEST: ${{ steps.publish.outputs.digest }}
-        run: |
-          sh .github/scripts/discord-notifier.sh \
-              --type             image-verdict \
-              --profile          image-primary \
-              --run-url          "${RUN_URL}" \
-              --repository       "${REPOSITORY}" \
-              --ref-name         "${REF_NAME}" \
-              --job-status       "${JOB_STATUS}" \
-              --ghcr-image       "${GHCR_IMAGE}" \
-              --ghcr-package-url "${GHCR_PACKAGE_URL}" \
-              --dockerhub-url    "${DOCKERHUB_URL}" \
-              --published-tags   "${PUBLISHED_TAGS}" \
-              --published-digest "${PUBLISHED_DIGEST}"
+      - name: "Unpack the Notification Wardrobe 🧰"
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
 
       #
-      # Send the same final state to the optional Hades destination even when an
-      # earlier publication step failed.
+      # Pass metadata as arguments and keep each webhook out of logs.
       #
-      - name: "Notify Secondary Discord: build verdict 📣"
-        if: always()
+      - name: "Notify Discord: image pipeline result 📣"
+        continue-on-error: true
         env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_HADES_HOOK_URL }}
-          JOB_STATUS: ${{ job.status }}
+          DISCORD_WEBHOOK_URL: ${{ secrets[matrix.webhook] }}
+          IMAGE_NAME: ${{ matrix.image-name }}
+          PROFILE: ${{ matrix.profile }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           REPOSITORY: ${{ github.repository }}
           REF_NAME: ${{ github.ref_name }}
-          GHCR_IMAGE: ${{ env.GHCR_IMAGE }}
-          GHCR_PACKAGE_URL: ${{ github.server_url }}/${{ github.repository }}/pkgs/container/maraudarr
-          DOCKERHUB_URL: https://hub.docker.com/r/${{ github.repository_owner }}/maraudarr
-          PUBLISHED_TAGS: ${{ steps.metadata.outputs.tags }}
-          PUBLISHED_DIGEST: ${{ steps.publish.outputs.digest }}
+          WORKFLOW_NAME: ${{ github.workflow }}
+          ACTOR: ${{ github.actor }}
+          GHCR_IMAGE: ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}
+          DOCKERHUB_IMAGE: ${{ matrix.dockerhub && format('docker.io/{0}/{1}', github.repository_owner, matrix.image) || '' }}
+          JOB_STATUS: ${{ needs.publish-image.outputs[format('{0}-result', matrix.image)] || (needs.test-image.result != 'success' && needs.test-image.result) || needs.publish-image.result }}
+          PUBLICATION_STATUS: ${{ needs.publish-image.outputs[format('{0}-publication', matrix.image)] }}
+          MIRROR_STATUS: ${{ needs.publish-image.outputs[format('{0}-mirror', matrix.image)] }}
+          FAILURE_STAGE: ${{ needs.test-image.result != 'success' && 'Image validation' || needs.publish-image.outputs[format('{0}-stage', matrix.image)] }}
+          PUBLISHED_TAGS: ${{ needs.publish-image.outputs[format('{0}-tags', matrix.image)] }}
+          PUBLISHED_DIGEST: ${{ needs.publish-image.outputs[format('{0}-digest', matrix.image)] }}
+          GHCR_PACKAGE_URL: ${{ github.server_url }}/${{ github.repository }}/pkgs/container/${{ matrix.image }}
+          DOCKERHUB_URL: ${{ matrix.dockerhub && format('https://hub.docker.com/r/{0}/{1}', github.repository_owner, matrix.image) || '' }}
         run: |
           sh .github/scripts/discord-notifier.sh \
-              --type             image-verdict \
-              --profile          image-secondary \
-              --run-url          "${RUN_URL}" \
-              --repository       "${REPOSITORY}" \
-              --ref-name         "${REF_NAME}" \
-              --job-status       "${JOB_STATUS}" \
-              --ghcr-image       "${GHCR_IMAGE}" \
+              --type "image-verdict" \
+              --profile "${PROFILE}" \
+              --image-name "${IMAGE_NAME}" \
+              --run-url "${RUN_URL}" \
+              --repository "${REPOSITORY}" \
+              --ref-name "${REF_NAME}" \
+              --workflow-name "${WORKFLOW_NAME}" \
+              --actor "${ACTOR}" \
+              --ghcr-image "${GHCR_IMAGE}" \
+              --job-status "${JOB_STATUS}" \
+              --publication-status "${PUBLICATION_STATUS}" \
+              --mirror-status "${MIRROR_STATUS}" \
+              --failure-stage "${FAILURE_STAGE}" \
               --ghcr-package-url "${GHCR_PACKAGE_URL}" \
-              --dockerhub-url    "${DOCKERHUB_URL}" \
-              --published-tags   "${PUBLISHED_TAGS}" \
+              --dockerhub-url "${DOCKERHUB_URL}" \
+              --published-tags "${PUBLISHED_TAGS}" \
               --published-digest "${PUBLISHED_DIGEST}"
