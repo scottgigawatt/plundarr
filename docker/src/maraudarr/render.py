@@ -502,6 +502,10 @@ def render_environment(
         "HOST_SCENES_PATH": ("/volume1/plex/scenes", f"{media_root}/scenes"),
         "JELLYFIN_DATA_PATH": ("/volume1/jellyfin", media_root),
         "STASH_DATA_PATH": ("/volume1/jellyfin", media_root),
+        "STASH_CREATORS_PATH": (
+            "/volume1/jellyfin/scenes/creators",
+            f"{media_root}/scenes/creators",
+        ),
         "WHISPARR_DATA_PATH": ("/volume1/media/adult", media_root),
         "WHISPARR_IMPORT_PATH": ("/volume1/media/adult/import", f"{media_root}/import"),
         "WHISPARR_MOVIES_PATH": ("/volume1/media/adult/movies/main", f"{media_root}/movies/main"),

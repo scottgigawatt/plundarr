@@ -412,7 +412,9 @@ class UI:
             steps.append("Complete Cruisarr setup with Jellyfin, then connect Whisparr v3.")
 
         if "stash" in selected:
-            steps.append("Check Stash's writable state paths and read-only media root in .env.")
+            steps.append(
+                "Check Stash's state and media paths in .env; prepare its writable creators directory."
+            )
             steps.append(
                 "After launch, create a Stash account and scan only the intended video libraries."
             )

@@ -41,7 +41,7 @@ services:
     ports:
       - ${STASH_WEBUI_PORT}:9999  # Browser access; internal integrations use http://stash:9999
 
-    # Share media read-only while persisting Stash's independent application state.
+    # Protect shared media while allowing organization inside the creators directory.
     volumes:
       - ${STASH_CONFIG_PATH}:/config:rw        # Configuration, database, plugins, and scrapers
       - ${STASH_METADATA_PATH}:/metadata:rw    # Metadata exports and application backups
@@ -49,6 +49,14 @@ services:
       - ${STASH_BLOBS_PATH}:/blobs:rw          # Covers and performer images
       - ${STASH_GENERATED_PATH}:/generated:rw  # Generated previews and transcodes
       - ${STASH_DATA_PATH}:/data:ro            # Same media root and internal paths as Jellyfin
+
+      # Require the existing creators directory instead of creating a root-owned bind source.
+      - type: bind                          # Writable exception within the shared read-only media root
+        source: ${STASH_CREATORS_PATH}       # Same host directory as STASH_DATA_PATH/scenes/creators
+        target: /data/scenes/creators        # Stash owns organization and sidecar files only here
+        read_only: false                    # Allow creator video moves, renames, NFO files, and artwork
+        bind:                               # Keep external media directories operator-managed
+          create_host_path: false           # Fail startup when the configured creators directory is missing
 
     # Check the unauthenticated heartbeat without exposing application credentials.
     healthcheck:

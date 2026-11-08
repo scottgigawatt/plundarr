@@ -211,7 +211,7 @@ order = 420
 # Stash catalogs shared media independently of Jellyfin and Whisparr.
 [services.stash]
 title = "Stash"
-description = "Identifies, catalogs, and plays adult media with read-only access to shared files."
+description = "Catalogs shared adult media and supports organization in a separate creators directory."
 category = "Media servers"
 url = "https://stashapp.cc/"
 order = 421

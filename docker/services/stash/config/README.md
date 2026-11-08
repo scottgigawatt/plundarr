@@ -4,7 +4,7 @@ Maraudarr creates the `config`, `metadata`, `cache`, `blobs`, and `generated` di
 
 ## Before launch
 
-Confirm that `DEFAULT_PUID`, `DEFAULT_PGID`, and `DEFAULT_GROUP` allow writing all five state directories and reading `STASH_DATA_PATH`. The media mount is read-only. Set a Stash username and password during first-run setup, then scan only the intended video library roots. StashDB and application API keys are separate credentials; enter them in the owning applications and keep them out of logs and source control.
+Confirm that `DEFAULT_PUID`, `DEFAULT_PGID`, and `DEFAULT_GROUP` allow writing all five state directories and reading `STASH_DATA_PATH`. Create `STASH_CREATORS_PATH` as the shared root's `scenes/creators` directory with write permissions for that identity before launch. A missing creators directory prevents startup. Other shared media remains read-only. Set a Stash username and password during first-run setup, then select individual video library directories. Include `unmatched` if wanted and omit `unsorted` staging directories. Restrict organization and NFO export to `/data/scenes/creators`. Metadata-provider and application API keys are separate credentials; enter them in the owning applications and keep them out of logs and source control.
 
 ## Backups and recovery
 

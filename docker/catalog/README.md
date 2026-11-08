@@ -8,7 +8,7 @@ Each preset owns its Compose project name, network defaults, high-level media ro
 
 Preset `core` services cannot be removed. Preset `defaults` are only preselected in the interactive picker and may be unchecked. Plundarr and Boudoirr use this boundary to default to qBittorrent and Watchtower while leaving SABnzbd and NZBGet as independent opt-in services. Calibre-Web Automated is another removable Plundarr default and the only core service in its standalone preset. The focused Watchtower preset makes the same updater available as its own persistent or one-shot project.
 
-Boudoirr also preselects Cruisarr, Jellyfin, and Stash as independently removable companions. Stash has no required companion services and mounts the preset media root read-only at `/data`.
+Boudoirr also preselects Cruisarr, Jellyfin, and Stash as independently removable companions. Stash has no required companion services. It mounts the preset media root read-only at `/data`, with a writable exception at `/data/scenes/creators`.
 
 Preset bridge networks have distinct, sequential defaults. Operators can change the subnet, address pool, and gateway together in the generated `.env` to suit their host.
 
