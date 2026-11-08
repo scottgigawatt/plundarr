@@ -13,7 +13,8 @@
         "test/typing",
         "scripts/compose/preset_examples.py",
         ".github/scripts/update_preset_examples.py",
-        "test/helpers/test_preset_examples.py"
+        "test/helpers/test_preset_examples.py",
+        "test/helpers/test_discord_secret_scope.py"
     ],
     "exclude": [
         "**/node_modules",
