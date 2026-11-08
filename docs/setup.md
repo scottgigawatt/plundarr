@@ -49,7 +49,7 @@ Homepage requires v2 or later for native login. Generated secrets are created wh
 
 Boudoirr selects removable Cruisarr, Jellyfin, and Stash companions. Use `REMOVE_SERVICES=jellyfin` for an existing Jellyfin server, `REMOVE_SERVICES=cruisarr` to omit requests, or `REMOVE_SERVICES=stash` to omit cataloging. Combine their IDs to omit several companions. Jellyfin provides Cruisarr login; Plex cannot replace it. Follow the [Cruisarr setup guide](project-guides/cruisarr.md) for private GHCR authentication, architecture support, owner setup, paths, and recovery.
 
-The [Stash guide](project-guides/stash.md) covers shared media, the writable creators directory, first-run identification, Jellyfin connections, and backup/recovery.
+The [Stash guide](project-guides/stash.md) covers storage, first-run identification, Jellyfin connections, and backup/recovery.
 
 The optional [Whisparr Alt guide](https://github.com/scottgigawatt/plundarr/blob/main/docker/services/whisparr-alt/README.md) covers a second instance. Keep its database, libraries, categories, and API key separate. Movie providers are selected in Whisparr; directory names do not select them.
 

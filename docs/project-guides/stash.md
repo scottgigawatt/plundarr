@@ -1,13 +1,13 @@
 # Add Stash to a shared media library
 
-Use Stash to catalog the same adult-media files that Jellyfin plays, while organizing creator media separately from Whisparr's managed files.
+Use Stash to identify, catalog, and play shared adult media.
 
 > [!NOTE]
 > This addition is unreleased. Use a Maraudarr image built from this checkout through [generator revision selection](../development/maraudarr/index.md#choose-the-generator-revision). Keep `MARAUDARR_IMAGE` set to that reference for generation commands on this page.
 
 ## Before you start
 
-Use Docker Compose or DSM 7.4 with Synology Container Manager, following the [main setup guide](../setup.md). Have the media available on the deployment host, sufficient space for previews and cache, and a host user/group that can read the media and write Stash state and creator media. Back up existing application settings before changing integrations. StashDB identification needs an account and API key; Stash can scan and play files before that connection is configured.
+Use Docker Compose or DSM 7.4 with Synology Container Manager, following the [main setup guide](../setup.md). Have the media available on the deployment host, sufficient space for previews and cache, and a host user/group with the required media and application-state permissions. Back up existing application settings before changing integrations. StashDB identification needs an account and API key; Stash can scan and play files before that connection is configured.
 
 The chart uses the official stable `stashapp/stash:latest` image. Confirm architecture support for the selected tag before deploying. No GPU access is configured. Preview generation and simultaneous transcoding can compete with Jellyfin for CPU, memory, and disk access; start with a small library and schedule bulk processing during idle time.
 
@@ -35,30 +35,30 @@ Other presets can add Stash with `ADD_SERVICES=stash`. Repeat the complete inten
 
 ## Review storage and ports
 
-Edit `dist/boudoirr/.env` before launch. Keep `STASH_DATA_PATH` and `JELLYFIN_DATA_PATH` pointed at the same host media root when using local Jellyfin. Both expose it as `/data`. Stash reads the shared root and can write only its `/data/scenes/creators` child. Existing path overrides are preserved rather than synchronized automatically.
+Edit `dist/boudoirr/.env` before launch. Keep `STASH_DATA_PATH` and `JELLYFIN_DATA_PATH` pointed at the same host media root when using local Jellyfin. Both expose it as `/data`. Review the read-only and writable mounts below before enabling file changes in Stash. Existing path overrides are preserved rather than synchronized automatically.
 
 | Setting | Boudoirr default | Review |
 | --- | --- | --- |
 | `STASH_WEBUI_PORT` | `19999` | Change for a host-port conflict; container port remains `9999` |
-| `STASH_DATA_PATH` | `/volume1/jellyfin` | Same media root as Jellyfin; read-only outside the creators directory |
-| `STASH_CREATORS_PATH` | `/volume1/jellyfin/scenes/creators` | Existing `scenes/creators` child of the shared media root; writable organization and sidecar files |
+| `STASH_DATA_PATH` | `/volume1/jellyfin` | Shared media root; read-only |
+| `STASH_CREATORS_PATH` | `/volume1/jellyfin/scenes/creators` | Writable mount at `/data/scenes/creators`; use the matching child of the shared root |
 | `STASH_CONFIG_PATH` | `./config/stash/config` | Configuration, database, plugins, and scrapers |
 | `STASH_METADATA_PATH` | `./config/stash/metadata` | Metadata exports and application backups |
 | `STASH_CACHE_PATH` | `./config/stash/cache` | Processing and streaming cache |
 | `STASH_BLOBS_PATH` | `./config/stash/blobs` | Images when filesystem blob storage is selected |
 | `STASH_GENERATED_PATH` | `./config/stash/generated` | Previews, sprites, and transcodes |
 
-Stash runs as the configured `DEFAULT_PUID:DEFAULT_PGID`, with `DEFAULT_GROUP`. Before launch, create the creators directory and allow that identity to write it. Point `STASH_CREATORS_PATH` at the same physical directory as `STASH_DATA_PATH/scenes/creators`, so Jellyfin and Stash see the same files. A missing creators directory prevents startup. The container does not repair ownership. If a bind source is outside the generated config tree, create it yourself and include durable external state in backups. Do not share Stash's database or config directory with Jellyfin or Whisparr.
+Stash runs as the configured `DEFAULT_PUID:DEFAULT_PGID`, with `DEFAULT_GROUP`. Prepare host bind sources and grant that identity the access listed above. `STASH_CREATORS_PATH` must refer to the same physical directory as `STASH_DATA_PATH/scenes/creators`, so both applications see the same files. This bind source must exist before launch. The container does not repair ownership. If a bind source is outside the generated config tree, create it yourself and include durable external state in backups. Do not share Stash's database or config directory with Jellyfin or Whisparr.
 
 ## Start and identify media
 
 1. Launch the generated project using the [main launch procedure](../setup.md#launch-with-docker-compose). Open your deployment host on port `19999`, adjusted for `STASH_WEBUI_PORT`, and complete Stash's setup wizard. Set a username and password before granting access to other users or exposing the service through a reverse proxy.
 2. Retain `/config/config.yml` and the database under `/config`. Use `/generated`, `/metadata`, `/cache`, and `/blobs` for their corresponding storage settings. Image blobs may be kept in the database; `/blobs` is available when you choose filesystem storage.
-3. Under **Settings > Library**, add the individual directories you want cataloged as video-only paths, such as `/data/movies/main`, `/data/movies/alt`, `/data/movies/unmatched`, `/data/scenes/main`, `/data/scenes/alt`, `/data/scenes/creators`, and `/data/scenes/unmatched`. Add only directories that exist and match your intended Jellyfin selection. Leave `unsorted`, import, and recycling directories out; selecting a parent includes its subdirectories. Exclude images so existing artwork does not become separate gallery items.
+3. Under **Settings > Library**, add the individual directories you want cataloged as video-only paths. Match your intended Jellyfin selection and omit staging and recycling directories. Selecting a parent includes its subdirectories. Exclude images so existing artwork does not become separate gallery items.
 4. Scan a small folder first. Confirm the expected scene count, open an item, and test playback. A healthy container only confirms its heartbeat; it does not establish successful scanning or matching.
 5. Follow [Accessing StashDB](https://guidelines.stashdb.org/docs/faq_getting-started/stashdb/accessing-stashdb/) to obtain an API key. Add `https://stashdb.org/graphql` under Stash's **Settings > Metadata Providers > Stash-box Endpoints**, then use the [scene tagger](https://docs.stashapp.cc/in-app-manual/tagger/) to identify a sample. Review the match before saving or processing the rest of the library.
 
-Stash maintains its own metadata; enabling this service does not import existing Whisparr NFO files. Whisparr owns its managed files. For creator media, add the [FansDB endpoint](https://docs.fansdb.cc/guides/scraping-scenes-from-fansdb/) in Stash and optionally use [mcMetadata](https://github.com/carrotwaxr/stash-plugins/blob/main/plugins/mcMetadata/README.md) for NFO export and organization. Restrict its **Include Paths** to `/data/scenes/creators/*`, leave **Require StashDB Link** off for FansDB matches, and review a dry run before enabling writes or renaming. Use your preferred Whisparr naming format as the reference for its filename template.
+Stash maintains its own metadata; enabling this service does not import existing NFO files. Configure optional providers and plugins in Stash using their upstream instructions, such as [FansDB](https://docs.fansdb.cc/guides/scraping-scenes-from-fansdb/) and [mcMetadata](https://github.com/carrotwaxr/stash-plugins/blob/main/plugins/mcMetadata/README.md). Limit file-changing plugins to writable paths and review a dry run before enabling changes.
 
 ## Connect Jellyfin deliberately
 
