@@ -32,7 +32,9 @@ Reference generation validates both the generated `.env` and public `example.env
 make test-workflows
 ```
 
-This offline suite validates annotated release tags and main-branch ancestry, randomized build and documentation Discord payloads, both short and long command-line flags, registry tag mirroring, and cross-registry digest comparison. It uses fixture repositories, dry-run payloads, and a local Skopeo stub, so it never contacts Discord or either container registry.
+The [notification guide](https://github.com/scottgigawatt/plundarr/blob/main/.github/discord/README.md) explains destinations, copy edits, and previews. The notifier fixtures cover image and documentation starts and results, every themed variant, fixed colors, publication evidence, metadata limits, and isolated delivery failures.
+
+The suite also validates annotated release tags and main-branch ancestry, both short and long command-line flags, registry tag mirroring, and digest comparison. It uses fixture repositories, dry-run payloads, and a local Skopeo stub, so it never contacts Discord or either container registry.
 
 The same target enforces synchronized SHA-256 build pins across Dockerfiles, the root example environment, and the build workflow. Every Docker metadata block must also expose the canonical `latest`, `edge`, `sha-...`, exact SemVer, minor, and stable-major channels. Disposable negative fixtures prove the checks reject drift rather than merely accepting the current repository.
 

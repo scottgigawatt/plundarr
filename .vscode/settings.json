@@ -12,6 +12,9 @@
     // Accept project names, dependencies, and intentional pirate vocabulary.
     //
     "cSpell.words": [
+        "govulncheck",
+        "rootfs",
+        "startswith",
         "absmiddle",
         "ensurepip",
         "metapackage",
@@ -32,6 +35,7 @@
         "appletv",
         "aquasecurity",
         "argjson",
+        "Asteres",
         "Arrr",
         "Atheris",
         "autoclean",
