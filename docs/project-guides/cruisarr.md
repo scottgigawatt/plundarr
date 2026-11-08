@@ -1,6 +1,6 @@
 # Discover and request adult media with Cruisarr 🔞
 
-[Cruisarr](https://github.com/scottgigawatt/cruisarr) discovers adult movies and scenes, sends approved requests to Whisparr v3, and connects users to Jellyfin playback. Boudoirr selects Cruisarr and Jellyfin by default; you can remove either service in the CLI or interactive picker.
+[Cruisarr](https://github.com/scottgigawatt/cruisarr) discovers adult movies and scenes, sends approved requests to Whisparr v3, and connects users to Jellyfin playback. Boudoirr selects Cruisarr, Jellyfin, and [Stash](stash.md) by default; you can remove each service in the CLI or interactive picker.
 
 Use this guide to generate Boudoirr, complete Cruisarr setup, and maintain its application data.
 
@@ -38,7 +38,7 @@ To omit Cruisarr, clear its initially checked box in `make configure`, or use:
 make ship PRESET=boudoirr REMOVE_SERVICES=cruisarr
 ```
 
-To omit both companions, use `REMOVE_SERVICES=cruisarr,jellyfin`. Other presets can select either service through `ADD_SERVICES` or `make configure`. Include your complete service selection whenever you regenerate a project.
+To omit requests and local Jellyfin playback while retaining Stash, use `REMOVE_SERVICES=cruisarr,jellyfin`. Add `stash` to that list to omit all three companions. Other presets can select either service through `ADD_SERVICES` or `make configure`. Include your complete service selection whenever you regenerate a project.
 
 ## Review the generated defaults
 

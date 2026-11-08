@@ -334,7 +334,7 @@ class CruisarrTests(unittest.TestCase):
         ui = UI()
         ui.plain = False
 
-        for service_id in ("cruisarr", "jellyfin"):
+        for service_id in ("cruisarr", "jellyfin", "stash"):
             with (
                 self.subTest(service=service_id),
                 patch("maraudarr.ui.sys.stdin.isatty", return_value=True),

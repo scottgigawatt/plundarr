@@ -98,6 +98,9 @@ services:
       # Homepage Themerr click target
       HOMEPAGE_VAR_THEMERR_HREF: ${HOMEPAGE_VAR_THEMERR_HREF}
 
+      # Homepage Stash click target
+      HOMEPAGE_VAR_STASH_HREF: ${HOMEPAGE_VAR_STASH_HREF}
+
       # Homepage Cruisarr click target
       HOMEPAGE_VAR_CRUISARR_HREF: ${HOMEPAGE_VAR_CRUISARR_HREF}
 

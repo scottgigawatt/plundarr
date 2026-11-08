@@ -146,4 +146,6 @@ Plugins are optional; the generated stack installs none automatically. Use Jelly
 
 Back up server config, install one compatible plugin through **Dashboard > Plugins**, restart Jellyfin, and test the intended behavior on a small library subset. Keep Whisparr-owned NFOs authoritative for managed media. Web-injection plugins may not affect Vue or native apps. Restrict notification destinations and watch-history sharing deliberately.
 
+Follow the [Stash setup guide](stash.md) to add the optional service and connect it to Jellyfin.
+
 Reports can help audit metadata; collection, subtitle, and preview plugins should solve a specific need. Native Trickplay already provides thumbnails. Keep the local CSS theme independent of plugins and avoid installing several overlapping enhancements at once. Your server does not need every plugin in the harbor.

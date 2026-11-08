@@ -15,6 +15,7 @@ import io
 import os
 import unittest
 from contextlib import redirect_stdout
+from itertools import combinations
 from pathlib import Path
 from unittest.mock import patch
 
@@ -79,10 +80,12 @@ class MaraudarrCliTests(unittest.TestCase):
             )
 
     def test_boudoirr_cli_default_and_removal_reach_the_generation_plan(self) -> None:
-        """Keep both companions selected initially and independently removable."""
+        """Keep all three companions selected initially and independently removable."""
         plans: list[StackPlan] = []
-        removals = ("", "cruisarr", "jellyfin", "cruisarr,jellyfin")
-        companions = {"cruisarr", "jellyfin"}
+        companions = {"cruisarr", "jellyfin", "stash"}
+        removals = tuple(
+            ",".join(group) for size in range(4) for group in combinations(sorted(companions), size)
+        )
 
         def capture_write(catalog: Catalog, plan: StackPlan, output: Path, ui: UI) -> int:
             """Record resolved selections without writing private deployment files."""
@@ -104,20 +107,22 @@ class MaraudarrCliTests(unittest.TestCase):
             self.assertEqual(companions.intersection(plan.service_ids), companions - omitted)
 
     def test_boudoirr_interactive_default_can_be_unchecked(self) -> None:
-        """Keep Cruisarr and Jellyfin checked initially without making either core."""
+        """Keep all three companions checked initially without making them core."""
         ui = UI(plain=True)
         offered: list[set[str]] = []
         defaults: list[set[str]] = []
         plans: list[StackPlan] = []
-        removals = ("", "cruisarr", "jellyfin", "cruisarr,jellyfin")
-        companions = {"cruisarr", "jellyfin"}
+        companions = {"cruisarr", "jellyfin", "stash"}
+        removals = tuple(
+            ",".join(group) for size in range(4) for group in combinations(sorted(companions), size)
+        )
 
         for removed in removals:
 
             def choose_services(
                 services: list[Service], selected: set[str], *, omit: str = removed
             ) -> set[str]:
-                """Keep defaults or simulate unchecking either or both companions."""
+                """Keep defaults or simulate unchecking any combination of companions."""
                 offered.append({service.id for service in services})
                 defaults.append(selected.copy())
                 return selected - {name for name in omit.split(",") if name}

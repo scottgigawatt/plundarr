@@ -15,6 +15,7 @@ Pick the chart that matches the work ahead:
 - [Manage Plex and Jellyfin theme songs](themerr.md) 🎵
 - [Discover and request adult media with Cruisarr](cruisarr.md) 🔞
 - [Customize Jellyfin Web and Vue](jellyfin.md) 🎞️
+- [Catalog a shared media library with Stash](stash.md)
 - [Run Plundarr test voyages](testing.md) 🧪
 - [Use the host helper scripts](scripts.md) 🦜
 - [Contribute to the project](../CONTRIBUTING.md) 🛠️
