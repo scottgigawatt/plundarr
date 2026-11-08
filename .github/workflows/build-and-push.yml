@@ -20,6 +20,7 @@ on:
     tags:
       - "v*.*.*"
     paths:
+      - ".trivyignore.yaml"
       - "docker/**"
       - "docker-compose.maraudarr.yml"
       - "example.maraudarr.env"
@@ -171,6 +172,8 @@ jobs:
       # Keep HIGH and CRITICAL fixed vulnerabilities out of the published image.
       #
       - name: "Scan Maraudarr for Bilge Rot 🔍"
+        env:
+          TRIVY_SHOW_SUPPRESSED: "true"
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25  # v0.36.0
         with:
           image-ref: ghcr.io/${{ github.repository_owner }}/maraudarr:scan
@@ -178,6 +181,9 @@ jobs:
           vuln-type: os,library
           severity: CRITICAL,HIGH
           ignore-unfixed: true
+
+          # The exact-path exception expires automatically; retain every other finding.
+          trivyignores: .trivyignore.yaml
           exit-code: 1
 
       #
