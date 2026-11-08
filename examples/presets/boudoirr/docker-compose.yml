@@ -549,12 +549,12 @@ services:
       - ${STASH_DATA_PATH}:/data:ro            # Same media root and internal paths as Jellyfin
 
       # Require an existing writable bind source instead of creating a root-owned directory.
-      - type: bind                          # Writable exception within the shared read-only media root
-        source: ${STASH_CREATORS_PATH}       # Same host directory as STASH_DATA_PATH/scenes/creators
-        target: /data/scenes/creators        # Writable media directory
-        read_only: false                    # Allow file changes within this mount
-        bind:                               # Keep external media directories operator-managed
-          create_host_path: false           # Fail startup when the configured bind source is missing
+      - type: bind                      # Writable exception within the shared read-only media root
+        source: ${STASH_CREATORS_PATH}  # Same host directory as STASH_DATA_PATH/scenes/creators
+        target: /data/scenes/creators   # Writable media directory
+        read_only: false                # Allow file changes within this mount
+        bind:                           # Keep external media directories operator-managed
+          create_host_path: false       # Fail startup when the configured bind source is missing
 
     # Check the unauthenticated heartbeat without exposing application credentials.
     healthcheck:
