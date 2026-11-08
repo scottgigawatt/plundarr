@@ -208,6 +208,14 @@ category = "Media servers"
 url = "https://jellyfin.org"
 order = 420
 
+# Stash catalogs shared media independently of Jellyfin and Whisparr.
+[services.stash]
+title = "Stash"
+description = "Catalogs and plays shared adult media."
+category = "Media servers"
+url = "https://stashapp.cc/"
+order = 421
+
 # Jellyfin Vue serves an opt-in frontend for a local or external Jellyfin server.
 [services.jellyfin-vue]
 title = "Jellyfin Vue"
@@ -403,10 +411,10 @@ defaults = ["qbittorrent", "calibre-web-automated", "cleanuparr", "watchtower", 
 #
 # Boudoirr reuses the same catalog for an adult-media-focused stack.
 #
-# This preset pairs Whisparr with removable Cruisarr requests and Jellyfin playback.
+# This preset pairs Whisparr with removable Cruisarr requests, Jellyfin playback, and Stash cataloging.
 [presets.boudoirr]
 title = "Boudoirr"
-description = "Whisparr automation with removable Cruisarr requests, Jellyfin playback, and VPN downloads."
+description = "Whisparr automation and VPN downloads with removable Cruisarr, Jellyfin, and Stash companions."
 project_name = "boudoirr"
 network_subnet = "172.21.0.0/16"
 network_ip_range = "172.21.5.0/24"
@@ -425,7 +433,7 @@ compose_summary = [
   "environment-specific settings for a seamless VPN setup.",
 ]
 core = ["privateerr", "gluetun", "flaresolverr", "prowlarr", "whisparr"]
-defaults = ["qbittorrent", "cruisarr", "jellyfin", "cleanuparr", "watchtower"]
+defaults = ["qbittorrent", "cruisarr", "jellyfin", "stash", "cleanuparr", "watchtower"]
 
 #
 # Jellyfin keeps the standalone deployment deliberately small.

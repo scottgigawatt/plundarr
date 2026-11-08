@@ -8,6 +8,8 @@ Each preset owns its Compose project name, network defaults, high-level media ro
 
 Preset `core` services cannot be removed. Preset `defaults` are only preselected in the interactive picker and may be unchecked. Plundarr and Boudoirr use this boundary to default to qBittorrent and Watchtower while leaving SABnzbd and NZBGet as independent opt-in services. Calibre-Web Automated is another removable Plundarr default and the only core service in its standalone preset. The focused Watchtower preset makes the same updater available as its own persistent or one-shot project.
 
+Boudoirr also preselects Cruisarr, Jellyfin, and Stash as independently removable companions. Stash has no required companion services and shares the preset media root with Jellyfin.
+
 Preset bridge networks have distinct, sequential defaults. Operators can change the subnet, address pool, and gateway together in the generated `.env` to suit their host.
 
 Tracearr is a removable Plundarr default; its application, database, and Redis containers are one logical selection in `services/tracearr/`. Tautulli remains optional in every preset. Duplex keeps Kometa, ImageMaid, and Themerr in `core`. Themerr connects Plex and Jellyfin through one instance without requiring local media servers. PATTRMM and Notifiarr live in `defaults`, so the generated preset includes them out of the box while the interactive picker may remove them. Overlay Reset and Watchtower are opt-in services. PATTRMM and Overlay Reset require Kometa because both consume its external configuration tree.

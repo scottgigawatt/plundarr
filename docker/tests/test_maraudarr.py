@@ -121,6 +121,7 @@ class MaraudarrTests(unittest.TestCase):
                 "whisparr",
                 "cruisarr",
                 "jellyfin",
+                "stash",
                 "cleanuparr",
                 "watchtower",
             ),

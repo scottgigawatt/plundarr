@@ -411,6 +411,12 @@ class UI:
             )
             steps.append("Complete Cruisarr setup with Jellyfin, then connect Whisparr v3.")
 
+        if "stash" in selected:
+            steps.append("Review Stash's media paths and permissions in .env before launch.")
+            steps.append(
+                "After launch, create a Stash account and scan only the intended video libraries."
+            )
+
         if selected.intersection({"whisparr", "whisparr-alt"}):
             steps.append("Check Whisparr import, movie, scene, and recycle paths in .env.")
             steps.append(
@@ -430,6 +436,7 @@ class UI:
                 "bazarr",
                 "duplicati",
                 "jellyfin",
+                "stash",
                 "lidarr",
                 "nzbget",
                 "plex",

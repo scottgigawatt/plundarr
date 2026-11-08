@@ -56,6 +56,7 @@ nav:
       - Themerr theme songs: project-guides/themerr.md
       - Cruisarr requests: project-guides/cruisarr.md
       - Jellyfin customization: project-guides/jellyfin.md
+      - Stash cataloging: project-guides/stash.md
       - Testing: project-guides/testing.md
       - Host scripts: project-guides/scripts.md
       - Documentation style: documentation-style.md

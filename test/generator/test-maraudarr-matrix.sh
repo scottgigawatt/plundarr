@@ -244,7 +244,7 @@ run_case duplex-core \
     --remove pattrmm,notifiarr
 
 #
-# Default Boudoirr voyage with Cruisarr, Jellyfin, and qBittorrent as the only downloader.
+# Default Boudoirr voyage with removable Cruisarr, Jellyfin, and Stash companions.
 #
 run_case boudoirr --preset boudoirr
 run_case boudoirr-vue --preset boudoirr --add jellyfin-vue,homepage
@@ -283,7 +283,36 @@ run_case boudoirr-cruisarr \
     --preset boudoirr \
     --add homepage
 run_case boudoirr-without-cruisarr --preset boudoirr --remove cruisarr
-run_case boudoirr-without-companions --preset boudoirr --remove cruisarr,jellyfin
+run_case boudoirr-without-companions --preset boudoirr --remove cruisarr,jellyfin,stash
+
+# Stash is independent of the other companions and can accompany an external Jellyfin.
+run_case boudoirr-without-stash --preset boudoirr --remove stash --add homepage
+run_case boudoirr-stash-only-companion --preset boudoirr --remove cruisarr,jellyfin --add homepage
+run_case custom-stash --preset custom --add stash,homepage
+run_case plundarr-stash --preset plundarr --add stash
+run_case jellyfin-stash --preset jellyfin --add stash
+
+# Resolve the writable child mount without widening access to Whisparr-managed media.
+for preset in boudoirr plundarr-stash jellyfin-stash custom-stash; do
+    docker compose \
+        --env-file "${TEST_ROOT}/${preset}/.env" \
+        --file "${TEST_ROOT}/${preset}/docker-compose.yml" \
+        config --format json | "${PYTHON_BIN}" -c '
+import json
+import sys
+
+service = json.load(sys.stdin)["services"]["stash"]
+mounts = {mount["target"]: mount for mount in service["volumes"]}
+shared = mounts["/data"]
+creators = mounts["/data/scenes/creators"]
+assert shared["read_only"] is True, "Shared media must remain read-only"
+assert creators.get("read_only", False) is False, "Creator organization requires write access"
+assert creators["source"] == shared["source"] + "/scenes/creators"
+assert creators["bind"]["create_host_path"] is False, "Missing creator media must fail startup"
+assert not any(path.startswith("/data/") for path in mounts if path != "/data/scenes/creators")
+'
+done
+
 run_case custom-cruisarr \
     --preset custom \
     --add cruisarr,homepage
@@ -337,7 +366,7 @@ run_case duplex-monitoring --preset duplex --add tracearr,tautulli,homepage
 #
 run_case everything \
     --preset plundarr \
-    --add portainer,apprise,imagemaid,jellyfin,jellyfin-vue,lidarr,notifiarr,nzbget,overlay-reset,pattrmm,plex,recyclarr,sabnzbd,sonarr-anime,tautulli,themerr,cruisarr,watchtower,whisparr,whisparr-alt
+    --add portainer,apprise,imagemaid,jellyfin,jellyfin-vue,lidarr,notifiarr,nzbget,overlay-reset,pattrmm,plex,recyclarr,sabnzbd,sonarr-anime,tautulli,themerr,cruisarr,stash,watchtower,whisparr,whisparr-alt
 
 #
 # Report one clear success line after every Compose chart passes.

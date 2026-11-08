@@ -1,0 +1,70 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# compose.yml: Maraudarr service chart for Stash.
+#
+
+#
+# Define the project name for this stack.
+#
+name: ${COMPOSE_PROJECT_NAME}
+
+services:
+  #
+  # Define the 'stash' service for cataloging and playing shared adult media.
+  #
+  stash:
+    <<:                      # Merge the shared host identity and security restrictions
+      - *rootless-container  # Run as DEFAULT_PUID and DEFAULT_PGID with the shared media group
+      - *security-hardening  # Drop capabilities and prevent privilege escalation
+
+    # Docker image and container information
+    image: stashapp/stash:${STASH_TAG}                          # Official stable image channel selected in .env
+    container_name: ${COMPOSE_PROJECT_NAME}-stash-${STASH_TAG}  # Namespace the container by project and tag
+    hostname: stash                                             # Internal hostname for application integrations
+    init: true                                                  # Reap media-processing child processes
+
+    # Keep configuration outside the upstream image's root-owned home directory.
+    environment:
+      <<: *default-environment               # Reuse the stack timezone
+      USER: stash                            # Go user lookup needs a name when DEFAULT_PUID has no passwd entry
+      STASH_CONFIG_FILE: /config/config.yml  # Writable application settings and database location
+      STASH_GENERATED: /generated            # Previews, sprites, and transcodes; separate from original media
+      STASH_METADATA: /metadata              # Metadata exports and application backups
+      STASH_CACHE: /cache                    # Writable processing and streaming cache
+      STASH_BLOBS: /blobs                    # Persistent scene covers and performer images
+      STASH_PORT: 9999                       # Internal listener; host-port changes do not change this value
+
+    # Publish the web interface on the selected preset's host port.
+    ports:
+      - ${STASH_WEBUI_PORT}:9999  # Browser access; internal integrations use http://stash:9999
+
+    # Keep shared media read-only with an explicit writable child mount.
+    volumes:
+      - ${STASH_CONFIG_PATH}:/config:rw        # Configuration, database, plugins, and scrapers
+      - ${STASH_METADATA_PATH}:/metadata:rw    # Metadata exports and application backups
+      - ${STASH_CACHE_PATH}:/cache:rw          # Processing and streaming cache
+      - ${STASH_BLOBS_PATH}:/blobs:rw          # Covers and performer images
+      - ${STASH_GENERATED_PATH}:/generated:rw  # Generated previews and transcodes
+      - ${STASH_DATA_PATH}:/data:ro            # Same media root and internal paths as Jellyfin
+
+      # Require an existing writable bind source instead of creating a root-owned directory.
+      - type: bind                      # Writable exception within the shared read-only media root
+        source: ${STASH_CREATORS_PATH}  # Same host directory as STASH_DATA_PATH/scenes/creators
+        target: /data/scenes/creators   # Writable media directory
+        read_only: false                # Allow file changes within this mount
+        bind:                           # Keep external media directories operator-managed
+          create_host_path: false       # Fail startup when the configured bind source is missing
+
+    # Check the unauthenticated heartbeat without exposing application credentials.
+    healthcheck:
+      <<: *default-healthcheck-settings  # Reuse the stack healthcheck timing
+      test:                              # BusyBox wget is provided by the official Alpine image
+        - CMD
+        - wget
+        - -q
+        - -O
+        - /dev/null
+        - http://127.0.0.1:9999/healthz

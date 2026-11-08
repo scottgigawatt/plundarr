@@ -1,0 +1,12 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# stash.yaml: Homepage link for the selected Stash service.
+#
+
+    - Stash:
+        icon: mdi-movie-open
+        href: {{HOMEPAGE_VAR_STASH_HREF}}
+        description: Adult-media catalog and playback

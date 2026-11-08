@@ -16,6 +16,8 @@
         "rootfs",
         "startswith",
         "absmiddle",
+        "stashapp",
+        "healthz",
         "ensurepip",
         "metapackage",
         "tzdata",
