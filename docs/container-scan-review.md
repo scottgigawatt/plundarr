@@ -25,7 +25,7 @@ Counts are identical within each channel across amd64, arm64, and ARMv7:
 | `edge` | 1 | 1 | 1 | The three Compose reports below |
 | `latest` | 1 | 2 | 1 | The same Compose reports plus zlib |
 
-The stable image retains [CVE-2026-4738 in zlib](https://security.alpinelinux.org/vuln/CVE-2026-4738): `1.3.2-r1` is installed and `1.4-r0` is fixed. The existing stable-package refresh already installs zlib `1.4-r0` in the audited `edge` image; no separate package floor or new suppression is needed. A new stable release is required to deliver that fix through `latest`. Neither channel has a CRITICAL finding in these reports.
+The stable image retains [CVE-2026-4738 in zlib](https://secdb.alpinelinux.org/v3.24/main.json): `1.3.2-r1` is installed and `1.4-r0` is fixed. The existing stable-package refresh already installs zlib `1.4-r0` in the audited `edge` image; no separate package floor or new suppression is needed. A new stable release is required to deliver that fix through `latest`. Neither channel has a CRITICAL finding in these reports.
 
 The remaining Compose reports are:
 
