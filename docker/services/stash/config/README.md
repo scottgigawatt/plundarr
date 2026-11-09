@@ -4,7 +4,7 @@ Maraudarr creates the `config`, `metadata`, `cache`, `blobs`, and `generated` di
 
 ## Before launch
 
-Confirm that `DEFAULT_PUID`, `DEFAULT_PGID`, and `DEFAULT_GROUP` allow writing all five state directories and reading `STASH_DATA_PATH`. Prepare the writable `STASH_CREATORS_PATH` bind source at the shared root's `scenes/creators` directory before launch; a missing source prevents startup. Other shared media remains read-only. Set a Stash username and password during first-run setup, then select individual video library directories. Omit staging and recycling directories, and limit file-changing plugins to writable paths. Metadata-provider and application API keys are separate credentials; enter them in the owning applications and keep them out of logs and source control.
+Confirm that `DEFAULT_PUID`, `DEFAULT_PGID`, and `DEFAULT_GROUP` allow writing all five state directories and reading `STASH_DATA_PATH`. Prepare the writable `STASH_CREATORS_PATH` bind source at the shared root's `scenes/creators` directory before launch; a missing source prevents startup. Docker creates `STASH_RECYCLE_PATH` if needed; ensure the configured identity can write this recycling directory. Other shared media remains read-only. Set a Stash username and password during first-run setup, then select individual video library directories. Omit staging and recycling directories, and limit file-changing plugins to writable paths. Metadata-provider and application API keys are separate credentials; enter them in the owning applications and keep them out of logs and source control.
 
 ## Backups and recovery
 

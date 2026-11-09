@@ -41,14 +41,15 @@ services:
     ports:
       - ${STASH_WEBUI_PORT}:9999  # Browser access; internal integrations use http://stash:9999
 
-    # Keep shared media read-only with an explicit writable child mount.
+    # Keep shared media read-only with explicit writable child mounts.
     volumes:
-      - ${STASH_CONFIG_PATH}:/config:rw        # Configuration, database, plugins, and scrapers
-      - ${STASH_METADATA_PATH}:/metadata:rw    # Metadata exports and application backups
-      - ${STASH_CACHE_PATH}:/cache:rw          # Processing and streaming cache
-      - ${STASH_BLOBS_PATH}:/blobs:rw          # Covers and performer images
-      - ${STASH_GENERATED_PATH}:/generated:rw  # Generated previews and transcodes
-      - ${STASH_DATA_PATH}:/data:ro            # Same media root and internal paths as Jellyfin
+      - ${STASH_CONFIG_PATH}:/config:rw               # Configuration, database, plugins, and scrapers
+      - ${STASH_METADATA_PATH}:/metadata:rw           # Metadata exports and application backups
+      - ${STASH_CACHE_PATH}:/cache:rw                 # Processing and streaming cache
+      - ${STASH_BLOBS_PATH}:/blobs:rw                 # Covers and performer images
+      - ${STASH_GENERATED_PATH}:/generated:rw         # Generated previews and transcodes
+      - ${STASH_RECYCLE_PATH}:/data/recycle/stash:rw  # Select this path as Stash's recycle-bin directory
+      - ${STASH_DATA_PATH}:/data:ro                   # Same media root and internal paths as Jellyfin
 
       # Require an existing writable bind source instead of creating a root-owned directory.
       - type: bind                      # Writable exception within the shared read-only media root

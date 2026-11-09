@@ -292,7 +292,7 @@ run_case custom-stash --preset custom --add stash,homepage
 run_case plundarr-stash --preset plundarr --add stash
 run_case jellyfin-stash --preset jellyfin --add stash
 
-# Resolve the writable child mount without widening access to Whisparr-managed media.
+# Resolve the writable child mounts without widening access to Whisparr-managed media.
 for preset in boudoirr plundarr-stash jellyfin-stash custom-stash; do
     docker compose \
         --env-file "${TEST_ROOT}/${preset}/.env" \
@@ -305,11 +305,17 @@ service = json.load(sys.stdin)["services"]["stash"]
 mounts = {mount["target"]: mount for mount in service["volumes"]}
 shared = mounts["/data"]
 creators = mounts["/data/scenes/creators"]
+recycle = mounts["/data/recycle/stash"]
 assert shared["read_only"] is True, "Shared media must remain read-only"
 assert creators.get("read_only", False) is False, "Creator organization requires write access"
 assert creators["source"] == shared["source"] + "/scenes/creators"
 assert creators["bind"]["create_host_path"] is False, "Missing creator media must fail startup"
-assert not any(path.startswith("/data/") for path in mounts if path != "/data/scenes/creators")
+assert recycle.get("read_only", False) is False, "Recycling requires write access"
+assert recycle["source"] == shared["source"] + "/recycle/stash"
+assert recycle.get("bind", {}).get("create_host_path", True) is True, "Missing recycling directory must be created"
+assert {path for path in mounts if path.startswith("/data/")} == {
+    "/data/scenes/creators", "/data/recycle/stash"
+}
 '
 done
 
