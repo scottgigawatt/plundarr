@@ -556,13 +556,8 @@ services:
         bind:                           # Keep external media directories operator-managed
           create_host_path: false       # Fail startup when the configured bind source is missing
 
-      # Keep recycled files outside the writable media directory.
-      - type: bind                     # Writable recycling exception within the shared media root
-        source: ${STASH_RECYCLE_PATH}  # Same host directory as STASH_DATA_PATH/recycle/stash
-        target: /data/recycle/stash    # Select this path as Stash's recycle-bin directory
-        read_only: false               # Allow moving deleted writable media into recycling
-        bind:                          # Create the host recycling directory when needed
-          create_host_path: true       # Docker creates a missing bind source
+      # Create a missing host directory and allow recycling from writable media.
+      - ${STASH_RECYCLE_PATH}:/data/recycle/stash:rw  # Select this path as Stash's recycle-bin directory
 
     # Check the unauthenticated heartbeat without exposing application credentials.
     healthcheck:
