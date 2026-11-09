@@ -106,6 +106,8 @@ The image refreshes Alpine 3.24 stable packages before installing dependencies. 
 
 Alpine Python's standard-library `ensurepip` seed remains pip 26.2.2 with its upstream vendored components, including msgpack 1.1.2, urllib3 2.7.0, and pkg_resources from setuptools 70.3.0. It is not installed in the application environment or used by generation. The image scan totals above do not establish coverage of nested bootstrap-wheel contents.
 
+[pip 26.3](https://pip.pypa.io/en/stable/news/#v26-3), published on November 2, updates msgpack to 1.2.4 and urllib3 to 2.8.0. Its complete, unmodified wheel has SHA-256 `f3b60b20ffaadd4415ed7957212a38ac63fa4c5fa375bd0f4a797777940fad13`, matching the published PyPI hash. That release does not replace Alpine's package-owned bootstrap archive: its SHA-256 remains `fd7f4dfa8190e014013b9f08f3e973f4e4c26ffd179a204895533a7254813a70` in all six audited Maraudarr runtime manifests. Keep this archive assessment separate from the whole-image counts above until Alpine updates its Python package.
+
 Supported launch paths disable container networking and drop all optional capabilities. These boundaries do not remove module-level findings. Use the [generator revision guide](development/maraudarr/index.md#choose-the-generator-revision) to select the source-built generator for this checkout's catalog and dependencies.
 
 ## Scan an immutable artifact
