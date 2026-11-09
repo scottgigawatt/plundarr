@@ -1,10 +1,45 @@
 # Maraudarr container scan review
 
-This dated assessment records candidate-specific evidence and unresolved findings. It is separate from the [security reporting policy](SECURITY.md); candidate results do not describe a released image or future moving tags.
+This assessment helps maintainers compare published Maraudarr images, review unresolved findings, and reassess the temporary Compose exception. It is separate from the [security reporting policy](SECURITY.md). Results describe the immutable artifacts and database dates below.
+
+## November 9, 2026 published image check
+
+Trivy 0.76.2 scanned every runtime manifest below with comprehensive detection, every severity, unfixed findings included, and an explicit empty ignore file. The same database, updated at `2026-11-09 06:57:06 UTC`, was held constant for all six scans. Complete configurations and layers were verified against their SHA-256 digests and sizes before scanning. Each local OCI layout selected one runtime manifest; reported architecture and ARMv7 variant matched the requested platform.
+
+- `edge`: index `sha256:4679b53ba2dc1143975d4a6f567852bb95187c9de71a16a99cc04c22299fde6d`, built from `bbcc3e7112525e6cf73d10c8e596a865564ab117`.
+- `latest`: index `sha256:e28575292e342997bc95ec8bf28918cf8e8303c723c564571fb99cc99867b0c2`, built from `aa8f13bb8f972484e0ffb9339497f3c22aaf4329`.
+
+| Channel and platform | Runtime manifest |
+| --- | --- |
+| `edge`, `linux/amd64` | `sha256:c05244029b81d0af268852719fcf38dd09d44aee6bc2fd86b75c56cf26b6b241` |
+| `edge`, `linux/arm64` | `sha256:c4b10dcb972cb2a79d2126f424cc25f3534ef9dce3ad3abf636b4d910c6f8213` |
+| `edge`, `linux/arm/v7` | `sha256:454699eb209b39bdb756effc10d7cc6dc55ab175bba63d7ee6ab90e92b339b16` |
+| `latest`, `linux/amd64` | `sha256:ec00f345054e489840560ff07ff19d99a61fb67b5c70011a17b514f8ed9c7283` |
+| `latest`, `linux/arm64` | `sha256:0aa6999ac7f22fd5c963c7fc1208a09227767ca9fbaef87fb089caa417706e3b` |
+| `latest`, `linux/arm/v7` | `sha256:c2ae21f33403187e81d574ead412d448925ce88732d194d6c9778d506c2a479c` |
+
+Counts are identical within each channel across amd64, arm64, and ARMv7:
+
+| Channel | HIGH | MEDIUM | UNKNOWN | Findings |
+| --- | --- | --- | --- | --- |
+| `edge` | 1 | 1 | 1 | The three Compose reports below |
+| `latest` | 1 | 2 | 1 | The same Compose reports plus zlib |
+
+The stable image retains [CVE-2026-4738 in zlib](https://secdb.alpinelinux.org/v3.24/main.json): `1.3.2-r1` is installed and `1.4-r0` is fixed. The existing stable-package refresh already installs zlib `1.4-r0` in the audited `edge` image; no separate package floor or new suppression is needed. A new stable release is required to deliver that fix through `latest`. Neither channel has a CRITICAL finding in these reports.
+
+The remaining Compose reports are:
+
+| Advisory | Severity | Module in Compose 5.7.0 | Upstream fixed version |
+| --- | --- | --- | --- |
+| [CVE-2026-78661 / GO-2026-6860](https://pkg.go.dev/vuln/GO-2026-6860) | HIGH | `golang.org/x/net v0.60.0` | `v0.62.0` |
+| [CVE-2026-97045 / GO-2026-6866](https://pkg.go.dev/vuln/GO-2026-6866) | MEDIUM | `golang.org/x/net v0.60.0` | `v0.62.0` |
+| [GO-2026-5932](https://pkg.go.dev/vuln/GO-2026-5932) | UNKNOWN | `golang.org/x/crypto v0.57.0` | `v0.58.1-0.20261009181718-2f1f834330b2` |
+
+The official Compose release check on November 9 still returned 5.7.0. Module fixes are published, but no newer official donor containing them was available. Keep these reports and the exception's expiry/removal requirements until a compatible official donor can be adopted. A passing filtered CI gate is not an unfiltered clean image scan.
 
 ## November 8, 2026 temporary Compose exception
 
-This section is for maintainers reviewing the temporary CI exception for Maraudarr. Trivy now classifies [CVE-2026-78661 / GO-2026-6860](https://pkg.go.dev/vuln/GO-2026-6860) as HIGH in Compose's `golang.org/x/net v0.60.0` module. The affected HTML parser is fixed upstream in x/net 0.62.0. At this check, the latest [official Compose release](https://github.com/docker/compose/releases/tag/v5.7.0) remained 5.7.0; no newer official donor containing that module fix was available. The exception is justified by absent affected code in the reviewed binary, not by an absence of an upstream module fix. The November 4 UNKNOWN and November 8 HIGH classifications come from dated scanner/database results for the same immutable donor; the earlier counts remain historical evidence.
+This section is for maintainers reviewing the temporary CI exception for Maraudarr. Trivy now classifies [CVE-2026-78661 / GO-2026-6860](https://pkg.go.dev/vuln/GO-2026-6860) as HIGH in Compose's `golang.org/x/net v0.60.0` module. The affected HTML parser is fixed upstream in x/net 0.62.0. At this check, the latest [official Compose release](https://github.com/docker/compose/releases/tag/v5.7.0) remained 5.7.0; no newer official donor containing that module fix was available. The exception is justified by absent affected code in the reviewed binary, not by an absence of an upstream module fix.
 
 The [temporary exception](https://github.com/scottgigawatt/plundarr/blob/main/.trivyignore.yaml) excludes only `CVE-2026-78661` at `usr/local/bin/docker-compose`. Its owner is `scottgigawatt`. Trivy stops applying it on **November 22, 2026 at 00:00 UTC**. It applies only to the Maraudarr scan in pull-request and publication workflows. Every other finding remains subject to the existing scan policy. Affected CI scans enable `TRIVY_SHOW_SUPPRESSED`, so the ignored finding and its justification remain visible. Raw audits continue to use `--ignorefile /dev/null`.
 
@@ -61,74 +96,28 @@ The [scope guard](https://github.com/scottgigawatt/plundarr/blob/main/test/polic
 3. When removing the exception, remove `.trivyignore.yaml`, its `trivyignores` and `TRIVY_SHOW_SUPPRESSED` workflow settings, the dedicated guard and fixture scripts, their calls in `test-workflow-helpers.sh`, and the dedicated pre-commit hook. Update the build path filter and this dated decision together.
 4. Run `make test-workflows`, the repository hooks, and strict documentation checks. Confirm the unfiltered image gate passes before merging a fix. Do not extend the exception solely to obtain a green build.
 
-The older CVE-2026-78669 exception remains removed. This decision neither restores that exception nor suppresses CVE-2026-97045 or other Compose advisories.
+This is the only active exception. CVE-2026-97045 and other Compose advisories remain visible in unfiltered reports.
 
-## Artifact and assessment scope
+## Runtime and toolchain boundaries
 
-Maraudarr uses Docker's official digest-pinned [Compose 5.7.0 binary](https://github.com/docker/compose/releases/tag/v5.7.0), built with Go 1.26.10 and `golang.org/x/net v0.60.0`. Development checkers and installed pip/setuptools stay out of the application virtual environment. Alpine Python retains its standard-library `ensurepip` bootstrap wheel. Use the [generator revision guide](development/maraudarr/index.md#choose-the-generator-revision) to select the source-built generator for this checkout's catalog and dependencies.
+Maraudarr uses Docker's official digest-pinned [Compose 5.7.0 binary](https://github.com/docker/compose/releases/tag/v5.7.0), built with Go 1.26.10. Dockerfile, example environment, and publication arguments share the reviewed donor pin. No custom Go rebuild or modified upstream binary is maintained.
 
-### Current dependency choices
+The image refreshes Alpine 3.24 stable packages before installing dependencies. Python and its matching bytecode packages come from stable; the hardened smoke test verifies the installed musl security backport. Runtime and documentation requirements remain exact and hash-verified. Development checkers and installed pip/setuptools stay out of the application virtual environment. The disposable type-check image retains its locked Pyright version and removes npm and system pip after installation.
 
-The image refreshes Alpine 3.24 stable packages before installing dependencies. Stable supplies musl `1.2.6-r3`, OpenSSL `3.5.9-r0`, zlib `1.3.2-r1`, and Expat `2.9.0-r0` on amd64, arm64, and ARMv7. Separate library floors and the selective OpenSSL refresh are no longer needed. The hardened smoke test still verifies the installed musl security backport.
+Alpine Python's standard-library `ensurepip` seed remains pip 26.2.2 with its upstream vendored components, including msgpack 1.1.2, urllib3 2.7.0, and pkg_resources from setuptools 70.3.0. It is not installed in the application environment or used by generation. The image scan totals above do not establish coverage of nested bootstrap-wheel contents.
 
-Alpine 3.24 stable supplies Python `3.14.10-r1` on all three generator platforms, addressing [CVE-2026-12345, CVE-2026-114583, and CVE-2026-115557](https://discuss.python.org/t/python-3-15-2-3-14-10-3-13-18-3-12-16-and-3-11-18-are-out/109678). Both Maraudarr stages and the disposable type-check image install Python and its matching bytecode packages from stable. The temporary tagged edge repository and Python package floor are no longer needed; all APK packages come from stable.
+[pip 26.3](https://pip.pypa.io/en/stable/news/#v26-3), published on November 2, updates msgpack to 1.2.4 and urllib3 to 2.8.0. Its complete, unmodified wheel has SHA-256 `f3b60b20ffaadd4415ed7957212a38ac63fa4c5fa375bd0f4a797777940fad13`, matching the published PyPI hash. That release does not replace Alpine's package-owned bootstrap archive: its SHA-256 remains `fd7f4dfa8190e014013b9f08f3e973f4e4c26ffd179a204895533a7254813a70` in all six audited Maraudarr runtime manifests. Keep this archive assessment separate from the whole-image counts above until Alpine updates its Python package.
 
-Runtime and documentation requirements remain exact and hash-verified. The October 27 PyPI review found the direct requirements current after updating Ruff to 0.17.3; the pre-commit hook uses the same version. The disposable checker retains its locked Pyright version and removes npm and system pip after installation. Its historical nghttp2 floor is redundant with the current stable package refresh. No custom Go rebuild or modified upstream binary is maintained.
+Supported launch paths disable container networking and drop all optional capabilities. These boundaries do not remove module-level findings. Use the [generator revision guide](development/maraudarr/index.md#choose-the-generator-revision) to select the source-built generator for this checkout's catalog and dependencies.
 
-The standard-library `ensurepip` seed is pip 26.2.2 and retains its upstream vendored components, including msgpack 1.1.2, urllib3 2.7.0, and pkg_resources from setuptools 70.3.0. It is not installed in the application environment or used by generation; the normal image scan totals below do not establish coverage of nested bootstrap-wheel contents.
+## Scan an immutable artifact
 
-### November 4, 2026 official Compose update
-
-The donor index is now `sha256:a4de4851b16f18634f74de66f126d5de65f7c5cb5a9502d67ab83e9a96041a70`. Its official binaries include the x/net 0.60.0 fix on `linux/amd64`, `linux/arm64`, and `linux/arm/v7`. Dockerfile, example environment, and publication build arguments use the same immutable pin. No custom Go build is introduced.
-
-Trivy 0.76.1 compared this index with the previous 5.6.1 index on all three platforms using comprehensive detection, every severity, unfixed findings, and an explicit empty ignore file. The same database, updated at `2026-11-03 19:16:30 UTC`, was held constant for all six scans. Reported image architectures matched the requested platforms. Findings fell from eight to three on each platform: CVE-2026-78669, CVE-2026-78659, CVE-2026-78660, CVE-2026-78663, and CVE-2026-97032 are absent from 5.7.0. GO-2026-5932, CVE-2026-78661, and CVE-2026-97045 remain visible at UNKNOWN severity.
-
-These donor-image results are separate from the published-image recheck below. The October 28 candidate identities and counts remain historical evidence.
-
-### Removed Compose exception
-
-The exact-path exception for [CVE-2026-78669](https://pkg.go.dev/vuln/GO-2026-6611) is removed, together with the unused ignore file and workflow references. Official Compose 5.7.0 contains the [fix from x/net 0.60.0](https://pkg.go.dev/golang.org/x/net@v0.60.0) on every generator platform. That November 4 change retained the fixed HIGH/CRITICAL gate and added no exception. The separate November 8 decision above concerns only CVE-2026-78661.
-
-On November 4, Trivy 0.76.1 scanned all three runtime manifests from published Maraudarr index `sha256:63e384c6cf571c6a3620af149c4c3c7f4f3283cd6e58ca649c77b3d5ceb73dcf`, built from source `d48316584966eb8b0f291bcf1d57dc6fa2d0ceb9`. The database updated at `2026-11-04 13:16:53 UTC` was held constant. Comprehensive detection included every severity and unfixed findings with an explicit empty ignore file. Each reported architecture matched the selected manifest.
-
-| Platform | Published runtime manifest digest |
-| --- | --- |
-| `linux/amd64` | `sha256:fcce76074fd94f9e8c2870beb384e1264b2e88fff82095c85dca1cc262558766` |
-| `linux/arm64` | `sha256:1450445c746b9e035d7b7d1421ae556e407d07dcafe8bd0b14211494b48586fb` |
-| `linux/arm/v7` | `sha256:1f6941631d215bd20e40890873c0b9f59ed44886c772c8bc1a066be93ae4cb04` |
-
-CVE-2026-78669 is absent from every report. Each platform retains three UNKNOWN Compose findings: GO-2026-5932, CVE-2026-78661, and CVE-2026-97045. There are no HIGH or CRITICAL findings in these reports. This result does not establish coverage of nested archives or claim vulnerability-free images. The current database now identifies an upstream fix for GO-2026-5932; Compose 5.7.0 still contains the older module. The historical counts below describe different artifacts and an older database.
-
-Maraudarr's supported launch paths still disable container networking and drop all optional capabilities. Removing the exception does not change those runtime boundaries or update previously released images.
-
-### October 28, 2026 artifact review
-
-The stable-only candidate review used Trivy 0.76.1 with a freshly downloaded database updated at `2026-10-28 01:21:08 UTC`, held constant for every platform, and Docker Scout 1.27.0. All severities and unfixed findings were included, without repository ignores. Docker archives preserved each OCI manifest's configuration and layer contents; architecture, layer hashes, installed packages, and stable repository membership were checked explicitly.
-
-The local candidate OCI index is `sha256:f2943d215a7ed832884e6f5b09ae651b71806d16ada852cea3f4fb4f8552d023`; it has not been published. All three platforms install the matching Python `3.14.10-r1` package family, musl `1.2.6-r3`, OpenSSL `3.5.9-r0`, Expat `2.9.0-r0`, and zlib `1.3.2-r1`. Every installed APK is available from Alpine 3.24 stable. Installed pip and setuptools remain absent from the application environment; its standard-library bootstrap wheel remains pip 26.2.2 with the nested components listed above.
-
-| Artifact | Trivy findings per platform | Scout findings per platform |
-| --- | --- | --- |
-| Stable-only candidate: amd64, arm64, ARMv7 | 8 | 10 |
-
-Each Trivy report contains one HIGH, four MEDIUM, and three UNKNOWN Compose module findings. Scout retains those eight reports plus the stable musl backport and Windows CLI reports described below. Counts are identical across all three platforms, but each scanner counts findings differently; compare within its column. The three patched Python interpreter advisories are absent from the image reports. A passing CI exception is not a clean artifact scan, and these totals do not establish coverage of nested bootstrap-wheel contents.
-
-The remaining reports have these boundaries:
-
-- **Stable musl backport:** Alpine's [stable recipe](https://github.com/alpinelinux/aports/blob/3.24-stable/main/musl/APKBUILD) and [stable security database](https://secdb.alpinelinux.org/v3.24/main.json) record CVE-2026-107891 fixed in `1.2.6-r3`. Scout compares the installed stable revision against edge's `r6`; these are different branch revisions. Trivy no longer selects the edge advisory repository after the temporary Python source is removed, and reports neither musl package. No musl ignore is added.
-- **Compose networking:** The HIGH HTTP/2 finding and four MEDIUM x/net reports remain visible pending the official binary update.
-- **HTML package metadata:** [CVE-2026-78661](https://pkg.go.dev/vuln/GO-2026-6860) concerns quadratic HTML parsing; [CVE-2026-97045](https://pkg.go.dev/vuln/GO-2026-6866) concerns HTML rendering namespace handling. Both are fixed in x/net 0.62.0. Comprehensive module detection reports them against Compose's x/net dependency, but the affected `golang.org/x/net/html` package is absent from the compiled binaries on all three platforms. Both reports were retained without new suppressions in that October review. Raw audits remain unfiltered; the November 8 decision above changes only CI handling of CVE-2026-78661 at the reviewed binary path.
-- **OpenPGP:** At the October review, [GO-2026-5932](https://pkg.go.dev/vuln/GO-2026-5932) had no fixed version and concerns a package absent from the compiled Compose binary. Comprehensive package detection retains the module-level report.
-- **Windows CLI:** Scout also reports [CVE-2025-15558](https://github.com/docker/cli/security/advisories/GHSA-p436-gjf2-799p), a Windows plugin-discovery issue. The generator runs on Linux; no blanket suppression is applied.
-
-The disposable type-check image is development tooling, not a published runtime. It uses only stable repositories, installs matching Python `3.14.10-r1` packages before creating its isolated environment, and removes npm and system pip after installing its locked checker. No stale Python bytecode metapackage or scanner suppression is retained.
-
-### Scan an immutable artifact
-
-Use an explicit empty ignore file so CI exceptions cannot hide findings. Replace `IMAGE-DIGEST` with an immutable index digest and repeat for arm64 and ARMv7:
+Use Trivy with an explicit empty ignore file so CI exceptions cannot hide findings. Replace `IMAGE-DIGEST` with an immutable index digest and repeat for arm64 and ARMv7:
 
 ```sh
-trivy image --ignorefile /dev/null --image-src remote --platform linux/amd64 --detection-priority comprehensive --scanners vuln ghcr.io/scottgigawatt/maraudarr@sha256:IMAGE-DIGEST
+trivy image --ignorefile /dev/null --image-src remote --platform linux/amd64 --detection-priority comprehensive --scanners vuln --severity UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL --ignore-unfixed=false ghcr.io/scottgigawatt/maraudarr@sha256:IMAGE-DIGEST
 ```
+
+For an offline OCI scan, select exactly one runtime descriptor in the layout's `index.json` and retain its complete verified blobs. With Trivy 0.76.2, `--platform` did not select a different manifest from a multi-platform `--input` layout. Check `Metadata.ImageConfig.architecture` and `variant` in each JSON report; repeating the first architecture is not a three-platform audit.
 
 Publication requires generator smoke tests and artifact verification on every supported architecture. Main builds publish `edge`; version releases publish stable aliases. These dated results do not describe future moving tags, the host Docker daemon, or third-party service images in a generated stack. Pulling an image does not update running containers automatically.
