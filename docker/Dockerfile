@@ -11,7 +11,7 @@
 # Default Alpine and Compose image tags plus the Maraudarr installation root.
 # Build arguments can override each value.
 #
-ARG ALPINE_TAG=3.24@sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3c0371ea2c9a
+ARG ALPINE_TAG=3.24@sha256:f59abe656b692d901e184be3445e084786602108599d2a51d229c0f5a48c71bf
 ARG DOCKER_COMPOSE_TAG=v5.7.0@sha256:a4de4851b16f18634f74de66f126d5de65f7c5cb5a9502d67ab83e9a96041a70
 ARG MARAUDARR_BIN_HOME=/maraudarr
 
@@ -87,7 +87,7 @@ FROM alpine:${ALPINE_TAG}
 #
 # Re-declare the Alpine tag after FROM so labels can record the base image.
 #
-ARG ALPINE_TAG=3.24@sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3c0371ea2c9a
+ARG ALPINE_TAG=3.24@sha256:f59abe656b692d901e184be3445e084786602108599d2a51d229c0f5a48c71bf
 
 #
 # Default install locations, runtime identity, and image metadata. Every value
