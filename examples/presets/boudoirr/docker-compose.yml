@@ -539,7 +539,7 @@ services:
     ports:
       - ${STASH_WEBUI_PORT}:9999  # Browser access; internal integrations use http://stash:9999
 
-    # Keep shared media read-only with an explicit writable child mount.
+    # Keep shared media read-only with explicit writable child mounts.
     volumes:
       - ${STASH_CONFIG_PATH}:/config:rw        # Configuration, database, plugins, and scrapers
       - ${STASH_METADATA_PATH}:/metadata:rw    # Metadata exports and application backups
@@ -555,6 +555,14 @@ services:
         read_only: false                # Allow file changes within this mount
         bind:                           # Keep external media directories operator-managed
           create_host_path: false       # Fail startup when the configured bind source is missing
+
+      # Keep recycled files outside the writable media directory.
+      - type: bind                     # Writable recycling exception within the shared media root
+        source: ${STASH_RECYCLE_PATH}  # Same host directory as STASH_DATA_PATH/recycle/stash
+        target: /data/recycle/stash    # Select this path as Stash's recycle-bin directory
+        read_only: false               # Allow moving deleted writable media into recycling
+        bind:                          # Create the host recycling directory when needed
+          create_host_path: true       # Docker creates a missing bind source
 
     # Check the unauthenticated heartbeat without exposing application credentials.
     healthcheck:

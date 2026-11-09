@@ -52,14 +52,17 @@ class StashTests(unittest.TestCase):
         self.assertNotIn("stash", removed.service_ids)
         self.assertTrue({"cruisarr", "jellyfin"}.issubset(removed.service_ids))
 
-    def test_only_creator_media_is_writable_and_state_is_separate(self) -> None:
-        """Allow creator organization without granting writes to Whisparr libraries."""
+    def test_writable_children_keep_other_media_read_only_and_state_separate(self) -> None:
+        """Allow creator organization and recycling without writes to Whisparr libraries."""
         plan = self.catalog.resolve("boudoirr")
         service = extract_service(render_compose(self.catalog, plan), "stash")
         self.assertIn("${STASH_DATA_PATH}:/data:ro", service)
         self.assertNotIn("/data:rw", service)
         self.assertIn("source: ${STASH_CREATORS_PATH}", service)
         self.assertIn("target: /data/scenes/creators", service)
+        self.assertIn("source: ${STASH_RECYCLE_PATH}", service)
+        self.assertIn("target: /data/recycle/stash", service)
+        self.assertIn("create_host_path: true", service)
         self.assertIn("read_only: false", service)
         self.assertIn("create_host_path: false", service)
         self.assertNotIn("/downloads", service)
@@ -96,6 +99,10 @@ class StashTests(unittest.TestCase):
                     f'STASH_CREATORS_PATH="${{STASH_CREATORS_PATH:-{media}/scenes/creators}}"',
                     environment,
                 )
+                self.assertIn(
+                    f'STASH_RECYCLE_PATH="${{STASH_RECYCLE_PATH:-{media}/recycle/stash}}"',
+                    environment,
+                )
                 self.assertIn(f'JELLYFIN_DATA_PATH="${{JELLYFIN_DATA_PATH:-{media}}}"', environment)
                 self.assertIn("${STASH_WEBUI_PORT}:9999", compose)
                 self.assertIn("- Stash:", homepage)
@@ -129,6 +136,7 @@ class StashTests(unittest.TestCase):
                 "STASH_WEBUI_PORT": "20999",
                 "STASH_DATA_PATH": "/srv/shared/library",
                 "STASH_CREATORS_PATH": "/srv/shared/library/scenes/creators",
+                "STASH_RECYCLE_PATH": "/srv/shared/library/recycle/stash",
                 "STASH_GENERATED_PATH": "/srv/stash/previews",
             }
             environment = env_path.read_text()

@@ -506,6 +506,10 @@ def render_environment(
             "/volume1/jellyfin/scenes/creators",
             f"{media_root}/scenes/creators",
         ),
+        "STASH_RECYCLE_PATH": (
+            "/volume1/jellyfin/recycle/stash",
+            f"{media_root}/recycle/stash",
+        ),
         "WHISPARR_DATA_PATH": ("/volume1/media/adult", media_root),
         "WHISPARR_IMPORT_PATH": ("/volume1/media/adult/import", f"{media_root}/import"),
         "WHISPARR_MOVIES_PATH": ("/volume1/media/adult/movies/main", f"{media_root}/movies/main"),

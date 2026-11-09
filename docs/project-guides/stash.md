@@ -39,13 +39,14 @@ Edit `dist/boudoirr/.env` before launch. Keep `STASH_DATA_PATH` and `JELLYFIN_DA
 | `STASH_WEBUI_PORT` | `19999` | Change for a host-port conflict; container port remains `9999` |
 | `STASH_DATA_PATH` | `/volume1/jellyfin` | Shared media root; read-only |
 | `STASH_CREATORS_PATH` | `/volume1/jellyfin/scenes/creators` | Writable mount at `/data/scenes/creators`; use the matching child of the shared root |
+| `STASH_RECYCLE_PATH` | `/volume1/jellyfin/recycle/stash` | Writable recycling directory at `/data/recycle/stash` |
 | `STASH_CONFIG_PATH` | `./config/stash/config` | Configuration, database, plugins, and scrapers |
 | `STASH_METADATA_PATH` | `./config/stash/metadata` | Metadata exports and application backups |
 | `STASH_CACHE_PATH` | `./config/stash/cache` | Processing and streaming cache |
 | `STASH_BLOBS_PATH` | `./config/stash/blobs` | Images when filesystem blob storage is selected |
 | `STASH_GENERATED_PATH` | `./config/stash/generated` | Previews, sprites, and transcodes |
 
-Stash runs as the configured `DEFAULT_PUID:DEFAULT_PGID`, with `DEFAULT_GROUP`. Prepare host bind sources and grant that identity the access listed above. `STASH_CREATORS_PATH` must refer to the same physical directory as `STASH_DATA_PATH/scenes/creators`, so both applications see the same files. This bind source must exist before launch. The container does not repair ownership. If a bind source is outside the generated config tree, create it yourself and include durable external state in backups. Do not share Stash's database or config directory with Jellyfin or Whisparr.
+Stash runs as the configured `DEFAULT_PUID:DEFAULT_PGID`, with `DEFAULT_GROUP`. Prepare host bind sources and grant that identity the access listed above. `STASH_CREATORS_PATH` must refer to the same physical directory as `STASH_DATA_PATH/scenes/creators`, so both applications see the same files. Create `STASH_CREATORS_PATH` before launch; a missing source prevents startup. Docker creates `STASH_RECYCLE_PATH` when missing. Keep it at the shared root's `recycle/stash` directory and ensure the configured identity can write it; new host-directory ownership and permissions follow Docker and host defaults. The container does not repair ownership. Bind sources outside the generated config tree remain separate from application-state backups; include durable external state in your backup plan. Do not share Stash's database or config directory with Jellyfin or Whisparr.
 
 ## Start and identify media
 
@@ -56,6 +57,10 @@ Stash runs as the configured `DEFAULT_PUID:DEFAULT_PGID`, with `DEFAULT_GROUP`. 
 5. Follow [Accessing StashDB](https://guidelines.stashdb.org/docs/faq_getting-started/stashdb/accessing-stashdb/) to obtain an API key. Add `https://stashdb.org/graphql` under Stash's **Settings > Metadata Providers > Stash-box Endpoints**, then use the [scene tagger](https://docs.stashapp.cc/in-app-manual/tagger/) to identify a sample. Review the match before saving or processing the rest of the library.
 
 Stash maintains its own metadata; enabling this service does not import existing NFO files. Configure optional providers and plugins in Stash using their upstream instructions, such as [FansDB](https://docs.fansdb.cc/guides/scraping-scenes-from-fansdb/) and [mcMetadata](https://github.com/carrotwaxr/stash-plugins/blob/main/plugins/mcMetadata/README.md). Limit file-changing plugins to writable paths and review a dry run before enabling changes.
+
+## Configure recycling
+
+In Stash's system settings, set the recycle-bin directory to `/data/recycle/stash`. Keep this directory outside your selected library paths. Stash needs write access to the original directory to move deleted files; the shared read-only mount continues to protect Whisparr-managed media. Recycled files remain on the host when Stash is removed or the stack is regenerated.
 
 ## Connect Jellyfin deliberately
 
