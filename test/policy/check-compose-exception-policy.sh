@@ -17,13 +17,13 @@
 set -eu
 repository_root=${1:-$(CDPATH='' cd -- "$(dirname -- "$0")/../.." && pwd)}
 cd "${repository_root}"
-reviewed_tag='v5.7.0@sha256:a4de4851b16f18634f74de66f126d5de65f7c5cb5a9502d67ab83e9a96041a70'
+reviewed_tag='v5.7.1@sha256:6a6704a7ccbc45eb4cc7e5b71dba685e9bc23705c580430f15034b2b5e46ec2b'
 
 #
 # Require a new reachability review when the donor changes. Module versions
 # alone cannot establish that a vulnerable package is absent from a new binary.
 #
-if ! grep -F -x 'ARG DOCKER_COMPOSE_TAG=v5.7.0@sha256:a4de4851b16f18634f74de66f126d5de65f7c5cb5a9502d67ab83e9a96041a70' 'docker/Dockerfile' >/dev/null; then
+if ! grep -F -x 'ARG DOCKER_COMPOSE_TAG=v5.7.1@sha256:6a6704a7ccbc45eb4cc7e5b71dba685e9bc23705c580430f15034b2b5e46ec2b' 'docker/Dockerfile' >/dev/null; then
     echo 'Compose donor changed; remove the exception or review its binary evidence again.' >&2
     exit 1
 fi
