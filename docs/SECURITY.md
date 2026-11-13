@@ -59,7 +59,7 @@ Plundarr pulls published container images for the stack and keeps configuration 
 
 ## Image scan evidence
 
-The [container scan review](container-scan-review.md) retains dated artifact identities, unresolved findings, the [CVE-2026-78661-only Compose exception](container-scan-review.md#november-8-2026-temporary-compose-exception), and reproduction commands. Read its scope before applying results to a moving image tag. A passing CI exception is not a clean artifact scan.
+The [container scan review](container-scan-review.md) retains dated artifact identities, unresolved findings, the [CVE-2026-78661-only Compose exception](container-scan-review.md#november-13-2026-temporary-compose-exception), and reproduction commands. Read its scope before applying results to a moving image tag. A passing CI exception is not a clean artifact scan.
 
 Use the [support guide](SUPPORT.md) for non-sensitive setup questions and reproducible bugs.
 
