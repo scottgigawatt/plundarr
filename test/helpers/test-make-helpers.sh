@@ -802,4 +802,7 @@ done
 #
 # Report success.
 #
+# Keep workstation ownership out of the public terminal recording.
+sh test/helpers/test-demo-ls.sh
+
 echo "Make helper tests passed."

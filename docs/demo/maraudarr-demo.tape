@@ -10,11 +10,11 @@
 Output docs/assets/maraudarr-demo.gif
 Require docker
 Set Shell "zsh"
-Set FontSize 20
+Set FontSize 22
 Set Width 2400
-Set Height 1800
+Set Height 2200
 Set Padding 20
-Set Framerate 8
+Set Framerate 5
 Set PlaybackSpeed 1
 Set TypingSpeed 35ms
 Set Theme {"name": "Maraudarr", "background": "#0b0f14", "foreground": "#e6edf3", "cursor": "#e6edf3", "black": "#0b0f14", "red": "#ff7b72", "green": "#00cc66", "yellow": "#f2c14e", "blue": "#79c0ff", "magenta": "#d2a8ff", "cyan": "#56d4dd", "white": "#e6edf3", "brightBlack": "#8b949e", "brightRed": "#ffa198", "brightGreen": "#56d364", "brightYellow": "#e3b341", "brightBlue": "#a5d6ff", "brightMagenta": "#d2a8ff", "brightCyan": "#a5d6ff", "brightWhite": "#ffffff"}
@@ -22,6 +22,8 @@ Set CursorBlink false
 
 # Use a disposable working directory without showing a temporary host path.
 Hide
+Type "exec zsh -f"
+Enter
 Type `cd "$PLUNDARR_DEMO_DIR"`
 Enter
 Type `export PS1='%F{#00ff00}$%f '`
