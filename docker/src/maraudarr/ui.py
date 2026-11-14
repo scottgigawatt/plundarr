@@ -11,8 +11,10 @@
 from __future__ import annotations
 
 import os
+import shlex
 import sys
 from collections import defaultdict
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -105,7 +107,7 @@ class UI:
     def welcome(self) -> None:
         """Display Maraudarr's purpose before listing available choices."""
         message = (
-            "[bold]Choose a voyage, load the services, and chart one reusable "
+            "[bold]Choose a preset and services to generate your "
             "Plundarr Docker Compose stack.[/bold]"
         )
         if self.console:
@@ -189,7 +191,7 @@ class UI:
         if self.plain or prompts is None or not sys.stdin.isatty():
             raise UserCancelled("Interactive configuration requires a terminal.")
         answer = prompts.select(
-            "🗺️  Choose a voyage",
+            "🗺️  Choose a preset",
             choices=[prompts.Choice(preset.title, preset.id) for preset in presets],
             style=_prompt_style(),
             use_shortcuts=True,
@@ -343,7 +345,7 @@ class UI:
         if self.plain or prompts is None or not sys.stdin.isatty():
             return True
         answer = prompts.confirm(
-            "⚒️  Build this stack?",
+            "⚒️  Generate these stack files?",
             default=True,
             style=_prompt_style(),
         ).ask()
@@ -377,8 +379,26 @@ class UI:
             env_path: Display path to the generated environment file.
             config_path: Display path to the generated config root.
         """
+        # Translate the standard container output mount into host-relative paths.
+        display_paths: list[str] = []
+        for path in (compose_path, env_path, config_path):
+            try:
+                display_paths.append(str(Path(path).relative_to("/output")))
+            except ValueError:
+                display_paths.append(path)
+
+        compose_display, env_display, config_display = display_paths
+        output_directory = shlex.quote(str(Path(compose_display).parent))
+        commands = (
+            f"cd {output_directory}",
+            "docker compose config --quiet",
+            "docker compose up --detach --pull always",
+            "docker compose ps",
+        )
         selected = set(plan.service_ids)
-        steps: list[str] = []
+        steps: list[str] = [
+            f"Edit {env_display}; review host paths, user/group IDs, timezone, and ports."
+        ]
         if "privateerr" in selected:
             steps.append("Set PIA_USER and PIA_PASS in .env.")
         if selected.intersection(
@@ -450,7 +470,13 @@ class UI:
             }
         ):
             steps.append("Check download, media, and config paths in .env.")
-        steps.append(f"Start the stack with make up PRESET={plan.preset.id}.")
+        if "homepage" in selected:
+            steps.append(
+                "Set HOMEPAGE_EXTERNAL_URL to your full browser URL; HOMEPAGE_ALLOWED_HOSTS needs host:port without http:// or https://."
+            )
+            steps.append(
+                "After startup, open that address and sign in with HOMEPAGE_AUTH_PASSWORD from .env."
+            )
 
         if self.console:
             from rich.panel import Panel
@@ -459,25 +485,37 @@ class UI:
             table = Table.grid(padding=(0, 2))
             table.add_column(style="bold")
             table.add_column()
-            table.add_row("Compose chart", compose_path)
-            table.add_row("Environment", env_path)
-            table.add_row("Config cargo", config_path)
+            table.add_row("Compose file", compose_display)
+            table.add_row("Settings", env_display)
+            table.add_row("Application config", config_display)
             table.add_row("Services", str(len(plan.services)))
             self.console.print(
                 Panel(
                     table,
-                    title=f"✅ {plan.preset.title} Ready to Sail",
+                    title=f"✅ {plan.preset.title} files generated",
                     border_style="#52b788",
                 )
             )
-            self.console.print("\n[bold]Before launch:[/]")
+            self.console.print("\n[bold]Review your settings:[/]")
             for number, step in enumerate(steps, start=1):
-                self.console.print(f"  {number}. {step}")
+                self.console.print(f"  {number}. {step}", markup=False)
+            self.console.print("\n[bold]Then run on the host:[/]")
+            for command in commands:
+                self.console.print(f"  {command}", markup=False)
+            self.console.print(
+                f"\nFrom a repository checkout, you can also use make up PRESET={plan.preset.id}."
+            )
             return
 
-        print(f"{plan.preset.title} ready: {compose_path}, {env_path}, and {config_path}")
+        print(
+            f"{plan.preset.title} files generated: {compose_display}, {env_display}, and {config_display}"
+        )
         for number, step in enumerate(steps, start=1):
             print(f"{number}. {step}")
+        print("\nThen run on the host:")
+        for command in commands:
+            print(f"  {command}")
+        print(f"\nFrom a repository checkout, you can also use make up PRESET={plan.preset.id}.")
 
     def error(self, message: str, fix: str | None = None) -> None:
         """Display a generator failure and optional corrective action.

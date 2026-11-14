@@ -12,6 +12,16 @@
     // Accept project names, dependencies, and intentional pirate vocabulary.
     //
     "cSpell.words": [
+        "scrollfix",
+        "Donath",
+        "endmacro",
+        "alphamerge",
+        "argb",
+        "colorspace",
+        "ffprobe",
+        "magick",
+        "qtrle",
+        "rgba",
         "govulncheck",
         "rootfs",
         "startswith",
@@ -167,6 +177,7 @@
         "lanczos",
         "langserver",
         "Launchin",
+        "lavfi",
         "leakin",
         "libcrypto",
         "libexpat",
@@ -213,6 +224,8 @@
         "opkg",
         "ossf",
         "oughta",
+        "palettegen",
+        "paletteuse",
         "pathspec",
         "PATTRMM",
         "pgdata",

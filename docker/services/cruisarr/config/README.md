@@ -14,6 +14,6 @@ Stop Cruisarr before copying its complete data directory, including any SQLite j
 
 Replace `YOUR-PRESET` with your selected preset ID. `make backup PRESET=YOUR-PRESET` archives `dist/YOUR-PRESET/config` by default. It excludes `.env` and any data outside that tree. If `CRUISARR_CONFIG_PATH` points elsewhere, back up that host directory separately. Stopping Cruisarr does not make backups of other running applications consistent.
 
-`make down` and `make nuke` preserve bind-mounted data. `make delete-config` deletes the selected host config tree, including Cruisarr data only when it is stored inside that tree. Keep backups outside the config tree and off the deployment host.
+`make down` and `make remove-stack` preserve bind-mounted data. `make delete-config` deletes the selected host config tree, including Cruisarr data only when it is stored inside that tree. Keep backups outside the config tree and off the deployment host.
 
-Follow the [Cruisarr setup and recovery guide](https://github.com/scottgigawatt/plundarr/blob/main/docs/project-guides/cruisarr.md#back-up-and-recover) for backup commands, verification, and recovery steps.
+Follow the [Cruisarr setup and recovery guide](https://scottgigawatt.github.io/plundarr/project-guides/cruisarr/#back-up-and-recover) for backup commands, verification, and recovery steps.

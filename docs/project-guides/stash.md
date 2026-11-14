@@ -13,19 +13,19 @@ The chart uses the official stable `stashapp/stash:latest` image. Confirm archit
 Boudoirr includes Stash, Jellyfin, and Cruisarr as independently removable defaults. The interactive `make configure` picker starts all three checked. For non-interactive generation:
 
 ```sh
-make ship PRESET=boudoirr
+make generate PRESET=boudoirr
 ```
 
 To omit Stash while retaining Jellyfin and Cruisarr:
 
 ```sh
-make ship PRESET=boudoirr REMOVE_SERVICES=stash
+make generate PRESET=boudoirr REMOVE_SERVICES=stash
 ```
 
 To use Stash with an existing Jellyfin server, omit the local Jellyfin service:
 
 ```sh
-make ship PRESET=boudoirr REMOVE_SERVICES=jellyfin
+make generate PRESET=boudoirr REMOVE_SERVICES=jellyfin
 ```
 
 Other presets can add Stash with `ADD_SERVICES=stash`. Repeat the complete intended service selection whenever you regenerate. Omitting a service preserves its settings and files but does not stop a container already running from the previous chart. Stop that service before regenerating if you are retiring it.
@@ -107,4 +107,4 @@ Stash state and the original media need separate backups. Configuration, a Stash
 
 6. Confirm account login, scene counts, identified metadata, images, and playback on a sample before resuming bulk tasks. If recovery fails, retain the original backup and inspect logs before retrying. Stopping Stash does not make another application's database backup consistent.
 
-Deselecting Stash, `make down`, and `make nuke` preserve its bind-mounted state. `make delete-config` is destructive and removes Stash data inside the selected config tree; it is not a service-removal step.
+Deselecting Stash, `make down`, and `make remove-stack` preserve its bind-mounted state. `make delete-config` is destructive and removes Stash data inside the selected config tree; it is not a service-removal step.

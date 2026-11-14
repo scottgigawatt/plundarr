@@ -6,9 +6,9 @@ Sonarr stores its database, settings, and credentials here. Configure its televi
 
 Sonarr sees qBittorrent and SABnzbd downloads at `/downloads` and your TV library at `/tv`. In Plundarr, `/downloads` maps to `HOST_DOWNLOADS_PATH`, while qBittorrent writes under `/downloads/torrents` and SABnzbd writes under `/downloads/usenet`.
 
-Keep Sonarr's download client paths pointed at `/downloads`. That shared path lets Sonarr import completed episode downloads cleanly and use hardlinks when the host filesystem supports them.
+Keep Sonarr's download client paths pointed at `/downloads`. That shared path lets Sonarr import completed episode downloads cleanly with matching download paths. The generated download and library directories are separate bind mounts, so imports between them use copies rather than hardlinks.
 
-If ye keep seeding, leave the original torrent payload in `/downloads` so qBittorrent can keep sharing it while Sonarr manages the imported episode in `/tv`.
+To keep seeding, leave the original torrent payload in `/downloads` so qBittorrent can keep sharing it while Sonarr manages the imported episode in `/tv`.
 
 Use these download client categories:
 

@@ -123,6 +123,44 @@ class MaraudarrUiTests(unittest.TestCase):
         self.assertIn("Check CWA config, ingest, and library paths in .env.", listing)
         self.assertIn("make up PRESET=calibre-web-automated", listing)
 
+    def test_image_success_provides_host_commands_without_requiring_make(self) -> None:
+        """Guide image users from the host mount to validation and startup."""
+        output = io.StringIO()
+        plan = self.catalog.resolve("plundarr")
+
+        with redirect_stdout(output):
+            UI(plain=True).success(
+                plan,
+                "/output/dist/plundarr/docker-compose.yml",
+                "/output/dist/plundarr/.env",
+                "/output/dist/plundarr/config",
+            )
+
+        listing = output.getvalue()
+        self.assertIn("files generated", listing)
+        self.assertIn("Edit dist/plundarr/.env", listing)
+        self.assertIn("cd dist/plundarr", listing)
+        self.assertLess(
+            listing.index("docker compose config --quiet"), listing.index("docker compose up")
+        )
+        self.assertIn("HOMEPAGE_AUTH_PASSWORD", listing)
+        self.assertNotIn("/output/", listing)
+
+    def test_success_quotes_exact_output_directories(self) -> None:
+        """Keep automation paths containing spaces usable in the host shell."""
+        output = io.StringIO()
+        plan = self.catalog.resolve("jellyfin")
+
+        with redirect_stdout(output):
+            UI(plain=True).success(
+                plan,
+                "/tmp/media project/docker-compose.yml",
+                "/tmp/media project/.env",
+                "/tmp/media project/config",
+            )
+
+        self.assertIn("cd '/tmp/media project'", output.getvalue())
+
     @unittest.skipUnless(RICH_AVAILABLE, "Rich is not installed")
     def test_styled_tables_keep_emoji_outside_grid_cells(self) -> None:
         """Avoid terminal-dependent emoji widths inside bordered table columns."""

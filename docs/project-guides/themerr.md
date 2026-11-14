@@ -2,18 +2,18 @@
 
 Give the library a soundtrack. Duplex includes one required Themerr instance alongside Kometa and ImageMaid. PATTRMM and Notifiarr remain removable defaults. The same Themerr instance connects to both Plex and Jellyfin, including servers deployed in separate Compose projects. It does not deploy either media server itself.
 
-Run generation examples from the repository root with `MARAUDARR_IMAGE` set to the [source-built generator](../development/maraudarr/index.md#choose-the-generator-revision) for this checkout.
+The Make examples run from a repository checkout and use the published generator. For interactive Docker setup, follow [customization](../customize.md).
 
 ## Generate the service
 
 ```sh
-make ship PRESET=duplex
+make generate PRESET=duplex
 ```
 
 Themerr is also an optional addition to standalone Jellyfin, Boudoirr, or another preset:
 
 ```sh
-make ship PRESET=jellyfin ADD_SERVICES=themerr
+make generate PRESET=jellyfin ADD_SERVICES=themerr
 ```
 
 Review these values in the generated `.env`:

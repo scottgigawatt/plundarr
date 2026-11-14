@@ -1,6 +1,6 @@
 # Test Plundarr deployments 🧪🏴‍☠️
 
-Use the [developer testing guide](https://github.com/scottgigawatt/plundarr/blob/main/docs/development/maraudarr/testing.md) for unit, strict type, helper, workflow, image, generation-matrix, and documentation checks. This page covers optional live deployment tests and their recovery boundaries.
+Use the [developer testing guide](https://scottgigawatt.github.io/plundarr/development/maraudarr/testing/) for unit, strict type, helper, workflow, image, generation-matrix, and documentation checks. This page covers optional live deployment tests and their recovery boundaries.
 
 ## Find a test
 
@@ -22,7 +22,7 @@ Replace `YOUR-PRESET` with one catalog ID and use it consistently. Run mutating 
 > [!CAUTION]
 > `make test-e2e` and `make test-stack` replace selected WireGuard and forwarding files with examples before and after validation and can interrupt services. Back up disposable test state and protect credentials. Interrupted commands can leave services or sensitive state behind; inspect before recovery. Never use these targets to diagnose an operator deployment.
 
-The [generator revision guide](https://github.com/scottgigawatt/plundarr/blob/main/docs/development/maraudarr/index.md#choose-the-generator-revision) explains selecting the source-built image. Generate the full desired selection before live tests. Supply test credentials privately; never publish `.env`, `wg0.conf`, `privateerr.env`, application databases, or raw private logs.
+The [generator revision guide](https://scottgigawatt.github.io/plundarr/development/maraudarr/#choose-the-generator-revision) explains selecting the source-built image. Generate the full desired selection before live tests. Supply test credentials privately; never publish `.env`, `wg0.conf`, `privateerr.env`, application databases, or raw private logs.
 
 ## Check an already-running test stack
 
@@ -38,7 +38,7 @@ This inspects actual Privateerr/Gluetun containers, generated files, tunnel heal
 make test-e2e PRESET=YOUR-PRESET
 ```
 
-This restores fixtures, starts the VPN pair and selected download clients, waits for health, validates the forwarding chain, brings the stack down, and restores fixtures again. Generate the intended downloader selection first; for example, Usenet-only uses `REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=sabnzbd`. Use `nzbget` instead for NZBGet, or add either without removal to test combined modes.
+This stops the selected disposable stack before restoring fixtures, starts the VPN pair and selected download clients, waits for health, and validates the forwarding chain. After either a passing or failing test, it shuts the stack down and restores fixtures only when shutdown succeeds. A failed shutdown preserves the generated VPN files and reports how to retry cleanup; shutdown or restoration errors fail the target. Generate the intended downloader selection first; for example, Usenet-only uses `REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=sabnzbd`. Use `nzbget` instead for NZBGet, or add either without removal to test combined modes.
 
 ## Start and test the full stack
 
@@ -46,7 +46,7 @@ This restores fixtures, starts the VPN pair and selected download clients, waits
 make test-stack PRESET=YOUR-PRESET
 ```
 
-This restores fixtures, starts all services, waits for configured healthchecks, and validates VPN/forwarding state. It leaves the stack running on success, prints status/recent logs on failure, and restores fixtures after validation. It is a mutating development test, not a routine health check.
+This stops the selected disposable test stack before restoring fixtures, starts all services, waits for configured healthchecks, and validates VPN/forwarding state. On success, it leaves the stack running with its generated VPN files intact. On failure, it prints status/recent logs, stops the stack, and restores fixtures only after shutdown succeeds. If shutdown fails, it preserves the VPN files; resolve the reported shutdown error, then run `make reset-test-stack PRESET=YOUR-PRESET`. It is a mutating development test, not a routine health check.
 
 ## Validate lifecycle cleanup ownership
 
@@ -63,11 +63,11 @@ It creates uniquely named projects and unrelated sentinels, proves `down` retain
 The following commands stop or reset only the explicitly selected disposable test deployment:
 
 > [!CAUTION]
-> `make clean-test` stops the selected stack and replaces its VPN files with examples. `make restore-test-config` replaces those files even while services run, potentially breaking VPN operation. Confirm the preset and isolation before running either.
+> `make reset-test-stack` stops the selected stack and replaces its VPN files with examples. `make restore-vpn-examples` replaces those files even while services run, potentially breaking VPN operation. Confirm the preset and isolation before running either.
 
 ```sh
-make clean-test PRESET=YOUR-PRESET
-make restore-test-config PRESET=YOUR-PRESET
+make reset-test-stack PRESET=YOUR-PRESET
+make restore-vpn-examples PRESET=YOUR-PRESET
 ```
 
-`clean-test` uses volume-preserving `down`. `make clean` removes disposable repository artifacts only. `make nuke` also stops services and removes scoped containers, networks, eligible images, the separate Maraudarr project, and repository-owned build cache; it preserves application volumes, deployment `.env`, persistent config, and backups. `make delete-config` is a separate destructive host-config deletion and is not part of routine cleanup. Keep exported backups off-host; named-volume application backups need their own export procedure.
+`reset-test-stack` uses volume-preserving `down`. `make clean-artifacts` removes disposable repository artifacts only. `make remove-stack` also stops services and removes scoped containers, networks, eligible images, the separate Maraudarr project, and repository-owned build cache; it preserves application volumes, deployment `.env`, persistent config, and backups. `make delete-config` is a separate destructive host-config deletion and is not part of routine cleanup. Keep exported backups off-host; named-volume application backups need their own export procedure.

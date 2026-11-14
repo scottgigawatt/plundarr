@@ -4,7 +4,7 @@ Homepage reads its dashboard settings and generated service cards from this dire
 
 ## Configure password login
 
-Homepage native password login is enabled by default and requires Homepage v2 or later. Maraudarr creates `HOMEPAGE_AUTH_PASSWORD` and `HOMEPAGE_AUTH_SECRET` in the deployment's `.env` when absent, and preserves their values during regeneration. Read the password locally; the login form does not need a username. `example.env` intentionally leaves both secrets empty and is not a ready-to-use login configuration.
+Homepage native password login is enabled by default. Maraudarr creates `HOMEPAGE_AUTH_PASSWORD` and `HOMEPAGE_AUTH_SECRET` in the deployment's `.env` when absent, and preserves their values during regeneration. Read the password locally; the login form does not need a username. `example.env` intentionally leaves both secrets empty and is not a ready-to-use login configuration.
 
 Set `HOMEPAGE_EXTERNAL_URL` to the exact browser URL, including its scheme and any nonstandard port. Set `HOMEPAGE_ALLOWED_HOSTS` to the matching hostname and port without the scheme. For example, use `https://homepage.example.com` and `homepage.example.com` behind an HTTPS reverse proxy. Keep `HOMEPAGE_AUTH_ENABLED=true`.
 
@@ -16,9 +16,9 @@ The native login uses one shared password. Homepage does not rate-limit password
 
 ## Understand generated files
 
-Maraudarr assembles Homepage service cards from `services.base.yaml`, selected service fragments in `fragments/`, and `services.footer.yaml` when `make ship` runs. Homepage reads the generated `services.yaml` at runtime.
+Maraudarr assembles Homepage service cards from `services.base.yaml`, selected service fragments in `fragments/`, and `services.footer.yaml` when `make generate` runs. Homepage reads the generated `services.yaml` at runtime.
 
-If you edit generated cards, update the Maraudarr source fragment under `docker/services/homepage/config/fragments/`; otherwise the next voyage may replace the change.
+Use the `.env` URL and widget settings below for normal customization. Generation refreshes `services.yaml`, so keep a copy of manual layout edits before regenerating. Developing a different generated layout uses the source fragments under `docker/services/homepage/config/fragments/`.
 
 ## Configure links and widget URLs
 
@@ -27,7 +27,7 @@ Homepage uses two kinds of URL values:
 - `HOMEPAGE_VAR_*_HREF` controls where a dashboard card sends the browser.
 - `HOMEPAGE_VAR_*_URL` controls where a Homepage widget talks to the service API.
 
-For a simple LAN with no reverse proxy, set each `HREF` to a full IP-and-port address such as `http://192.168.1.210:7878`. Keep each widget `URL` pointed at an endpoint Homepage can reach from inside Docker.
+For a simple LAN with no reverse proxy, set each `HREF` to a full IP-and-port address such as `http://192.0.2.10:7878`. Keep each widget `URL` pointed at an endpoint Homepage can reach from inside Docker.
 
 ## Read upstream guidance
 

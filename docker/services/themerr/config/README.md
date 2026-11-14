@@ -6,4 +6,4 @@ The separate `../secrets/themerr-tokens.key` file encrypts stored credentials. K
 
 Open `https://HOST:9494` using the generated host port. Read the first-run admin setup link locally in container logs, create the administrator account, and add Plex and Jellyfin on the Servers page. Jellyfin must reach Themerr's connector address using a host address and its published connector port. Review automatic connector installation and restart preferences before connecting; retain the seeded `REMOVE_LEGACY_PLUGIN=False` preference.
 
-Read the [Themerr project guide](https://github.com/scottgigawatt/plundarr/blob/main/docs/project-guides/themerr.md) for permissions, setup, backups, and media-library requirements.
+Read the [Themerr project guide](https://scottgigawatt.github.io/plundarr/project-guides/themerr/) for permissions, setup, backups, and media-library requirements.

@@ -4,14 +4,14 @@ Runs an optional second Whisparr v3 instance with its own database, settings, AP
 
 The primary service ID is `whisparr`; each instance has independent configuration. Both organize movies and scenes, and each has a **TMDB** or **TPDB** movie-provider choice under **Settings → General → Movie metadata source**. The default is TMDB; choose a different provider in one instance to use both. Host directory names do not select the provider. Scene lookups use StashDB in both instances. This chart uses hotio's floating `v3` channel.
 
-For generation commands, select this checkout's [source-built Maraudarr image](../../../docs/development/maraudarr/index.md#choose-the-generator-revision) through `MARAUDARR_IMAGE`.
+Use the published generator through the [interactive setup](../../../docs/customize.md) or the Make examples below.
 
 ## Select the second instance
 
 From the repository root, generate Boudoirr with the optional instance:
 
 ```sh
-make ship PRESET=boudoirr ADD_SERVICES=whisparr-alt
+make generate PRESET=boudoirr ADD_SERVICES=whisparr-alt
 ```
 
 Or run `make configure`, choose Boudoirr, and check **Whisparr Alt** in **Media automation**. Custom and other presets can also select it. It brings the shared Prowlarr and FlareSolverr services through catalog dependencies; it does not require the primary Whisparr. Both Whisparr instances wait for Prowlarr to be healthy during Compose startup.

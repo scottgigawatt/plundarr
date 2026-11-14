@@ -1,6 +1,6 @@
 # Plundarr 🏴‍☠️
 
-Plundarr is a generated Docker Compose media stack for Docker Compose and Synology Container Manager. Maraudarr, the included generator, turns your selected services into one commented `docker-compose.yml`, an editable `.env`, and configuration directories under `dist/<preset>/`, then exits.
+Plundarr helps you run a media stack with one Docker Compose file, using Docker Compose or Synology Container Manager. Run Maraudarr, the published generator image, to choose your services and create the stack files, settings, and configuration directories. Then start the generated stack on your Docker host.
 
 <!-- markdownlint-disable-next-line MD033 MD041 -->
 <hr />
@@ -49,101 +49,134 @@ Plundarr is a generated Docker Compose media stack for Docker Compose and Synolo
 
 ## Generate the default stack ⚡
 
-Install Git, Make, Docker with Compose, and an active PIA subscription for the default VPN-enabled stack. Run from the cloned repository root. These commands build the catalog and seeds in this checkout; for a published image, select its matching source documentation through [generator revision selection](docs/development/maraudarr/index.md#choose-the-generator-revision).
+You need Docker with Compose, a terminal on your Docker host, writable storage, and an active Private Internet Access (PIA) subscription. The default stack requires an amd64 or arm64 host. You do not need Git, Make, or a local image build.
+
+![Maraudarr's interactive setup selects the default Plundarr services and generates the stack files](docs/assets/maraudarr-demo.gif)
+
+🔎 [View the full-size demo](docs/assets/maraudarr-demo.gif).
+
+Create a directory you own, then open the interactive setup using the published image:
+
+```sh
+mkdir -p plundarr
+cd plundarr
+docker run --rm -it --pull always \
+  --user "$(id -u):$(id -g)" \
+  --read-only --network none \
+  --cap-drop ALL --security-opt no-new-privileges:true \
+  --tmpfs /tmp:rw,noexec,nosuid,size=64m \
+  --volume "$PWD:/output:rw" \
+  ghcr.io/scottgigawatt/maraudarr:latest configure
+```
+
+Choose **Plundarr**. Use the arrow keys to move, Space to toggle optional services, and Enter to continue. Keep the defaults for the standard stack. Maraudarr creates `dist/plundarr/docker-compose.yml`, `.env`, `example.env`, and `config/`, then exits.
+
+Open `dist/plundarr/.env` in a text editor. Set PIA credentials, host storage paths, user/group IDs, timezone, and Homepage's browser address. The [setup guide](https://scottgigawatt.github.io/plundarr/setup/#review-the-settings) identifies the required settings and storage preparation before launch. Generated passwords and keys are ready to use; keep them private.
+
+After completing that review, run from the same directory:
+
+```sh
+cd dist/plundarr
+docker compose config --quiet
+docker compose up --detach --pull always
+docker compose ps
+```
+
+Open Homepage at your Docker host's port `3000` and sign in with `HOMEPAGE_AUTH_PASSWORD` from `.env`. The [first-login steps](https://scottgigawatt.github.io/plundarr/setup/#open-your-applications) cover qBittorrent and the other primary interfaces. Change the port in the address if you customized it.
+
+The Privateerr container generates the PIA WireGuard configuration file; Gluetun runs the VPN connection; qBittorrent downloads through Gluetun. Applications still need their own setup after their containers start. Continue with [connecting your applications in Plundarrpedia](https://scottgigawatt.github.io/plundarrpedia/projects/plundarr/connect-applications/).
+
+<!-- markdownlint-disable-next-line MD033 -->
+<a id="customize-a-deployment-"></a>
+
+## Choose a preset 🗺️
+
+The interactive setup offers these starting points. Standalone media-server and utility presets do not require PIA.
+
+<!-- GitHub preserves nowrap cells; samp keeps literal preset IDs monospaced without code's wrapping rules. -->
+<!-- markdownlint-disable MD033 -->
+<table>
+  <thead>
+    <tr>
+      <th scope="col" align="center" width="240" nowrap>🗺️ Preset</th>
+      <th scope="col" align="center" nowrap>🎯 Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td nowrap valign="middle">🏴‍☠️ <samp>plundarr</samp></td>
+      <td valign="middle">Movies, TV, ebooks, and VPN torrent downloads</td>
+    </tr>
+    <tr>
+      <td nowrap valign="middle">🔞 <samp>boudoirr</samp></td>
+      <td valign="middle">Whisparr, Cruisarr requests, Jellyfin, and Stash</td>
+    </tr>
+    <tr>
+      <td nowrap valign="middle">🎞️ <samp>jellyfin</samp></td>
+      <td valign="middle">Jellyfin media server</td>
+    </tr>
+    <tr>
+      <td nowrap valign="middle">📺 <samp>plex</samp></td>
+      <td valign="middle">Plex Media Server</td>
+    </tr>
+    <tr>
+      <td nowrap valign="middle">📚 <samp>calibre-web-automated</samp></td>
+      <td valign="middle">Ebook library and imports</td>
+    </tr>
+    <tr>
+      <td nowrap valign="middle">🎭 <samp>duplex</samp></td>
+      <td valign="middle">Plex artwork, metadata, theme songs, and maintenance</td>
+    </tr>
+    <tr>
+      <td nowrap valign="middle">🔭 <samp>watchtower</samp></td>
+      <td valign="middle">Container image updates</td>
+    </tr>
+    <tr>
+      <td nowrap valign="middle">🚢 <samp>portainer</samp></td>
+      <td valign="middle">Docker management interface</td>
+    </tr>
+    <tr>
+      <td nowrap valign="middle">🧩 <samp>custom</samp></td>
+      <td valign="middle">Individually selected services</td>
+    </tr>
+  </tbody>
+</table>
+<!-- markdownlint-enable MD033 -->
+
+✨ [**Browse the complete preset examples**](examples/presets/README.md) ✨ and inspect each preset’s Compose file and example settings before generating your stack.
+
+Use [customization](https://scottgigawatt.github.io/plundarr/customize/) for service choices, networks, and optional integrations.
+
+## Use the Make helpers
+
+For generation and maintenance shortcuts, clone the repository into a separate directory and run commands from its root:
 
 ```sh
 git clone https://github.com/scottgigawatt/plundarr.git
 cd plundarr
-export MARAUDARR_IMAGE=maraudarr:local
-make build
-make ship
+make configure
 ```
 
-Keep `MARAUDARR_IMAGE` set for later generation commands. Maraudarr creates `dist/plundarr/docker-compose.yml`, `.env`, `example.env`, and `config/`. Plundarr is the generated deployment that remains after the generator exits. Privateerr prepares PIA configuration; Gluetun runs the VPN tunnel.
+Make uses the published Maraudarr image. Review `dist/plundarr/.env` and prepare storage before `make up`; `make ps` shows status. Use `make help` for available operations. [Local image builds](https://scottgigawatt.github.io/plundarr/development/maraudarr/#choose-the-generator-revision) are available for development.
 
-> [!IMPORTANT]
-> Before launch, edit `dist/plundarr/.env`: set PIA credentials and confirm host paths, user/group IDs, timezone, network values, and ports. Follow the [setup guide](docs/setup.md) for application-specific preparation or Synology Container Manager deployment.
+<!-- markdownlint-disable-next-line MD033 -->
+<a id="inspect-and-maintain-the-stack-"></a>
+<!-- markdownlint-disable-next-line MD033 -->
+<a id="read-more-and-get-help-"></a>
 
-Validate without printing credentials, start, and inspect the stack:
+## Maintain the stack and get help
 
-```sh
-docker compose --env-file dist/plundarr/.env -f dist/plundarr/docker-compose.yml config --quiet
-make up
-make ps
-```
-
-<!-- markdownlint-disable MD033 -->
-<details>
-<summary>Watch Maraudarr generate and start the default stack</summary>
-
-The recording shows `make configure`, `make up`, and `make ps` using `dist/plundarr/`.
-
-<img src="./docs/assets/maraudarr-demo.gif" width="1000" alt="Maraudarr selects services, generates a Plundarr project, and starts its Docker Compose services" />
-
-You can inspect or replay the [recording source](./docs/demo/record-maraudarr-demo.sh).
-
-</details>
-<!-- markdownlint-enable MD033 -->
-
-## Choose a preset 🗺️
-
-Use `make configure` for the interactive picker, or `make ship PRESET=YOUR-PRESET` with an ID below. Standalone media-server and utility presets do not require PIA.
-
-| Preset                          | Purpose                                                                       |
-| ------------------------------- | ----------------------------------------------------------------------------- |
-| 🏴‍☠️&nbsp;`plundarr`              | Movies, television, and ebooks with VPN-protected torrent downloads           |
-| 🔞&nbsp;`boudoirr`              | Whisparr automation, VPN downloads, and removable Cruisarr/Jellyfin/Stash companions |
-| 🎞️&nbsp;`jellyfin`              | Standalone Jellyfin media server                                              |
-| 🎬&nbsp;`plex`                  | Standalone Plex Media Server                                                  |
-| 📚&nbsp;`calibre-web-automated` | Standalone ebook library and ingest                                           |
-| 🎭&nbsp;`duplex`                | Plex metadata/artwork, theme songs, and maintenance                           |
-| 🔭&nbsp;`watchtower`            | Container image updates                                                       |
-| 🚢&nbsp;`portainer`             | Docker management with Portainer CE                                           |
-| 🧩&nbsp;`custom`                | Services selected individually                                                |
-
-Browse [complete preset examples](examples/presets/README.md), or inspect the selected generator's current catalog with `make presets` and `make services`.
-
-## Customize a deployment 🧩
-
-`ADD_SERVICES` and `REMOVE_SERVICES` accept comma-separated IDs. Required core services cannot be removed; defaults and optional services can be changed. For example:
-
-```sh
-make ship ADD_SERVICES=lidarr,recyclarr
-make ship REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=nzbget
-make ship PRESET=boudoirr ADD_SERVICES=whisparr-alt
-```
-
-Repeat your complete intended selection on every regeneration. Existing `.env` values and application data survive, but saved values do not reselect services. Omitted running containers are not stopped automatically; review Compose orphans separately.
-
-Use the [setup guide](docs/setup.md) for network planning, storage, media libraries, and optional services. Focused guides cover [VPN regions and recovery](docs/project-guides/vpn.md), [Cruisarr](docs/project-guides/cruisarr.md), [Jellyfin customization](docs/project-guides/jellyfin.md), [Stash cataloging](docs/project-guides/stash.md), [monitoring](docs/project-guides/monitoring.md), [Themerr](docs/project-guides/themerr.md), and [Portainer](docs/project-guides/portainer.md).
-
-`.env` supplies Compose settings; applications still need their own setup. Jellyfin Web JSON/CSS, Recyclarr YAML, and external Kometa/PATTRMM settings may also need editing. Prepare those paths before launch. Recyclarr and Overlay Reset are profile-gated tools with deliberate invocation and dry-run/preview requirements in the setup guide.
-
-## Inspect and maintain the stack 🔎
-
-Use `make help` for commands. Replace `YOUR-PRESET` with the selected ID; omit it for default Plundarr:
-
-Before a config archive, follow the [backup procedure](docker/config/README.md#back-up-or-reset-the-hold-): export application databases, stop affected writers, and retain `.env`, encryption keys, external state, and named-volume exports separately. `make backup` archives host config only. Verify an off-host recovery copy. `make down` preserves volumes and images; `make clean` removes disposable repository artifacts only.
-
-```sh
-make ps PRESET=YOUR-PRESET
-make down PRESET=YOUR-PRESET
-```
+[Maintenance](https://scottgigawatt.github.io/plundarr/maintain/) covers updates, regeneration, backups, and stopping the stack. `make down` preserves images and data. `make clean-artifacts` removes disposable developer files.
 
 > [!CAUTION]
-> `make nuke` stops the selected deployment and removes containers, networks, eligible images, the separate Maraudarr project, and scoped build cache; it preserves application volumes, deployment files, config, and host backups. Restarting may need image downloads. `make delete-config` deletes host config and exports stored there. Review backups and the selected preset before either operation.
+> `make remove-stack` removes the selected stack's Docker resources, the Maraudarr project, and scoped build cache while preserving configuration, application volumes, and backups. `make delete-config` deletes the selected host config tree. Review the selected preset and verify backups before destructive cleanup.
 
-`make config` and `make env` can print credentials. Keep their output private. [Live VPN/stack tests](test/README.md) can start services and replace test configuration; they are optional development checks for isolated environments.
-
-## Read more and get help 📚
-
-- [Plundarrpedia](https://scottgigawatt.github.io/plundarrpedia/): integrated deployment and platform walkthroughs.
-- [Developer documentation](https://scottgigawatt.github.io/plundarr/): generator architecture, extension, tests, and API reference.
-- [Host helper scripts](scripts/README.md): Linux, Synology, backup, restart, and status helpers.
-- [Contributing](docs/CONTRIBUTING.md), [support](docs/SUPPORT.md), [security policy](docs/SECURITY.md), and [Code of Conduct](docs/CODE_OF_CONDUCT.md).
+- [Set up Docker or Synology](https://scottgigawatt.github.io/plundarr/setup/): required settings, first login, and troubleshooting.
+- [Plundarrpedia](https://scottgigawatt.github.io/plundarrpedia/): connect applications and follow integrated platform guides.
+- [Service guides](https://scottgigawatt.github.io/plundarr/project-guides/): VPN, Jellyfin, Stash, Cruisarr, monitoring, and other integrations.
+- [Developer documentation](https://scottgigawatt.github.io/plundarr/development/maraudarr/): build, extend, and test Maraudarr.
+- [Support](https://scottgigawatt.github.io/plundarr/SUPPORT/), [security](https://scottgigawatt.github.io/plundarr/SECURITY/), [contributing](https://scottgigawatt.github.io/plundarr/CONTRIBUTING/), and [Code of Conduct](https://scottgigawatt.github.io/plundarr/CODE_OF_CONDUCT/).
 
 ## Compatibility and licensing ⚖️
 
-Maraudarr supports `linux/amd64`, `linux/arm64`, and `linux/arm/v7`; selected service images may support fewer architectures. Plundarr is tested with Synology Container Manager and Docker Desktop on macOS; compatible Linux Docker hosts are expected to work.
-
-Plundarr uses the [Apache License 2.0](LICENSE) and the published Privateerr image. It does not vendor PIA's manual-connection scripts. Fair winds and no surprise port collisions. 🏴‍☠️
+Maraudarr supports `linux/amd64`, `linux/arm64`, and `linux/arm/v7`; selected services may support fewer platforms. Plundarr is tested with Synology Container Manager and Docker Desktop on macOS. It uses the [Apache License 2.0](LICENSE) and the published Privateerr image; PIA's manual-connection scripts remain owned by their upstream project.
