@@ -98,18 +98,18 @@ The interactive setup offers these starting points. Standalone media-server and 
 <table>
   <thead>
     <tr>
-      <th scope="col" align="left" nowrap>🗺️ Preset</th>
-      <th scope="col" align="left" nowrap>🎯 Purpose</th>
+      <th scope="col" align="center" width="28%" nowrap>🗺️ Preset</th>
+      <th scope="col" align="center" width="72%" nowrap>🎯 Purpose</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <td nowrap valign="top">🏴‍☠️ <samp>plundarr</samp></td>
-      <td valign="top">Movies, television, and ebooks with VPN-protected torrent downloads</td>
+      <td valign="top">Movies, TV, ebooks, and VPN torrent downloads</td>
     </tr>
     <tr>
       <td nowrap valign="top">🔞 <samp>boudoirr</samp></td>
-      <td valign="top">Whisparr automation with Cruisarr requests, Jellyfin playback, and Stash cataloging</td>
+      <td valign="top">Whisparr, Cruisarr requests, Jellyfin, and Stash</td>
     </tr>
     <tr>
       <td nowrap valign="top">🎞️ <samp>jellyfin</samp></td>
