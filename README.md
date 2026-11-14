@@ -104,40 +104,40 @@ The interactive setup offers these starting points. Standalone media-server and 
   </thead>
   <tbody>
     <tr>
-      <td nowrap valign="top">🏴‍☠️ <samp>plundarr</samp></td>
-      <td valign="top">Movies, TV, ebooks, and VPN torrent downloads</td>
+      <td nowrap valign="middle">🏴‍☠️ <samp>plundarr</samp></td>
+      <td valign="middle">Movies, TV, ebooks, and VPN torrent downloads</td>
     </tr>
     <tr>
-      <td nowrap valign="top">🔞 <samp>boudoirr</samp></td>
-      <td valign="top">Whisparr, Cruisarr requests, Jellyfin, and Stash</td>
+      <td nowrap valign="middle">🔞 <samp>boudoirr</samp></td>
+      <td valign="middle">Whisparr, Cruisarr requests, Jellyfin, and Stash</td>
     </tr>
     <tr>
-      <td nowrap valign="top">🎞️ <samp>jellyfin</samp></td>
-      <td valign="top">Jellyfin media server</td>
+      <td nowrap valign="middle">🎞️ <samp>jellyfin</samp></td>
+      <td valign="middle">Jellyfin media server</td>
     </tr>
     <tr>
-      <td nowrap valign="top">📺 <samp>plex</samp></td>
-      <td valign="top">Plex Media Server</td>
+      <td nowrap valign="middle">📺 <samp>plex</samp></td>
+      <td valign="middle">Plex Media Server</td>
     </tr>
     <tr>
-      <td nowrap valign="top">📚 <samp>calibre-web-automated</samp></td>
-      <td valign="top">Ebook library and imports</td>
+      <td nowrap valign="middle">📚 <samp>calibre-web-automated</samp></td>
+      <td valign="middle">Ebook library and imports</td>
     </tr>
     <tr>
-      <td nowrap valign="top">🎭 <samp>duplex</samp></td>
-      <td valign="top">Plex artwork, metadata, theme songs, and maintenance</td>
+      <td nowrap valign="middle">🎭 <samp>duplex</samp></td>
+      <td valign="middle">Plex artwork, metadata, theme songs, and maintenance</td>
     </tr>
     <tr>
-      <td nowrap valign="top">🔭 <samp>watchtower</samp></td>
-      <td valign="top">Container image updates</td>
+      <td nowrap valign="middle">🔭 <samp>watchtower</samp></td>
+      <td valign="middle">Container image updates</td>
     </tr>
     <tr>
-      <td nowrap valign="top">🚢 <samp>portainer</samp></td>
-      <td valign="top">Docker management interface</td>
+      <td nowrap valign="middle">🚢 <samp>portainer</samp></td>
+      <td valign="middle">Docker management interface</td>
     </tr>
     <tr>
-      <td nowrap valign="top">🧩 <samp>custom</samp></td>
-      <td valign="top">Individually selected services</td>
+      <td nowrap valign="middle">🧩 <samp>custom</samp></td>
+      <td valign="middle">Individually selected services</td>
     </tr>
   </tbody>
 </table>
