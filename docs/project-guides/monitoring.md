@@ -7,20 +7,20 @@ Tracearr is Plundarr's preferred media monitor and a removable default. It conne
 A fresh Plundarr generation includes Tracearr:
 
 ```sh
-make ship PRESET=plundarr
+make generate PRESET=plundarr
 ```
 
 For an existing project, select Tracearr in `make configure` or explicitly include it while generating. The single `tracearr` selection includes the application, TimescaleDB, and Redis together; its internal containers are not separate choices:
 
 ```sh
-make ship PRESET=duplex ADD_SERVICES=tracearr
+make generate PRESET=duplex ADD_SERVICES=tracearr
 ```
 
 To omit it from Plundarr or select Tautulli instead:
 
 ```sh
-make ship PRESET=plundarr REMOVE_SERVICES=tracearr
-make ship PRESET=plundarr REMOVE_SERVICES=tracearr ADD_SERVICES=tautulli
+make generate PRESET=plundarr REMOVE_SERVICES=tracearr
+make generate PRESET=plundarr REMOVE_SERVICES=tracearr ADD_SERVICES=tautulli
 ```
 
 Both monitors may run together. Regeneration preserves existing application configuration and previously configured environment values, including values belonging to temporarily unselected services. Keep your complete service selection when regenerating a project.
@@ -66,7 +66,7 @@ Regeneration refreshes Homepage `services.yaml` from the selected source fragmen
 
 ## Back up and update
 
-Tracearr's database, Redis state, and backup workspace use project-scoped named Docker volumes. Docker manages their permissions; regeneration, `make down`, and `make nuke` preserve them.
+Tracearr's database, Redis state, and backup workspace use project-scoped named Docker volumes. Docker manages their permissions; regeneration, `make down`, and `make remove-stack` preserve them.
 
 Watchtower can update Tracearr automatically. Its database and Redis are excluded from Watchtower updates. `make up` still pulls all selected images, so it can update a floating database or Redis tag. Review upstream release notes and export a backup before updating; use an exact image tag in `.env` when you need a fixed version.
 
@@ -95,6 +95,6 @@ With Tracearr running, create and export a consistent application backup. These 
 `make backup` archives the host config tree; it does not dump databases or copy named volumes. Duplicati likewise needs exported backup files in its configured source paths. Downloading a backup through Tracearr's web interface is another option. Use the application's backup and restore interface for restoration; do not copy live PostgreSQL data files.
 
 > [!CAUTION]
-> `make delete-config` deletes the host config tree, including exported backups stored there. Keep a separate verified backup before using it. The database and internal backup volumes survive deployment cleanup, including `make nuke`.
+> `make delete-config` deletes the host config tree, including exported backups stored there. Keep a separate verified backup before using it. The database and internal backup volumes survive deployment cleanup, including `make remove-stack`.
 
 Retain the matching `.env` and an off-host copy of exported backups. Your viewing history deserves a lifeboat.

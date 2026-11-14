@@ -128,4 +128,62 @@ if grep -E 'image rm|buildx rm' "${test_output}/failure.log" >/dev/null; then
     exit 1
 fi
 
+#
+# Exercise the complete Make recipe so post-helper commands cannot reset real state.
+#
+repository_root=$(pwd)
+fixture="${test_output}/make-fixture"
+expected="${test_output}/expected"
+mkdir -p "${fixture}/config/gluetun/wireguard" "${fixture}/config/privateerr/logs" \
+    "${fixture}/config/application" "${fixture}/backups" "${expected}"
+cp Makefile "${fixture}/Makefile"
+cp "${test_output}/Dockerfile.test" "${fixture}/Dockerfile"
+printf '%s\n' 'public fixture settings' >"${fixture}/.env"
+printf '%s\n' 'services: {}' >"${fixture}/docker-compose.yml"
+printf '%s\n' 'services: {}' >"${fixture}/maraudarr.yml"
+printf '%s\n' 'public generator settings' >"${fixture}/maraudarr.env"
+
+# Protect saved VPN files, connection state, logs, and application databases.
+for state_file in gluetun/wireguard/wg0.conf gluetun/wireguard/privateerr.env \
+    gluetun/forwarded_port gluetun/ip gluetun/piaportforward.json gluetun/servers \
+    privateerr/logs/startup.log application/state.db; do
+    printf '%s\n' "preserved fixture: ${state_file}" >"${fixture}/config/${state_file}"
+done
+printf '%s\n' 'preserved backup fixture' >"${fixture}/backups/config.tar.gz"
+cp -R "${fixture}/config" "${expected}/config"
+cp -R "${fixture}/backups" "${expected}/backups"
+cp "${fixture}/.env" "${expected}/.env"
+cp "${fixture}/docker-compose.yml" "${expected}/docker-compose.yml"
+
+# Keep every command and cleanup path inside the disposable fixture.
+NUKE_STUB_LOG="${test_output}/make-nuke.log" NO_COLOR=1 \
+    make --no-print-directory --directory "${fixture}" remove-stack \
+        DOCKER_BIN="${stub_path}" \
+        DOCKER_COMPOSE="${stub_path} compose" \
+        DEPENDENCIES=true \
+        COMPOSE_NUKE_CMD="${repository_root}/scripts/compose/nuke.sh" \
+        COMPOSE_FILE="${fixture}/docker-compose.yml" \
+        ENV_FILE="${fixture}/.env" \
+        COMPOSE_ENV_FILE="${fixture}/.env" \
+        CONFIG_PATH="${fixture}/config" \
+        MARAUDARR_COMPOSE_FILE="${fixture}/maraudarr.yml" \
+        MARAUDARR_ENV_FILE="${fixture}/maraudarr.env" \
+        DOCKERFILES="${fixture}/Dockerfile" \
+        DOCKERFILE_BASE_IMAGES_AWK="${repository_root}/scripts/awk/collect-dockerfile-base-images.awk" \
+        BUILDX_BUILDER_NAME=test-builder \
+        MARAUDARR_IMAGE=test/additional:local \
+        MARAUDARR_MULTIARCH_IMAGE=test/absent:latest \
+        >"${test_output}/make-nuke.out" 2>&1
+
+diff -r "${expected}/config" "${fixture}/config"
+diff -r "${expected}/backups" "${fixture}/backups"
+cmp "${expected}/.env" "${fixture}/.env"
+cmp "${expected}/docker-compose.yml" "${fixture}/docker-compose.yml"
+test "$(grep -c ' down --timeout ' "${test_output}/make-nuke.log")" -eq 2
+if grep -E -- '--volumes|volume rm|system prune|image prune|volume prune|builder prune' \
+    "${test_output}/make-nuke.log" >/dev/null; then
+    echo "The Make remove-stack recipe crossed a protected Docker cleanup boundary." >&2
+    exit 1
+fi
+
 echo "Compose nuke helper tests passed."

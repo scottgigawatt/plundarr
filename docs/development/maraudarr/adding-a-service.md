@@ -47,7 +47,7 @@ For named Docker volumes, add a `named_volumes` table mapping each unique key to
 named_volumes = { example-data = "Persistent application data and internal backups" }
 ```
 
-A list of volume names is not valid catalog input. The descriptions become comments on the generated declarations. The renderer declares selected volumes at the top level without a global `name` or `external` flag. Keys must be unique across services. Deployment cleanup, including `make nuke`, preserves these volumes. Document application backup exports because host config archives do not include named-volume state. Omit `config/` when a service has no host config seeds.
+A list of volume names is not valid catalog input. The descriptions become comments on the generated declarations. The renderer declares selected volumes at the top level without a global `name` or `external` flag. Keys must be unique across services. Deployment cleanup, including `make remove-stack`, preserves these volumes. Document application backup exports because host config archives do not include named-volume state. Omit `config/` when a service has no host config seeds.
 
 ## Group dedicated containers
 

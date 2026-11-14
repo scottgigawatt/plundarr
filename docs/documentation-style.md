@@ -19,7 +19,7 @@ Choose a useful shape: a short concept explanation, a quickstart, a numbered how
 
 Plundarr owns generator and service contracts. Privateerr owns its file/API/recovery implementation, Kometa-config owns collection and configuration behavior, and Plundarrpedia owns integrated platform walkthroughs. Link to precise authoritative detail while retaining enough context for a usable local quickstart.
 
-Remove repeated introductions, exhaustive command inventories already covered by `make help`, obsolete history, speculative advice, and implementation narration that does not help the intended reader. Keep currently needed migration/compatibility instructions, security findings, backup coverage, data-loss warnings, licenses, and attribution. Moving text elsewhere is not a reduction in total content.
+Remove repeated introductions, exhaustive command inventories already covered by `make help`, obsolete history, speculative advice, and implementation narration that does not help the intended reader. Describe current behavior directly. Remove historical comparisons, migration sections, and obsolete feature caveats. Keep current requirements, security findings, backup coverage, data-loss warnings, licenses, and attribution. Moving text elsewhere is not a reduction in total content.
 
 ## Write and format plainly
 
@@ -48,7 +48,7 @@ Most pages need no more than one or two alerts. Keep routine commands outside th
 
 ## Review the reader's route
 
-1. Check commands, paths, defaults, supported versions, and backup boundaries against source and the supported release. Label unreleased behavior.
+1. Check commands, paths, defaults, and backup boundaries against the code and image used in the documented workflow.
 2. Start from the relevant entry page and follow a representative task without assuming undocumented knowledge. Check the expected result and recovery path.
 3. Run `pre-commit run --all-files`, spelling checks using the repository vocabulary, `make docs`, and `git diff --check`.
 4. Inspect changed GitHub and Material pages, links/anchors, images, alerts, tables, diagrams, and narrow-screen layouts.

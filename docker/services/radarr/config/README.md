@@ -6,9 +6,9 @@ Radarr stores its database, settings, and credentials here. Configure its movie 
 
 Radarr sees qBittorrent and SABnzbd downloads at `/downloads` and your movie library at `/movies`. In Plundarr, `/downloads` maps to `HOST_DOWNLOADS_PATH`, while qBittorrent writes under `/downloads/torrents` and SABnzbd writes under `/downloads/usenet`.
 
-Keep Radarr's download client paths pointed at `/downloads`. That shared path lets Radarr import completed movie downloads cleanly and use hardlinks when the host filesystem supports them.
+Keep Radarr's download client paths pointed at `/downloads`. That shared path lets Radarr import completed movie downloads cleanly with matching download paths. The generated download and library directories are separate bind mounts, so imports between them use copies rather than hardlinks.
 
-If ye keep seeding, leave the original torrent payload in `/downloads` so qBittorrent can keep sharing it while Radarr manages the imported movie in `/movies`.
+To keep seeding, leave the original torrent payload in `/downloads` so qBittorrent can keep sharing it while Radarr manages the imported movie in `/movies`.
 
 Use these download client categories:
 

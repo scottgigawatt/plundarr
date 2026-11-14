@@ -85,9 +85,9 @@ echo "Stopping current containers for '$PROJECT_NAME' while preserving volumes..
 $COMPOSE_CMD down --remove-orphans
 
 #
-# Rebuild and start the stack in detached mode.
+# Start the stack in detached mode using its declared Compose dependencies.
 #
-echo "Rebuilding and starting containers for '$PROJECT_NAME' with enforced startup order..."
+echo "Starting containers for '$PROJECT_NAME' in the declared Compose dependency order..."
 $COMPOSE_CMD up -d
 
 #

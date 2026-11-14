@@ -23,5 +23,5 @@ For Usenet, point SABnzbd completed jobs at `/downloads/usenet` and temporary jo
 Render the service into the final chart:
 
 ```sh
-make ship ADD_SERVICES=sonarr-anime
+make generate ADD_SERVICES=sonarr-anime
 ```

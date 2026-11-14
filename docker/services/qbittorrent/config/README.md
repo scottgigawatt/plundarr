@@ -6,7 +6,7 @@ qBittorrent keeps its database and settings here; preserve them during regenerat
 
 qBittorrent writes downloads under `/downloads/torrents` inside the container. In Plundarr, that path maps to `HOST_TORRENTS_DOWNLOADS_PATH` on the host. Radarr and Sonarr mount the broader `HOST_DOWNLOADS_PATH` at `/downloads`, so they see the same completed torrent files at `/downloads/torrents/...`.
 
-Keep qBittorrent, Radarr, and Sonarr aligned under `/downloads`. If qBittorrent saves to a different path that Radarr or Sonarr cannot see, imports can fail or copy files instead of using hardlinks.
+Keep qBittorrent, Radarr, and Sonarr aligned under `/downloads` so the media managers can find completed files. The default separate download and library mounts use copies during import. Hardlinks require a custom shared mount on the same filesystem; matching path names alone does not enable them.
 
 With SABnzbd aboard, keep torrent cargo in its own lane:
 

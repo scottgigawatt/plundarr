@@ -6,7 +6,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 # test-make-helpers.sh: Validate Make's AWK, documentation, backup, credential,
-#                       and Compose status helpers without mutating a deployment.
+#                       Compose status, and test lifecycle helpers without a deployment.
 #
 # Usage: test/helpers/test-make-helpers.sh
 #
@@ -254,7 +254,7 @@ fi
 #
 # Keep clean repository-only and protect every generated deployment.
 #
-NO_COLOR=1 make --dry-run clean >"${test_output}/clean.out"
+NO_COLOR=1 make --dry-run clean-artifacts >"${test_output}/clean.out"
 grep -F 'rm -rf .venv-docs site .ruff_cache .pytest_cache test/logs' \
     "${test_output}/clean.out" >/dev/null
 grep -F -- "-path './dist'" "${test_output}/clean.out" >/dev/null
@@ -413,7 +413,7 @@ grep -F 'The selected deployment does not include recyclarr.' \
 #
 # Keep Plundarr and Maraudarr cleanup separate without deleting application config.
 #
-NO_COLOR=1 make --dry-run nuke \
+NO_COLOR=1 make --dry-run remove-stack \
     DOCKER_COMPOSE=true \
     ENV_FILE="${test_output}/stack.env" \
     COMPOSE_ENV_FILE="${test_output}/stack.env" \
@@ -422,13 +422,264 @@ NO_COLOR=1 make --dry-run nuke \
 test "$(grep -c '^scripts/compose/nuke.sh' "${test_output}/nuke.out")" -eq 2
 grep -F -- '--project-name "maraudarr"' "${test_output}/nuke.out" >/dev/null
 grep -F -- '--builder-name "plundarr-local"' "${test_output}/nuke.out" >/dev/null
-test "$(grep -c 'make --no-print-directory clean' "${test_output}/nuke.out")" -eq 1
-test "$(grep -c 'make --no-print-directory restore-test-config' "${test_output}/nuke.out")" -eq 1
-if grep -E 'delete-config|rm -rf .*\.env|rm -rf .*backups|docker (system|image|volume|builder) prune|--all-inactive' \
+test "$(grep -c 'make --no-print-directory clean-artifacts' "${test_output}/nuke.out")" -eq 1
+test "$(grep -c 'make --no-print-directory restore-vpn-examples' "${test_output}/nuke.out")" -eq 0
+if grep -E 'delete-config|restore-vpn-examples|rm -rf .*config/|rm -rf .*\.env|rm -rf .*backups|docker (system|image|volume|builder) prune|--all-inactive' \
     "${test_output}/nuke.out" >/dev/null; then
     echo "The nuke target crossed a protected cleanup boundary." >&2
     exit 1
 fi
+
+#
+# Even with parallel Make, restoration waits for shutdown and stops on failure.
+#
+reset_fixture="${test_output}/reset"
+mkdir -p "${reset_fixture}"
+cat >"${reset_fixture}/Makefile" <<'MAKE'
+fixture-down:
+	@sleep 1
+	@test "$(RESET_FIXTURE_FAIL)" != yes
+	@printf "%s\n" "example WireGuard configuration" >"$(PRIVATEERR_EXAMPLE_WG_CONFIG)"
+	@printf "%s\n" "example PIA metadata" >"$(PRIVATEERR_EXAMPLE_METADATA)"
+MAKE
+
+make --no-print-directory -j4 -f Makefile -f "${reset_fixture}/Makefile" \
+    reset-test-stack DOWN=fixture-down \
+    DOCKER_COMPOSE=true DEPENDENCIES=true \
+    ENV_FILE="${test_output}/stack.env" COMPOSE_FILE="${test_output}/compose.yml" \
+    PRIVATEERR_EXAMPLE_WG_CONFIG="${reset_fixture}/example-wg.conf" \
+    PRIVATEERR_EXAMPLE_METADATA="${reset_fixture}/example-metadata.env" \
+    PRIVATEERR_GENERATED_WG_CONFIG="${reset_fixture}/saved/wg.conf" \
+    PRIVATEERR_GENERATED_METADATA="${reset_fixture}/saved/metadata.env" \
+    >"${reset_fixture}/success.out" 2>&1 || {
+    cat "${reset_fixture}/success.out" >&2
+    exit 1
+}
+cmp "${reset_fixture}/example-wg.conf" "${reset_fixture}/saved/wg.conf"
+cmp "${reset_fixture}/example-metadata.env" "${reset_fixture}/saved/metadata.env"
+
+printf '%s\n' 'keep WireGuard configuration' >"${reset_fixture}/saved/wg.conf"
+printf '%s\n' 'keep PIA metadata' >"${reset_fixture}/saved/metadata.env"
+cp "${reset_fixture}/saved/wg.conf" "${reset_fixture}/expected-wg.conf"
+cp "${reset_fixture}/saved/metadata.env" "${reset_fixture}/expected-metadata.env"
+
+if make --no-print-directory -j4 -f Makefile -f "${reset_fixture}/Makefile" \
+    reset-test-stack DOWN=fixture-down RESET_FIXTURE_FAIL=yes \
+    DOCKER_COMPOSE=true DEPENDENCIES=true \
+    ENV_FILE="${test_output}/stack.env" COMPOSE_FILE="${test_output}/compose.yml" \
+    PRIVATEERR_EXAMPLE_WG_CONFIG="${reset_fixture}/example-wg.conf" \
+    PRIVATEERR_EXAMPLE_METADATA="${reset_fixture}/example-metadata.env" \
+    PRIVATEERR_GENERATED_WG_CONFIG="${reset_fixture}/saved/wg.conf" \
+    PRIVATEERR_GENERATED_METADATA="${reset_fixture}/saved/metadata.env" \
+    >"${reset_fixture}/failure.out" 2>&1; then
+    echo "Test reset ignored a failed shutdown." >&2
+    exit 1
+fi
+
+cmp "${reset_fixture}/expected-wg.conf" "${reset_fixture}/saved/wg.conf"
+cmp "${reset_fixture}/expected-metadata.env" "${reset_fixture}/saved/metadata.env"
+
+#
+# Exercise the real stack-test targets with controlled writers and no Docker access.
+#
+stack_fixture="${test_output}/stack-lifecycle"
+stack_real_cp=$(command -v cp)
+mkdir -p "${stack_fixture}/bin"
+cat >"${stack_fixture}/compose.sh" <<'SH'
+#!/bin/sh
+set -eu
+case "$1" in
+    down)
+        count=0
+
+        if [ -f "${STACK_FIXTURE_DIR}/down-count" ]; then
+            count=$(cat "${STACK_FIXTURE_DIR}/down-count")
+        fi
+
+        count=$((count + 1))
+        printf '%s\n' "${count}" >"${STACK_FIXTURE_DIR}/down-count"
+        printf '%s\n' down >>"${STACK_FIXTURE_DIR}/events"
+
+        if [ "${STACK_FIXTURE_FAIL_DOWN}" = "${count}" ]; then
+            echo 'Controlled shutdown failure.' >&2
+            exit 19
+        fi
+
+        rm -f "${STACK_FIXTURE_DIR}/running"
+        ;;
+    up)
+        printf '%s\n' up >>"${STACK_FIXTURE_DIR}/events"
+        printf '%s\n' 'generated WireGuard configuration' >"${STACK_FIXTURE_DIR}/saved/wg.conf"
+        printf '%s\n' 'generated PIA metadata' >"${STACK_FIXTURE_DIR}/saved/metadata.env"
+        touch "${STACK_FIXTURE_DIR}/running"
+        test "${STACK_FIXTURE_FAIL_STAGE}" != up
+        ;;
+    ps|logs)
+        printf '%s\n' "$1" >>"${STACK_FIXTURE_DIR}/events"
+        ;;
+    *)
+        echo "Unexpected fixture Compose operation: $1" >&2
+        exit 1
+        ;;
+esac
+SH
+cat >"${stack_fixture}/stage.sh" <<'SH'
+#!/bin/sh
+set -eu
+printf '%s\n' "$1" >>"${STACK_FIXTURE_DIR}/events"
+test "${STACK_FIXTURE_FAIL_STAGE}" != "$1"
+SH
+cat >"${stack_fixture}/bin/cp" <<'SH'
+#!/bin/sh
+set -eu
+
+# A running marker represents a supervisor that could still write the VPN files.
+if [ -e "${STACK_FIXTURE_DIR}/running" ]; then
+    touch "${STACK_FIXTURE_DIR}/unsafe-restore"
+    echo 'Attempted to restore examples while a test writer was running.' >&2
+    exit 23
+fi
+
+copy_count=0
+
+if [ -f "${STACK_FIXTURE_DIR}/copy-count" ]; then
+    copy_count=$(cat "${STACK_FIXTURE_DIR}/copy-count")
+fi
+
+copy_count=$((copy_count + 1))
+printf '%s\n' "${copy_count}" >"${STACK_FIXTURE_DIR}/copy-count"
+
+if [ "${STACK_FIXTURE_FAIL_COPY}" = "${copy_count}" ]; then
+    echo 'Controlled example restoration failure.' >&2
+    exit 29
+fi
+
+printf '%s\n' restore >>"${STACK_FIXTURE_DIR}/events"
+exec "${STACK_FIXTURE_REAL_CP}" "$@"
+SH
+chmod +x "${stack_fixture}/bin/cp"
+
+#
+# run_stack_case: Execute a stack-test lifecycle scenario in isolated files.
+#
+# Parameters: $1 - Scenario name.
+#             $2 - Stage that fails, or none.
+#             $3 - Shutdown invocation that fails, or 0.
+#             $4 - Make target; defaults to test-stack.
+#             $5 - Example copy invocation that fails; defaults to 0.
+#
+# Returns: 0 after recording Make's status; fails on an unsafe restoration attempt.
+#
+run_stack_case() {
+    stack_case="${stack_fixture}/$1"
+    mkdir -p "${stack_case}/saved"
+    printf '%s\n' 'original WireGuard configuration' >"${stack_case}/saved/wg.conf"
+    printf '%s\n' 'original PIA metadata' >"${stack_case}/saved/metadata.env"
+    printf '%s\n' 'example WireGuard configuration' >"${stack_case}/example-wg.conf"
+    printf '%s\n' 'example PIA metadata' >"${stack_case}/example-metadata.env"
+    touch "${stack_case}/running"
+
+    if STACK_FIXTURE_DIR="${stack_case}" \
+        STACK_FIXTURE_FAIL_STAGE="$2" STACK_FIXTURE_FAIL_DOWN="$3" \
+        STACK_FIXTURE_FAIL_COPY="${5:-0}" \
+        STACK_FIXTURE_REAL_CP="${stack_real_cp}" \
+        PATH="${stack_fixture}/bin:${PATH}" NO_COLOR=1 \
+        make --no-print-directory -j4 "${4:-test-stack}" \
+            BUILD_DEPENDS= CHECK_ENV= CHECK_RENDERED= CHECK_PIA= \
+            SELECTED_COMPOSE_SERVICES='privateerr gluetun qbittorrent' \
+            PLUNDARR_COMPOSE="sh '${stack_fixture}/compose.sh'" \
+            PLUNDARR_STACK_WAIT_CMD="sh '${stack_fixture}/stage.sh' wait" \
+            PLUNDARR_VPN_TEST_CMD="sh '${stack_fixture}/stage.sh' vpn" \
+            PRIVATEERR_EXAMPLE_WG_CONFIG="${stack_case}/example-wg.conf" \
+            PRIVATEERR_EXAMPLE_METADATA="${stack_case}/example-metadata.env" \
+            PRIVATEERR_GENERATED_WG_CONFIG="${stack_case}/saved/wg.conf" \
+            PRIVATEERR_GENERATED_METADATA="${stack_case}/saved/metadata.env" \
+            >"${stack_case}/output" 2>&1; then
+        printf '%s\n' 0 >"${stack_case}/status"
+    else
+        printf '%s\n' "$?" >"${stack_case}/status"
+    fi
+
+    # A failing Make invocation must not hide an attempted concurrent write.
+    if [ -e "${stack_case}/unsafe-restore" ]; then
+        cat "${stack_case}/output" >&2
+        return 1
+    fi
+}
+
+# Successful tests retain the running stack and its generated configuration.
+run_stack_case success none 0
+test "$(cat "${stack_case}/status")" -eq 0
+test -f "${stack_case}/running"
+test "$(cat "${stack_case}/down-count")" -eq 1
+grep -Fx 'generated WireGuard configuration' "${stack_case}/saved/wg.conf" >/dev/null
+grep -Fx 'generated PIA metadata' "${stack_case}/saved/metadata.env" >/dev/null
+
+# Every test-stage failure must stop the writer before restoring examples.
+for failure_stage in up wait vpn; do
+    run_stack_case "${failure_stage}" "${failure_stage}" 0
+    test "$(cat "${stack_case}/status")" -ne 0
+    test ! -e "${stack_case}/running"
+    test "$(cat "${stack_case}/down-count")" -eq 2
+    cmp "${stack_case}/example-wg.conf" "${stack_case}/saved/wg.conf"
+    cmp "${stack_case}/example-metadata.env" "${stack_case}/saved/metadata.env"
+done
+
+# A failed cleanup leaves generated files intact and supplies a recovery action.
+run_stack_case shutdown wait 2
+test "$(cat "${stack_case}/status")" -ne 0
+test -f "${stack_case}/running"
+grep -Fx 'generated WireGuard configuration' "${stack_case}/saved/wg.conf" >/dev/null
+grep -Fx 'generated PIA metadata' "${stack_case}/saved/metadata.env" >/dev/null
+grep -F 'generated VPN files have been preserved.' "${stack_case}/output" >/dev/null
+grep -F 'make reset-test-stack PRESET=plundarr.' "${stack_case}/output" >/dev/null
+
+# A failed initial shutdown must not reset files or start another test writer.
+run_stack_case preparation none 1
+test "$(cat "${stack_case}/status")" -ne 0
+test -f "${stack_case}/running"
+grep -Fx 'original WireGuard configuration' "${stack_case}/saved/wg.conf" >/dev/null
+grep -Fx 'original PIA metadata' "${stack_case}/saved/metadata.env" >/dev/null
+grep -F 'Correct shutdown or example-file errors before retrying.' "${stack_case}/output" >/dev/null
+
+# Focused e2e tests restore examples after a passing or failing test has stopped.
+for failure_stage in none up vpn; do
+    run_stack_case "e2e-${failure_stage}" "${failure_stage}" 0 test-e2e
+
+    if [ "${failure_stage}" = none ]; then
+        test "$(cat "${stack_case}/status")" -eq 0
+    else
+        test "$(cat "${stack_case}/status")" -ne 0
+    fi
+
+    test ! -e "${stack_case}/running"
+    test "$(cat "${stack_case}/down-count")" -eq 2
+    cmp "${stack_case}/example-wg.conf" "${stack_case}/saved/wg.conf"
+    cmp "${stack_case}/example-metadata.env" "${stack_case}/saved/metadata.env"
+done
+
+# A failed e2e shutdown fails even after passing validation and keeps the live pair.
+for failure_stage in none vpn; do
+    run_stack_case "e2e-shutdown-${failure_stage}" "${failure_stage}" 2 test-e2e
+    test "$(cat "${stack_case}/status")" -ne 0
+    test -f "${stack_case}/running"
+    grep -Fx 'generated WireGuard configuration' "${stack_case}/saved/wg.conf" >/dev/null
+    grep -Fx 'generated PIA metadata' "${stack_case}/saved/metadata.env" >/dev/null
+    grep -F 'generated VPN files have been preserved.' "${stack_case}/output" >/dev/null
+    grep -F 'make reset-test-stack PRESET=plundarr.' "${stack_case}/output" >/dev/null
+done
+
+# Initial shutdown and final copy failures must both reject the e2e run.
+run_stack_case e2e-preparation none 1 test-e2e
+test "$(cat "${stack_case}/status")" -ne 0
+test -f "${stack_case}/running"
+grep -Fx 'original WireGuard configuration' "${stack_case}/saved/wg.conf" >/dev/null
+grep -Fx 'original PIA metadata' "${stack_case}/saved/metadata.env" >/dev/null
+
+run_stack_case e2e-restoration none 0 test-e2e 3
+test "$(cat "${stack_case}/status")" -ne 0
+test ! -e "${stack_case}/running"
+grep -F 'Controlled example restoration failure.' "${stack_case}/output" >/dev/null
 
 #
 # Give Maraudarr an explicit Compose identity and repository-owned builder.
@@ -456,7 +707,7 @@ common_targets=$(awk '
         exit
     }
 ' Makefile)
-test "${common_targets}" = "BUILD_DEPENDS CHECK_ENV CHECK_PIA ENSURE_BUILDX_BUILDER ALL UP WATCHTOWER_RUN_ONCE KOMETA_OVERLAY_RESET RECYCLARR_PREVIEW RECYCLARR_SYNC DOWN PS LOGS CONFIG ENV PRINT_CONFIG PRINT_ENV BUILD BUILD_PLATFORMS TEST TEST_MAKE_HELPERS TEST_WORKFLOWS TEST_E2E BACKUP RESTORE_TEST_CONFIG CLEAN_TEST CLEAN NUKE HELP"
+test "${common_targets}" = "BUILD_DEPENDS CHECK_ENV CHECK_PIA ENSURE_BUILDX_BUILDER ALL UP WATCHTOWER_RUN_ONCE KOMETA_OVERLAY_RESET RECYCLARR_PREVIEW RECYCLARR_SYNC DOWN PS LOGS CONFIG ENV PRINT_CONFIG PRINT_ENV BUILD BUILD_PLATFORMS TEST TEST_MAKE_HELPERS TEST_WORKFLOWS TEST_E2E BACKUP RESTORE_VPN_EXAMPLES RESET_TEST_STACK CLEAN_ARTIFACTS REMOVE_STACK HELP"
 common_recipe_order=$(awk '
     /^\$\([A-Z0-9_]+\)(:| )/ {
         target = $0

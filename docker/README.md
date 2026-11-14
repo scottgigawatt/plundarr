@@ -19,7 +19,7 @@ Maraudarr generates Plundarr Compose deployments and exits. It resolves selected
 
 ## Generate a deployment
 
-Use the [repository quickstart](../README.md#generate-the-default-stack-) for prerequisites, image selection, generation, and startup. Run Make commands from the repository root. `MARAUDARR_IMAGE` chooses the packaged source/catalog; mounting a checkout does not make that image use live Python source.
+Use the [repository quickstart](../README.md#generate-the-default-stack-) for prerequisites, image selection, generation, and startup. The published image supports interactive Docker setup without Git or Make. Make shortcuts run from the repository root; `MARAUDARR_IMAGE` chooses the packaged catalog.
 
 The [setup guide](../docs/setup.md) covers Docker/Synology deployment and service preparation. `make help` lists operations; the [testing guide](../docs/development/maraudarr/testing.md) explains validation by changed boundary.
 
