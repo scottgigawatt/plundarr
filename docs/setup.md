@@ -133,6 +133,8 @@ The [Synology project documentation](https://kb.synology.com/en-id/DSM/help/Cont
 <a id="configure-duplex-services"></a>
 <a id="configure-watchtower"></a>
 
+For host preparation and coordinated stack startup after a reboot, follow the [Synology boot-task guide](project-guides/scripts.md#create-a-synology-boot-task).
+
 ## Customize further
 
 Use [customization](customize.md) to select services, plan networks, configure libraries, and prepare optional integrations. Service-specific instructions are listed in the [service guides](project-guides/index.md).
