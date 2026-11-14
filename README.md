@@ -53,6 +53,8 @@ You need Docker with Compose, a terminal on your Docker host, writable storage, 
 
 ![Maraudarr's interactive setup selects the default Plundarr services and generates the stack files](docs/assets/maraudarr-demo.gif)
 
+🔎 [View the full-size demo](docs/assets/maraudarr-demo.gif).
+
 Create a directory you own, then open the interactive setup using the published image:
 
 ```sh
@@ -91,19 +93,21 @@ The Privateerr container generates the PIA WireGuard configuration file; Gluetun
 
 The interactive setup offers these starting points. Standalone media-server and utility presets do not require PIA.
 
-| Preset | Purpose |
+| 🗺️ Preset | 🎯 Purpose |
 | --- | --- |
-| `plundarr` | Movies, television, and ebooks with VPN-protected torrent downloads |
-| `boudoirr` | Whisparr automation with Cruisarr requests, Jellyfin playback, and Stash cataloging |
-| `jellyfin` | Jellyfin media server |
-| `plex` | Plex Media Server |
-| `calibre-web-automated` | Ebook library and imports |
-| `duplex` | Plex artwork, metadata, theme songs, and maintenance |
-| `watchtower` | Container image updates |
-| `portainer` | Docker management interface |
-| `custom` | Individually selected services |
+| 🏴‍☠️ `plundarr` | Movies, television, and ebooks with VPN-protected torrent downloads |
+| 🔞 `boudoirr` | Whisparr automation with Cruisarr requests, Jellyfin playback, and Stash cataloging |
+| 🎞️ `jellyfin` | Jellyfin media server |
+| 📺 `plex` | Plex Media Server |
+| 📚 `calibre-web-automated` | Ebook library and imports |
+| 🎭 `duplex` | Plex artwork, metadata, theme songs, and maintenance |
+| 🔭 `watchtower` | Container image updates |
+| 🚢 `portainer` | Docker management interface |
+| 🧩 `custom` | Individually selected services |
 
-Use [customization](https://scottgigawatt.github.io/plundarr/customize/) for service choices, networks, and optional integrations, or browse the [complete preset examples](examples/presets/README.md).
+🗂️ **[Browse the complete preset examples](examples/presets/README.md)** — inspect each preset’s Compose file and example settings before generating your stack. 🔎
+
+Use [customization](https://scottgigawatt.github.io/plundarr/customize/) for service choices, networks, and optional integrations.
 
 ## Use the Make helpers
 

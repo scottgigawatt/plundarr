@@ -37,6 +37,12 @@ repos:
     rev: v6.0.0
     hooks:
       - id: check-added-large-files
+        # Keep the full terminal recording under its own eight-MiB limit.
+        exclude: ^docs/assets/maraudarr-demo\.gif$
+      - id: check-added-large-files
+        name: Check full-resolution terminal recording size
+        args: [--maxkb=8192]
+        files: ^docs/assets/maraudarr-demo\.gif$
       - id: check-executables-have-shebangs
       - id: check-merge-conflict
       - id: check-shebang-scripts-are-executable

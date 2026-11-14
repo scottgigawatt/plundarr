@@ -11,18 +11,22 @@ Output docs/assets/maraudarr-demo.gif
 Require docker
 Set Shell "zsh"
 Set FontSize 20
-Set Width 1200
-Set Height 780
+Set Width 2400
+Set Height 1800
 Set Padding 20
 Set Framerate 8
 Set PlaybackSpeed 1
 Set TypingSpeed 35ms
-Set Theme "TokyoNight"
+Set Theme {"name": "Maraudarr", "background": "#0b0f14", "foreground": "#e6edf3", "cursor": "#e6edf3", "black": "#0b0f14", "red": "#ff7b72", "green": "#00cc66", "yellow": "#f2c14e", "blue": "#79c0ff", "magenta": "#d2a8ff", "cyan": "#56d4dd", "white": "#e6edf3", "brightBlack": "#8b949e", "brightRed": "#ffa198", "brightGreen": "#56d364", "brightYellow": "#e3b341", "brightBlue": "#a5d6ff", "brightMagenta": "#d2a8ff", "brightCyan": "#a5d6ff", "brightWhite": "#ffffff"}
 Set CursorBlink false
 
 # Use a disposable working directory without showing a temporary host path.
 Hide
 Type `cd "$PLUNDARR_DEMO_DIR"`
+Enter
+Type `export PS1='%F{#00ff00}$%f '`
+Enter
+Type `export PS2='%F{#00ff00}>%f '`
 Enter
 Type "clear"
 Enter
@@ -41,36 +45,36 @@ Type `  --tmpfs /tmp:rw,noexec,nosuid,size=64m \`
 Enter
 Type `  --volume "$PWD:/output:rw" \`
 Enter
-Type `  ghcr.io/scottgigawatt/maraudarr:latest configure`
+Type `  ghcr.io/scottgigawatt/maraudarr:3.2.0 configure`
 
-# Hold the complete command for one minute before opening the configurator.
-Sleep 60s
+# Hold the complete command for five seconds before opening the configurator.
+Sleep 5s
 Enter
-Sleep 6s
+Sleep 3s
 
 # Select Plundarr and retain defaults in all eight optional service categories.
 Enter
-Sleep 4s
+Sleep 3s
 Enter
-Sleep 4s
+Sleep 3s
 Enter
-Sleep 4s
+Sleep 3s
 Enter
-Sleep 4s
+Sleep 3s
 Enter
-Sleep 4s
+Sleep 3s
 Enter
-Sleep 4s
+Sleep 3s
 Enter
-Sleep 4s
+Sleep 3s
 Enter
-Sleep 4s
+Sleep 3s
 Enter
-Sleep 4s
+Sleep 3s
 
 # Confirm generation; then inspect filenames without printing .env values.
 Enter
-Sleep 8s
+Sleep 3s
 Type "clear"
 Enter
 Type "cd dist/plundarr"
