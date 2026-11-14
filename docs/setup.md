@@ -52,7 +52,7 @@ Keep generated passwords and API keys in the private `.env`. Homepage uses `HOME
 
 Create the host directories you selected and grant the configured numeric identity access. Docker Desktop also needs permission to share them. Do not change ownership of an existing library indiscriminately.
 
-The default Calibre-Web Automated service needs separate config, ingest, and library directories. For a new library, choose an empty writable directory; CWA creates and registers the library on startup. To use an existing Calibre library, select its directory containing `metadata.db`. See the [CWA storage instructions](https://github.com/crocodilestick/Calibre-Web-Automated#explanation-of-the-container-bindings). CWA removes files from its ingest directory after processing: use completed books only, never an active downloads directory. Keep `CWA_NETWORK_SHARE_MODE=false` for local disks and use `true` for NFS/SMB storage.
+The default Calibre-Web Automated service needs separate config, ingest, and library directories. For a new library, choose an empty writable directory; CWA creates and registers the library on startup. To use an existing Calibre library, select its directory containing `metadata.db`. See the [CWA storage instructions](https://github.com/crocodilestick/Calibre-Web-Automated/blob/main/README.md#explanation-of-the-container-bindings). CWA removes files from its ingest directory after processing: use completed books only, never an active downloads directory. Keep `CWA_NETWORK_SHARE_MODE=false` for local disks and use `true` for NFS/SMB storage.
 
 Watchtower is selected by default and can update eligible containers across the Docker host. Run one persistent Watchtower instance per host; deselect it if you already have one. The [Watchtower chart](https://github.com/scottgigawatt/plundarr/blob/main/docker/services/watchtower/README.md) explains its scope and exclusions.
 
@@ -76,7 +76,7 @@ docker compose up --detach --pull always
 docker compose ps
 ```
 
-The first run downloads images and may take several minutes. Check Privateerr's startup readiness first, Gluetun's healthy VPN connection second, and qBittorrent third. Privateerr creates the VPN settings; Gluetun carries VPN traffic. Other applications have their own startup dependencies.
+The first run downloads images and may take several minutes. Check Privateerr's startup readiness first, Gluetun's healthy VPN connection second, and qBittorrent third. The Privateerr container generates the PIA WireGuard configuration file; the Gluetun VPN container carries VPN traffic. Other applications have their own startup dependencies.
 
 ## Open your applications
 

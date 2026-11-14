@@ -2,7 +2,7 @@
 
 This directory contains persistent configuration for your selected services. Read each service subdirectory's README for its first-run settings and storage boundaries. The deployment's private `.env` lives one directory above this one.
 
-Maraudarr adds missing seeds and preserves application state during generation. External libraries/configuration and named Docker volumes are separate storage locations. Keep a complete recovery set covering all of them. `make down` and `make nuke` preserve this directory and saved VPN settings.
+Maraudarr adds missing seeds and preserves application state during generation. External libraries/configuration and named Docker volumes are separate storage locations. Keep a complete recovery set covering all of them. `make down` and `make remove-stack` preserve this directory and saved VPN settings.
 
 ## Back up or reset the hold 🧽
 

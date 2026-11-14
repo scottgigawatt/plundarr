@@ -12,4 +12,4 @@ Create a database backup through Stash’s Backup task, then stop Stash before a
 
 `make backup PRESET=YOUR-PRESET` archives the selected project's `config/` tree, excluding `.env` and external bind sources. Stopping Stash does not make other applications' databases consistent. Verify the archive and retain an off-host copy before treating it as recoverable.
 
-`make down` and `make nuke` preserve these bind-mounted files. `make delete-config` is destructive and deletes Stash state stored beneath the selected config tree. Do not use it to remove the service. Follow the [Stash backup and recovery procedure](https://github.com/scottgigawatt/plundarr/blob/main/docs/project-guides/stash.md#back-up-and-recover) for a complete recovery set and restore checks.
+`make down` and `make remove-stack` preserve these bind-mounted files. `make delete-config` is destructive and deletes Stash state stored beneath the selected config tree. Do not use it to remove the service. Follow the [Stash backup and recovery procedure](https://scottgigawatt.github.io/plundarr/project-guides/stash/#back-up-and-recover) for a complete recovery set and restore checks.

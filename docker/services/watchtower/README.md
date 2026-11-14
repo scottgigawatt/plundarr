@@ -7,7 +7,7 @@ Watchtower can inspect eligible running and stopped containers visible through t
 Generate and start the standalone persistent preset:
 
 ```sh
-make ship PRESET=watchtower
+make generate PRESET=watchtower
 make up PRESET=watchtower
 ```
 

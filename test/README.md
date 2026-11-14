@@ -1,6 +1,6 @@
 # Test Plundarr deployments 🧪🏴‍☠️
 
-Use the [developer testing guide](https://github.com/scottgigawatt/plundarr/blob/main/docs/development/maraudarr/testing.md) for unit, strict type, helper, workflow, image, generation-matrix, and documentation checks. This page covers optional live deployment tests and their recovery boundaries.
+Use the [developer testing guide](https://scottgigawatt.github.io/plundarr/development/maraudarr/testing/) for unit, strict type, helper, workflow, image, generation-matrix, and documentation checks. This page covers optional live deployment tests and their recovery boundaries.
 
 ## Find a test
 
@@ -22,7 +22,7 @@ Replace `YOUR-PRESET` with one catalog ID and use it consistently. Run mutating 
 > [!CAUTION]
 > `make test-e2e` and `make test-stack` replace selected WireGuard and forwarding files with examples before and after validation and can interrupt services. Back up disposable test state and protect credentials. Interrupted commands can leave services or sensitive state behind; inspect before recovery. Never use these targets to diagnose an operator deployment.
 
-The [generator revision guide](https://github.com/scottgigawatt/plundarr/blob/main/docs/development/maraudarr/index.md#choose-the-generator-revision) explains selecting the source-built image. Generate the full desired selection before live tests. Supply test credentials privately; never publish `.env`, `wg0.conf`, `privateerr.env`, application databases, or raw private logs.
+The [generator revision guide](https://scottgigawatt.github.io/plundarr/development/maraudarr/#choose-the-generator-revision) explains selecting the source-built image. Generate the full desired selection before live tests. Supply test credentials privately; never publish `.env`, `wg0.conf`, `privateerr.env`, application databases, or raw private logs.
 
 ## Check an already-running test stack
 
@@ -63,11 +63,11 @@ It creates uniquely named projects and unrelated sentinels, proves `down` retain
 The following commands stop or reset only the explicitly selected disposable test deployment:
 
 > [!CAUTION]
-> `make clean-test` stops the selected stack and replaces its VPN files with examples. `make restore-test-config` replaces those files even while services run, potentially breaking VPN operation. Confirm the preset and isolation before running either.
+> `make reset-test-stack` stops the selected stack and replaces its VPN files with examples. `make restore-vpn-examples` replaces those files even while services run, potentially breaking VPN operation. Confirm the preset and isolation before running either.
 
 ```sh
-make clean-test PRESET=YOUR-PRESET
-make restore-test-config PRESET=YOUR-PRESET
+make reset-test-stack PRESET=YOUR-PRESET
+make restore-vpn-examples PRESET=YOUR-PRESET
 ```
 
-`clean-test` uses volume-preserving `down`. `make clean` removes disposable repository artifacts only. `make nuke` also stops services and removes scoped containers, networks, eligible images, the separate Maraudarr project, and repository-owned build cache; it preserves application volumes, deployment `.env`, persistent config, and backups. `make delete-config` is a separate destructive host-config deletion and is not part of routine cleanup. Keep exported backups off-host; named-volume application backups need their own export procedure.
+`reset-test-stack` uses volume-preserving `down`. `make clean-artifacts` removes disposable repository artifacts only. `make remove-stack` also stops services and removes scoped containers, networks, eligible images, the separate Maraudarr project, and repository-owned build cache; it preserves application volumes, deployment `.env`, persistent config, and backups. `make delete-config` is a separate destructive host-config deletion and is not part of routine cleanup. Keep exported backups off-host; named-volume application backups need their own export procedure.

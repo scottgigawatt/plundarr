@@ -23,19 +23,19 @@ The Make examples run from the Plundarr repository root and use the published ge
 Generate Boudoirr with Cruisarr and a local Jellyfin server:
 
 ```sh
-make ship PRESET=boudoirr
+make generate PRESET=boudoirr
 ```
 
 If Jellyfin already runs in another project or on another host, omit the local Jellyfin container and connect the existing server during setup:
 
 ```sh
-make ship PRESET=boudoirr REMOVE_SERVICES=jellyfin
+make generate PRESET=boudoirr REMOVE_SERVICES=jellyfin
 ```
 
 To omit Cruisarr, clear its initially checked box in `make configure`, or use:
 
 ```sh
-make ship PRESET=boudoirr REMOVE_SERVICES=cruisarr
+make generate PRESET=boudoirr REMOVE_SERVICES=cruisarr
 ```
 
 To omit requests and local Jellyfin playback while retaining Stash, use `REMOVE_SERVICES=cruisarr,jellyfin`. Add `stash` to that list to omit all three companions. Other presets can select either service through `ADD_SERVICES` or `make configure`. Include your complete service selection whenever you regenerate a project.
@@ -216,4 +216,4 @@ Keep the current data directory and its encryption key until you have verified r
 
 For an online SQLite snapshot, follow [Cruisarr backup and recovery](https://github.com/scottgigawatt/cruisarr/blob/main/docs/operations/setup-and-configuration.md#backup-and-recovery). Restore that snapshot as `cruisarr.sqlite` in fresh storage with its matching key.
 
-`make down`, `make nuke`, and regeneration preserve bind-mounted application state. `make delete-config` deletes the selected host config tree, including Cruisarr data and backups stored inside it. A `CRUISARR_CONFIG_PATH` outside that tree is not deleted by this target. Keep recovery copies outside the config tree and off the deployment host.
+`make down`, `make remove-stack`, and regeneration preserve bind-mounted application state. `make delete-config` deletes the selected host config tree, including Cruisarr data and backups stored inside it. A `CRUISARR_CONFIG_PATH` outside that tree is not deleted by this target. Keep recovery copies outside the config tree and off the deployment host.

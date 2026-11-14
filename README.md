@@ -69,7 +69,7 @@ docker run --rm -it --pull always \
 
 Choose **Plundarr**. Use the arrow keys to move, Space to toggle optional services, and Enter to continue. Keep the defaults for the standard stack. Maraudarr creates `dist/plundarr/docker-compose.yml`, `.env`, `example.env`, and `config/`, then exits.
 
-Open `dist/plundarr/.env` in a text editor. Set PIA credentials, host storage paths, user/group IDs, timezone, and Homepage's browser address. The [setup guide](docs/setup.md#review-the-settings) identifies the required settings and storage preparation before launch. Generated passwords and keys are ready to use; keep them private.
+Open `dist/plundarr/.env` in a text editor. Set PIA credentials, host storage paths, user/group IDs, timezone, and Homepage's browser address. The [setup guide](https://scottgigawatt.github.io/plundarr/setup/#review-the-settings) identifies the required settings and storage preparation before launch. Generated passwords and keys are ready to use; keep them private.
 
 After completing that review, run from the same directory:
 
@@ -80,9 +80,9 @@ docker compose up --detach --pull always
 docker compose ps
 ```
 
-Open Homepage at your Docker host's port `3000` and sign in with `HOMEPAGE_AUTH_PASSWORD` from `.env`. The [first-login steps](docs/setup.md#open-your-applications) cover qBittorrent and the other primary interfaces. Change the port in the address if you customized it.
+Open Homepage at your Docker host's port `3000` and sign in with `HOMEPAGE_AUTH_PASSWORD` from `.env`. The [first-login steps](https://scottgigawatt.github.io/plundarr/setup/#open-your-applications) cover qBittorrent and the other primary interfaces. Change the port in the address if you customized it.
 
-Privateerr prepares the VPN settings; Gluetun runs the VPN connection; qBittorrent downloads through Gluetun. Applications still need their own setup after their containers start. Continue with [connecting your applications in Plundarrpedia](https://scottgigawatt.github.io/plundarrpedia/projects/plundarr/connect-applications/).
+The Privateerr container generates the PIA WireGuard configuration file; Gluetun runs the VPN connection; qBittorrent downloads through Gluetun. Applications still need their own setup after their containers start. Continue with [connecting your applications in Plundarrpedia](https://scottgigawatt.github.io/plundarrpedia/projects/plundarr/connect-applications/).
 
 <!-- markdownlint-disable-next-line MD033 -->
 <a id="customize-a-deployment-"></a>
@@ -103,7 +103,7 @@ The interactive setup offers these starting points. Standalone media-server and 
 | `portainer` | Docker management interface |
 | `custom` | Individually selected services |
 
-Use [customization](docs/customize.md) for service choices, networks, and optional integrations, or browse the [complete preset examples](examples/presets/README.md).
+Use [customization](https://scottgigawatt.github.io/plundarr/customize/) for service choices, networks, and optional integrations, or browse the [complete preset examples](examples/presets/README.md).
 
 ## Use the Make helpers
 
@@ -115,7 +115,7 @@ cd plundarr
 make configure
 ```
 
-Make uses the published Maraudarr image. Review `dist/plundarr/.env` and prepare storage before `make up`; `make ps` shows status. Use `make help` for available operations. [Local image builds](docs/development/maraudarr/index.md#choose-the-generator-revision) are available for development.
+Make uses the published Maraudarr image. Review `dist/plundarr/.env` and prepare storage before `make up`; `make ps` shows status. Use `make help` for available operations. [Local image builds](https://scottgigawatt.github.io/plundarr/development/maraudarr/#choose-the-generator-revision) are available for development.
 
 <!-- markdownlint-disable-next-line MD033 -->
 <a id="inspect-and-maintain-the-stack-"></a>
@@ -124,16 +124,16 @@ Make uses the published Maraudarr image. Review `dist/plundarr/.env` and prepare
 
 ## Maintain the stack and get help
 
-[Maintenance](docs/maintain.md) covers updates, regeneration, backups, and stopping the stack. `make down` preserves images and data. `make clean` removes disposable developer files.
+[Maintenance](https://scottgigawatt.github.io/plundarr/maintain/) covers updates, regeneration, backups, and stopping the stack. `make down` preserves images and data. `make clean-artifacts` removes disposable developer files.
 
 > [!CAUTION]
-> `make nuke` removes the selected stack's Docker resources, the Maraudarr project, and scoped build cache while preserving configuration, application volumes, and backups. `make delete-config` deletes the selected host config tree. Review the selected preset and verify backups before destructive cleanup.
+> `make remove-stack` removes the selected stack's Docker resources, the Maraudarr project, and scoped build cache while preserving configuration, application volumes, and backups. `make delete-config` deletes the selected host config tree. Review the selected preset and verify backups before destructive cleanup.
 
-- [Set up Docker or Synology](docs/setup.md): required settings, first login, and troubleshooting.
+- [Set up Docker or Synology](https://scottgigawatt.github.io/plundarr/setup/): required settings, first login, and troubleshooting.
 - [Plundarrpedia](https://scottgigawatt.github.io/plundarrpedia/): connect applications and follow integrated platform guides.
-- [Service guides](docs/project-guides/index.md): VPN, Jellyfin, Stash, Cruisarr, monitoring, and other integrations.
-- [Developer documentation](docs/development/maraudarr/index.md): build, extend, and test Maraudarr.
-- [Support](docs/SUPPORT.md), [security](docs/SECURITY.md), [contributing](docs/CONTRIBUTING.md), and [Code of Conduct](docs/CODE_OF_CONDUCT.md).
+- [Service guides](https://scottgigawatt.github.io/plundarr/project-guides/): VPN, Jellyfin, Stash, Cruisarr, monitoring, and other integrations.
+- [Developer documentation](https://scottgigawatt.github.io/plundarr/development/maraudarr/): build, extend, and test Maraudarr.
+- [Support](https://scottgigawatt.github.io/plundarr/SUPPORT/), [security](https://scottgigawatt.github.io/plundarr/SECURITY/), [contributing](https://scottgigawatt.github.io/plundarr/CONTRIBUTING/), and [Code of Conduct](https://scottgigawatt.github.io/plundarr/CODE_OF_CONDUCT/).
 
 ## Compatibility and licensing ⚖️
 

@@ -23,7 +23,7 @@ Maraudarr does **not** start the generated stack, manage long-running service st
 
 ## Choose the generator revision
 
-`make ship`, `make configure`, `make presets`, and `make services` run the configured `MARAUDARR_IMAGE`, which defaults to `ghcr.io/scottgigawatt/maraudarr:latest`. Make first reuses that exact local reference. If it is absent, Make pulls the configured reference; a failed pull triggers a local build from this checkout. The mounted repository is the output destination, not a live source-code mount into the generator.
+`make generate`, `make configure`, `make presets`, and `make services` run the configured `MARAUDARR_IMAGE`, which defaults to `ghcr.io/scottgigawatt/maraudarr:latest`. Make first reuses that exact local reference. If it is absent, Make pulls the configured reference; a failed pull triggers a local build from this checkout. The mounted repository is the output destination, not a live source-code mount into the generator.
 
 Published images contain their own catalog and configuration seeds. Use a local build when developing changes to those sources.
 
@@ -36,7 +36,7 @@ make presets
 make configure
 ```
 
-For non-interactive generation, use `make ship PRESET=boudoirr` with the exported image reference and the complete intended additions/removals. `make build` packages the checkout into the configured local image. `make pull-image` refreshes the configured published image.
+For non-interactive generation, use `make generate PRESET=boudoirr` with the exported image reference and the complete intended additions/removals. `make build` packages the checkout into the configured local image. `make pull-image` refreshes the configured published image.
 
 ## Explore the source map
 

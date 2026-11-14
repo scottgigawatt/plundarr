@@ -254,7 +254,7 @@ fi
 #
 # Keep clean repository-only and protect every generated deployment.
 #
-NO_COLOR=1 make --dry-run clean >"${test_output}/clean.out"
+NO_COLOR=1 make --dry-run clean-artifacts >"${test_output}/clean.out"
 grep -F 'rm -rf .venv-docs site .ruff_cache .pytest_cache test/logs' \
     "${test_output}/clean.out" >/dev/null
 grep -F -- "-path './dist'" "${test_output}/clean.out" >/dev/null
@@ -413,7 +413,7 @@ grep -F 'The selected deployment does not include recyclarr.' \
 #
 # Keep Plundarr and Maraudarr cleanup separate without deleting application config.
 #
-NO_COLOR=1 make --dry-run nuke \
+NO_COLOR=1 make --dry-run remove-stack \
     DOCKER_COMPOSE=true \
     ENV_FILE="${test_output}/stack.env" \
     COMPOSE_ENV_FILE="${test_output}/stack.env" \
@@ -422,13 +422,62 @@ NO_COLOR=1 make --dry-run nuke \
 test "$(grep -c '^scripts/compose/nuke.sh' "${test_output}/nuke.out")" -eq 2
 grep -F -- '--project-name "maraudarr"' "${test_output}/nuke.out" >/dev/null
 grep -F -- '--builder-name "plundarr-local"' "${test_output}/nuke.out" >/dev/null
-test "$(grep -c 'make --no-print-directory clean' "${test_output}/nuke.out")" -eq 1
-test "$(grep -c 'make --no-print-directory restore-test-config' "${test_output}/nuke.out")" -eq 0
-if grep -E 'delete-config|restore-test-config|rm -rf .*config/|rm -rf .*\.env|rm -rf .*backups|docker (system|image|volume|builder) prune|--all-inactive' \
+test "$(grep -c 'make --no-print-directory clean-artifacts' "${test_output}/nuke.out")" -eq 1
+test "$(grep -c 'make --no-print-directory restore-vpn-examples' "${test_output}/nuke.out")" -eq 0
+if grep -E 'delete-config|restore-vpn-examples|rm -rf .*config/|rm -rf .*\.env|rm -rf .*backups|docker (system|image|volume|builder) prune|--all-inactive' \
     "${test_output}/nuke.out" >/dev/null; then
     echo "The nuke target crossed a protected cleanup boundary." >&2
     exit 1
 fi
+
+#
+# Even with parallel Make, restoration waits for shutdown and stops on failure.
+#
+reset_fixture="${test_output}/reset"
+mkdir -p "${reset_fixture}"
+cat >"${reset_fixture}/Makefile" <<'MAKE'
+fixture-down:
+	@sleep 1
+	@test "$(RESET_FIXTURE_FAIL)" != yes
+	@printf "%s\n" "example WireGuard configuration" >"$(PRIVATEERR_EXAMPLE_WG_CONFIG)"
+	@printf "%s\n" "example PIA metadata" >"$(PRIVATEERR_EXAMPLE_METADATA)"
+MAKE
+
+make --no-print-directory -j4 -f Makefile -f "${reset_fixture}/Makefile" \
+    reset-test-stack DOWN=fixture-down \
+    DOCKER_COMPOSE=true DEPENDENCIES=true \
+    ENV_FILE="${test_output}/stack.env" COMPOSE_FILE="${test_output}/compose.yml" \
+    PRIVATEERR_EXAMPLE_WG_CONFIG="${reset_fixture}/example-wg.conf" \
+    PRIVATEERR_EXAMPLE_METADATA="${reset_fixture}/example-metadata.env" \
+    PRIVATEERR_GENERATED_WG_CONFIG="${reset_fixture}/saved/wg.conf" \
+    PRIVATEERR_GENERATED_METADATA="${reset_fixture}/saved/metadata.env" \
+    >"${reset_fixture}/success.out" 2>&1 || {
+    cat "${reset_fixture}/success.out" >&2
+    exit 1
+}
+cmp "${reset_fixture}/example-wg.conf" "${reset_fixture}/saved/wg.conf"
+cmp "${reset_fixture}/example-metadata.env" "${reset_fixture}/saved/metadata.env"
+
+printf '%s\n' 'keep WireGuard configuration' >"${reset_fixture}/saved/wg.conf"
+printf '%s\n' 'keep PIA metadata' >"${reset_fixture}/saved/metadata.env"
+cp "${reset_fixture}/saved/wg.conf" "${reset_fixture}/expected-wg.conf"
+cp "${reset_fixture}/saved/metadata.env" "${reset_fixture}/expected-metadata.env"
+
+if make --no-print-directory -j4 -f Makefile -f "${reset_fixture}/Makefile" \
+    reset-test-stack DOWN=fixture-down RESET_FIXTURE_FAIL=yes \
+    DOCKER_COMPOSE=true DEPENDENCIES=true \
+    ENV_FILE="${test_output}/stack.env" COMPOSE_FILE="${test_output}/compose.yml" \
+    PRIVATEERR_EXAMPLE_WG_CONFIG="${reset_fixture}/example-wg.conf" \
+    PRIVATEERR_EXAMPLE_METADATA="${reset_fixture}/example-metadata.env" \
+    PRIVATEERR_GENERATED_WG_CONFIG="${reset_fixture}/saved/wg.conf" \
+    PRIVATEERR_GENERATED_METADATA="${reset_fixture}/saved/metadata.env" \
+    >"${reset_fixture}/failure.out" 2>&1; then
+    echo "Test reset ignored a failed shutdown." >&2
+    exit 1
+fi
+
+cmp "${reset_fixture}/expected-wg.conf" "${reset_fixture}/saved/wg.conf"
+cmp "${reset_fixture}/expected-metadata.env" "${reset_fixture}/saved/metadata.env"
 
 #
 # Give Maraudarr an explicit Compose identity and repository-owned builder.
@@ -456,7 +505,7 @@ common_targets=$(awk '
         exit
     }
 ' Makefile)
-test "${common_targets}" = "BUILD_DEPENDS CHECK_ENV CHECK_PIA ENSURE_BUILDX_BUILDER ALL UP WATCHTOWER_RUN_ONCE KOMETA_OVERLAY_RESET RECYCLARR_PREVIEW RECYCLARR_SYNC DOWN PS LOGS CONFIG ENV PRINT_CONFIG PRINT_ENV BUILD BUILD_PLATFORMS TEST TEST_MAKE_HELPERS TEST_WORKFLOWS TEST_E2E BACKUP RESTORE_TEST_CONFIG CLEAN_TEST CLEAN NUKE HELP"
+test "${common_targets}" = "BUILD_DEPENDS CHECK_ENV CHECK_PIA ENSURE_BUILDX_BUILDER ALL UP WATCHTOWER_RUN_ONCE KOMETA_OVERLAY_RESET RECYCLARR_PREVIEW RECYCLARR_SYNC DOWN PS LOGS CONFIG ENV PRINT_CONFIG PRINT_ENV BUILD BUILD_PLATFORMS TEST TEST_MAKE_HELPERS TEST_WORKFLOWS TEST_E2E BACKUP RESTORE_VPN_EXAMPLES RESET_TEST_STACK CLEAN_ARTIFACTS REMOVE_STACK HELP"
 common_recipe_order=$(awk '
     /^\$\([A-Z0-9_]+\)(:| )/ {
         target = $0

@@ -157,7 +157,7 @@ cp "${fixture}/docker-compose.yml" "${expected}/docker-compose.yml"
 
 # Keep every command and cleanup path inside the disposable fixture.
 NUKE_STUB_LOG="${test_output}/make-nuke.log" NO_COLOR=1 \
-    make --no-print-directory --directory "${fixture}" nuke \
+    make --no-print-directory --directory "${fixture}" remove-stack \
         DOCKER_BIN="${stub_path}" \
         DOCKER_COMPOSE="${stub_path} compose" \
         DEPENDENCIES=true \
@@ -182,7 +182,7 @@ cmp "${expected}/docker-compose.yml" "${fixture}/docker-compose.yml"
 test "$(grep -c ' down --timeout ' "${test_output}/make-nuke.log")" -eq 2
 if grep -E -- '--volumes|volume rm|system prune|image prune|volume prune|builder prune' \
     "${test_output}/make-nuke.log" >/dev/null; then
-    echo "The Make nuke recipe crossed a protected Docker cleanup boundary." >&2
+    echo "The Make remove-stack recipe crossed a protected Docker cleanup boundary." >&2
     exit 1
 fi
 

@@ -23,7 +23,7 @@ These pairs are generated from this source revision and validated without starti
 To reproduce the curated custom selection with your own generated secrets and configuration, first build the local image as described below, then run this from the repository root:
 
 ```sh
-make ship MARAUDARR_IMAGE=maraudarr:examples PRESET=custom ADD_SERVICES=privateerr,gluetun,qbittorrent,prowlarr,radarr,sonarr,sonarr-anime
+make generate MARAUDARR_IMAGE=maraudarr:examples PRESET=custom ADD_SERVICES=privateerr,gluetun,qbittorrent,prowlarr,radarr,sonarr,sonarr-anime
 ```
 
 The interactive custom preset still starts with no services checked. An empty non-interactive custom selection is rejected; select services explicitly rather than treating the curated example as a default. Review the resulting `dist/custom/.env` before starting any containers.

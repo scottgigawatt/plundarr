@@ -36,17 +36,17 @@ EXAMPLES=examples
 TEST_EXAMPLES=test-examples
 TEST_E2E=test-e2e
 BACKUP=backup
-RESTORE_TEST_CONFIG=restore-test-config
-CLEAN_TEST=clean-test
-CLEAN=clean
-NUKE=nuke
+RESTORE_VPN_EXAMPLES=restore-vpn-examples
+RESET_TEST_STACK=reset-test-stack
+CLEAN_ARTIFACTS=clean-artifacts
+REMOVE_STACK=remove-stack
 HELP=help
 
 #
 # Project target names.
 #
 PULL_IMAGE=pull-image
-SHIP=ship
+GENERATE=generate
 CONFIGURE=configure
 PRESETS=presets
 AVAILABLE_SERVICES=services
@@ -96,10 +96,10 @@ COMMON_TARGETS= \
 	$(TEST_WORKFLOWS) \
 	$(TEST_E2E) \
 	$(BACKUP) \
-	$(RESTORE_TEST_CONFIG) \
-	$(CLEAN_TEST) \
-	$(CLEAN) \
-	$(NUKE) \
+	$(RESTORE_VPN_EXAMPLES) \
+	$(RESET_TEST_STACK) \
+	$(CLEAN_ARTIFACTS) \
+	$(REMOVE_STACK) \
 	$(HELP)
 
 #
@@ -107,7 +107,7 @@ COMMON_TARGETS= \
 #
 PROJECT_TARGETS= \
 	$(PULL_IMAGE) \
-	$(SHIP) \
+	$(GENERATE) \
 	$(CONFIGURE) \
 	$(PRESETS) \
 	$(AVAILABLE_SERVICES) \
@@ -604,7 +604,7 @@ $(UP): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED) $(CHECK_PIA)
 $(WATCHTOWER_RUN_ONCE): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 	@if [ -z "$(filter $(WATCHTOWER_SERVICE),$(SELECTED_COMPOSE_SERVICES))" ]; then \
 		$(call print_line_inline,$(COLOR_ERROR),The selected deployment does not include $(WATCHTOWER_SERVICE).); \
-		$(call print_detail_inline,$(COLOR_MUTED),Run: make $(SHIP) PRESET=watchtower); \
+		$(call print_detail_inline,$(COLOR_MUTED),Run: make $(GENERATE) PRESET=watchtower); \
 		exit 1; \
 	fi
 	@running_containers=$$($(PLUNDARR_COMPOSE) ps --quiet "$(WATCHTOWER_SERVICE)") || exit $$?; \
@@ -629,7 +629,7 @@ $(WATCHTOWER_RUN_ONCE): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 $(KOMETA_OVERLAY_RESET): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 	@if [ -z "$(filter $(OVERLAY_RESET_SERVICE),$(PROFILED_COMPOSE_SERVICES))" ]; then \
 		$(call print_line_inline,$(COLOR_ERROR),The selected deployment does not include $(OVERLAY_RESET_SERVICE).); \
-		$(call print_detail_inline,$(COLOR_MUTED),Run: make $(SHIP) PRESET=duplex); \
+		$(call print_detail_inline,$(COLOR_MUTED),Run: make $(GENERATE) PRESET=duplex); \
 		exit 1; \
 	fi
 	@running_containers=$$($(PLUNDARR_COMPOSE) ps --quiet "$(OVERLAY_RESET_SERVICE)") || exit $$?; \
@@ -654,7 +654,7 @@ $(KOMETA_OVERLAY_RESET): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 $(RECYCLARR_PREVIEW): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 	@if [ -z "$(filter $(RECYCLARR_SERVICE),$(PROFILED_COMPOSE_SERVICES))" ]; then \
 		$(call print_line_inline,$(COLOR_ERROR),The selected deployment does not include $(RECYCLARR_SERVICE).); \
-		$(call print_detail_inline,$(COLOR_MUTED),Run: make $(SHIP) PRESET=$(PRESET) ADD_SERVICES=$(RECYCLARR_SERVICE)); \
+		$(call print_detail_inline,$(COLOR_MUTED),Run: make $(GENERATE) PRESET=$(PRESET) ADD_SERVICES=$(RECYCLARR_SERVICE)); \
 		exit 1; \
 	fi
 	$(call announce,Previewin' the Recyclarr synchronization plan. ♻️)
@@ -673,7 +673,7 @@ $(RECYCLARR_PREVIEW): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 $(RECYCLARR_SYNC): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 	@if [ -z "$(filter $(RECYCLARR_SERVICE),$(PROFILED_COMPOSE_SERVICES))" ]; then \
 		$(call print_line_inline,$(COLOR_ERROR),The selected deployment does not include $(RECYCLARR_SERVICE).); \
-		$(call print_detail_inline,$(COLOR_MUTED),Run: make $(SHIP) PRESET=$(PRESET) ADD_SERVICES=$(RECYCLARR_SERVICE)); \
+		$(call print_detail_inline,$(COLOR_MUTED),Run: make $(GENERATE) PRESET=$(PRESET) ADD_SERVICES=$(RECYCLARR_SERVICE)); \
 		exit 1; \
 	fi
 	$(call announce_warning,Recyclarr will change the configured Radarr and Sonarr instances. ⚠️)
@@ -823,10 +823,10 @@ $(TEST_WORKFLOWS):
 #   $(BUILD_DEPENDS) - Ensure build dependencies are installed.
 #   $(CHECK_ENV) - Ensure the environment file exists.
 #   $(CHECK_RENDERED) - Ensure the rendered Compose file exists.
-#   $(RESTORE_TEST_CONFIG) - Restore example config files.
+#   $(RESTORE_VPN_EXAMPLES) - Restore example config files.
 #   $(CHECK_PIA) - Validate resolved PIA credentials when Privateerr is selected.
 #
-$(TEST_E2E): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED) $(RESTORE_TEST_CONFIG) $(CHECK_PIA)
+$(TEST_E2E): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED) $(RESTORE_VPN_EXAMPLES) $(CHECK_PIA)
 	$(call announce,Launching Privateerr$(COMMA) Gluetun$(COMMA) and selected download mates for one clean test voyage. 🌊)
 	@status=0; \
 	$(PLUNDARR_COMPOSE) \
@@ -844,7 +844,7 @@ $(TEST_E2E): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED) $(RESTORE_TEST_CONF
 		$(PLUNDARR_VPN_TEST_CMD) || status=$$?; \
 	fi; \
 	$(PLUNDARR_COMPOSE) down $(COMPOSE_DOWN_OPTIONS); \
-	$(MAKE) --no-print-directory $(RESTORE_TEST_CONFIG); \
+	$(MAKE) --no-print-directory $(RESTORE_VPN_EXAMPLES); \
 	exit "$$status"
 
 #
@@ -860,34 +860,34 @@ $(BACKUP):
 		"$(PRESET)"
 
 #
-# $(RESTORE_TEST_CONFIG): Restores checked-in example config files after live tests.
+# $(RESTORE_VPN_EXAMPLES): Restores checked-in example config files after live tests.
 #
 # Dependencies: None.
 #
-$(RESTORE_TEST_CONFIG):
-	$(call announce,Restorin' example maps for safe check-in. 🧭)
-	mkdir -p $$(dirname $(PRIVATEERR_GENERATED_WG_CONFIG))
-	cp $(PRIVATEERR_EXAMPLE_WG_CONFIG) $(PRIVATEERR_GENERATED_WG_CONFIG)
-	cp $(PRIVATEERR_EXAMPLE_METADATA) $(PRIVATEERR_GENERATED_METADATA)
+$(RESTORE_VPN_EXAMPLES):
+	$(call announce_warning,Replacing saved WireGuard configuration and PIA metadata with test examples. Stop any Privateerr containers using this directory first. ⚠️)
+	mkdir -p "$$(dirname "$(PRIVATEERR_GENERATED_WG_CONFIG)")"
+	cp "$(PRIVATEERR_EXAMPLE_WG_CONFIG)" "$(PRIVATEERR_GENERATED_WG_CONFIG)"
+	cp "$(PRIVATEERR_EXAMPLE_METADATA)" "$(PRIVATEERR_GENERATED_METADATA)"
 
 #
-# $(CLEAN_TEST): Stops and removes containers, then restores example config files.
+# $(RESET_TEST_STACK): Stops and removes containers, then restores example config files.
 #
 # Dependencies:
 #   $(DOWN) - Stop and remove the stack.
-#   $(RESTORE_TEST_CONFIG) - Restore example config files.
 #
-$(CLEAN_TEST): $(DOWN) $(RESTORE_TEST_CONFIG)
+$(RESET_TEST_STACK): $(DOWN)
+	@$(MAKE) --no-print-directory $(RESTORE_VPN_EXAMPLES)
 
 #
-# $(CLEAN): Removes only disposable developer artifacts. It never reads or
+# $(CLEAN_ARTIFACTS): Removes only disposable developer artifacts. It never reads or
 #           deletes dist/, generated configuration, environment files, Docker
 #           resources, or backups.
 #
 # Dependencies: None.
 #
-$(CLEAN):
-	$(call announce,Scrubbin' disposable developer artifacts only. 🧽)
+$(CLEAN_ARTIFACTS):
+	$(call announce,Deleting generated documentation$(COMMA) test logs$(COMMA) and Python caches only. 🧽)
 	rm -rf $(CLEAN_ARTIFACT_PATHS)
 	find "$(CLEAN_ARTIFACT_FIND_ROOT)" \
 		\( $(CLEAN_ARTIFACT_FIND_PRUNE) \) -prune -o \
@@ -895,14 +895,14 @@ $(CLEAN):
 	$(call announce_detail,Deployment charts$(COMMA) .env files$(COMMA) config$(COMMA) backups$(COMMA) containers$(COMMA) volumes$(COMMA) and images remain untouched. ⚓)
 
 #
-# $(NUKE): Removes project Docker resources while preserving deployment state.
+# $(REMOVE_STACK): Removes project Docker resources while preserving deployment state.
 #
 # Dependencies:
 #   $(BUILD_DEPENDS) - Ensure build dependencies are installed.
 #   $(CHECK_ENV) - Ensure the environment file exists.
 #   $(CHECK_RENDERED) - Ensure the rendered Compose file exists.
 #
-$(NUKE): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
+$(REMOVE_STACK): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 	$(call announce_warning,Removing selected-stack and Maraudarr Docker resources. Configuration, application data, and backups are preserved. 💣)
 	$(COMPOSE_NUKE_CMD) \
 		--docker-bin "$(DOCKER_BIN)" \
@@ -920,7 +920,7 @@ $(NUKE): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 		--builder-name "$(BUILDX_BUILDER_NAME)" \
 		--additional-image "$(MARAUDARR_IMAGE)" \
 		--additional-image "$(MARAUDARR_MULTIARCH_IMAGE)"
-	@$(MAKE) --no-print-directory $(CLEAN)
+	@$(MAKE) --no-print-directory $(CLEAN_ARTIFACTS)
 
 #
 # $(HELP): Print help information.
@@ -955,13 +955,13 @@ $(HELP):
 	$(call help_line,$(TEST_E2E),Run the focused VPN end-to-end test.)
 	$(call help_heading,🧹 Maintenance)
 	$(call help_line,$(BACKUP),Archive the selected preset config safely.)
-	$(call help_line,$(RESTORE_TEST_CONFIG),Restore example VPN config files for tests.)
-	$(call help_line,$(CLEAN_TEST),Stop the stack and restore example test config.)
-	$(call help_line,$(CLEAN),Remove only disposable developer artifacts.)
-	$(call help_line,$(NUKE),‼️ DANGER ‼️ remove Docker resources and build cache; keep config$(COMMA) data$(COMMA) and backups.)
+	$(call help_line,$(RESTORE_VPN_EXAMPLES),‼️ DANGER ‼️ replace saved WireGuard configuration and PIA metadata with test examples.)
+	$(call help_line,$(RESET_TEST_STACK),‼️ DANGER ‼️ stop the selected stack$(COMMA) then replace VPN files with test examples; disposable tests only.)
+	$(call help_line,$(CLEAN_ARTIFACTS),Delete generated docs$(COMMA) test logs$(COMMA) and Python caches; keep deployments.)
+	$(call help_line,$(REMOVE_STACK),‼️ DANGER ‼️ delete stack/Maraudarr containers$(COMMA) networks$(COMMA) images and build cache; keep config$(COMMA) volumes and backups.)
 	$(call help_heading,🧭 Plundarr and Maraudarr tools)
 	$(call help_line,$(PULL_IMAGE),Pull the latest published Maraudarr image.)
-	$(call help_line,$(SHIP),Generate a preset deployment (default: plundarr).)
+	$(call help_line,$(GENERATE),Generate Compose$(COMMA) .env$(COMMA) and config files for a preset without starting services.)
 	$(call help_line,$(CONFIGURE),Open the interactive preset and service selector.)
 	$(call help_line,$(PRESETS),List presets and their default services.)
 	$(call help_line,$(AVAILABLE_SERVICES),List every selectable service.)
@@ -976,7 +976,7 @@ $(HELP):
 	$(call help_line,$(DOCS),Build the strict developer documentation site.)
 	$(call help_line,$(DOCS_SERVE),Preview developer documentation locally.)
 	$(call help_line,$(DELETE_CONFIG),‼️ DANGER ‼️ delete the selected preset config tree.)
-	$(call announce_warning,⚠️  Destructive targets never run automatically. Back up config before using them.)
+	$(call announce_warning,⚠️  Review the selected preset and verify backups before reset$(COMMA) removal$(COMMA) or config deletion.)
 
 #
 # $(CHECK_RENDERED): Ensure the deployable Compose file exists.
@@ -1029,12 +1029,12 @@ $(PULL_IMAGE): $(BUILD_DEPENDS)
 	$(DOCKER_BIN) pull "$(MARAUDARR_IMAGE)"
 
 #
-# $(SHIP): Generates the comment-rich Compose and environment files.
+# $(GENERATE): Generates the comment-rich Compose and environment files.
 #
 # Dependencies:
 #   $(ENSURE_MARAUDARR_IMAGE) - Prepare a local Maraudarr image.
 #
-$(SHIP): $(ENSURE_MARAUDARR_IMAGE)
+$(GENERATE): $(ENSURE_MARAUDARR_IMAGE)
 	$(call announce,🧭 Maraudarr is charting the $(PRESET) deployment...)
 	@$(MARAUDARR_RUN) build \
 		--preset "$(PRESET)" \
@@ -1049,7 +1049,7 @@ $(SHIP): $(ENSURE_MARAUDARR_IMAGE)
 #   $(ENSURE_MARAUDARR_IMAGE) - Prepare a local Maraudarr image.
 #
 $(CONFIGURE): $(ENSURE_MARAUDARR_IMAGE)
-	$(call announce,🧭 Openin' Maraudarr's interactive voyage planner...)
+	$(call announce,🧭 Opening Maraudarr to select a preset and services...)
 	@$(MARAUDARR_RUN_INTERACTIVE) configure --output-root "$(MARAUDARR_OUTPUT_ROOT)"
 
 #
@@ -1198,10 +1198,10 @@ $(TEST_VPN): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 #   $(BUILD_DEPENDS) - Ensure build dependencies are installed.
 #   $(CHECK_ENV) - Ensure the environment file exists.
 #   $(CHECK_RENDERED) - Ensure the rendered Compose file exists.
-#   $(RESTORE_TEST_CONFIG) - Restore example config files.
+#   $(RESTORE_VPN_EXAMPLES) - Restore example config files.
 #   $(CHECK_PIA) - Validate resolved PIA credentials when Privateerr is selected.
 #
-$(TEST_STACK): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED) $(RESTORE_TEST_CONFIG) $(CHECK_PIA)
+$(TEST_STACK): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED) $(RESTORE_VPN_EXAMPLES) $(CHECK_PIA)
 	$(call announce,Launching the whole Plundarr fleet for a full-stack test voyage. 🏴‍☠️)
 	@status=0; \
 	$(PLUNDARR_COMPOSE) up $(COMPOSE_UP_OPTIONS) || status=$$?; \
@@ -1227,7 +1227,7 @@ $(TEST_STACK): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED) $(RESTORE_TEST_CO
 		$(PLUNDARR_COMPOSE) ps; \
 		$(PLUNDARR_COMPOSE) logs --tail=120; \
 	fi; \
-	$(MAKE) --no-print-directory $(RESTORE_TEST_CONFIG); \
+	$(MAKE) --no-print-directory $(RESTORE_VPN_EXAMPLES); \
 	exit "$$status"
 
 #
@@ -1267,7 +1267,7 @@ $(DOCS_SERVE): $(DOCS_INSTALL)
 $(DELETE_CONFIG):
 	$(call announce_warning,Removing the complete Plundarr config hold. ☠️)
 	rm -rf "$(CONFIG_PATH)"
-	$(call announce_detail,Run make $(SHIP) to regenerate selected service folders and seed files. 🗺️)
+	$(call announce_detail,Run make $(GENERATE) to regenerate selected service folders and seed files. 🗺️)
 
 #
 # $(DOCS_PYTHON_STAMP): Creates an isolated documentation environment with the

@@ -11,7 +11,7 @@ Use the published generator through the [interactive setup](../../../docs/custom
 From the repository root, generate Boudoirr with the optional instance:
 
 ```sh
-make ship PRESET=boudoirr ADD_SERVICES=whisparr-alt
+make generate PRESET=boudoirr ADD_SERVICES=whisparr-alt
 ```
 
 Or run `make configure`, choose Boudoirr, and check **Whisparr Alt** in **Media automation**. Custom and other presets can also select it. It brings the shared Prowlarr and FlareSolverr services through catalog dependencies; it does not require the primary Whisparr. Both Whisparr instances wait for Prowlarr to be healthy during Compose startup.

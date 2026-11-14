@@ -46,7 +46,7 @@ The wrapper installed by Privateerr lets Privateerr reach Gluetun's health liste
 
 To disable recovery, set `PRIVATEERR_AUTO_RECOVER=false` in the generated `.env` and recreate the complete stack with `make up PRESET=YOUR-PRESET`. The wrapper then uses your normal `GLUETUN_HEALTH_RESTART_VPN` setting. A manually stopped VPN pauses automatic recovery; an unreachable or unauthorized control API does not trigger repeated PIA registrations. A port-forwarding-only failure does not rotate a healthy tunnel.
 
-Recovery respects `PIA_AUTOCONNECT`, `PIA_PREFERRED_REGION`, and `PIA_PF`. A selected region stays pinned during recovery. See [Privateerr's recovery guide](https://github.com/scottgigawatt/privateerr/blob/main/docs/automatic-recovery.md) for the full sequence, authentication routes, and limits.
+Recovery respects `PIA_AUTOCONNECT`, `PIA_PREFERRED_REGION`, and `PIA_PF`. A selected region stays pinned during recovery. See [Privateerr's recovery guide](https://scottgigawatt.github.io/privateerr/automatic-recovery/) for the full sequence, authentication routes, and limits.
 
 ### Configure the recovery wrapper
 

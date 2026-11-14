@@ -7,13 +7,13 @@ The Make examples run from a repository checkout and use the published generator
 ## Generate the service
 
 ```sh
-make ship PRESET=duplex
+make generate PRESET=duplex
 ```
 
 Themerr is also an optional addition to standalone Jellyfin, Boudoirr, or another preset:
 
 ```sh
-make ship PRESET=jellyfin ADD_SERVICES=themerr
+make generate PRESET=jellyfin ADD_SERVICES=themerr
 ```
 
 Review these values in the generated `.env`:

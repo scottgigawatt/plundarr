@@ -36,7 +36,7 @@ Watchtower can automate eligible updates across the Docker host. Review its [sco
 Regeneration updates Compose files and missing seeds. Existing environment values and application state survive; Homepage's generated service cards are refreshed. Review any manual card edits before regeneration.
 
 1. Verify backups and record the full intended preset/service selection.
-2. Run the [published generator command](https://github.com/scottgigawatt/plundarr#generate-the-default-stack-) from the same output directory and select those services again. From a checkout, use `make pull-image` then `make configure` or `make ship` with the full selection.
+2. Run the [published generator command](https://scottgigawatt.github.io/plundarr/setup/#generate-a-deployment) from the same output directory and select those services again. From a checkout, use `make pull-image` then `make configure` or `make generate` with the full selection.
 3. Review `.env` for selected services and required host values. Preserved values do not reselect services.
 4. From the generated directory, validate and recreate the project:
 
@@ -54,12 +54,12 @@ These Make commands operate from the checkout on the selected preset:
 
 | Command | Removes | Preserves |
 | --- | --- | --- |
-| `make clean` | Disposable developer files | Deployments and all Docker resources |
+| `make clean-artifacts` | Disposable developer files | Deployments and all Docker resources |
 | `make down` | Project containers and networks | Images, volumes, configuration, backups |
-| `make nuke` | Selected-stack Docker resources, Maraudarr resources, eligible images, and scoped build cache | Deployment files, all config/VPN state, application volumes, backups |
+| `make remove-stack` | Selected-stack Docker resources, Maraudarr resources, eligible images, and scoped build cache | Deployment files, all config/VPN state, application volumes, backups |
 | `make delete-config` | Selected host config tree | Named volumes and paths outside that tree |
 
 > [!CAUTION]
-> `make nuke` interrupts services and can require image downloads before restart. `make delete-config` deletes configuration, databases, and exports stored inside the selected config tree. Stop affected services and verify backups before destructive cleanup.
+> `make remove-stack` interrupts services and can require image downloads before restart. `make delete-config` deletes configuration, databases, and exports stored inside the selected config tree. Stop affected services and verify backups before destructive cleanup.
 
-`make nuke` leaves saved VPN settings intact and never restores test examples. Test-only reset commands belong to isolated disposable tests; read the [testing guide](project-guides/testing.md) before using them.
+`make remove-stack` leaves saved VPN settings intact and never restores test examples. Test-only reset commands belong to isolated disposable tests; read the [testing guide](project-guides/testing.md) before using them.

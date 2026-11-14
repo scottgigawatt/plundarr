@@ -16,7 +16,7 @@ The native login uses one shared password. Homepage does not rate-limit password
 
 ## Understand generated files
 
-Maraudarr assembles Homepage service cards from `services.base.yaml`, selected service fragments in `fragments/`, and `services.footer.yaml` when `make ship` runs. Homepage reads the generated `services.yaml` at runtime.
+Maraudarr assembles Homepage service cards from `services.base.yaml`, selected service fragments in `fragments/`, and `services.footer.yaml` when `make generate` runs. Homepage reads the generated `services.yaml` at runtime.
 
 Use the `.env` URL and widget settings below for normal customization. Generation refreshes `services.yaml`, so keep a copy of manual layout edits before regenerating. Developing a different generated layout uses the source fragments under `docker/services/homepage/config/fragments/`.
 

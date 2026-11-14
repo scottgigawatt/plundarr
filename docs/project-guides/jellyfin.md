@@ -11,14 +11,14 @@ Jellyfin Web is bundled with the server and supports `config.json`, custom menu 
 Generate either supported combination:
 
 ```sh
-make ship PRESET=boudoirr ADD_SERVICES=jellyfin-vue
-make ship PRESET=jellyfin ADD_SERVICES=jellyfin-vue
+make generate PRESET=boudoirr ADD_SERVICES=jellyfin-vue
+make generate PRESET=jellyfin ADD_SERVICES=jellyfin-vue
 ```
 
 Vue stays opt-in for every preset. Select it in Maraudarr's service picker or add `jellyfin-vue` on the command line. It recommends Jellyfin without deploying another server automatically. To use an existing server with Boudoirr:
 
 ```sh
-make ship PRESET=boudoirr REMOVE_SERVICES=jellyfin ADD_SERVICES=jellyfin-vue
+make generate PRESET=boudoirr REMOVE_SERVICES=jellyfin ADD_SERVICES=jellyfin-vue
 ```
 
 Fresh deployment ports are:

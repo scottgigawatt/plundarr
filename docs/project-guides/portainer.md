@@ -3,7 +3,7 @@
 From a repository checkout, generate standalone Portainer Community Edition with the published generator. You can also select Portainer in the [interactive Docker setup](../customize.md#select-services-and-presets):
 
 ```sh
-make ship PRESET=portainer
+make generate PRESET=portainer
 ```
 
 Review `dist/portainer/.env` before starting it:

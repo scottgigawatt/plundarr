@@ -35,7 +35,7 @@ Make invokes these helpers automatically. Review each script header for its inte
 
 ### `compose/backup.sh`
 
-Archives one generated preset's complete config directory with a timestamped name. An incrementing suffix prevents a same-second backup from replacing an existing archive. Before a file-copy archive, stop affected applications cleanly and prepare application-consistent exports; the helper does not pause writers or snapshot databases. Then use `make backup PRESET=YOUR-PRESET`. This archives host config files only, excluding the deployment `.env`, external configuration trees, and named-volume databases. Keep [Tracearr exports](https://github.com/scottgigawatt/plundarr/blob/main/docs/project-guides/monitoring.md#back-up-and-update), external state, and matching encryption keys in the recovery set and verify an off-host copy.
+Archives one generated preset's complete config directory with a timestamped name. An incrementing suffix prevents a same-second backup from replacing an existing archive. Before a file-copy archive, stop affected applications cleanly and prepare application-consistent exports; the helper does not pause writers or snapshot databases. Then use `make backup PRESET=YOUR-PRESET`. This archives host config files only, excluding the deployment `.env`, external configuration trees, and named-volume databases. Keep [Tracearr exports](https://scottgigawatt.github.io/plundarr/project-guides/monitoring/#back-up-and-update), external state, and matching encryption keys in the recovery set and verify an off-host copy.
 
 ### `compose/check-pia-credentials.sh`
 

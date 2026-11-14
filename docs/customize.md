@@ -15,12 +15,12 @@ make configure
 Make uses the published generator. For non-interactive generation, `PRESET` chooses the starting point; `ADD_SERVICES` and `REMOVE_SERVICES` accept comma-separated IDs:
 
 ```sh
-make ship ADD_SERVICES=lidarr,recyclarr
-make ship REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=nzbget
-make ship PRESET=boudoirr ADD_SERVICES=whisparr-alt
+make generate ADD_SERVICES=lidarr,recyclarr
+make generate REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=nzbget
+make generate PRESET=boudoirr ADD_SERVICES=whisparr-alt
 ```
 
-Use `make presets` and `make services` to inspect the catalog, or browse [preset examples](https://github.com/scottgigawatt/plundarr/blob/main/examples/presets/README.md). To use Docker directly, replace `configure` in the [generator command](https://github.com/scottgigawatt/plundarr#generate-the-default-stack-) with `build --preset boudoirr --add whisparr-alt`, for example.
+Use `make presets` and `make services` to inspect the catalog, or browse [preset examples](https://github.com/scottgigawatt/plundarr/blob/main/examples/presets/README.md). To use Docker directly, replace `configure` in the [generator command](https://scottgigawatt.github.io/plundarr/setup/#generate-a-deployment) with `build --preset boudoirr --add whisparr-alt`, for example.
 
 Repeat your full intended selection on regeneration. Maraudarr preserves environment values and application state, but those values do not remember service choices. Generation does not stop omitted running services. Review removals before recreating the project; see [maintenance](maintain.md#regenerate-a-deployment).
 

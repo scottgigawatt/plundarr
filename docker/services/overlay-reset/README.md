@@ -1,6 +1,6 @@
 # Kometa Overlay Reset service chart ⚠️
 
-Provides Kometa Overlay Reset as an opt-in, profile-gated recovery tool. Add it with `make ship PRESET=duplex ADD_SERVICES=overlay-reset`. Normal `make up` runs do not start it. Invoke it explicitly with:
+Provides Kometa Overlay Reset as an opt-in, profile-gated recovery tool. Add it with `make generate PRESET=duplex ADD_SERVICES=overlay-reset`. Normal `make up` runs do not start it. Invoke it explicitly with:
 
 ```sh
 make kometa-overlay-reset PRESET=duplex
