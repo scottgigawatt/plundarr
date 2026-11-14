@@ -51,9 +51,16 @@ Plundarr helps you run a media stack with one Docker Compose file, using Docker 
 
 You need Docker with Compose, a terminal on your Docker host, writable storage, and an active Private Internet Access (PIA) subscription. The default stack requires an amd64 or arm64 host. You do not need Git, Make, or a local image build.
 
+<!-- markdownlint-disable MD033 -->
+<details>
+<summary><strong>🎬 See it in action — expand the demo</strong></summary>
+
+<br />
+
 ![Maraudarr's interactive setup selects the default Plundarr services and generates the stack files](docs/assets/maraudarr-demo.gif)
 
-🔎 [View the full-size demo](docs/assets/maraudarr-demo.gif).
+</details>
+<!-- markdownlint-enable MD033 -->
 
 Create a directory you own, then open the interactive setup using the published image:
 

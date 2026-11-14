@@ -18,6 +18,7 @@ set -eu
 
 # Bound the full-resolution documentation asset to eight MiB.
 MAX_DEMO_BYTES=8388608
+DEMO_FRAMERATE=5
 
 #
 # render_demo: Frame a captured terminal video and encode the shared GIF.
@@ -30,6 +31,14 @@ MAX_DEMO_BYTES=8388608
 render_demo() {
     RECORDING_WIDTH=$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of csv=p=0 "$1")
     RECORDING_HEIGHT=$(ffprobe -v error -select_streams v:0 -show_entries stream=height -of csv=p=0 "$1")
+
+    # MP4 needs an even height; remove its single extra bottom padding row.
+    if [ "$RECORDING_WIDTH" -ne 1456 ] || [ "$RECORDING_HEIGHT" -ne 928 ]; then
+        echo "Expected a 1456 by 928 terminal capture; the current GIF was preserved." >&2
+        return 1
+    fi
+
+    RECORDING_HEIGHT=$((RECORDING_HEIGHT - 1))
     FRAME_WIDTH=$((RECORDING_WIDTH + 40))
     FRAME_HEIGHT=$((RECORDING_HEIGHT + 40))
 
@@ -49,18 +58,18 @@ EOF
     magick -background none "$2/frame.svg" -depth 8 "$2/frame.png"
     magick "$2/mask.svg" -colorspace Gray -depth 8 "$2/mask.png"
     ffmpeg -loglevel error -y -i "$1" \
-        -loop 1 -framerate 8 -i "$2/frame.png" -i "$2/mask.png" \
-        -filter_complex '[0:v]fps=8,format=rgba[screen];[2:v]format=gray[mask];[screen][mask]alphamerge[rounded];[1:v][rounded]overlay=20:20:shortest=1:format=auto,format=argb[framed]' \
+        -loop 1 -framerate "${DEMO_FRAMERATE}" -i "$2/frame.png" -i "$2/mask.png" \
+        -filter_complex "[0:v]fps=${DEMO_FRAMERATE},format=rgba,crop=iw:${RECORDING_HEIGHT}:0:0[screen];[2:v]format=gray[mask];[screen][mask]alphamerge[rounded];[1:v][rounded]overlay=20:20:shortest=1:format=auto,format=argb[framed]" \
         -map '[framed]' -c:v qtrle "$2/framed.mov"
 
     # Separate palette passes avoid buffering every full-resolution frame in memory.
     ffmpeg -loglevel error -y -i "$2/framed.mov" \
-        -vf 'fps=8,palettegen=max_colors=64:stats_mode=full' -frames:v 1 "$2/palette.png"
+        -vf "fps=${DEMO_FRAMERATE},palettegen=max_colors=64:stats_mode=full" -frames:v 1 "$2/palette.png"
 
     # Reserve an unused opaque palette slot for the green prompt; preserve the final transparent slot.
     magick "$2/palette.png" -fill '#00ff00' -draw 'point 14,15' "PNG32:$2/palette.png"
     ffmpeg -loglevel error -y -i "$2/framed.mov" -i "$2/palette.png" \
-        -lavfi '[0:v]fps=8[frames];[frames][1:v]paletteuse=dither=none:diff_mode=rectangle' "$2/recording.gif"
+        -lavfi "[0:v]fps=${DEMO_FRAMERATE}[frames];[frames][1:v]paletteuse=dither=none:diff_mode=rectangle" "$2/recording.gif"
     gifsicle --optimize=2 --output "$2/optimized.gif" "$2/recording.gif"
     ASSET_BYTES=$(wc -c <"$2/optimized.gif" | tr -d '[:space:]')
 
@@ -71,7 +80,7 @@ EOF
 }
 
 # Check recording tools before creating disposable files.
-for dependency in docker ffmpeg ffprobe gifsicle magick vhs; do
+for dependency in awk docker ffmpeg ffprobe gifsicle magick vhs; do
     command -v "$dependency" >/dev/null 2>&1 || {
         echo "Missing required recording dependency: $dependency" >&2
         exit 1
@@ -108,15 +117,29 @@ esac
 docker image inspect ghcr.io/scottgigawatt/maraudarr:3.2.0 \
     --format 'Recording Maraudarr {{index .Config.Labels "org.opencontainers.image.revision"}}'
 
+# Keep the real listing command while publishing only fixed demo ownership fields.
+PLUNDARR_DEMO_REAL_LS=$(command -v ls)
+PLUNDARR_DEMO_LISTING_VERIFIED="$DEMO_ROOT/listing-verified"
+export PLUNDARR_DEMO_REAL_LS PLUNDARR_DEMO_LISTING_VERIFIED
+mkdir -p "$DEMO_ROOT/bin"
+cp "$SCRIPT_PATH/demo-ls.sh" "$DEMO_ROOT/bin/ls"
+chmod 0700 "$DEMO_ROOT/bin/ls"
+
 # Record the real published image; no application containers or VPN are started.
 RECORDED_ASSET="$DEMO_ROOT/recording.mp4"
 RECORDING_TAPE="$DEMO_ROOT/recording.tape"
 
 # VHS adds command-line outputs to tape outputs; render only the temporary video.
 sed '/^Output /d' "$SCRIPT_PATH/maraudarr-demo.tape" >"$RECORDING_TAPE"
-vhs --output "$RECORDED_ASSET" "$RECORDING_TAPE"
+PATH="$DEMO_ROOT/bin:$PATH" vhs --output "$RECORDED_ASSET" "$RECORDING_TAPE"
 [ -s "$RECORDED_ASSET" ] || {
     echo "VHS did not produce a recording; the current GIF was preserved." >&2
+    exit 1
+}
+
+# Require the reviewed listing wrapper to finish before accepting this capture.
+[ -f "$PLUNDARR_DEMO_LISTING_VERIFIED" ] || {
+    echo "The demo listing did not pass its identity check; the current GIF was preserved." >&2
     exit 1
 }
 
