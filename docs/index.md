@@ -2,26 +2,20 @@
 icon: material/ship-wheel
 ---
 
-# Plundarr developer chart room 🏴‍☠️
+# Run and customize Plundarr 🏴‍☠️
 
-Welcome aboard the developer documentation for **Plundarr** and its Docker Compose project generator, **Maraudarr**. These charts explain how the Python application turns a service catalog into one comment-rich Docker Compose deployment without trampling existing user configuration.
+Plundarr is your generated media stack. Maraudarr is the short-lived generator that helps you choose services and creates the Compose file, settings, and initial configuration. Start with the published image and add complexity as you need it.
 
-## Choose a route 🧭
+## Start and operate your stack
 
-| Destination                                                   | Best for                                                  |
-| :------------------------------------------------------------ | :-------------------------------------------------------- |
-| [Maraudarr overview](development/maraudarr/index.md)          | Understanding responsibilities and source layout          |
-| [Architecture](development/maraudarr/architecture.md)         | Following data from CLI input to generated files          |
-| [Add a service](development/maraudarr/adding-a-service.md)    | Extending the selectable service catalog safely           |
-| [Documentation style](development/maraudarr/documentation.md) | Writing useful public docstrings and private-helper notes |
-| [Testing](development/maraudarr/testing.md)                   | Selecting the right validation voyage                     |
-| [Python reference](development/maraudarr/reference/index.md)  | Looking up public classes and functions from source       |
+| Task | Guide |
+| --- | --- |
+| Generate, configure, and start the default stack | [Set up Plundarr](setup.md) |
+| Select services, presets, networks, and integrations | [Customize your stack](customize.md) |
+| Update, stop, back up, or clean up | [Maintain your stack](maintain.md) |
+| Configure a particular service | [Service guides](project-guides/index.md) |
+| Connect applications or follow a platform walkthrough | [Plundarrpedia](https://scottgigawatt.github.io/plundarrpedia/) |
 
-> [!NOTE]
-> Plundarr is the generated Docker Compose deployment. Maraudarr is the short-lived Python application that selects, renders, validates, and writes that deployment.
+## Develop Maraudarr
 
-## Understand documentation boundaries 📚
-
-This site owns code-adjacent developer documentation and the version-matched Python reference. User deployment routes and broader fleet guidance remain in [Plundarrpedia](https://scottgigawatt.github.io/plundarrpedia/), which links back here rather than copying generated API pages.
-
-The static HTML is generated during validation and deployment. Only the Markdown sources, MkDocs configuration, and pinned documentation dependencies belong in Git; the generated `site/` directory does not.
+Use the [developer overview](development/maraudarr/index.md) to build locally and understand source ownership. Continue with [architecture](development/maraudarr/architecture.md), [adding a service](development/maraudarr/adding-a-service.md), [testing](development/maraudarr/testing.md), or the source-derived [Python reference](development/maraudarr/reference/index.md).

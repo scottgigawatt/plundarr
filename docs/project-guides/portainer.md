@@ -1,6 +1,6 @@
 # Deploy Portainer 🚢
 
-Run generation examples from the repository root with the [source-built generator](../development/maraudarr/index.md#choose-the-generator-revision) selected through `MARAUDARR_IMAGE`. Generate a standalone Portainer Community Edition server to manage your Docker host:
+From a repository checkout, generate standalone Portainer Community Edition with the published generator. You can also select Portainer in the [interactive Docker setup](../customize.md#select-services-and-presets):
 
 ```sh
 make ship PRESET=portainer

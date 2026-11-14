@@ -84,7 +84,6 @@ class ProjectNameTests(unittest.TestCase):
         sources = [
             self.catalog.root / "templates/compose.yml",
             self.repository_root / "docker-compose.maraudarr.yml",
-            self.repository_root / "docs/demo/docker-compose.demo.yml",
             *sorted((self.catalog.root / "services").glob("*/compose.yml")),
             *references,
         ]

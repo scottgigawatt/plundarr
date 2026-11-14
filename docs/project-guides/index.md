@@ -2,24 +2,19 @@
 icon: material/book-open-page-variant
 ---
 
-# Project guides 📖
+# Service guides 📖
 
-These guides describe this checkout's service catalog and configuration seeds. For generation commands, select the [source-built generator](../development/maraudarr/index.md#choose-the-generator-revision) through `MARAUDARR_IMAGE`; published images use their matching source documentation.
+Start with [setup](../setup.md), then use the guide for the service you are configuring. [Customization](../customize.md) covers preset selection and [maintenance](../maintain.md) covers updates and backups.
 
-Pick the chart that matches the work ahead:
+| Task | Guide |
+| --- | --- |
+| Choose a VPN region or manage automatic recovery | [VPN operation](vpn.md) |
+| Deploy a Docker management interface | [Portainer](portainer.md) |
+| Monitor media servers | [Monitoring](monitoring.md) |
+| Add Plex/Jellyfin theme songs | [Themerr](themerr.md) |
+| Configure requests and Jellyfin login | [Cruisarr](cruisarr.md) |
+| Configure Jellyfin Web or Vue | [Jellyfin](jellyfin.md) |
+| Catalog shared libraries and creators | [Stash](stash.md) |
+| Use Linux or Synology helpers | [Host scripts](scripts.md) |
 
-- [Set up Plundarr on Synology](../setup.md) ⚓
-- [Configure VPN regions and recovery](vpn.md) 🧭
-- [Deploy Portainer](portainer.md) 🚢
-- [Monitor media servers](monitoring.md) 🔎
-- [Manage Plex and Jellyfin theme songs](themerr.md) 🎵
-- [Discover and request adult media with Cruisarr](cruisarr.md) 🔞
-- [Customize Jellyfin Web and Vue](jellyfin.md) 🎞️
-- [Catalog a shared media library with Stash](stash.md)
-- [Run Plundarr test voyages](testing.md) 🧪
-- [Use the host helper scripts](scripts.md) 🦜
-- [Contribute to the project](../CONTRIBUTING.md) 🛠️
-- [Follow the documentation style](../documentation-style.md) ✍️
-- [Report a security concern](../SECURITY.md) 🛡️
-- [Get support](../SUPPORT.md) 🛟
-- [Review the Code of Conduct](../CODE_OF_CONDUCT.md) 🤝
+For development, use [testing](testing.md) or [contributing](../CONTRIBUTING.md). Get operational help through [support](../SUPPORT.md); report vulnerabilities through the [security policy](../SECURITY.md).

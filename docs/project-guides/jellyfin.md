@@ -2,7 +2,7 @@
 
 Add an alternative browser client, keep Web settings on the host, and give your library a little velvet. Plundarr deploys the stack; Maraudarr generates its Compose chart, environment, and safe configuration seeds. These instructions target the official Jellyfin image and Jellyfin Server/Web 12.2, while retaining the floating `latest` image default.
 
-Run generation examples from the repository root with `MARAUDARR_IMAGE` set to the [source-built generator](../development/maraudarr/index.md#choose-the-generator-revision) for this checkout.
+The Make examples run from a repository checkout and use the published generator. For interactive Docker setup, follow [customization](../customize.md).
 
 ## Choose the client
 

@@ -5,224 +5,72 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-# record-maraudarr-demo.sh: This script records the isolated Maraudarr README
-#                           animation from a disposable Plundarr checkout.
+# record-maraudarr-demo.sh: Record published Maraudarr generating the default
+#                          Plundarr preset in a disposable output directory.
 #
-# The script:
-#   - Verifies every command required to record and optimize the animation.
-#   - Clones the current repository and applies tracked worktree edits.
-#   - Isolates Compose networking, storage paths, credentials, and host ports.
-#   - Builds a disposable Maraudarr image from the current checkout.
-#   - Generates the default Plundarr preset and pre-pulls its container images.
-#   - Records the interactive Maraudarr and Docker Compose workflow with VHS.
-#   - Optimizes the generated GIF for the repository's added-file size limit.
-#   - Stops the demonstration stack and removes all temporary files on exit.
+# Purpose: Capture interactive generation and quiet Compose validation without
+#          credentials, application startup, or access to an operator deployment.
 #
-# Usage: sh docs/demo/record-maraudarr-demo.sh
+# Usage: [MARAUDARR_DEMO_PULL=false] sh docs/demo/record-maraudarr-demo.sh
 #
 
-#
-# Fail on any error or unset variable.
-#
 set -eu
 
-#
-# Resolve repository, recording source, output, and temporary checkout paths.
-#
-SCRIPT_PATH=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
-REPOSITORY_ROOT=$(CDPATH='' cd -- "$SCRIPT_PATH/../.." && pwd)
-TAPE_PATH="$SCRIPT_PATH/maraudarr-demo.tape"
-ASSET_PATH="$REPOSITORY_ROOT/docs/assets/maraudarr-demo.gif"
-DEMO_ROOT=$(mktemp -d "${TMPDIR:-/tmp}/plundarr-readme-demo.XXXXXX")
-DEMO_CHECKOUT="$DEMO_ROOT/plundarr"
-DEMO_DATA="$DEMO_ROOT/data"
-MARAUDARR_IMAGE="maraudarr:readme-demo-$$"
-VOLUME_LEDGER="$DEMO_ROOT/volumes"
-: > "$VOLUME_LEDGER"
-
-#
-# cleanup: Stop the temporary project and remove its disposable checkout.
-#
-# Parameters: None.
-#
-# Returns: Always returns 0 so cleanup cannot hide the original result.
-#
-cleanup() {
-    # Stop the demonstration stack if it is still running.
-    if [ -f "$DEMO_CHECKOUT/dist/plundarr/docker-compose.yml" ] && [ -f "$DEMO_CHECKOUT/dist/plundarr/.env" ]; then
-        (
-            cd "$DEMO_CHECKOUT/dist/plundarr"
-            docker compose --env-file .env --file docker-compose.yml down \
-                --timeout 15 --remove-orphans
-        ) >/dev/null 2>&1 || true
-    fi
-
-    # Remove only disposable volumes reserved by this run and labeled by Compose.
-    while IFS= read -r volume; do
-        project=$(docker volume inspect --format '{{ index .Labels "com.docker.compose.project" }}' "$volume" 2>/dev/null) || continue
-        if [ "$project" = "$COMPOSE_PROJECT_NAME" ]; then
-            docker volume rm "$volume" >/dev/null 2>&1 || true
-        fi
-    done < "$VOLUME_LEDGER"
-
-    # Remove the disposable Maraudarr image and checkout.
-    docker image rm --force "$MARAUDARR_IMAGE" >/dev/null 2>&1 || true
-    rm -rf -- "$DEMO_ROOT"
-}
-
-#
-# Register cleanup for normal completion, interruptions, and termination.
-#
-trap cleanup EXIT HUP INT TERM
-
-#
-# Verify every recording dependency before creating demonstration state.
-#
-for dependency in docker gifsicle git make vhs; do
+# Check recording tools before creating disposable files.
+for dependency in docker ffmpeg gifsicle vhs; do
     command -v "$dependency" >/dev/null 2>&1 || {
         echo "Missing required recording dependency: $dependency" >&2
         exit 1
     }
 done
 
-#
-# Create the disposable checkout and copy its demo-only Compose override.
-#
-git clone --quiet --local "$REPOSITORY_ROOT" "$DEMO_CHECKOUT"
-if ! git -C "$REPOSITORY_ROOT" diff --quiet HEAD; then
-    git -C "$REPOSITORY_ROOT" diff --binary HEAD |
-        git -C "$DEMO_CHECKOUT" apply
-fi
-cp "$SCRIPT_PATH/docker-compose.demo.yml" "$DEMO_CHECKOUT/docker-compose.demo.yml"
+# Keep output separate from the checkout and every real deployment.
+SCRIPT_PATH=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
+REPOSITORY_ROOT=$(CDPATH='' cd -- "$SCRIPT_PATH/../.." && pwd)
+DEMO_ROOT=$(mktemp -d "${TMPDIR:-/tmp}/plundarr-demo.XXXXXX")
+export PLUNDARR_DEMO_DIR="$DEMO_ROOT/plundarr"
+mkdir -p "$PLUNDARR_DEMO_DIR"
 
 #
-# Create isolated host directories for every generated bind mount.
+# cleanup: Remove only this recording's temporary output directory.
 #
-mkdir -p \
-    "$DEMO_DATA/books" \
-    "$DEMO_DATA/backups" \
-    "$DEMO_DATA/downloads/torrents" \
-    "$DEMO_DATA/downloads/usenet" \
-    "$DEMO_DATA/media/anime-tv" \
-    "$DEMO_DATA/media/movies" \
-    "$DEMO_DATA/media/tv"
+# Parameters: None.
+#
+# Returns: Preserves the script's existing exit status.
+#
+cleanup() {
+    rm -rf -- "$DEMO_ROOT"
+}
 
-#
-# Isolate the demonstration project and Docker network from local deployments.
-#
-export PLUNDARR_DEMO_DIR="$DEMO_CHECKOUT"
-export MARAUDARR_IMAGE
-export COMPOSE_PROJECT_NAME="demo-$$"
-export COMPOSE_NETWORK_SUBNET="10.254.0.0/16"
-export COMPOSE_NETWORK_IP_RANGE="10.254.5.0/24"
-export COMPOSE_NETWORK_GATEWAY="10.254.5.254"
-export COMPOSE_UP_OPTIONS="--force-recreate --pull never --detach --remove-orphans"
+trap cleanup EXIT HUP INT TERM
 
-#
-# Match generated container ownership to the user running the recording.
-#
-DEFAULT_PUID=$(id -u)
-DEFAULT_PGID=$(id -g)
-export DEFAULT_PUID DEFAULT_PGID
+# Pull before capture so registry download time does not obscure the setup.
+case "${MARAUDARR_DEMO_PULL:-true}" in
+    true) docker pull ghcr.io/scottgigawatt/maraudarr:latest >/dev/null ;;
+    false) docker image inspect ghcr.io/scottgigawatt/maraudarr:latest >/dev/null ;;
+    *) echo "MARAUDARR_DEMO_PULL must be true or false." >&2; exit 2 ;;
+esac
+docker image inspect ghcr.io/scottgigawatt/maraudarr:latest \
+    --format 'Recording Maraudarr {{index .Config.Labels "org.opencontainers.image.revision"}}'
 
-#
-# Shorten healthcheck timing so the recorded startup remains concise.
-#
-export DEFAULT_HEALTHCHECK_INTERVAL="2s"
-export DEFAULT_HEALTHCHECK_TIMEOUT="2s"
-export DEFAULT_HEALTHCHECK_START_PERIOD="2s"
-export DEFAULT_HEALTHCHECK_RETRIES="10"
-
-#
-# Use obvious placeholder credentials without creating a real VPN connection.
-#
-export PIA_CONNECT="false"
-export PIA_USER="p0000000"
-export PIA_PASS="demo-only"
-
-#
-# Bind generated storage settings to the disposable data directory.
-#
-export HOST_DOWNLOADS_PATH="$DEMO_DATA/downloads"
-export HOST_TORRENTS_DOWNLOADS_PATH="$DEMO_DATA/downloads/torrents"
-export HOST_USENET_DOWNLOADS_PATH="$DEMO_DATA/downloads/usenet"
-export HOST_MOVIES_PATH="$DEMO_DATA/media/movies"
-export HOST_TV_PATH="$DEMO_DATA/media/tv"
-export HOST_ANIME_TV_PATH="$DEMO_DATA/media/anime-tv"
-export CWA_LIBRARY_PATH="$DEMO_DATA/books"
-export DUPLICATI_BACKUPS_PATH="$DEMO_DATA/backups"
-export HOMEPAGE_DATA_ROOT_PATH="$DEMO_DATA/media"
-
-#
-# Remap published service ports away from normal Plundarr deployment ports.
-#
-export FLARESOLVERR_PORT="48191"
-export PROWLARR_WEBUI_PORT="49696"
-export QBITTORRENT_WEBUI_PORT="48080"
-export RADARR_WEBUI_PORT="47878"
-export SONARR_WEBUI_PORT="48989"
-export BAZARR_WEBUI_PORT="46767"
-export SEERR_WEBUI_PORT="45055"
-export CLEANUPARR_WEBUI_PORT="41011"
-export SPEEDTEST_TRACKER_WEBUI_PORT="39080"
-export DUPLICATI_WEBUI_PORT="48200"
-export HOMEPAGE_WEBUI_PORT="33000"
-export CWA_WEBUI_PORT="48213"
-export TRACEARR_WEBUI_PORT="43080"
-
-#
-# Build Maraudarr, generate the stack, and pre-pull images outside the recording.
-#
-(
-    cd "$DEMO_CHECKOUT"
-    make build >/dev/null
-    make ship >/dev/null
-
-    # Reserve new project-specific volumes before the recording can create them.
-    for name in $(docker compose --env-file dist/plundarr/.env --file dist/plundarr/docker-compose.yml config --volumes); do
-        volume="${COMPOSE_PROJECT_NAME}_${name}"
-        if docker volume inspect "$volume" >/dev/null 2>&1; then
-            echo "Demo volume already exists: $volume" >&2
-            exit 1
-        fi
-        printf '%s\n' "$volume" >> "$VOLUME_LEDGER"
-    done
-    docker compose \
-        --env-file dist/plundarr/.env \
-        --file dist/plundarr/docker-compose.yml \
-        pull --quiet
-)
-
-#
-# Record the configured voyage into the repository documentation assets.
-#
-mkdir -p "$REPOSITORY_ROOT/docs/assets"
-cd "$REPOSITORY_ROOT"
-RECORDED_ASSET="$DEMO_ROOT/maraudarr-demo.gif"
-vhs --output "$RECORDED_ASSET" "$TAPE_PATH"
-if [ ! -s "$RECORDED_ASSET" ]; then
-    echo "VHS did not produce a recording; the existing demo GIF was preserved." >&2
+# Record the real published image; no application containers or VPN are started.
+RECORDED_ASSET="$DEMO_ROOT/recording.gif"
+vhs --output "$RECORDED_ASSET" "$SCRIPT_PATH/maraudarr-demo.tape"
+[ -s "$RECORDED_ASSET" ] || {
+    echo "VHS did not produce a recording; the current GIF was preserved." >&2
     exit 1
-fi
+}
 
-#
-# Optimize the recorded animation for the repository's added-file size limit.
-#
-OPTIMIZED_ASSET=$(mktemp "$DEMO_ROOT/maraudarr-demo.XXXXXX.gif")
-gifsicle \
-    --optimize=3 \
-    --lossy=100 \
-    --colors 48 \
-    --resize-width 800 \
-    --resize-method lanczos3 \
+# Verify generation and Compose syntax without displaying generated credentials.
+[ -f "$PLUNDARR_DEMO_DIR/dist/plundarr/.env" ]
+docker compose \
+    --project-directory "$PLUNDARR_DEMO_DIR/dist/plundarr" \
+    config --quiet
+
+# Optimize before replacing the shared documentation asset.
+OPTIMIZED_ASSET="$DEMO_ROOT/optimized.gif"
+gifsicle --optimize=3 --lossy=100 --colors 48 \
+    --resize-width 900 --resize-method lanczos3 \
     --output "$OPTIMIZED_ASSET" "$RECORDED_ASSET"
-
-#
-# Move the optimized animation into the repository documentation assets.
-#
-mv "$OPTIMIZED_ASSET" "$ASSET_PATH"
-
-#
-# Set the optimized animation to be readable by all users.
-#
-chmod 0644 "$ASSET_PATH"
+chmod 0644 "$OPTIMIZED_ASSET"
+mv "$OPTIMIZED_ASSET" "$REPOSITORY_ROOT/docs/assets/maraudarr-demo.gif"

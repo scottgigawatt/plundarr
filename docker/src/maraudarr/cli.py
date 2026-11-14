@@ -96,8 +96,8 @@ def _write(catalog: Catalog, plan: StackPlan, output: Path, ui: UI) -> int:
     if not ui.confirm():
         raise UserCancelled("Voyage cancelled before the stack was built.")
 
-    ui.progress("🧭 Charting the selected services...")
-    ui.progress("📦 Packing the environment and config cargo...")
+    ui.progress("🧭 Generating the selected services...")
+    ui.progress("📦 Preparing settings and application configuration...")
     compose_path, env_path, config_path = write_stack(catalog, plan, output)
     ui.progress("🔎 Docker Compose inspection passed.")
     ui.success(plan, str(compose_path), str(env_path), str(config_path))

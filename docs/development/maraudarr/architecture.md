@@ -69,7 +69,7 @@ Compose and environment files are written to a temporary directory inside the re
 
 Config seeding copies missing seeds and may refresh project-owned README files while preserving application files. Privateerr installs its image-owned Gluetun scripts into the shared configuration mount before startup readiness. Maraudarr does not seed or replace those scripts. Destructive cleanup belongs exclusively to the explicit `make delete-config` target.
 
-`make nuke` removes project Docker resources and transient runtime residue but does not call `delete-config`; generated `.env`, host backups, and bind-mounted application state remain intact. All application volumes, including Tracearr databases and internal backups, remain intact. Only isolated tests may delete their recorded volumes after verifying ownership labels.
+`make nuke` removes project Docker resources and disposable developer files but does not call `delete-config`; generated `.env`, host backups, and bind-mounted application state remain intact. All application volumes, including Tracearr databases and internal backups, remain intact. Only isolated tests may delete their recorded volumes after verifying ownership labels.
 
 ## Understand failure boundaries
 

@@ -20,7 +20,7 @@ docker compose --project-directory dist/YOUR-PRESET run --rm --no-deps -e PRIVAT
 make up PRESET=YOUR-PRESET
 ```
 
-Run these commands from the Plundarr repository root. For a deployment managed directly with Compose, run `docker compose stop`, the same `docker compose run` command without `--project-directory`, and `docker compose up --detach --force-recreate` from its generated project directory. Stopping the supervisor prevents concurrent writers; recreating the full stack keeps Gluetun and its network-sharing applications together.
+Run Make commands from the Plundarr repository root. For a deployment managed directly with Compose, run `docker compose stop`, the same `docker compose run` command without `--project-directory`, and `docker compose up --detach --force-recreate` from its generated project directory. Stopping the supervisor prevents concurrent writers; recreating the full stack keeps Gluetun and its network-sharing applications together.
 
 In Synology Container Manager, stop the project before the one-shot generation and rebuild it afterward using the updated `.env`. If you manage this entirely through the UI, temporarily set `PRIVATEERR_AUTO_RECOVER=false`, rebuild and verify fresh generation, then restore `true` and rebuild again. A container restart alone does not reload environment changes. Keep the generated Compose mappings in place.
 

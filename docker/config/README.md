@@ -1,54 +1,29 @@
-# Generated configuration hold ⚓
+# Application configuration
 
-Maraudarr copies this README into every generated `dist/<preset>/config/` directory. That hold keeps persistent configuration for the services selected in the voyage, including PIA WireGuard and port-forwarding files.
+This directory contains persistent configuration for your selected services. Read each service subdirectory's README for its first-run settings and storage boundaries. The deployment's private `.env` lives one directory above this one.
 
-Services with managed seed files receive subfolders in `config/`. External operator-owned paths and named Docker volumes have separate storage boundaries. The root repository `config/` directory is not used by normal generated deployments.
-
-## Find service configuration 🗺️
-
-| Service                | Purpose                                                  |
-| ---------------------- | -------------------------------------------------------- |
-| 🏴‍☠️ `bazarr`          | Manages subtitles for movie and television libraries     |
-| 🧹 `cleanuparr`        | Removes unwanted or blocked download files               |
-| 💾 `duplicati`         | Backs up operator-selected data                          |
-| 🌩️ `flaresolverr`      | Provides a proxy for supported challenge-protected sites |
-| 🛡️ `gluetun`           | PIA WireGuard tunnel and port-forwarding quartermaster   |
-| 🗺️ `homepage`          | Provides a dashboard for selected services               |
-| 🎞️ `jellyfin`          | Open media server for movies, television, and anime      |
-| 📚 `calibre-web-automated` | Serves and automatically ingests a Calibre ebook library |
-| 🎬 `plex`              | Containerized Plex Media Server option                   |
-| 📜 `seerr`             | Manages media requests                                   |
-| 🕵️‍♂️ `privateerr`        | PIA WireGuard and port-forwarding mapmaker for Gluetun   |
-| 🧭 `prowlarr`          | Manages indexers for automation services                 |
-| ⚓ `qbittorrent`       | Downloads and seeds torrents                             |
-| 📰 `sabnzbd`           | Downloads, repairs, and extracts Usenet jobs             |
-| 🎬 `radarr`            | Automates movie libraries                                |
-| 📺 `sonarr`            | Automates television libraries                           |
-| 🍜 `sonarr-anime`      | Optional anime TV captain with its own library hold      |
-| 🌬️ `speedtest-tracker` | Measure the wind in yer sails (or yer bandwidth)         |
-| 🔔 `apprise`           | Delivers notification cargo to supported services        |
-| 🔞 `whisparr`          | Adult media automation for the Boudoirr voyage           |
-| 🔭 `watchtower`        | Optional or standalone container image updater           |
-| 🚢 `portainer`         | Optional or standalone Docker management interface      |
-
-Each folder follows the same general format: configuration files go in and persistent state stays. Docker Compose maps these directories automatically.
+Maraudarr adds missing seeds and preserves application state during generation. External libraries/configuration and named Docker volumes are separate storage locations. Keep a complete recovery set covering all of them. `make down` and `make nuke` preserve this directory and saved VPN settings.
 
 ## Back up or reset the hold 🧽
 
-From the repository root, replace `YOUR-PRESET` with the selected preset ID, such as `boudoirr`. Before creating a file-copy archive, make application-consistent backup exports and stop affected services cleanly so databases, journal files, and other configuration are no longer changing. Copying a database that is still being written is not an application-consistent backup. Stopping services interrupts their applications and may interrupt VPN/download activity; plan the maintenance window first.
+Before creating a file-copy archive, make application-consistent backup exports and stop affected services cleanly so databases, journal files, and other configuration are no longer changing. Copying a database that is still being written is not an application-consistent backup. Stopping services interrupts their applications and may interrupt VPN/download activity; plan the maintenance window first.
 
 The host config archive does not include the deployment's `.env`, external Kometa checkout, or named-volume databases. Export named-volume application data separately and retain matching encryption keys, private settings, and external state with the recovery set. Keep affected services stopped while the archive is created:
 
+From the generated project directory, use a unique destination outside `config/` for the archive. Replace `BACKUP_FILE` with an absolute filename in your backup storage:
+
 ```sh
-make backup PRESET=YOUR-PRESET
+tar -czf BACKUP_FILE config
 ```
+
+From a repository checkout, `make backup PRESET=YOUR-PRESET` creates a timestamped config archive. Replace `YOUR-PRESET` with the selected preset ID.
 
 Verify the archive and a recoverable off-host copy before resetting anything. If this was only a backup, restart the services deliberately after verification. For a reset or restore, leave affected services stopped until the replacement state and permissions are ready.
 
 > [!CAUTION]
 > `make delete-config` irreversibly deletes the selected host config tree and any backups stored inside it. Stop affected services and verify a recoverable backup before proceeding. Named-volume data requires separate management.
 
-Only after reviewing that risk, use `make delete-config PRESET=YOUR-PRESET`. The next `make ship PRESET=YOUR-PRESET` voyage recreates missing seed files for the complete selection you specify; it does not restore databases, secrets, external state, or operator edits.
+Use `make delete-config PRESET=YOUR-PRESET` only from a checkout after that review. Regenerating the complete service selection recreates missing seeds; it does not restore databases, secrets, external state, or operator edits.
 
 > [!CAUTION]
 > Do not commit API keys, passwords, VPN credentials, generated WireGuard configuration, or other private application state.

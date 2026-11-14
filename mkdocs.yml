@@ -15,8 +15,8 @@
 #
 # Public site identity and search metadata.
 #
-site_name: Plundarr Developer Documentation
-site_description: Architecture, contributor guides, and Python API reference for Plundarr and Maraudarr.
+site_name: Plundarr Documentation
+site_description: Set up and operate Plundarr, customize services, and develop the Maraudarr generator.
 site_url: https://scottgigawatt.github.io/plundarr/
 copyright: Copyright &copy; 2025-2026 Scott Gigawatt
 
@@ -32,14 +32,19 @@ edit_uri: edit/main/docs/
 # explicit navigation hierarchy.
 #
 nav:
-  - Chart Room: index.md
-  - Maraudarr:
+  - Start here: index.md
+  - Run Plundarr:
+      - Set up the stack: setup.md
+      - Customize services: customize.md
+      - Maintain the stack: maintain.md
+      - Service guides: project-guides/index.md
+  - Develop Maraudarr:
       - Developer overview: development/maraudarr/index.md
       - Architecture: development/maraudarr/architecture.md
       - Add a service: development/maraudarr/adding-a-service.md
       - Python documentation: development/maraudarr/documentation.md
       - Testing: development/maraudarr/testing.md
-  - Python Reference:
+  - Python reference:
       - Reference map: development/maraudarr/reference/index.md
       - Catalog: development/maraudarr/reference/catalog.md
       - Command line: development/maraudarr/reference/cli.md
@@ -47,9 +52,7 @@ nav:
       - Rendering: development/maraudarr/reference/render.md
       - Text helpers: development/maraudarr/reference/text.md
       - Terminal UI: development/maraudarr/reference/ui.md
-  - Project Guides:
-      - Guide map: project-guides/index.md
-      - Synology setup: setup.md
+  - Guides and support:
       - VPN regions and recovery: project-guides/vpn.md
       - Portainer: project-guides/portainer.md
       - Media monitoring: project-guides/monitoring.md

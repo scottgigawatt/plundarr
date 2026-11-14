@@ -16,7 +16,7 @@ You need:
 
 The examples use Boudoirr. For another preset, replace `boudoirr` in commands and paths with your preset ID.
 
-Run commands from the Plundarr repository root. Set `MARAUDARR_IMAGE` to the [source-built generator](../development/maraudarr/index.md#choose-the-generator-revision) for this checkout before generating a project.
+The Make examples run from the Plundarr repository root and use the published generator. For interactive Docker setup, follow [customization](../customize.md).
 
 ## Select the services
 

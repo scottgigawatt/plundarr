@@ -3,46 +3,24 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-# maraudarr-demo.tape: This tape records Maraudarr generating and starting a
-#                       complete Plundarr Docker Compose stack.
-#
-# The recording:
-#   - Opens Maraudarr's interactive configurator through Make.
-#   - Keeps the current default Plundarr service selections.
-#   - Generates the complete Compose chart, environment, and configuration.
-#   - Applies the credential-free runtime override outside the visible capture.
-#   - Starts the selected Compose fleet and displays its container status.
+# maraudarr-demo.tape: Record interactive default-preset generation using the
+#                       published image, followed by quiet Compose validation.
 #
 
-#
-# Write the generated animation to the README asset directory.
-#
 Output docs/assets/maraudarr-demo.gif
-
-#
-# Fail before recording when a required command is unavailable.
-#
 Require docker
-Require make
-
-#
-# Configure terminal dimensions, playback, typing, colors, and cursor behavior.
-#
 Set Shell "zsh"
-Set FontSize 16
+Set FontSize 20
 Set Width 1200
-Set Height 720
+Set Height 780
 Set Padding 20
-Set Framerate 12
-Set PlaybackSpeed 1.4
-Set LoopOffset 0%
-Set TypingSpeed 35ms
+Set Framerate 8
+Set PlaybackSpeed 1.3
+Set TypingSpeed 10ms
 Set Theme "TokyoNight"
 Set CursorBlink false
 
-#
-# Enter the disposable checkout without exposing its temporary host path.
-#
+# Use a disposable working directory without showing a temporary host path.
 Hide
 Type `cd "$PLUNDARR_DEMO_DIR"`
 Enter
@@ -50,70 +28,41 @@ Type "clear"
 Enter
 Show
 
-#
-# Open Maraudarr's interactive stack configurator through Make.
-#
 Sleep 1s
-Type "make configure"
-Sleep 500ms
+Type `docker run --rm -it --user "$(id -u):$(id -g)" --read-only --network none --cap-drop ALL --security-opt no-new-privileges:true --tmpfs /tmp:rw,noexec,nosuid,size=64m --volume "$PWD:/output:rw" ghcr.io/scottgigawatt/maraudarr:latest configure`
 Enter
-Sleep 3s
+Sleep 4s
 
-#
-# Choose the default Plundarr voyage.
-#
+# Select Plundarr and retain defaults in all eight optional service categories.
+Enter
+Sleep 2s
+Enter
+Sleep 1200ms
+Enter
+Sleep 1200ms
+Enter
+Sleep 1200ms
+Enter
+Sleep 1200ms
+Enter
+Sleep 1200ms
+Enter
+Sleep 1200ms
+Enter
+Sleep 1200ms
 Enter
 Sleep 2s
 
-#
-# Keep the defaults across all six service categories.
-#
-Enter
-Sleep 1500ms
-Enter
-Sleep 1500ms
-Enter
-Sleep 1500ms
-Enter
-Sleep 1500ms
-Enter
-Sleep 1500ms
-Enter
-Sleep 2s
-
-#
-# Confirm the resolved Plundarr service manifest and generate its files.
-#
+# Confirm generation; then inspect filenames without printing .env values.
 Enter
 Sleep 5s
-
-#
-# Merge the credential-free runtime override outside the visible recording.
-#
-Hide
-Type `docker compose --env-file dist/plundarr/.env -f dist/plundarr/docker-compose.yml -f docker-compose.demo.yml config > dist/plundarr/docker-compose.runtime.yml`
-Enter
-Sleep 2s
-Type "mv dist/plundarr/docker-compose.runtime.yml dist/plundarr/docker-compose.yml"
-Enter
 Type "clear"
 Enter
-Sleep 500ms
-Show
-
-#
-# Start the complete selected Compose fleet through Make.
-#
-Sleep 1s
-Type "make up"
-Sleep 500ms
+Type "cd dist/plundarr"
 Enter
-Sleep 35s
-
-#
-# Display the final service and container status table.
-#
-Type "make ps"
-Sleep 500ms
+Type "ls -a"
 Enter
-Sleep 12s
+Sleep 3s
+Type "docker compose config --quiet"
+Enter
+Sleep 3s
