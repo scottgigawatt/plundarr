@@ -98,8 +98,8 @@ The interactive setup offers these starting points. Standalone media-server and 
 <table>
   <thead>
     <tr>
-      <th scope="col" align="center" width="28%" nowrap>🗺️ Preset</th>
-      <th scope="col" align="center" width="72%" nowrap>🎯 Purpose</th>
+      <th scope="col" align="center" width="240" nowrap>🗺️ Preset</th>
+      <th scope="col" align="center" nowrap>🎯 Purpose</th>
     </tr>
   </thead>
   <tbody>
