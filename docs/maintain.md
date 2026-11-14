@@ -10,7 +10,7 @@ Stop the project and remove its containers and network:
 docker compose down
 ```
 
-Application volumes, bind-mounted data, and images remain. Start again with `docker compose up --detach`. From a checkout, the equivalent shortcuts are `make down` and `make up`.
+Application volumes, bind-mounted data, and images remain. Start again with `docker compose up --detach`. From a checkout, the equivalent shortcuts are `make down` and `make up`. Generated charts use `pull_policy: always`, so starting the project can download updated images and recreate containers. Review image requirements and backups before starting, including through a scheduled boot task.
 
 ## Back up before changes
 
@@ -36,7 +36,19 @@ Watchtower can automate eligible updates across the Docker host. Review its [sco
 Regeneration updates Compose files and missing seeds. Existing environment values and application state survive; Homepage's generated service cards are refreshed. Review any manual card edits before regeneration.
 
 1. Verify backups and record the full intended preset/service selection.
-2. Run the [published generator command](https://scottgigawatt.github.io/plundarr/setup/#generate-a-deployment) from the same output directory and select those services again. From a checkout, use `make pull-image` then `make configure` or `make generate` with the full selection.
+2. Return to the original output directory, the parent containing `dist/`, and open the published generator again:
+
+    ```sh
+    docker run --rm -it --pull always \
+      --user "$(id -u):$(id -g)" \
+      --read-only --network none \
+      --cap-drop ALL --security-opt no-new-privileges:true \
+      --tmpfs /tmp:rw,noexec,nosuid,size=64m \
+      --volume "$PWD:/output:rw" \
+      ghcr.io/scottgigawatt/maraudarr:latest configure
+    ```
+
+    Select the complete intended service set. From a checkout, use `make pull-image` then `make configure` or `make generate` with the full selection.
 3. Review `.env` for selected services and required host values. Preserved values do not reselect services.
 4. From the generated directory, validate and recreate the project:
 

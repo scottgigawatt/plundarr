@@ -1,4 +1,4 @@
-# Plex configuration 🎬
+# Plex configuration 📺
 
 Plex stores its server database and transcode workspace beneath this generated service directory by default. Media libraries remain mounted separately and read-only.
 

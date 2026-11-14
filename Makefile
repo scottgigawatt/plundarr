@@ -823,11 +823,15 @@ $(TEST_WORKFLOWS):
 #   $(BUILD_DEPENDS) - Ensure build dependencies are installed.
 #   $(CHECK_ENV) - Ensure the environment file exists.
 #   $(CHECK_RENDERED) - Ensure the rendered Compose file exists.
-#   $(RESTORE_VPN_EXAMPLES) - Restore example config files.
 #   $(CHECK_PIA) - Validate resolved PIA credentials when Privateerr is selected.
 #
-$(TEST_E2E): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED) $(RESTORE_VPN_EXAMPLES) $(CHECK_PIA)
+$(TEST_E2E): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED) $(CHECK_PIA)
 	$(call announce,Launching Privateerr$(COMMA) Gluetun$(COMMA) and selected download mates for one clean test voyage. 🌊)
+	@$(MAKE) --no-print-directory $(RESET_TEST_STACK) || { \
+		$(call print_line_inline,$(COLOR_ERROR),Test-stack preparation failed.); \
+		$(call print_detail_inline,$(COLOR_MUTED),Correct shutdown or example-file errors before retrying.); \
+		exit 1; \
+	}
 	@status=0; \
 	$(PLUNDARR_COMPOSE) \
 		up $(COMPOSE_E2E_OPTIONS) $(E2E_SERVICES) || status=$$?; \
@@ -843,8 +847,21 @@ $(TEST_E2E): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED) $(RESTORE_VPN_EXAMP
 		PLUNDARR_WAIT_SECONDS=$(COMPOSE_E2E_WAIT) \
 		$(PLUNDARR_VPN_TEST_CMD) || status=$$?; \
 	fi; \
-	$(PLUNDARR_COMPOSE) down $(COMPOSE_DOWN_OPTIONS); \
-	$(MAKE) --no-print-directory $(RESTORE_VPN_EXAMPLES); \
+	if $(PLUNDARR_COMPOSE) down $(COMPOSE_DOWN_OPTIONS); then \
+		$(MAKE) --no-print-directory $(RESTORE_VPN_EXAMPLES) || { \
+			restore_status=$$?; \
+			if [ "$$status" -eq 0 ]; then \
+				status=$$restore_status; \
+			fi; \
+		}; \
+	else \
+		shutdown_status=$$?; \
+		$(call print_line_inline,$(COLOR_ERROR),Could not stop the test stack; generated VPN files have been preserved.); \
+		$(call print_detail_inline,$(COLOR_MUTED),Resolve Docker shutdown errors$(COMMA) then run make $(RESET_TEST_STACK) PRESET=$(PRESET).); \
+		if [ "$$status" -eq 0 ]; then \
+			status=$$shutdown_status; \
+		fi; \
+	fi; \
 	exit "$$status"
 
 #
@@ -1192,17 +1209,21 @@ $(TEST_VPN): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 	$(PLUNDARR_VPN_TEST_CMD)
 
 #
-# $(TEST_STACK): Starts every service, waits for health, validates VPN and qBittorrent state.
+# $(TEST_STACK): Starts and validates every service in a disposable test stack.
 #
 # Dependencies:
 #   $(BUILD_DEPENDS) - Ensure build dependencies are installed.
 #   $(CHECK_ENV) - Ensure the environment file exists.
 #   $(CHECK_RENDERED) - Ensure the rendered Compose file exists.
-#   $(RESTORE_VPN_EXAMPLES) - Restore example config files.
 #   $(CHECK_PIA) - Validate resolved PIA credentials when Privateerr is selected.
 #
-$(TEST_STACK): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED) $(RESTORE_VPN_EXAMPLES) $(CHECK_PIA)
+$(TEST_STACK): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED) $(CHECK_PIA)
 	$(call announce,Launching the whole Plundarr fleet for a full-stack test voyage. 🏴‍☠️)
+	@$(MAKE) --no-print-directory $(RESET_TEST_STACK) || { \
+		$(call print_line_inline,$(COLOR_ERROR),Test-stack preparation failed.); \
+		$(call print_detail_inline,$(COLOR_MUTED),Correct shutdown or example-file errors before retrying.); \
+		exit 1; \
+	}
 	@status=0; \
 	$(PLUNDARR_COMPOSE) up $(COMPOSE_UP_OPTIONS) || status=$$?; \
 	if [ "$$status" -eq 0 ]; then \
@@ -1226,8 +1247,13 @@ $(TEST_STACK): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED) $(RESTORE_VPN_EXA
 	if [ "$$status" -ne 0 ]; then \
 		$(PLUNDARR_COMPOSE) ps; \
 		$(PLUNDARR_COMPOSE) logs --tail=120; \
+		if $(PLUNDARR_COMPOSE) down $(COMPOSE_DOWN_OPTIONS); then \
+			$(MAKE) --no-print-directory $(RESTORE_VPN_EXAMPLES); \
+		else \
+			$(call print_line_inline,$(COLOR_ERROR),Could not stop the test stack; generated VPN files have been preserved.); \
+			$(call print_detail_inline,$(COLOR_MUTED),Resolve Docker shutdown errors$(COMMA) then run make $(RESET_TEST_STACK) PRESET=$(PRESET).); \
+		fi; \
 	fi; \
-	$(MAKE) --no-print-directory $(RESTORE_VPN_EXAMPLES); \
 	exit "$$status"
 
 #

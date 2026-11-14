@@ -37,7 +37,6 @@ nav:
       - Set up the stack: setup.md
       - Customize services: customize.md
       - Maintain the stack: maintain.md
-      - Service guides: project-guides/index.md
   - Develop Maraudarr:
       - Developer overview: development/maraudarr/index.md
       - Architecture: development/maraudarr/architecture.md
@@ -53,6 +52,7 @@ nav:
       - Text helpers: development/maraudarr/reference/text.md
       - Terminal UI: development/maraudarr/reference/ui.md
   - Guides and support:
+      - Service guides: project-guides/index.md
       - VPN regions and recovery: project-guides/vpn.md
       - Portainer: project-guides/portainer.md
       - Media monitoring: project-guides/monitoring.md

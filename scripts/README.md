@@ -73,7 +73,7 @@ Resolves the selected Compose project and prints only its containers in a termin
 
 Waits up to 60 seconds for Docker, then runs Compose `down --remove-orphans` followed by `up -d` in the supplied project directory. This interrupts the selected stack and removes its orphaned containers while preserving volumes and application state. The generated Compose dependencies control startup order, including waiting for Privateerr and Gluetun health where declared.
 
-Use the [shared boot-task setup](#create-a-synology-boot-task). Select `root` when combining this restart with root-only preparation tasks; otherwise, a trusted user with Docker socket access and read access to the project can run it. Prepare any required host settings first. The script detects `docker compose` or `docker-compose`; it does not explicitly pull images or request an image build.
+Use the [shared boot-task setup](#create-a-synology-boot-task). Select `root` when combining this restart with root-only preparation tasks; otherwise, a trusted user with Docker socket access and read access to the project can run it. Prepare any required host settings first. The script detects `docker compose` or `docker-compose`. Compose still applies the project's image pull policy: generated charts use `pull_policy: always`, so a boot task can download updated images and recreate containers. Review image-update requirements and backups before enabling scheduled startup.
 
 ```sh
 sh /volume1/docker/plundarr/scripts/compose/restart.sh /volume1/docker/plundarr/dist/plundarr

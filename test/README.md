@@ -38,7 +38,7 @@ This inspects actual Privateerr/Gluetun containers, generated files, tunnel heal
 make test-e2e PRESET=YOUR-PRESET
 ```
 
-This restores fixtures, starts the VPN pair and selected download clients, waits for health, validates the forwarding chain, brings the stack down, and restores fixtures again. Generate the intended downloader selection first; for example, Usenet-only uses `REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=sabnzbd`. Use `nzbget` instead for NZBGet, or add either without removal to test combined modes.
+This stops the selected disposable stack before restoring fixtures, starts the VPN pair and selected download clients, waits for health, and validates the forwarding chain. After either a passing or failing test, it shuts the stack down and restores fixtures only when shutdown succeeds. A failed shutdown preserves the generated VPN files and reports how to retry cleanup; shutdown or restoration errors fail the target. Generate the intended downloader selection first; for example, Usenet-only uses `REMOVE_SERVICES=qbittorrent,cleanuparr ADD_SERVICES=sabnzbd`. Use `nzbget` instead for NZBGet, or add either without removal to test combined modes.
 
 ## Start and test the full stack
 
@@ -46,7 +46,7 @@ This restores fixtures, starts the VPN pair and selected download clients, waits
 make test-stack PRESET=YOUR-PRESET
 ```
 
-This restores fixtures, starts all services, waits for configured healthchecks, and validates VPN/forwarding state. It leaves the stack running on success, prints status/recent logs on failure, and restores fixtures after validation. It is a mutating development test, not a routine health check.
+This stops the selected disposable test stack before restoring fixtures, starts all services, waits for configured healthchecks, and validates VPN/forwarding state. On success, it leaves the stack running with its generated VPN files intact. On failure, it prints status/recent logs, stops the stack, and restores fixtures only after shutdown succeeds. If shutdown fails, it preserves the VPN files; resolve the reported shutdown error, then run `make reset-test-stack PRESET=YOUR-PRESET`. It is a mutating development test, not a routine health check.
 
 ## Validate lifecycle cleanup ownership
 
