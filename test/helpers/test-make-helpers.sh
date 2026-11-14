@@ -423,8 +423,8 @@ test "$(grep -c '^scripts/compose/nuke.sh' "${test_output}/nuke.out")" -eq 2
 grep -F -- '--project-name "maraudarr"' "${test_output}/nuke.out" >/dev/null
 grep -F -- '--builder-name "plundarr-local"' "${test_output}/nuke.out" >/dev/null
 test "$(grep -c 'make --no-print-directory clean' "${test_output}/nuke.out")" -eq 1
-test "$(grep -c 'make --no-print-directory restore-test-config' "${test_output}/nuke.out")" -eq 1
-if grep -E 'delete-config|rm -rf .*\.env|rm -rf .*backups|docker (system|image|volume|builder) prune|--all-inactive' \
+test "$(grep -c 'make --no-print-directory restore-test-config' "${test_output}/nuke.out")" -eq 0
+if grep -E 'delete-config|restore-test-config|rm -rf .*config/|rm -rf .*\.env|rm -rf .*backups|docker (system|image|volume|builder) prune|--all-inactive' \
     "${test_output}/nuke.out" >/dev/null; then
     echo "The nuke target crossed a protected cleanup boundary." >&2
     exit 1

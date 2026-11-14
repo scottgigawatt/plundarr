@@ -222,17 +222,6 @@ PRESET_EXAMPLES_PATH           ?= examples/presets
 MARAUDARR_TYPECHECK_CMD        ?= scripts/compose/typecheck.sh
 
 #
-# Disposable runtime state. Persistent application config and backups must
-# never enter this fixed inventory.
-#
-RUNTIME_ARTIFACT_PATHS := $(CONFIG_PATH)/privateerr/logs \
-	$(CONFIG_PATH)/gluetun/forwarded_port \
-	$(CONFIG_PATH)/gluetun/ip \
-	$(CONFIG_PATH)/gluetun/piaportforward.json \
-	$(CONFIG_PATH)/gluetun/servers \
-	test/logs
-
-#
 # AWK command and reusable program options.
 #
 AWK_BIN                ?= awk
@@ -538,7 +527,7 @@ $(BUILD_DEPENDS):
 		$(if $(shell which $(exe) 2> /dev/null),,$(error "No $(exe) in PATH")))
 	@# Verify Docker Compose availability.
 	@$(DOCKER_COMPOSE) version >/dev/null 2>&1 || { \
-		$(call print_line_inline,$(COLOR_ERROR),Docker Compose be missin'.); \
+		$(call print_line_inline,$(COLOR_ERROR),Docker Compose is unavailable.); \
 		$(call print_detail_inline,$(COLOR_MUTED),Install docker compose or docker-compose. 🧭); \
 		exit 1; \
 	}
@@ -550,8 +539,8 @@ $(BUILD_DEPENDS):
 #
 $(CHECK_ENV):
 	@if [ ! -f "$(ENV_FILE)" ]; then \
-		$(call print_line_inline,$(COLOR_ERROR),No $(ENV_FILE) found. The ship needs a chart before it sails. 🗺️); \
-		$(call print_detail_inline,$(COLOR_MUTED),Run: make $(SHIP)); \
+		$(call print_line_inline,$(COLOR_ERROR),The generated environment file is missing: $(ENV_FILE).); \
+		$(call print_detail_inline,$(COLOR_MUTED),Run: make $(CONFIGURE)); \
 		exit 1; \
 	fi
 
@@ -906,7 +895,7 @@ $(CLEAN):
 	$(call announce_detail,Deployment charts$(COMMA) .env files$(COMMA) config$(COMMA) backups$(COMMA) containers$(COMMA) volumes$(COMMA) and images remain untouched. ⚓)
 
 #
-# $(NUKE): Removes project Docker resources and disposable runtime state.
+# $(NUKE): Removes project Docker resources while preserving deployment state.
 #
 # Dependencies:
 #   $(BUILD_DEPENDS) - Ensure build dependencies are installed.
@@ -914,7 +903,7 @@ $(CLEAN):
 #   $(CHECK_RENDERED) - Ensure the rendered Compose file exists.
 #
 $(NUKE): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
-	$(call announce_warning,Firin' the clean broadside across Plundarr and Maraudarr. Application volumes and host files stay aboard. 💣)
+	$(call announce_warning,Removing selected-stack and Maraudarr Docker resources. Configuration, application data, and backups are preserved. 💣)
 	$(COMPOSE_NUKE_CMD) \
 		--docker-bin "$(DOCKER_BIN)" \
 		--compose-file "$(COMPOSE_FILE)" \
@@ -932,9 +921,6 @@ $(NUKE): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_RENDERED)
 		--additional-image "$(MARAUDARR_IMAGE)" \
 		--additional-image "$(MARAUDARR_MULTIARCH_IMAGE)"
 	@$(MAKE) --no-print-directory $(CLEAN)
-	$(call announce,Scrubbin' generated logs and Gluetun state. 🧽)
-	rm -rf $(RUNTIME_ARTIFACT_PATHS)
-	@$(MAKE) --no-print-directory $(RESTORE_TEST_CONFIG)
 
 #
 # $(HELP): Print help information.
@@ -972,7 +958,7 @@ $(HELP):
 	$(call help_line,$(RESTORE_TEST_CONFIG),Restore example VPN config files for tests.)
 	$(call help_line,$(CLEAN_TEST),Stop the stack and restore example test config.)
 	$(call help_line,$(CLEAN),Remove only disposable developer artifacts.)
-	$(call help_line,$(NUKE),‼️ DANGER ‼️ remove containers$(COMMA) networks$(COMMA) images$(COMMA) and build cache; preserve application volumes.)
+	$(call help_line,$(NUKE),‼️ DANGER ‼️ remove Docker resources and build cache; keep config$(COMMA) data$(COMMA) and backups.)
 	$(call help_heading,🧭 Plundarr and Maraudarr tools)
 	$(call help_line,$(PULL_IMAGE),Pull the latest published Maraudarr image.)
 	$(call help_line,$(SHIP),Generate a preset deployment (default: plundarr).)
@@ -1000,7 +986,7 @@ $(HELP):
 $(CHECK_RENDERED):
 	@if [ ! -f "$(COMPOSE_FILE)" ]; then \
 		$(call print_line_inline,$(COLOR_ERROR),No $(COMPOSE_FILE) found. The fleet needs one final chart. 🗺️); \
-		$(call print_detail_inline,$(COLOR_MUTED),Run: make $(SHIP)); \
+		$(call print_detail_inline,$(COLOR_MUTED),Run: make $(CONFIGURE)); \
 		exit 1; \
 	fi
 
