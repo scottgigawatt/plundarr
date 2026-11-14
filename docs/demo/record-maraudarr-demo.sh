@@ -31,6 +31,14 @@ DEMO_FRAMERATE=5
 render_demo() {
     RECORDING_WIDTH=$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of csv=p=0 "$1")
     RECORDING_HEIGHT=$(ffprobe -v error -select_streams v:0 -show_entries stream=height -of csv=p=0 "$1")
+
+    # MP4 needs an even height; remove its single extra bottom padding row.
+    if [ "$RECORDING_WIDTH" -ne 1456 ] || [ "$RECORDING_HEIGHT" -ne 928 ]; then
+        echo "Expected a 1456 by 928 terminal capture; the current GIF was preserved." >&2
+        return 1
+    fi
+
+    RECORDING_HEIGHT=$((RECORDING_HEIGHT - 1))
     FRAME_WIDTH=$((RECORDING_WIDTH + 40))
     FRAME_HEIGHT=$((RECORDING_HEIGHT + 40))
 
@@ -51,7 +59,7 @@ EOF
     magick "$2/mask.svg" -colorspace Gray -depth 8 "$2/mask.png"
     ffmpeg -loglevel error -y -i "$1" \
         -loop 1 -framerate "${DEMO_FRAMERATE}" -i "$2/frame.png" -i "$2/mask.png" \
-        -filter_complex "[0:v]fps=${DEMO_FRAMERATE},format=rgba[screen];[2:v]format=gray[mask];[screen][mask]alphamerge[rounded];[1:v][rounded]overlay=20:20:shortest=1:format=auto,format=argb[framed]" \
+        -filter_complex "[0:v]fps=${DEMO_FRAMERATE},format=rgba,crop=iw:${RECORDING_HEIGHT}:0:0[screen];[2:v]format=gray[mask];[screen][mask]alphamerge[rounded];[1:v][rounded]overlay=20:20:shortest=1:format=auto,format=argb[framed]" \
         -map '[framed]' -c:v qtrle "$2/framed.mov"
 
     # Separate palette passes avoid buffering every full-resolution frame in memory.

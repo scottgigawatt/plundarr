@@ -10,9 +10,9 @@
 Output docs/assets/maraudarr-demo.gif
 Require docker
 Set Shell "zsh"
-Set FontSize 22
-Set Width 2400
-Set Height 2200
+Set FontSize 16
+Set Width 1456
+Set Height 928
 Set Padding 20
 Set Framerate 5
 Set PlaybackSpeed 1
