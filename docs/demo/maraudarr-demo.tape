@@ -72,14 +72,14 @@ Sleep 3s
 Enter
 Sleep 3s
 
-# Confirm generation; then inspect filenames without printing .env values.
+# Confirm generation; then inspect generated files without printing .env values.
 Enter
 Sleep 3s
 Type "clear"
 Enter
 Type "cd dist/plundarr"
 Enter
-Type "ls -a"
+Type "ls -lah"
 Enter
 Sleep 5s
 Type "docker compose config --quiet"

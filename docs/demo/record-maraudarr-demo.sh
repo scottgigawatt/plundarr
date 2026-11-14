@@ -56,6 +56,9 @@ EOF
     # Separate palette passes avoid buffering every full-resolution frame in memory.
     ffmpeg -loglevel error -y -i "$2/framed.mov" \
         -vf 'fps=8,palettegen=max_colors=64:stats_mode=full' -frames:v 1 "$2/palette.png"
+
+    # Reserve an unused opaque palette slot for the green prompt; preserve the final transparent slot.
+    magick "$2/palette.png" -fill '#00ff00' -draw 'point 14,15' "PNG32:$2/palette.png"
     ffmpeg -loglevel error -y -i "$2/framed.mov" -i "$2/palette.png" \
         -lavfi '[0:v]fps=8[frames];[frames][1:v]paletteuse=dither=none:diff_mode=rectangle' "$2/recording.gif"
     gifsicle --optimize=2 --output "$2/optimized.gif" "$2/recording.gif"

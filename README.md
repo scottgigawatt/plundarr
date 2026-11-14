@@ -93,19 +93,57 @@ The Privateerr container generates the PIA WireGuard configuration file; Gluetun
 
 The interactive setup offers these starting points. Standalone media-server and utility presets do not require PIA.
 
-| 🗺️ Preset | 🎯 Purpose |
-| --- | --- |
-| 🏴‍☠️ `plundarr` | Movies, television, and ebooks with VPN-protected torrent downloads |
-| 🔞 `boudoirr` | Whisparr automation with Cruisarr requests, Jellyfin playback, and Stash cataloging |
-| 🎞️ `jellyfin` | Jellyfin media server |
-| 📺 `plex` | Plex Media Server |
-| 📚 `calibre-web-automated` | Ebook library and imports |
-| 🎭 `duplex` | Plex artwork, metadata, theme songs, and maintenance |
-| 🔭 `watchtower` | Container image updates |
-| 🚢 `portainer` | Docker management interface |
-| 🧩 `custom` | Individually selected services |
+<!-- GitHub preserves nowrap cells; samp keeps literal preset IDs monospaced without code's wrapping rules. -->
+<!-- markdownlint-disable MD033 -->
+<table>
+  <thead>
+    <tr>
+      <th scope="col" align="left" nowrap>🗺️ Preset</th>
+      <th scope="col" align="left" nowrap>🎯 Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td nowrap valign="top">🏴‍☠️ <samp>plundarr</samp></td>
+      <td valign="top">Movies, television, and ebooks with VPN-protected torrent downloads</td>
+    </tr>
+    <tr>
+      <td nowrap valign="top">🔞 <samp>boudoirr</samp></td>
+      <td valign="top">Whisparr automation with Cruisarr requests, Jellyfin playback, and Stash cataloging</td>
+    </tr>
+    <tr>
+      <td nowrap valign="top">🎞️ <samp>jellyfin</samp></td>
+      <td valign="top">Jellyfin media server</td>
+    </tr>
+    <tr>
+      <td nowrap valign="top">📺 <samp>plex</samp></td>
+      <td valign="top">Plex Media Server</td>
+    </tr>
+    <tr>
+      <td nowrap valign="top">📚 <samp>calibre-web-automated</samp></td>
+      <td valign="top">Ebook library and imports</td>
+    </tr>
+    <tr>
+      <td nowrap valign="top">🎭 <samp>duplex</samp></td>
+      <td valign="top">Plex artwork, metadata, theme songs, and maintenance</td>
+    </tr>
+    <tr>
+      <td nowrap valign="top">🔭 <samp>watchtower</samp></td>
+      <td valign="top">Container image updates</td>
+    </tr>
+    <tr>
+      <td nowrap valign="top">🚢 <samp>portainer</samp></td>
+      <td valign="top">Docker management interface</td>
+    </tr>
+    <tr>
+      <td nowrap valign="top">🧩 <samp>custom</samp></td>
+      <td valign="top">Individually selected services</td>
+    </tr>
+  </tbody>
+</table>
+<!-- markdownlint-enable MD033 -->
 
-🗂️ **[Browse the complete preset examples](examples/presets/README.md)** — inspect each preset’s Compose file and example settings before generating your stack. 🔎
+✨ [**Browse the complete preset examples**](examples/presets/README.md) ✨ and inspect each preset’s Compose file and example settings before generating your stack.
 
 Use [customization](https://scottgigawatt.github.io/plundarr/customize/) for service choices, networks, and optional integrations.
 
