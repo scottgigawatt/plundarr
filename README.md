@@ -55,6 +55,8 @@ You need Docker with Compose, a terminal on your Docker host, writable storage, 
 <details>
 <summary><strong>🎬 See it in action — expand the demo</strong></summary>
 
+<br />
+
 ![Maraudarr's interactive setup selects the default Plundarr services and generates the stack files](docs/assets/maraudarr-demo.gif)
 
 </details>
