@@ -11,36 +11,36 @@ Plundarr helps you run a media stack with one Docker Compose file, using Docker 
 </p>
 
 <p align="center">
-  <a href="https://github.com/scottgigawatt/plundarr/stargazers"><img src="https://img.shields.io/github/stars/scottgigawatt/plundarr?style=social&amp;label=Treasure%20Hunters" alt="GitHub stars: Treasure Hunters" /></a>
-  <a href="https://github.com/scottgigawatt/plundarr/forks"><img src="https://img.shields.io/github/forks/scottgigawatt/plundarr?style=social&amp;label=Mutinous%20Forks" alt="GitHub forks: Mutinous Forks" /></a>
-  <a href="https://github.com/scottgigawatt/plundarr/watchers"><img src="https://img.shields.io/github/watchers/scottgigawatt/plundarr?style=social&amp;label=Crow%27s%20Nest%20Lookouts" alt="GitHub watchers: Crow's Nest Lookouts" /></a>
+  <a href="https://github.com/scottgigawatt/plundarr/stargazers"><img src="https://img.shields.io/github/stars/scottgigawatt/plundarr?label=Treasure%20Hunters&amp;style=flat&amp;color=D7263D&amp;labelColor=D7263D" alt="GitHub stars: Treasure Hunters" /></a>
+  <a href="https://github.com/scottgigawatt/plundarr/forks"><img src="https://img.shields.io/github/forks/scottgigawatt/plundarr?label=Mutinous%20Forks&amp;style=flat&amp;color=C45100&amp;labelColor=C45100" alt="GitHub forks: Mutinous Forks" /></a>
+  <a href="https://github.com/scottgigawatt/plundarr/watchers"><img src="https://img.shields.io/github/watchers/scottgigawatt/plundarr?label=Crow%27s%20Nest%20Lookouts&amp;style=flat&amp;color=8C6900&amp;labelColor=8C6900" alt="GitHub watchers: Crow's Nest Lookouts" /></a>
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Containers-Ahoy%21-2496ED?logo=docker&amp;logoColor=white" alt="Containers: Ahoy!" />
-  <img src="https://img.shields.io/badge/Cloaked-by%20PIA%20%26%20WireGuard-2EA44F?logo=wireguard&amp;logoColor=white" alt="Cloaked by PIA and WireGuard" />
-  <a href="./LICENSE"><img src="https://img.shields.io/github/license/scottgigawatt/plundarr?label=Legal%20Scroll&amp;color=8250DF" alt="Legal Scroll: Apache 2.0 license" /></a>
+  <img src="https://img.shields.io/badge/Containers-Ahoy%21-2496ED?logo=docker&amp;logoColor=white&amp;style=flat&amp;color=2496ED&amp;labelColor=2496ED" alt="Containers: Ahoy!" />
+  <img src="https://img.shields.io/badge/Cloaked-by%20PIA%20%26%20WireGuard-2EA44F?logo=wireguard&amp;logoColor=white&amp;style=flat&amp;color=2EA44F&amp;labelColor=2EA44F" alt="Cloaked by PIA and WireGuard" />
+  <a href="./LICENSE"><img src="https://img.shields.io/github/license/scottgigawatt/plundarr?label=Legal%20Scroll&amp;style=flat&amp;color=8250DF&amp;labelColor=8250DF" alt="Legal Scroll: Apache 2.0 license" /></a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/scottgigawatt/plundarr/commits/main"><img src="https://img.shields.io/github/last-commit/scottgigawatt/plundarr?label=Last%20Plunder&amp;logo=git&amp;color=D97706" alt="Date of the last commit to main" /></a>
-  <img src="https://img.shields.io/badge/Sea--Tested-Synology%20%7C%20macOS-0891B2" alt="Sea-tested on Synology and macOS" />
-  <img src="https://img.shields.io/badge/Rum%20Supply-Full-C2410C" alt="Rum supply: Full" />
+  <a href="https://github.com/scottgigawatt/plundarr/commits/main"><img src="https://img.shields.io/github/last-commit/scottgigawatt/plundarr?label=Last%20Plunder&amp;logo=git&amp;style=flat&amp;color=D97706&amp;labelColor=D97706" alt="Date of the last commit to main" /></a>
+  <img src="https://img.shields.io/badge/Sea--Tested-Synology%20%7C%20macOS-0891B2?style=flat&amp;color=0891B2&amp;labelColor=0891B2" alt="Sea-tested on Synology and macOS" />
+  <img src="https://img.shields.io/badge/Rum%20Supply-Full-C2410C?style=flat&amp;color=C2410C&amp;labelColor=C2410C" alt="Rum supply: Full" />
 </p>
 
 <p align="center">
-  <a href="https://github.com/scottgigawatt/plundarr/actions/workflows/build-and-push.yml"><img src="https://img.shields.io/github/actions/workflow/status/scottgigawatt/plundarr/build-and-push.yml?branch=main&amp;label=Maraudarr%20build&amp;logo=githubactions&amp;logoColor=white" alt="Maraudarr build status on main" /></a>
-  <a href="https://hub.docker.com/r/scottgigawatt/maraudarr"><img src="https://img.shields.io/docker/pulls/scottgigawatt/maraudarr?label=Maraudarr%20pulls&amp;logo=docker&amp;logoColor=white&amp;color=FF69B4" alt="Maraudarr image pulls on Docker Hub" /></a>
-  <a href="https://github.com/scottgigawatt/plundarr/pkgs/container/maraudarr"><img src="https://img.shields.io/badge/Fleet-amd64%20%7C%20arm64%20%7C%20arm%2Fv7-6D28D9?logo=docker&amp;logoColor=white" alt="Maraudarr images for amd64, arm64, and arm/v7" /></a>
-  <a href="https://github.com/scottgigawatt/plundarr/actions/workflows/build-and-push.yml"><img src="https://img.shields.io/badge/Bilge%20Check-Trivy-BE185D?logo=aqua&amp;logoColor=white" alt="Container images scanned with Trivy" /></a>
-  <a href="https://www.bestpractices.dev/projects/14767"><img src="https://www.bestpractices.dev/projects/14767/badge" alt="OpenSSF Best Practices status" /></a>
+  <a href="https://github.com/scottgigawatt/plundarr/actions/workflows/build-and-push.yml"><img src="https://img.shields.io/github/actions/workflow/status/scottgigawatt/plundarr/build-and-push.yml?branch=main&amp;label=Maraudarr%20build&amp;logo=githubactions&amp;logoColor=white&amp;style=flat&amp;color=0284C7&amp;labelColor=0284C7" alt="Maraudarr build status on main" /></a>
+  <a href="https://hub.docker.com/r/scottgigawatt/maraudarr"><img src="https://img.shields.io/docker/pulls/scottgigawatt/maraudarr?label=Maraudarr%20pulls&amp;logo=docker&amp;logoColor=white&amp;style=flat&amp;color=FF69B4&amp;labelColor=FF69B4" alt="Maraudarr image pulls on Docker Hub" /></a>
+  <a href="https://github.com/scottgigawatt/plundarr/pkgs/container/maraudarr"><img src="https://img.shields.io/badge/Fleet-amd64%20%7C%20arm64%20%7C%20arm%2Fv7-6D28D9?logo=docker&amp;logoColor=white&amp;style=flat&amp;color=6D28D9&amp;labelColor=6D28D9" alt="Maraudarr images for amd64, arm64, and arm/v7" /></a>
+  <a href="https://github.com/scottgigawatt/plundarr/actions/workflows/build-and-push.yml"><img src="https://img.shields.io/badge/Bilge%20Check-Trivy-BE185D?logo=aqua&amp;logoColor=white&amp;style=flat&amp;color=BE185D&amp;labelColor=BE185D" alt="Container images scanned with Trivy" /></a>
+  <a href="https://www.bestpractices.dev/projects/14767"><img src="https://img.shields.io/cii/summary/14767?label=OpenSSF%20Best%20Practices&amp;style=flat&amp;color=16823B&amp;labelColor=16823B" alt="OpenSSF Best Practices status" /></a>
 </p>
 
 <p align="center">─── ⛧ ───</p>
 
 <p align="center">
   <em>☠️ Compose in dependency hell? Bribe the ferryman and enter</em>
-  <a href="https://discord.gg/BpEGzWwGYf"><img src="https://img.shields.io/discord/1403601106315116626?label=%F0%9F%94%A5HADES%F0%9F%94%A5&logo=discord&logoColor=white&color=5865F2" alt="HADES Discord community" align="absmiddle" /></a>
+  <a href="https://discord.gg/BpEGzWwGYf"><img src="https://img.shields.io/discord/1403601106315116626?label=%F0%9F%94%A5HADES%F0%9F%94%A5&amp;logo=discord&amp;logoColor=white&amp;style=flat&amp;color=5865F2&amp;labelColor=5865F2" alt="HADES Discord community" align="absmiddle" /></a>
 </p>
 <!-- markdownlint-enable MD033 -->
 
