@@ -10,10 +10,13 @@ Maraudarr generates Plundarr Compose deployments and exits. It resolves selected
 </p>
 
 <p align="center">
-  <a href="https://github.com/scottgigawatt/plundarr/actions/workflows/build-and-push.yml"><img src="https://github.com/scottgigawatt/plundarr/actions/workflows/build-and-push.yml/badge.svg" alt="Maraudarr Build" /></a>
-  <img src="https://img.shields.io/badge/Fleet-amd64%20%7C%20arm64%20%7C%20arm%2Fv7-blue?logo=docker" alt="Multi-Architecture Fleet" />
-  <img src="https://img.shields.io/badge/Run%20As-Non--Root-success" alt="Runs as non-root" />
-  <img src="https://img.shields.io/badge/Bilge%20Check-Trivy-1904DA?logo=aqua" alt="Scanned with Trivy" />
+  <img src="https://img.shields.io/badge/Run%20As-Non--Root-D7263D?style=flat&amp;logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI%2BPHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0xMiAyIDMgNnY2YzAgNSA0IDggOSAxMCA1LTIgOS01IDktMTBWNnptLTEgMTQtNC00IDItMiAyIDIgNC00IDIgMnoiLz48L3N2Zz4%3D&amp;logoColor=white&amp;color=D7263D&amp;labelColor=D7263D" alt="Runs as non-root" />
+  <a href="https://github.com/scottgigawatt/plundarr/actions/workflows/build-and-push.yml"><img src="https://img.shields.io/github/actions/workflow/status/scottgigawatt/plundarr/build-and-push.yml?branch=main&amp;label=Maraudarr%20build&amp;style=flat&amp;logo=githubactions&amp;logoColor=white&amp;color=16823B&amp;labelColor=16823B" alt="Maraudarr Build" /></a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/scottgigawatt/plundarr/pkgs/container/maraudarr"><img src="https://img.shields.io/badge/Fleet-amd64%20%7C%20arm64%20%7C%20arm%2Fv7-3152C7?style=flat&amp;logo=docker&amp;logoColor=white&amp;color=3152C7&amp;labelColor=3152C7" alt="Multi-Architecture Fleet" /></a>
+  <a href="https://github.com/scottgigawatt/plundarr/actions/workflows/build-and-push.yml"><img src="https://img.shields.io/badge/Bilge%20Check-Trivy-D62F65?style=flat&amp;logo=aqua&amp;logoColor=white&amp;color=D62F65&amp;labelColor=D62F65" alt="Scanned with Trivy" /></a>
 </p>
 <!-- markdownlint-enable MD033 -->
 
