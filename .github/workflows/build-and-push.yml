@@ -320,7 +320,7 @@ jobs:
             index:org.opencontainers.image.documentation=https://github.com/${{ github.repository }}#readme
           build-args: |
             ALPINE_TAG=3.24@sha256:f59abe656b692d901e184be3445e084786602108599d2a51d229c0f5a48c71bf
-            DOCKER_COMPOSE_TAG=v5.7.1@sha256:6a6704a7ccbc45eb4cc7e5b71dba685e9bc23705c580430f15034b2b5e46ec2b
+            DOCKER_COMPOSE_TAG=v5.8.0@sha256:c9f99a4efa43ca83e5acc056da938c38504010c10a2dd804569032be5d3b0dd5
             IMAGE_CREATED=${{ steps.build-data.outputs.created }}
             IMAGE_REVISION=${{ github.sha }}
             IMAGE_VERSION=${{ steps.metadata.outputs.version }}
