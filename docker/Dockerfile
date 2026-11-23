@@ -39,10 +39,10 @@ ARG MARAUDARR_BIN_HOME
 ENV PATH=${MARAUDARR_BIN_HOME}/venv/bin:${PATH}
 
 #
-# Refresh stable libraries and install the patched stable interpreter and bootstrap tools.
+# Require the stable OpenSSL security backport and install Python bootstrap tools.
 #
 RUN apk upgrade --no-cache && \
-    apk add --no-cache python3 py3-pip && \
+    apk add --no-cache python3 py3-pip 'libcrypto3>=3.5.9-r1' 'libssl3>=3.5.9-r1' && \
     python3 -m venv "${MARAUDARR_BIN_HOME}/venv"
 
 #
@@ -128,11 +128,11 @@ LABEL org.opencontainers.image.title="Maraudarr" \
         org.opencontainers.image.base.name="docker.io/library/alpine:${ALPINE_TAG}"
 
 #
-# Refresh stable runtime libraries and install the same patched Python as the build stage.
+# Require the stable OpenSSL security backport and the build stage's Python.
 # System pip stays in the build stage; Python retains its standard-library bootstrap wheel.
 #
 RUN apk upgrade --no-cache && \
-    apk add --no-cache python3
+    apk add --no-cache python3 'libcrypto3>=3.5.9-r1' 'libssl3>=3.5.9-r1'
 
 #
 # Copy the standalone Compose binary from its official image.
