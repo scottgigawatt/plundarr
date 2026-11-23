@@ -58,7 +58,7 @@ repos:
   # Validate every Markdown document with the shared repository configuration.
   #
   - repo: https://github.com/DavidAnson/markdownlint-cli2
-    rev: v0.24.1
+    rev: v0.24.2
     hooks:
       - id: markdownlint-cli2
         pass_filenames: false
@@ -96,7 +96,7 @@ repos:
   # Enforce synchronized build pins and the shared image-tag channel policy.
   #
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.17.5
+    rev: v0.17.6
     hooks:
       - id: ruff-check
       - id: ruff-format
