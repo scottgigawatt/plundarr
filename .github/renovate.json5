@@ -37,7 +37,9 @@
     "automergeSchedule": ["* 0-7 1 * *"],
     "updateNotScheduled": false,
     "prConcurrentLimit": 2,
-    "dependencyDashboard": true,
+    "dependencyDashboard": {
+        "enabled": true
+    },
 
     //
     // Merge dependency PRs after required checks pass; keep branches current.
