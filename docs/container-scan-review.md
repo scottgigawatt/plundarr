@@ -86,7 +86,7 @@ An unfiltered candidate scan retains one HIGH, three MEDIUM, and one UNKNOWN fin
 
 The production image refreshes stable Alpine packages and uses exact, hash-verified application dependencies. Development checkers, installed pip, and installed setuptools stay outside the application environment. Supported launch paths disable container networking and drop all optional capabilities; those controls do not remove module-level findings.
 
-The fresh arm64 candidate retains Alpine's package-owned `pip-26.2.2-py3-none-any.whl` bootstrap archive, SHA-256 `fd7f4dfa8190e014013b9f08f3e973f4e4c26ffd179a204895533a7254813a70`. It vendors msgpack 1.1.2, urllib3 2.7.0, and setuptools 70.3.0. Generation does not install or use it. Whole-image totals do not establish coverage of nested wheel contents; a newer pip wheel does not replace Alpine's archive automatically.
+The fresh arm64 candidate retains Alpine's package-owned `pip-26.2.2-py3-none-any.whl` bootstrap archive, SHA-256 `fd7f4dfa8190e014013b9f08f3e973f4e4c26ffd179a204895533a7254813a70`. It vendors msgpack 1.1.2, urllib3 2.7.0, and setuptools 70.3.0. Generation does not install or use it. A separate metadata scan of its extracted components with the same database reports five HIGH, two MEDIUM, and one LOW finding: msgpack has two HIGH; setuptools has one HIGH, one MEDIUM, and one LOW; urllib3 has two HIGH and one MEDIUM. These are version-level findings, without a code-reachability assessment. Whole-image totals exclude these nested results. A newer pip wheel does not replace Alpine's package-owned archive automatically.
 
 ## Scan an immutable artifact
 
