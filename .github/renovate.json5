@@ -1,77 +1,45 @@
-//
-// Copyright 2025-2026 Scott Gigawatt
-//
-// SPDX-License-Identifier: Apache-2.0
-//
-// renovate.json5: Automated dependency update policy for Plundarr.
-//
 {
-    //
-    // Renovate schema and shared safe defaults.
-    //
-    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-    "extends": [
+    $schema: "https://docs.renovatebot.com/renovate-schema.json",
+    extends: [
         "config:recommended",
         "helpers:pinGitHubActionDigests",
-        ":enablePreCommit"
+        ":enablePreCommit",
     ],
-
-    //
-    // Keep dependency ignores while allowing the real test/typing/Dockerfile.
-    //
-    "ignorePaths": [
+    ignorePaths: [
         "**/node_modules/**",
         "**/bower_components/**",
         "**/vendor/**",
         "**/examples/**",
         "**/__tests__/**",
         "**/tests/**",
-        "**/__fixtures__/**"
+        "**/__fixtures__/**",
     ],
-
-    //
-    // Batch routine tooling updates on the first day of each month, before 8 a.m.
-    //
-    "timezone": "America/New_York",
-    "schedule": ["* 0-7 1 * *"],
-    "automergeSchedule": ["* 0-7 1 * *"],
-    "updateNotScheduled": false,
-    "prConcurrentLimit": 2,
-    "dependencyDashboard": true,
-
-    //
-    // Merge dependency PRs after required checks pass; keep branches current.
-    //
-    "automerge": true,
-    "automergeType": "pr",
-    "automergeStrategy": "squash",
-
-    //
-    // Use Renovate-managed merges so the maintenance window is enforced.
-    //
-    "platformAutomerge": false,
-    "rebaseWhen": "behind-base-branch",
-    "labels": ["dependencies"],
-    "assignees": ["scottgigawatt"],
-    "reviewers": ["scottgigawatt"],
-
-    //
-    // Let supported vulnerability fixes bypass routine windows for maintainer review.
-    //
-    "vulnerabilityAlerts": {
-        "enabled": true,
-        "dependencyDashboardApproval": false,
-        "groupName": null,
-        "automerge": false,
-        "schedule": ["at any time"],
-        "automergeSchedule": ["at any time"],
-        "updateNotScheduled": true
+    timezone: "America/New_York",
+    schedule: ["* 0-7 1 * *"],
+    automergeSchedule: ["* 0-7 1 * *"],
+    updateNotScheduled: false,
+    prConcurrentLimit: 2,
+    dependencyDashboard: {
+        enabled: true,
     },
-
-    //
-    // Renovate owns updates that Dependabot previously duplicated.
-    //
-    "enabledManagers": [
+    automerge: true,
+    automergeType: "pr",
+    automergeStrategy: "squash",
+    platformAutomerge: false,
+    rebaseWhen: "behind-base-branch",
+    labels: ["dependencies"],
+    assignees: ["scottgigawatt"],
+    reviewers: ["scottgigawatt"],
+    vulnerabilityAlerts: {
+        enabled: true,
+        dependencyDashboardApproval: false,
+        groupName: null,
+        automerge: false,
+        schedule: ["at any time"],
+        automergeSchedule: ["at any time"],
+        updateNotScheduled: true,
+    },
+    enabledManagers: [
         "custom.regex",
         "docker-compose",
         "dockerfile",
@@ -79,144 +47,111 @@
         "npm",
         "pep621",
         "pip_requirements",
-        "pre-commit"
+        "pre-commit",
     ],
-
-    //
-    // Track the docs Python version, test tools, and shared image pins.
-    // Keep direct and shell-default forms separate so each pin is extracted once.
-    //
-    "customManagers": [
+    customManagers: [
         {
-            "customType": "regex",
-            "managerFilePatterns": [
-                "/^Makefile$/"
+            customType: "regex",
+            managerFilePatterns: ["/^Makefile$/"],
+            matchStrings: [
+                "DOCS_PYTHON_VERSION\\s+\\?=\\s*(?<currentValue>\\d+\\.\\d+\\.\\d+)",
             ],
-            "matchStrings": [
-                "DOCS_PYTHON_VERSION\\s+\\?=\\s*(?<currentValue>\\d+\\.\\d+\\.\\d+)"
-            ],
-            "depNameTemplate": "python",
-            "datasourceTemplate": "python-version",
-            "versioningTemplate": "python"
+            depNameTemplate: "python",
+            datasourceTemplate: "python-version",
+            versioningTemplate: "python",
         },
         {
-            "customType": "regex",
-            "managerFilePatterns": [
+            customType: "regex",
+            managerFilePatterns: [
                 "/^docker/Dockerfile$/",
                 "/^test/typing/Dockerfile$/",
-                "/^\\.github/workflows/build-and-push\\.yml$/"
+                "/^\\.github/workflows/build-and-push\\.yml$/",
             ],
-            "matchStrings": [
-                "ALPINE_TAG[=:]\\s*(?<currentValue>[^@\\s]+)@(?<currentDigest>sha256:[a-f0-9]+)"
+            matchStrings: [
+                "ALPINE_TAG[=:]\\s*(?<currentValue>[^@\\s]+)@(?<currentDigest>sha256:[a-f0-9]+)",
             ],
-            "depNameTemplate": "alpine",
-            "datasourceTemplate": "docker",
-            "versioningTemplate": "docker"
+            depNameTemplate: "alpine",
+            datasourceTemplate: "docker",
+            versioningTemplate: "docker",
         },
         {
-            "customType": "regex",
-            "managerFilePatterns": [
-                "/^example\\.maraudarr\\.env$/"
+            customType: "regex",
+            managerFilePatterns: ["/^example\\.maraudarr\\.env$/"],
+            matchStrings: [
+                'ALPINE_TAG="\\$\\{ALPINE_TAG:-(?<currentValue>[^@\\s}]+)@(?<currentDigest>sha256:[a-f0-9]+)\\}"',
             ],
-            "matchStrings": [
-                "ALPINE_TAG=\"\\$\\{ALPINE_TAG:-(?<currentValue>[^@\\s}]+)@(?<currentDigest>sha256:[a-f0-9]+)\\}\""
-            ],
-            "depNameTemplate": "alpine",
-            "datasourceTemplate": "docker",
-            "versioningTemplate": "docker"
+            depNameTemplate: "alpine",
+            datasourceTemplate: "docker",
+            versioningTemplate: "docker",
         },
         {
-            "customType": "regex",
-            "managerFilePatterns": [
+            customType: "regex",
+            managerFilePatterns: [
                 "/^docker/Dockerfile$/",
-                "/^\\.github/workflows/build-and-push\\.yml$/"
+                "/^\\.github/workflows/build-and-push\\.yml$/",
             ],
-            "matchStrings": [
-                "DOCKER_COMPOSE_TAG[=:]\\s*(?<currentValue>[^@\\s]+)@(?<currentDigest>sha256:[a-f0-9]+)"
+            matchStrings: [
+                "DOCKER_COMPOSE_TAG[=:]\\s*(?<currentValue>[^@\\s]+)@(?<currentDigest>sha256:[a-f0-9]+)",
             ],
-            "depNameTemplate": "docker/compose-bin",
-            "datasourceTemplate": "docker",
-            "versioningTemplate": "docker"
+            depNameTemplate: "docker/compose-bin",
+            datasourceTemplate: "docker",
+            versioningTemplate: "docker",
         },
         {
-            "customType": "regex",
-            "managerFilePatterns": [
-                "/^example\\.maraudarr\\.env$/"
+            customType: "regex",
+            managerFilePatterns: ["/^example\\.maraudarr\\.env$/"],
+            matchStrings: [
+                'DOCKER_COMPOSE_TAG="\\$\\{DOCKER_COMPOSE_TAG:-(?<currentValue>[^@\\s}]+)@(?<currentDigest>sha256:[a-f0-9]+)\\}"',
             ],
-            "matchStrings": [
-                "DOCKER_COMPOSE_TAG=\"\\$\\{DOCKER_COMPOSE_TAG:-(?<currentValue>[^@\\s}]+)@(?<currentDigest>sha256:[a-f0-9]+)\\}\""
-            ],
-            "depNameTemplate": "docker/compose-bin",
-            "datasourceTemplate": "docker",
-            "versioningTemplate": "docker"
-        }
+            depNameTemplate: "docker/compose-bin",
+            datasourceTemplate: "docker",
+            versioningTemplate: "docker",
+        },
     ],
-
-    //
-    // Keep related update types grouped and dependency pins deterministic.
-    //
-    "packageRules": [
+    packageRules: [
         {
-            "matchDatasources": ["docker"],
-            "pinDigests": true
+            matchDatasources: ["docker"],
+            pinDigests: true,
         },
         {
-            "groupName": "GitHub Actions",
-            "matchManagers": ["github-actions"]
+            groupName: "GitHub Actions",
+            matchManagers: ["github-actions"],
         },
         {
-            "groupName": "pre-commit hooks",
-            "matchManagers": ["pre-commit"]
+            groupName: "pre-commit hooks",
+            matchManagers: ["pre-commit"],
         },
         {
-            "groupName": "Docker images",
-            "matchDatasources": ["docker"]
+            groupName: "Docker images",
+            matchDatasources: ["docker"],
         },
         {
-            "description": "Keep Python dependencies exact and hash-verified",
-            "matchManagers": ["pep621", "pip_requirements"],
-            "rangeStrategy": "pin"
+            description: "Keep Python dependencies exact and hash-verified",
+            matchManagers: ["pep621", "pip_requirements"],
+            rangeStrategy: "pin",
         },
-        //
-        // Preserve Python compatibility ranges instead of pinning them to one interpreter.
-        //
         {
-            "description": "Keep supported Python versions as a compatibility range",
-            "matchManagers": ["pep621"],
-            "matchDepTypes": ["requires-python"],
-            "rangeStrategy": "replace"
+            description: "Keep supported Python versions as a compatibility range",
+            matchManagers: ["pep621"],
+            matchDepTypes: ["requires-python"],
+            rangeStrategy: "replace",
         },
-        //
-        // Apply this after manager groups so workflow and runtime pins stay together.
-        //
         {
-            "groupName": "Python runtime",
-            "matchDepNames": ["python"]
+            groupName: "Python runtime",
+            matchDepNames: ["python"],
         },
-
-        //
-        // Combine non-major tooling updates in the monthly maintenance window.
-        //
         {
-            "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
-            "groupName": "monthly maintenance"
+            matchUpdateTypes: ["minor", "patch", "pin", "digest"],
+            groupName: "monthly maintenance",
         },
-
-        //
-        // Keep shared image pins together in the weekly production window.
-        //
         {
-            "matchDatasources": ["docker"],
-            "schedule": ["* 0-7 * * 1"],
-            "automergeSchedule": ["* 0-7 * * 1"],
-            "groupName": "weekly production dependencies"
+            matchDatasources: ["docker"],
+            schedule: ["* 0-7 * * 1"],
+            automergeSchedule: ["* 0-7 * * 1"],
+            groupName: "weekly production dependencies",
         },
-
-        //
-        // Keep shipped generator packages and their shared pins in the weekly batch.
-        //
         {
-            "matchPackageNames": [
+            matchPackageNames: [
                 "markdown-it-py",
                 "mdurl",
                 "prompt-toolkit",
@@ -224,34 +159,26 @@
                 "questionary",
                 "rich",
                 "setuptools",
-                "wcwidth"
+                "wcwidth",
             ],
-            "schedule": ["* 0-7 * * 1"],
-            "automergeSchedule": ["* 0-7 * * 1"],
-            "groupName": "weekly production dependencies"
+            schedule: ["* 0-7 * * 1"],
+            automergeSchedule: ["* 0-7 * * 1"],
+            groupName: "weekly production dependencies",
         },
-
-        //
-        // Update the current Compose source dependencies weekly until that builder is retired.
-        //
         {
-            "matchPackageNames": [
+            matchPackageNames: [
                 "github.com/docker/compose/v5",
-                "golang.org/x/net"
+                "golang.org/x/net",
             ],
-            "schedule": ["* 0-7 * * 1"],
-            "automergeSchedule": ["* 0-7 * * 1"],
-            "groupName": "weekly production dependencies"
+            schedule: ["* 0-7 * * 1"],
+            automergeSchedule: ["* 0-7 * * 1"],
+            groupName: "weekly production dependencies",
         },
-
-        //
-        // Require dashboard approval for major upgrades and keep them separate.
-        //
         {
-            "matchUpdateTypes": ["major"],
-            "dependencyDashboardApproval": true,
-            "automerge": false,
-            "groupName": null
-        }
-    ]
+            matchUpdateTypes: ["major"],
+            dependencyDashboardApproval: true,
+            automerge: false,
+            groupName: null,
+        },
+    ],
 }
